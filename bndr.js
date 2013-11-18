@@ -1,14 +1,16 @@
+;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 require('proto');
 
-var bndr = function() {};
+function bndr() {};
+module.exports = bndr;
 
 var opts = {
-	BNDR_ATTR: 'data-bind'
+	BNDR_ATTR: 'ml-bind'
 }
 
 // bind document or section for binding attributes
 bndr.bind = function(scopeEl) {
-	return new View(scopeEl);
+	return new bndr.View(scopeEl);
 };
 
 bndr.config = function(options) {
@@ -24,9 +26,6 @@ bndr.registerComponentClass = function(componentClass, name) {
 	function validateComponentClass(componentClass, name) {
 		if (typeof componentClass != 'function')
 			throw new TypeError('component class must be function');
-		var test = new componentClass(new window.Element);
-		if (! test instanceof componentClass)
-			throw new TypeError('component class must be constructor');
 		validateName(name, 'empty component class name')
 		if (_components[name])
 			throw new TypeError('component is already registered');
@@ -60,19 +59,21 @@ bndr.View = function(el) {
 		enumerable: false,
 		value: el
 	});
+	this.bind(el);
 }
 
-View.extendProto({
+bndr.View.extendProto({
 	bind: function(scopeEl) {
-		var elements = element.querySelectorAll('[' + opts.BNDR_ATTR + ']')
+		var elements = scopeEl.querySelectorAll('[' + opts.BNDR_ATTR + ']')
 			, view = this;
-		scopeEl.forEach(function(el) {
+		console.log(elements);
+		Array.prototype.forEach.call(elements, function(el) {
 			var attr = parseBindAttribute(el);
 			validateBindAttr(view, attr);
 			view[attr.name] = new _components[attr.cls](view, el);
 
 			function parseBindAttribute(el) {
-				var attr = el.getAttribute(opts.BNDR_ATTR).split(':')
+				var attr = el.getAttribute(opts.BNDR_ATTR)
 					, bindTo = attr.split(':');
 				switch (bindTo.length) {
 					case 1:
@@ -86,7 +87,7 @@ View.extendProto({
 							cls: bindTo[0]
 						};
 					default:
-						throw new BindError('invalid bind attribute ' + bindTo.join(':'));
+						throw new BindError('invalid bind attribute ' + attr);
 				}
 			}
 
@@ -106,6 +107,39 @@ View.extendProto({
 });
 
 
-bndr.Component = function(element) {
+bndr.Component = function Component(element) {
 
 }
+
+bndr.registerComponentClass(bndr.Component);
+
+window.bndr = bndr;
+
+
+},{"proto":2}],2:[function(require,module,exports){
+function extendProto(methods) {
+	var props = {};
+	for (var name in methods)
+		props[name] = {
+			enumerable: false,
+			configurable: false,
+			writable: false,
+			value: methods[name]
+		};
+	Object.defineProperties(this.prototype, props);
+	return this;
+}
+
+function extend(obj) {
+	for (var prop in obj)
+		this[prop] = obj[prop];
+	return this;
+}
+
+extendProto.call(Function, {
+	extendProto: extendProto,
+	extend: extend
+});
+
+},{}]},{},[1,2])
+;

@@ -16,6 +16,13 @@
     "url": "https://github.com/MailOnline/bndr/issues"
   },
   "dependencies": {
-    "proto": "*"
+    "proto": "*",
+    "browserify": "~2.35.4",
+    "grunt-browserify": "~1.2.11",
+    "grunt": "~0.4.1",
+    "grunt-contrib-uglify": "~0.2.7",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-mocha": "~0.4.1",
+    "grunt-contrib-watch": "~0.5.3"
   }
 }
