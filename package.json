@@ -1,0 +1,21 @@
+{
+  "name": "bndr",
+  "version": "0.0.1",
+  "description": "A minimalist browser framework that binds HTML elements to JS components",
+  "main": "bndr.js",
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/MailOnline/bndr.git"
+  },
+  "author": "",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/MailOnline/bndr/issues"
+  },
+  "dependencies": {
+    "proto": "*"
+  }
+}
