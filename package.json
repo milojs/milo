@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "async": "~0.2.9",
-    "underscore": "~1.5.2"
+    "underscore": "~1.5.2",
+    "grunt-mocha-test": "~0.7.0"
   }
 }
