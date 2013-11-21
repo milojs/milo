@@ -1,9 +1,12 @@
 'use strict';
 
-var registry = require('../../lib/components/registry')
+var ClassRegistry = require('../lib/registry.js')
+	, _ = require('proto')
 	, assert = require('assert');
 
-describe('registry of components', function() {
+describe('ClassRegistry class', function() {
+	var registry = new ClassRegistry(Object);
+
 	beforeEach(function() {
 		registry.clean();
 	});
@@ -65,5 +68,25 @@ describe('registry of components', function() {
 		assert.throws(function() {
 			registry.remove(ComponentClass1);
 		}, 'should fail if component is not registered');
+	});
+
+	it('should only allow to register class passed to registry constructor and its subclasses', function() {
+		function MyClass() {}
+		function AnotherClass() {}
+
+		var MySubclass = _.createSubclass(MyClass, 'MySubclass');
+		var MySubSubclass = _.createSubclass(MySubclass, 'MySubSubclass');
+
+		var myRegistry = new ClassRegistry(MyClass);
+
+		assert.doesNotThrow(function() {
+			myRegistry.add(MyClass);
+			myRegistry.add(MySubclass);
+			myRegistry.add(MySubSubclass);
+		}, 'should allow registering foundation class and its subclasses');
+
+		assert.throws(function() {
+			myRegistry.add(AnotherClass);
+		}, 'should NOT allow registering classes that are not subclasses of foundation class');
 	});
 });

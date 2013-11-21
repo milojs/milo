@@ -1,5 +1,5 @@
 var FacetedObject = require('../../lib/facets/object')
-	, Facet = require('../../lib/facets/class')
+	, Facet = require('../../lib/facets/f_class')
 	, assert = require('assert');
 
 describe('FacetedObject', function() {
