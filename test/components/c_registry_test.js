@@ -11,11 +11,11 @@ describe('registry of components', function() {
 		registry.clean();
 	});
 
-	it.skip('should have "add" and "get" methods', function() {
-		var ComponentClass1 = Component.create('', {
+	it('should have "add" and "get" methods', function() {
+		var ComponentClass1 = Component.createComponentClass('', {
 			facet1: Facet
 		});
-		var ComponentClass2 = Component.create('ComponentClass2', {
+		var ComponentClass2 = Component.createComponentClass('ComponentClass2', {
 			facet2: Facet
 		});
 
@@ -26,8 +26,6 @@ describe('registry of components', function() {
 		assert.throws(function() {
 			registry.add(undefined, 'Class1');
 		}, 'should fail if constructor not specified');
-
-		console.log('ComponentClass1', ComponentClass1);
 
 		registry.add(ComponentClass1, 'Class1');
 		registry.add(ComponentClass2);
@@ -50,8 +48,10 @@ describe('registry of components', function() {
 		}, 'should fail if component registered under same name')
 	});
 
-	it.skip('should have "remove" method', function() {
-		function ComponentClass1() { this.prop = 1; }
+	it('should have "remove" method', function() {
+		var ComponentClass1 = Component.createComponentClass('ComponentClass1', {
+			facet1: Facet
+		});
 
 		assert.throws(registry.remove, 'should fail if name or class is not supplied');
 		assert.throws(function() {

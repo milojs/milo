@@ -1,6 +1,6 @@
 var Component = require('../../lib/components/c_class')
 	, Facet = require('../../lib/facets/f_class')
-	, FacetedObject = require('../../lib/facets/object')
+	, FacetedObject = require('../../lib/facets/f_object')
 	, assert = require('assert');
 
 describe('Component class', function() {
@@ -15,7 +15,7 @@ describe('Component class', function() {
 		});
 
 		assert(MyComponent.prototype instanceof Component, 'should create subclass of Component');
-		// var aComp = new MyComponent;
+		var aComp = new MyComponent;
 
 		assert(aComp instanceof MyComponent, '');
 	});
