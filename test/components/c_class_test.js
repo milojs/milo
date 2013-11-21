@@ -1,3 +1,5 @@
+'use strict';
+
 var Component = require('../../lib/components/c_class')
 	, Facet = require('../../lib/facets/f_class')
 	, FacetedObject = require('../../lib/facets/f_object')

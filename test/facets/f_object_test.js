@@ -1,3 +1,5 @@
+'use strict';
+
 var FacetedObject = require('../../lib/facets/f_object')
 	, Facet = require('../../lib/facets/f_class')
 	, assert = require('assert')
