@@ -17,7 +17,7 @@ function testRegistry(registry, FoundationClass) {
 		// TODO check if it is in the registry
 	});
 
-	it(FoundationClass != Object)
+	if(FoundationClass != Object)
 		it('should NOT allow registering classes that are not subclasses of ' + FoundationClass.name, function() {
 			function MyClassQR2MRSMIEulp() {};
 
@@ -28,13 +28,13 @@ function testRegistry(registry, FoundationClass) {
 			assert.equal(registry.get('MyClassQR2MRSMIEulp'), undefined);
 		});
 
-	it('should NOT allow registering classes twice', function() {
+	it.skip('should NOT allow registering classes twice', function() {
 
 
 		// TODO
 	});
 
-	it('should NOT allow registering another class under the same name', function() {
+	it.skip('should NOT allow registering another class under the same name', function() {
 		var MyClassQR2MRSMIEulp = _.createSubclass(FoundationClass);
 
 		// registry.add(MyClassQR2MRSMIEulp);

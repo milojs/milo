@@ -1,3 +1,5 @@
+'use strict';
+
 // var bndr = require('../bndr.js');
 // var assert = require('assert');
 
