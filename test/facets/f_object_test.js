@@ -2,7 +2,7 @@ var FacetedObject = require('../../lib/facets/f_object')
 	, Facet = require('../../lib/facets/f_class')
 	, assert = require('assert');
 
-describe('FacetedObject', function() {
+describe('FacetedObject class', function() {
 	it('should have a factory that creates classes of faceted objects', function() {
 		var factory = FacetedObject.createFacetedClass.bind(FacetedObject);
 		var facetsClasses = {

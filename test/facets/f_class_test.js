@@ -4,7 +4,7 @@ var Facet = require('../../lib/facets/f_class')
 	, assert = require('assert')
 	, _ = require('proto');
 
-describe('Facet', function() {
+describe('Facet class', function() {
 	it('should initialize Facet objects', function() {
 		var self = {}
 		var aFacet = new Facet(self, { prop: 1 });
