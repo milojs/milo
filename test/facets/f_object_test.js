@@ -1,13 +1,16 @@
 var FacetedObject = require('../../lib/facets/f_object')
 	, Facet = require('../../lib/facets/f_class')
-	, assert = require('assert');
+	, assert = require('assert')
+	, _ = require('proto');
 
 describe('FacetedObject class', function() {
+	var factory = FacetedObject.createFacetedClass.bind(FacetedObject);
+
+	var facetsClasses = {
+			facet: Facet
+		}
+
 	it('should have a factory that creates classes of faceted objects', function() {
-		var factory = FacetedObject.createFacetedClass.bind(FacetedObject);
-		var facetsClasses = {
-				facet: Facet
-			}
 		var TestFacetedClass = factory('TestFacetedClass', facetsClasses);
 
 			assert.equal(TestFacetedClass.prototype.facets, facetsClasses);
@@ -33,5 +36,18 @@ describe('FacetedObject class', function() {
 		assert.throws(function() { factory(); });
 		assert.throws(function() { factory('name'); });
 		assert.throws(function() { factory('name', {facet: 1}); });
+	});
+
+	it('should call init method defined in Subclass when instantiated', function() {
+		var TestFacetedClass = factory('TestFacetedClass', facetsClasses);
+
+		var result;
+		_.extendProto(TestFacetedClass, {
+			init: function() { result = 'initCalled'; }
+		})
+
+		var aTestFacetedObject = new TestFacetedClass;
+
+		assert.equal(result, 'initCalled');
 	});
 });
