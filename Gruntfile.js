@@ -3,23 +3,32 @@ module.exports = function(grunt) {
 
 	grunt.initConfig({
 		mochaTest: {
-			build: {
+			test: {
 				options: {
 		        	reporter: 'spec'
 		        },
-		        src: ['test/**/*.js']
+		        src: 'test/**/*.js'
+			}
+		},
+		mocha: {
+			test: {
+				src: 'test_html/**/*.html',
+				options: {
+					run: true,
+					log: true
+				}
 			}
 		},
 		browserify: {
 			build: {
 				files: {
-					'milo.bundle.js': bundles.milo
+					'milo.bundle.js': 'lib/milo.js'
 				}
 			}
 		},
 		watch: {
 			build: {
-				files: bundles.milo,
+				files: ['lib/**/*.js', 'node_modules/proto/lib/proto.js'],
 				tasks: 'browserify'
 			}
 		}
@@ -46,16 +55,14 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-browserify');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-mocha-test');
+	grunt.loadNpmTasks('grunt-mocha');
 
 	grunt.registerTask('test', 'mochaTest');
+	grunt.registerTask('htmltest', 'mocha');
 	grunt.registerTask('default', ['test', 'browserify', 'watch']);
 
 	function getBundles() {
         return {
-            milo: [
-                'lib/milo.js',
-                'node_modules/proto/proto.js'
-            ]
         };
     }
 };

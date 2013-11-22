@@ -68,10 +68,10 @@ function validateAttribute() {
 },{"../check":4,"./error":3,"proto":11}],2:[function(require,module,exports){
 'use strict';
 
-require('proto');
 var registry = require('../components/c_registry')
 	, Attribute = require('./attribute')
-	, BindError = require('./error');
+	, BindError = require('./error')
+	, _ = require('proto');
 
 
 var opts = {

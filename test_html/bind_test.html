@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Simple binding test</title>
+    <link rel="stylesheet" href="css/mocha.css" type="text/css" charset="utf-8" />
+</head>
+<body>
+    <div id="viewToBind">
+        <label for="article-id">Article ID</label>
+        <input id="article-id" type="text" ml-bind="articleIdInput">
+        <button ml-bind="articleButton">Open</button>
+    </div>
+
+    <!-- Required for browser reporter -->
+    <div id="mocha"></div>
+
+    <!-- mocha -->
+    <script src="js/mocha.js"></script>
+    <script>
+        // This will be overridden by mocha-helper if you run with grunt
+        mocha.setup('bdd');
+    </script>
+
+    <!--
+         IMPORTANT
+         If you do not want to set the `run` option to `true` for some reason
+         and are not using AMD, you must include the bridge.js file
+         in the `phantomjs` folder after you include `mocha.js`
+    -->
+    <script src="js/phantomjs/bridge.js"></script>
+
+    <!-- Include your assertion lib of choice -->
+    <script src="js/chai.js"></script>
+    <script>
+        // Setup chai
+        var expect = chai.expect;
+    </script>
+
+    <!-- Include anything you want to test -->
+    <script src="../node_modules/proto/lib/proto.js"></script>
+    <script src="../milo.bundle.js"></script>
+
+    <!-- Spec files -->
+    <script src="bind_test.js"></script>
+
+    <!-- run mocha -->
+    <script type="text/javascript">
+        mocha
+            .globals(['milo', '_']) // acceptable globals
+            .run();
+    </script>
+</body>
+</html>
