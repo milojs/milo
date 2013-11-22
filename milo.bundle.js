@@ -68,10 +68,13 @@ function validateAttribute() {
 },{"../check":4,"./error":3,"proto":11}],2:[function(require,module,exports){
 'use strict';
 
-var registry = require('../components/c_registry')
+var componentsRegistry = require('../components/c_registry')
+	, Component = componentsRegistry.get('Component')
 	, Attribute = require('./attribute')
 	, BindError = require('./error')
-	, _ = require('proto');
+	, _ = require('proto')
+	, check = require('../check')
+	, Match =  check.Match;
 
 
 var opts = {
@@ -85,47 +88,51 @@ function bind(scopeEl) {
 		, components = {};
 
 	// iterate children of scopeEl
-	Array.prototype.forEach.call(scopeEl.children, function(el){
-		attr = new Attribute(el, opts.BIND_ATTR);
+	Array.prototype.forEach.call(scopeEl.children, bindElement);
 
-		bindComponent(attr);
+	return components;
+
+	function bindElement(el){
+		var attr = new Attribute(el, opts.BIND_ATTR);
+
+		var aComponent = createComponent(el, attr);
 
 		// bind inner elements to components
 		var innerComponents = bind(el);
 
 		// attach inner components to the current one (create a new scope) ...
-		if (aComponent && aComponent.container)
+		if (typeof aComponent != 'undefined' && aComponent.container)
 			aComponent.container.add(innerComponents);
 		else // or keep them in the current scope
 			_.eachKey(innerComponents, storeComponent);
 
 		if (aComponent)
 			storeComponent(aComponent, attr.name);
+	}
 
-
-		function bindComponent(attr) {
-			if (attr.node) { // element will be bound to a component
-				attr.parse().validate();
-			
-				// get component class from registry and validate
-				var ComponentClass = componentsRegistry.get(attr.compClass);
-				if (! ComponentClass)
-					throw new BindError('class ' + attr.compClass + ' is not registered');
-				check(ComponentClass, Match.Subclass(Component));
+	function createComponent(el, attr) {
+		if (attr.node) { // element will be bound to a component
+			attr.parse().validate();
 		
-				// create new component
-				var aComponent = new ComponentClass({}, el);
-			}
+			// get component class from registry and validate
+			var ComponentClass = componentsRegistry.get(attr.compClass);
+			if (! ComponentClass)
+				throw new BindError('class ' + attr.compClass + ' is not registered');
+			console.log(ComponentClass);
+			check(ComponentClass, Match.Subclass(Component, true));
+	
+			// create new component
+			return new ComponentClass({}, el);
 		}
+	}
 
 
-		function storeComponent(aComponent, name) {
-			if (components[name])
-				throw new BindError('duplicate component name: ' + name);
+	function storeComponent(aComponent, name) {
+		if (components[name])
+			throw new BindError('duplicate component name: ' + name);
 
-			components[name] = aComponent;
-		}
-	});
+		components[name] = aComponent;
+	}
 }
 
 
@@ -133,7 +140,7 @@ bind.config = function(options) {
 	opts.extend(options);
 };
 
-},{"../components/c_registry":6,"./attribute":1,"./error":3,"proto":11}],3:[function(require,module,exports){
+},{"../check":4,"../components/c_registry":6,"./attribute":1,"./error":3,"proto":11}],3:[function(require,module,exports){
 'use strict';
 
 var _ = require('proto');
@@ -186,7 +193,7 @@ var Match = check.Match = {
   },
 
   Subclass: function(Superclass, matchSuperclassToo) {
-    return new Subclass(Superclass);
+    return new Subclass(Superclass, matchSuperclassToo);
   },
 
   // XXX matchers should know how to describe themselves for errors
@@ -630,15 +637,18 @@ FacetedObject.createFacetedClass = function (name, facetsClasses) {
 },{"../check":4,"./f_class":7,"proto":11}],9:[function(require,module,exports){
 'use strict';
 
-var milo = module.exports = {
+var milo = {
 	bind: require('./binder/bind')
 }
+
+if (typeof module == 'object' && module.exports)
+	// export for node/browserify
+	module.exports = milo;
 
 if (typeof window == 'object')
 	window.milo = milo;
 
 },{"./binder/bind":2}],10:[function(require,module,exports){
-'use strict';
 'use strict';
 
 var _ = require('proto')
@@ -739,16 +749,19 @@ var proto = _ = {
 };
 
 
-if (typeof window != 'undefined') {
+if (typeof window == 'object') {
 	// preserve existing _ object
 	if (window._)
 		proto.underscore = window._
 
 	// expose global _
 	window._ = proto;
-} else if (module.exports)
+}
+
+if (typeof module == 'object' && module.exports)
 	// export for node/browserify
 	module.exports = proto;
+	
 
 function extendProto(self, methods) {
 	var propDescriptors = {};

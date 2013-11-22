@@ -22,27 +22,20 @@
         mocha.setup('bdd');
     </script>
 
-    <!--
-         IMPORTANT
-         If you do not want to set the `run` option to `true` for some reason
-         and are not using AMD, you must include the bridge.js file
-         in the `phantomjs` folder after you include `mocha.js`
-    -->
-    <script src="js/phantomjs/bridge.js"></script>
+    <!--<script src="js/phantomjs/bridge.js"></script>-->
 
     <!-- Include your assertion lib of choice -->
     <script src="js/chai.js"></script>
     <script>
         // Setup chai
-        var expect = chai.expect;
+        var expect = chai.expect
+            , assert = chai.assert;
     </script>
 
     <!-- Include anything you want to test -->
-    <script src="../node_modules/proto/lib/proto.js"></script>
-    <script src="../milo.bundle.js"></script>
 
     <!-- Spec files -->
-    <script src="bind_test.js"></script>
+    <script src="bind_test.bundle.js"></script>
 
     <!-- run mocha -->
     <script type="text/javascript">
