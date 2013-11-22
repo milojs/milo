@@ -118,7 +118,7 @@ function bind(scopeEl) {
 			var ComponentClass = componentsRegistry.get(attr.compClass);
 			if (! ComponentClass)
 				throw new BindError('class ' + attr.compClass + ' is not registered');
-			console.log(ComponentClass);
+
 			check(ComponentClass, Match.Subclass(Component, true));
 	
 			// create new component
@@ -592,9 +592,9 @@ function FacetedObject(facetsOptions /*, other args - passed to init method */) 
 	if (! thisClass.prototype.facets)
 		throw new Error('No facets defined in class ' + this.constructor.name);
 	
-	_.eachKey(facetsOptions, instantiateFacet, this, true);
+	// _.eachKey(facetsOptions, instantiateFacet, this, true);
 
-	// _.eachKey(this.facets, instantiateFacet, this, true);
+	_.eachKey(this.facets, instantiateFacet, this, true);
 
 	var unusedFacetsNames = Object.keys(facetsOptions);
 	if (unusedFacetsNames.length)
@@ -606,9 +606,9 @@ function FacetedObject(facetsOptions /*, other args - passed to init method */) 
 	if (this.init)
 		this.init.apply(this, arguments);
 
-	function instantiateFacet(facetOpts /* facetClass */, fct) {
-		var facetClass = this.facets[fct];
-		// var facetOpts = facetsOptions[fct];
+	function instantiateFacet(/* facetOpts */ facetClass, fct) {
+		// var facetClass = this.facets[fct];
+		var facetOpts = facetsOptions[fct];
 		delete facetsOptions[fct];
 
 		facets[fct] = {
