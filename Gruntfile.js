@@ -13,7 +13,7 @@ module.exports = function(grunt) {
 		browserify: {
 			build: {
 				files: {
-					'milo.js': bundles.milo
+					'milo.bundle.js': bundles.milo
 				}
 			}
 		},
@@ -48,7 +48,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-mocha-test');
 
 	grunt.registerTask('test', 'mochaTest');
-	grunt.registerTask('default', ['browserify', 'watch']);
+	grunt.registerTask('default', ['test', 'browserify', 'watch']);
 
 	function getBundles() {
         return {

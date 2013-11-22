@@ -1,0 +1,72 @@
+'use strict';
+
+var Attribute = require('../../lib/binder/attribute')
+	, assert = require('assert');
+
+
+describe('Attribute class', function() {
+	it('should have parse and validate methods', function() {
+		var elMock = {
+			attributes: {
+				'ml-bind': {}
+			}
+		};
+
+		var attr = new Attribute(elMock, 'ml-bind');
+		elMock.getAttribute = function(name) { return ''; }
+
+			assert.throws(attr.parse.bind(attr), 
+				'attribute ' + attr.name + ' can\'t be empty');
+			assert.equal(attr.compClass, undefined, 'comp class and name should be undefined');
+			assert.equal(attr.compName, undefined, 'comp class and name should be undefined');
+			assert.throws(attr.validate.bind(attr),
+				'attribute ' + attr.name + ' can\'t be empty');
+
+		attr = new Attribute(elMock, 'ml-bind');
+		elMock.getAttribute = function(name) { return 'myButton'; }
+
+			attr.parse();
+			assert.equal(attr.compClass, 'Component', 'comp class and name should be parsed correctly');
+			assert.equal(attr.compName, 'myButton', 'comp class and name should be parsed correctly');
+			assert.doesNotThrow(attr.validate.bind(attr),
+				'attribute ' + attr.name + ' may contain only component name');
+
+		attr = new Attribute(elMock, 'ml-bind');
+		elMock.getAttribute = function(name) { return 'Button:myButton'; }
+
+			attr.parse();
+			assert.equal(attr.compClass, 'Button', 'comp class and name should be parsed correctly');
+			assert.equal(attr.compName, 'myButton', 'comp class and name should be parsed correctly');
+			assert.doesNotThrow(attr.validate.bind(attr),
+				'attribute ' + attr.name + ' may contain component class and name separated with :');
+
+		attr = new Attribute(elMock, 'ml-bind');
+		elMock.getAttribute = function(name) { return 'Button:myButton:shmuck'; }
+
+			assert.throws(attr.parse.bind(attr), 
+				'attribute ' + attr.name + ' can\'t contain more than 2 elements');
+
+			assert.equal(attr.compClass, undefined, 'comp class and name should be undefined');
+			assert.equal(attr.compName, undefined, 'comp class and name should be undefined');
+			assert.throws(attr.validate.bind(attr),
+				'attribute ' + attr.name + ' can\'t contain more than 2 elements');
+
+		attr = new Attribute(elMock, 'ml-bind');
+		elMock.getAttribute = function(name) { return 'Button:'; }
+
+			attr.parse();
+			assert.equal(attr.compClass, 'Button', 'comp class and name should be undefined');
+			assert.equal(attr.compName, '', 'comp class and name should be undefined');
+			assert.throws(attr.validate.bind(attr),
+				'attribute ' + attr.name + ' can\'t contain empty name');
+
+		attr = new Attribute(elMock, 'ml-bind');
+		elMock.getAttribute = function(name) { return ':myButton'; }
+
+			attr.parse();
+			assert.equal(attr.compClass, '', 'comp class and name should be undefined');
+			assert.equal(attr.compName, 'myButton', 'comp class and name should be undefined');
+			assert.throws(attr.validate.bind(attr),
+				'attribute ' + attr.name + ' can\'t contain empty class if ":" is present');
+	});
+});
