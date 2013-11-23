@@ -35,10 +35,6 @@ describe('messengerMixin', function() {
 
     });
 
-    it.skip('should define broadcastMessage method', function() {
-
-    });
-
     it.skip('should define getMessageSubscribers method', function() {
 
     });

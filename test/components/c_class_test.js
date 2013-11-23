@@ -11,6 +11,7 @@ describe('Component class', function() {
 		assert.equal(Component.name, 'Component');
 	});
 
+
 	it('should have a class method createComponentClass that creates subclasses', function() {
 		var MyComponent = Component.createComponentClass('MyComponent', {
 			facet: Facet
@@ -20,5 +21,10 @@ describe('Component class', function() {
 		var aComp = new MyComponent;
 
 		assert(aComp instanceof MyComponent, '');
+	});
+
+
+	it.skip('should have messengerMixin', function() {
+
 	});
 });

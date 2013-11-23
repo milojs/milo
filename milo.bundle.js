@@ -65,7 +65,7 @@ function validateAttribute() {
 		throw new BindError('empty component class name ' + this.compClass);
 }
 
-},{"../check":4,"./error":3,"proto":11}],2:[function(require,module,exports){
+},{"../check":4,"./error":3,"proto":21}],2:[function(require,module,exports){
 'use strict';
 
 var componentsRegistry = require('../components/c_registry')
@@ -145,7 +145,7 @@ binder.config = function(options) {
 	opts.extend(options);
 };
 
-},{"../check":4,"../components/c_registry":6,"./attribute":1,"./error":3,"proto":11}],3:[function(require,module,exports){
+},{"../check":4,"../components/c_registry":13,"./attribute":1,"./error":3,"proto":21}],3:[function(require,module,exports){
 'use strict';
 
 var _ = require('proto');
@@ -158,7 +158,7 @@ _.makeSubclass(BindError, Error);
 
 module.exports = BindError;
 
-},{"proto":11}],4:[function(require,module,exports){
+},{"proto":21}],4:[function(require,module,exports){
 'use strict';
 
 // XXX docs
@@ -528,13 +528,17 @@ function _prependPath(key, base) {
 };
 
 
-},{"proto":11}],5:[function(require,module,exports){
+},{"proto":21}],5:[function(require,module,exports){
 'use strict';
 
 var FacetedObject = require('../facets/f_object')
+	, messengerMixin = require('./messenger')
 	, _ = require('proto');
 
-var Component = module.exports = _.createSubclass(FacetedObject, 'Component', true)
+var Component = _.createSubclass(FacetedObject, 'Component', true);
+
+module.exports = Component;
+
 
 Component.createComponentClass = FacetedObject.createFacetedClass;
 delete Component.createFacetedClass;
@@ -543,12 +547,328 @@ _.extendProto(Component, {
 	init: initComponent
 });
 
+_.extendProto(Component, messengerMixin);
 
 function initComponent(facetsOptions, element) {
 	this.el = element;
+	this.initMessenger();
 }
 
-},{"../facets/f_object":8,"proto":11}],6:[function(require,module,exports){
+},{"../facets/f_object":18,"./messenger":16,"proto":21}],6:[function(require,module,exports){
+'use strict';
+
+var Facet = require('../facets/f_class')
+	, messengerMixin = require('./messenger')
+	, _ = require('proto');
+
+var ComponentFacet = _.createSubclass(Facet, 'ComponentFacet');
+
+module.exports = ComponentFacet;
+
+
+_.extendProto(ComponentFacet, {
+	init: initComponentFacet,
+});
+
+_.extendProto(ComponentFacet, messengerMixin);
+
+
+function initComponentFacet() {
+	this.initMessenger();
+}
+
+},{"../facets/f_class":17,"./messenger":16,"proto":21}],7:[function(require,module,exports){
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+	, binder = require('../../binder/binder')
+	, _ = require('proto')
+	, facetsRegistry = require('./cf_registry');
+
+// container facet
+var Container = _.createSubclass(ComponentFacet, 'Container');
+
+_.extendProto(Container, {
+	init: initContainer,
+	_bind: _bindComponents,
+	add: addChildComponents
+});
+
+function initContainer() {
+	this.children = {};
+}
+
+function _bindComponents() {
+	// TODO
+	// this function should re-bind rather than bind all internal elements
+	this.children = binder(this.owner.el);
+}
+
+function addChildComponents(childComponents) {
+	// TODO
+	// this function should intelligently re-bind existing components to
+	// new elements (if they changed) and re-bind previously bound events to the same
+	// event handlers
+	// or maybe not, if this function is only used by binder to add new elements...
+	_.extend(this.children, childComponents);
+}
+
+
+facetsRegistry.add(Container);
+
+},{"../../binder/binder":2,"../c_facet":6,"./cf_registry":11,"proto":21}],8:[function(require,module,exports){
+'use strict';
+
+// DOM element facet
+var El = _.createSubclass(ComponentFacet, 'El');
+
+
+},{}],9:[function(require,module,exports){
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+	, FacetError = ComponentFacet.Error
+	, _ = require('proto')
+	, facetsRegistry = require('./cf_registry')
+	, messengerMixin = require('../messenger')
+	, eventsConstructors = require('./dom_events');
+
+// events facet
+var Events = _.createSubclass(ComponentFacet, 'Events');
+
+_.extendProto(Events, {
+	init: initEventsFacet,
+	dom: getDomElement,
+	handleEvent: handleEvent, // event dispatcher - as defined by Event DOM API
+	on: addListener,
+	off: removeListener,
+	onEvents: addListenersToEvents,
+	offEvents: removeListenersFromEvents,
+	trigger: triggerEvents,
+	getListeners: getListeners,
+	_reattach: _reattachEventsOnElementChange
+});
+
+facetsRegistry.add(Events);
+
+
+var useCaptureSuffix = '__capture'
+	, wrongEventPattern = /__capture/;
+
+
+function initEventsFacet() {
+	// dependency
+	if (! this.owner.facets.El)
+		throw new FacetError('Events facet require El facet');
+
+	// initialize listeners map
+	this._eventsListeners = {};
+}
+
+
+function getDomElement() {
+	return this.owner.El.dom;
+}
+
+
+function handleEvent(event) {
+	isCapturePhase = event.eventPhase == window.Event.CAPTURING_PHASE;
+
+	var eventKey = event.type + (isCapturePhase ? useCaptureSuffix : '')
+		, eventListeners = this._eventsListeners[eventKey];
+
+	if (eventListeners)
+		eventListeners.forEach(function(listener) {
+			listener(event);
+		});
+}
+
+
+function addListener(eventTypes, listener, useCapture) {
+	check(events, String);
+	check(listener, Function);
+
+	var eventsArray = eventTypes.split(/\s*\,?\s*/)
+		, wasAttached = false;
+
+	eventsArray.forEach(function(eventType) {
+		if (wrongEventPattern.test(eventType))
+			throw new RangeError('event type cannot contain ' + useCaptureSuffix);
+
+		var eventKey = eventType + (useCapture ? useCaptureSuffix : '')
+			, eventListeners = this._eventsListeners[eventKey]
+				= this._eventsListeners[eventKey] || [];
+
+		if (! _hasEventListeners(eventKey)) {
+			// true = use capture, for particular listener it is determined in handleEvent
+			this.dom().addEventListener(eventKey, this, true);
+			var notYetAttached = true;
+		} else
+			notYetAttached = eventListeners.indexOf(listener) == -1;
+
+		if (notYetAttached) {
+			wasAttached = true;
+			eventListeners.push(listener);
+		}
+	});
+
+	return wasAttached;
+}
+
+
+function addListenersToEvents(eventsListeners, useCapture) {
+	check(eventsListeners, Match.Object);
+
+	var wasAttachedMap = _.mapKeys(eventsListeners, function(listener, eventTypes) {
+		return this.addListener(eventTypes, listener, useCapture)
+	}, this);
+
+	return wasAttachedMap;	
+}
+
+
+function removeListener(eventTypes, listener, useCapture) {
+	check(eventTypes, String);
+	check(listener, Function);
+
+	var eventsArray = eventTypes.split(/\s*\,?\s*/)
+		, wasRemoved = false;
+
+	eventsArray.forEach(function(eventType) {
+		if (wrongEventPattern.test(eventType))
+			throw new RangeError('event type cannot contain ' + useCaptureSuffix);
+
+		var eventKey = eventType + (useCapture ? useCaptureSuffix : '')
+			, eventListeners = this._eventsListeners[eventKey];
+
+		if (! (eventListeners && eventListeners.length)) return;
+
+		if (listener) {
+			listenerIndex = eventListeners.indexOf(listener);
+			if (listenerIndex == -1)
+				return;
+			eventListeners.splice(listenerIndex, 1);
+			if (! eventListeners.length)
+				delete this._eventsListeners[eventKey];
+		} else
+			delete this._eventsListeners[eventKey];
+
+		wasRemoved = true;
+
+		if (! _hasEventListeners(eventType))
+			// true = use capture, for particular listener it is determined in handleEvent
+			this.dom().removeEventListener(eventType, this, true);
+	});
+
+	return wasRemoved;
+}
+
+
+function removeListenersFromEvents(eventsListeners, useCapture) {
+	check(eventsListeners, Match.Object);
+
+	var wasRemovedMap = _.mapKeys(eventsListeners, function(listener, eventTypes) {
+		return this.removeListener(eventTypes, listener, useCapture);
+	}, this);
+
+	return wasRemovedMap;
+}
+
+
+function triggerEvent(eventType, properties) {
+	check(eventType, String);
+
+	var EventConstructor = eventsConstructors[eventType];
+
+	if (typeof eventConstructor != 'function')
+		throw new Error('unsupported event type');
+
+	var domEvent = EventConstructor(eventType, properties);
+	var notCancelled = this.dom().dispatchEvent(domEvent);
+
+	return notCancelled;
+}
+
+
+function getListeners(eventType, useCapture) {
+	check(eventType, String);
+
+	var eventKey = eventType + (useCapture ? useCaptureSuffix : '')
+		, eventListeners = this._eventsListeners[eventKey];
+
+	return eventListeners && eventListeners.length
+				 ? [].concat(eventListeners)
+				 : undefined;
+}
+
+
+function _hasEventListeners(eventType) {
+	var notCapturedEvents = this._eventsListeners[eventType]
+		, capturedEvents = this._eventsListeners[eventType + useCaptureSuffix];
+
+	return (notCapturedEvents && notCapturedEvents.length)
+		    || (capturedEvents && capturedEvents.length);
+}
+
+},{"../c_facet":6,"../messenger":16,"./cf_registry":11,"./dom_events":12,"proto":21}],10:[function(require,module,exports){
+'use strict';
+
+},{}],11:[function(require,module,exports){
+'use strict';
+
+var ClassRegistry = require('../../registry')
+	, ComponentFacet = require('../c_facet');
+
+var facetsRegistry = new ClassRegistry(ComponentFacet);
+
+facetsRegistry.add(ComponentFacet);
+
+module.exports = facetsRegistry;
+
+// TODO - refactor components registry test into a function
+// that tests a registry with a given foundation class
+// Make test for this registry based on this function
+},{"../../registry":20,"../c_facet":6}],12:[function(require,module,exports){
+'use strict';
+
+var _ = require('proto');
+
+var eventTypes = {
+	ClipboardEvent: ['copy', 'cut', 'paste', 'beforecopy', 'beforecut', 'beforepaste'],
+
+};
+
+
+// mock window and event constructors for testing
+if (typeof window == 'undefined') {
+	window = {};
+	_.eachKey(eventTypes, function(eTypes, eventConstructorName) {
+		var eventsConstructor;
+		eval(
+			'eventsConstructor = function ' + eventConstructorName + '(type, properties) { \
+				this.type = type; \
+				_.extend(this, properties); \
+			};'
+		);
+		window[eventConstructorName] = eventsConstructor;
+	});
+}
+
+
+var eventsConstructors = {};
+
+_.eachKey(eventTypes, function(eTypes, eventConstructorName) {
+	eTypes.forEach(function(type) {
+		if (Object.hasOwnProperty(eventsConstructors, type))
+			throw new Error('duplicate event type ' + type);
+
+		eventsConstructors[type] = window[eventConstructorName];
+	});
+});
+
+module.exports = eventsConstructors;
+
+},{"proto":21}],13:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../registry')
@@ -560,7 +880,167 @@ componentsRegistry.add(Component);
 
 module.exports = componentsRegistry;
 
-},{"../registry":10,"./c_class":5}],7:[function(require,module,exports){
+},{"../registry":20,"./c_class":5}],14:[function(require,module,exports){
+module.exports=require(10)
+},{}],15:[function(require,module,exports){
+'use strict';
+
+var Component = require('../c_class')
+	, facetsRegistry = require('../c_facets/cf_registry')
+	, componentsRegistry = require('../c_registry');
+
+
+var View = Component.createComponentClass('View', {
+	container: facetsRegistry.get('Container')
+});
+
+componentsRegistry.add(View);
+
+module.exports = View;
+
+},{"../c_class":5,"../c_facets/cf_registry":11,"../c_registry":13}],16:[function(require,module,exports){
+'use strict';
+
+var _ = require('proto')
+	, check = require('../check')
+	, Match = check.Match;
+
+var messengerMixin =  {
+	initMessenger: initMessenger,
+	onMessage: registerSubscriber,
+	offMessage: removeSubscriber,
+	onMessages: registerSubscribers,
+	offMessages: removeSubscribers,
+	postMessage: postMessage,
+	getMessageSubscribers: getMessageSubscribers,
+	_chooseSubscribersHash: _chooseSubscribersHash
+};
+
+module.exports = messengerMixin;
+
+
+function initMessenger() {
+	this._messageSubscribers = {};
+	this._patternMessageSubscribers = {};
+}
+
+
+function registerSubscriber(message, subscriber) {
+	check(message, Match.OneOf(String, RegExp));
+	check(subscriber, Function); 
+
+	var subscribersHash = this._chooseSubscribersHash(message);
+	var msgSubscribers = subscribersHash[message] = subscribersHash[message] || [];
+	var notYetRegistered = msgSubscribers.indexOf(subscriber) == -1;
+
+	if (notYetRegistered)
+		msgSubscribers.push(subscriber);
+
+	return notYetRegistered;
+}
+
+
+function registerSubscribers(messageSubscribers) {
+	check(messageSubscribers, Match.Object);
+
+	var notYetRegisteredMap = _.mapKeys(messageSubscribers, function(subscriber, message) {
+		return this.registerSubscriber(message, subscriber)
+	}, this);
+
+	return notYetRegisteredMap;
+}
+
+
+// removes all subscribers for the message if subscriber isn't supplied
+function removeSubscriber(message, subscriber) {
+	check(message, Match.OneOf(String, RegExp));
+	check(subscriber, Match.Optional(Function)); 
+
+	var subscribersHash = this._chooseSubscribersHash(message);
+	var msgSubscribers = subscribersHash[message];
+	if (! msgSubscribers || ! msgSubscribers.length) return false;
+
+	if (subscriber) {
+		subscriberIndex = msgSubscribers.indexOf(subscriber);
+		if (subscriberIndex == -1) return false;
+		msgSubscribers.splice(subscriberIndex, 1);
+		if (! msgSubscribers.length)
+			delete subscribersHash[message];
+	} else
+		delete subscribersHash[message];
+
+	return true; // subscriber(s) removed
+}
+
+
+function removeSubscribers(messageSubscribers) {
+	check(messageSubscribers, Match.Object);
+
+	var subscriberRemovedMap = _.mapKeys(messageSubscribers, function(subscriber, message) {
+		return this.registerSubscriber(message, subscriber)
+	}, this);
+
+	return subscriberRemovedMap;	
+}
+
+
+function postMessage(message, data) {
+	check(message, Match.OneOf(String, RegExp));
+
+	var subscribersHash = this._chooseSubscribersHash(message);
+	var msgSubscribers = subscribersHash[message];
+
+	callSubscribers(msgSubscribers);
+
+	if (message instanceof String) {
+		_.eachKey(this._patternMessageSubscribers, 
+			function(patternSubscribers, pattern) {
+				if (pattern.test(message))
+					callSubscribers(patternSubscribers);
+			}
+		);
+	}
+
+	function callSubscribers(msgSubscribers) {
+		msgSubscribers.forEach(function(subscriber) {
+			subscriber(message, data);
+		});
+	}
+}
+
+
+function getMessageSubscribers(message, includePatternSubscribers) {
+	check(message, Match.OneOf(String, RegExp));
+
+	var subscribersHash = this._chooseSubscribersHash(message);
+	var msgSubscribers = msgSubscribers
+							? [].concat(subscribersHash[message])
+							: [];
+
+	// pattern subscribers are incuded by default
+	if (includePatternSubscribers != false && message instanceof String) {
+		_.eachKey(this._patternMessageSubscribers, 
+			function(patternSubscribers, pattern) {
+				if (patternSubscribers && patternSubscribers.length
+						&& pattern.test(message))
+					_.appendArray(msgSubscribers, patternSubscribers);
+			}
+		);
+	}
+
+	return msgSubscribers.length
+				? msgSubscribers
+				: undefined;
+}
+
+
+function _chooseSubscribersHash(message) {
+	return message instanceof RegExp
+				? this._patternMessageSubscribers
+				: this._messageSubscribers;
+}
+
+},{"../check":4,"proto":21}],17:[function(require,module,exports){
 'use strict';
 
 var _ = require('proto');
@@ -574,10 +1054,10 @@ function Facet(owner, options) {
 }
 
 _.extendProto(Facet, {
-	init: function() {},
+	init: function() {}
 });
 
-},{"proto":11}],8:[function(require,module,exports){
+},{"proto":21}],18:[function(require,module,exports){
 'use strict';
 
 var Facet = require('./f_class')
@@ -643,12 +1123,24 @@ FacetedObject.createFacetedClass = function (name, facetsClasses) {
 };
 
 
-},{"../check":4,"./f_class":7,"proto":11}],9:[function(require,module,exports){
+},{"../check":4,"./f_class":17,"proto":21}],19:[function(require,module,exports){
 'use strict';
 
 var milo = {
 	binder: require('./binder/binder')
 }
+
+
+// used facets
+require('./components/c_facets/Container');
+require('./components/c_facets/El');
+require('./components/c_facets/Events');
+require('./components/c_facets/Model');
+
+// used components
+require('./components/classes/Element');
+require('./components/classes/View');
+
 
 if (typeof module == 'object' && module.exports)
 	// export for node/browserify
@@ -657,7 +1149,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./binder/binder":2}],10:[function(require,module,exports){
+},{"./binder/binder":2,"./components/c_facets/Container":7,"./components/c_facets/El":8,"./components/c_facets/Events":9,"./components/c_facets/Model":10,"./components/classes/Element":14,"./components/classes/View":15}],20:[function(require,module,exports){
 'use strict';
 
 var _ = require('proto')
@@ -741,7 +1233,7 @@ function unregisterAllClasses() {
 	this.__registeredClasses = {};
 };
 
-},{"./check":4,"proto":11}],11:[function(require,module,exports){
+},{"./check":4,"proto":21}],21:[function(require,module,exports){
 'use strict';
 
 var _;
@@ -791,6 +1283,7 @@ function extendProto(self, methods) {
 	return self;
 }
 
+
 function extend(self, obj, onlyEnumerable) {
 	var propDescriptors = {};
 
@@ -804,13 +1297,13 @@ function extend(self, obj, onlyEnumerable) {
 	return self;
 }
 
+
 function clone(obj) {
 	var clonedObject = Object.create(obj.constructor.prototype);
-
 	_.extend(clonedObject, obj);
-
 	return clonedObject;
 }
+
 
 function createSubclass(thisClass, name, applyConstructor) {
 	var subclass;
@@ -916,5 +1409,5 @@ function prependArray(self, arrToPrepend) {
     return self;
 }
 
-},{}]},{},[9])
+},{}]},{},[19])
 ;
