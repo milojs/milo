@@ -570,11 +570,11 @@ module.exports = Facet;
 function Facet(owner, options) {
 	this.owner = owner;
 	this.options = options;
-	this.init();
+	this.init.apply(this, arguments);
 }
 
 _.extendProto(Facet, {
-	init: Function(),
+	init: function() {},
 });
 
 },{"proto":11}],8:[function(require,module,exports){
