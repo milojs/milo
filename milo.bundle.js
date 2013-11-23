@@ -81,10 +81,10 @@ var opts = {
 	BIND_ATTR: 'ml-bind'
 }
 
-module.exports = bind;
+module.exports = binder;
 
-function bind(scopeEl) {
-	var scopeEl = scopeEl || document.body
+function binder(scopeEl, bindScopeEl) {
+	var scopeEl = scopeEl // || document.body
 		, components = {};
 
 	// iterate children of scopeEl
@@ -98,13 +98,17 @@ function bind(scopeEl) {
 		var aComponent = createComponent(el, attr);
 
 		// bind inner elements to components
-		var innerComponents = bind(el);
+		if (el.children && el.children.length) {
+			var innerComponents = binder(el);
 
-		// attach inner components to the current one (create a new scope) ...
-		if (typeof aComponent != 'undefined' && aComponent.container)
-			aComponent.container.add(innerComponents);
-		else // or keep them in the current scope
-			_.eachKey(innerComponents, storeComponent);
+			if (Object.keys(innerComponents).length) {
+				// attach inner components to the current one (create a new scope) ...
+				if (typeof aComponent != 'undefined' && aComponent.container)
+					aComponent.container.add(innerComponents);
+				else // or keep them in the current scope
+					_.eachKey(innerComponents, storeComponent);
+			}
+		}
 
 		if (aComponent)
 			storeComponent(aComponent, attr.name);
@@ -113,9 +117,10 @@ function bind(scopeEl) {
 	function createComponent(el, attr) {
 		if (attr.node) { // element will be bound to a component
 			attr.parse().validate();
-		
+
 			// get component class from registry and validate
 			var ComponentClass = componentsRegistry.get(attr.compClass);
+
 			if (! ComponentClass)
 				throw new BindError('class ' + attr.compClass + ' is not registered');
 
@@ -136,7 +141,7 @@ function bind(scopeEl) {
 }
 
 
-bind.config = function(options) {
+binder.config = function(options) {
 	opts.extend(options);
 };
 
@@ -145,7 +150,11 @@ bind.config = function(options) {
 
 var _ = require('proto');
 
-var BindError = _.createSubclass(Error, 'BindError');
+function BindError(msg) {
+	this.message = msg;
+}
+
+_.makeSubclass(BindError, Error);
 
 module.exports = BindError;
 
@@ -565,7 +574,7 @@ function Facet(owner, options) {
 }
 
 _.extendProto(Facet, {
-	init: Function()
+	init: Function(),
 });
 
 },{"proto":11}],8:[function(require,module,exports){
@@ -638,7 +647,7 @@ FacetedObject.createFacetedClass = function (name, facetsClasses) {
 'use strict';
 
 var milo = {
-	bind: require('./binder/bind')
+	binder: require('./binder/binder')
 }
 
 if (typeof module == 'object' && module.exports)
@@ -648,7 +657,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./binder/bind":2}],10:[function(require,module,exports){
+},{"./binder/binder":2}],10:[function(require,module,exports){
 'use strict';
 
 var _ = require('proto')
@@ -741,11 +750,14 @@ var proto = _ = {
 	extend: extend,
 	clone: clone,
 	createSubclass: createSubclass,
+	makeSubclass: makeSubclass,
 	allKeys: Object.getOwnPropertyNames.bind(Object),
 	keyOf: keyOf,
 	allKeysOf: allKeysOf,
 	eachKey: eachKey,
-	mapKeys: mapKeys
+	mapKeys: mapKeys,
+	appendArray: appendArray,
+	prependArray: prependArray
 };
 
 
@@ -826,6 +838,13 @@ function createSubclass(thisClass, name, applyConstructor) {
 }
 
 
+function makeSubclass(thisClass, Superclass) {
+	thisClass.prototype = Object.create(Superclass.prototype);
+	thisClass.prototype.constructor = thisClass;
+	return thisClass;
+}
+
+
 function keyOf(self, searchElement, onlyEnumerable) {
 	var properties = onlyEnumerable 
 						? Object.keys(self)
@@ -875,6 +894,26 @@ function mapKeys(self, callback, thisArg, onlyEnumerable) {
 			Object.defineProperty(mapResult, key, descriptor);
 		}
 	}
+}
+
+
+function appendArray(self, arrToAppend) {
+	if (! arrToAppend.length) return self;
+
+    var args = [self.length, 0].concat(arrToAppend);
+    Array.prototype.splice.apply(self, args);
+
+    return self;
+}
+
+
+function prependArray(self, arrToPrepend) {
+	if (! arrToPrepend.length) return self;
+
+    var args = [0, 0].concat(arrToPrepend);
+    Array.prototype.splice.apply(self, args);
+
+    return self;
 }
 
 },{}]},{},[9])
