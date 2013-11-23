@@ -65,7 +65,7 @@ function validateAttribute() {
 		throw new BindError('empty component class name ' + this.compClass);
 }
 
-},{"../check":4,"./error":3,"proto":20}],2:[function(require,module,exports){
+},{"../check":4,"./error":3,"proto":19}],2:[function(require,module,exports){
 'use strict';
 
 var componentsRegistry = require('../components/c_registry')
@@ -145,7 +145,7 @@ binder.config = function(options) {
 	opts.extend(options);
 };
 
-},{"../check":4,"../components/c_registry":12,"./attribute":1,"./error":3,"proto":20}],3:[function(require,module,exports){
+},{"../check":4,"../components/c_registry":12,"./attribute":1,"./error":3,"proto":19}],3:[function(require,module,exports){
 'use strict';
 
 var _ = require('proto');
@@ -158,7 +158,7 @@ _.makeSubclass(BindError, Error);
 
 module.exports = BindError;
 
-},{"proto":20}],4:[function(require,module,exports){
+},{"proto":19}],4:[function(require,module,exports){
 'use strict';
 
 // XXX docs
@@ -528,7 +528,7 @@ function _prependPath(key, base) {
 };
 
 
-},{"proto":20}],5:[function(require,module,exports){
+},{"proto":19}],5:[function(require,module,exports){
 'use strict';
 
 var FacetedObject = require('../facets/f_object')
@@ -554,7 +554,7 @@ function initComponent(facetsOptions, element) {
 	this.initMessenger();
 }
 
-},{"../facets/f_object":17,"./messenger":15,"proto":20}],6:[function(require,module,exports){
+},{"../facets/f_object":16,"./messenger":14,"proto":19}],6:[function(require,module,exports){
 'use strict';
 
 var Facet = require('../facets/f_class')
@@ -577,7 +577,7 @@ function initComponentFacet() {
 	this.initMessenger();
 }
 
-},{"../facets/f_class":16,"./messenger":15,"proto":20}],7:[function(require,module,exports){
+},{"../facets/f_class":15,"./messenger":14,"proto":19}],7:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -618,7 +618,7 @@ function addChildComponents(childComponents) {
 	_.extend(this.children, childComponents);
 }
 
-},{"../../binder/binder":2,"../c_facet":6,"./cf_registry":10,"proto":20}],8:[function(require,module,exports){
+},{"../../binder/binder":2,"../c_facet":6,"./cf_registry":10,"proto":19}],8:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -807,7 +807,7 @@ function _hasEventListeners(eventType) {
 		    || (capturedEvents && capturedEvents.length);
 }
 
-},{"../c_facet":6,"../messenger":15,"./cf_registry":10,"./dom_events":11,"proto":20}],9:[function(require,module,exports){
+},{"../c_facet":6,"../messenger":14,"./cf_registry":10,"./dom_events":11,"proto":19}],9:[function(require,module,exports){
 'use strict';
 
 },{}],10:[function(require,module,exports){
@@ -825,7 +825,7 @@ module.exports = facetsRegistry;
 // TODO - refactor components registry test into a function
 // that tests a registry with a given foundation class
 // Make test for this registry based on this function
-},{"../../registry":19,"../c_facet":6}],11:[function(require,module,exports){
+},{"../../registry":18,"../c_facet":6}],11:[function(require,module,exports){
 'use strict';
 
 var _ = require('proto');
@@ -877,7 +877,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"proto":20}],12:[function(require,module,exports){
+},{"proto":19}],12:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../registry')
@@ -889,9 +889,7 @@ componentsRegistry.add(Component);
 
 module.exports = componentsRegistry;
 
-},{"../registry":19,"./c_class":5}],13:[function(require,module,exports){
-module.exports=require(9)
-},{}],14:[function(require,module,exports){
+},{"../registry":18,"./c_class":5}],13:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -907,7 +905,7 @@ componentsRegistry.add(View);
 
 module.exports = View;
 
-},{"../c_class":5,"../c_facets/cf_registry":10,"../c_registry":12}],15:[function(require,module,exports){
+},{"../c_class":5,"../c_facets/cf_registry":10,"../c_registry":12}],14:[function(require,module,exports){
 'use strict';
 
 var _ = require('proto')
@@ -1049,7 +1047,7 @@ function _chooseSubscribersHash(message) {
 				: this._messageSubscribers;
 }
 
-},{"../check":4,"proto":20}],16:[function(require,module,exports){
+},{"../check":4,"proto":19}],15:[function(require,module,exports){
 'use strict';
 
 var _ = require('proto');
@@ -1066,7 +1064,7 @@ _.extendProto(Facet, {
 	init: function() {}
 });
 
-},{"proto":20}],17:[function(require,module,exports){
+},{"proto":19}],16:[function(require,module,exports){
 'use strict';
 
 var Facet = require('./f_class')
@@ -1132,7 +1130,7 @@ FacetedObject.createFacetedClass = function (name, facetsClasses) {
 };
 
 
-},{"../check":4,"./f_class":16,"proto":20}],18:[function(require,module,exports){
+},{"../check":4,"./f_class":15,"proto":19}],17:[function(require,module,exports){
 'use strict';
 
 var milo = {
@@ -1146,7 +1144,6 @@ require('./components/c_facets/Events');
 require('./components/c_facets/Model');
 
 // used components
-require('./components/classes/Element');
 require('./components/classes/View');
 
 
@@ -1157,7 +1154,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./binder/binder":2,"./components/c_facets/Container":7,"./components/c_facets/Events":8,"./components/c_facets/Model":9,"./components/classes/Element":13,"./components/classes/View":14}],19:[function(require,module,exports){
+},{"./binder/binder":2,"./components/c_facets/Container":7,"./components/c_facets/Events":8,"./components/c_facets/Model":9,"./components/classes/View":13}],18:[function(require,module,exports){
 'use strict';
 
 var _ = require('proto')
@@ -1241,7 +1238,7 @@ function unregisterAllClasses() {
 	this.__registeredClasses = {};
 };
 
-},{"./check":4,"proto":20}],20:[function(require,module,exports){
+},{"./check":4,"proto":19}],19:[function(require,module,exports){
 'use strict';
 
 var _;
@@ -1417,5 +1414,5 @@ function prependArray(self, arrToPrepend) {
     return self;
 }
 
-},{}]},{},[18])
+},{}]},{},[17])
 ;
