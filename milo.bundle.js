@@ -431,19 +431,22 @@ function checkSubtree(value, pattern) {
 
   var requiredPatterns = {};
   var optionalPatterns = {};
-  _.each(pattern, function (subPattern, key) {
-    if (subPattern instanceof Optional)
-      optionalPatterns[key] = subPattern.pattern;
+
+  Object.keys(pattern).forEach(function(key) {
+    var subPattern = pattern[key];
+    if (pattern[key] instanceof Optional)
+      optionalPatterns[key] = pattern[key].pattern;
     else
-      requiredPatterns[key] = subPattern;
+      requiredPatterns[key] = pattern[key];
   });
 
-  _.each(value, function (subValue, key) {
+  Object.keys(value).forEach(function(key) {
+    var subValue = value[key];
     try {
-      if (_.has(requiredPatterns, key)) {
+      if (requiredPatterns.hasOwnProperty(key)) {
         checkSubtree(subValue, requiredPatterns[key]);
         delete requiredPatterns[key];
-      } else if (_.has(optionalPatterns, key)) {
+      } else if (optionalPatterns.hasOwnProperty(key)) {
         checkSubtree(subValue, optionalPatterns[key]);
       } else {
         if (!unknownKeysAllowed)
@@ -456,7 +459,7 @@ function checkSubtree(value, pattern) {
     }
   });
 
-  _.each(requiredPatterns, function (subPattern, key) {
+  Object.keys(requiredPatterns).forEach(function(key) {
     throw new Match.Error("Missing key '" + key + "'");
   });
 };
@@ -519,7 +522,7 @@ var _jsKeywords = ["do", "if", "in", "for", "let", "new", "try", "var", "case",
 function _prependPath(key, base) {
   if ((typeof key) === "number" || key.match(/^[0-9]+$/))
     key = "[" + key + "]";
-  else if (!key.match(/^[a-z_$][0-9a-z_$]*$/i) || _.contains(_jsKeywords, key))
+  else if (!key.match(/^[a-z_$][0-9a-z_$]*$/i) || _jsKeywords.indexOf(key) != -1)//_.contains(_jsKeywords, key))
     key = JSON.stringify([key]);
 
   if (base && base[0] !== "[")
@@ -1085,8 +1088,8 @@ function FacetedObject(facetsOptions /*, other args - passed to init method */) 
 
 	if (this.constructor == FacetedObject)		
 		throw new Error('FacetedObject is an abstract class, can\'t be instantiated');
-	if (! thisClass.prototype.facets)
-		throw new Error('No facets defined in class ' + this.constructor.name);
+	//if (! thisClass.prototype.facets)
+	//	throw new Error('No facets defined in class ' + this.constructor.name);
 	
 	// _.eachKey(facetsOptions, instantiateFacet, this, true);
 
@@ -1395,20 +1398,20 @@ function mapKeys(self, callback, thisArg, onlyEnumerable) {
 }
 
 
-function appendArray(self, arrToAppend) {
-	if (! arrToAppend.length) return self;
+function appendArray(self, arrayToAppend) {
+	if (! arrayToAppend.length) return self;
 
-    var args = [self.length, 0].concat(arrToAppend);
+    var args = [self.length, 0].concat(arrayToAppend);
     Array.prototype.splice.apply(self, args);
 
     return self;
 }
 
 
-function prependArray(self, arrToPrepend) {
-	if (! arrToPrepend.length) return self;
+function prependArray(self, arrayToPrepend) {
+	if (! arrayToPrepend.length) return self;
 
-    var args = [0, 0].concat(arrToPrepend);
+    var args = [0, 0].concat(arrayToPrepend);
     Array.prototype.splice.apply(self, args);
 
     return self;

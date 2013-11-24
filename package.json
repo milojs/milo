@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git://github.com/MailOnline/milo.git"
   },
-  "author": "",
+  "author": "MailOnline",
   "license": "BSD",
   "bugs": {
     "url": "https://github.com/MailOnline/milo/issues"
