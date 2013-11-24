@@ -1,6 +1,6 @@
 {
   "name": "milo",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A minimalist browser framework that binds HTML elements to JS components",
   "main": "milo.bundle.js",
   "scripts": {
@@ -16,7 +16,7 @@
     "url": "https://github.com/MailOnline/milo/issues"
   },
   "devDependencies": {
-    "proto": "*",
+    "mol-proto": "*",
     "async": "~0.2.9",
     "grunt": "~0.4.1",
     "grunt-mocha-test": "~0.7.0",

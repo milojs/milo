@@ -2,7 +2,7 @@
 
 var ClassRegistry = require('../../lib/registry')
 	, assert = require('assert')
-	, _ = require('proto');
+	, _ = require('mol-proto');
 
 module.exports = testRegistry;
 

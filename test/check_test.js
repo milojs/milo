@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('proto')
+var _ = require('mol-proto')
 	, assert = require('assert')
 	, check = require('../lib/check')
 	, Match = check.Match;

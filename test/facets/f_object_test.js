@@ -3,7 +3,7 @@
 var FacetedObject = require('../../lib/facets/f_object')
 	, Facet = require('../../lib/facets/f_class')
 	, assert = require('assert')
-	, _ = require('proto');
+	, _ = require('mol-proto');
 
 describe('FacetedObject class', function() {
 	var factory = FacetedObject.createFacetedClass.bind(FacetedObject);

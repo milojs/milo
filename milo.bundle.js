@@ -1,7 +1,7 @@
 ;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var _ = require('proto')
+var _ = require('mol-proto')
 	, check = require('../check')
 	, Match = check.Match
 	, BindError = require('./error');
@@ -69,10 +69,10 @@ function validateAttribute() {
 	return this;
 }
 
-},{"../check":4,"./error":2,"proto":19}],2:[function(require,module,exports){
+},{"../check":4,"./error":2,"mol-proto":19}],2:[function(require,module,exports){
 'use strict';
 
-var _ = require('proto');
+var _ = require('mol-proto');
 
 function BindError(msg) {
 	this.message = msg;
@@ -82,14 +82,14 @@ _.makeSubclass(BindError, Error);
 
 module.exports = BindError;
 
-},{"proto":19}],3:[function(require,module,exports){
+},{"mol-proto":19}],3:[function(require,module,exports){
 'use strict';
 
 var componentsRegistry = require('../components/c_registry')
 	, Component = componentsRegistry.get('Component')
 	, Attribute = require('./attribute')
 	, BindError = require('./error')
-	, _ = require('proto')
+	, _ = require('mol-proto')
 	, check = require('../check')
 	, Match =  check.Match;
 
@@ -171,14 +171,14 @@ binder.config = function(options) {
 	opts.extend(options);
 };
 
-},{"../check":4,"../components/c_registry":12,"./attribute":1,"./error":2,"proto":19}],4:[function(require,module,exports){
+},{"../check":4,"../components/c_registry":12,"./attribute":1,"./error":2,"mol-proto":19}],4:[function(require,module,exports){
 'use strict';
 
 // XXX docs
 
 // Things we explicitly do NOT support:
 //    - heterogenous arrays
-var _ = require('proto');
+var _ = require('mol-proto');
 
 var check = function (value, pattern) {
   // Record that check got called, if somebody cared.
@@ -544,14 +544,14 @@ function _prependPath(key, base) {
 };
 
 
-},{"proto":19}],5:[function(require,module,exports){
+},{"mol-proto":19}],5:[function(require,module,exports){
 'use strict';
 
 var FacetedObject = require('../facets/f_object')
 	, facetsRegistry = require('./c_facets/cf_registry')
 	, ComponentFacet = require('./c_facet')
 	, messengerMixin = require('./messenger')
-	, _ = require('proto')
+	, _ = require('mol-proto')
 	, check = require('../check')
 	, Match = check.Match;
 
@@ -605,12 +605,12 @@ function addFacet(facetNameOrClass, facetOpts, facetName) {
 	FacetedObject.prototype.addFacet.call(this, FacetClass, facetOpts, facetName);
 }
 
-},{"../check":4,"../facets/f_object":16,"./c_facet":6,"./c_facets/cf_registry":10,"./messenger":14,"proto":19}],6:[function(require,module,exports){
+},{"../check":4,"../facets/f_object":16,"./c_facet":6,"./c_facets/cf_registry":10,"./messenger":14,"mol-proto":19}],6:[function(require,module,exports){
 'use strict';
 
 var Facet = require('../facets/f_class')
 	, messengerMixin = require('./messenger')
-	, _ = require('proto');
+	, _ = require('mol-proto');
 
 var ComponentFacet = _.createSubclass(Facet, 'ComponentFacet');
 
@@ -628,12 +628,12 @@ function initComponentFacet() {
 	this.initMessenger();
 }
 
-},{"../facets/f_class":15,"./messenger":14,"proto":19}],7:[function(require,module,exports){
+},{"../facets/f_class":15,"./messenger":14,"mol-proto":19}],7:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
 	, binder = require('../../binder')
-	, _ = require('proto')
+	, _ = require('mol-proto')
 	, facetsRegistry = require('./cf_registry');
 
 // container facet
@@ -670,7 +670,7 @@ function addChildComponents(childComponents) {
 	_.extend(this.children, childComponents);
 }
 
-},{"../../binder":3,"../c_facet":6,"./cf_registry":10,"proto":19}],8:[function(require,module,exports){
+},{"../../binder":3,"../c_facet":6,"./cf_registry":10,"mol-proto":19}],8:[function(require,module,exports){
 'use strict';
 
 },{}],9:[function(require,module,exports){
@@ -678,7 +678,7 @@ function addChildComponents(childComponents) {
 
 var ComponentFacet = require('../c_facet')
 	, FacetError = ComponentFacet.Error
-	, _ = require('proto')
+	, _ = require('mol-proto')
 	, facetsRegistry = require('./cf_registry')
 	, messengerMixin = require('../messenger')
 	, domEventsConstructors = require('./dom_events')
@@ -876,7 +876,7 @@ function _hasEventListeners(eventType) {
 		    || (capturedEvents && capturedEvents.length);
 }
 
-},{"../../check":4,"../c_facet":6,"../messenger":14,"./cf_registry":10,"./dom_events":11,"proto":19}],10:[function(require,module,exports){
+},{"../../check":4,"../c_facet":6,"../messenger":14,"./cf_registry":10,"./dom_events":11,"mol-proto":19}],10:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../registry')
@@ -894,7 +894,7 @@ module.exports = facetsRegistry;
 },{"../../registry":18,"../c_facet":6}],11:[function(require,module,exports){
 'use strict';
 
-var _ = require('proto');
+var _ = require('mol-proto');
 
 
 // https://developer.mozilla.org/en-US/docs/Web/Reference/Events
@@ -943,7 +943,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"proto":19}],12:[function(require,module,exports){
+},{"mol-proto":19}],12:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../registry')
@@ -971,7 +971,7 @@ module.exports = View;
 },{"../c_class":5,"../c_registry":12}],14:[function(require,module,exports){
 'use strict';
 
-var _ = require('proto')
+var _ = require('mol-proto')
 	, check = require('../check')
 	, Match = check.Match;
 
@@ -1116,10 +1116,10 @@ function _chooseSubscribersHash(message) {
 				: this._messageSubscribers;
 }
 
-},{"../check":4,"proto":19}],15:[function(require,module,exports){
+},{"../check":4,"mol-proto":19}],15:[function(require,module,exports){
 'use strict';
 
-var _ = require('proto');
+var _ = require('mol-proto');
 
 module.exports = Facet;
 
@@ -1133,11 +1133,11 @@ _.extendProto(Facet, {
 	init: function() {}
 });
 
-},{"proto":19}],16:[function(require,module,exports){
+},{"mol-proto":19}],16:[function(require,module,exports){
 'use strict';
 
 var Facet = require('./f_class')
-	, _ = require('proto')
+	, _ = require('mol-proto')
 	, check = require('../check')
 	, Match = check.Match;
 
@@ -1226,7 +1226,7 @@ FacetedObject.createFacetedClass = function (name, facetsClasses) {
 };
 
 
-},{"../check":4,"./f_class":15,"proto":19}],17:[function(require,module,exports){
+},{"../check":4,"./f_class":15,"mol-proto":19}],17:[function(require,module,exports){
 'use strict';
 
 var milo = {
@@ -1253,7 +1253,7 @@ if (typeof window == 'object')
 },{"./binder":3,"./components/c_facets/Container":7,"./components/c_facets/Data":8,"./components/c_facets/Events":9,"./components/classes/View":13}],18:[function(require,module,exports){
 'use strict';
 
-var _ = require('proto')
+var _ = require('mol-proto')
 	, check = require('./check')
 	, Match = check.Match;
 
@@ -1334,7 +1334,7 @@ function unregisterAllClasses() {
 	this.__registeredClasses = {};
 };
 
-},{"./check":4,"proto":19}],19:[function(require,module,exports){
+},{"./check":4,"mol-proto":19}],19:[function(require,module,exports){
 'use strict';
 
 var _;
