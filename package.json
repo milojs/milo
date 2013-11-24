@@ -1,5 +1,5 @@
 {
-  "name": "milo",
+  "name": "mol-milo",
   "version": "0.0.3",
   "description": "A minimalist browser framework that binds HTML elements to JS components",
   "main": "milo.bundle.js",
