@@ -111,7 +111,7 @@ function binder(scopeEl, bindScopeEl) {
 		}
 
 		if (aComponent)
-			storeComponent(aComponent, attr.name);
+			storeComponent(aComponent, attr.compName);
 	}
 
 	function createComponent(el, attr) {
@@ -930,8 +930,16 @@ module.exports = messengerMixin;
 
 
 function initMessenger() {
-	this._messageSubscribers = {};
-	this._patternMessageSubscribers = {};
+	Object.defineProperties(this, {
+		_messageSubscribers: {
+			writable: true,
+			value: {}
+		},
+		_patternMessageSubscribers: {
+			writable: true,
+			value: {}
+		}
+	});
 }
 
 
@@ -1093,7 +1101,8 @@ function FacetedObject(facetsOptions /*, other args - passed to init method */) 
 	
 	// _.eachKey(facetsOptions, instantiateFacet, this, true);
 
-	_.eachKey(this.facets, instantiateFacet, this, true);
+	if (this.facets)
+		_.eachKey(this.facets, instantiateFacet, this, true);
 
 	var unusedFacetsNames = Object.keys(facetsOptions);
 	if (unusedFacetsNames.length)
@@ -1328,8 +1337,12 @@ function createSubclass(thisClass, name, applyConstructor) {
 
 	// pprototype chain
 	subclass.prototype = Object.create(thisClass.prototype);
+	
 	// subclass identity
-	subclass.prototype.constructor = subclass;
+	_.extendProto(subclass, {
+		constructor: subclass
+	});
+	
 	// copy class methods
 	// - for them to work correctly they should not explictly use superclass name
 	// and use "this" instead
