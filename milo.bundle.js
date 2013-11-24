@@ -535,6 +535,8 @@ function _prependPath(key, base) {
 'use strict';
 
 var FacetedObject = require('../facets/f_object')
+	, facetsRegistry = require('./c_facets/cf_registry')
+	, ComponentFacet = require('./c_facet')
 	, messengerMixin = require('./messenger')
 	, _ = require('proto');
 
@@ -543,21 +545,52 @@ var Component = _.createSubclass(FacetedObject, 'Component', true);
 module.exports = Component;
 
 
-Component.createComponentClass = FacetedObject.createFacetedClass;
+Component.createComponentClass = function(name, facets) {
+	var facetsClasses = {};
+
+	facets.forEach(function(fct) {
+		var fctName = _.firstLowerCase(fct);
+		var fctClassName = _.firstUpperCase(fct);
+		facetsClasses[fctName] = facetsRegistry.get(fctClassName)
+	});
+
+	return FacetedObject.createFacetedClass.call(this, name, facetsClasses);
+};
+
 delete Component.createFacetedClass;
 
+
 _.extendProto(Component, {
-	init: initComponent
+	init: initComponent,
+	addFacet: addFacet
 });
 
 _.extendProto(Component, messengerMixin);
+
 
 function initComponent(facetsOptions, element) {
 	this.el = element;
 	this.initMessenger();
 }
 
-},{"../facets/f_object":16,"./messenger":14,"proto":19}],6:[function(require,module,exports){
+
+function addFacet(facetNameOrClass, facetOpts, facetName) {
+	check(facetNameOrClass, Match.OneOf(String, Match.Subclass(ComponentFacet)));
+	check(facetOpts, Match.Optional(Object));
+	check(facetName, Match.Optional(String));
+
+	if (typeof facetNameOrClass == 'string') {
+		var facetClassName = _.firstUpperCase(facetNameOrClass);
+		var FacetClass = facetsRegistry.get(facetClassName);
+	} else 
+		FacetClass = facetNameOrClass;
+
+	facetName = facetName || FacetClass.name;
+
+	FacetedObject.prototype.addFacet.call(this, FacetClass, facetOpts, facetName);
+}
+
+},{"../facets/f_object":16,"./c_facet":6,"./c_facets/cf_registry":10,"./messenger":14,"proto":19}],6:[function(require,module,exports){
 'use strict';
 
 var Facet = require('../facets/f_class')
@@ -896,19 +929,16 @@ module.exports = componentsRegistry;
 'use strict';
 
 var Component = require('../c_class')
-	, facetsRegistry = require('../c_facets/cf_registry')
 	, componentsRegistry = require('../c_registry');
 
 
-var View = Component.createComponentClass('View', {
-	container: facetsRegistry.get('Container')
-});
+var View = Component.createComponentClass('View', ['container']);
 
 componentsRegistry.add(View);
 
 module.exports = View;
 
-},{"../c_class":5,"../c_facets/cf_registry":10,"../c_registry":12}],14:[function(require,module,exports){
+},{"../c_class":5,"../c_registry":12}],14:[function(require,module,exports){
 'use strict';
 
 var _ = require('proto')
@@ -1067,7 +1097,7 @@ module.exports = Facet;
 
 function Facet(owner, options) {
 	this.owner = owner;
-	this.options = options;
+	this.options = options || {};
 	this.init.apply(this, arguments);
 }
 
@@ -1114,16 +1144,42 @@ function FacetedObject(facetsOptions /*, other args - passed to init method */) 
 	if (this.init)
 		this.init.apply(this, arguments);
 
-	function instantiateFacet(/* facetOpts */ facetClass, fct) {
-		// var facetClass = this.facets[fct];
+	function instantiateFacet(/* facetOpts */ FacetClass, fct) {
+		// var FacetClass = this.facets[fct];
 		var facetOpts = facetsOptions[fct];
 		delete facetsOptions[fct];
 
 		facets[fct] = {
 			enumerable: false,
-			value: new facetClass(this, facetOpts)
+			value: new FacetClass(this, facetOpts)
 		};
 	}
+}
+
+
+_.extendProto(FacetedObject, {
+	addFacet: addFacet
+});
+
+
+function addFacet(FacetClass, facetOpts, facetName) {
+	check(FacetClass, Function);
+	check(facetName, Match.Optional(String));
+
+	facetName = _.firstLowerCase(facetName || FacetClass.name);
+
+	if (this.constructor.prototype.facets[facetName])
+		throw new Error('facet ' + facetName + ' is already part of the class ' + this.constructor.name);
+
+	if (this.facets[facetName])
+		throw new Error('facet ' + facetName + ' is already present in object');
+
+	this.facets[facetName] = FacetClass;
+
+	Object.defineProperty(this, facetName, {
+		enumerable: false,
+		value: new FacetClass(this, facetOpts)
+	});
 }
 
 
@@ -1266,7 +1322,9 @@ var proto = _ = {
 	eachKey: eachKey,
 	mapKeys: mapKeys,
 	appendArray: appendArray,
-	prependArray: prependArray
+	prependArray: prependArray,
+	firstUpperCase: firstUpperCase,
+	firstLowerCase: firstLowerCase
 };
 
 
@@ -1342,7 +1400,7 @@ function createSubclass(thisClass, name, applyConstructor) {
 	_.extendProto(subclass, {
 		constructor: subclass
 	});
-	
+
 	// copy class methods
 	// - for them to work correctly they should not explictly use superclass name
 	// and use "this" instead
@@ -1428,6 +1486,16 @@ function prependArray(self, arrayToPrepend) {
     Array.prototype.splice.apply(self, args);
 
     return self;
+}
+
+
+function firstUpperCase(str) {
+	return str[0].toUpperCase() + str.slice(1);
+}
+
+
+function firstLowerCase(str) {
+	return str[0].toLowerCase() + str.slice(1);
 }
 
 },{}]},{},[17])

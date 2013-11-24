@@ -1,7 +1,7 @@
 'use strict';
 
 var Component = require('../../lib/components/c_class')
-	, Facet = require('../../lib/facets/f_class')
+	, ComponentFacet = require('../../lib/components/c_facet')
 	, FacetedObject = require('../../lib/facets/f_object')
 	, assert = require('assert');
 
@@ -13,9 +13,7 @@ describe('Component class', function() {
 
 
 	it('should have a class method createComponentClass that creates subclasses', function() {
-		var MyComponent = Component.createComponentClass('MyComponent', {
-			facet: Facet
-		});
+		var MyComponent = Component.createComponentClass('MyComponent', ['ComponentFacet']);
 
 		assert(MyComponent.prototype instanceof Component, 'should create subclass of Component');
 		var aComp = new MyComponent;

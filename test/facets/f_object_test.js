@@ -40,6 +40,7 @@ describe('FacetedObject class', function() {
 		assert.throws(function() { factory('name', {facet: 1}); });
 	});
 
+
 	it('should call init method defined in Subclass when instantiated', function() {
 		var TestFacetedClass = factory('TestFacetedClass', facetsClasses);
 
@@ -51,5 +52,10 @@ describe('FacetedObject class', function() {
 		var aTestFacetedObject = new TestFacetedClass;
 
 		assert.equal(result, 'initCalled');
+	});
+
+
+	it.skip('should define addFacet method', function() {
+
 	});
 });

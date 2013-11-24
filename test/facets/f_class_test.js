@@ -13,6 +13,7 @@ describe('Facet class', function() {
 		assert.deepEqual(aFacet.options, { prop: 1 }, 'second parameter should be copied to .options');
 	});
 
+
 	it('should call init methods of Facet subclasses', function() {
 		var MyFacet = _.createSubclass(Facet, 'MyFacet');
 		
