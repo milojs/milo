@@ -77,6 +77,28 @@ describe('check module', function() {
 		});
 	});
 
+	it('should match.test and check using Array [pattern]', function() {
+		assert(Match.test(['test1', 'test2', 'test3'], [String]), 
+			'match.test array of strings with Array [pattern]');
+		assert.doesNotThrow(
+			function() { check(['test1', 'test2', 'test3'], [String]); }, 
+			'check array of strings with Array [pattern]'
+		);
+		assert.equal(Match.test(['test1', 'test2', 34], [String]), false,
+			'match.test array of strings with Array [pattern]');
+		assert.throws(
+			function() { check(['test1', 'test2', 34], [String]); }, 
+			'check array of strings with Array [pattern]'
+		);
+	});
+
+	it.skip('should match.test and check using Match.OneOf', function() {
+		assert(Match.test('test', Match.OneOf(null, Number, String)),
+			'match string against number of types');
+		assert.equal(Match.test([], Match.OneOf(null, Number, String)), false,
+			'match string against number of types');
+	});
+
 	it('should match.test and check with ObjectHash pattern', function() {
 		var objPass = { prop1: function() {}, prop2: function() {} };
 		var objFail = { prop1: function() {}, prop2: 'test' };
