@@ -37,13 +37,13 @@ module.exports = function(grunt) {
 		},
 		watch: {
 			milo: {
-				files: ['lib/**/*.js', 'node_modules/proto/lib/proto.js'],
+				files: ['lib/**/*.js', 'node_modules/mol-proto/lib/proto.js'],
 				tasks: 'browserify:milo'
 			},
 			test1: {
 				files: [
 					'lib/**/*.js', 
-					'node_modules/proto/lib/proto.js', 
+					'node_modules/mol-proto/lib/proto.js', 
 					'test_html/bind_test/*.js'
 				],
 				tasks: 'browserify:test1'
