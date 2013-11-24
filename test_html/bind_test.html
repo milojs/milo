@@ -8,11 +8,11 @@
 <body>
     <div id="viewToBind">
         <label for="article-id">Article ID</label>
-        <input id="article-id" type="text" ml-bind="articleIdInput">
-        <button ml-bind="articleButton">Open</button>
+        <input id="article-id" type="text" ml-bind="[Events]:articleIdInput">
+        <button ml-bind="[Events]:articleButton">Open</button>
         <div ml-bind="View:infoView">
-            <p ml-bind="para1">Info 1</p>
-            <p ml-bind="para2">Info 2</p>
+            <p ml-bind=":para1">Info 1</p>
+            <p ml-bind=":para2">Info 2</p>
         </div>
     </div>
 

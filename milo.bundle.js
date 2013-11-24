@@ -6,6 +6,14 @@ var _ = require('proto')
 	, Match = check.Match
 	, BindError = require('./error');
 
+// Matches;
+// :myView - only component name
+// View:myView - class and component name
+// [Events, Data]:myView - facets and component name
+// View[Events]:myView - class, facet(s) and component name
+var attrRegExp= /^([^\:\[\]]*)(?:\[([^\:\[\]]*)\])?\:?([^:]*)$/
+	, facetsSplitRegExp = /\s*(?:\,|\s)\s*/;
+
 
 module.exports = Attribute;
 
@@ -37,22 +45,16 @@ function parseAttribute() {
 	var value = this.get();
 
 	if (value)
-		var bindTo = value.split(':');
+		var bindTo = value.match(attrRegExp);
 
-	switch (bindTo && bindTo.length) {
-		case 1:
-			this.compName = bindTo[0];
-			this.compClass = 'Component';
-			return this;
+	if (! bindTo)
+		throw new BindError('invalid bind attribute ' + value);
 
-		case 2:
-			this.compName = bindTo[1];
-			this.compClass = bindTo[0];
-			return this;
+	this.compClass = bindTo[1] || 'Component';
+	this.compFacets = (bindTo[2] && bindTo[2].split(facetsSplitRegExp)) || undefined;
+	this.compName = bindTo[3] || undefined;
 
-		default:
-			throw new BindError('invalid bind attribute ' + value);
-	}
+	return this;
 }
 
 function validateAttribute() {
@@ -63,9 +65,24 @@ function validateAttribute() {
 
 	if (! this.compClass)
 		throw new BindError('empty component class name ' + this.compClass);
+
+	return this;
 }
 
-},{"../check":4,"./error":3,"proto":19}],2:[function(require,module,exports){
+},{"../check":4,"./error":2,"proto":19}],2:[function(require,module,exports){
+'use strict';
+
+var _ = require('proto');
+
+function BindError(msg) {
+	this.message = msg;
+}
+
+_.makeSubclass(BindError, Error);
+
+module.exports = BindError;
+
+},{"proto":19}],3:[function(require,module,exports){
 'use strict';
 
 var componentsRegistry = require('../components/c_registry')
@@ -84,7 +101,7 @@ var opts = {
 module.exports = binder;
 
 function binder(scopeEl, bindScopeEl) {
-	var scopeEl = scopeEl // || document.body
+	var scopeEl = scopeEl || document.body
 		, components = {};
 
 	// iterate children of scopeEl
@@ -127,7 +144,16 @@ function binder(scopeEl, bindScopeEl) {
 			check(ComponentClass, Match.Subclass(Component, true));
 	
 			// create new component
-			return new ComponentClass({}, el);
+			var aComponent = new ComponentClass({}, el);
+
+			// add extra facets
+			var facets = attr.compFacets;
+			if (facets)
+				facets.forEach(function(fct) {
+					aComponent.addFacet(fct);
+				});
+
+			return aComponent;
 		}
 	}
 
@@ -145,20 +171,7 @@ binder.config = function(options) {
 	opts.extend(options);
 };
 
-},{"../check":4,"../components/c_registry":12,"./attribute":1,"./error":3,"proto":19}],3:[function(require,module,exports){
-'use strict';
-
-var _ = require('proto');
-
-function BindError(msg) {
-	this.message = msg;
-}
-
-_.makeSubclass(BindError, Error);
-
-module.exports = BindError;
-
-},{"proto":19}],4:[function(require,module,exports){
+},{"../check":4,"../components/c_registry":12,"./attribute":1,"./error":2,"proto":19}],4:[function(require,module,exports){
 'use strict';
 
 // XXX docs
@@ -538,7 +551,9 @@ var FacetedObject = require('../facets/f_object')
 	, facetsRegistry = require('./c_facets/cf_registry')
 	, ComponentFacet = require('./c_facet')
 	, messengerMixin = require('./messenger')
-	, _ = require('proto');
+	, _ = require('proto')
+	, check = require('../check')
+	, Match = check.Match;
 
 var Component = _.createSubclass(FacetedObject, 'Component', true);
 
@@ -585,12 +600,12 @@ function addFacet(facetNameOrClass, facetOpts, facetName) {
 	} else 
 		FacetClass = facetNameOrClass;
 
-	facetName = facetName || FacetClass.name;
+	facetName = facetName || _.firstLowerCase(FacetClass.name);
 
 	FacetedObject.prototype.addFacet.call(this, FacetClass, facetOpts, facetName);
 }
 
-},{"../facets/f_object":16,"./c_facet":6,"./c_facets/cf_registry":10,"./messenger":14,"proto":19}],6:[function(require,module,exports){
+},{"../check":4,"../facets/f_object":16,"./c_facet":6,"./c_facets/cf_registry":10,"./messenger":14,"proto":19}],6:[function(require,module,exports){
 'use strict';
 
 var Facet = require('../facets/f_class')
@@ -617,7 +632,7 @@ function initComponentFacet() {
 'use strict';
 
 var ComponentFacet = require('../c_facet')
-	, binder = require('../../binder/binder')
+	, binder = require('../../binder')
 	, _ = require('proto')
 	, facetsRegistry = require('./cf_registry');
 
@@ -634,6 +649,7 @@ facetsRegistry.add(Container);
 
 
 function initContainer() {
+	this.initMessenger();
 	this.children = {};
 }
 
@@ -654,7 +670,10 @@ function addChildComponents(childComponents) {
 	_.extend(this.children, childComponents);
 }
 
-},{"../../binder/binder":2,"../c_facet":6,"./cf_registry":10,"proto":19}],8:[function(require,module,exports){
+},{"../../binder":3,"../c_facet":6,"./cf_registry":10,"proto":19}],8:[function(require,module,exports){
+'use strict';
+
+},{}],9:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -662,7 +681,12 @@ var ComponentFacet = require('../c_facet')
 	, _ = require('proto')
 	, facetsRegistry = require('./cf_registry')
 	, messengerMixin = require('../messenger')
-	, domEventsConstructors = require('./dom_events');
+	, domEventsConstructors = require('./dom_events')
+	, check = require('../../check')
+	, Match = check.Match;
+
+var eventsSplitRegExp = /\s*(?:\,|\s)\s*/;
+
 
 // events facet
 var Events = _.createSubclass(ComponentFacet, 'Events');
@@ -677,6 +701,7 @@ _.extendProto(Events, {
 	offEvents: removeListenersFromEvents,
 	trigger: triggerEvent,
 	getListeners: getListeners,
+	_hasEventListeners: _hasEventListeners
 	// _reattach: _reattachEventsOnElementChange
 });
 
@@ -688,22 +713,20 @@ var useCaptureSuffix = '__capture'
 
 
 function initEventsFacet() {
-	// dependency
-	if (! this.owner.facets.El)
-		throw new FacetError('Events facet require El facet');
-
 	// initialize listeners map
-	this._eventsListeners = {};
+	Object.defineProperty(this, '_eventsListeners', {
+		value: {}
+	});
 }
 
 
 function getDomElement() {
-	return this.owner.El.dom;
+	return this.owner.el;
 }
 
 
 function handleEvent(event) {
-	isCapturePhase = event.eventPhase == window.Event.CAPTURING_PHASE;
+	var isCapturePhase = event.eventPhase == window.Event.CAPTURING_PHASE;
 
 	var eventKey = event.type + (isCapturePhase ? useCaptureSuffix : '')
 		, eventListeners = this._eventsListeners[eventKey];
@@ -716,13 +739,20 @@ function handleEvent(event) {
 
 
 function addListener(eventTypes, listener, useCapture) {
-	check(events, String);
+	check(eventTypes, String);
 	check(listener, Function);
 
-	var eventsArray = eventTypes.split(/\s*\,?\s*/)
+	var eventsArray = eventTypes.split(eventsSplitRegExp)
 		, wasAttached = false;
 
 	eventsArray.forEach(function(eventType) {
+		_addListener.call(this, eventType, listener, useCapture);
+	}, this);
+
+	return wasAttached;
+
+
+	function _addListener(eventType, listener, useCapture) {
 		if (wrongEventPattern.test(eventType))
 			throw new RangeError('event type cannot contain ' + useCaptureSuffix);
 
@@ -730,7 +760,7 @@ function addListener(eventTypes, listener, useCapture) {
 			, eventListeners = this._eventsListeners[eventKey]
 				= this._eventsListeners[eventKey] || [];
 
-		if (! _hasEventListeners(eventKey)) {
+		if (! this._hasEventListeners(eventKey)) {
 			// true = use capture, for particular listener it is determined in handleEvent
 			this.dom().addEventListener(eventKey, this, true);
 			var notYetAttached = true;
@@ -741,9 +771,7 @@ function addListener(eventTypes, listener, useCapture) {
 			wasAttached = true;
 			eventListeners.push(listener);
 		}
-	});
-
-	return wasAttached;
+	}
 }
 
 
@@ -762,10 +790,17 @@ function removeListener(eventTypes, listener, useCapture) {
 	check(eventTypes, String);
 	check(listener, Function);
 
-	var eventsArray = eventTypes.split(/\s*\,?\s*/)
+	var eventsArray = eventTypes.split(eventsSplitRegExp)
 		, wasRemoved = false;
 
 	eventsArray.forEach(function(eventType) {
+		_removeListener.call(this, eventType, listener, useCapture);
+	}, this);
+
+	return wasRemoved;
+
+
+	function _removeListener(eventType, listener, useCapture) {
 		if (wrongEventPattern.test(eventType))
 			throw new RangeError('event type cannot contain ' + useCaptureSuffix);
 
@@ -786,12 +821,10 @@ function removeListener(eventTypes, listener, useCapture) {
 
 		wasRemoved = true;
 
-		if (! _hasEventListeners(eventType))
+		if (! this._hasEventListeners(eventType))
 			// true = use capture, for particular listener it is determined in handleEvent
 			this.dom().removeEventListener(eventType, this, true);
-	});
-
-	return wasRemoved;
+	}
 }
 
 
@@ -843,10 +876,7 @@ function _hasEventListeners(eventType) {
 		    || (capturedEvents && capturedEvents.length);
 }
 
-},{"../c_facet":6,"../messenger":14,"./cf_registry":10,"./dom_events":11,"proto":19}],9:[function(require,module,exports){
-'use strict';
-
-},{}],10:[function(require,module,exports){
+},{"../../check":4,"../c_facet":6,"../messenger":14,"./cf_registry":10,"./dom_events":11,"proto":19}],10:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../registry')
@@ -962,11 +992,9 @@ module.exports = messengerMixin;
 function initMessenger() {
 	Object.defineProperties(this, {
 		_messageSubscribers: {
-			writable: true,
 			value: {}
 		},
 		_patternMessageSubscribers: {
-			writable: true,
 			value: {}
 		}
 	});
@@ -1168,13 +1196,13 @@ function addFacet(FacetClass, facetOpts, facetName) {
 
 	facetName = _.firstLowerCase(facetName || FacetClass.name);
 
-	if (this.constructor.prototype.facets[facetName])
+	var protoFacets = this.constructor.prototype.facets;
+
+	if (protoFacets && protoFacets[facetName])
 		throw new Error('facet ' + facetName + ' is already part of the class ' + this.constructor.name);
 
-	if (this.facets[facetName])
+	if (this[facetName])
 		throw new Error('facet ' + facetName + ' is already present in object');
-
-	this.facets[facetName] = FacetClass;
 
 	Object.defineProperty(this, facetName, {
 		enumerable: false,
@@ -1202,14 +1230,14 @@ FacetedObject.createFacetedClass = function (name, facetsClasses) {
 'use strict';
 
 var milo = {
-	binder: require('./binder/binder')
+	binder: require('./binder')
 }
 
 
 // used facets
 require('./components/c_facets/Container');
 require('./components/c_facets/Events');
-require('./components/c_facets/Model');
+require('./components/c_facets/Data');
 
 // used components
 require('./components/classes/View');
@@ -1222,7 +1250,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./binder/binder":2,"./components/c_facets/Container":7,"./components/c_facets/Events":8,"./components/c_facets/Model":9,"./components/classes/View":13}],18:[function(require,module,exports){
+},{"./binder":3,"./components/c_facets/Container":7,"./components/c_facets/Data":8,"./components/c_facets/Events":9,"./components/classes/View":13}],18:[function(require,module,exports){
 'use strict';
 
 var _ = require('proto')

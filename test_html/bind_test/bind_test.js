@@ -6,8 +6,18 @@ describe('milo binder', function() {
 
 		expect({p: 1}).property('p', 1);
 
-    	var components = milo.binder(document.getElementById('viewToBind'));
+    	var ctrl = milo.binder();
+
+    	ctrl.articleButton.events.on('click', function(e) {
+    		console.log('button clicked', e);
+    	});
+
+    	ctrl.articleIdInput.events.on('input', logEvent);
+
+    	function logEvent(e) {
+    		console.log(e);
+    	}
     	
-		console.log(components);
+		console.log(ctrl);
     });
 });
