@@ -6,7 +6,7 @@
     "MOL Technical <MOL_Technical@assocnews.co.uk>"
   ],
   "description": "A minimalist browser framework that binds HTML elements to JS components and components to models",
-  "main": "milo.js",
+  "main": "lib/milo.js",
   "license": "MIT",
   "ignore": [
     "**/.*",
