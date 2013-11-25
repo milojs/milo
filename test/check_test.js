@@ -22,22 +22,40 @@ describe('check module', function() {
 		[Infinity, Number, 'Infinity number'],
 		[obj, Object, 'object'],
 		[false, Boolean, 'boolean'],
-		[4, Match.Integer, 'Match.Integet'],
+		[4, Match.Integer, 'Match.Integer'],
 		[notDefined, undefined, 'undefined'],
 		[nullVar, null, 'null'],
 		[arr, Array, 'Array']
 	];
+	var failValues = [
+		undefined,
+		undefined,
+		undefined,
+		undefined,
+		undefined,
+		undefined,
+		undefined,
+		undefined,
+		undefined,
+		String,
+		undefined,
+		undefined
+	];
 
 	it('should match.test for different data types', function() {
-		toTest.forEach(function(val) {
+		toTest.forEach(function(val, i) {
 			assert(Match.test(val[0], val[1]), 'match.test ' + val[2]);
+			assert.equal(Match.test(val[0], failValues[i]), false, 'match.test fails ' + val[2]);
 		});
 	});
 
 	it('should check test for different data types', function() {
-		toTest.forEach(function(val) {
+		toTest.forEach(function(val, i) {
 			assert.doesNotThrow(function() {
 				check(val[0], val[1]);
+			}, 'check ' + val[2]);
+			assert.throws(function() {
+				check(val[0], failValues[i]);
 			}, 'check ' + val[2]);
 		});
 	});
@@ -92,21 +110,77 @@ describe('check module', function() {
 		);
 	});
 
-	it.skip('should match.test and check using Match.OneOf', function() {
-		assert(Match.test('test', Match.OneOf(null, Number, String)),
-			'match string against number of types');
-		assert.equal(Match.test([], Match.OneOf(null, Number, String)), false,
-			'match string against number of types');
+	it('should match.test and check using Object {key: pattern}', function() {
+		assert(Match.test({key1: 'test', key2: 6}, {key1: String, key2: Match.Integer}), 
+			'match.test array of strings with Object {key: pattern}');
+		assert.doesNotThrow(
+			function() { check({key1: 'test', key2: 6}, {key1: String, key2: Match.Integer}); }, 
+			'check array of strings with Object {key: pattern}'
+		);
+		assert.equal(Match.test({key1: 'test'}, {key1: String, key2: Match.Integer}), false,
+			'match.test array of strings with Object {key: pattern} fails');
+		assert.throws(
+			function() { check({key1: 'test'}, {key1: String, key2: Match.Integer}); }, 
+			'check array of strings with Object {key: pattern} throws'
+		);
 	});
 
-	it('should match.test and check with ObjectHash pattern', function() {
+	it('should match.test and check using Match.ObjectIncluding', function() {
+		assert(Match.test({key1: 'test', key2: 6, key3:null, key4: ['hello']}, Match.ObjectIncluding({key1: String, key2: Match.Integer})), 
+			'match.test array of strings with ObjectIncluding');
+		assert.doesNotThrow(
+			function() { check({key1: 'test', key2: 6, key3:null, key4: ['hello']}, Match.ObjectIncluding({key1: String, key2: Match.Integer})); }, 
+			'check array of strings with ObjectIncluding'
+		);
+		assert.equal(Match.test({key1: 'test', key3:null, key4: ['hello']}, Match.ObjectIncluding({key1: String, key2: Match.Integer})), false,
+			'match.test array of strings with ObjectIncluding fails');
+		assert.throws(
+			function() { check({key1: 'test', key3:null, key4: ['hello']}, Match.ObjectIncluding({key1: String, key2: Match.Integer})); }, 
+			'check array of strings with ObjectIncluding throws'
+		);
+	});
+
+	it('should match.test and check using Match.OneOf', function() {
+		assert(Match.test('test', Match.OneOf(null, Number, String)),
+			'match.test string against number of types');
+		assert.equal(Match.test([], Match.OneOf(null, Number, String)), false,
+			'match.test array against number of types fails');
+		assert.doesNotThrow(
+			function() { check('test', Match.OneOf(null, Number, String)) },
+			'check string against number of types');
+		assert.throws(
+			function() { check([], Match.OneOf(null, Number, String)) },
+			'check array against number of types fails');
+	});
+
+	it('should match.test and check using Match.Where', function() {
+		var NonEmptyString = Match.Where(function (x) {
+		  	check(x, String);
+		  	return x.length > 0;
+		});
+		assert(Match.test('test', NonEmptyString),
+			'match.test string against Match.Where');
+		assert.equal(Match.test('', NonEmptyString), false,
+			'match.test array against Match.Where fails');
+		assert.doesNotThrow(
+			function() { check('test', NonEmptyString) },
+			'check string against Match.Where');
+		assert.throws(
+			function() { check('', NonEmptyString) },
+			'check array against Match.Where throws');
+	});
+
+	it('should match.test and check with Match.ObjectHash pattern', function() {
 		var objPass = { prop1: function() {}, prop2: function() {} };
 		var objFail = { prop1: function() {}, prop2: 'test' };
 
+		assert(Match.test(objPass, Match.ObjectHash(Function)),
+			'match.test object against Match.ObjectHash');
+		assert.equal(Match.test(objFail, Match.ObjectHash(Function)), false,
+			'match.test object against Match.ObjectHash fails');
 		assert.doesNotThrow(function() {
 			check(objPass, Match.ObjectHash(Function));
 		}, 'should NOT throw if all properties of object are Functions');
-
 		assert.throws(function() {
 			check(objFail, Match.ObjectHash(Function));
 		}, 'should fail if one property is a string');
