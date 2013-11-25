@@ -47,3 +47,8 @@ In addition to patterns described in Meteor docs the following patterns are impl
       check(MySubclass, Match.Where(function() {
           return MySubclass.prototype instanceof MyClass;
       });
+
+Changes to existing pattern
+---------------------------
+
+Object match can be any instance.
