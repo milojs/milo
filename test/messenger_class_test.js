@@ -11,7 +11,7 @@ describe('Messenger class', function() {
 		this.name = 'test';
 	})();
 
-	var messenger = new Messenger(hostInstance, /*undefined,*/{
+	var messenger = new Messenger(hostInstance, {
 		on: 'on',
 		off: 'off',
 		onEvents: 'onMessages',

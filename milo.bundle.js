@@ -69,7 +69,7 @@ function validateAttribute() {
 	return this;
 }
 
-},{"../check":4,"./error":2,"mol-proto":19}],2:[function(require,module,exports){
+},{"../check":4,"./error":2,"mol-proto":21}],2:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -82,7 +82,7 @@ _.makeSubclass(BindError, Error);
 
 module.exports = BindError;
 
-},{"mol-proto":19}],3:[function(require,module,exports){
+},{"mol-proto":21}],3:[function(require,module,exports){
 'use strict';
 
 var componentsRegistry = require('../components/c_registry')
@@ -171,7 +171,7 @@ binder.config = function(options) {
 	opts.extend(options);
 };
 
-},{"../check":4,"../components/c_registry":12,"./attribute":1,"./error":2,"mol-proto":19}],4:[function(require,module,exports){
+},{"../check":4,"../components/c_registry":12,"./attribute":1,"./error":2,"mol-proto":21}],4:[function(require,module,exports){
 'use strict';
 
 // XXX docs
@@ -234,11 +234,7 @@ var Match = check.Match = {
   // }),
 
   // Tests to see if value matches pattern. Unlike check, it merely returns true
-  // or false (unless an error other than Match.Error was thrown). It does not
-  // interact with _failIfArgumentsAreNotAllChecked.
-  // XXX maybe also implement a Match.match which returns more information about
-  //     failures but without using exception handling or doing what check()
-  //     does with _failIfArgumentsAreNotAllChecked and Meteor.Error conversion
+  // or false (unless an error other than Match.Error was thrown).
   test: function (value, pattern) {
     try {
       checkSubtree(value, pattern);
@@ -249,20 +245,6 @@ var Match = check.Match = {
       // Rethrow other errors.
       throw e;
     }
-  },
-
-  // Runs `f.apply(context, args)`. If check() is not called on every element of
-  // `args` (either directly or in the first level of an array), throws an error
-  // (using `description` in the message).
-  //
-  _failIfArgumentsAreNotAllChecked: function (f, context, args, description) {
-    var argChecker = new ArgumentChecker(args, description);
-    var result = currentArgumentChecker.withValue(argChecker, function () {
-      return f.apply(context, args);
-    });
-    // If f didn't itself throw, make sure it checked all of its arguments.
-    argChecker.throwUnlessAllArgumentsHaveBeenChecked();
-    return result;
   }
 };
 
@@ -297,7 +279,7 @@ var typeofChecks = [
   [String, "string"],
   [Number, "number"],
   [Boolean, "boolean"],
-  // While we don't allow undefined in EJSON, this is good for optional
+  // While we don't allow undefined in JSON, this is good for optional
   // arguments with OneOf.
   [undefined, "undefined"]
 ];
@@ -320,7 +302,7 @@ function checkSubtree(value, pattern) {
   if (pattern === null) {
     if (value === null)
       return;
-    throw new Match.Error("Expected null, got " + EJSON.stringify(value));
+    throw new Match.Error("Expected null, got " + JSON.stringify(value));
   }
 
   // Match.Integer is special type encoded with array
@@ -334,7 +316,7 @@ function checkSubtree(value, pattern) {
     if (typeof value === "number" && (value | 0) === value)
       return
     throw new Match.Error("Expected Integer, got "
-                + (value instanceof Object ? EJSON.stringify(value) : value));
+                + (value instanceof Object ? JSON.stringify(value) : value));
   }
 
   // "Object" is shorthand for Match.ObjectIncluding({});
@@ -345,12 +327,12 @@ function checkSubtree(value, pattern) {
   if (pattern instanceof Array) {
     if (pattern.length !== 1)
       throw Error("Bad pattern: arrays must have one type element" +
-                  EJSON.stringify(pattern));
-    if (!_.isArray(value) && !_.isArguments(value)) {
-      throw new Match.Error("Expected array, got " + EJSON.stringify(value));
+                  JSON.stringify(pattern));
+    if (!Array.isArray(value)) {
+      throw new Match.Error("Expected array, got " + JSON.stringify(value));
     }
 
-    _.each(value, function (valueElement, index) {
+    value.forEach(function (valueElement, index) {
       try {
         checkSubtree(valueElement, pattern[0]);
       } catch (err) {
@@ -422,7 +404,7 @@ function checkSubtree(value, pattern) {
 
   if (pattern instanceof Subclass) {
     var Superclass = pattern.Superclass;
-    if (pattern.matchSuperclass && value == Superclass)
+    if (pattern.matchSuperclass && value == Superclass) 
       return;
     if (! (value.prototype instanceof Superclass))
       throw new Match.Error("Expected " + pattern.constructor.name + " of " + Superclass.name);
@@ -439,21 +421,18 @@ function checkSubtree(value, pattern) {
     throw new Match.Error("Expected object, got " + typeof value);
   if (value === null)
     throw new Match.Error("Expected object, got null");
-  if (value.constructor !== Object)
-    throw new Match.Error("Expected plain object");
 
   var requiredPatterns = {};
   var optionalPatterns = {};
 
-  Object.keys(pattern).forEach(function(key) {
-    var subPattern = pattern[key];
+  _.eachKey(pattern, function(subPattern, key) {
     if (pattern[key] instanceof Optional)
       optionalPatterns[key] = pattern[key].pattern;
     else
       requiredPatterns[key] = pattern[key];
-  });
+  }, this, true);
 
-  Object.keys(value).forEach(function(key) {
+  _.eachKey(value, function(subValue, key) {
     var subValue = value[key];
     try {
       if (requiredPatterns.hasOwnProperty(key)) {
@@ -470,57 +449,13 @@ function checkSubtree(value, pattern) {
         err.path = _prependPath(key, err.path);
       throw err;
     }
-  });
+  }, this, true);
 
-  Object.keys(requiredPatterns).forEach(function(key) {
+  _.eachKey(requiredPatterns, function(value, key) {
     throw new Match.Error("Missing key '" + key + "'");
-  });
+  }, this, true);
 };
 
-function ArgumentChecker(args, description) {
-  var self = this;
-  // Make a SHALLOW copy of the arguments. (We'll be doing identity checks
-  // against its contents.)
-  self.args = _.clone(args);
-  // Since the common case will be to check arguments in order, and we splice
-  // out arguments when we check them, make it so we splice out from the end
-  // rather than the beginning.
-  self.args.reverse();
-  self.description = description;
-};
-
-_.extendProto(ArgumentChecker, {
-  checking: function (value) {
-    var self = this;
-    if (self._checkingOneValue(value))
-      return;
-    // Allow check(arguments, [String]) or check(arguments.slice(1), [String])
-    // or check([foo, bar], [String]) to count... but only if value wasn't
-    // itself an argument.
-    if (_.isArray(value) || _.isArguments(value)) {
-      _.each(value, _.bind(self._checkingOneValue, self));
-    }
-  },
-  _checkingOneValue: function (value) {
-    var self = this;
-    for (var i = 0; i < self.args.length; ++i) {
-      // Is this value one of the arguments? (This can have a false positive if
-      // the argument is an interned primitive, but it's still a good enough
-      // check.)
-      if (value === self.args[i]) {
-        self.args.splice(i, 1);
-        return true;
-      }
-    }
-    return false;
-  },
-  throwUnlessAllArgumentsHaveBeenChecked: function () {
-    var self = this;
-    if (!_.isEmpty(self.args))
-      throw new Error("Did not check() all arguments during " +
-                      self.description);
-  }
-});
 
 var _jsKeywords = ["do", "if", "in", "for", "let", "new", "try", "var", "case",
   "else", "enum", "eval", "false", "null", "this", "true", "void", "with",
@@ -535,7 +470,7 @@ var _jsKeywords = ["do", "if", "in", "for", "let", "new", "try", "var", "case",
 function _prependPath(key, base) {
   if ((typeof key) === "number" || key.match(/^[0-9]+$/))
     key = "[" + key + "]";
-  else if (!key.match(/^[a-z_$][0-9a-z_$]*$/i) || _jsKeywords.indexOf(key) != -1)//_.contains(_jsKeywords, key))
+  else if (!key.match(/^[a-z_$][0-9a-z_$]*$/i) || _jsKeywords.indexOf(key) != -1)
     key = JSON.stringify([key]);
 
   if (base && base[0] !== "[")
@@ -544,7 +479,7 @@ function _prependPath(key, base) {
 };
 
 
-},{"mol-proto":19}],5:[function(require,module,exports){
+},{"mol-proto":21}],5:[function(require,module,exports){
 'use strict';
 
 var FacetedObject = require('../facets/f_object')
@@ -605,7 +540,7 @@ function addFacet(facetNameOrClass, facetOpts, facetName) {
 	FacetedObject.prototype.addFacet.call(this, FacetClass, facetOpts, facetName);
 }
 
-},{"../check":4,"../facets/f_object":16,"./c_facet":6,"./c_facets/cf_registry":10,"./messenger":14,"mol-proto":19}],6:[function(require,module,exports){
+},{"../check":4,"../facets/f_object":16,"./c_facet":6,"./c_facets/cf_registry":10,"./messenger":14,"mol-proto":21}],6:[function(require,module,exports){
 'use strict';
 
 var Facet = require('../facets/f_class')
@@ -628,7 +563,7 @@ function initComponentFacet() {
 	this.initMessenger();
 }
 
-},{"../facets/f_class":15,"./messenger":14,"mol-proto":19}],7:[function(require,module,exports){
+},{"../facets/f_class":15,"./messenger":14,"mol-proto":21}],7:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -670,7 +605,7 @@ function addChildComponents(childComponents) {
 	_.extend(this.children, childComponents);
 }
 
-},{"../../binder":3,"../c_facet":6,"./cf_registry":10,"mol-proto":19}],8:[function(require,module,exports){
+},{"../../binder":3,"../c_facet":6,"./cf_registry":10,"mol-proto":21}],8:[function(require,module,exports){
 'use strict';
 
 },{}],9:[function(require,module,exports){
@@ -680,8 +615,13 @@ var ComponentFacet = require('../c_facet')
 	, FacetError = ComponentFacet.Error
 	, _ = require('mol-proto')
 	, facetsRegistry = require('./cf_registry')
+
+	, Messenger = require('../../messenger_class')
+
 	, messengerMixin = require('../messenger')
 	, domEventsConstructors = require('./dom_events')
+	
+
 	, check = require('../../check')
 	, Match = check.Match;
 
@@ -695,14 +635,12 @@ _.extendProto(Events, {
 	init: initEventsFacet,
 	dom: getDomElement,
 	handleEvent: handleEvent, // event dispatcher - as defined by Event DOM API
-	on: addListener,
-	off: removeListener,
-	onEvents: addListenersToEvents,
-	offEvents: removeListenersFromEvents,
 	trigger: triggerEvent,
-	getListeners: getListeners,
+
 	_hasEventListeners: _hasEventListeners
 	// _reattach: _reattachEventsOnElementChange
+
+
 });
 
 facetsRegistry.add(Events);
@@ -713,9 +651,32 @@ var useCaptureSuffix = '__capture'
 
 
 function initEventsFacet() {
-	// initialize listeners map
-	Object.defineProperty(this, '_eventsListeners', {
-		value: {}
+	// initialize messenger for DOM events
+	Object.defineProperties(this, {
+		'_eventsMessenger': {
+			value: new Messenger(this, undefined, {
+						on: 'on',
+						off: 'off',
+						onEvents: 'onMessages',
+						offEvents: 'offMessaged',
+						getListeners: 'getSubscribers'
+					})
+		},
+		// '_events'
+	});
+
+	// initialize messenger for DOM events
+	Object.defineProperties(this, {
+		'_eventsMessenger': {
+			value: new Messenger(this, undefined, {
+						on: 'on',
+						off: 'off',
+						onEvents: 'onMessages',
+						offEvents: 'offMessaged',
+						getListeners: 'getSubscribers'
+					})
+		},
+		//'_events'
 	});
 }
 
@@ -876,7 +837,7 @@ function _hasEventListeners(eventType) {
 		    || (capturedEvents && capturedEvents.length);
 }
 
-},{"../../check":4,"../c_facet":6,"../messenger":14,"./cf_registry":10,"./dom_events":11,"mol-proto":19}],10:[function(require,module,exports){
+},{"../../check":4,"../../messenger_class":17,"../c_facet":6,"../messenger":14,"./cf_registry":10,"./dom_events":11,"mol-proto":21}],10:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../registry')
@@ -891,7 +852,7 @@ module.exports = facetsRegistry;
 // TODO - refactor components registry test into a function
 // that tests a registry with a given foundation class
 // Make test for this registry based on this function
-},{"../../registry":18,"../c_facet":6}],11:[function(require,module,exports){
+},{"../../registry":20,"../c_facet":6}],11:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -943,7 +904,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"mol-proto":19}],12:[function(require,module,exports){
+},{"mol-proto":21}],12:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../registry')
@@ -955,7 +916,7 @@ componentsRegistry.add(Component);
 
 module.exports = componentsRegistry;
 
-},{"../registry":18,"./c_class":5}],13:[function(require,module,exports){
+},{"../registry":20,"./c_class":5}],13:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -1116,7 +1077,7 @@ function _chooseSubscribersHash(message) {
 				: this._messageSubscribers;
 }
 
-},{"../check":4,"mol-proto":19}],15:[function(require,module,exports){
+},{"../check":4,"mol-proto":21}],15:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1133,7 +1094,7 @@ _.extendProto(Facet, {
 	init: function() {}
 });
 
-},{"mol-proto":19}],16:[function(require,module,exports){
+},{"mol-proto":21}],16:[function(require,module,exports){
 'use strict';
 
 var Facet = require('./f_class')
@@ -1226,7 +1187,235 @@ FacetedObject.createFacetedClass = function (name, facetsClasses) {
 };
 
 
-},{"../check":4,"./f_class":15,"mol-proto":19}],17:[function(require,module,exports){
+},{"../check":4,"./f_class":15,"mol-proto":21}],17:[function(require,module,exports){
+'use strict';
+
+var Mixin = require('./mixin')
+	, _ = require('mol-proto')
+	, check = require('./check')
+	, Match = check.Match;
+
+
+var eventsSplitRegExp = /\s*(\,|\s)\s*/;
+
+
+var Messenger = _.createSubclass(Mixin, 'Messenger');
+
+_.extendProto(Messenger, {
+	init: initMessenger, // called by Mixin (superclass)
+	on: registerSubscriber,
+	off: removeSubscriber,
+	onMessages: registerSubscribers,
+	offMessages: removeSubscribers,
+	postMessage: postMessage,
+	getSubscribers: getMessageSubscribers,
+	_chooseSubscribersHash: _chooseSubscribersHash,
+	_registerSubscriber: _registerSubscriber,
+	_removeSubscriber: _removeSubscriber,
+	_removeAllSubscribers: _removeAllSubscribers,
+	_callPatternSubscribers: _callPatternSubscribers,
+	_callSubscribers: _callSubscribers
+});
+
+
+module.exports = Messenger;
+
+
+function initMessenger(hostObject, proxyMethods, messageSource) {
+	// hostObject and proxyMethods are used in Mixin
+ 	// messenger data
+ 	Object.defineProperties(this, {
+ 		_messageSubscribers: { value: {} },
+ 		_patternMessageSubscribers: { value: {} },
+ 		_messageSource: { value: messageSource }
+ 	});
+}
+
+
+function registerSubscriber(messages, subscriber) {
+	check(messages, Match.OneOf(String, [String], RegExp));
+	check(subscriber, Function); 
+
+	if (typeof messages == 'string')
+		messages = messages.split(eventsSplitRegExp);
+
+	var subscribersHash = this._chooseSubscribersHash(messages);
+
+	if (messages instanceof RegExp)
+		return this._registerSubscriber(subscribersHash, message, subscriber);
+
+	else {
+		var wasRegistered = false;
+
+		messages.forEach(function(message) {
+			var notYetRegistered = this._registerSubscriber(subscribersHash, message, subscriber);			
+			wasRegistered = wasRegistered || notYetRegistered;			
+		}, this);
+
+		return wasRegistered;
+	}
+}
+
+
+function _registerSubscriber(subscribersHash, message, subscriber) {
+	if (! (subscribersHash[messages] && subscribersHash[messages].length)) {
+		subscribersHash[messages] = [];
+		var noSubscribers = true;
+		if (this._messageSource)
+			this._messageSource.addSubscriber(message);
+	}
+
+	var msgSubscribers = subscribersHash[messages];
+	var notYetRegistered = noSubscribers || msgSubscribers.indexOf(subscriber) == -1;
+
+	if (notYetRegistered)
+		msgSubscribers.push(subscriber);
+
+	return notYetRegistered;
+}
+
+
+function registerSubscribers(messageSubscribers) {
+	check(messageSubscribers, Match.ObjectHash(Function));
+
+	var notYetRegisteredMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
+		return this.registerSubscriber(messages, subscriber)
+	}, this);
+
+	return notYetRegisteredMap;
+}
+
+
+// removes all subscribers for the message if subscriber isn't supplied
+function removeSubscriber(messages, subscriber) {
+	check(messages, Match.OneOf(String, [String], RegExp));
+	check(subscriber, Match.Optional(Function)); 
+
+	if (typeof messages == 'string')
+		messages = messages.split(eventsSplitRegExp);
+
+	var subscribersHash = this._chooseSubscribersHash(message);
+
+	if (messages instanceof RegExp)
+		return this._removeSubscriber(subscribersHash, message, subscriber);
+
+	else {
+		var wasRemoved = false;
+
+		messages.forEach(function(message) {
+			var subscriberRemoved = this._removeSubscriber(subscribersHash, message, subscriber);			
+			wasRemoved = wasRemoved || subscriberRemoved;			
+		}, this);
+
+		return wasRemoved;
+	}
+}
+
+
+function _removeSubscriber(subscribersHash, message, subscriber) {
+	var msgSubscribers = subscribersHash[message];
+	if (! msgSubscribers || ! msgSubscribers.length)
+		return false; // nothing removed
+
+	if (subscriber) {
+		subscriberIndex = msgSubscribers.indexOf(subscriber);
+		if (subscriberIndex == -1) 
+			return false; // nothing removed
+		msgSubscribers.splice(subscriberIndex, 1);
+		if (! msgSubscribers.length)
+			this._removeAllSubscribers(subscribersHash, message);
+
+	} else 
+		this._removeAllSubscribers(subscribersHash, message);
+
+	return true; // subscriber(s) removed
+}
+
+
+function _removeAllSubscribers(subscribersHash, message) {
+	delete subscribersHash[message];
+	if (this._messageSource)
+		this._messageSource.removeSubscriber(message);
+}
+
+
+function removeSubscribers(messageSubscribers) {
+	check(messageSubscribers, Match.ObjectHash(Function));
+
+	var subscriberRemovedMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
+		return this.removeSubscriber(messages, subscriber)
+	}, this);
+
+	return subscriberRemovedMap;	
+}
+
+
+// TODO - send event to messageSource
+
+
+function postMessage(message, data) {
+	check(message, Match.OneOf(String, RegExp));
+
+	var subscribersHash = this._chooseSubscribersHash(message);
+	var msgSubscribers = subscribersHash[message];
+
+	this._callSubscribers(message, data, msgSubscribers);
+
+	if (typeof message == 'string')
+		this._callPatternSubscribers(message, data);
+}
+
+
+function _callPatternSubscribers(message, data) {
+	_.eachKey(this._patternMessageSubscribers, 
+		function(patternSubscribers, pattern) {
+			if (pattern.test(message))
+				this._callSubscribers(message, data, patternSubscribers);
+		}
+	, this);
+}
+
+
+function _callSubscribers(message, data, msgSubscribers) {
+	if (msgSubscribers && msgSubscribers.length)
+		msgSubscribers.forEach(function(subscriber) {
+			subscriber.call(this, message, data);
+		}, this);
+}
+
+
+function getMessageSubscribers(message, includePatternSubscribers) {
+	check(message, Match.OneOf(String, RegExp));
+
+	var subscribersHash = this._chooseSubscribersHash(message);
+	var msgSubscribers = subscribersHash[message]
+							? [].concat(subscribersHash[message])
+							: [];
+
+	// pattern subscribers are incuded by default
+	if (includePatternSubscribers !== false && typeof message == 'string') {
+		_.eachKey(this._patternMessageSubscribers, 
+			function(patternSubscribers, pattern) {
+				if (patternSubscribers && patternSubscribers.length
+						&& pattern.test(message))
+					_.appendArray(msgSubscribers, patternSubscribers);
+			}
+		);
+	}
+
+	return msgSubscribers.length
+				? msgSubscribers
+				: undefined;
+}
+
+
+function _chooseSubscribersHash(message) {
+	return message instanceof RegExp
+				? this._patternMessageSubscribers
+				: this._messageSubscribers;
+}
+
+},{"./check":4,"./mixin":19,"mol-proto":21}],18:[function(require,module,exports){
 'use strict';
 
 var milo = {
@@ -1250,7 +1439,52 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./binder":3,"./components/c_facets/Container":7,"./components/c_facets/Data":8,"./components/c_facets/Events":9,"./components/classes/View":13}],18:[function(require,module,exports){
+},{"./binder":3,"./components/c_facets/Container":7,"./components/c_facets/Data":8,"./components/c_facets/Events":9,"./components/classes/View":13}],19:[function(require,module,exports){
+'use strict';
+
+var _ = require('mol-proto')
+	, check = require('./check')
+	, Match = check.Match;
+
+
+module.exports = Mixin;
+
+// an abstract class for mixin pattern - adding proxy methods to host objects
+function Mixin(hostObject, proxyMethods) {
+	// TODO - moce checks from Messenger here
+	check(proxyMethods, Match.ObjectHash(String));
+
+	Object.defineProperty(this, '_hostObject', { value: hostObject });
+	if (proxyMethods)
+		this._createProxyMethods(proxyMethods);
+
+	// calling init if it is defined in the class
+	if (this.init)
+		this.init.apply(this, arguments);
+}
+
+_.extendProto(Mixin, {
+	_createProxyMethod: _createProxyMethod,
+	_createProxyMethods: _createProxyMethods
+});
+
+
+function _createProxyMethod(mixinMethodName, proxyMethodName) {
+	if (this._hostObject[proxyMethodName])
+		throw new MessengerError('method ' + proxyMethodName +
+								 ' already defined in host object');
+
+	Object.defineProperty(this._hostObject, proxyMethodName,
+		{ value: this[mixinMethodName].bind(this) });
+}
+
+
+function _createProxyMethods(proxyMethods) {
+	// creating and binding proxy methods on the host object
+	_.eachKey(proxyMethods, _createProxyMethod, this);
+}
+
+},{"./check":4,"mol-proto":21}],20:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -1334,7 +1568,7 @@ function unregisterAllClasses() {
 	this.__registeredClasses = {};
 };
 
-},{"./check":4,"mol-proto":19}],19:[function(require,module,exports){
+},{"./check":4,"mol-proto":21}],21:[function(require,module,exports){
 'use strict';
 
 var _;
@@ -1526,5 +1760,5 @@ function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
 }
 
-},{}]},{},[17])
+},{}]},{},[18])
 ;
