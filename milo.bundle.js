@@ -69,7 +69,7 @@ function validateAttribute() {
 	return this;
 }
 
-},{"../check":4,"./error":2,"mol-proto":21}],2:[function(require,module,exports){
+},{"../check":4,"./error":2,"mol-proto":22}],2:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -82,7 +82,7 @@ _.makeSubclass(BindError, Error);
 
 module.exports = BindError;
 
-},{"mol-proto":21}],3:[function(require,module,exports){
+},{"mol-proto":22}],3:[function(require,module,exports){
 'use strict';
 
 var componentsRegistry = require('../components/c_registry')
@@ -171,7 +171,7 @@ binder.config = function(options) {
 	opts.extend(options);
 };
 
-},{"../check":4,"../components/c_registry":12,"./attribute":1,"./error":2,"mol-proto":21}],4:[function(require,module,exports){
+},{"../check":4,"../components/c_registry":12,"./attribute":1,"./error":2,"mol-proto":22}],4:[function(require,module,exports){
 'use strict';
 
 // XXX docs
@@ -479,7 +479,7 @@ function _prependPath(key, base) {
 };
 
 
-},{"mol-proto":21}],5:[function(require,module,exports){
+},{"mol-proto":22}],5:[function(require,module,exports){
 'use strict';
 
 var FacetedObject = require('../facets/f_object')
@@ -540,7 +540,7 @@ function addFacet(facetNameOrClass, facetOpts, facetName) {
 	FacetedObject.prototype.addFacet.call(this, FacetClass, facetOpts, facetName);
 }
 
-},{"../check":4,"../facets/f_object":16,"./c_facet":6,"./c_facets/cf_registry":10,"./messenger":14,"mol-proto":21}],6:[function(require,module,exports){
+},{"../check":4,"../facets/f_object":16,"./c_facet":6,"./c_facets/cf_registry":10,"./messenger":14,"mol-proto":22}],6:[function(require,module,exports){
 'use strict';
 
 var Facet = require('../facets/f_class')
@@ -563,7 +563,7 @@ function initComponentFacet() {
 	this.initMessenger();
 }
 
-},{"../facets/f_class":15,"./messenger":14,"mol-proto":21}],7:[function(require,module,exports){
+},{"../facets/f_class":15,"./messenger":14,"mol-proto":22}],7:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -605,7 +605,7 @@ function addChildComponents(childComponents) {
 	_.extend(this.children, childComponents);
 }
 
-},{"../../binder":3,"../c_facet":6,"./cf_registry":10,"mol-proto":21}],8:[function(require,module,exports){
+},{"../../binder":3,"../c_facet":6,"./cf_registry":10,"mol-proto":22}],8:[function(require,module,exports){
 'use strict';
 
 },{}],9:[function(require,module,exports){
@@ -837,7 +837,7 @@ function _hasEventListeners(eventType) {
 		    || (capturedEvents && capturedEvents.length);
 }
 
-},{"../../check":4,"../../messenger_class":17,"../c_facet":6,"../messenger":14,"./cf_registry":10,"./dom_events":11,"mol-proto":21}],10:[function(require,module,exports){
+},{"../../check":4,"../../messenger_class":18,"../c_facet":6,"../messenger":14,"./cf_registry":10,"./dom_events":11,"mol-proto":22}],10:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../registry')
@@ -852,7 +852,7 @@ module.exports = facetsRegistry;
 // TODO - refactor components registry test into a function
 // that tests a registry with a given foundation class
 // Make test for this registry based on this function
-},{"../../registry":20,"../c_facet":6}],11:[function(require,module,exports){
+},{"../../registry":21,"../c_facet":6}],11:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -904,7 +904,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"mol-proto":21}],12:[function(require,module,exports){
+},{"mol-proto":22}],12:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../registry')
@@ -916,7 +916,7 @@ componentsRegistry.add(Component);
 
 module.exports = componentsRegistry;
 
-},{"../registry":20,"./c_class":5}],13:[function(require,module,exports){
+},{"../registry":21,"./c_class":5}],13:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -1077,7 +1077,7 @@ function _chooseSubscribersHash(message) {
 				: this._messageSubscribers;
 }
 
-},{"../check":4,"mol-proto":21}],15:[function(require,module,exports){
+},{"../check":4,"mol-proto":22}],15:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1094,7 +1094,7 @@ _.extendProto(Facet, {
 	init: function() {}
 });
 
-},{"mol-proto":21}],16:[function(require,module,exports){
+},{"mol-proto":22}],16:[function(require,module,exports){
 'use strict';
 
 var Facet = require('./f_class')
@@ -1187,10 +1187,68 @@ FacetedObject.createFacetedClass = function (name, facetsClasses) {
 };
 
 
-},{"../check":4,"./f_class":15,"mol-proto":21}],17:[function(require,module,exports){
+},{"../check":4,"./f_class":15,"mol-proto":22}],17:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('./mixin')
+	, _ = require('mol-proto');
+
+// an abstract class for dispatching external to internal events
+var MessageSource = _.createSubclass(Mixin, 'MessageSource');
+
+
+_.extendProto(MessageSource, {
+	// initializes messageSource - called by Mixin superclass
+	init: initMessageSource,
+
+	// called by Messenger to notify when the first subscriber for an internal message was added
+	onSubscriberAdded: onSubscriberAdded,
+
+	// called by Messenger to notify when the last subscriber for an internal message was removed
+ 	onSubscriberRemoved: onSubscriberRemoved, 
+ 	
+	// converts internal message type to external message type - should be implemented in subclass
+	translateToExternalMessage: toBeImplemented,
+
+	// converts external message type to internal message type - should be implemented in subclass
+	translateToInternalMessage: toBeImplemented,
+
+ 	// adds listener to external message - should be implemented by subclass
+ 	addExternalListener: toBeImplemented,
+
+ 	// removes listener from external message - should be implemented by subclass
+ 	removeExternalListener: toBeImplemented,
+
+ 	// dispatches external message - should be implemented by subclass
+ 	dispatchMessage: toBeImplemented,
+});
+
+
+function initMessageSource() {
+	Object.defineProperty(this, '_externalToInternalMessagesMap', { value: {} });
+}
+
+
+function onSubscriberAdded() {
+
+}
+
+
+function onSubscriberRemoved() {
+	
+}
+
+
+function toBeImplemented() {
+
+}
+
+
+},{"./mixin":20,"mol-proto":22}],18:[function(require,module,exports){
+'use strict';
+
+var Mixin = require('./mixin')
+	, MessageSource = require('./message_source')
 	, _ = require('mol-proto')
 	, check = require('./check')
 	, Match = check.Match;
@@ -1222,6 +1280,8 @@ module.exports = Messenger;
 
 
 function initMessenger(hostObject, proxyMethods, messageSource) {
+	check(messageSource, Match.Optional(MessageSource));
+
 	// hostObject and proxyMethods are used in Mixin
  	// messenger data
  	Object.defineProperties(this, {
@@ -1262,7 +1322,7 @@ function _registerSubscriber(subscribersHash, message, subscriber) {
 		subscribersHash[messages] = [];
 		var noSubscribers = true;
 		if (this._messageSource)
-			this._messageSource.addSubscriber(message);
+			this._messageSource.onSubscriberAdded(message);
 	}
 
 	var msgSubscribers = subscribersHash[messages];
@@ -1415,7 +1475,7 @@ function _chooseSubscribersHash(message) {
 				: this._messageSubscribers;
 }
 
-},{"./check":4,"./mixin":19,"mol-proto":21}],18:[function(require,module,exports){
+},{"./check":4,"./message_source":17,"./mixin":20,"mol-proto":22}],19:[function(require,module,exports){
 'use strict';
 
 var milo = {
@@ -1439,7 +1499,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./binder":3,"./components/c_facets/Container":7,"./components/c_facets/Data":8,"./components/c_facets/Events":9,"./components/classes/View":13}],19:[function(require,module,exports){
+},{"./binder":3,"./components/c_facets/Container":7,"./components/c_facets/Data":8,"./components/c_facets/Events":9,"./components/classes/View":13}],20:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -1452,6 +1512,7 @@ module.exports = Mixin;
 // an abstract class for mixin pattern - adding proxy methods to host objects
 function Mixin(hostObject, proxyMethods) {
 	// TODO - moce checks from Messenger here
+	check(hostObject, Object);
 	check(proxyMethods, Match.ObjectHash(String));
 
 	Object.defineProperty(this, '_hostObject', { value: hostObject });
@@ -1484,7 +1545,7 @@ function _createProxyMethods(proxyMethods) {
 	_.eachKey(proxyMethods, _createProxyMethod, this);
 }
 
-},{"./check":4,"mol-proto":21}],20:[function(require,module,exports){
+},{"./check":4,"mol-proto":22}],21:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -1568,7 +1629,7 @@ function unregisterAllClasses() {
 	this.__registeredClasses = {};
 };
 
-},{"./check":4,"mol-proto":21}],21:[function(require,module,exports){
+},{"./check":4,"mol-proto":22}],22:[function(require,module,exports){
 'use strict';
 
 var _;
@@ -1760,5 +1821,5 @@ function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
 }
 
-},{}]},{},[18])
+},{}]},{},[19])
 ;
