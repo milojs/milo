@@ -85,10 +85,10 @@ describe('check module', function() {
 			'check array of strings with Array [pattern]'
 		);
 		assert.equal(Match.test(['test1', 'test2', 34], [String]), false,
-			'match.test array of strings with Array [pattern]');
+			'match.test array of strings with Array [pattern] fails');
 		assert.throws(
 			function() { check(['test1', 'test2', 34], [String]); }, 
-			'check array of strings with Array [pattern]'
+			'check array of strings with Array [pattern] throws'
 		);
 	});
 
