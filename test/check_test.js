@@ -186,22 +186,20 @@ describe('check module', function() {
 		}, 'should fail if one property is a string');
 	});
 
-	it.skip('should match.test and check using Match.Subclass', function() {
+	it('should match.test and check using Match.Subclass', function() {
 		var Parent = function(name) { this.name = name; };
 		var Child = _.createSubclass(Parent, 'Child', true);
-		var baby = new Child('Baby');
 		
-		assert(Match.test(baby, Match.Subclass(Child)),
+		assert(Match.test(Child, Match.Subclass(Parent)),
 			'match.test instance with Match.Subclass including superclass');
-
-		// assert.equal(Match.test([], Match.OneOf(null, Number, String)), false,
-		// 	'match.test array against number of types fails');
-		// assert.doesNotThrow(
-		// 	function() { check('test', Match.OneOf(null, Number, String)) },
-		// 	'check string against number of types');
-		// assert.throws(
-		// 	function() { check([], Match.OneOf(null, Number, String)) },
-		// 	'check array against number of types fails');
+		assert.equal(Match.test(Child, Match.Subclass(Array)), false,
+			'match.test instance with Match.Subclass including superclass fails');
+		assert.doesNotThrow(function() { 
+			check(Child, Match.Subclass(Parent)) 
+		}, 'check instance with Match.Subclass including superclass');
+		assert.throws(function() { 
+			check(Child, Match.Subclass(Array)) 
+		}, 'check instance with Match.Subclass including superclass throws');
 	});
 
 });
