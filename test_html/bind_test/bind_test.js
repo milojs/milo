@@ -8,11 +8,11 @@ describe('milo binder', function() {
 
     	var ctrl = milo.binder();
 
-    	ctrl.articleButton.events.on('click', function(e) {
+    	ctrl.articleButton.events.on('click mouseenter', function(e) {
     		console.log('button clicked', e);
     	});
 
-    	ctrl.articleIdInput.events.on('input', logEvent);
+    	ctrl.articleIdInput.events.on('input keypress', logEvent);
 
     	function logEvent(e) {
     		console.log(e);
