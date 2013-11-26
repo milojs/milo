@@ -75,9 +75,7 @@ describe('check module', function() {
 		toTest.forEach(function(val) {
 			assert(Match.test(val[0], Match.Optional(val[1])), 
 				'match.test ' + val[2] + ' with Match.Optional');
-			assert(Match.test(notDefined, Match.Optional(String)), 
-				'match.test ' + val[2] + ' with Match.Optional');
-			assert.equal(Match.test(34, Match.Optional(String)), false,
+			assert(Match.test(notDefined, Match.Optional(val[1])), 
 				'match.test ' + val[2] + ' with Match.Optional');
 
 			assert.doesNotThrow(
@@ -85,14 +83,20 @@ describe('check module', function() {
 				'check ' + val[2] + ' with Match.Optional'
 			);
 			assert.doesNotThrow(
-				function() { check(notDefined, Match.Optional(String)); },
+				function() { check(notDefined, Match.Optional(val[1])); },
 				'check an undefined against a string'
 			);
-			assert.throws(
-				function() { check(34, Match.Optional(String)); },
-				'check a number against a string'
-			);
 		});
+		assert.equal(Match.test(34, Match.Optional(String)), false,
+				'match.test number with Match.Optional string');
+		assert.doesNotThrow(
+			function() { check(func, Match.Optional(Function)); }, 
+			'check function with with Match.Optional'
+		);
+		assert.throws(
+			function() { check(34, Match.Optional(String)); },
+			'check a number against a string'
+		);
 	});
 
 	it('should match.test and check using Array [pattern]', function() {
