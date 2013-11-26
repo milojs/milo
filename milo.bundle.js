@@ -1506,8 +1506,12 @@ function _createProxyMethod(mixinMethodName, proxyMethodName) {
 		throw new MixinError('method ' + proxyMethodName +
 								 ' already defined in host object');
 
+	check(this[mixinMethodName], Function);
+
+	var boundMethod = this[mixinMethodName].bind(this);
+
 	Object.defineProperty(this._hostObject, proxyMethodName,
-		{ value: this[mixinMethodName].bind(this) });
+		{ value: boundMethod });
 }
 
 
