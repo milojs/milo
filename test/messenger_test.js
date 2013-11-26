@@ -1,6 +1,6 @@
 'use strict';
 
-var Messenger = require('../lib/messenger_class.js')
+var Messenger = require('../lib/messenger.js')
 	, _ = require('mol-proto')
 	, check = require('../lib/check')
 	, Match = check.Match
@@ -11,8 +11,8 @@ describe('Messenger class', function() {
         var host = {};
         var messenger = new Messenger(host, {
             init: 'init',
-            on: 'on',
-            off: 'off',
+            on: 'onMessage',
+            off: 'offMessage',
             onEvents: 'onMessages',
             offEvents: 'offMessages',
             post: 'postMessage',
@@ -24,7 +24,7 @@ describe('Messenger class', function() {
         var HostFail = function(){};
         HostFail.prototype.on = function(){/*Fails*/};
         var hostFail = new HostFail();
-        var messenger = new Messenger(hostFail, {init: 'init', on: 'on', off: 'off'});
+        var messenger = new Messenger(hostFail, {init: 'init', on: 'onMessage', off: 'offMessage'});
         return hostFail;
     }
 

@@ -69,7 +69,7 @@ function validateAttribute() {
 	return this;
 }
 
-},{"../check":4,"./error":2,"mol-proto":26}],2:[function(require,module,exports){
+},{"../check":4,"./error":2,"mol-proto":25}],2:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -82,7 +82,7 @@ _.makeSubclass(BindError, Error);
 
 module.exports = BindError;
 
-},{"mol-proto":26}],3:[function(require,module,exports){
+},{"mol-proto":25}],3:[function(require,module,exports){
 'use strict';
 
 var componentsRegistry = require('../components/c_registry')
@@ -171,7 +171,7 @@ binder.config = function(options) {
 	opts.extend(options);
 };
 
-},{"../check":4,"../components/c_registry":11,"./attribute":1,"./error":2,"mol-proto":26}],4:[function(require,module,exports){
+},{"../check":4,"../components/c_registry":11,"./attribute":1,"./error":2,"mol-proto":25}],4:[function(require,module,exports){
 'use strict';
 
 // XXX docs
@@ -479,13 +479,13 @@ function _prependPath(key, base) {
 };
 
 
-},{"mol-proto":26}],5:[function(require,module,exports){
+},{"mol-proto":25}],5:[function(require,module,exports){
 'use strict';
 
 var FacetedObject = require('../facets/f_object')
 	, facetsRegistry = require('./c_facets/cf_registry')
 	, ComponentFacet = require('./c_facet')
-	, messengerMixin = require('./messenger')
+	, Messenger = require('../messenger')
 	, _ = require('mol-proto')
 	, check = require('../check')
 	, Match = check.Match;
@@ -515,12 +515,15 @@ _.extendProto(Component, {
 	addFacet: addFacet
 });
 
-_.extendProto(Component, messengerMixin);
-
 
 function initComponent(facetsOptions, element) {
 	this.el = element;
-	this.initMessenger();
+
+	var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
+
+	Object.defineProperties(this, {
+		_messenger: { value: messenger },
+	});	
 }
 
 
@@ -540,11 +543,11 @@ function addFacet(facetNameOrClass, facetOpts, facetName) {
 	FacetedObject.prototype.addFacet.call(this, FacetClass, facetOpts, facetName);
 }
 
-},{"../check":4,"../facets/f_object":18,"./c_facet":6,"./c_facets/cf_registry":10,"./messenger":13,"mol-proto":26}],6:[function(require,module,exports){
+},{"../check":4,"../facets/f_object":17,"../messenger":21,"./c_facet":6,"./c_facets/cf_registry":10,"mol-proto":25}],6:[function(require,module,exports){
 'use strict';
 
 var Facet = require('../facets/f_class')
-	, messengerMixin = require('./messenger')
+	, Messenger = require('../messenger')
 	, _ = require('mol-proto');
 
 var ComponentFacet = _.createSubclass(Facet, 'ComponentFacet');
@@ -556,14 +559,16 @@ _.extendProto(ComponentFacet, {
 	init: initComponentFacet,
 });
 
-_.extendProto(ComponentFacet, messengerMixin);
-
 
 function initComponentFacet() {
-	this.initMessenger();
+	var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
+
+	Object.defineProperties(this, {
+		_facetMessenger: { value: messenger },
+	});
 }
 
-},{"../facets/f_class":17,"./messenger":13,"mol-proto":26}],7:[function(require,module,exports){
+},{"../facets/f_class":16,"../messenger":21,"mol-proto":25}],7:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -584,7 +589,7 @@ facetsRegistry.add(Container);
 
 
 function initContainer() {
-	this.initMessenger();
+	ComponentFacet.prototype.init.apply(this, arguments);
 	this.children = {};
 }
 
@@ -605,7 +610,7 @@ function addChildComponents(childComponents) {
 	_.extend(this.children, childComponents);
 }
 
-},{"../../binder":3,"../c_facet":6,"./cf_registry":10,"mol-proto":26}],8:[function(require,module,exports){
+},{"../../binder":3,"../c_facet":6,"./cf_registry":10,"mol-proto":25}],8:[function(require,module,exports){
 'use strict';
 
 },{}],9:[function(require,module,exports){
@@ -614,7 +619,7 @@ function addChildComponents(childComponents) {
 var ComponentFacet = require('../c_facet')
 	, facetsRegistry = require('./cf_registry')
 
-	, Messenger = require('../../messenger_class')
+	, Messenger = require('../../messenger')
 	, DOMEventsSource = require('../../dom_events_source')
 
 	, _ = require('mol-proto');
@@ -633,11 +638,13 @@ facetsRegistry.add(Events);
 
 
 function initEventsFacet() {
+	ComponentFacet.prototype.init.apply(this, arguments);
+
 	var domEventsSource = new DOMEventsSource(this, { trigger: 'trigger' }, this.owner);
 
 	var proxyMessengerMethods = {
-		on: 'on',
-		off: 'off',
+		on: 'onMessage',
+		off: 'offMessage',
 		onEvents: 'onMessages',
 		offEvents: 'offMessages',
 		getListeners: 'getSubscribers'
@@ -651,7 +658,7 @@ function initEventsFacet() {
 	});
 }
 
-},{"../../dom_events_source":15,"../../messenger_class":22,"../c_facet":6,"./cf_registry":10,"mol-proto":26}],10:[function(require,module,exports){
+},{"../../dom_events_source":14,"../../messenger":21,"../c_facet":6,"./cf_registry":10,"mol-proto":25}],10:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../registry')
@@ -666,7 +673,7 @@ module.exports = facetsRegistry;
 // TODO - refactor components registry test into a function
 // that tests a registry with a given foundation class
 // Make test for this registry based on this function
-},{"../../registry":25,"../c_facet":6}],11:[function(require,module,exports){
+},{"../../registry":24,"../c_facet":6}],11:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../registry')
@@ -678,7 +685,7 @@ componentsRegistry.add(Component);
 
 module.exports = componentsRegistry;
 
-},{"../registry":25,"./c_class":5}],12:[function(require,module,exports){
+},{"../registry":24,"./c_class":5}],12:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -692,154 +699,6 @@ componentsRegistry.add(View);
 module.exports = View;
 
 },{"../c_class":5,"../c_registry":11}],13:[function(require,module,exports){
-'use strict';
-
-var _ = require('mol-proto')
-	, check = require('../check')
-	, Match = check.Match;
-
-var messengerMixin =  {
-	initMessenger: initMessenger,
-	onMessage: registerSubscriber,
-	offMessage: removeSubscriber,
-	onMessages: registerSubscribers,
-	offMessages: removeSubscribers,
-	postMessage: postMessage,
-	getMessageSubscribers: getMessageSubscribers,
-	_chooseSubscribersHash: _chooseSubscribersHash
-};
-
-module.exports = messengerMixin;
-
-
-function initMessenger() {
-	Object.defineProperties(this, {
-		_messageSubscribers: {
-			value: {}
-		},
-		_patternMessageSubscribers: {
-			value: {}
-		}
-	});
-}
-
-
-function registerSubscriber(message, subscriber) {
-	check(message, Match.OneOf(String, RegExp));
-	check(subscriber, Function); 
-
-	var subscribersHash = this._chooseSubscribersHash(message);
-	var msgSubscribers = subscribersHash[message] = subscribersHash[message] || [];
-	var notYetRegistered = msgSubscribers.indexOf(subscriber) == -1;
-
-	if (notYetRegistered)
-		msgSubscribers.push(subscriber);
-
-	return notYetRegistered;
-}
-
-
-function registerSubscribers(messageSubscribers) {
-	check(messageSubscribers, Match.Object);
-
-	var notYetRegisteredMap = _.mapKeys(messageSubscribers, function(subscriber, message) {
-		return this.registerSubscriber(message, subscriber)
-	}, this);
-
-	return notYetRegisteredMap;
-}
-
-
-// removes all subscribers for the message if subscriber isn't supplied
-function removeSubscriber(message, subscriber) {
-	check(message, Match.OneOf(String, RegExp));
-	check(subscriber, Match.Optional(Function)); 
-
-	var subscribersHash = this._chooseSubscribersHash(message);
-	var msgSubscribers = subscribersHash[message];
-	if (! msgSubscribers || ! msgSubscribers.length) return false;
-
-	if (subscriber) {
-		subscriberIndex = msgSubscribers.indexOf(subscriber);
-		if (subscriberIndex == -1) return false;
-		msgSubscribers.splice(subscriberIndex, 1);
-		if (! msgSubscribers.length)
-			delete subscribersHash[message];
-	} else
-		delete subscribersHash[message];
-
-	return true; // subscriber(s) removed
-}
-
-
-function removeSubscribers(messageSubscribers) {
-	check(messageSubscribers, Match.Object);
-
-	var subscriberRemovedMap = _.mapKeys(messageSubscribers, function(subscriber, message) {
-		return this.registerSubscriber(message, subscriber)
-	}, this);
-
-	return subscriberRemovedMap;	
-}
-
-
-function postMessage(message, data) {
-	check(message, Match.OneOf(String, RegExp));
-
-	var subscribersHash = this._chooseSubscribersHash(message);
-	var msgSubscribers = subscribersHash[message];
-
-	callSubscribers(msgSubscribers);
-
-	if (message instanceof String) {
-		_.eachKey(this._patternMessageSubscribers, 
-			function(patternSubscribers, pattern) {
-				if (pattern.test(message))
-					callSubscribers(patternSubscribers);
-			}
-		);
-	}
-
-	function callSubscribers(msgSubscribers) {
-		msgSubscribers.forEach(function(subscriber) {
-			subscriber(message, data);
-		});
-	}
-}
-
-
-function getMessageSubscribers(message, includePatternSubscribers) {
-	check(message, Match.OneOf(String, RegExp));
-
-	var subscribersHash = this._chooseSubscribersHash(message);
-	var msgSubscribers = msgSubscribers
-							? [].concat(subscribersHash[message])
-							: [];
-
-	// pattern subscribers are incuded by default
-	if (includePatternSubscribers != false && message instanceof String) {
-		_.eachKey(this._patternMessageSubscribers, 
-			function(patternSubscribers, pattern) {
-				if (patternSubscribers && patternSubscribers.length
-						&& pattern.test(message))
-					_.appendArray(msgSubscribers, patternSubscribers);
-			}
-		);
-	}
-
-	return msgSubscribers.length
-				? msgSubscribers
-				: undefined;
-}
-
-
-function _chooseSubscribersHash(message) {
-	return message instanceof RegExp
-				? this._patternMessageSubscribers
-				: this._messageSubscribers;
-}
-
-},{"../check":4,"mol-proto":26}],14:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -891,7 +750,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"mol-proto":26}],15:[function(require,module,exports){
+},{"mol-proto":25}],14:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('./message_source')
@@ -967,8 +826,6 @@ function filterCapturedDomEvent(eventType, message, event) {
 
 // event dispatcher - as defined by Event DOM API
 function handleEvent(event) {
-	console.log('handleEvent', event);
-
 	this.dispatchMessage(event.type, event);
 }
 
@@ -992,7 +849,7 @@ function triggerDomEvent(eventType, properties) {
 
 	return notCancelled;
 }
-},{"./check":4,"./components/c_class":5,"./dom_events_constructors":14,"./message_source":21,"mol-proto":26}],16:[function(require,module,exports){
+},{"./check":4,"./components/c_class":5,"./dom_events_constructors":13,"./message_source":20,"mol-proto":25}],15:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1020,7 +877,7 @@ function createErrorClass(errorClassName) {
 	return ErrorClass;
 }
 
-},{"mol-proto":26}],17:[function(require,module,exports){
+},{"mol-proto":25}],16:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1037,7 +894,7 @@ _.extendProto(Facet, {
 	init: function() {}
 });
 
-},{"mol-proto":26}],18:[function(require,module,exports){
+},{"mol-proto":25}],17:[function(require,module,exports){
 'use strict';
 
 var Facet = require('./f_class')
@@ -1130,7 +987,7 @@ FacetedObject.createFacetedClass = function (name, facetsClasses) {
 };
 
 
-},{"../check":4,"./f_class":17,"mol-proto":26}],19:[function(require,module,exports){
+},{"../check":4,"./f_class":16,"mol-proto":25}],18:[function(require,module,exports){
 'use strict';
 
 var Logger = require('./logger_class');
@@ -1139,7 +996,7 @@ var logger = new Logger({ level: 3 });
 
 module.exports = logger;
 
-},{"./logger_class":20}],20:[function(require,module,exports){
+},{"./logger_class":19}],19:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1235,7 +1092,7 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"mol-proto":26}],21:[function(require,module,exports){
+},{"mol-proto":25}],20:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('./mixin')
@@ -1343,7 +1200,7 @@ function toBeImplemented() {
 	throw new AbsctractClassError('calling the method of an absctract class MessageSource');
 }
 
-},{"./error":16,"./logger":19,"./mixin":24,"mol-proto":26}],22:[function(require,module,exports){
+},{"./error":15,"./logger":18,"./mixin":23,"mol-proto":25}],21:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('./mixin')
@@ -1361,8 +1218,8 @@ var Messenger = _.createSubclass(Mixin, 'Messenger');
 
 _.extendProto(Messenger, {
 	init: initMessenger, // called by Mixin (superclass)
-	on: registerSubscriber,
-	off: removeSubscriber,
+	onMessage: registerSubscriber,
+	offMessage: removeSubscriber,
 	onMessages: registerSubscribers,
 	offMessages: removeSubscribers,
 	postMessage: postMessage,
@@ -1374,6 +1231,16 @@ _.extendProto(Messenger, {
 	_callPatternSubscribers: _callPatternSubscribers,
 	_callSubscribers: _callSubscribers
 });
+
+
+Messenger.defaultMethods = {
+	onMessage: 'onMessage',
+	offMessage: 'offMessage',
+	onMessages: 'onMessages',
+	offMessages: 'offMessages',
+	postMessage: 'postMessage',
+	getSubscribers: 'getSubscribers'
+};
 
 
 module.exports = Messenger;
@@ -1442,7 +1309,7 @@ function registerSubscribers(messageSubscribers) {
 	check(messageSubscribers, Match.ObjectHash(Function));
 
 	var notYetRegisteredMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
-		return this.on(messages, subscriber)
+		return this.onMessage(messages, subscriber)
 	}, this);
 
 	return notYetRegisteredMap;
@@ -1506,7 +1373,7 @@ function removeSubscribers(messageSubscribers) {
 	check(messageSubscribers, Match.ObjectHash(Function));
 
 	var subscriberRemovedMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
-		return this.removeSubscriber(messages, subscriber)
+		return this.offMessages(messages, subscriber)
 	}, this);
 
 	return subscriberRemovedMap;	
@@ -1578,7 +1445,7 @@ function _chooseSubscribersHash(message) {
 				: this._messageSubscribers;
 }
 
-},{"./check":4,"./error":16,"./message_source":21,"./mixin":24,"mol-proto":26}],23:[function(require,module,exports){
+},{"./check":4,"./error":15,"./message_source":20,"./mixin":23,"mol-proto":25}],22:[function(require,module,exports){
 'use strict';
 
 var milo = {
@@ -1602,7 +1469,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./binder":3,"./components/c_facets/Container":7,"./components/c_facets/Data":8,"./components/c_facets/Events":9,"./components/classes/View":12}],24:[function(require,module,exports){
+},{"./binder":3,"./components/c_facets/Container":7,"./components/c_facets/Data":8,"./components/c_facets/Events":9,"./components/classes/View":12}],23:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -1649,7 +1516,7 @@ function _createProxyMethods(proxyMethods) {
 	_.eachKey(proxyMethods, _createProxyMethod, this);
 }
 
-},{"./check":4,"./error":16,"mol-proto":26}],25:[function(require,module,exports){
+},{"./check":4,"./error":15,"mol-proto":25}],24:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -1733,7 +1600,7 @@ function unregisterAllClasses() {
 	this.__registeredClasses = {};
 };
 
-},{"./check":4,"mol-proto":26}],26:[function(require,module,exports){
+},{"./check":4,"mol-proto":25}],25:[function(require,module,exports){
 'use strict';
 
 var _;
@@ -1936,5 +1803,5 @@ function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
 }
 
-},{}]},{},[23])
+},{}]},{},[22])
 ;
