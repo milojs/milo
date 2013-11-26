@@ -1,0 +1,19 @@
+'use strict';
+
+var Logger = require('../lib/logger_class')
+	, assert = require('assert');
+
+var logger = new Logger();
+
+describe('Logger', function() {
+    it('should define logger methods when instantiated', function() {
+    	['log', 'error', 'warn', 'info', 'debug'].forEach(function(level) {
+    		assert(typeof (logger[level]) == 'function', 'should define logger methods');
+    	});
+    });
+
+
+    it.skip('logger methods should log to console', function() {
+
+    });
+});

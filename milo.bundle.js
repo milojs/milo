@@ -69,7 +69,7 @@ function validateAttribute() {
 	return this;
 }
 
-},{"../check":4,"./error":2,"mol-proto":22}],2:[function(require,module,exports){
+},{"../check":4,"./error":2,"mol-proto":25}],2:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -82,7 +82,7 @@ _.makeSubclass(BindError, Error);
 
 module.exports = BindError;
 
-},{"mol-proto":22}],3:[function(require,module,exports){
+},{"mol-proto":25}],3:[function(require,module,exports){
 'use strict';
 
 var componentsRegistry = require('../components/c_registry')
@@ -171,7 +171,7 @@ binder.config = function(options) {
 	opts.extend(options);
 };
 
-},{"../check":4,"../components/c_registry":12,"./attribute":1,"./error":2,"mol-proto":22}],4:[function(require,module,exports){
+},{"../check":4,"../components/c_registry":12,"./attribute":1,"./error":2,"mol-proto":25}],4:[function(require,module,exports){
 'use strict';
 
 // XXX docs
@@ -479,7 +479,7 @@ function _prependPath(key, base) {
 };
 
 
-},{"mol-proto":22}],5:[function(require,module,exports){
+},{"mol-proto":25}],5:[function(require,module,exports){
 'use strict';
 
 var FacetedObject = require('../facets/f_object')
@@ -540,7 +540,7 @@ function addFacet(facetNameOrClass, facetOpts, facetName) {
 	FacetedObject.prototype.addFacet.call(this, FacetClass, facetOpts, facetName);
 }
 
-},{"../check":4,"../facets/f_object":16,"./c_facet":6,"./c_facets/cf_registry":10,"./messenger":14,"mol-proto":22}],6:[function(require,module,exports){
+},{"../check":4,"../facets/f_object":17,"./c_facet":6,"./c_facets/cf_registry":10,"./messenger":14,"mol-proto":25}],6:[function(require,module,exports){
 'use strict';
 
 var Facet = require('../facets/f_class')
@@ -563,7 +563,7 @@ function initComponentFacet() {
 	this.initMessenger();
 }
 
-},{"../facets/f_class":15,"./messenger":14,"mol-proto":22}],7:[function(require,module,exports){
+},{"../facets/f_class":16,"./messenger":14,"mol-proto":25}],7:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -605,7 +605,7 @@ function addChildComponents(childComponents) {
 	_.extend(this.children, childComponents);
 }
 
-},{"../../binder":3,"../c_facet":6,"./cf_registry":10,"mol-proto":22}],8:[function(require,module,exports){
+},{"../../binder":3,"../c_facet":6,"./cf_registry":10,"mol-proto":25}],8:[function(require,module,exports){
 'use strict';
 
 },{}],9:[function(require,module,exports){
@@ -837,7 +837,7 @@ function _hasEventListeners(eventType) {
 		    || (capturedEvents && capturedEvents.length);
 }
 
-},{"../../check":4,"../../messenger_class":18,"../c_facet":6,"../messenger":14,"./cf_registry":10,"./dom_events":11,"mol-proto":22}],10:[function(require,module,exports){
+},{"../../check":4,"../../messenger_class":21,"../c_facet":6,"../messenger":14,"./cf_registry":10,"./dom_events":11,"mol-proto":25}],10:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../registry')
@@ -852,7 +852,7 @@ module.exports = facetsRegistry;
 // TODO - refactor components registry test into a function
 // that tests a registry with a given foundation class
 // Make test for this registry based on this function
-},{"../../registry":21,"../c_facet":6}],11:[function(require,module,exports){
+},{"../../registry":24,"../c_facet":6}],11:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -904,7 +904,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"mol-proto":22}],12:[function(require,module,exports){
+},{"mol-proto":25}],12:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../registry')
@@ -916,7 +916,7 @@ componentsRegistry.add(Component);
 
 module.exports = componentsRegistry;
 
-},{"../registry":21,"./c_class":5}],13:[function(require,module,exports){
+},{"../registry":24,"./c_class":5}],13:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -1077,7 +1077,35 @@ function _chooseSubscribersHash(message) {
 				: this._messageSubscribers;
 }
 
-},{"../check":4,"mol-proto":22}],15:[function(require,module,exports){
+},{"../check":4,"mol-proto":25}],15:[function(require,module,exports){
+'use strict';
+
+var _ = require('mol-proto');
+
+
+// module exports error classes for all names defined in this array
+var errorClassNames = ['AbstractClass', 'Mixin', 'Messenger']
+	, errorClasses = {};
+
+errorClassNames.forEach(function(name) {
+	errorClasses[name] = createErrorClass(name + 'Error');
+});
+
+module.exports = errorClasses;
+
+
+function createErrorClass(errorClassName) {
+	var ErrorClass;
+	eval('ErrorClass = function ' + errorClassName + '(message) { \
+			this.name = "' + errorClassName + '"; \
+			this.message = message || "There was an error"; \
+		}');
+	_.makeSubclass(ErrorClass, Error);
+
+	return ErrorClass;
+}
+
+},{"mol-proto":25}],16:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1094,7 +1122,7 @@ _.extendProto(Facet, {
 	init: function() {}
 });
 
-},{"mol-proto":22}],16:[function(require,module,exports){
+},{"mol-proto":25}],17:[function(require,module,exports){
 'use strict';
 
 var Facet = require('./f_class')
@@ -1187,14 +1215,121 @@ FacetedObject.createFacetedClass = function (name, facetsClasses) {
 };
 
 
-},{"../check":4,"./f_class":15,"mol-proto":22}],17:[function(require,module,exports){
+},{"../check":4,"./f_class":16,"mol-proto":25}],18:[function(require,module,exports){
+'use strict';
+
+var Logger = require('./logger_class');
+
+var logger = new Logger({ level: 3 });
+
+module.exports = logger;
+
+},{"./logger_class":19}],19:[function(require,module,exports){
+'use strict';
+
+var _ = require('mol-proto');
+
+
+/**
+ * Log levels.
+ */
+
+var levels = [
+    'error',
+    'warn',
+    'info',
+    'debug'
+];
+
+var maxLevelLength = Math.max.apply(Math, levels.map(function(level) { return level.length; }));
+
+/**
+ * Colors for log levels.
+ */
+
+var colors = [
+    31,
+    33,
+    36,
+    90
+];
+
+/**
+ * Pads the nice output to the longest log level.
+ */
+
+function pad (str) {
+    if (str.length < maxLevelLength)
+        return str + new Array(maxLevelLength - str.length + 1).join(' ');
+
+    return str;
+};
+
+/**
+ * Logger (console).
+ *
+ * @api public
+ */
+
+var Logger = function (opts) {
+    opts = opts || {}
+    this.colors = false !== opts.colors;
+    this.level = opts.level || 3;
+    this.enabled = opts.enabled || true;
+    this.logPrefix = opts.logPrefix || '';
+    this.logPrefixColor = opts.logPrefixColor;
+};
+
+
+/**
+ * Log method.
+ *
+ * @api public
+ */
+
+Logger.prototype.log = function (type) {
+    var index = levels.indexOf(type);
+
+    if (index > this.level || ! this.enabled)
+        return this;
+
+    console.log.apply(
+          console
+        , [this.logPrefixColor
+             ? '   \x1B[' + this.logPrefixColor + 'm' + this.logPrefix + '  -\x1B[39m'
+             : this.logPrefix
+          ,this.colors
+             ? ' \x1B[' + colors[index] + 'm' + pad(type) + ' -\x1B[39m'
+             : type + ':'
+          ].concat(_.toArray(arguments).slice(1))
+    );
+
+    return this;
+};
+
+/**
+ * Generate methods.
+ */
+
+levels.forEach(function (name) {
+    Logger.prototype[name] = function () {
+        this.log.apply(this, [name].concat(_.toArray(arguments)));
+    };
+});
+
+
+module.exports = Logger;
+
+},{"mol-proto":25}],20:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('./mixin')
+	, logger = require('./logger')
+	, AbsctractClassError = require('./error').AbsctractClass
 	, _ = require('mol-proto');
 
 // an abstract class for dispatching external to internal events
-var MessageSource = _.createSubclass(Mixin, 'MessageSource');
+var MessageSource = _.createSubclass(Mixin, 'MessageSource', true);
 
 
 _.extendProto(MessageSource, {
@@ -1206,12 +1341,12 @@ _.extendProto(MessageSource, {
 
 	// called by Messenger to notify when the last subscriber for an internal message was removed
  	onSubscriberRemoved: onSubscriberRemoved, 
+
+
+ 	// Methods below should be implemented in subclass
  	
 	// converts internal message type to external message type - should be implemented in subclass
-	translateToExternalMessage: toBeImplemented,
-
-	// converts external message type to internal message type - should be implemented in subclass
-	translateToInternalMessage: toBeImplemented,
+	translateToSourceMessage: toBeImplemented,
 
  	// adds listener to external message - should be implemented by subclass
  	addExternalListener: toBeImplemented,
@@ -1225,36 +1360,65 @@ _.extendProto(MessageSource, {
 
 
 function initMessageSource() {
-	Object.defineProperty(this, '_externalToInternalMessagesMap', { value: {} });
+	Object.defineProperty(this, '_internalMessages', { value: {} });
 }
 
 
-function onSubscriberAdded() {
+function onSubscriberAdded(message) {
+	var sourceMessage = this.translateToSourceMessage(message);
 
+	if (! this._internalMessages.hasOwnProperty(sourceMessage)) {
+		this.addExternalListener(sourceMessage);
+		this._internalMessages[sourceMessage] = [];
+	}
+	var internalMsgs = this._internalMessages[sourceMessage];
+
+	if (internalMsgs.indexOf(message) == -1)
+		internalMsgs.push(message);
+	else
+		logger.warn('Duplicate notification received: for subscribe to internal message ' + message);
 }
 
 
-function onSubscriberRemoved() {
-	
+function onSubscriberRemoved(message) {
+	var sourceMessage = this.translateToSourceMessage(message);
+
+	var internalMsgs = this._internalMessages[sourceMessage];
+
+	if (internalMsgs) {
+		messageIndex = internalMsgs.indexOf(message);
+		if (messageIndex >= 0) {
+			internalMsgs.splice(messageIndex, 1);
+			this.removeExternalListener(sourceMessage);
+		} else
+			unexpectedNotificationWarning();
+	} else
+		unexpectedNotificationWarning();
+
+
+	function unexpectedNotificationWarning() {
+		logger.warn('notification received: un-subscribe from internal message ' + message
+					 + ' without previous subscription notification');
+	}
 }
 
 
 function toBeImplemented() {
-
+	throw new AbsctractClassError('calling the method of an absctract class MessageSource');
 }
 
-
-},{"./mixin":20,"mol-proto":22}],18:[function(require,module,exports){
+},{"./error":15,"./logger":18,"./mixin":23,"mol-proto":25}],21:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('./mixin')
 	, MessageSource = require('./message_source')
 	, _ = require('mol-proto')
 	, check = require('./check')
-	, Match = check.Match;
+	, Match = check.Match
+	, MessengerError = require('./error').Messenger;
 
 
-var eventsSplitRegExp = /\s*(\,|\s)\s*/;
+var eventsSplitRegExp = /\s*(?:\,|\s)\s*/;
 
 
 var Messenger = _.createSubclass(Mixin, 'Messenger');
@@ -1302,7 +1466,7 @@ function registerSubscriber(messages, subscriber) {
 	var subscribersHash = this._chooseSubscribersHash(messages);
 
 	if (messages instanceof RegExp)
-		return this._registerSubscriber(subscribersHash, message, subscriber);
+		return this._registerSubscriber(subscribersHash, messages, subscriber);
 
 	else {
 		var wasRegistered = false;
@@ -1317,7 +1481,7 @@ function registerSubscriber(messages, subscriber) {
 }
 
 
-function _registerSubscriber(subscribersHash, message, subscriber) {
+function _registerSubscriber(subscribersHash, messages, subscriber) {
 	if (! (subscribersHash[messages] && subscribersHash[messages].length)) {
 		subscribersHash[messages] = [];
 		var noSubscribers = true;
@@ -1395,7 +1559,7 @@ function _removeSubscriber(subscribersHash, message, subscriber) {
 function _removeAllSubscribers(subscribersHash, message) {
 	delete subscribersHash[message];
 	if (this._messageSource)
-		this._messageSource.removeSubscriber(message);
+		this._messageSource.onSubscriberRemoved(message);
 }
 
 
@@ -1475,7 +1639,7 @@ function _chooseSubscribersHash(message) {
 				: this._messageSubscribers;
 }
 
-},{"./check":4,"./message_source":17,"./mixin":20,"mol-proto":22}],19:[function(require,module,exports){
+},{"./check":4,"./error":15,"./message_source":20,"./mixin":23,"mol-proto":25}],22:[function(require,module,exports){
 'use strict';
 
 var milo = {
@@ -1499,18 +1663,19 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./binder":3,"./components/c_facets/Container":7,"./components/c_facets/Data":8,"./components/c_facets/Events":9,"./components/classes/View":13}],20:[function(require,module,exports){
+},{"./binder":3,"./components/c_facets/Container":7,"./components/c_facets/Data":8,"./components/c_facets/Events":9,"./components/classes/View":13}],23:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
 	, check = require('./check')
-	, Match = check.Match;
+	, Match = check.Match
+	, MixinError = require('./error').Mixin;
 
 
 module.exports = Mixin;
 
 // an abstract class for mixin pattern - adding proxy methods to host objects
-function Mixin(hostObject, proxyMethods) {
+function Mixin(hostObject, proxyMethods /*, other args - passed to init method */) {
 	// TODO - moce checks from Messenger here
 	check(hostObject, Object);
 	check(proxyMethods, Match.ObjectHash(String));
@@ -1532,7 +1697,7 @@ _.extendProto(Mixin, {
 
 function _createProxyMethod(mixinMethodName, proxyMethodName) {
 	if (this._hostObject[proxyMethodName])
-		throw new MessengerError('method ' + proxyMethodName +
+		throw new MixinError('method ' + proxyMethodName +
 								 ' already defined in host object');
 
 	Object.defineProperty(this._hostObject, proxyMethodName,
@@ -1545,7 +1710,7 @@ function _createProxyMethods(proxyMethods) {
 	_.eachKey(proxyMethods, _createProxyMethod, this);
 }
 
-},{"./check":4,"mol-proto":22}],21:[function(require,module,exports){
+},{"./check":4,"./error":15,"mol-proto":25}],24:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -1629,7 +1794,7 @@ function unregisterAllClasses() {
 	this.__registeredClasses = {};
 };
 
-},{"./check":4,"mol-proto":22}],22:[function(require,module,exports){
+},{"./check":4,"mol-proto":25}],25:[function(require,module,exports){
 'use strict';
 
 var _;
@@ -1646,6 +1811,7 @@ var proto = _ = {
 	mapKeys: mapKeys,
 	appendArray: appendArray,
 	prependArray: prependArray,
+	toArray: toArray,
 	firstUpperCase: firstUpperCase,
 	firstLowerCase: firstLowerCase
 };
@@ -1812,6 +1978,16 @@ function prependArray(self, arrayToPrepend) {
 }
 
 
+function toArray(arrayLike) {
+	var arr = [];
+	Array.prototype.forEach.call(arrayLike, function(item) {
+		arr.push(item)
+	});
+
+	return arr;
+}
+
+
 function firstUpperCase(str) {
 	return str[0].toUpperCase() + str.slice(1);
 }
@@ -1821,5 +1997,5 @@ function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
 }
 
-},{}]},{},[19])
+},{}]},{},[22])
 ;

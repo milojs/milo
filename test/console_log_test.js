@@ -23,7 +23,7 @@ describe('console.log statements', function() {
     function notExcluded(file) {
         if (! file) return false;
 
-        var exclusion = [/vendor/, /console_log_test/].some(function(pattern) {
+        var exclusion = [/vendor/, /console_log_test/, /logger_class/].some(function(pattern) {
             return pattern.test(file);
         });
 
