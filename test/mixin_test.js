@@ -6,11 +6,7 @@ var Mixin = require('../lib/mixin')
 
 describe('Mixin', function() {
     it.skip('should define _createProxyMethod method', function() {
-
-    });
-
-    it.skip('should define _createProxyMethods method', function() {
-
+    	
     });
 
     it.skip('should create proxy methods on host object when Mixin subclassed', function() {
