@@ -126,7 +126,12 @@ describe('Messenger class', function() {
                 'event1 event2': handler2,
                 'event3': handler3
             };
-        assert(host.onEvents(events), 'add subscribers with events hash');
+
+        assert.deepEqual(host.onEvents(events), {event1: true, 'event1 event2': true, event3: true}, 
+            'add subscribers with events hash');
+        assert(Match.test(messenger._messageSubscribers, Match.ObjectHash([Function])), '_messageSubscribers is set');
+        assert.deepEqual(host.onEvents(events), {event1: false, 'event1 event2': false, event3: false}, 
+            'add subscribers with events hash second time');
     });
 
     it.skip('should define offEvents method', function() {
