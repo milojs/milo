@@ -1342,20 +1342,23 @@ _.extendProto(MessageSource, {
 	// called by Messenger to notify when the last subscriber for an internal message was removed
  	onSubscriberRemoved: onSubscriberRemoved, 
 
+ 	// dispatches source message
+ 	dispatchMessage: dispatchSourceMessage,
 
+ 	// ***
  	// Methods below should be implemented in subclass
  	
 	// converts internal message type to external message type - should be implemented in subclass
 	translateToSourceMessage: toBeImplemented,
 
  	// adds listener to external message - should be implemented by subclass
- 	addExternalListener: toBeImplemented,
+ 	addSourceListener: toBeImplemented,
 
  	// removes listener from external message - should be implemented by subclass
- 	removeExternalListener: toBeImplemented,
+ 	removeSourceListener: toBeImplemented,
 
- 	// dispatches external message - should be implemented by subclass
- 	dispatchMessage: toBeImplemented,
+	// filters source message based on the data of the message - should be implemented in subclass
+	filterSourceMessage: toBeImplemented,
 });
 
 
@@ -1368,7 +1371,7 @@ function onSubscriberAdded(message) {
 	var sourceMessage = this.translateToSourceMessage(message);
 
 	if (! this._internalMessages.hasOwnProperty(sourceMessage)) {
-		this.addExternalListener(sourceMessage);
+		this.addSourceListener(sourceMessage);
 		this._internalMessages[sourceMessage] = [];
 	}
 	var internalMsgs = this._internalMessages[sourceMessage];
@@ -1385,11 +1388,14 @@ function onSubscriberRemoved(message) {
 
 	var internalMsgs = this._internalMessages[sourceMessage];
 
-	if (internalMsgs) {
+	if (internalMsgs && internalMsgs.length) {
 		messageIndex = internalMsgs.indexOf(message);
 		if (messageIndex >= 0) {
 			internalMsgs.splice(messageIndex, 1);
-			this.removeExternalListener(sourceMessage);
+			if (internalMsgs.length == 0) {
+				delete this._internalMessages[sourceMessage];
+				this.removeSourceListener(sourceMessage);
+			}
 		} else
 			unexpectedNotificationWarning();
 	} else
@@ -1400,6 +1406,19 @@ function onSubscriberRemoved(message) {
 		logger.warn('notification received: un-subscribe from internal message ' + message
 					 + ' without previous subscription notification');
 	}
+}
+
+
+function dispatchSourceMessage(sourceMessage, data) {
+	var internalMsgs = this._internalMessages[sourceMessage];
+
+	if (internalMsgs && internalMsgs.length)
+		internalMsgs.forEach(function(message) {
+			if (this.filterSourceMessage(sourceMessage, message, data))
+				this.messenger.postMessage(message, data);
+		}, this);
+	else
+		logger.warn('source message received for which there is no mapped internal message');
 }
 
 
@@ -1453,6 +1472,9 @@ function initMessenger(hostObject, proxyMethods, messageSource) {
  		_patternMessageSubscribers: { value: {} },
  		_messageSource: { value: messageSource }
  	});
+
+ 	if (messageSource)
+ 		messageSource.messenger = this;
 }
 
 
