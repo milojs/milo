@@ -1,33 +1,140 @@
 ;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var _ = require('mol-proto')
+var Attribute = require('./index')
+	, AttributeError = require('../error').Attribute
+	, config = require('../config')
+	, _ = require('mol-proto')
 	, check = require('../check')
-	, Match = check.Match
-	, BindError = require('./error');
+	, Match = check.Match;
+
 
 // Matches;
 // :myView - only component name
 // View:myView - class and component name
 // [Events, Data]:myView - facets and component name
 // View[Events]:myView - class, facet(s) and component name
+
 var attrRegExp= /^([^\:\[\]]*)(?:\[([^\:\[\]]*)\])?\:?([^:]*)$/
 	, facetsSplitRegExp = /\s*(?:\,|\s)\s*/;
 
 
+var BindAttribute = _.createSubclass(Attribute, 'BindAttribute', true);
+
+_.extendProto(BindAttribute, {
+	attrName: getAttributeName,
+	parse: parseAttribute,
+	validate: validateAttribute
+});
+
+
+module.exports = BindAttribute;
+
+
+function getAttributeName() {
+	return config.attrs['bind'];
+}
+
+
+function parseAttribute() {
+	if (! this.node) return;
+
+	var value = this.get();
+
+	if (value)
+		var bindTo = value.match(attrRegExp);
+
+	if (! bindTo)
+		throw new AttributeError('invalid bind attribute ' + value);
+
+	this.compClass = bindTo[1] || 'Component';
+	this.compFacets = (bindTo[2] && bindTo[2].split(facetsSplitRegExp)) || undefined;
+	this.compName = bindTo[3] || undefined;
+
+	return this;
+}
+
+
+function validateAttribute() {
+	var compName = this.compName;
+	check(compName, Match.Where(function() {
+  		return typeof compName == 'string' && compName != '';
+	}), 'empty component name');
+
+	if (! this.compClass)
+		throw new AttributeError('empty component class name ' + this.compClass);
+
+	return this;
+}
+
+},{"../check":5,"../config":17,"../error":18,"./index":3,"mol-proto":30}],2:[function(require,module,exports){
+'use strict';
+
+var Attribute = require('./index')
+	, AttributeError = require('../error').Attribute
+	, config = require('../config')
+	, _ = require('mol-proto');
+
+
+var LoadAttribute = _.createSubclass(Attribute, 'LoadAttribute', true);
+
+_.extendProto(LoadAttribute, {
+	attrName: getAttributeName,
+	parse: parseAttribute,
+	validate: validateAttribute
+});
+
+module.exports = LoadAttribute;
+
+
+function getAttributeName() {
+	return config.attrs.load;
+}
+
+
+function parseAttribute() {
+	if (! this.node) return;
+
+	var value = this.get();
+
+	this.loadUrl = value;
+
+	return this;
+}
+
+
+function validateAttribute() {
+	// TODO url validation
+
+	return this;
+}
+},{"../config":17,"../error":18,"./index":3,"mol-proto":30}],3:[function(require,module,exports){
+'use strict';
+
+var _ = require('mol-proto')
+	, check = require('../check')
+	, Match = check.Match
+	, toBeImplemented = require('../error').toBeImplemented;
+
+
+// an abstract attribute class for attribute parsing and validation
+
 module.exports = Attribute;
 
 function Attribute(el, name) {
-	this.name = name;
+	this.name = name || this.attrName();
 	this.el = el;
-	this.node = el.attributes[name];
+	this.node = el.attributes[this.name];
 }
 
 _.extendProto(Attribute, {
 	get: getAttributeValue,
 	set: setAttributeValue,
-	parse: parseAttribute,
-	validate: validateAttribute
+
+	// should be defined in subclass
+	attrName: toBeImplemented,
+	parse: toBeImplemented,
+	validate: toBeImplemented,
 });
 
 
@@ -39,68 +146,21 @@ function setAttributeValue(value) {
 	this.el.setAttribute(this.name, value);
 }
 
-function parseAttribute() {
-	if (! this.node) return;
-
-	var value = this.get();
-
-	if (value)
-		var bindTo = value.match(attrRegExp);
-
-	if (! bindTo)
-		throw new BindError('invalid bind attribute ' + value);
-
-	this.compClass = bindTo[1] || 'Component';
-	this.compFacets = (bindTo[2] && bindTo[2].split(facetsSplitRegExp)) || undefined;
-	this.compName = bindTo[3] || undefined;
-
-	return this;
-}
-
-function validateAttribute() {
-	var compName = this.compName;
-	check(compName, Match.Where(function() {
-  		return typeof compName == 'string' && compName != '';
-	}), 'empty component name');
-
-	if (! this.compClass)
-		throw new BindError('empty component class name ' + this.compClass);
-
-	return this;
-}
-
-},{"../check":4,"./error":2,"mol-proto":26}],2:[function(require,module,exports){
+},{"../check":5,"../error":18,"mol-proto":30}],4:[function(require,module,exports){
 'use strict';
 
-var _ = require('mol-proto');
-
-function BindError(msg) {
-	this.message = msg;
-}
-
-_.makeSubclass(BindError, Error);
-
-module.exports = BindError;
-
-},{"mol-proto":26}],3:[function(require,module,exports){
-'use strict';
-
-var componentsRegistry = require('../components/c_registry')
+var componentsRegistry = require('./components/c_registry')
 	, Component = componentsRegistry.get('Component')
-	, Attribute = require('./attribute')
-	, BindError = require('./error')
+	, BindAttribute = require('./attribute/a_bind')
+	, BinderError = require('./error').Binder
 	, _ = require('mol-proto')
-	, check = require('../check')
+	, check = require('./check')
 	, Match =  check.Match;
 
 
-var opts = {
-	BIND_ATTR: 'ml-bind'
-}
-
 module.exports = binder;
 
-function binder(scopeEl, bindScopeEl) {
+function binder(scopeEl) {
 	var scopeEl = scopeEl || document.body
 		, components = {};
 
@@ -110,7 +170,7 @@ function binder(scopeEl, bindScopeEl) {
 	return components;
 
 	function bindElement(el){
-		var attr = new Attribute(el, opts.BIND_ATTR);
+		var attr = new BindAttribute(el);
 
 		var aComponent = createComponent(el, attr);
 
@@ -139,7 +199,7 @@ function binder(scopeEl, bindScopeEl) {
 			var ComponentClass = componentsRegistry.get(attr.compClass);
 
 			if (! ComponentClass)
-				throw new BindError('class ' + attr.compClass + ' is not registered');
+				throw new BinderError('class ' + attr.compClass + ' is not registered');
 
 			check(ComponentClass, Match.Subclass(Component, true));
 	
@@ -160,18 +220,14 @@ function binder(scopeEl, bindScopeEl) {
 
 	function storeComponent(aComponent, name) {
 		if (components[name])
-			throw new BindError('duplicate component name: ' + name);
+			throw new BinderError('duplicate component name: ' + name);
 
 		components[name] = aComponent;
 	}
 }
 
 
-binder.config = function(options) {
-	opts.extend(options);
-};
-
-},{"../check":4,"../components/c_registry":14,"./attribute":1,"./error":2,"mol-proto":26}],4:[function(require,module,exports){
+},{"./attribute/a_bind":1,"./check":5,"./components/c_registry":15,"./error":18,"mol-proto":30}],5:[function(require,module,exports){
 'use strict';
 
 // XXX docs
@@ -479,7 +535,7 @@ function _prependPath(key, base) {
 };
 
 
-},{"mol-proto":26}],5:[function(require,module,exports){
+},{"mol-proto":30}],6:[function(require,module,exports){
 'use strict';
 
 var FacetedObject = require('../facets/f_object')
@@ -543,7 +599,7 @@ function addFacet(facetNameOrClass, facetOpts, facetName) {
 	FacetedObject.prototype.addFacet.call(this, FacetClass, facetOpts, facetName);
 }
 
-},{"../check":4,"../facets/f_object":18,"../messenger":21,"./c_facet":6,"./c_facets/cf_registry":10,"mol-proto":26}],6:[function(require,module,exports){
+},{"../check":5,"../facets/f_object":20,"../messenger":24,"./c_facet":7,"./c_facets/cf_registry":11,"mol-proto":30}],7:[function(require,module,exports){
 'use strict';
 
 var Facet = require('../facets/f_class')
@@ -568,7 +624,7 @@ function initComponentFacet() {
 	// });
 }
 
-},{"../facets/f_class":17,"../messenger":21,"mol-proto":26}],7:[function(require,module,exports){
+},{"../facets/f_class":19,"../messenger":24,"mol-proto":30}],8:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -612,7 +668,7 @@ function addChildComponents(childComponents) {
 	_.extend(this.children, childComponents);
 }
 
-},{"../../binder":3,"../c_facet":6,"./cf_registry":10,"mol-proto":26}],8:[function(require,module,exports){
+},{"../../binder":4,"../c_facet":7,"./cf_registry":11,"mol-proto":30}],9:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -665,7 +721,7 @@ function initDataFacet() {
 	});
 }
 
-},{"../../messenger":21,"../c_facet":6,"../c_message_sources/component_data_source":11,"./cf_registry":10,"mol-proto":26}],9:[function(require,module,exports){
+},{"../../messenger":24,"../c_facet":7,"../c_message_sources/component_data_source":12,"./cf_registry":11,"mol-proto":30}],10:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -712,7 +768,7 @@ function initEventsFacet() {
 	});
 }
 
-},{"../../messenger":21,"../c_facet":6,"../c_message_sources/dom_events_source":13,"./cf_registry":10,"mol-proto":26}],10:[function(require,module,exports){
+},{"../../messenger":24,"../c_facet":7,"../c_message_sources/dom_events_source":14,"./cf_registry":11,"mol-proto":30}],11:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../registry')
@@ -727,7 +783,7 @@ module.exports = facetsRegistry;
 // TODO - refactor components registry test into a function
 // that tests a registry with a given foundation class
 // Make test for this registry based on this function
-},{"../../registry":25,"../c_facet":6}],11:[function(require,module,exports){
+},{"../../registry":28,"../c_facet":7}],12:[function(require,module,exports){
 'use strict';
 
 var DOMEventsSource = require('./dom_events_source')
@@ -820,7 +876,7 @@ function triggerDataMessage(message, data) {
 	// TODO - opposite translation + event trigger 
 }
 
-},{"../../check":4,"../../error":16,"../c_class":5,"./dom_events_source":13,"mol-proto":26}],12:[function(require,module,exports){
+},{"../../check":5,"../../error":18,"../c_class":6,"./dom_events_source":14,"mol-proto":30}],13:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -872,7 +928,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"mol-proto":26}],13:[function(require,module,exports){
+},{"mol-proto":30}],14:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../../messenger/message_source')
@@ -973,7 +1029,7 @@ function triggerDomEvent(eventType, properties) {
 
 	return notCancelled;
 }
-},{"../../check":4,"../../messenger/message_source":22,"../c_class":5,"./dom_events_constructors":12,"mol-proto":26}],14:[function(require,module,exports){
+},{"../../check":5,"../../messenger/message_source":25,"../c_class":6,"./dom_events_constructors":13,"mol-proto":30}],15:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../registry')
@@ -985,7 +1041,7 @@ componentsRegistry.add(Component);
 
 module.exports = componentsRegistry;
 
-},{"../registry":25,"./c_class":5}],15:[function(require,module,exports){
+},{"../registry":28,"./c_class":6}],16:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -998,21 +1054,43 @@ componentsRegistry.add(View);
 
 module.exports = View;
 
-},{"../c_class":5,"../c_registry":14}],16:[function(require,module,exports){
+},{"../c_class":6,"../c_registry":15}],17:[function(require,module,exports){
+'use strict';
+
+var _ = require('mol-proto');
+
+
+module.exports = config;
+
+function config(options) {
+	_.deepExtend(config, options);
+}
+
+config({
+	attrs: {
+		bind: 'ml-bind',
+		load: 'ml-load'
+	}
+});
+
+},{"mol-proto":30}],18:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
 
 
 // module exports error classes for all names defined in this array
-var errorClassNames = ['AbstractClass', 'Mixin', 'Messenger', 'ComponentDataSource']
-	, errorClasses = {};
+var errorClassNames = ['AbstractClass', 'Mixin', 'Messenger', 'ComponentDataSource', 'Attribute', 'Binder', 'Loader']
+	, error = {};
 
 errorClassNames.forEach(function(name) {
-	errorClasses[name] = createErrorClass(name + 'Error');
+	error[name] = createErrorClass(name + 'Error');
 });
 
-module.exports = errorClasses;
+error.toBeImplemented = toBeImplemented;
+
+
+module.exports = error;
 
 
 function createErrorClass(errorClassName) {
@@ -1026,7 +1104,12 @@ function createErrorClass(errorClassName) {
 	return ErrorClass;
 }
 
-},{"mol-proto":26}],17:[function(require,module,exports){
+
+function toBeImplemented() {
+	throw new error.AbstractClass('calling the method of an absctract class MessageSource');
+}
+
+},{"mol-proto":30}],19:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1043,7 +1126,7 @@ _.extendProto(Facet, {
 	init: function() {}
 });
 
-},{"mol-proto":26}],18:[function(require,module,exports){
+},{"mol-proto":30}],20:[function(require,module,exports){
 'use strict';
 
 var Facet = require('./f_class')
@@ -1136,7 +1219,81 @@ FacetedObject.createFacetedClass = function (name, facetsClasses) {
 };
 
 
-},{"../check":4,"./f_class":17,"mol-proto":26}],19:[function(require,module,exports){
+},{"../check":5,"./f_class":19,"mol-proto":30}],21:[function(require,module,exports){
+'use strict';
+
+var request = require('./request')
+	, logger = require('./logger')
+	, config = require('./config')
+	, LoadAttribute = require('./attribute/a_load')
+	, LoaderError = require('./error').Loader;
+
+
+module.exports = loader;
+
+
+function loader(rootEl /* optional */, callback) {
+	if (document.readyState == 'loading')
+		document.addEventListener('readystatechange', loadWhenReady);
+	else
+		loadWhenReady();
+
+	function loadWhenReady() {
+		document.removeEventListener('readystatechange', loadWhenReady);
+		_loader.call(null, rootEl, callback);
+	}
+}
+
+
+function _loader(rootEl /* optional */, callback) {
+	if (typeof rootEl == 'function') {
+		callback = rootEl;
+		rootEl = undefined;
+	}
+
+	rootEl = rootEl || document.body;
+	
+	var views = {};
+
+	var loadElements = rootEl.querySelectorAll('[' + config.attrs.load + ']');
+
+	var results = {}
+		, totalCount = loadElements.length
+		, loadedCount = 0;
+
+	Array.prototype.forEach.call(loadElements, function (el) {
+		loadView(el, function(err) {
+			results[el.id] = err || el;
+			loadedCount++;
+			if (loadedCount == totalCount)
+				callback(results);
+		});
+	});
+};
+
+
+function loadView(el, callback) {
+	if (el.children.length)
+		throw new LoaderError('can\'t load html into element that is not empty');
+
+	var attr = new LoadAttribute(el);
+
+	attr.parse().validate();
+
+	request.get(attr.loadUrl, function(err, html) {
+		if (err) {
+			err.message = err.message || 'can\'t load file ' + attr.loadUrl;
+			// logger.error(err.message);
+			callback(err);
+			return;
+		}
+
+		el.innerHTML = html;
+		callback(null);
+	});
+}
+
+},{"./attribute/a_load":2,"./config":17,"./error":18,"./logger":22,"./request":29}],22:[function(require,module,exports){
 'use strict';
 
 var Logger = require('./logger_class');
@@ -1145,7 +1302,7 @@ var logger = new Logger({ level: 3 });
 
 module.exports = logger;
 
-},{"./logger_class":20}],20:[function(require,module,exports){
+},{"./logger_class":23}],23:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1194,7 +1351,7 @@ function pad (str) {
 
 var Logger = function (opts) {
     opts = opts || {}
-    this.colors = false !== opts.colors;
+    this.colors = opts.colors;
     this.level = opts.level || 3;
     this.enabled = opts.enabled || true;
     this.logPrefix = opts.logPrefix || '';
@@ -1241,7 +1398,7 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"mol-proto":26}],21:[function(require,module,exports){
+},{"mol-proto":30}],24:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../mixin')
@@ -1486,12 +1643,12 @@ function _chooseSubscribersHash(message) {
 				: this._messageSubscribers;
 }
 
-},{"../check":4,"../error":16,"../mixin":24,"./message_source":22,"mol-proto":26}],22:[function(require,module,exports){
+},{"../check":5,"../error":18,"../mixin":27,"./message_source":25,"mol-proto":30}],25:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../mixin')
 	, logger = require('../logger')
-	, AbsctractClassError = require('../error').AbsctractClass
+	, toBeImplemented = require('../error').toBeImplemented
 	, _ = require('mol-proto');
 
 // an abstract class for dispatching external to internal events
@@ -1596,16 +1753,13 @@ function dispatchAllSourceMessages(sourceMessage, message, data) {
 	return true;
 }
 
-
-function toBeImplemented() {
-	throw new AbsctractClassError('calling the method of an absctract class MessageSource');
-}
-
-},{"../error":16,"../logger":19,"../mixin":24,"mol-proto":26}],23:[function(require,module,exports){
+},{"../error":18,"../logger":22,"../mixin":27,"mol-proto":30}],26:[function(require,module,exports){
 'use strict';
 
 var milo = {
-	binder: require('./binder')
+	loader: require('./loader'),
+	binder: require('./binder'),
+	config: require('./config')
 }
 
 
@@ -1625,7 +1779,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./binder":3,"./components/c_facets/Container":7,"./components/c_facets/Data":8,"./components/c_facets/Events":9,"./components/classes/View":15}],24:[function(require,module,exports){
+},{"./binder":4,"./components/c_facets/Container":8,"./components/c_facets/Data":9,"./components/c_facets/Events":10,"./components/classes/View":16,"./config":17,"./loader":21}],27:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -1676,7 +1830,7 @@ function _createProxyMethods(proxyMethods) {
 	_.eachKey(proxyMethods, _createProxyMethod, this);
 }
 
-},{"./check":4,"./error":16,"mol-proto":26}],25:[function(require,module,exports){
+},{"./check":5,"./error":18,"mol-proto":30}],28:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -1760,16 +1914,50 @@ function unregisterAllClasses() {
 	this.__registeredClasses = {};
 };
 
-},{"./check":4,"mol-proto":26}],26:[function(require,module,exports){
+},{"./check":5,"mol-proto":30}],29:[function(require,module,exports){
+'use strict';
+
+var _ = require('mol-proto');
+
+module.exports = request;
+
+
+// TODO add error statuses
+var okStatuses = ['200', '304'];
+
+
+function request(url, opts, callback) {
+	var req = new XMLHttpRequest();
+	req.open(opts.method, url, true); // what true means?
+	req.onreadystatechange = function () {
+		if (req.readyState == 4 && req.statusText.toUpperCase() == 'OK' )
+			callback(null, req.responseText, req);
+		// else
+		// 	callback(req.status, req.responseText, req);
+	};
+	req.send(null);
+}
+
+_.extend(request, {
+	get: get
+});
+
+
+function get(url, callback) {
+	request(url, { method: 'GET' }, callback);
+}
+
+},{"mol-proto":30}],30:[function(require,module,exports){
 'use strict';
 
 var _;
 var proto = _ = {
 	extendProto: extendProto,
-	extend: extend,
-	clone: clone,
 	createSubclass: createSubclass,
 	makeSubclass: makeSubclass,
+	extend: extend,
+	clone: clone,
+	deepExtend: deepExtend,
 	allKeys: Object.getOwnPropertyNames.bind(Object),
 	keyOf: keyOf,
 	allKeysOf: allKeysOf,
@@ -1825,6 +2013,30 @@ function extend(self, obj, onlyEnumerable) {
 	Object.defineProperties(self, propDescriptors);
 
 	return self;
+}
+
+
+function deepExtend(self, obj, onlyEnumerable) {
+	return _extendTree(self, obj, onlyEnumerable, []);
+}
+
+
+function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
+	if (objTraversed.indexOf(objNode) >= 0) return; // node already traversed
+	objTraversed.push(objNode);
+
+	_.eachKey(objNode, function(value, prop) {
+		var descriptor = Object.getOwnPropertyDescriptor(objNode, prop);
+		if (typeof value == 'object') {
+			if (selfNode.hasOwnProperty(prop) && typeof selfNode[prop] == 'object')
+				_extendTree(selfNode[prop], value, onlyEnumerable, objTraversed)
+			else
+				Object.defineProperty(selfNode, prop, descriptor);
+		} else
+			Object.defineProperty(selfNode, prop, descriptor);
+	}, this, onlyEnumerable);
+
+	return selfNode;
 }
 
 
@@ -1962,5 +2174,5 @@ function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
 }
 
-},{}]},{},[23])
+},{}]},{},[26])
 ;

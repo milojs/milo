@@ -16,7 +16,6 @@
     "url": "https://github.com/MailOnline/milo/issues"
   },
   "devDependencies": {
-    "mol-proto": "*",
     "async": "~0.2.9",
     "grunt": "~0.4.1",
     "grunt-mocha-test": "~0.7.0",
@@ -26,5 +25,8 @@
     "grunt-contrib-uglify": "~0.2.7",
     "grunt-contrib-concat": "~0.3.0",
     "grunt-contrib-watch": "~0.5.3"
+  },
+  "dependencies": {
+    "mol-proto": "*"
   }
 }
