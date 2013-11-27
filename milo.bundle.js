@@ -505,7 +505,7 @@ _.extendProto(ComponentDataSource, {
  	// class specific methods
  	// dom: implemented in DOMEventsSource
  	value: getDomElementData,
- 	handleEvent: handleEvent,
+ 	handleEvent: handleEvent,  // event dispatcher - as defined by Event DOM API
  	trigger: triggerDataMessage // redefines method of superclass DOMEventsSource
 });
 
@@ -514,13 +514,21 @@ module.exports = ComponentDataSource;
 
 function initComponentDataSource() {
 	DOMEventsSource.prototype.init.apply(this, arguments);
-	this._value = this.value();
+
+	this.value(); // stores current component data value in this._value
 }
 
 
 // TODO: should return value dependent on element tag
 function getDomElementData() { // value method
-	return this.component.el.value;
+	var newValue = this.component.el.value;
+
+	Object.defineProperty(this, '_value', {
+		configurable: true,
+		value: newValue
+	});
+
+	return newValue;
 }
 
 
@@ -549,13 +557,14 @@ function filterDataMessage(eventType, message, data) {
 };
 
 
+ // event dispatcher - as defined by Event DOM API
 function handleEvent(event) {
+	var oldValue = this._value;
+
 	this.dispatchMessage(event.type, {
-		oldValue: this._value,
+		oldValue: oldValue,
 		newValue: this.value()
 	});
-
-	this._value = this.value();
 }
 
 
