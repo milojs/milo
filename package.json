@@ -27,6 +27,6 @@
     "grunt-contrib-watch": "~0.5.3"
   },
   "dependencies": {
-    "mol-proto": "*"
+    "mol-proto": "~0.0.4"
   }
 }
