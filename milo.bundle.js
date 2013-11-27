@@ -69,7 +69,7 @@ function validateAttribute() {
 	return this;
 }
 
-},{"../check":4,"./error":2,"mol-proto":25}],2:[function(require,module,exports){
+},{"../check":4,"./error":2,"mol-proto":26}],2:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -82,7 +82,7 @@ _.makeSubclass(BindError, Error);
 
 module.exports = BindError;
 
-},{"mol-proto":25}],3:[function(require,module,exports){
+},{"mol-proto":26}],3:[function(require,module,exports){
 'use strict';
 
 var componentsRegistry = require('../components/c_registry')
@@ -171,7 +171,7 @@ binder.config = function(options) {
 	opts.extend(options);
 };
 
-},{"../check":4,"../components/c_registry":11,"./attribute":1,"./error":2,"mol-proto":25}],4:[function(require,module,exports){
+},{"../check":4,"../components/c_registry":12,"./attribute":1,"./error":2,"mol-proto":26}],4:[function(require,module,exports){
 'use strict';
 
 // XXX docs
@@ -479,7 +479,91 @@ function _prependPath(key, base) {
 };
 
 
-},{"mol-proto":25}],5:[function(require,module,exports){
+},{"mol-proto":26}],5:[function(require,module,exports){
+'use strict';
+
+var DOMEventsSource = require('./dom_events_source')
+	, Component = require('./components/c_class')
+	, ComponentDataSourceError = require('./error').ComponentDataSource
+	, _ = require('mol-proto')
+	, check = require('./check')
+	, Match = check.Match;
+
+
+// class to handle subscribtions to changes in DOM for UI (maybe also content editable) elements
+var ComponentDataSource = _.createSubclass(DOMEventsSource, 'ComponentDataSource', true);
+
+
+_.extendProto(ComponentDataSource, {
+	// implementing MessageSource interface
+	init: initComponentDataSource,
+	translateToSourceMessage: translateToDomEvent,
+ 	addSourceListener: addDomEventListener,
+ 	removeSourceListener: removeDomEventListener,
+ 	filterSourceMessage: filterDataMessage,
+
+ 	// class specific methods
+ 	// dom: implemented in DOMEventsSource
+ 	value: getDomElementData,
+ 	handleEvent: handleEvent,
+ 	trigger: triggerDataMessage // redefines method of superclass DOMEventsSource
+});
+
+module.exports = ComponentDataSource;
+
+
+function initComponentDataSource() {
+	DOMEventsSource.prototype.init.apply(this, arguments);
+	this._value = this.value();
+}
+
+
+// TODO: should return value dependent on element tag
+function getDomElementData() { // value method
+	return this.component.el.value;
+}
+
+
+// TODO: this function should return relevant DOM event dependent on element tag
+// Can also implement beforedatachanged event to allow preventing the change
+function translateToDomEvent(message) {
+	if (message == 'datachanged')
+		return 'input';
+	else
+		throw new ComponentDataSourceError('unknown component data event');
+}
+
+
+function addDomEventListener(eventType) {
+	this.dom().addEventListener(eventType, this, false); // no capturing
+}
+
+
+function removeDomEventListener(eventType) {
+	this.dom().removeEventListener(eventType, this, false); // no capturing
+}
+
+
+function filterDataMessage(eventType, message, data) {
+	return data.newValue != data.oldValue;
+};
+
+
+function handleEvent(event) {
+	this.dispatchMessage(event.type, {
+		oldValue: this._value,
+		newValue: this.value()
+	});
+
+	this._value = this.value();
+}
+
+
+function triggerDataMessage(message, data) {
+	// TODO - opposite translation + event trigger 
+}
+
+},{"./check":4,"./components/c_class":6,"./dom_events_source":15,"./error":16,"mol-proto":26}],6:[function(require,module,exports){
 'use strict';
 
 var FacetedObject = require('../facets/f_object')
@@ -543,7 +627,7 @@ function addFacet(facetNameOrClass, facetOpts, facetName) {
 	FacetedObject.prototype.addFacet.call(this, FacetClass, facetOpts, facetName);
 }
 
-},{"../check":4,"../facets/f_object":17,"../messenger":21,"./c_facet":6,"./c_facets/cf_registry":10,"mol-proto":25}],6:[function(require,module,exports){
+},{"../check":4,"../facets/f_object":18,"../messenger":22,"./c_facet":7,"./c_facets/cf_registry":11,"mol-proto":26}],7:[function(require,module,exports){
 'use strict';
 
 var Facet = require('../facets/f_class')
@@ -561,14 +645,14 @@ _.extendProto(ComponentFacet, {
 
 
 function initComponentFacet() {
-	var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
+	// var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
 
-	Object.defineProperties(this, {
-		_facetMessenger: { value: messenger },
-	});
+	// Object.defineProperties(this, {
+	// 	_facetMessenger: { value: messenger },
+	// });
 }
 
-},{"../facets/f_class":16,"../messenger":21,"mol-proto":25}],7:[function(require,module,exports){
+},{"../facets/f_class":17,"../messenger":22,"mol-proto":26}],8:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -586,6 +670,8 @@ _.extendProto(Container, {
 });
 
 facetsRegistry.add(Container);
+
+module.exports = Container;
 
 
 function initContainer() {
@@ -610,10 +696,60 @@ function addChildComponents(childComponents) {
 	_.extend(this.children, childComponents);
 }
 
-},{"../../binder":3,"../c_facet":6,"./cf_registry":10,"mol-proto":25}],8:[function(require,module,exports){
+},{"../../binder":3,"../c_facet":7,"./cf_registry":11,"mol-proto":26}],9:[function(require,module,exports){
 'use strict';
 
-},{}],9:[function(require,module,exports){
+var ComponentFacet = require('../c_facet')
+	, facetsRegistry = require('./cf_registry')
+
+	, Messenger = require('../../messenger')
+	, ComponentDataSource = require('../../component_data_source')
+
+	, _ = require('mol-proto');
+
+
+// data model connection facet
+var Data = _.createSubclass(ComponentFacet, 'Data');
+
+_.extendProto(Data, {
+	init: initDataFacet,
+
+	// _reattach: _reattachEventsOnElementChange
+});
+
+facetsRegistry.add(Data);
+
+module.exports = Data;
+
+
+function initDataFacet() {
+	ComponentFacet.prototype.init.apply(this, arguments);
+
+	var proxyCompDataSourceMethods = {
+		value: 'value',
+		trigger: 'trigger'
+	};
+
+	// instead of this.owner should pass model? Where it is set?
+	var compDataSource = new ComponentDataSource(this, proxyCompDataSourceMethods, this.owner);
+
+	var proxyMessengerMethods = {
+		on: 'onMessage',
+		off: 'offMessage',
+		onMessages: 'onMessages',
+		offMessages: 'offMessages',
+		getSubscribers: 'getSubscribers'
+	};
+
+	var dataMessenger = new Messenger(this, proxyMessengerMethods, compDataSource);
+
+	Object.defineProperties(this, {
+		_dataMessenger: { value: dataMessenger },
+		_compDataSource: { value: compDataSource }
+	});
+}
+
+},{"../../component_data_source":5,"../../messenger":22,"../c_facet":7,"./cf_registry":11,"mol-proto":26}],10:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -635,6 +771,8 @@ _.extendProto(Events, {
 });
 
 facetsRegistry.add(Events);
+
+module.exports = Events;
 
 
 function initEventsFacet() {
@@ -658,7 +796,7 @@ function initEventsFacet() {
 	});
 }
 
-},{"../../dom_events_source":14,"../../messenger":21,"../c_facet":6,"./cf_registry":10,"mol-proto":25}],10:[function(require,module,exports){
+},{"../../dom_events_source":15,"../../messenger":22,"../c_facet":7,"./cf_registry":11,"mol-proto":26}],11:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../registry')
@@ -673,7 +811,7 @@ module.exports = facetsRegistry;
 // TODO - refactor components registry test into a function
 // that tests a registry with a given foundation class
 // Make test for this registry based on this function
-},{"../../registry":24,"../c_facet":6}],11:[function(require,module,exports){
+},{"../../registry":25,"../c_facet":7}],12:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../registry')
@@ -685,7 +823,7 @@ componentsRegistry.add(Component);
 
 module.exports = componentsRegistry;
 
-},{"../registry":24,"./c_class":5}],12:[function(require,module,exports){
+},{"../registry":25,"./c_class":6}],13:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -698,7 +836,7 @@ componentsRegistry.add(View);
 
 module.exports = View;
 
-},{"../c_class":5,"../c_registry":11}],13:[function(require,module,exports){
+},{"../c_class":6,"../c_registry":12}],14:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -750,7 +888,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"mol-proto":25}],14:[function(require,module,exports){
+},{"mol-proto":26}],15:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('./message_source')
@@ -830,6 +968,7 @@ function handleEvent(event) {
 }
 
 
+// TODO make work with messages (with _capture)
 function triggerDomEvent(eventType, properties) {
 	check(eventType, String);
 	check(properties, Match.Optional(Object));
@@ -849,14 +988,14 @@ function triggerDomEvent(eventType, properties) {
 
 	return notCancelled;
 }
-},{"./check":4,"./components/c_class":5,"./dom_events_constructors":13,"./message_source":20,"mol-proto":25}],15:[function(require,module,exports){
+},{"./check":4,"./components/c_class":6,"./dom_events_constructors":14,"./message_source":21,"mol-proto":26}],16:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
 
 
 // module exports error classes for all names defined in this array
-var errorClassNames = ['AbstractClass', 'Mixin', 'Messenger']
+var errorClassNames = ['AbstractClass', 'Mixin', 'Messenger', 'ComponentDataSource']
 	, errorClasses = {};
 
 errorClassNames.forEach(function(name) {
@@ -877,7 +1016,7 @@ function createErrorClass(errorClassName) {
 	return ErrorClass;
 }
 
-},{"mol-proto":25}],16:[function(require,module,exports){
+},{"mol-proto":26}],17:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -894,7 +1033,7 @@ _.extendProto(Facet, {
 	init: function() {}
 });
 
-},{"mol-proto":25}],17:[function(require,module,exports){
+},{"mol-proto":26}],18:[function(require,module,exports){
 'use strict';
 
 var Facet = require('./f_class')
@@ -987,7 +1126,7 @@ FacetedObject.createFacetedClass = function (name, facetsClasses) {
 };
 
 
-},{"../check":4,"./f_class":16,"mol-proto":25}],18:[function(require,module,exports){
+},{"../check":4,"./f_class":17,"mol-proto":26}],19:[function(require,module,exports){
 'use strict';
 
 var Logger = require('./logger_class');
@@ -996,7 +1135,7 @@ var logger = new Logger({ level: 3 });
 
 module.exports = logger;
 
-},{"./logger_class":19}],19:[function(require,module,exports){
+},{"./logger_class":20}],20:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1092,7 +1231,7 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"mol-proto":25}],20:[function(require,module,exports){
+},{"mol-proto":26}],21:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('./mixin')
@@ -1119,8 +1258,11 @@ _.extendProto(MessageSource, {
  	// dispatches source message
  	dispatchMessage: dispatchSourceMessage,
 
+	// filters source message based on the data of the message - should be implemented in subclass
+	filterSourceMessage: dispatchAllSourceMessages,
+
  	// ***
- 	// Methods below should be implemented in subclass
+ 	// Methods below must be implemented in subclass
  	
 	// converts internal message type to external message type - should be implemented in subclass
 	translateToSourceMessage: toBeImplemented,
@@ -1130,9 +1272,6 @@ _.extendProto(MessageSource, {
 
  	// removes listener from external message - should be implemented by subclass
  	removeSourceListener: toBeImplemented,
-
-	// filters source message based on the data of the message - should be implemented in subclass
-	filterSourceMessage: toBeImplemented,
 });
 
 
@@ -1188,7 +1327,8 @@ function dispatchSourceMessage(sourceMessage, data) {
 
 	if (internalMsgs && internalMsgs.length)
 		internalMsgs.forEach(function(message) {
-			if (this.filterSourceMessage(sourceMessage, message, data))
+			if (this.filterSourceMessage
+					&& this.filterSourceMessage(sourceMessage, message, data))
 				this.messenger.postMessage(message, data);
 		}, this);
 	else
@@ -1196,11 +1336,17 @@ function dispatchSourceMessage(sourceMessage, data) {
 }
 
 
+// can be overridden in subclass to implement filtering based on message data
+function dispatchAllSourceMessages(sourceMessage, message, data) {
+	return true;
+}
+
+
 function toBeImplemented() {
 	throw new AbsctractClassError('calling the method of an absctract class MessageSource');
 }
 
-},{"./error":15,"./logger":18,"./mixin":23,"mol-proto":25}],21:[function(require,module,exports){
+},{"./error":16,"./logger":19,"./mixin":24,"mol-proto":26}],22:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('./mixin')
@@ -1445,7 +1591,7 @@ function _chooseSubscribersHash(message) {
 				: this._messageSubscribers;
 }
 
-},{"./check":4,"./error":15,"./message_source":20,"./mixin":23,"mol-proto":25}],22:[function(require,module,exports){
+},{"./check":4,"./error":16,"./message_source":21,"./mixin":24,"mol-proto":26}],23:[function(require,module,exports){
 'use strict';
 
 var milo = {
@@ -1469,7 +1615,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./binder":3,"./components/c_facets/Container":7,"./components/c_facets/Data":8,"./components/c_facets/Events":9,"./components/classes/View":12}],23:[function(require,module,exports){
+},{"./binder":3,"./components/c_facets/Container":8,"./components/c_facets/Data":9,"./components/c_facets/Events":10,"./components/classes/View":13}],24:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -1520,7 +1666,7 @@ function _createProxyMethods(proxyMethods) {
 	_.eachKey(proxyMethods, _createProxyMethod, this);
 }
 
-},{"./check":4,"./error":15,"mol-proto":25}],24:[function(require,module,exports){
+},{"./check":4,"./error":16,"mol-proto":26}],25:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -1604,7 +1750,7 @@ function unregisterAllClasses() {
 	this.__registeredClasses = {};
 };
 
-},{"./check":4,"mol-proto":25}],25:[function(require,module,exports){
+},{"./check":4,"mol-proto":26}],26:[function(require,module,exports){
 'use strict';
 
 var _;
@@ -1807,5 +1953,5 @@ function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
 }
 
-},{}]},{},[22])
+},{}]},{},[23])
 ;
