@@ -2,7 +2,7 @@
   "name": "mol-milo",
   "version": "0.0.4",
   "description": "A minimalist browser framework that binds HTML elements to JS components",
-  "main": "milo.bundle.js",
+  "main": "lib/milo.js",
   "scripts": {
     "test": "grunt test"
   },
