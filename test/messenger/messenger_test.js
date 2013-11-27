@@ -2,7 +2,7 @@
 
 var Messenger = require('../../lib/messenger')
 	, _ = require('mol-proto')
-	, check = require('../../lib/check')
+	, check = require('../../lib/util/check')
 	, Match = check.Match
 	, assert = require('assert');
 

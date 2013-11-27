@@ -2,7 +2,7 @@
 
 var _ = require('mol-proto')
 	, assert = require('assert')
-	, check = require('../lib/check')
+	, check = require('../lib/util/check')
 	, Match = check.Match;
 
 describe('check module', function() {

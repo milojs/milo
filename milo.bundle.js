@@ -1,11 +1,146 @@
 ;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
+var _ = require('mol-proto')
+	, check = require('../util/check')
+	, Match = check.Match
+	, MixinError = require('../util/error').Mixin;
+
+
+module.exports = Mixin;
+
+// an abstract class for mixin pattern - adding proxy methods to host objects
+function Mixin(hostObject, proxyMethods /*, other args - passed to init method */) {
+	// TODO - moce checks from Messenger here
+	check(hostObject, Object);
+	check(proxyMethods, Match.ObjectHash(String));
+
+	Object.defineProperty(this, '_hostObject', { value: hostObject });
+	if (proxyMethods)
+		this._createProxyMethods(proxyMethods);
+
+	// calling init if it is defined in the class
+	if (this.init)
+		this.init.apply(this, arguments);
+}
+
+_.extendProto(Mixin, {
+	_createProxyMethod: _createProxyMethod,
+	_createProxyMethods: _createProxyMethods
+});
+
+
+function _createProxyMethod(mixinMethodName, proxyMethodName) {
+	if (this._hostObject[proxyMethodName])
+		throw new MixinError('method ' + proxyMethodName +
+								 ' already defined in host object');
+
+	check(this[mixinMethodName], Function);
+
+	var boundMethod = this[mixinMethodName].bind(this);
+
+	Object.defineProperty(this._hostObject, proxyMethodName,
+		{ value: boundMethod });
+}
+
+
+function _createProxyMethods(proxyMethods) {
+	// creating and binding proxy methods on the host object
+	_.eachKey(proxyMethods, _createProxyMethod, this);
+}
+
+},{"../util/check":25,"../util/error":26,"mol-proto":30}],2:[function(require,module,exports){
+'use strict';
+
+var _ = require('mol-proto')
+	, check = require('../util/check')
+	, Match = check.Match;
+
+module.exports = ClassRegistry;
+
+function ClassRegistry (FoundationClass) {
+	if (FoundationClass)
+		this.setClass(FoundationClass);
+
+	// Object.defineProperty(this, '__registeredClasses', {
+	// 		enumerable: false,
+	// 		writable: true,
+	// 		configurable: true,
+	// 		value: {}
+	// });
+
+	this.__registeredClasses = {};
+}
+
+_.extendProto(ClassRegistry, {
+	add: registerClass,
+	get: getClass,
+	remove: unregisterClass,
+	clean: unregisterAllClasses,
+	setClass: setFoundationClass
+});
+
+
+function setFoundationClass(FoundationClass) {
+	check(FoundationClass, Function);
+	Object.defineProperty(this, 'FoundationClass', {
+		enumerable: true,
+		value: FoundationClass
+	});
+}
+
+function registerClass(aClass, name) {
+	name = name || aClass.name;
+
+	check(name, String, 'class name must be string');
+	check(name, Match.Where(function() {
+		return typeof name == 'string' && name != '';
+	}), 'class name must be string');
+	if (this.FoundationClass) {
+		if (aClass != this.FoundationClass)
+			check(aClass, Match.Subclass(this.FoundationClass), 'class must be a sub(class) of a foundation class');
+	} else
+		throw new TypeError('foundation class must be set before adding classes to registry');
+
+	if (this.__registeredClasses[name])
+		throw new TypeError('is already registered');
+
+	this.__registeredClasses[name] = aClass;
+};
+
+
+function getClass(name) {
+	check(name, String, 'class name must be string');
+	return this.__registeredClasses[name];
+};
+
+
+function unregisterClass(nameOrClass) {
+	check(nameOrClass, Match.OneOf(String, Function), 'class or name must be supplied');
+
+	var name = typeof nameOrClass == 'string'
+						? nameOrClass
+						: nameOrClass.name;
+						
+	if (! this.__registeredClasses[name])
+		throw new TypeError('class is not registered');
+
+	delete this.__registeredClasses[name];
+};
+
+
+function unregisterAllClasses() {
+	this.__registeredClasses = {};
+};
+
+},{"../util/check":25,"mol-proto":30}],3:[function(require,module,exports){
+'use strict';
+
 var Attribute = require('./index')
-	, AttributeError = require('../error').Attribute
+	, AttributeError = require('../util/error').Attribute
 	, config = require('../config')
 	, _ = require('mol-proto')
-	, check = require('../check')
+	, check = require('../util/check')
 	, Match = check.Match;
 
 
@@ -67,11 +202,11 @@ function validateAttribute() {
 	return this;
 }
 
-},{"../check":5,"../config":17,"../error":18,"./index":3,"mol-proto":30}],2:[function(require,module,exports){
+},{"../config":18,"../util/check":25,"../util/error":26,"./index":5,"mol-proto":30}],4:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./index')
-	, AttributeError = require('../error').Attribute
+	, AttributeError = require('../util/error').Attribute
 	, config = require('../config')
 	, _ = require('mol-proto');
 
@@ -108,13 +243,13 @@ function validateAttribute() {
 
 	return this;
 }
-},{"../config":17,"../error":18,"./index":3,"mol-proto":30}],3:[function(require,module,exports){
+},{"../config":18,"../util/error":26,"./index":5,"mol-proto":30}],5:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
-	, check = require('../check')
+	, check = require('../util/check')
 	, Match = check.Match
-	, toBeImplemented = require('../error').toBeImplemented;
+	, toBeImplemented = require('../util/error').toBeImplemented;
 
 
 // an abstract attribute class for attribute parsing and validation
@@ -146,15 +281,15 @@ function setAttributeValue(value) {
 	this.el.setAttribute(this.name, value);
 }
 
-},{"../check":5,"../error":18,"mol-proto":30}],4:[function(require,module,exports){
+},{"../util/check":25,"../util/error":26,"mol-proto":30}],6:[function(require,module,exports){
 'use strict';
 
 var componentsRegistry = require('./components/c_registry')
 	, Component = componentsRegistry.get('Component')
 	, BindAttribute = require('./attribute/a_bind')
-	, BinderError = require('./error').Binder
+	, BinderError = require('./util/error').Binder
 	, _ = require('mol-proto')
-	, check = require('./check')
+	, check = require('./util/check')
 	, Match =  check.Match;
 
 
@@ -227,7 +362,1110 @@ function binder(scopeEl) {
 }
 
 
-},{"./attribute/a_bind":1,"./check":5,"./components/c_registry":15,"./error":18,"mol-proto":30}],5:[function(require,module,exports){
+},{"./attribute/a_bind":3,"./components/c_registry":16,"./util/check":25,"./util/error":26,"mol-proto":30}],7:[function(require,module,exports){
+'use strict';
+
+var FacetedObject = require('../facets/f_object')
+	, facetsRegistry = require('./c_facets/cf_registry')
+	, ComponentFacet = require('./c_facet')
+	, Messenger = require('../messenger')
+	, _ = require('mol-proto')
+	, check = require('../util/check')
+	, Match = check.Match;
+
+var Component = _.createSubclass(FacetedObject, 'Component', true);
+
+module.exports = Component;
+
+
+Component.createComponentClass = function(name, facets) {
+	var facetsClasses = {};
+
+	facets.forEach(function(fct) {
+		var fctName = _.firstLowerCase(fct);
+		var fctClassName = _.firstUpperCase(fct);
+		facetsClasses[fctName] = facetsRegistry.get(fctClassName)
+	});
+
+	return FacetedObject.createFacetedClass.call(this, name, facetsClasses);
+};
+
+delete Component.createFacetedClass;
+
+
+_.extendProto(Component, {
+	init: initComponent,
+	addFacet: addFacet
+});
+
+
+function initComponent(facetsOptions, element) {
+	this.el = element;
+
+	var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
+
+	Object.defineProperties(this, {
+		_messenger: { value: messenger },
+	});	
+}
+
+
+function addFacet(facetNameOrClass, facetOpts, facetName) {
+	check(facetNameOrClass, Match.OneOf(String, Match.Subclass(ComponentFacet)));
+	check(facetOpts, Match.Optional(Object));
+	check(facetName, Match.Optional(String));
+
+	if (typeof facetNameOrClass == 'string') {
+		var facetClassName = _.firstUpperCase(facetNameOrClass);
+		var FacetClass = facetsRegistry.get(facetClassName);
+	} else 
+		FacetClass = facetNameOrClass;
+
+	facetName = facetName || _.firstLowerCase(FacetClass.name);
+
+	FacetedObject.prototype.addFacet.call(this, FacetClass, facetOpts, facetName);
+}
+
+},{"../facets/f_object":20,"../messenger":22,"../util/check":25,"./c_facet":8,"./c_facets/cf_registry":12,"mol-proto":30}],8:[function(require,module,exports){
+'use strict';
+
+var Facet = require('../facets/f_class')
+	, Messenger = require('../messenger')
+	, _ = require('mol-proto');
+
+var ComponentFacet = _.createSubclass(Facet, 'ComponentFacet');
+
+module.exports = ComponentFacet;
+
+
+_.extendProto(ComponentFacet, {
+	init: initComponentFacet,
+});
+
+
+function initComponentFacet() {
+	// var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
+
+	// Object.defineProperties(this, {
+	// 	_facetMessenger: { value: messenger },
+	// });
+}
+
+},{"../facets/f_class":19,"../messenger":22,"mol-proto":30}],9:[function(require,module,exports){
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+	, binder = require('../../binder')
+	, _ = require('mol-proto')
+	, facetsRegistry = require('./cf_registry');
+
+// container facet
+var Container = _.createSubclass(ComponentFacet, 'Container');
+
+_.extendProto(Container, {
+	init: initContainer,
+	_bind: _bindComponents,
+	add: addChildComponents
+});
+
+facetsRegistry.add(Container);
+
+module.exports = Container;
+
+
+function initContainer() {
+	ComponentFacet.prototype.init.apply(this, arguments);
+	this.children = {};
+}
+
+
+function _bindComponents() {
+	// TODO
+	// this function should re-bind rather than bind all internal elements
+	this.children = binder(this.owner.el);
+}
+
+
+function addChildComponents(childComponents) {
+	// TODO
+	// this function should intelligently re-bind existing components to
+	// new elements (if they changed) and re-bind previously bound events to the same
+	// event handlers
+	// or maybe not, if this function is only used by binder to add new elements...
+	_.extend(this.children, childComponents);
+}
+
+},{"../../binder":6,"../c_facet":8,"./cf_registry":12,"mol-proto":30}],10:[function(require,module,exports){
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+	, facetsRegistry = require('./cf_registry')
+
+	, Messenger = require('../../messenger')
+	, ComponentDataSource = require('../c_message_sources/component_data_source')
+
+	, _ = require('mol-proto');
+
+
+// data model connection facet
+var Data = _.createSubclass(ComponentFacet, 'Data');
+
+_.extendProto(Data, {
+	init: initDataFacet,
+
+	// _reattach: _reattachEventsOnElementChange
+});
+
+facetsRegistry.add(Data);
+
+module.exports = Data;
+
+
+function initDataFacet() {
+	ComponentFacet.prototype.init.apply(this, arguments);
+
+	var proxyCompDataSourceMethods = {
+		value: 'value',
+		trigger: 'trigger'
+	};
+
+	// instead of this.owner should pass model? Where it is set?
+	var compDataSource = new ComponentDataSource(this, proxyCompDataSourceMethods, this.owner);
+
+	var proxyMessengerMethods = {
+		on: 'onMessage',
+		off: 'offMessage',
+		onMessages: 'onMessages',
+		offMessages: 'offMessages',
+		getSubscribers: 'getSubscribers'
+	};
+
+	var dataMessenger = new Messenger(this, proxyMessengerMethods, compDataSource);
+
+	Object.defineProperties(this, {
+		_dataMessenger: { value: dataMessenger },
+		_compDataSource: { value: compDataSource }
+	});
+}
+
+},{"../../messenger":22,"../c_facet":8,"../c_message_sources/component_data_source":13,"./cf_registry":12,"mol-proto":30}],11:[function(require,module,exports){
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+	, facetsRegistry = require('./cf_registry')
+
+	, Messenger = require('../../messenger')
+	, DOMEventsSource = require('../c_message_sources/dom_events_source')
+
+	, _ = require('mol-proto');
+
+
+// events facet
+var Events = _.createSubclass(ComponentFacet, 'Events');
+
+_.extendProto(Events, {
+	init: initEventsFacet,
+
+	// _reattach: _reattachEventsOnElementChange
+});
+
+facetsRegistry.add(Events);
+
+module.exports = Events;
+
+
+function initEventsFacet() {
+	ComponentFacet.prototype.init.apply(this, arguments);
+
+	var domEventsSource = new DOMEventsSource(this, { trigger: 'trigger' }, this.owner);
+
+	var proxyMessengerMethods = {
+		on: 'onMessage',
+		off: 'offMessage',
+		onEvents: 'onMessages',
+		offEvents: 'offMessages',
+		getListeners: 'getSubscribers'
+	};
+
+	var messenger = new Messenger(this, proxyMessengerMethods, domEventsSource);
+
+	Object.defineProperties(this, {
+		_eventsMessenger: { value: messenger },
+		_domEventsSource: { value: domEventsSource }
+	});
+}
+
+},{"../../messenger":22,"../c_facet":8,"../c_message_sources/dom_events_source":15,"./cf_registry":12,"mol-proto":30}],12:[function(require,module,exports){
+'use strict';
+
+var ClassRegistry = require('../../abstract/registry')
+	, ComponentFacet = require('../c_facet');
+
+var facetsRegistry = new ClassRegistry(ComponentFacet);
+
+facetsRegistry.add(ComponentFacet);
+
+module.exports = facetsRegistry;
+
+// TODO - refactor components registry test into a function
+// that tests a registry with a given foundation class
+// Make test for this registry based on this function
+},{"../../abstract/registry":2,"../c_facet":8}],13:[function(require,module,exports){
+'use strict';
+
+var DOMEventsSource = require('./dom_events_source')
+	, Component = require('../c_class')
+	, ComponentDataSourceError = require('../../util/error').ComponentDataSource
+	, _ = require('mol-proto')
+	, check = require('../../util/check')
+	, Match = check.Match;
+
+
+// class to handle subscribtions to changes in DOM for UI (maybe also content editable) elements
+var ComponentDataSource = _.createSubclass(DOMEventsSource, 'ComponentDataSource', true);
+
+
+_.extendProto(ComponentDataSource, {
+	// implementing MessageSource interface
+	init: initComponentDataSource,
+	translateToSourceMessage: translateToDomEvent,
+ 	addSourceListener: addDomEventListener,
+ 	removeSourceListener: removeDomEventListener,
+ 	filterSourceMessage: filterDataMessage,
+
+ 	// class specific methods
+ 	// dom: implemented in DOMEventsSource
+ 	value: getDomElementDataValue,
+ 	handleEvent: handleEvent,  // event dispatcher - as defined by Event DOM API
+ 	trigger: triggerDataMessage // redefines method of superclass DOMEventsSource
+});
+
+module.exports = ComponentDataSource;
+
+
+function initComponentDataSource() {
+	DOMEventsSource.prototype.init.apply(this, arguments);
+
+	this.value(); // stores current component data value in this._value
+}
+
+
+// TODO: should return value dependent on element tag
+function getDomElementDataValue() { // value method
+	var newValue = this.component.el.value;
+
+	Object.defineProperty(this, '_value', {
+		configurable: true,
+		value: newValue
+	});
+
+	return newValue;
+}
+
+
+// TODO: this function should return relevant DOM event dependent on element tag
+// Can also implement beforedatachanged event to allow preventing the change
+function translateToDomEvent(message) {
+	if (message == 'datachanged')
+		return 'input';
+	else
+		throw new ComponentDataSourceError('unknown component data event');
+}
+
+
+function addDomEventListener(eventType) {
+	this.dom().addEventListener(eventType, this, false); // no capturing
+}
+
+
+function removeDomEventListener(eventType) {
+	this.dom().removeEventListener(eventType, this, false); // no capturing
+}
+
+
+function filterDataMessage(eventType, message, data) {
+	return data.newValue != data.oldValue;
+};
+
+
+ // event dispatcher - as defined by Event DOM API
+function handleEvent(event) {
+	var oldValue = this._value;
+
+	this.dispatchMessage(event.type, {
+		oldValue: oldValue,
+		newValue: this.value()
+	});
+}
+
+
+function triggerDataMessage(message, data) {
+	// TODO - opposite translation + event trigger 
+}
+
+},{"../../util/check":25,"../../util/error":26,"../c_class":7,"./dom_events_source":15,"mol-proto":30}],14:[function(require,module,exports){
+'use strict';
+
+var _ = require('mol-proto');
+
+
+// https://developer.mozilla.org/en-US/docs/Web/Reference/Events
+
+var eventTypes = {
+	ClipboardEvent: ['copy', 'cut', 'paste', 'beforecopy', 'beforecut', 'beforepaste'],
+	Event: ['input'],
+	FocusEvent: ['focus', 'blur', 'focusin', 'focusout'],
+	KeyboardEvent: ['keydown', 'keypress',  'keyup'],
+	MouseEvent: ['click', 'contextmenu', 'dblclick', 'mousedown', 'mouseup',
+				 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover',
+				 'show' /* context menu */],
+	TouchEvent: ['touchstart', 'touchend', 'touchmove', 'touchenter', 'touchleave', 'touchcancel'],
+};
+
+
+// mock window and event constructors for testing
+if (typeof window != 'undefined')
+	var global = window;
+else {
+	global = {};
+	_.eachKey(eventTypes, function(eTypes, eventConstructorName) {
+		var eventsConstructor;
+		eval(
+			'eventsConstructor = function ' + eventConstructorName + '(type, properties) { \
+				this.type = type; \
+				_.extend(this, properties); \
+			};'
+		);
+		global[eventConstructorName] = eventsConstructor;
+	});
+}
+
+
+var domEventsConstructors = {};
+
+_.eachKey(eventTypes, function(eTypes, eventConstructorName) {
+	eTypes.forEach(function(type) {
+		if (Object.hasOwnProperty(domEventsConstructors, type))
+			throw new Error('duplicate event type ' + type);
+
+		domEventsConstructors[type] = global[eventConstructorName];
+	});
+});
+
+
+module.exports = domEventsConstructors;
+
+},{"mol-proto":30}],15:[function(require,module,exports){
+'use strict';
+
+var MessageSource = require('../../messenger/message_source')
+	, Component = require('../c_class')
+	, domEventsConstructors = require('./dom_events_constructors') // TODO merge with DOMEventSource ??
+	, _ = require('mol-proto')
+	, check = require('../../util/check')
+	, Match = check.Match;
+
+var DOMEventsSource = _.createSubclass(MessageSource, 'DOMMessageSource', true);
+
+
+_.extendProto(DOMEventsSource, {
+	// implementing MessageSource interface
+	init: initDomEventsSource,
+	translateToSourceMessage: translateToDomEvent,
+ 	addSourceListener: addDomEventListener,
+ 	removeSourceListener: removeDomEventListener,
+ 	filterSourceMessage: filterCapturedDomEvent,
+
+ 	// class specific methods
+ 	dom: getDomElement,
+ 	handleEvent: handleEvent,  // event dispatcher - as defined by Event DOM API
+ 	trigger: triggerDomEvent
+});
+
+module.exports = DOMEventsSource;
+
+
+var useCapturePattern = /__capture$/;
+
+
+function initDomEventsSource(hostObject, proxyMethods, component) {
+	check(component, Component);
+	MessageSource.prototype.init.apply(this, arguments);
+
+	this.component = component;
+
+	// this.messenger is set by Messenger class
+}
+
+
+function getDomElement() {
+	return this.component.el;
+}
+
+
+function translateToDomEvent(message) {
+	if (useCapturePattern.test(message))
+		message = message.replace(useCapturePattern, '');
+	return message;
+}
+
+
+function addDomEventListener(eventType) {
+	this.dom().addEventListener(eventType, this, true);
+}
+
+
+function removeDomEventListener(eventType) {
+	this.dom().removeEventListener(eventType, this, true);
+}
+
+
+function filterCapturedDomEvent(eventType, message, event) {
+	var isCapturePhase;
+	if (typeof window != 'undefined')
+		isCapturePhase = event.eventPhase == window.Event.CAPTURING_PHASE;
+
+	return (! isCapturePhase || (isCapturePhase && useCapturePattern.test(message)));
+}
+
+
+// event dispatcher - as defined by Event DOM API
+function handleEvent(event) {
+	this.dispatchMessage(event.type, event);
+	return true;
+}
+
+
+// TODO make work with messages (with _capture)
+function triggerDomEvent(eventType, properties) {
+	check(eventType, String);
+	check(properties, Match.Optional(Object));
+
+	var EventConstructor = domEventsConstructors[eventType];
+
+	if (typeof eventConstructor != 'function')
+		throw new Error('unsupported event type');
+
+	// check if it is correct
+	if (typeof properties != 'undefined')
+		properties.type = eventType;
+
+	var domEvent = EventConstructor(eventType, properties);
+
+	var notCancelled = this.dom().dispatchEvent(domEvent);
+
+	return notCancelled;
+}
+},{"../../messenger/message_source":23,"../../util/check":25,"../c_class":7,"./dom_events_constructors":14,"mol-proto":30}],16:[function(require,module,exports){
+'use strict';
+
+var ClassRegistry = require('../abstract/registry')
+	, Component = require('./c_class');
+
+var componentsRegistry = new ClassRegistry(Component);
+
+componentsRegistry.add(Component);
+
+module.exports = componentsRegistry;
+
+},{"../abstract/registry":2,"./c_class":7}],17:[function(require,module,exports){
+'use strict';
+
+var Component = require('../c_class')
+	, componentsRegistry = require('../c_registry');
+
+
+var View = Component.createComponentClass('View', ['container']);
+
+componentsRegistry.add(View);
+
+module.exports = View;
+
+},{"../c_class":7,"../c_registry":16}],18:[function(require,module,exports){
+'use strict';
+
+var _ = require('mol-proto');
+
+
+module.exports = config;
+
+function config(options) {
+	_.deepExtend(config, options);
+}
+
+config({
+	attrs: {
+		bind: 'ml-bind',
+		load: 'ml-load'
+	}
+});
+
+},{"mol-proto":30}],19:[function(require,module,exports){
+'use strict';
+
+var _ = require('mol-proto');
+
+module.exports = Facet;
+
+function Facet(owner, options) {
+	this.owner = owner;
+	this.options = options || {};
+	this.init.apply(this, arguments);
+}
+
+_.extendProto(Facet, {
+	init: function() {}
+});
+
+},{"mol-proto":30}],20:[function(require,module,exports){
+'use strict';
+
+var Facet = require('./f_class')
+	, _ = require('mol-proto')
+	, check = require('../util/check')
+	, Match = check.Match;
+
+module.exports = FacetedObject;
+
+// abstract class for faceted object
+function FacetedObject(facetsOptions /*, other args - passed to init method */) {
+	// TODO instantiate facets if configuration isn't passed
+	// write a test to check it
+	facetsOptions = facetsOptions ? _.clone(facetsOptions) : {};
+
+	var thisClass = this.constructor
+		, facets = {};
+
+	if (this.constructor == FacetedObject)		
+		throw new Error('FacetedObject is an abstract class, can\'t be instantiated');
+	//if (! thisClass.prototype.facets)
+	//	throw new Error('No facets defined in class ' + this.constructor.name);
+	
+	// _.eachKey(facetsOptions, instantiateFacet, this, true);
+
+	if (this.facets)
+		_.eachKey(this.facets, instantiateFacet, this, true);
+
+	var unusedFacetsNames = Object.keys(facetsOptions);
+	if (unusedFacetsNames.length)
+		throw new Error('Configuration for unknown facet(s) passed: ' + unusedFacetsNames.join(', '));
+
+	Object.defineProperties(this, facets);
+
+	// calling init if it is defined in the class
+	if (this.init)
+		this.init.apply(this, arguments);
+
+	function instantiateFacet(/* facetOpts */ FacetClass, fct) {
+		// var FacetClass = this.facets[fct];
+		var facetOpts = facetsOptions[fct];
+		delete facetsOptions[fct];
+
+		facets[fct] = {
+			enumerable: false,
+			value: new FacetClass(this, facetOpts)
+		};
+	}
+}
+
+
+_.extendProto(FacetedObject, {
+	addFacet: addFacet
+});
+
+
+function addFacet(FacetClass, facetOpts, facetName) {
+	check(FacetClass, Function);
+	check(facetName, Match.Optional(String));
+
+	facetName = _.firstLowerCase(facetName || FacetClass.name);
+
+	var protoFacets = this.constructor.prototype.facets;
+
+	if (protoFacets && protoFacets[facetName])
+		throw new Error('facet ' + facetName + ' is already part of the class ' + this.constructor.name);
+
+	if (this[facetName])
+		throw new Error('facet ' + facetName + ' is already present in object');
+
+	Object.defineProperty(this, facetName, {
+		enumerable: false,
+		value: new FacetClass(this, facetOpts)
+	});
+}
+
+
+// factory that creates classes (constructors) from the map of facets
+// these classes inherit from FacetedObject
+FacetedObject.createFacetedClass = function (name, facetsClasses) {
+	check(name, String);
+	check(facetsClasses, Match.ObjectHash(Function /* Match.Subclass(Facet, true) TODO - fix */));
+
+	var FacetedClass = _.createSubclass(this, name, true);
+
+	_.extendProto(FacetedClass, {
+		facets: facetsClasses
+	});
+	return FacetedClass;
+};
+
+
+},{"../util/check":25,"./f_class":19,"mol-proto":30}],21:[function(require,module,exports){
+'use strict';
+
+var request = require('./util/request')
+	, logger = require('./util/logger')
+	, config = require('./config')
+	, LoadAttribute = require('./attribute/a_load')
+	, LoaderError = require('./util/error').Loader;
+
+
+module.exports = loader;
+
+
+function loader(rootEl /* optional */, callback) {
+	if (document.readyState == 'loading')
+		document.addEventListener('readystatechange', loadWhenReady);
+	else
+		loadWhenReady();
+
+	function loadWhenReady() {
+		document.removeEventListener('readystatechange', loadWhenReady);
+		_loader.call(null, rootEl, callback);
+	}
+}
+
+
+function _loader(rootEl /* optional */, callback) {
+	if (typeof rootEl == 'function') {
+		callback = rootEl;
+		rootEl = undefined;
+	}
+
+	rootEl = rootEl || document.body;
+	
+	var views = {};
+
+	var loadElements = rootEl.querySelectorAll('[' + config.attrs.load + ']');
+
+	var results = {}
+		, totalCount = loadElements.length
+		, loadedCount = 0;
+
+	Array.prototype.forEach.call(loadElements, function (el) {
+		loadView(el, function(err) {
+			results[el.id] = err || el;
+			loadedCount++;
+			if (loadedCount == totalCount)
+				callback(results);
+		});
+	});
+};
+
+
+function loadView(el, callback) {
+	if (el.children.length)
+		throw new LoaderError('can\'t load html into element that is not empty');
+
+	var attr = new LoadAttribute(el);
+
+	attr.parse().validate();
+
+	request.get(attr.loadUrl, function(err, html) {
+		if (err) {
+			err.message = err.message || 'can\'t load file ' + attr.loadUrl;
+			// logger.error(err.message);
+			callback(err);
+			return;
+		}
+
+		el.innerHTML = html;
+		callback(null);
+	});
+}
+
+},{"./attribute/a_load":4,"./config":18,"./util/error":26,"./util/logger":27,"./util/request":29}],22:[function(require,module,exports){
+'use strict';
+
+var Mixin = require('../abstract/mixin')
+	, MessageSource = require('./message_source')
+	, _ = require('mol-proto')
+	, check = require('../util/check')
+	, Match = check.Match
+	, MessengerError = require('../util/error').Messenger;
+
+
+var eventsSplitRegExp = /\s*(?:\,|\s)\s*/;
+
+
+var Messenger = _.createSubclass(Mixin, 'Messenger');
+
+_.extendProto(Messenger, {
+	init: initMessenger, // called by Mixin (superclass)
+	onMessage: registerSubscriber,
+	offMessage: removeSubscriber,
+	onMessages: registerSubscribers,
+	offMessages: removeSubscribers,
+	postMessage: postMessage,
+	getSubscribers: getMessageSubscribers,
+	_chooseSubscribersHash: _chooseSubscribersHash,
+	_registerSubscriber: _registerSubscriber,
+	_removeSubscriber: _removeSubscriber,
+	_removeAllSubscribers: _removeAllSubscribers,
+	_callPatternSubscribers: _callPatternSubscribers,
+	_callSubscribers: _callSubscribers
+});
+
+
+Messenger.defaultMethods = {
+	onMessage: 'onMessage',
+	offMessage: 'offMessage',
+	onMessages: 'onMessages',
+	offMessages: 'offMessages',
+	postMessage: 'postMessage',
+	getSubscribers: 'getSubscribers'
+};
+
+
+module.exports = Messenger;
+
+
+function initMessenger(hostObject, proxyMethods, messageSource) {
+	check(messageSource, Match.Optional(MessageSource));
+
+	// hostObject and proxyMethods are used in Mixin
+ 	// messenger data
+ 	Object.defineProperties(this, {
+ 		_messageSubscribers: { value: {} },
+ 		_patternMessageSubscribers: { value: {} },
+ 		_messageSource: { value: messageSource }
+ 	});
+
+ 	if (messageSource)
+ 		messageSource.messenger = this;
+}
+
+
+function registerSubscriber(messages, subscriber) {
+	check(messages, Match.OneOf(String, [String], RegExp));
+	check(subscriber, Function); 
+
+	if (typeof messages == 'string')
+		messages = messages.split(eventsSplitRegExp);
+
+	var subscribersHash = this._chooseSubscribersHash(messages);
+
+	if (messages instanceof RegExp)
+		return this._registerSubscriber(subscribersHash, messages, subscriber);
+
+	else {
+		var wasRegistered = false;
+
+		messages.forEach(function(message) {
+			var notYetRegistered = this._registerSubscriber(subscribersHash, message, subscriber);			
+			wasRegistered = wasRegistered || notYetRegistered;			
+		}, this);
+
+		return wasRegistered;
+	}
+}
+
+
+function _registerSubscriber(subscribersHash, message, subscriber) {
+	if (! (subscribersHash[message] && subscribersHash[message].length)) {
+		subscribersHash[message] = [];
+		var noSubscribers = true;
+		if (this._messageSource)
+			this._messageSource.onSubscriberAdded(message);
+	}
+
+	var msgSubscribers = subscribersHash[message];
+	var notYetRegistered = noSubscribers || msgSubscribers.indexOf(subscriber) == -1;
+
+	if (notYetRegistered)
+		msgSubscribers.push(subscriber);
+
+	return notYetRegistered;
+}
+
+
+function registerSubscribers(messageSubscribers) {
+	check(messageSubscribers, Match.ObjectHash(Function));
+
+	var notYetRegisteredMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
+		return this.onMessage(messages, subscriber)
+	}, this);
+
+	return notYetRegisteredMap;
+}
+
+
+// removes all subscribers for the message if subscriber isn't supplied
+function removeSubscriber(messages, subscriber) {
+	check(messages, Match.OneOf(String, [String], RegExp));
+	check(subscriber, Match.Optional(Function)); 
+
+	if (typeof messages == 'string')
+		messages = messages.split(eventsSplitRegExp);
+
+	var subscribersHash = this._chooseSubscribersHash(messages);
+
+	if (messages instanceof RegExp)
+		return this._removeSubscriber(subscribersHash, messages, subscriber);
+
+	else {
+		var wasRemoved = false;
+
+		messages.forEach(function(message) {
+			var subscriberRemoved = this._removeSubscriber(subscribersHash, message, subscriber);			
+			wasRemoved = wasRemoved || subscriberRemoved;			
+		}, this);
+
+		return wasRemoved;
+	}
+}
+
+
+function _removeSubscriber(subscribersHash, message, subscriber) {
+	var msgSubscribers = subscribersHash[message];
+	if (! msgSubscribers || ! msgSubscribers.length)
+		return false; // nothing removed
+
+	if (subscriber) {
+		var subscriberIndex = msgSubscribers.indexOf(subscriber);
+		if (subscriberIndex == -1) 
+			return false; // nothing removed
+		msgSubscribers.splice(subscriberIndex, 1);
+		if (! msgSubscribers.length)
+			this._removeAllSubscribers(subscribersHash, message);
+
+	} else 
+		this._removeAllSubscribers(subscribersHash, message);
+
+	return true; // subscriber(s) removed
+}
+
+
+function _removeAllSubscribers(subscribersHash, message) {
+	delete subscribersHash[message];
+	if (this._messageSource)
+		this._messageSource.onSubscriberRemoved(message);
+}
+
+
+function removeSubscribers(messageSubscribers) {
+	check(messageSubscribers, Match.ObjectHash(Function));
+
+	var subscriberRemovedMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
+		return this.offMessages(messages, subscriber)
+	}, this);
+
+	return subscriberRemovedMap;	
+}
+
+
+// TODO - send event to messageSource
+
+
+function postMessage(message, data) {
+	check(message, Match.OneOf(String, RegExp));
+
+	var subscribersHash = this._chooseSubscribersHash(message);
+	var msgSubscribers = subscribersHash[message];
+
+	this._callSubscribers(message, data, msgSubscribers);
+
+	if (typeof message == 'string')
+		this._callPatternSubscribers(message, data);
+}
+
+
+function _callPatternSubscribers(message, data) {
+	_.eachKey(this._patternMessageSubscribers, 
+		function(patternSubscribers, pattern) {
+			if (pattern.test(message))
+				this._callSubscribers(message, data, patternSubscribers);
+		}
+	, this);
+}
+
+
+function _callSubscribers(message, data, msgSubscribers) {
+	if (msgSubscribers && msgSubscribers.length)
+		msgSubscribers.forEach(function(subscriber) {
+			subscriber.call(this, message, data);
+		}, this);
+}
+
+
+function getMessageSubscribers(message, includePatternSubscribers) {
+	check(message, Match.OneOf(String, RegExp));
+
+	var subscribersHash = this._chooseSubscribersHash(message);
+	var msgSubscribers = subscribersHash[message]
+							? [].concat(subscribersHash[message])
+							: [];
+
+	// pattern subscribers are incuded by default
+	if (includePatternSubscribers !== false && typeof message == 'string') {
+		_.eachKey(this._patternMessageSubscribers, 
+			function(patternSubscribers, pattern) {
+				if (patternSubscribers && patternSubscribers.length
+						&& pattern.test(message))
+					_.appendArray(msgSubscribers, patternSubscribers);
+			}
+		);
+	}
+
+	return msgSubscribers.length
+				? msgSubscribers
+				: undefined;
+}
+
+
+function _chooseSubscribersHash(message) {
+	return message instanceof RegExp
+				? this._patternMessageSubscribers
+				: this._messageSubscribers;
+}
+
+},{"../abstract/mixin":1,"../util/check":25,"../util/error":26,"./message_source":23,"mol-proto":30}],23:[function(require,module,exports){
+'use strict';
+
+var Mixin = require('../abstract/mixin')
+	, logger = require('../util/logger')
+	, toBeImplemented = require('../util/error').toBeImplemented
+	, _ = require('mol-proto');
+
+// an abstract class for dispatching external to internal events
+var MessageSource = _.createSubclass(Mixin, 'MessageSource', true);
+
+module.exports = MessageSource;
+
+
+_.extendProto(MessageSource, {
+	// initializes messageSource - called by Mixin superclass
+	init: initMessageSource,
+
+	// called by Messenger to notify when the first subscriber for an internal message was added
+	onSubscriberAdded: onSubscriberAdded,
+
+	// called by Messenger to notify when the last subscriber for an internal message was removed
+ 	onSubscriberRemoved: onSubscriberRemoved, 
+
+ 	// dispatches source message
+ 	dispatchMessage: dispatchSourceMessage,
+
+	// filters source message based on the data of the message - should be implemented in subclass
+	filterSourceMessage: dispatchAllSourceMessages,
+
+ 	// ***
+ 	// Methods below must be implemented in subclass
+ 	
+	// converts internal message type to external message type - should be implemented in subclass
+	translateToSourceMessage: toBeImplemented,
+
+ 	// adds listener to external message - should be implemented by subclass
+ 	addSourceListener: toBeImplemented,
+
+ 	// removes listener from external message - should be implemented by subclass
+ 	removeSourceListener: toBeImplemented,
+});
+
+
+function initMessageSource() {
+	Object.defineProperty(this, '_internalMessages', { value: {} });
+}
+
+
+function onSubscriberAdded(message) {
+	var sourceMessage = this.translateToSourceMessage(message);
+
+	if (! this._internalMessages.hasOwnProperty(sourceMessage)) {
+		this.addSourceListener(sourceMessage);
+		this._internalMessages[sourceMessage] = [];
+	}
+	var internalMsgs = this._internalMessages[sourceMessage];
+
+	if (internalMsgs.indexOf(message) == -1)
+		internalMsgs.push(message);
+	else
+		logger.warn('Duplicate notification received: for subscribe to internal message ' + message);
+}
+
+
+function onSubscriberRemoved(message) {
+	var sourceMessage = this.translateToSourceMessage(message);
+
+	var internalMsgs = this._internalMessages[sourceMessage];
+
+	if (internalMsgs && internalMsgs.length) {
+		messageIndex = internalMsgs.indexOf(message);
+		if (messageIndex >= 0) {
+			internalMsgs.splice(messageIndex, 1);
+			if (internalMsgs.length == 0) {
+				delete this._internalMessages[sourceMessage];
+				this.removeSourceListener(sourceMessage);
+			}
+		} else
+			unexpectedNotificationWarning();
+	} else
+		unexpectedNotificationWarning();
+
+
+	function unexpectedNotificationWarning() {
+		logger.warn('notification received: un-subscribe from internal message ' + message
+					 + ' without previous subscription notification');
+	}
+}
+
+
+function dispatchSourceMessage(sourceMessage, data) {
+	var internalMsgs = this._internalMessages[sourceMessage];
+
+	if (internalMsgs && internalMsgs.length)
+		internalMsgs.forEach(function(message) {
+			if (this.filterSourceMessage
+					&& this.filterSourceMessage(sourceMessage, message, data))
+				this.messenger.postMessage(message, data);
+		}, this);
+	else
+		logger.warn('source message received for which there is no mapped internal message');
+}
+
+
+// can be overridden in subclass to implement filtering based on message data
+function dispatchAllSourceMessages(sourceMessage, message, data) {
+	return true;
+}
+
+},{"../abstract/mixin":1,"../util/error":26,"../util/logger":27,"mol-proto":30}],24:[function(require,module,exports){
+'use strict';
+
+var milo = {
+	loader: require('./loader'),
+	binder: require('./binder'),
+	config: require('./config')
+}
+
+
+// used facets
+require('./components/c_facets/Container');
+require('./components/c_facets/Events');
+require('./components/c_facets/Data');
+
+// used components
+require('./components/classes/View');
+
+
+if (typeof module == 'object' && module.exports)
+	// export for node/browserify
+	module.exports = milo;
+
+if (typeof window == 'object')
+	window.milo = milo;
+
+},{"./binder":6,"./components/c_facets/Container":9,"./components/c_facets/Data":10,"./components/c_facets/Events":11,"./components/classes/View":17,"./config":18,"./loader":21}],25:[function(require,module,exports){
 'use strict';
 
 // XXX docs
@@ -535,545 +1773,7 @@ function _prependPath(key, base) {
 };
 
 
-},{"mol-proto":30}],6:[function(require,module,exports){
-'use strict';
-
-var FacetedObject = require('../facets/f_object')
-	, facetsRegistry = require('./c_facets/cf_registry')
-	, ComponentFacet = require('./c_facet')
-	, Messenger = require('../messenger')
-	, _ = require('mol-proto')
-	, check = require('../check')
-	, Match = check.Match;
-
-var Component = _.createSubclass(FacetedObject, 'Component', true);
-
-module.exports = Component;
-
-
-Component.createComponentClass = function(name, facets) {
-	var facetsClasses = {};
-
-	facets.forEach(function(fct) {
-		var fctName = _.firstLowerCase(fct);
-		var fctClassName = _.firstUpperCase(fct);
-		facetsClasses[fctName] = facetsRegistry.get(fctClassName)
-	});
-
-	return FacetedObject.createFacetedClass.call(this, name, facetsClasses);
-};
-
-delete Component.createFacetedClass;
-
-
-_.extendProto(Component, {
-	init: initComponent,
-	addFacet: addFacet
-});
-
-
-function initComponent(facetsOptions, element) {
-	this.el = element;
-
-	var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
-
-	Object.defineProperties(this, {
-		_messenger: { value: messenger },
-	});	
-}
-
-
-function addFacet(facetNameOrClass, facetOpts, facetName) {
-	check(facetNameOrClass, Match.OneOf(String, Match.Subclass(ComponentFacet)));
-	check(facetOpts, Match.Optional(Object));
-	check(facetName, Match.Optional(String));
-
-	if (typeof facetNameOrClass == 'string') {
-		var facetClassName = _.firstUpperCase(facetNameOrClass);
-		var FacetClass = facetsRegistry.get(facetClassName);
-	} else 
-		FacetClass = facetNameOrClass;
-
-	facetName = facetName || _.firstLowerCase(FacetClass.name);
-
-	FacetedObject.prototype.addFacet.call(this, FacetClass, facetOpts, facetName);
-}
-
-},{"../check":5,"../facets/f_object":20,"../messenger":24,"./c_facet":7,"./c_facets/cf_registry":11,"mol-proto":30}],7:[function(require,module,exports){
-'use strict';
-
-var Facet = require('../facets/f_class')
-	, Messenger = require('../messenger')
-	, _ = require('mol-proto');
-
-var ComponentFacet = _.createSubclass(Facet, 'ComponentFacet');
-
-module.exports = ComponentFacet;
-
-
-_.extendProto(ComponentFacet, {
-	init: initComponentFacet,
-});
-
-
-function initComponentFacet() {
-	// var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
-
-	// Object.defineProperties(this, {
-	// 	_facetMessenger: { value: messenger },
-	// });
-}
-
-},{"../facets/f_class":19,"../messenger":24,"mol-proto":30}],8:[function(require,module,exports){
-'use strict';
-
-var ComponentFacet = require('../c_facet')
-	, binder = require('../../binder')
-	, _ = require('mol-proto')
-	, facetsRegistry = require('./cf_registry');
-
-// container facet
-var Container = _.createSubclass(ComponentFacet, 'Container');
-
-_.extendProto(Container, {
-	init: initContainer,
-	_bind: _bindComponents,
-	add: addChildComponents
-});
-
-facetsRegistry.add(Container);
-
-module.exports = Container;
-
-
-function initContainer() {
-	ComponentFacet.prototype.init.apply(this, arguments);
-	this.children = {};
-}
-
-
-function _bindComponents() {
-	// TODO
-	// this function should re-bind rather than bind all internal elements
-	this.children = binder(this.owner.el);
-}
-
-
-function addChildComponents(childComponents) {
-	// TODO
-	// this function should intelligently re-bind existing components to
-	// new elements (if they changed) and re-bind previously bound events to the same
-	// event handlers
-	// or maybe not, if this function is only used by binder to add new elements...
-	_.extend(this.children, childComponents);
-}
-
-},{"../../binder":4,"../c_facet":7,"./cf_registry":11,"mol-proto":30}],9:[function(require,module,exports){
-'use strict';
-
-var ComponentFacet = require('../c_facet')
-	, facetsRegistry = require('./cf_registry')
-
-	, Messenger = require('../../messenger')
-	, ComponentDataSource = require('../c_message_sources/component_data_source')
-
-	, _ = require('mol-proto');
-
-
-// data model connection facet
-var Data = _.createSubclass(ComponentFacet, 'Data');
-
-_.extendProto(Data, {
-	init: initDataFacet,
-
-	// _reattach: _reattachEventsOnElementChange
-});
-
-facetsRegistry.add(Data);
-
-module.exports = Data;
-
-
-function initDataFacet() {
-	ComponentFacet.prototype.init.apply(this, arguments);
-
-	var proxyCompDataSourceMethods = {
-		value: 'value',
-		trigger: 'trigger'
-	};
-
-	// instead of this.owner should pass model? Where it is set?
-	var compDataSource = new ComponentDataSource(this, proxyCompDataSourceMethods, this.owner);
-
-	var proxyMessengerMethods = {
-		on: 'onMessage',
-		off: 'offMessage',
-		onMessages: 'onMessages',
-		offMessages: 'offMessages',
-		getSubscribers: 'getSubscribers'
-	};
-
-	var dataMessenger = new Messenger(this, proxyMessengerMethods, compDataSource);
-
-	Object.defineProperties(this, {
-		_dataMessenger: { value: dataMessenger },
-		_compDataSource: { value: compDataSource }
-	});
-}
-
-},{"../../messenger":24,"../c_facet":7,"../c_message_sources/component_data_source":12,"./cf_registry":11,"mol-proto":30}],10:[function(require,module,exports){
-'use strict';
-
-var ComponentFacet = require('../c_facet')
-	, facetsRegistry = require('./cf_registry')
-
-	, Messenger = require('../../messenger')
-	, DOMEventsSource = require('../c_message_sources/dom_events_source')
-
-	, _ = require('mol-proto');
-
-
-// events facet
-var Events = _.createSubclass(ComponentFacet, 'Events');
-
-_.extendProto(Events, {
-	init: initEventsFacet,
-
-	// _reattach: _reattachEventsOnElementChange
-});
-
-facetsRegistry.add(Events);
-
-module.exports = Events;
-
-
-function initEventsFacet() {
-	ComponentFacet.prototype.init.apply(this, arguments);
-
-	var domEventsSource = new DOMEventsSource(this, { trigger: 'trigger' }, this.owner);
-
-	var proxyMessengerMethods = {
-		on: 'onMessage',
-		off: 'offMessage',
-		onEvents: 'onMessages',
-		offEvents: 'offMessages',
-		getListeners: 'getSubscribers'
-	};
-
-	var messenger = new Messenger(this, proxyMessengerMethods, domEventsSource);
-
-	Object.defineProperties(this, {
-		_eventsMessenger: { value: messenger },
-		_domEventsSource: { value: domEventsSource }
-	});
-}
-
-},{"../../messenger":24,"../c_facet":7,"../c_message_sources/dom_events_source":14,"./cf_registry":11,"mol-proto":30}],11:[function(require,module,exports){
-'use strict';
-
-var ClassRegistry = require('../../registry')
-	, ComponentFacet = require('../c_facet');
-
-var facetsRegistry = new ClassRegistry(ComponentFacet);
-
-facetsRegistry.add(ComponentFacet);
-
-module.exports = facetsRegistry;
-
-// TODO - refactor components registry test into a function
-// that tests a registry with a given foundation class
-// Make test for this registry based on this function
-},{"../../registry":28,"../c_facet":7}],12:[function(require,module,exports){
-'use strict';
-
-var DOMEventsSource = require('./dom_events_source')
-	, Component = require('../c_class')
-	, ComponentDataSourceError = require('../../error').ComponentDataSource
-	, _ = require('mol-proto')
-	, check = require('../../check')
-	, Match = check.Match;
-
-
-// class to handle subscribtions to changes in DOM for UI (maybe also content editable) elements
-var ComponentDataSource = _.createSubclass(DOMEventsSource, 'ComponentDataSource', true);
-
-
-_.extendProto(ComponentDataSource, {
-	// implementing MessageSource interface
-	init: initComponentDataSource,
-	translateToSourceMessage: translateToDomEvent,
- 	addSourceListener: addDomEventListener,
- 	removeSourceListener: removeDomEventListener,
- 	filterSourceMessage: filterDataMessage,
-
- 	// class specific methods
- 	// dom: implemented in DOMEventsSource
- 	value: getDomElementDataValue,
- 	handleEvent: handleEvent,  // event dispatcher - as defined by Event DOM API
- 	trigger: triggerDataMessage // redefines method of superclass DOMEventsSource
-});
-
-module.exports = ComponentDataSource;
-
-
-function initComponentDataSource() {
-	DOMEventsSource.prototype.init.apply(this, arguments);
-
-	this.value(); // stores current component data value in this._value
-}
-
-
-// TODO: should return value dependent on element tag
-function getDomElementDataValue() { // value method
-	var newValue = this.component.el.value;
-
-	Object.defineProperty(this, '_value', {
-		configurable: true,
-		value: newValue
-	});
-
-	return newValue;
-}
-
-
-// TODO: this function should return relevant DOM event dependent on element tag
-// Can also implement beforedatachanged event to allow preventing the change
-function translateToDomEvent(message) {
-	if (message == 'datachanged')
-		return 'input';
-	else
-		throw new ComponentDataSourceError('unknown component data event');
-}
-
-
-function addDomEventListener(eventType) {
-	this.dom().addEventListener(eventType, this, false); // no capturing
-}
-
-
-function removeDomEventListener(eventType) {
-	this.dom().removeEventListener(eventType, this, false); // no capturing
-}
-
-
-function filterDataMessage(eventType, message, data) {
-	return data.newValue != data.oldValue;
-};
-
-
- // event dispatcher - as defined by Event DOM API
-function handleEvent(event) {
-	var oldValue = this._value;
-
-	this.dispatchMessage(event.type, {
-		oldValue: oldValue,
-		newValue: this.value()
-	});
-}
-
-
-function triggerDataMessage(message, data) {
-	// TODO - opposite translation + event trigger 
-}
-
-},{"../../check":5,"../../error":18,"../c_class":6,"./dom_events_source":14,"mol-proto":30}],13:[function(require,module,exports){
-'use strict';
-
-var _ = require('mol-proto');
-
-
-// https://developer.mozilla.org/en-US/docs/Web/Reference/Events
-
-var eventTypes = {
-	ClipboardEvent: ['copy', 'cut', 'paste', 'beforecopy', 'beforecut', 'beforepaste'],
-	Event: ['input'],
-	FocusEvent: ['focus', 'blur', 'focusin', 'focusout'],
-	KeyboardEvent: ['keydown', 'keypress',  'keyup'],
-	MouseEvent: ['click', 'contextmenu', 'dblclick', 'mousedown', 'mouseup',
-				 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover',
-				 'show' /* context menu */],
-	TouchEvent: ['touchstart', 'touchend', 'touchmove', 'touchenter', 'touchleave', 'touchcancel'],
-};
-
-
-// mock window and event constructors for testing
-if (typeof window != 'undefined')
-	var global = window;
-else {
-	global = {};
-	_.eachKey(eventTypes, function(eTypes, eventConstructorName) {
-		var eventsConstructor;
-		eval(
-			'eventsConstructor = function ' + eventConstructorName + '(type, properties) { \
-				this.type = type; \
-				_.extend(this, properties); \
-			};'
-		);
-		global[eventConstructorName] = eventsConstructor;
-	});
-}
-
-
-var domEventsConstructors = {};
-
-_.eachKey(eventTypes, function(eTypes, eventConstructorName) {
-	eTypes.forEach(function(type) {
-		if (Object.hasOwnProperty(domEventsConstructors, type))
-			throw new Error('duplicate event type ' + type);
-
-		domEventsConstructors[type] = global[eventConstructorName];
-	});
-});
-
-
-module.exports = domEventsConstructors;
-
-},{"mol-proto":30}],14:[function(require,module,exports){
-'use strict';
-
-var MessageSource = require('../../messenger/message_source')
-	, Component = require('../c_class')
-	, domEventsConstructors = require('./dom_events_constructors') // TODO merge with DOMEventSource ??
-	, _ = require('mol-proto')
-	, check = require('../../check')
-	, Match = check.Match;
-
-var DOMEventsSource = _.createSubclass(MessageSource, 'DOMMessageSource', true);
-
-
-_.extendProto(DOMEventsSource, {
-	// implementing MessageSource interface
-	init: initDomEventsSource,
-	translateToSourceMessage: translateToDomEvent,
- 	addSourceListener: addDomEventListener,
- 	removeSourceListener: removeDomEventListener,
- 	filterSourceMessage: filterCapturedDomEvent,
-
- 	// class specific methods
- 	dom: getDomElement,
- 	handleEvent: handleEvent,  // event dispatcher - as defined by Event DOM API
- 	trigger: triggerDomEvent
-});
-
-module.exports = DOMEventsSource;
-
-
-var useCapturePattern = /__capture$/;
-
-
-function initDomEventsSource(hostObject, proxyMethods, component) {
-	check(component, Component);
-	MessageSource.prototype.init.apply(this, arguments);
-
-	this.component = component;
-
-	// this.messenger is set by Messenger class
-}
-
-
-function getDomElement() {
-	return this.component.el;
-}
-
-
-function translateToDomEvent(message) {
-	if (useCapturePattern.test(message))
-		message = message.replace(useCapturePattern, '');
-	return message;
-}
-
-
-function addDomEventListener(eventType) {
-	this.dom().addEventListener(eventType, this, true);
-}
-
-
-function removeDomEventListener(eventType) {
-	this.dom().removeEventListener(eventType, this, true);
-}
-
-
-function filterCapturedDomEvent(eventType, message, event) {
-	var isCapturePhase;
-	if (typeof window != 'undefined')
-		isCapturePhase = event.eventPhase == window.Event.CAPTURING_PHASE;
-
-	return (! isCapturePhase || (isCapturePhase && useCapturePattern.test(message)));
-}
-
-
-// event dispatcher - as defined by Event DOM API
-function handleEvent(event) {
-	this.dispatchMessage(event.type, event);
-	return true;
-}
-
-
-// TODO make work with messages (with _capture)
-function triggerDomEvent(eventType, properties) {
-	check(eventType, String);
-	check(properties, Match.Optional(Object));
-
-	var EventConstructor = domEventsConstructors[eventType];
-
-	if (typeof eventConstructor != 'function')
-		throw new Error('unsupported event type');
-
-	// check if it is correct
-	if (typeof properties != 'undefined')
-		properties.type = eventType;
-
-	var domEvent = EventConstructor(eventType, properties);
-
-	var notCancelled = this.dom().dispatchEvent(domEvent);
-
-	return notCancelled;
-}
-},{"../../check":5,"../../messenger/message_source":25,"../c_class":6,"./dom_events_constructors":13,"mol-proto":30}],15:[function(require,module,exports){
-'use strict';
-
-var ClassRegistry = require('../registry')
-	, Component = require('./c_class');
-
-var componentsRegistry = new ClassRegistry(Component);
-
-componentsRegistry.add(Component);
-
-module.exports = componentsRegistry;
-
-},{"../registry":28,"./c_class":6}],16:[function(require,module,exports){
-'use strict';
-
-var Component = require('../c_class')
-	, componentsRegistry = require('../c_registry');
-
-
-var View = Component.createComponentClass('View', ['container']);
-
-componentsRegistry.add(View);
-
-module.exports = View;
-
-},{"../c_class":6,"../c_registry":15}],17:[function(require,module,exports){
-'use strict';
-
-var _ = require('mol-proto');
-
-
-module.exports = config;
-
-function config(options) {
-	_.deepExtend(config, options);
-}
-
-config({
-	attrs: {
-		bind: 'ml-bind',
-		load: 'ml-load'
-	}
-});
-
-},{"mol-proto":30}],18:[function(require,module,exports){
+},{"mol-proto":30}],26:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1109,191 +1809,7 @@ function toBeImplemented() {
 	throw new error.AbstractClass('calling the method of an absctract class MessageSource');
 }
 
-},{"mol-proto":30}],19:[function(require,module,exports){
-'use strict';
-
-var _ = require('mol-proto');
-
-module.exports = Facet;
-
-function Facet(owner, options) {
-	this.owner = owner;
-	this.options = options || {};
-	this.init.apply(this, arguments);
-}
-
-_.extendProto(Facet, {
-	init: function() {}
-});
-
-},{"mol-proto":30}],20:[function(require,module,exports){
-'use strict';
-
-var Facet = require('./f_class')
-	, _ = require('mol-proto')
-	, check = require('../check')
-	, Match = check.Match;
-
-module.exports = FacetedObject;
-
-// abstract class for faceted object
-function FacetedObject(facetsOptions /*, other args - passed to init method */) {
-	// TODO instantiate facets if configuration isn't passed
-	// write a test to check it
-	facetsOptions = facetsOptions ? _.clone(facetsOptions) : {};
-
-	var thisClass = this.constructor
-		, facets = {};
-
-	if (this.constructor == FacetedObject)		
-		throw new Error('FacetedObject is an abstract class, can\'t be instantiated');
-	//if (! thisClass.prototype.facets)
-	//	throw new Error('No facets defined in class ' + this.constructor.name);
-	
-	// _.eachKey(facetsOptions, instantiateFacet, this, true);
-
-	if (this.facets)
-		_.eachKey(this.facets, instantiateFacet, this, true);
-
-	var unusedFacetsNames = Object.keys(facetsOptions);
-	if (unusedFacetsNames.length)
-		throw new Error('Configuration for unknown facet(s) passed: ' + unusedFacetsNames.join(', '));
-
-	Object.defineProperties(this, facets);
-
-	// calling init if it is defined in the class
-	if (this.init)
-		this.init.apply(this, arguments);
-
-	function instantiateFacet(/* facetOpts */ FacetClass, fct) {
-		// var FacetClass = this.facets[fct];
-		var facetOpts = facetsOptions[fct];
-		delete facetsOptions[fct];
-
-		facets[fct] = {
-			enumerable: false,
-			value: new FacetClass(this, facetOpts)
-		};
-	}
-}
-
-
-_.extendProto(FacetedObject, {
-	addFacet: addFacet
-});
-
-
-function addFacet(FacetClass, facetOpts, facetName) {
-	check(FacetClass, Function);
-	check(facetName, Match.Optional(String));
-
-	facetName = _.firstLowerCase(facetName || FacetClass.name);
-
-	var protoFacets = this.constructor.prototype.facets;
-
-	if (protoFacets && protoFacets[facetName])
-		throw new Error('facet ' + facetName + ' is already part of the class ' + this.constructor.name);
-
-	if (this[facetName])
-		throw new Error('facet ' + facetName + ' is already present in object');
-
-	Object.defineProperty(this, facetName, {
-		enumerable: false,
-		value: new FacetClass(this, facetOpts)
-	});
-}
-
-
-// factory that creates classes (constructors) from the map of facets
-// these classes inherit from FacetedObject
-FacetedObject.createFacetedClass = function (name, facetsClasses) {
-	check(name, String);
-	check(facetsClasses, Match.ObjectHash(Function /* Match.Subclass(Facet, true) TODO - fix */));
-
-	var FacetedClass = _.createSubclass(this, name, true);
-
-	_.extendProto(FacetedClass, {
-		facets: facetsClasses
-	});
-	return FacetedClass;
-};
-
-
-},{"../check":5,"./f_class":19,"mol-proto":30}],21:[function(require,module,exports){
-'use strict';
-
-var request = require('./request')
-	, logger = require('./logger')
-	, config = require('./config')
-	, LoadAttribute = require('./attribute/a_load')
-	, LoaderError = require('./error').Loader;
-
-
-module.exports = loader;
-
-
-function loader(rootEl /* optional */, callback) {
-	if (document.readyState == 'loading')
-		document.addEventListener('readystatechange', loadWhenReady);
-	else
-		loadWhenReady();
-
-	function loadWhenReady() {
-		document.removeEventListener('readystatechange', loadWhenReady);
-		_loader.call(null, rootEl, callback);
-	}
-}
-
-
-function _loader(rootEl /* optional */, callback) {
-	if (typeof rootEl == 'function') {
-		callback = rootEl;
-		rootEl = undefined;
-	}
-
-	rootEl = rootEl || document.body;
-	
-	var views = {};
-
-	var loadElements = rootEl.querySelectorAll('[' + config.attrs.load + ']');
-
-	var results = {}
-		, totalCount = loadElements.length
-		, loadedCount = 0;
-
-	Array.prototype.forEach.call(loadElements, function (el) {
-		loadView(el, function(err) {
-			results[el.id] = err || el;
-			loadedCount++;
-			if (loadedCount == totalCount)
-				callback(results);
-		});
-	});
-};
-
-
-function loadView(el, callback) {
-	if (el.children.length)
-		throw new LoaderError('can\'t load html into element that is not empty');
-
-	var attr = new LoadAttribute(el);
-
-	attr.parse().validate();
-
-	request.get(attr.loadUrl, function(err, html) {
-		if (err) {
-			err.message = err.message || 'can\'t load file ' + attr.loadUrl;
-			// logger.error(err.message);
-			callback(err);
-			return;
-		}
-
-		el.innerHTML = html;
-		callback(null);
-	});
-}
-
-},{"./attribute/a_load":2,"./config":17,"./error":18,"./logger":22,"./request":29}],22:[function(require,module,exports){
+},{"mol-proto":30}],27:[function(require,module,exports){
 'use strict';
 
 var Logger = require('./logger_class');
@@ -1302,7 +1818,7 @@ var logger = new Logger({ level: 3 });
 
 module.exports = logger;
 
-},{"./logger_class":23}],23:[function(require,module,exports){
+},{"./logger_class":28}],28:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1398,523 +1914,7 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"mol-proto":30}],24:[function(require,module,exports){
-'use strict';
-
-var Mixin = require('../mixin')
-	, MessageSource = require('./message_source')
-	, _ = require('mol-proto')
-	, check = require('../check')
-	, Match = check.Match
-	, MessengerError = require('../error').Messenger;
-
-
-var eventsSplitRegExp = /\s*(?:\,|\s)\s*/;
-
-
-var Messenger = _.createSubclass(Mixin, 'Messenger');
-
-_.extendProto(Messenger, {
-	init: initMessenger, // called by Mixin (superclass)
-	onMessage: registerSubscriber,
-	offMessage: removeSubscriber,
-	onMessages: registerSubscribers,
-	offMessages: removeSubscribers,
-	postMessage: postMessage,
-	getSubscribers: getMessageSubscribers,
-	_chooseSubscribersHash: _chooseSubscribersHash,
-	_registerSubscriber: _registerSubscriber,
-	_removeSubscriber: _removeSubscriber,
-	_removeAllSubscribers: _removeAllSubscribers,
-	_callPatternSubscribers: _callPatternSubscribers,
-	_callSubscribers: _callSubscribers
-});
-
-
-Messenger.defaultMethods = {
-	onMessage: 'onMessage',
-	offMessage: 'offMessage',
-	onMessages: 'onMessages',
-	offMessages: 'offMessages',
-	postMessage: 'postMessage',
-	getSubscribers: 'getSubscribers'
-};
-
-
-module.exports = Messenger;
-
-
-function initMessenger(hostObject, proxyMethods, messageSource) {
-	check(messageSource, Match.Optional(MessageSource));
-
-	// hostObject and proxyMethods are used in Mixin
- 	// messenger data
- 	Object.defineProperties(this, {
- 		_messageSubscribers: { value: {} },
- 		_patternMessageSubscribers: { value: {} },
- 		_messageSource: { value: messageSource }
- 	});
-
- 	if (messageSource)
- 		messageSource.messenger = this;
-}
-
-
-function registerSubscriber(messages, subscriber) {
-	check(messages, Match.OneOf(String, [String], RegExp));
-	check(subscriber, Function); 
-
-	if (typeof messages == 'string')
-		messages = messages.split(eventsSplitRegExp);
-
-	var subscribersHash = this._chooseSubscribersHash(messages);
-
-	if (messages instanceof RegExp)
-		return this._registerSubscriber(subscribersHash, messages, subscriber);
-
-	else {
-		var wasRegistered = false;
-
-		messages.forEach(function(message) {
-			var notYetRegistered = this._registerSubscriber(subscribersHash, message, subscriber);			
-			wasRegistered = wasRegistered || notYetRegistered;			
-		}, this);
-
-		return wasRegistered;
-	}
-}
-
-
-function _registerSubscriber(subscribersHash, message, subscriber) {
-	if (! (subscribersHash[message] && subscribersHash[message].length)) {
-		subscribersHash[message] = [];
-		var noSubscribers = true;
-		if (this._messageSource)
-			this._messageSource.onSubscriberAdded(message);
-	}
-
-	var msgSubscribers = subscribersHash[message];
-	var notYetRegistered = noSubscribers || msgSubscribers.indexOf(subscriber) == -1;
-
-	if (notYetRegistered)
-		msgSubscribers.push(subscriber);
-
-	return notYetRegistered;
-}
-
-
-function registerSubscribers(messageSubscribers) {
-	check(messageSubscribers, Match.ObjectHash(Function));
-
-	var notYetRegisteredMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
-		return this.onMessage(messages, subscriber)
-	}, this);
-
-	return notYetRegisteredMap;
-}
-
-
-// removes all subscribers for the message if subscriber isn't supplied
-function removeSubscriber(messages, subscriber) {
-	check(messages, Match.OneOf(String, [String], RegExp));
-	check(subscriber, Match.Optional(Function)); 
-
-	if (typeof messages == 'string')
-		messages = messages.split(eventsSplitRegExp);
-
-	var subscribersHash = this._chooseSubscribersHash(messages);
-
-	if (messages instanceof RegExp)
-		return this._removeSubscriber(subscribersHash, messages, subscriber);
-
-	else {
-		var wasRemoved = false;
-
-		messages.forEach(function(message) {
-			var subscriberRemoved = this._removeSubscriber(subscribersHash, message, subscriber);			
-			wasRemoved = wasRemoved || subscriberRemoved;			
-		}, this);
-
-		return wasRemoved;
-	}
-}
-
-
-function _removeSubscriber(subscribersHash, message, subscriber) {
-	var msgSubscribers = subscribersHash[message];
-	if (! msgSubscribers || ! msgSubscribers.length)
-		return false; // nothing removed
-
-	if (subscriber) {
-		var subscriberIndex = msgSubscribers.indexOf(subscriber);
-		if (subscriberIndex == -1) 
-			return false; // nothing removed
-		msgSubscribers.splice(subscriberIndex, 1);
-		if (! msgSubscribers.length)
-			this._removeAllSubscribers(subscribersHash, message);
-
-	} else 
-		this._removeAllSubscribers(subscribersHash, message);
-
-	return true; // subscriber(s) removed
-}
-
-
-function _removeAllSubscribers(subscribersHash, message) {
-	delete subscribersHash[message];
-	if (this._messageSource)
-		this._messageSource.onSubscriberRemoved(message);
-}
-
-
-function removeSubscribers(messageSubscribers) {
-	check(messageSubscribers, Match.ObjectHash(Function));
-
-	var subscriberRemovedMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
-		return this.offMessages(messages, subscriber)
-	}, this);
-
-	return subscriberRemovedMap;	
-}
-
-
-// TODO - send event to messageSource
-
-
-function postMessage(message, data) {
-	check(message, Match.OneOf(String, RegExp));
-
-	var subscribersHash = this._chooseSubscribersHash(message);
-	var msgSubscribers = subscribersHash[message];
-
-	this._callSubscribers(message, data, msgSubscribers);
-
-	if (typeof message == 'string')
-		this._callPatternSubscribers(message, data);
-}
-
-
-function _callPatternSubscribers(message, data) {
-	_.eachKey(this._patternMessageSubscribers, 
-		function(patternSubscribers, pattern) {
-			if (pattern.test(message))
-				this._callSubscribers(message, data, patternSubscribers);
-		}
-	, this);
-}
-
-
-function _callSubscribers(message, data, msgSubscribers) {
-	if (msgSubscribers && msgSubscribers.length)
-		msgSubscribers.forEach(function(subscriber) {
-			subscriber.call(this, message, data);
-		}, this);
-}
-
-
-function getMessageSubscribers(message, includePatternSubscribers) {
-	check(message, Match.OneOf(String, RegExp));
-
-	var subscribersHash = this._chooseSubscribersHash(message);
-	var msgSubscribers = subscribersHash[message]
-							? [].concat(subscribersHash[message])
-							: [];
-
-	// pattern subscribers are incuded by default
-	if (includePatternSubscribers !== false && typeof message == 'string') {
-		_.eachKey(this._patternMessageSubscribers, 
-			function(patternSubscribers, pattern) {
-				if (patternSubscribers && patternSubscribers.length
-						&& pattern.test(message))
-					_.appendArray(msgSubscribers, patternSubscribers);
-			}
-		);
-	}
-
-	return msgSubscribers.length
-				? msgSubscribers
-				: undefined;
-}
-
-
-function _chooseSubscribersHash(message) {
-	return message instanceof RegExp
-				? this._patternMessageSubscribers
-				: this._messageSubscribers;
-}
-
-},{"../check":5,"../error":18,"../mixin":27,"./message_source":25,"mol-proto":30}],25:[function(require,module,exports){
-'use strict';
-
-var Mixin = require('../mixin')
-	, logger = require('../logger')
-	, toBeImplemented = require('../error').toBeImplemented
-	, _ = require('mol-proto');
-
-// an abstract class for dispatching external to internal events
-var MessageSource = _.createSubclass(Mixin, 'MessageSource', true);
-
-module.exports = MessageSource;
-
-
-_.extendProto(MessageSource, {
-	// initializes messageSource - called by Mixin superclass
-	init: initMessageSource,
-
-	// called by Messenger to notify when the first subscriber for an internal message was added
-	onSubscriberAdded: onSubscriberAdded,
-
-	// called by Messenger to notify when the last subscriber for an internal message was removed
- 	onSubscriberRemoved: onSubscriberRemoved, 
-
- 	// dispatches source message
- 	dispatchMessage: dispatchSourceMessage,
-
-	// filters source message based on the data of the message - should be implemented in subclass
-	filterSourceMessage: dispatchAllSourceMessages,
-
- 	// ***
- 	// Methods below must be implemented in subclass
- 	
-	// converts internal message type to external message type - should be implemented in subclass
-	translateToSourceMessage: toBeImplemented,
-
- 	// adds listener to external message - should be implemented by subclass
- 	addSourceListener: toBeImplemented,
-
- 	// removes listener from external message - should be implemented by subclass
- 	removeSourceListener: toBeImplemented,
-});
-
-
-function initMessageSource() {
-	Object.defineProperty(this, '_internalMessages', { value: {} });
-}
-
-
-function onSubscriberAdded(message) {
-	var sourceMessage = this.translateToSourceMessage(message);
-
-	if (! this._internalMessages.hasOwnProperty(sourceMessage)) {
-		this.addSourceListener(sourceMessage);
-		this._internalMessages[sourceMessage] = [];
-	}
-	var internalMsgs = this._internalMessages[sourceMessage];
-
-	if (internalMsgs.indexOf(message) == -1)
-		internalMsgs.push(message);
-	else
-		logger.warn('Duplicate notification received: for subscribe to internal message ' + message);
-}
-
-
-function onSubscriberRemoved(message) {
-	var sourceMessage = this.translateToSourceMessage(message);
-
-	var internalMsgs = this._internalMessages[sourceMessage];
-
-	if (internalMsgs && internalMsgs.length) {
-		messageIndex = internalMsgs.indexOf(message);
-		if (messageIndex >= 0) {
-			internalMsgs.splice(messageIndex, 1);
-			if (internalMsgs.length == 0) {
-				delete this._internalMessages[sourceMessage];
-				this.removeSourceListener(sourceMessage);
-			}
-		} else
-			unexpectedNotificationWarning();
-	} else
-		unexpectedNotificationWarning();
-
-
-	function unexpectedNotificationWarning() {
-		logger.warn('notification received: un-subscribe from internal message ' + message
-					 + ' without previous subscription notification');
-	}
-}
-
-
-function dispatchSourceMessage(sourceMessage, data) {
-	var internalMsgs = this._internalMessages[sourceMessage];
-
-	if (internalMsgs && internalMsgs.length)
-		internalMsgs.forEach(function(message) {
-			if (this.filterSourceMessage
-					&& this.filterSourceMessage(sourceMessage, message, data))
-				this.messenger.postMessage(message, data);
-		}, this);
-	else
-		logger.warn('source message received for which there is no mapped internal message');
-}
-
-
-// can be overridden in subclass to implement filtering based on message data
-function dispatchAllSourceMessages(sourceMessage, message, data) {
-	return true;
-}
-
-},{"../error":18,"../logger":22,"../mixin":27,"mol-proto":30}],26:[function(require,module,exports){
-'use strict';
-
-var milo = {
-	loader: require('./loader'),
-	binder: require('./binder'),
-	config: require('./config')
-}
-
-
-// used facets
-require('./components/c_facets/Container');
-require('./components/c_facets/Events');
-require('./components/c_facets/Data');
-
-// used components
-require('./components/classes/View');
-
-
-if (typeof module == 'object' && module.exports)
-	// export for node/browserify
-	module.exports = milo;
-
-if (typeof window == 'object')
-	window.milo = milo;
-
-},{"./binder":4,"./components/c_facets/Container":8,"./components/c_facets/Data":9,"./components/c_facets/Events":10,"./components/classes/View":16,"./config":17,"./loader":21}],27:[function(require,module,exports){
-'use strict';
-
-var _ = require('mol-proto')
-	, check = require('./check')
-	, Match = check.Match
-	, MixinError = require('./error').Mixin;
-
-
-module.exports = Mixin;
-
-// an abstract class for mixin pattern - adding proxy methods to host objects
-function Mixin(hostObject, proxyMethods /*, other args - passed to init method */) {
-	// TODO - moce checks from Messenger here
-	check(hostObject, Object);
-	check(proxyMethods, Match.ObjectHash(String));
-
-	Object.defineProperty(this, '_hostObject', { value: hostObject });
-	if (proxyMethods)
-		this._createProxyMethods(proxyMethods);
-
-	// calling init if it is defined in the class
-	if (this.init)
-		this.init.apply(this, arguments);
-}
-
-_.extendProto(Mixin, {
-	_createProxyMethod: _createProxyMethod,
-	_createProxyMethods: _createProxyMethods
-});
-
-
-function _createProxyMethod(mixinMethodName, proxyMethodName) {
-	if (this._hostObject[proxyMethodName])
-		throw new MixinError('method ' + proxyMethodName +
-								 ' already defined in host object');
-
-	check(this[mixinMethodName], Function);
-
-	var boundMethod = this[mixinMethodName].bind(this);
-
-	Object.defineProperty(this._hostObject, proxyMethodName,
-		{ value: boundMethod });
-}
-
-
-function _createProxyMethods(proxyMethods) {
-	// creating and binding proxy methods on the host object
-	_.eachKey(proxyMethods, _createProxyMethod, this);
-}
-
-},{"./check":5,"./error":18,"mol-proto":30}],28:[function(require,module,exports){
-'use strict';
-
-var _ = require('mol-proto')
-	, check = require('./check')
-	, Match = check.Match;
-
-module.exports = ClassRegistry;
-
-function ClassRegistry (FoundationClass) {
-	if (FoundationClass)
-		this.setClass(FoundationClass);
-
-	// Object.defineProperty(this, '__registeredClasses', {
-	// 		enumerable: false,
-	// 		writable: true,
-	// 		configurable: true,
-	// 		value: {}
-	// });
-
-	this.__registeredClasses = {};
-}
-
-_.extendProto(ClassRegistry, {
-	add: registerClass,
-	get: getClass,
-	remove: unregisterClass,
-	clean: unregisterAllClasses,
-	setClass: setFoundationClass
-});
-
-
-function setFoundationClass(FoundationClass) {
-	check(FoundationClass, Function);
-	Object.defineProperty(this, 'FoundationClass', {
-		enumerable: true,
-		value: FoundationClass
-	});
-}
-
-function registerClass(aClass, name) {
-	name = name || aClass.name;
-
-	check(name, String, 'class name must be string');
-	check(name, Match.Where(function() {
-		return typeof name == 'string' && name != '';
-	}), 'class name must be string');
-	if (this.FoundationClass) {
-		if (aClass != this.FoundationClass)
-			check(aClass, Match.Subclass(this.FoundationClass), 'class must be a sub(class) of a foundation class');
-	} else
-		throw new TypeError('foundation class must be set before adding classes to registry');
-
-	if (this.__registeredClasses[name])
-		throw new TypeError('is already registered');
-
-	this.__registeredClasses[name] = aClass;
-};
-
-
-function getClass(name) {
-	check(name, String, 'class name must be string');
-	return this.__registeredClasses[name];
-};
-
-
-function unregisterClass(nameOrClass) {
-	check(nameOrClass, Match.OneOf(String, Function), 'class or name must be supplied');
-
-	var name = typeof nameOrClass == 'string'
-						? nameOrClass
-						: nameOrClass.name;
-						
-	if (! this.__registeredClasses[name])
-		throw new TypeError('class is not registered');
-
-	delete this.__registeredClasses[name];
-};
-
-
-function unregisterAllClasses() {
-	this.__registeredClasses = {};
-};
-
-},{"./check":5,"mol-proto":30}],29:[function(require,module,exports){
+},{"mol-proto":30}],29:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -2174,5 +2174,5 @@ function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
 }
 
-},{}]},{},[26])
+},{}]},{},[24])
 ;

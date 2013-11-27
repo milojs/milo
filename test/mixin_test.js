@@ -1,6 +1,6 @@
 'use strict';
 
-var Mixin = require('../lib/mixin')
+var Mixin = require('../lib/abstract/mixin')
 	,  assert = require('assert')
 	, _ = require('mol-proto');
 
