@@ -1,8 +1,8 @@
 'use strict';
 
-var Messenger = require('../lib/messenger.js')
+var Messenger = require('../../lib/messenger')
 	, _ = require('mol-proto')
-	, check = require('../lib/check')
+	, check = require('../../lib/check')
 	, Match = check.Match
 	, assert = require('assert');
 

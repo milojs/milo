@@ -1,6 +1,6 @@
 'use strict';
 
-var domEventsConstructors = require('../../../lib/dom_events_constructors');
+var domEventsConstructors = require('../../../lib/components/c_message_sources/dom_events_constructors');
 
 describe('domEventsConstructors', function() {
     beforeEach(function() {

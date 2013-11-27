@@ -12,6 +12,10 @@ describe('milo binder', function() {
     		console.log('button', eType, evt);
     	});
 
+        ctrl.main.events.on('click mouseenter input keypress', function(eType, evt) {
+            console.log('div', eType, evt);
+        });
+
     	ctrl.articleIdInput.data.on('datachanged', logData);
 
     	function logData(message, data) {

@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="css/mocha.css" type="text/css" charset="utf-8" />
 </head>
 <body>
-    <div id="viewToBind">
+    <div ml-bind="[Events]:main">
         <label for="article-id">Article ID</label>
         <input id="article-id" type="text" ml-bind="[Data]:articleIdInput">
         <button ml-bind="[Events]:articleButton">Open</button>
