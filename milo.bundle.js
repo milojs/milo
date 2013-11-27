@@ -752,7 +752,7 @@ _.extendProto(ComponentDataSource, {
 
  	// class specific methods
  	// dom: implemented in DOMEventsSource
- 	value: getDomElementData,
+ 	value: getDomElementDataValue,
  	handleEvent: handleEvent,  // event dispatcher - as defined by Event DOM API
  	trigger: triggerDataMessage // redefines method of superclass DOMEventsSource
 });
@@ -768,7 +768,7 @@ function initComponentDataSource() {
 
 
 // TODO: should return value dependent on element tag
-function getDomElementData() { // value method
+function getDomElementDataValue() { // value method
 	var newValue = this.component.el.value;
 
 	Object.defineProperty(this, '_value', {
@@ -1848,13 +1848,7 @@ function createSubclass(thisClass, name, applyConstructor) {
 
 	eval('subclass = function ' + name + '(){ ' + constructorCode + ' }');
 
-	// pprototype chain
-	subclass.prototype = Object.create(thisClass.prototype);
-	
-	// subclass identity
-	_.extendProto(subclass, {
-		constructor: subclass
-	});
+	_.makeSubclass(subclass, thisClass);
 
 	// copy class methods
 	// - for them to work correctly they should not explictly use superclass name
@@ -1866,8 +1860,13 @@ function createSubclass(thisClass, name, applyConstructor) {
 
 
 function makeSubclass(thisClass, Superclass) {
+	// prototype chain
 	thisClass.prototype = Object.create(Superclass.prototype);
-	thisClass.prototype.constructor = thisClass;
+	
+	// subclass identity
+	_.extendProto(thisClass, {
+		constructor: thisClass
+	});
 	return thisClass;
 }
 
