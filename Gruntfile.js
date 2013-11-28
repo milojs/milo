@@ -77,6 +77,7 @@ module.exports = function(grunt) {
 	grunt.registerTask('test', 'mochaTest');
 	grunt.registerTask('htmltest', ['browserify:test1', 'watch']);
 	grunt.registerTask('default', ['test', 'browserify', 'watch']);
+	grunt.registerTask('skiptest', ['browserify', 'watch']);
 
 	function getBundles() {
         return {
