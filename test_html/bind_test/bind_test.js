@@ -21,7 +21,14 @@ describe('milo binder', function() {
     	function logData(message, data) {
     		console.log(message, data);
     	}
-    	
-		console.log(ctrl);
+
+        var myTmplComps = ctrl.myTemplate.template
+                .set('<p ml-bind=":innerPara">I am rendered from template</p>')
+                .render()
+                .binder();
+
+        _.extend(ctrl, myTmplComps); // should be some function to add to controller
+
+        console.log(ctrl);
     });
 });
