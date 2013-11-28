@@ -1044,16 +1044,6 @@ function loader(rootEl, callback) {
 			callback(views);
 		});
 	});
-
-	// if (document.readyState == 'loading')
-	// 	document.addEventListener('readystatechange', loadWhenReady);
-	// else
-	// 	loadWhenReady();
-
-	// function loadWhenReady() {
-	// 	document.removeEventListener('readystatechange', loadWhenReady);
-	// 	_loader.call(null, rootEl, callback);
-	// }
 }
 
 
@@ -1168,8 +1158,11 @@ function removeDomEventListener(eventType) {
 
 function filterDomEvent(eventType, message, event) {
 	if (eventType == 'readystatechange') {
-		if (this.domReadyFired) return false;
-		this.domReadyFired = true;
+		if (this._domReadyFired) return false;
+		Object.defineProperty(this, '_domReadyFired', {
+			writable: true,
+			value: true
+		});
 		return true;
 	}
 };
