@@ -49,7 +49,7 @@ function _createProxyMethods(proxyMethods) {
 	_.eachKey(proxyMethods, _createProxyMethod, this);
 }
 
-},{"../util/check":26,"../util/error":27,"mol-proto":31}],2:[function(require,module,exports){
+},{"../util/check":27,"../util/error":28,"mol-proto":33}],2:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -133,7 +133,7 @@ function unregisterAllClasses() {
 	this.__registeredClasses = {};
 };
 
-},{"../util/check":26,"mol-proto":31}],3:[function(require,module,exports){
+},{"../util/check":27,"mol-proto":33}],3:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./index')
@@ -202,7 +202,7 @@ function validateAttribute() {
 	return this;
 }
 
-},{"../config":18,"../util/check":26,"../util/error":27,"./index":5,"mol-proto":31}],4:[function(require,module,exports){
+},{"../config":18,"../util/check":27,"../util/error":28,"./index":5,"mol-proto":33}],4:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./index')
@@ -243,7 +243,7 @@ function validateAttribute() {
 
 	return this;
 }
-},{"../config":18,"../util/error":27,"./index":5,"mol-proto":31}],5:[function(require,module,exports){
+},{"../config":18,"../util/error":28,"./index":5,"mol-proto":33}],5:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -281,10 +281,11 @@ function setAttributeValue(value) {
 	this.el.setAttribute(this.name, value);
 }
 
-},{"../util/check":26,"../util/error":27,"mol-proto":31}],6:[function(require,module,exports){
+},{"../util/check":27,"../util/error":28,"mol-proto":33}],6:[function(require,module,exports){
 'use strict';
 
-var componentsRegistry = require('./components/c_registry')
+var miloMail = require('./mail')
+	, componentsRegistry = require('./components/c_registry')
 	, Component = componentsRegistry.get('Component')
 	, BindAttribute = require('./attribute/a_bind')
 	, BinderError = require('./util/error').Binder
@@ -295,14 +296,16 @@ var componentsRegistry = require('./components/c_registry')
 
 module.exports = binder;
 
-function binder(scopeEl) {
+
+function binder(scopeEl, callback) {
 	var scopeEl = scopeEl || document.body
 		, components = {};
 
 	// iterate children of scopeEl
 	Array.prototype.forEach.call(scopeEl.children, bindElement);
 
-	return components;
+	callback(components);
+
 
 	function bindElement(el){
 		var attr = new BindAttribute(el);
@@ -362,7 +365,7 @@ function binder(scopeEl) {
 }
 
 
-},{"./attribute/a_bind":3,"./components/c_registry":16,"./util/check":26,"./util/error":27,"mol-proto":31}],7:[function(require,module,exports){
+},{"./attribute/a_bind":3,"./components/c_registry":16,"./mail":22,"./util/check":27,"./util/error":28,"mol-proto":33}],7:[function(require,module,exports){
 'use strict';
 
 var FacetedObject = require('../facets/f_object')
@@ -426,7 +429,7 @@ function addFacet(facetNameOrClass, facetOpts, facetName) {
 	FacetedObject.prototype.addFacet.call(this, FacetClass, facetOpts, facetName);
 }
 
-},{"../facets/f_object":20,"../messenger":23,"../util/check":26,"./c_facet":8,"./c_facets/cf_registry":12,"mol-proto":31}],8:[function(require,module,exports){
+},{"../facets/f_object":20,"../messenger":24,"../util/check":27,"./c_facet":8,"./c_facets/cf_registry":12,"mol-proto":33}],8:[function(require,module,exports){
 'use strict';
 
 var Facet = require('../facets/f_class')
@@ -451,7 +454,7 @@ function initComponentFacet() {
 	// });
 }
 
-},{"../facets/f_class":19,"../messenger":23,"mol-proto":31}],9:[function(require,module,exports){
+},{"../facets/f_class":19,"../messenger":24,"mol-proto":33}],9:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -495,7 +498,7 @@ function addChildComponents(childComponents) {
 	_.extend(this.children, childComponents);
 }
 
-},{"../../binder":6,"../c_facet":8,"./cf_registry":12,"mol-proto":31}],10:[function(require,module,exports){
+},{"../../binder":6,"../c_facet":8,"./cf_registry":12,"mol-proto":33}],10:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -548,7 +551,7 @@ function initDataFacet() {
 	});
 }
 
-},{"../../messenger":23,"../c_facet":8,"../c_message_sources/component_data_source":13,"./cf_registry":12,"mol-proto":31}],11:[function(require,module,exports){
+},{"../../messenger":24,"../c_facet":8,"../c_message_sources/component_data_source":13,"./cf_registry":12,"mol-proto":33}],11:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -595,7 +598,7 @@ function initEventsFacet() {
 	});
 }
 
-},{"../../messenger":23,"../c_facet":8,"../c_message_sources/dom_events_source":15,"./cf_registry":12,"mol-proto":31}],12:[function(require,module,exports){
+},{"../../messenger":24,"../c_facet":8,"../c_message_sources/dom_events_source":15,"./cf_registry":12,"mol-proto":33}],12:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../abstract/registry')
@@ -703,7 +706,7 @@ function triggerDataMessage(message, data) {
 	// TODO - opposite translation + event trigger 
 }
 
-},{"../../util/check":26,"../../util/error":27,"../c_class":7,"./dom_events_source":15,"mol-proto":31}],14:[function(require,module,exports){
+},{"../../util/check":27,"../../util/error":28,"../c_class":7,"./dom_events_source":15,"mol-proto":33}],14:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -755,7 +758,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"mol-proto":31}],15:[function(require,module,exports){
+},{"mol-proto":33}],15:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../../messenger/message_source')
@@ -855,7 +858,7 @@ function triggerDomEvent(eventType, properties) {
 
 	return notCancelled;
 }
-},{"../../messenger/message_source":24,"../../util/check":26,"../c_class":7,"./dom_events_constructors":14,"mol-proto":31}],16:[function(require,module,exports){
+},{"../../messenger/message_source":25,"../../util/check":27,"../c_class":7,"./dom_events_constructors":14,"mol-proto":33}],16:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -899,7 +902,7 @@ config({
 	}
 });
 
-},{"mol-proto":31}],19:[function(require,module,exports){
+},{"mol-proto":33}],19:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -916,7 +919,7 @@ _.extendProto(Facet, {
 	init: function() {}
 });
 
-},{"mol-proto":31}],20:[function(require,module,exports){
+},{"mol-proto":33}],20:[function(require,module,exports){
 'use strict';
 
 var Facet = require('./f_class')
@@ -1009,10 +1012,11 @@ FacetedObject.createFacetedClass = function (name, facetsClasses) {
 };
 
 
-},{"../util/check":26,"./f_class":19,"mol-proto":31}],21:[function(require,module,exports){
+},{"../util/check":27,"./f_class":19,"mol-proto":33}],21:[function(require,module,exports){
 'use strict';
 
-var request = require('./util/request')
+var miloMail = require('./mail')
+	, request = require('./util/request')
 	, logger = require('./util/logger')
 	, config = require('./config')
 	, LoadAttribute = require('./attribute/a_load')
@@ -1022,41 +1026,50 @@ var request = require('./util/request')
 module.exports = loader;
 
 
-function loader(rootEl /* optional */, callback) {
-	if (document.readyState == 'loading')
-		document.addEventListener('readystatechange', loadWhenReady);
-	else
-		loadWhenReady();
+function loader(rootEl, callback) {	
+	miloMail.onMessage('domready', function() {
+		if (typeof rootEl == 'function') {
+			callback = rootEl;
+			rootEl = undefined;
+		}
 
-	function loadWhenReady() {
-		document.removeEventListener('readystatechange', loadWhenReady);
-		_loader.call(null, rootEl, callback);
-	}
+		rootEl = rootEl || document.body;
+
+		miloMail.postMessage('loader', { state: 'started' });
+		_loader(rootEl, function(views) {
+			miloMail.postMessage('loader', { 
+				state: 'finished',
+				views: views
+			});
+			callback(views);
+		});
+	});
+
+	// if (document.readyState == 'loading')
+	// 	document.addEventListener('readystatechange', loadWhenReady);
+	// else
+	// 	loadWhenReady();
+
+	// function loadWhenReady() {
+	// 	document.removeEventListener('readystatechange', loadWhenReady);
+	// 	_loader.call(null, rootEl, callback);
+	// }
 }
 
 
-function _loader(rootEl /* optional */, callback) {
-	if (typeof rootEl == 'function') {
-		callback = rootEl;
-		rootEl = undefined;
-	}
-
-	rootEl = rootEl || document.body;
-	
-	var views = {};
-
+function _loader(rootEl, callback) {
 	var loadElements = rootEl.querySelectorAll('[' + config.attrs.load + ']');
 
-	var results = {}
+	var views = {}
 		, totalCount = loadElements.length
 		, loadedCount = 0;
 
 	Array.prototype.forEach.call(loadElements, function (el) {
 		loadView(el, function(err) {
-			results[el.id] = err || el;
+			views[el.id] = err || el;
 			loadedCount++;
 			if (loadedCount == totalCount)
-				callback(results);
+				callback(views);
 		});
 	});
 };
@@ -1083,17 +1096,91 @@ function loadView(el, callback) {
 	});
 }
 
-},{"./attribute/a_load":4,"./config":18,"./util/error":27,"./util/logger":28,"./util/request":30}],22:[function(require,module,exports){
+},{"./attribute/a_load":4,"./config":18,"./mail":22,"./util/error":28,"./util/logger":30,"./util/request":32}],22:[function(require,module,exports){
 'use strict';
 
-var Messenger = require('../messenger');
+var Messenger = require('../messenger')
+	, MailMessageSource = require('./mail_source');
 
-var miloMail = new Messenger();
+
+var mailMsgSource = new MailMessageSource();
+
+var miloMail = new Messenger(undefined, undefined, mailMsgSource);
 
 module.exports = miloMail;
 
+},{"../messenger":24,"./mail_source":23}],23:[function(require,module,exports){
+'use strict';
 
-},{"../messenger":23}],23:[function(require,module,exports){
+var MessageSource = require('../messenger/message_source')
+	, domEventsConstructors = require('../components/c_message_sources/dom_events_constructors')
+	, MailMessageSourceError = require('../util/error').MailMessageSource
+	, _ = require('mol-proto')
+	, check = require('../util/check')
+	, Match = check.Match;
+
+
+var MailMessageSource = _.createSubclass(MessageSource, 'MailMessageSource', true);
+
+
+_.extendProto(MailMessageSource, {
+	// implementing MessageSource interface
+	// init: defined in MessageSource
+	translateToSourceMessage: translateToDomEvent,
+ 	addSourceListener: addDomEventListener,
+ 	removeSourceListener: removeDomEventListener,
+ 	filterSourceMessage: filterDomEvent,
+
+ 	// class specific methods
+ 	handleEvent: handleEvent,  // event dispatcher - as defined by Event DOM API
+});
+
+module.exports = MailMessageSource;
+
+
+// TODO: this function should return relevant DOM event dependent on element tag
+// Can also implement beforedatachanged event to allow preventing the change
+function translateToDomEvent(message) {
+	if (message == 'domready')
+		return 'readystatechange';
+}
+
+
+function addDomEventListener(eventType) {
+	if (typeof document == 'object') {
+		if (eventType == 'readystatechange') {
+			if (document.readyState == 'loading')
+				document.addEventListener(eventType, this, false); // no capturing
+			else {
+				var domEvent = EventConstructor(eventType, { target: document });
+				this.dispatchMessage(eventType, event);
+			}
+		}
+	}
+}
+
+
+function removeDomEventListener(eventType) {
+	if (typeof document == 'object')
+		document.removeEventListener(eventType, this, false); // no capturing
+}
+
+
+function filterDomEvent(eventType, message, event) {
+	if (eventType == 'readystatechange') {
+		if (this.domReadyFired) return false;
+		this.domReadyFired = true;
+		return true;
+	}
+};
+
+
+ // event dispatcher - as defined by Event DOM API
+function handleEvent(event) {
+	this.dispatchMessage(event.type, event);
+}
+
+},{"../components/c_message_sources/dom_events_constructors":14,"../messenger/message_source":25,"../util/check":27,"../util/error":28,"mol-proto":33}],24:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -1338,7 +1425,7 @@ function _chooseSubscribersHash(message) {
 				: this._messageSubscribers;
 }
 
-},{"../abstract/mixin":1,"../util/check":26,"../util/error":27,"./message_source":24,"mol-proto":31}],24:[function(require,module,exports){
+},{"../abstract/mixin":1,"../util/check":27,"../util/error":28,"./message_source":25,"mol-proto":33}],25:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -1390,6 +1477,8 @@ function initMessageSource() {
 function onSubscriberAdded(message) {
 	var sourceMessage = this.translateToSourceMessage(message);
 
+	if (! sourceMessage) return;
+
 	if (! this._internalMessages.hasOwnProperty(sourceMessage)) {
 		this.addSourceListener(sourceMessage);
 		this._internalMessages[sourceMessage] = [];
@@ -1405,6 +1494,8 @@ function onSubscriberAdded(message) {
 
 function onSubscriberRemoved(message) {
 	var sourceMessage = this.translateToSourceMessage(message);
+
+	if (! sourceMessage) return;
 
 	var internalMsgs = this._internalMessages[sourceMessage];
 
@@ -1448,14 +1539,15 @@ function dispatchAllSourceMessages(sourceMessage, message, data) {
 	return true;
 }
 
-},{"../abstract/mixin":1,"../util/error":27,"../util/logger":28,"mol-proto":31}],25:[function(require,module,exports){
+},{"../abstract/mixin":1,"../util/error":28,"../util/logger":30,"mol-proto":33}],26:[function(require,module,exports){
 'use strict';
 
 var milo = {
 	loader: require('./loader'),
 	binder: require('./binder'),
 	mail: require('./mail'),
-	config: require('./config')
+	config: require('./config'),
+	util: require('./util')
 }
 
 
@@ -1475,7 +1567,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./binder":6,"./components/c_facets/Container":9,"./components/c_facets/Data":10,"./components/c_facets/Events":11,"./components/classes/View":17,"./config":18,"./loader":21,"./mail":22}],26:[function(require,module,exports){
+},{"./binder":6,"./components/c_facets/Container":9,"./components/c_facets/Data":10,"./components/c_facets/Events":11,"./components/classes/View":17,"./config":18,"./loader":21,"./mail":22,"./util":29}],27:[function(require,module,exports){
 'use strict';
 
 // XXX docs
@@ -1783,7 +1875,7 @@ function _prependPath(key, base) {
 };
 
 
-},{"mol-proto":31}],27:[function(require,module,exports){
+},{"mol-proto":33}],28:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1791,15 +1883,16 @@ var _ = require('mol-proto');
 
 // module exports error classes for all names defined in this array
 var errorClassNames = ['AbstractClass', 'Mixin', 'Messenger', 'ComponentDataSource',
-					   'Attribute', 'Binder', 'Loader', 'MailMessageSource']
-	, error = {};
+					   'Attribute', 'Binder', 'Loader', 'MailMessageSource'];
+
+var error = {
+	toBeImplemented: toBeImplemented,
+	createClass: createErrorClass
+};
 
 errorClassNames.forEach(function(name) {
 	error[name] = createErrorClass(name + 'Error');
 });
-
-error.toBeImplemented = toBeImplemented;
-
 
 module.exports = error;
 
@@ -1820,7 +1913,19 @@ function toBeImplemented() {
 	throw new error.AbstractClass('calling the method of an absctract class MessageSource');
 }
 
-},{"mol-proto":31}],28:[function(require,module,exports){
+},{"mol-proto":33}],29:[function(require,module,exports){
+'use strict';
+
+var util = {
+	logger: require('./logger'),
+	request: require('./request'),
+	check: require('./check'),
+	error: require('./error')
+};
+
+module.exports = util;
+
+},{"./check":27,"./error":28,"./logger":30,"./request":32}],30:[function(require,module,exports){
 'use strict';
 
 var Logger = require('./logger_class');
@@ -1829,7 +1934,7 @@ var logger = new Logger({ level: 3 });
 
 module.exports = logger;
 
-},{"./logger_class":29}],29:[function(require,module,exports){
+},{"./logger_class":31}],31:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1925,7 +2030,7 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"mol-proto":31}],30:[function(require,module,exports){
+},{"mol-proto":33}],32:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1958,7 +2063,7 @@ function get(url, callback) {
 	request(url, { method: 'GET' }, callback);
 }
 
-},{"mol-proto":31}],31:[function(require,module,exports){
+},{"mol-proto":33}],33:[function(require,module,exports){
 'use strict';
 
 var _;
@@ -2185,5 +2290,5 @@ function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
 }
 
-},{}]},{},[25])
+},{}]},{},[26])
 ;
