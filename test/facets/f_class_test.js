@@ -10,7 +10,7 @@ describe('Facet class', function() {
 		var aFacet = new Facet(self, { prop: 1 });
 
 		assert.deepEqual(aFacet.owner, self, 'first parameter should be copied to .owner');
-		assert.deepEqual(aFacet.options, { prop: 1 }, 'second parameter should be copied to .options');
+		assert.deepEqual(aFacet.config, { prop: 1 }, 'second parameter should be copied to .config');
 	});
 
 

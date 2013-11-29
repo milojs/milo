@@ -8,6 +8,8 @@ describe('milo binder', function() {
 
     	var ctrl = milo.binder();
 
+        console.log(ctrl);
+
     	ctrl.articleButton.events.on('click mouseenter', function(eType, evt) {
     		console.log('button', eType, evt);
     	});
@@ -30,7 +32,5 @@ describe('milo binder', function() {
         _.extend(ctrl, myTmplComps); // should be some function to add to controller
 
         ctrl.innerPara.el.innerHTML += ', then bound and changed via component inside template';
-
-        console.log(ctrl);
     });
 });

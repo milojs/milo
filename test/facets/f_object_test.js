@@ -13,7 +13,11 @@ describe('FacetedObject class', function() {
 		}
 
 	it('should have a factory that creates classes of faceted objects', function() {
-		var TestFacetedClass = factory('TestFacetedClass', facetsClasses);
+		var TestFacetedClass = factory('TestFacetedClass', facetsClasses, {
+			facet: {
+				prop: 1
+			}
+		});
 
 			assert.equal(TestFacetedClass.prototype.facets, facetsClasses);
 			assert(TestFacetedClass.prototype instanceof FacetedObject);
@@ -22,18 +26,8 @@ describe('FacetedObject class', function() {
 
 			assert(aTestFacetedObject instanceof TestFacetedClass);
 			assert(aTestFacetedObject instanceof FacetedObject);
+			assert.deepEqual(aTestFacetedObject.facet.config, { prop: 1 });
 
-		assert.doesNotThrow(function() {
-			aTestFacetedObject = new TestFacetedClass({
-				facet: { /* facet options */ }
-			});
-		});
-
-		assert.throws(function() {
-			aTestFacetedObject = new TestFacetedClass({
-				unknownFacet: { /* facet options */ }
-			});
-		});
 
 		assert.throws(function() { factory(); });
 		assert.throws(function() { factory('name'); });
