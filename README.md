@@ -20,6 +20,15 @@ or
 
     bower intall milo
 
+### Test
+
+    npm install
+    npm install -g grunt-cli
+    grunt test
+
+To test in browser, open:
+
+[bind_test.html](https://github.com/MailOnline/milo/blob/master/test_html/bind_test.html)
 
 ### Try
 
@@ -53,6 +62,20 @@ ctrl.myTestButton.events.on('click', function(msg, event) {
 	ctrl.myTestValue.el.innerHTML = ctrl.myField.data.value();
 });
 ```
+
+Hack
+
+```shell
+cd $MILO_FOLDER
+npm link
+cd $MY_PROJECT
+rm -R -f -d node_modules/mol-milo
+npm link mol-milo # link milo to your current project to use with browserify
+grunt # rebuild milo bundle every time you change any .js file
+```
+
+Additionally you can setup grunt in your project to rebuild it whenever
+milo bundle changes
 
 
 Modules and classes
@@ -193,4 +216,4 @@ for documentations and reasons behind our decision not to use
 third-party libraries.
 
 It is bundled together with milo and all its functions are available as
-properties of _ object.
+properties of _ object, you don't have to load it separately.
