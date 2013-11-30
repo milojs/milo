@@ -63,7 +63,7 @@ ctrl.myTestButton.events.on('click', function(msg, event) {
 });
 ```
 
-Hack
+###Hack
 
 ```shell
 cd $MILO_FOLDER
