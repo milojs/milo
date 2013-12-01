@@ -38,6 +38,7 @@ index.html
 <head>
 	<script src="milo.bundle.js"></script>
 	<script src="index.js"></script>
+</head>
 <body>
     <input type="text" ml-bind="[Data]:myField">
     <div ml-bind=":myCurrentValue"></div>
@@ -48,6 +49,7 @@ index.html
     	<span ml-bind=":myTestValue"></span>
     </div>
 </body>
+</html>
 ```
 
 index.js
@@ -63,14 +65,17 @@ ctrl.myTestButton.events.on('click', function(msg, event) {
 });
 ```
 
-###Hack
+### Contribute
 
 ```shell
 cd $MILO_FOLDER
 npm link
+
 cd $MY_PROJECT
 rm -R -f -d node_modules/mol-milo
 npm link mol-milo # link milo to your current project to use with browserify
+
+cd $MILO_FOLDER
 grunt # rebuild milo bundle every time you change any .js file
 ```
 
@@ -143,7 +148,7 @@ control view updates and data flow
 - being able to __extend functionality__ of components supplied by framework
 and to create new components
 
-We could not find such framework so we started developing __Milo__ in parallel with the application that uses this it.
+We could not find such framework so we started developing __Milo__ in parallel with the application that uses it.
 
 
 Architecture
@@ -153,9 +158,10 @@ Architecture
 
 Unlike many frameworks, we rely on JavaScript prototypes to build framework blocks.
 
-JavaScript is a very dynamic language. It allows writing functions that create classes (```Component.createComponentClass```) which allowed to implement a composition pattern where each component class is created as collection of pre-defined blocks
-(facets) with configuration of a facet that is specific to a constructed class
-(it has some similarity to Ext components, althouggh they are not created from blocks).
+JavaScript is a very dynamic language. It allows writing functions that create classes (```Component.createComponentClass```) which allowed to implement a composition pattern where each component class is created as collection of
+pre-defined blocks (facets) with configuration of a facet that is
+specific to a constructed class (it has some similarity to Ext components,
+although they are not created from blocks).
 
 ### Run-time "compilation"
 
@@ -211,9 +217,8 @@ Instead, Milo Components can have __Dom__ facet that includes several convenienc
 
 We have our own library [__Proto__](https://github.com/MailOnline/proto) that has
 a grownig collection of utility functions for the manipulation of objects,
-prototypes, arrays, functions and strings. Please see its repository
-for documentations and reasons behind our decision not to use
-third-party libraries.
+prototypes, arrays, functions and strings. Please see [its repository](https://github.com/MailOnline/proto) for documentations and reasons
+behind our decision not to use third-party libraries.
 
 It is bundled together with milo and all its functions are available as
-properties of _ object, you don't have to load it separately.
+properties of _ object, you don't need to load it separately.
