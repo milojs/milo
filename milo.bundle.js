@@ -743,28 +743,25 @@ function startDragFacet() {
 
 	var self = this;
 
-
 	function onMouseDown(eventType, event) {
 		self._target = event.target;
 		if (targetInDragHandle(event))
 			window.getSelection().empty();
 	}
 
-
 	function onMouseMovement(eventType, event) {
 		var shouldBeDraggable = targetInDragHandle(event);
 		self.owner.el.setAttribute('draggable', shouldBeDraggable);
 	}
 
-
 	function onDragging(eventType, event) {
 		if (targetInDragHandle(event)) {
-			event.dataTransfer.setData('text/html', self.owner.el.outerHTML);
-			event.dataTransfer.setData('x-application/milo-component', self.owner);
+			var dt = event.dataTransfer;
+			dt.setData('text/html', self.owner.el.outerHTML);
+			dt.setData('x-application/milo-component', self.owner);
 		} else
 			event.preventDefault();
 	}
-
 
 	function callConfiguredHandler(eventType, event) {
 		var handlerProperty = '_on' + eventType
@@ -772,7 +769,6 @@ function startDragFacet() {
 		if (handler)
 			handler.call(self.owner, eventType, event);
 	}
-
 
 	function targetInDragHandle(event) {
 		return ! self._dragHandle || self._dragHandle.contains(self._target);
@@ -832,8 +828,10 @@ function startDropFacet() {
 	function onDragging(eventType, event) {
 		var dataTypes = event.dataTransfer.types
 		if (dataTypes.indexOf('text/html') >= 0
-				|| dataTypes.indexOf('x-application/milo-component') >= 0)
+				|| dataTypes.indexOf('x-application/milo-component') >= 0) {
+			event.dataTransfer.dropEffect = 'move';
 			event.preventDefault();
+		}
 	}
 }
 },{"../c_facet":9,"./cf_registry":19,"mol-proto":41}],15:[function(require,module,exports){
@@ -873,6 +871,8 @@ function initEditableFacet() {
 
 	this._oneditable = this.config.oneditable;
 	this._onenterkey = this.config.onenterkey;
+	this._onkeypress = this.config.onkeypress;
+	this._onkeydown = this.config.onkeydown;
 }
 
 
@@ -891,7 +891,8 @@ function startEditableFacet() {
 	eventsFacet.onEvents({
 		'mousedown': onMouseDown,
 		'blur': onBlur,
-		'keypress': onKeyPress
+		'keypress': onKeyPress,
+		'keydown': callConfiguredHandler
 	});
 
 	var self = this;
@@ -916,6 +917,8 @@ function startEditableFacet() {
 	function onKeyPress(eventType, event) {
 		if (event.keyCode == 13 && self._onenterkey)
 			self._onenterkey.call(self.owner, 'onenterkey', event);
+
+		callConfiguredHandler(eventType, event);
 	}
 }
 
