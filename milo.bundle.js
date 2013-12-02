@@ -49,7 +49,7 @@ function _createProxyMethods(proxyMethods) {
 	_.eachKey(proxyMethods, _createProxyMethod, this);
 }
 
-},{"../util/check":33,"../util/error":34,"mol-proto":39}],2:[function(require,module,exports){
+},{"../util/check":34,"../util/error":35,"mol-proto":40}],2:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -133,7 +133,7 @@ function unregisterAllClasses() {
 	this.__registeredClasses = {};
 };
 
-},{"../util/check":33,"mol-proto":39}],3:[function(require,module,exports){
+},{"../util/check":34,"mol-proto":40}],3:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./index')
@@ -202,7 +202,7 @@ function validateAttribute() {
 	return this;
 }
 
-},{"../config":24,"../util/check":33,"../util/error":34,"./index":5,"mol-proto":39}],4:[function(require,module,exports){
+},{"../config":25,"../util/check":34,"../util/error":35,"./index":5,"mol-proto":40}],4:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./index')
@@ -243,7 +243,7 @@ function validateAttribute() {
 
 	return this;
 }
-},{"../config":24,"../util/error":34,"./index":5,"mol-proto":39}],5:[function(require,module,exports){
+},{"../config":25,"../util/error":35,"./index":5,"mol-proto":40}],5:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -281,7 +281,7 @@ function setAttributeValue(value) {
 	this.el.setAttribute(this.name, value);
 }
 
-},{"../util/check":33,"../util/error":34,"mol-proto":39}],6:[function(require,module,exports){
+},{"../util/check":34,"../util/error":35,"mol-proto":40}],6:[function(require,module,exports){
 'use strict';
 
 var miloMail = require('./mail')
@@ -376,7 +376,7 @@ function binder(scopeEl, componentsRegistry) {
 }
 
 
-},{"./attribute/a_bind":3,"./components/c_registry":22,"./mail":28,"./util/check":33,"./util/error":34,"mol-proto":39}],7:[function(require,module,exports){
+},{"./attribute/a_bind":3,"./components/c_registry":23,"./mail":29,"./util/check":34,"./util/error":35,"mol-proto":40}],7:[function(require,module,exports){
 'use strict';
 
 var classes = {
@@ -390,7 +390,7 @@ var classes = {
 
 module.exports = classes;
 
-},{"./abstract/registry":2,"./components/c_class":8,"./components/c_facet":9,"./components/c_facets/cf_registry":17,"./components/c_registry":22,"./facets/f_class":25}],8:[function(require,module,exports){
+},{"./abstract/registry":2,"./components/c_class":8,"./components/c_facet":9,"./components/c_facets/cf_registry":18,"./components/c_registry":23,"./facets/f_class":26}],8:[function(require,module,exports){
 'use strict';
 
 var FacetedObject = require('../facets/f_object')
@@ -485,7 +485,7 @@ function envokeMethodOnAllFacets(method /* , ... */) {
 	});
 }
 
-},{"../facets/f_object":26,"../messenger":30,"../util/check":33,"./c_facet":9,"./c_facets/cf_registry":17,"mol-proto":39}],9:[function(require,module,exports){
+},{"../facets/f_object":27,"../messenger":31,"../util/check":34,"./c_facet":9,"./c_facets/cf_registry":18,"mol-proto":40}],9:[function(require,module,exports){
 'use strict';
 
 var Facet = require('../facets/f_class')
@@ -523,7 +523,7 @@ function checkDependencies() {
 	}
 }
 
-},{"../facets/f_class":25,"../messenger":30,"../util/error":34,"mol-proto":39}],10:[function(require,module,exports){
+},{"../facets/f_class":26,"../messenger":31,"../util/error":35,"mol-proto":40}],10:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -567,7 +567,7 @@ function addChildComponents(childComponents) {
 	_.extend(this.children, childComponents);
 }
 
-},{"../../binder":6,"../c_facet":9,"./cf_registry":17,"mol-proto":39}],11:[function(require,module,exports){
+},{"../../binder":6,"../c_facet":9,"./cf_registry":18,"mol-proto":40}],11:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -620,7 +620,7 @@ function initDataFacet() {
 	});
 }
 
-},{"../../messenger":30,"../c_facet":9,"../c_message_sources/component_data_source":18,"./cf_registry":17,"mol-proto":39}],12:[function(require,module,exports){
+},{"../../messenger":31,"../c_facet":9,"../c_message_sources/component_data_source":19,"./cf_registry":18,"mol-proto":40}],12:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -688,7 +688,7 @@ function prependInsideElement(el) {
 }
 
 
-},{"../../binder":6,"../../util/check":33,"../c_facet":9,"./cf_registry":17,"mol-proto":39}],13:[function(require,module,exports){
+},{"../../binder":6,"../../util/check":34,"../c_facet":9,"./cf_registry":18,"mol-proto":40}],13:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -705,9 +705,7 @@ _.extendProto(Drag, {
 	start: startDragFacet,
 	require: ['Events'], // TODO implement facet dependencies
 
-	onDragStart: onDragStart,
-	onDrag: onDrag,
-	onDragEnd: onDragEnd
+	setHandle: setDragHandle
 	// _reattach: _reattachEventsOnElementChange
 });
 
@@ -718,6 +716,16 @@ module.exports = Drag;
 
 function initDragFacet() {
 	ComponentFacet.prototype.init.apply(this, arguments);
+	this._ondragstart = this.config.ondragstart;
+	this._ondrag = this.config.ondrag;
+	this._ondragend = this.config.ondragstart;
+}
+
+
+function setDragHandle(handleEl) {
+	if (! this.owner.el.contains(handleEl))
+		return logger.warn('drag handle should be inside element to be dragged')
+	this._dragHandle = handleEl;
 }
 
 
@@ -726,18 +734,117 @@ function startDragFacet() {
 
 	var eventsFacet = this.owner.events;
 	eventsFacet.onEvents({
-		dragstart: this.onDragStart,
-		drag: this.onDrag,
-		dragend: this.onDragEnd
+		'mousedown': onMouseDown,
+		'mouseenter mouseleave mousemove': onMouseMovement, 
+		'dragstart': onDragStart
 	});
+
+	if (this._ondrag) eventsFacet.on('drag', this._ondrag)
+	if (this._ondragend) eventsFacet.on('dragend', this._ondragend)
+
+
+	var self = this;
+
+
+	function onMouseDown(eventType, event) {
+		console.log('listener on paragraph', this);
+		self._target = event.target;
+		if (targetInDragHandle(event))
+			window.getSelection().empty();
+	}
+
+
+	function onMouseMovement(eventType, event) {
+		var shouldBeDraggable = targetInDragHandle(event);
+		self.owner.el.setAttribute('draggable', shouldBeDraggable);
+	}
+
+
+	function onDragStart(eventType, event) {
+		console.log(self._dragHandle);
+		console.log(self._target);
+
+		if (targetInDragHandle(event)) {
+			// event.dataTransfer.setData('text/plain', self.owner.el.innerHTML);
+			event.dataTransfer.setData('text/html', self.owner.el.outerHTML);
+			event.dataTransfer.setData('x-application/milo-component', self.owner);
+			self._ondragstart && self._ondragstart(eventType, event);
+
+
+			console.log(event.dataTransfer.getData('text/html'));
+			console.log(event.dataTransfer.getData('x-application/milo-component'));
+			console.log(event);
+		} else {
+			console.log('preventDefault');
+			event.preventDefault();
+		}
+	}
+
+
+	function targetInDragHandle(event) {
+		return ! self._dragHandle || self._dragHandle.contains(self._target);
+	}
+}
+
+},{"../c_facet":9,"./cf_registry":18,"mol-proto":40}],14:[function(require,module,exports){
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+	, facetsRegistry = require('./cf_registry')
+
+	, _ = require('mol-proto');
+
+
+// generic drag handler, should be overridden
+var Drop = _.createSubclass(ComponentFacet, 'Drop');
+
+_.extendProto(Drop, {
+	init: initDropFacet,
+	start: startDropFacet,
+	require: ['Events'] // TODO implement facet dependencies
+
+	// _reattach: _reattachEventsOnElementChange
+});
+
+facetsRegistry.add(Drop);
+
+module.exports = Drop;
+
+
+function initDropFacet() {
+	ComponentFacet.prototype.init.apply(this, arguments);
+
+	this._ondragenter = this.config.ondragenter;
+	this._ondragover = this.config.ondragover;
+	this._ondragleave = this.config.ondragleave;
+	this._ondrop = this.config.ondrop;
 }
 
 
-function onDragStart(event) {
-	event.preventDefault();
-}
+function startDropFacet() {
+	var eventsFacet = this.owner.events;
+	eventsFacet.on('dragenter dragover', onDragging);
+	eventsFacet.on('dragenter dragover dragleave drop', callConfiguredHandler);
 
-},{"../c_facet":9,"./cf_registry":17,"mol-proto":39}],14:[function(require,module,exports){
+	var self = this;
+
+
+	function callConfiguredHandler(eventType, event) {
+		var handlerProperty = '_on' + eventType
+			, handler = self[handlerProperty];
+		if (handler)
+			handler.call(self, eventType, event);
+	}
+
+
+	function onDragging(eventType, event) {
+		var dataTypes = event.dataTransfer.types
+		if (dataTypes.indexOf('text/html') >= 0
+				|| dataTypes.indexOf('x-application/milo-component') >= 0)
+			event.preventDefault();
+	}
+}
+},{"../c_facet":9,"./cf_registry":18,"mol-proto":40}],15:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -784,7 +891,7 @@ function initEventsFacet() {
 	});
 }
 
-},{"../../messenger":30,"../c_facet":9,"../c_message_sources/dom_events_source":20,"./cf_registry":17,"mol-proto":39}],15:[function(require,module,exports){
+},{"../../messenger":31,"../c_facet":9,"../c_message_sources/dom_events_source":21,"./cf_registry":18,"mol-proto":40}],16:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -834,7 +941,7 @@ function initFrameFacet() {
 		_messageSource: { value: messageSource }
 	});
 }
-},{"../../messenger":30,"../c_facet":9,"../c_message_sources/iframe_message_source":21,"./cf_registry":17,"mol-proto":39}],16:[function(require,module,exports){
+},{"../../messenger":31,"../c_facet":9,"../c_message_sources/iframe_message_source":22,"./cf_registry":18,"mol-proto":40}],17:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -904,7 +1011,7 @@ function bindInnerComponents(registry) {
 	return thisComponent;
 }
 
-},{"../../binder":6,"../../util/check":33,"../c_facet":9,"./cf_registry":17,"mol-proto":39}],17:[function(require,module,exports){
+},{"../../binder":6,"../../util/check":34,"../c_facet":9,"./cf_registry":18,"mol-proto":40}],18:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../abstract/registry')
@@ -919,7 +1026,7 @@ module.exports = facetsRegistry;
 // TODO - refactor components registry test into a function
 // that tests a registry with a given foundation class
 // Make test for this registry based on this function
-},{"../../abstract/registry":2,"../c_facet":9}],18:[function(require,module,exports){
+},{"../../abstract/registry":2,"../c_facet":9}],19:[function(require,module,exports){
 'use strict';
 
 var DOMEventsSource = require('./dom_events_source')
@@ -1012,7 +1119,7 @@ function triggerDataMessage(message, data) {
 	// TODO - opposite translation + event trigger 
 }
 
-},{"../../util/check":33,"../../util/error":34,"../c_class":8,"./dom_events_source":20,"mol-proto":39}],19:[function(require,module,exports){
+},{"../../util/check":34,"../../util/error":35,"../c_class":8,"./dom_events_source":21,"mol-proto":40}],20:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1064,7 +1171,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"mol-proto":39}],20:[function(require,module,exports){
+},{"mol-proto":40}],21:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../../messenger/message_source')
@@ -1120,12 +1227,12 @@ function translateToDomEvent(message) {
 
 
 function addDomEventListener(eventType) {
-	this.dom().addEventListener(eventType, this, true);
+	this.dom().addEventListener(eventType, this, false);
 }
 
 
 function removeDomEventListener(eventType) {
-	this.dom().removeEventListener(eventType, this, true);
+	this.dom().removeEventListener(eventType, this, false);
 }
 
 
@@ -1164,7 +1271,7 @@ function triggerDomEvent(eventType, properties) {
 
 	return notCancelled;
 }
-},{"../../messenger/message_source":31,"../../util/check":33,"../c_class":8,"./dom_events_constructors":19,"mol-proto":39}],21:[function(require,module,exports){
+},{"../../messenger/message_source":32,"../../util/check":34,"../c_class":8,"./dom_events_constructors":20,"mol-proto":40}],22:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../../messenger/message_source')
@@ -1232,7 +1339,7 @@ function handleEvent(event) {
 	this.dispatchMessage(event.type, event);
 }
 
-},{"../../messenger/message_source":31,"../../util/check":33,"mol-proto":39}],22:[function(require,module,exports){
+},{"../../messenger/message_source":32,"../../util/check":34,"mol-proto":40}],23:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -1244,7 +1351,7 @@ componentsRegistry.add(Component);
 
 module.exports = componentsRegistry;
 
-},{"../abstract/registry":2,"./c_class":8}],23:[function(require,module,exports){
+},{"../abstract/registry":2,"./c_class":8}],24:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -1257,7 +1364,7 @@ componentsRegistry.add(View);
 
 module.exports = View;
 
-},{"../c_class":8,"../c_registry":22}],24:[function(require,module,exports){
+},{"../c_class":8,"../c_registry":23}],25:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1276,7 +1383,7 @@ config({
 	}
 });
 
-},{"mol-proto":39}],25:[function(require,module,exports){
+},{"mol-proto":40}],26:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1293,7 +1400,7 @@ _.extendProto(Facet, {
 	init: function() {}
 });
 
-},{"mol-proto":39}],26:[function(require,module,exports){
+},{"mol-proto":40}],27:[function(require,module,exports){
 'use strict';
 
 var Facet = require('./f_class')
@@ -1390,7 +1497,7 @@ FacetedObject.createFacetedClass = function (name, facetsClasses, facetsConfig) 
 };
 
 
-},{"../util/check":33,"./f_class":25,"mol-proto":39}],27:[function(require,module,exports){
+},{"../util/check":34,"./f_class":26,"mol-proto":40}],28:[function(require,module,exports){
 'use strict';
 
 var miloMail = require('./mail')
@@ -1464,7 +1571,7 @@ function loadView(el, callback) {
 	});
 }
 
-},{"./attribute/a_load":4,"./config":24,"./mail":28,"./util/error":34,"./util/logger":36,"./util/request":38}],28:[function(require,module,exports){
+},{"./attribute/a_load":4,"./config":25,"./mail":29,"./util/error":35,"./util/logger":37,"./util/request":39}],29:[function(require,module,exports){
 'use strict';
 
 var Messenger = require('../messenger')
@@ -1477,7 +1584,7 @@ var miloMail = new Messenger(undefined, undefined, mailMsgSource);
 
 module.exports = miloMail;
 
-},{"../messenger":30,"./mail_source":29}],29:[function(require,module,exports){
+},{"../messenger":31,"./mail_source":30}],30:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../messenger/message_source')
@@ -1551,7 +1658,7 @@ function handleEvent(event) {
 	this.dispatchMessage(event.type, event);
 }
 
-},{"../components/c_message_sources/dom_events_constructors":19,"../messenger/message_source":31,"../util/check":33,"../util/error":34,"mol-proto":39}],30:[function(require,module,exports){
+},{"../components/c_message_sources/dom_events_constructors":20,"../messenger/message_source":32,"../util/check":34,"../util/error":35,"mol-proto":40}],31:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -1796,7 +1903,7 @@ function _chooseSubscribersHash(message) {
 				: this._messageSubscribers;
 }
 
-},{"../abstract/mixin":1,"../util/check":33,"../util/error":34,"./message_source":31,"mol-proto":39}],31:[function(require,module,exports){
+},{"../abstract/mixin":1,"../util/check":34,"../util/error":35,"./message_source":32,"mol-proto":40}],32:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -1910,7 +2017,7 @@ function dispatchAllSourceMessages(sourceMessage, message, data) {
 	return true;
 }
 
-},{"../abstract/mixin":1,"../util/error":34,"../util/logger":36,"mol-proto":39}],32:[function(require,module,exports){
+},{"../abstract/mixin":1,"../util/error":35,"../util/logger":37,"mol-proto":40}],33:[function(require,module,exports){
 'use strict';
 
 var milo = {
@@ -1931,6 +2038,7 @@ require('./components/c_facets/Events');
 require('./components/c_facets/Template');
 require('./components/c_facets/Container');
 require('./components/c_facets/Drag');
+require('./components/c_facets/Drop');
 
 // used components
 require('./components/classes/View');
@@ -1944,7 +2052,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./binder":6,"./classes":7,"./components/c_facets/Container":10,"./components/c_facets/Data":11,"./components/c_facets/Dom":12,"./components/c_facets/Drag":13,"./components/c_facets/Events":14,"./components/c_facets/Frame":15,"./components/c_facets/Template":16,"./components/classes/View":23,"./config":24,"./loader":27,"./mail":28,"./util":35}],33:[function(require,module,exports){
+},{"./binder":6,"./classes":7,"./components/c_facets/Container":10,"./components/c_facets/Data":11,"./components/c_facets/Dom":12,"./components/c_facets/Drag":13,"./components/c_facets/Drop":14,"./components/c_facets/Events":15,"./components/c_facets/Frame":16,"./components/c_facets/Template":17,"./components/classes/View":24,"./config":25,"./loader":28,"./mail":29,"./util":36}],34:[function(require,module,exports){
 'use strict';
 
 // XXX docs
@@ -2252,7 +2360,7 @@ function _prependPath(key, base) {
 };
 
 
-},{"mol-proto":39}],34:[function(require,module,exports){
+},{"mol-proto":40}],35:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -2290,7 +2398,7 @@ function toBeImplemented() {
 	throw new error.AbstractClass('calling the method of an absctract class MessageSource');
 }
 
-},{"mol-proto":39}],35:[function(require,module,exports){
+},{"mol-proto":40}],36:[function(require,module,exports){
 'use strict';
 
 var util = {
@@ -2302,7 +2410,7 @@ var util = {
 
 module.exports = util;
 
-},{"./check":33,"./error":34,"./logger":36,"./request":38}],36:[function(require,module,exports){
+},{"./check":34,"./error":35,"./logger":37,"./request":39}],37:[function(require,module,exports){
 'use strict';
 
 var Logger = require('./logger_class');
@@ -2311,7 +2419,7 @@ var logger = new Logger({ level: 3 });
 
 module.exports = logger;
 
-},{"./logger_class":37}],37:[function(require,module,exports){
+},{"./logger_class":38}],38:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -2407,7 +2515,7 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"mol-proto":39}],38:[function(require,module,exports){
+},{"mol-proto":40}],39:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -2440,7 +2548,7 @@ function get(url, callback) {
 	request(url, { method: 'GET' }, callback);
 }
 
-},{"mol-proto":39}],39:[function(require,module,exports){
+},{"mol-proto":40}],40:[function(require,module,exports){
 'use strict';
 
 var _;
@@ -2667,5 +2775,5 @@ function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
 }
 
-},{}]},{},[32])
+},{}]},{},[33])
 ;
