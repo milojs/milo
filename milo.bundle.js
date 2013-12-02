@@ -747,7 +747,6 @@ function startDragFacet() {
 
 
 	function onMouseDown(eventType, event) {
-		console.log('listener on paragraph', this);
 		self._target = event.target;
 		if (targetInDragHandle(event))
 			window.getSelection().empty();
@@ -761,23 +760,14 @@ function startDragFacet() {
 
 
 	function onDragStart(eventType, event) {
-		console.log(self._dragHandle);
-		console.log(self._target);
-
 		if (targetInDragHandle(event)) {
 			// event.dataTransfer.setData('text/plain', self.owner.el.innerHTML);
 			event.dataTransfer.setData('text/html', self.owner.el.outerHTML);
 			event.dataTransfer.setData('x-application/milo-component', self.owner);
 			self._ondragstart && self._ondragstart(eventType, event);
 
-
-			console.log(event.dataTransfer.getData('text/html'));
-			console.log(event.dataTransfer.getData('x-application/milo-component'));
-			console.log(event);
-		} else {
-			console.log('preventDefault');
+		} else
 			event.preventDefault();
-		}
 	}
 
 
