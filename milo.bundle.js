@@ -500,16 +500,25 @@ module.exports = ComponentFacet;
 
 _.extendProto(ComponentFacet, {
 	init: initComponentFacet,
-	check: checkDependencies
+	start: startComponentFacet,
+	check: checkDependencies,
+	_setMessageSource: _setMessageSource,
+	_createMessageSource: _createMessageSource
 });
 
 
 function initComponentFacet() {
-	// var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
+	var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
 
-	// Object.defineProperties(this, {
-	// 	_facetMessenger: { value: messenger },
-	// });
+	Object.defineProperties(this, {
+		_messenger: { value: messenger },
+	});
+}
+
+
+function startComponentFacet() {
+	if (this.config.messages)
+		this.onMessages(this.config.messages);
 }
 
 
@@ -523,6 +532,18 @@ function checkDependencies() {
 	}
 }
 
+
+function _setMessageSource(messageSource) {
+	this._messenger._setMessageSource(messageSource);
+}
+
+
+function _createMessageSource(MessageSourceClass) {
+	var messageSource = new MessageSourceClass(this, undefined, this.owner);
+	this._setMessageSource(messageSource)
+
+	Object.defineProperty(this, '_messageSource', { value: messageSource });
+}
 },{"../facets/f_class":27,"../messenger":32,"../util/error":36,"mol-proto":41}],10:[function(require,module,exports){
 'use strict';
 
@@ -603,19 +624,9 @@ function initDataFacet() {
 
 	// instead of this.owner should pass model? Where it is set?
 	var compDataSource = new ComponentDataSource(this, proxyCompDataSourceMethods, this.owner);
-
-	var proxyMessengerMethods = {
-		on: 'onMessage',
-		off: 'offMessage',
-		onMessages: 'onMessages',
-		offMessages: 'offMessages',
-		getSubscribers: 'getSubscribers'
-	};
-
-	var dataMessenger = new Messenger(this, proxyMessengerMethods, compDataSource);
+	this._setMessageSource(compDataSource);
 
 	Object.defineProperties(this, {
-		_dataMessenger: { value: dataMessenger },
 		_compDataSource: { value: compDataSource }
 	});
 }
@@ -693,6 +704,7 @@ function prependInsideElement(el) {
 
 var ComponentFacet = require('../c_facet')
 	, facetsRegistry = require('./cf_registry')
+	, DOMEventsSource = require('../c_message_sources/dom_events_source')
 
 	, _ = require('mol-proto');
 
@@ -703,7 +715,6 @@ var Drag = _.createSubclass(ComponentFacet, 'Drag');
 _.extendProto(Drag, {
 	init: initDragFacet,
 	start: startDragFacet,
-	require: ['Events'], // TODO implement facet dependencies
 
 	setHandle: setDragHandle
 	// _reattach: _reattachEventsOnElementChange
@@ -715,10 +726,8 @@ module.exports = Drag;
 
 
 function initDragFacet() {
-	ComponentFacet.prototype.init.apply(this, arguments);
-	this._ondragstart = this.config.ondragstart;
-	this._ondrag = this.config.ondrag;
-	this._ondragend = this.config.ondragend;
+	ComponentFacet.prototype.init.apply(this, arguments);	
+	this._createMessageSource(DOMEventsSource);
 }
 
 
@@ -730,16 +739,12 @@ function setDragHandle(handleEl) {
 
 
 function startDragFacet() {
+	ComponentFacet.prototype.start.apply(this, arguments);
 	this.owner.el.setAttribute('draggable', true);
 
-	var eventsFacet = this.owner.events;
-	eventsFacet.onEvents({
-		'mousedown': onMouseDown,
-		'mouseenter mouseleave mousemove': onMouseMovement,
-		'dragstart drag': onDragging,
-		'dragstart drag dragend': callConfiguredHandler
-	});
-
+	this.on('mousedown', onMouseDown);
+	this.on('mouseenter mouseleave mousemove', onMouseMovement);
+	this.on('dragstart drag', onDragging);
 
 	var self = this;
 
@@ -775,7 +780,7 @@ function startDragFacet() {
 	}
 }
 
-},{"../c_facet":9,"./cf_registry":19,"mol-proto":41}],14:[function(require,module,exports){
+},{"../c_facet":9,"../c_message_sources/dom_events_source":22,"./cf_registry":19,"mol-proto":41}],14:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -888,7 +893,7 @@ function startEditableFacet() {
 		this.makeEditable(true);
 	
 	var eventsFacet = this.owner.events;
-	eventsFacet.onEvents({
+	eventsFacet.onMessages({
 		'mousedown': onMouseDown,
 		'blur': onBlur,
 		'keypress': onKeyPress,
@@ -953,18 +958,9 @@ function initEventsFacet() {
 
 	var domEventsSource = new DOMEventsSource(this, { trigger: 'trigger' }, this.owner);
 
-	var proxyMessengerMethods = {
-		on: 'onMessage',
-		off: 'offMessage',
-		onEvents: 'onMessages',
-		offEvents: 'offMessages',
-		getListeners: 'getSubscribers'
-	};
-
-	var messenger = new Messenger(this, proxyMessengerMethods, domEventsSource);
+	this._setMessageSource(domEventsSource)
 
 	Object.defineProperties(this, {
-		_eventsMessenger: { value: messenger },
 		_domEventsSource: { value: domEventsSource }
 	});
 }
@@ -1004,18 +1000,9 @@ function initFrameFacet() {
 	};
 	var messageSource = new iFrameMessageSource(this, iFrameMessageSourceProxy);
 
-	var proxyMessengerMethods = {
-		on: 'onMessage',
-		off: 'offMessage',
-		onMessages: 'onMessages',
-		offMessages: 'offMessages',
-		getSubscribers: 'getSubscribers'
-	};
-
-	var iFrameMessenger = new Messenger(this, proxyMessengerMethods, messageSource);
+	this._setMessageSource(messageSource);
 
 	Object.defineProperties(this, {
-		_iFrameMessenger: { value: iFrameMessenger },
 		_messageSource: { value: messageSource }
 	});
 }
@@ -1765,13 +1752,14 @@ _.extendProto(Messenger, {
 	_removeSubscriber: _removeSubscriber,
 	_removeAllSubscribers: _removeAllSubscribers,
 	_callPatternSubscribers: _callPatternSubscribers,
-	_callSubscribers: _callSubscribers
+	_callSubscribers: _callSubscribers,
+	_setMessageSource: _setMessageSource
 });
 
 
 Messenger.defaultMethods = {
-	onMessage: 'onMessage',
-	offMessage: 'offMessage',
+	on: 'onMessage',
+	off: 'offMessage',
 	onMessages: 'onMessages',
 	offMessages: 'offMessages',
 	postMessage: 'postMessage',
@@ -1790,7 +1778,7 @@ function initMessenger(hostObject, proxyMethods, messageSource) {
  	Object.defineProperties(this, {
  		_messageSubscribers: { value: {} },
  		_patternMessageSubscribers: { value: {} },
- 		_messageSource: { value: messageSource }
+ 		_messageSource: { value: messageSource, writable: true }
  	});
 
  	if (messageSource)
@@ -1945,7 +1933,7 @@ function _callPatternSubscribers(message, data) {
 function _callSubscribers(message, data, msgSubscribers) {
 	if (msgSubscribers && msgSubscribers.length)
 		msgSubscribers.forEach(function(subscriber) {
-			subscriber.call(this, message, data);
+			subscriber.call(this._hostObject, message, data);
 		}, this);
 }
 
@@ -1980,6 +1968,17 @@ function _chooseSubscribersHash(message) {
 				? this._patternMessageSubscribers
 				: this._messageSubscribers;
 }
+
+
+function _setMessageSource(messageSource) {
+	check(messageSource, MessageSource);
+
+ 	Object.defineProperties(this, {
+ 		_messageSource: { value: messageSource }
+ 	});
+ 	messageSource.messenger = this;
+}
+
 
 },{"../abstract/mixin":1,"../util/check":35,"../util/error":36,"./message_source":33,"mol-proto":41}],33:[function(require,module,exports){
 'use strict';
