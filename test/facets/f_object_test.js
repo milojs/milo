@@ -19,7 +19,7 @@ describe('FacetedObject class', function() {
 			}
 		});
 
-			assert.equal(TestFacetedClass.prototype.facets, facetsClasses);
+			assert.equal(TestFacetedClass.prototype.facetsClasses, facetsClasses);
 			assert(TestFacetedClass.prototype instanceof FacetedObject);
 
 		var aTestFacetedObject = new TestFacetedClass();

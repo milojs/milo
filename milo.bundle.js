@@ -1578,29 +1578,25 @@ _.extendProto(Facet, {
 var Facet = require('./f_class')
 	, _ = require('mol-proto')
 	, check = require('../util/check')
-	, Match = check.Match;
+	, Match = check.Match
+	, FacetError = require('../util/error').Facet;
 
 module.exports = FacetedObject;
 
+
 // abstract class for faceted object
 function FacetedObject() {
-	// TODO instantiate facets if configuration isn't passed
-	// write a test to check it
-	var facetsConfig = _.clone(this.facetsConfig || {});
+	// TODO write a test to check that facets are created if configuration isn't passed
+	var facetsConfig = this.facetsConfig || {};
 
-	var thisClass = this.constructor
-		, facetsDescriptors = {}
+	var facetsDescriptors = {}
 		, facets = {};
 
 	if (this.constructor == FacetedObject)		
-		throw new Error('FacetedObject is an abstract class, can\'t be instantiated');
+		throw new FacetError('FacetedObject is an abstract class, can\'t be instantiated');
 
-	if (this.facets)
-		_.eachKey(this.facets, instantiateFacet, this, true);
-
-	var unusedFacetsNames = Object.keys(facetsConfig);
-	if (unusedFacetsNames.length)
-		throw new Error('Configuration for unknown facet(s) passed: ' + unusedFacetsNames.join(', '));
+	if (this.facetsClasses)
+		_.eachKey(this.facetsClasses, instantiateFacet, this, true);
 
 	Object.defineProperties(this, facetsDescriptors);
 	Object.defineProperty(this, 'facets', { value: facets });	
@@ -1611,7 +1607,6 @@ function FacetedObject() {
 
 	function instantiateFacet(FacetClass, fct) {
 		var facetOpts = facetsConfig[fct];
-		delete facetsConfig[fct];
 
 		facets[fct] = new FacetClass(this, facetOpts);
 
@@ -1621,7 +1616,6 @@ function FacetedObject() {
 		};
 	}
 }
-
 
 _.extendProto(FacetedObject, {
 	addFacet: addFacet
@@ -1637,10 +1631,10 @@ function addFacet(FacetClass, facetOpts, facetName) {
 	var protoFacets = this.constructor.prototype.facets;
 
 	if (protoFacets && protoFacets[facetName])
-		throw new Error('facet ' + facetName + ' is already part of the class ' + this.constructor.name);
+		throw new FacetError('facet ' + facetName + ' is already part of the class ' + this.constructor.name);
 
 	if (this[facetName])
-		throw new Error('facet ' + facetName + ' is already present in object');
+		throw new FacetError('facet ' + facetName + ' is already present in object');
 
 	var newFacet = this.facets[facetName] = new FacetClass(this, facetOpts);
 
@@ -1657,19 +1651,25 @@ function addFacet(FacetClass, facetOpts, facetName) {
 // these classes inherit from FacetedObject
 FacetedObject.createFacetedClass = function (name, facetsClasses, facetsConfig) {
 	check(name, String);
-	check(facetsClasses, Match.ObjectHash(Function /* Match.Subclass(Facet, true) TODO - fix */));
+	check(facetsClasses, Match.ObjectHash(Match.Subclass(Facet, true)));
+	check(facetsConfig, Match.Optional(Object));
+
+	if (facetsConfig)
+		_.eachKey(facetsConfig, function(fctConfig, fctName) {
+			if (! facetsClasses.hasOwnProperty(fctName))
+				throw new FacetError('configuration for facet (' + fctName + ') passed that is not in class');
+		});
 
 	var FacetedClass = _.createSubclass(this, name, true);
 
 	_.extendProto(FacetedClass, {
-		facets: facetsClasses,
+		facetsClasses: facetsClasses,
 		facetsConfig: facetsConfig
 	});
 	return FacetedClass;
 };
 
-
-},{"../util/check":36,"./f_class":28,"mol-proto":42}],30:[function(require,module,exports){
+},{"../util/check":36,"../util/error":37,"./f_class":28,"mol-proto":42}],30:[function(require,module,exports){
 'use strict';
 
 var miloMail = require('./mail')
