@@ -285,9 +285,9 @@ function setAttributeValue(value) {
 'use strict';
 
 var miloMail = require('./mail')
-	, miloComponentsRegistry = require('./components/c_registry')
+	, componentsRegistry = require('./components/c_registry')
 	, facetsRegistry = require('./components/c_facets/cf_registry')
-	, Component = miloComponentsRegistry.get('Component')
+	, Component = componentsRegistry.get('Component')
 	, Scope = require('./components/scope')
 	, BindAttribute = require('./attribute/a_bind')
 	, BinderError = require('./util/error').Binder
@@ -299,9 +299,8 @@ var miloMail = require('./mail')
 module.exports = binder;
 
 
-function binder(scopeEl, componentsRegistry) {
-	var componentsRegistry = componentsRegistry || miloComponentsRegistry
-		, scopeEl = scopeEl || document.body
+function binder(scopeEl) {
+	var scopeEl = scopeEl || document.body
 		, scope = new Scope;
 
 	bindElement(scope, scopeEl);
@@ -1093,8 +1092,8 @@ function renderTemplate(data) { // we need data only if use templating engine
 }
 
 
-function bindInnerComponents(registry) {
-	var thisScope = binder(this.owner.el, registry);
+function bindInnerComponents() {
+	var thisScope = binder(this.owner.el);
 
 	// TODO should be changed to reconcillation of existing children with new
 	this.owner.container.scope = thisScope[this.owner.name].container.scope;
