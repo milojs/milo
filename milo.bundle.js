@@ -328,16 +328,15 @@ function scanDomForBindAttribute(scopeEl) {
 
 
 function createBoundComponents(scanScope) {
-	var scope = new Scope;
+	var scope = new Scope(scanScope._rootEl);
 
-	if (scanScope)
-		scanScope._each(function(compInfo) {
-			var aComponent = Component.create(compInfo);
+	scanScope._each(function(compInfo) {
+		var aComponent = Component.create(compInfo);
 
-			scope._add(aComponent, aComponent.name);
-			if (aComponent.container)
-				aComponent.container.scope = createBoundComponents(compInfo.container.scope);
-		});
+		scope._add(aComponent, aComponent.name);
+		if (aComponent.container)
+			aComponent.container.scope = createBoundComponents(compInfo.container.scope);
+	});
 
 	return scope;
 }
@@ -345,7 +344,7 @@ function createBoundComponents(scanScope) {
 
 function createBinderScope(scopeEl, scopeObjectFactory) {
 	var scopeEl = scopeEl || document.body
-		, scope = new Scope;
+		, scope = new Scope(scopeEl);
 
 	createScopeForElement(scope, scopeEl);
 	return scope;
@@ -355,20 +354,25 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 		// get element's binding attribute (ml-bind by default)
 		var attr = new BindAttribute(el);
 
-		if (attr.node)
-			var scopeObject = scopeObjectFactory(scope, el, attr);
+		if (attr.node) {
+			var scopeObject = scopeObjectFactory(scope, el, attr)
+				, isContainer = typeof scopeObject != 'undefined' && scopeObject.container;
+		}
 
 		if (el.children && el.children.length) {
 			var innerScope = createScopeForChildren(el);
 
 			if (innerScope._length()) {
 				// attach inner attributes to the current one (create a new scope) ...
-				if (typeof scopeObject != 'undefined' && scopeObject.container)
+				if (isContainer)
 					scopeObject.container.scope = innerScope;
 				else // or keep them in the current scope
 					scope._copy(innerScope);;
 			}
 		}
+
+		if (isContainer && ! scopeObject.container.scope)
+			scopeObject.container.scope = new Scope(el);
 
 		if (scopeObject)
 			scope._add(scopeObject, attr.compName);
@@ -376,7 +380,7 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 
 
 	function createScopeForChildren(containerEl) {
-		var scope = new Scope;
+		var scope = new Scope(containerEl);
 		Array.prototype.forEach.call(containerEl.children, function(el) {
 			createScopeForElement(scope, el)
 		});
@@ -887,7 +891,8 @@ function initEditableFacet() {
 	ComponentFacet.prototype.init.apply(this, arguments);
 
 	this._createMessageSource(EditableEventsSource, {
-		editableOnClick: this.config.editableOnClick
+		editableOnClick: this.config.editableOnClick,
+		moveToAdjacentEditable: this.config.moveToAdjacentEditable
 	});
 
 	this._editable = typeof this.config.editable != 'undefined'
@@ -911,19 +916,52 @@ function startEditableFacet() {
 	
 	this.onMessages({
 		'editstart': onEditStart,
-		'editend': onEditEnd
+		'editend': onEditEnd,
+		'previouseditable': makePreviousComponentEditable,
+		'nexteditable': makePreviousComponentEditable
 	});
+}
 
-	var self = this;
 
-	function onEditStart(eventType, event) {
-		self.makeEditable(true);
+function onEditStart(eventType, event) {
+	this.makeEditable(true);
+}
+
+
+function onEditEnd(eventType, event) {
+	this.makeEditable(false);
+}
+
+
+function makePreviousComponentEditable(eventType, event) {
+	var el = this.owner.el
+			, scope = this.owner.scope
+			, treeWalker = document.createTreeWalker(scope._rootEl, NodeFilter.SHOW_ELEMENT);
+
+	treeWalker.currentNode = el;
+	var prevNode = treeWalker.previousNode();
+
+	outer: while (prevNode) {
+		var componentsNames = Object.keys(scope);
+
+		for (var i = 0; i < componentsNames.length; i++) {
+			var component = scope[componentsNames[i]];
+			if (component.el == prevNode && component.editable) {
+				var found = true;
+				break outer;
+			}
+		}
+
+		treeWalker.currentNode = prevNode;
+		prevNode = treeWalker.previousNode();
 	}
 
-	function onEditEnd(eventType, event) {
-		self.makeEditable(false);
+	if (found) {
+		component.editable.postMessage('editstart');
+		component.el.focus();
 	}
 }
+
 
 },{"../c_facet":9,"../c_message_sources/editable_events_source":24,"./cf_registry":19,"mol-proto":44}],16:[function(require,module,exports){
 'use strict';
@@ -1071,8 +1109,6 @@ function bindInnerComponents() {
 
 	// TODO should be changed to reconcillation of existing children with new
 	this.owner.container.scope = thisScope[this.owner.name].container.scope;
-
-	return thisScope;
 }
 
 },{"../../binder":6,"../../util/check":38,"../c_facet":9,"./cf_registry":19,"mol-proto":44}],19:[function(require,module,exports){
@@ -1435,7 +1471,10 @@ function initEditableEventsSource(hostObject, proxyMethods, component, options) 
 var editableEventsMap = {
 	'enterkey': 'keypress',
 	'editstart': 'mousedown',
-	'editend': 'blur'
+	'editend': 'blur',
+	'nexteditable': 'keydown',
+	'previouseditable': 'keydown',	
+	'adjacenteditable': 'keydown',
 };
 
 // TODO: this function should return relevant DOM event dependent on element tag
@@ -1459,11 +1498,37 @@ function removeDomEventListener(eventType) {
 
 
 function filterEditableMessage(eventType, message, data) {
-	if (message == 'enterkey' && data.keyCode != 13)
-		return false;
+	switch (message) {
+		case 'enterkey':
+		 	return data.keyCode == 13;
+		case 'previouseditable':
+			return this.options.moveToAdjacentEditable
+				&& movedToPrevious(data);
+		case 'nexteditable':
+			return this.options.moveToAdjacentEditable
+				&& movedToNext(data);
+		case 'adjacenteditable':
+			return this.options.moveToAdjacentEditable
+				&& (movedToPrevious(data) || movedToNext(data));
+		case 'editstart':
+		case 'editend':
+			return this.options.editableOnClick;
+		default:
+			return true;
+	}
 
-	return (this.options.editableOnClick || (message != 'editstart' && message != 'editend'))
-};
+	function movedToPrevious(data) {
+		return (data.keyCode == 37 || data.keyCode == 38) // up and left
+			&& window.getSelection().anchorOffset == 0;
+	}
+
+	function movedToNext(data) {
+		// console.log(window.getSelection().anchorOffset);
+		
+		return (data.keyCode == 39 || data.keyCode == 40) // down and right
+			&& window.getSelection().anchorOffset == 0;
+	}
+}
 
 
  // event dispatcher - as defined by Event DOM API
@@ -1579,11 +1644,9 @@ var _ = require('mol-proto')
 
 
 // Scope class
-function Scope(parent) {
-	check(parent, Match.Optional(Scope));
-
+function Scope(rootEl) {
 	Object.defineProperties(this, {
-		_parent: { value: parent }
+		_rootEl: { value: rootEl }
 	})
 };
 

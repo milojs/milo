@@ -35,8 +35,6 @@ describe('milo binder', function() {
                 .render()
                 .binder();
 
-        _.extend(ctrl, myTmplComps); // should be some function to add to controller
-
         var innerPara = ctrl.myTemplate.container.scope.innerPara;
         innerPara.el.innerHTML += ', then bound and changed via component inside template';
     });
