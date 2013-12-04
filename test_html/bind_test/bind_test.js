@@ -10,6 +10,8 @@ describe('milo binder', function() {
 
         console.log(ctrl);
 
+        console.log(milo.binder.scan());
+
     	ctrl.articleButton.events.on('click mouseenter', function(eType, evt) {
     		console.log('button', eType, evt);
     	});
