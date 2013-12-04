@@ -6,11 +6,15 @@ describe('milo binder', function() {
 
 		expect({p: 1}).property('p', 1);
 
-    	var ctrl = milo.binder();
-
-        console.log(ctrl);
-
         console.log(milo.binder.scan());
+
+        console.log('one pass binding');
+    	var ctrl1 = milo.binder();
+        console.log(ctrl1);
+
+        console.log('two pass binding');
+        var ctrl = milo.binder.twoPass();
+        console.log(ctrl);
 
     	ctrl.articleButton.events.on('click mouseenter', function(eType, evt) {
     		console.log('button', eType, evt);

@@ -296,119 +296,95 @@ var miloMail = require('./mail')
 	, Match =  check.Match;
 
 
-binder.scan = scan;
+binder.scan = scanDomForBindAttribute;
+binder.create = createBoundComponents;
+binder.twoPass = binderTwoPass;
+
 
 module.exports = binder;
 
 
 function binder(scopeEl) {
-	var scopeEl = scopeEl || document.body
-		, scope = new Scope;
-
-	bindElement(scope, scopeEl);
-	return scope;
-
-
-	function bindElement(scope, el){
-		var attr = new BindAttribute(el);
-
-		if (attr.node)
-			var aComponent = createComponent(scope, el, attr);
-
-		// bind inner elements to components
-		if (el.children && el.children.length) {
-			var innerScope = bindChildren(el);
-
-			if (innerScope._length()) {
-				// attach inner components to the current one (create a new scope) ...
-				if (typeof aComponent != 'undefined' && aComponent.container)
-					aComponent.container.scope = innerScope;
-				else // or keep them in the current scope
-					scope._copy(innerScope);;
-			}
-		}
-
-		if (aComponent)
-			scope._add(aComponent, attr.compName);
-	}
-
-
-	function bindChildren(containerEl) {
-		var scope = new Scope;
-		Array.prototype.forEach.call(containerEl.children, function(el) {
-			bindElement(scope, el)
-		});
-		return scope;
-	}
-
-
-	function createComponent(scope, el, attr) {
-		// element will be bound to a component
-		attr.parse().validate();
-
-		// get component class from registry and validate
-		var ComponentClass = componentsRegistry.get(attr.compClass);
-		if (! ComponentClass)
-			throw new BinderError('class ' + attr.compClass + ' is not registered');
-		check(ComponentClass, Match.Subclass(Component, true));
-
-		// create new component
-		var aComponent = new ComponentClass(scope, el, attr.compName);
-
-		// add extra facets
-		var facets = attr.compFacets;
-		if (facets)
-			facets.forEach(function(fct) {
-				aComponent.addFacet(fct);
-			});
-
-		return aComponent;
-	}
+	return createBinderScope(scopeEl, function(scope, el, attr) {
+		var info = new ComponentInfo(scope, el, attr);
+		return Component.create(info);
+	});
 }
 
 
-function scan(scopeEl) {
+function binderTwoPass(scopeEl) {
+	var scopeEl = scopeEl || document.body;
+	var scanScope = binder.scan(scopeEl);
+	return binder.create(scanScope);
+}
+
+
+function scanDomForBindAttribute(scopeEl) {
+	return createBinderScope(scopeEl, function(scope, el, attr) {
+		return new ComponentInfo(scope, el, attr);
+	});
+}
+
+
+function createBoundComponents(scanScope) {
+	var scope = new Scope;
+
+	if (scanScope)
+		scanScope._each(function(compInfo) {
+			var aComponent = Component.create(compInfo);
+
+			scope._add(aComponent, aComponent.name);
+			if (aComponent.container)
+				aComponent.container.scope = createBoundComponents(compInfo.container.scope);
+		});
+
+	return scope;
+}
+
+
+function createBinderScope(scopeEl, scopeObjectFactory) {
 	var scopeEl = scopeEl || document.body
 		, scope = new Scope;
 
-	scanElement(scope, scopeEl);
+	createScopeForElement(scope, scopeEl);
 	return scope;
 
 
-	function scanElement(scope, el){
+	function createScopeForElement(scope, el) {
 		// get element's binding attribute (ml-bind by default)
 		var attr = new BindAttribute(el);
 
 		if (attr.node)
-			var aComponentInfo = new ComponentInfo(scope, el, attr);
+			var scopeObject = scopeObjectFactory(scope, el, attr);
 
 		if (el.children && el.children.length) {
-			var innerScope = scanChildren(el);
+			var innerScope = createScopeForChildren(el);
 
 			if (innerScope._length()) {
 				// attach inner attributes to the current one (create a new scope) ...
-				if (typeof aComponentInfo != 'undefined' && aComponentInfo.container)
-					aComponentInfo.container.scope = innerScope;
+				if (typeof scopeObject != 'undefined' && scopeObject.container)
+					scopeObject.container.scope = innerScope;
 				else // or keep them in the current scope
 					scope._copy(innerScope);;
 			}
 		}
 
-		if (aComponentInfo)
-			scope._add(aComponentInfo, attr.compName);
+		if (scopeObject)
+			scope._add(scopeObject, attr.compName);
 	}
 
-	function scanChildren(containerEl) {
+
+	function createScopeForChildren(containerEl) {
 		var scope = new Scope;
 		Array.prototype.forEach.call(containerEl.children, function(el) {
-			scanElement(scope, el)
+			createScopeForElement(scope, el)
 		});
 		return scope;
 	}
 }
 
 
-// private class used to hold information about component
+// class used to hold information about component
 function ComponentInfo(scope, el, attr) {
 	attr.parse().validate();
 
@@ -417,6 +393,7 @@ function ComponentInfo(scope, el, attr) {
 	this.el = el;
 	this.ComponentClass = getComponentClass(attr);
 	this.extraFacetsClasses = getComponentExtraFacets(this.ComponentClass, attr);
+
 	if (hasContainerFacet(this.ComponentClass, attr))
 		this.container = {};
 
@@ -448,7 +425,7 @@ function ComponentInfo(scope, el, attr) {
 
 	function hasContainerFacet(ComponentClass, attr) {
 		return (ComponentClass.hasFacet('container')
-			|| (Array.isArray(attr.compFacets) && attr.compFacets.indexOf('Container') >= 1));
+			|| (Array.isArray(attr.compFacets) && attr.compFacets.indexOf('Container') >= 0));
 	}
 }
 
@@ -482,7 +459,38 @@ var Component = _.createSubclass(FacetedObject, 'Component', true);
 module.exports = Component;
 
 
-Component.createComponentClass = function(name, facetsConfig) {
+Component.createComponentClass = createComponentClass;
+delete Component.createFacetedClass;
+
+
+Component.create = createComponent;
+
+
+_.extendProto(Component, {
+	init: initComponent,
+	addFacet: addFacet,
+	allFacets: envokeMethodOnAllFacets,
+	remove: removeComponentFromScope
+});
+
+
+//
+// class methods
+//
+function createComponent(info) {
+	var ComponentClass = info.ComponentClass;
+	var aComponent = new ComponentClass(info.scope, info.el, info.name);
+
+	if (info.extraFacetsClasses)
+		_.eachKey(info.extraFacetsClasses, function(FacetClass) {
+			aComponent.addFacet(FacetClass);
+		});
+
+	return aComponent;
+}
+
+
+function createComponentClass(name, facetsConfig) {
 	var facetsClasses = {};
 
 	if (Array.isArray(facetsConfig)) {
@@ -505,17 +513,10 @@ Component.createComponentClass = function(name, facetsConfig) {
 	return ComponentClass;
 };
 
-delete Component.createFacetedClass;
 
-
-_.extendProto(Component, {
-	init: initComponent,
-	addFacet: addFacet,
-	allFacets: envokeMethodOnAllFacets,
-	remove: removeComponentFromScope
-});
-
-
+//
+// instance methods
+//
 function initComponent(scope, element, name) {
 	this.el = element;
 	this.name = name;
