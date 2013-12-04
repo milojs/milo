@@ -876,8 +876,7 @@ var Editable = _.createSubclass(ComponentFacet, 'Editable');
 _.extendProto(Editable, {
 	init: initEditableFacet,
 	start: startEditableFacet,
-	makeEditable: makeEditable,
-	require: ['Events'] // TODO implement facet dependencies
+	makeEditable: makeEditable
 
 	// _reattach: _reattachEventsOnElementChange
 });
