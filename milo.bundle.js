@@ -12,7 +12,7 @@ module.exports = Mixin;
 // an abstract class for mixin pattern - adding proxy methods to host objects
 function Mixin(hostObject, proxyMethods /*, other args - passed to init method */) {
 	// TODO - moce checks from Messenger here
-	check(hostObject, Match.Optional(Object));
+	check(hostObject, Match.Optional(Match.OneOf(Object, Function)));
 	check(proxyMethods, Match.Optional(Match.ObjectHash(String)));
 
 	Object.defineProperty(this, '_hostObject', { value: hostObject });
@@ -478,14 +478,15 @@ function createComponentClass(name, facetsConfig) {
 //
 function initComponent(scope, element, name) {
 	this.el = element;
-	this.name = name;
-	this.scope = scope;
+
+	_.defineProperties(this, {
+		name: name,
+		scope: scope
+	}, true);
 
 	var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
 
-	Object.defineProperties(this, {
-		_messenger: { value: messenger },
-	});	
+	_.defineProperty(this, '_messenger', messenger);
 
 	// start all facets
 	this.allFacets('check');
@@ -554,8 +555,8 @@ _.extendProto(ComponentFacet, {
 function initComponentFacet() {
 	var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
 
-	Object.defineProperties(this, {
-		_messenger: { value: messenger },
+	_.defineProperties(this, {
+		_messenger: messenger
 	});
 }
 
@@ -586,7 +587,7 @@ function _createMessageSource(MessageSourceClass, options) {
 	var messageSource = new MessageSourceClass(this, undefined, this.owner, options);
 	this._setMessageSource(messageSource)
 
-	Object.defineProperty(this, '_messageSource', { value: messageSource });
+	_.defineProperty(this, '_messageSource', messageSource);
 }
 },{"../facets/f_class":30,"../messenger":35,"../util/error":39,"mol-proto":44}],10:[function(require,module,exports){
 'use strict';
@@ -2735,7 +2736,7 @@ var _ = require('mol-proto');
 // module exports error classes for all names defined in this array
 var errorClassNames = ['AbstractClass', 'Mixin', 'Messenger', 'ComponentDataSource',
 					   'Attribute', 'Binder', 'Loader', 'MailMessageSource', 'Facet',
-					   'Scope', 'EditableEventsSource'];
+					   'Scope', 'EditableEventsSource', 'Model'];
 
 var error = {
 	toBeImplemented: toBeImplemented,
@@ -2925,6 +2926,8 @@ var proto = _ = {
 	makeSubclass: makeSubclass,
 	extend: extend,
 	clone: clone,
+	defineProperty: defineProperty,
+	defineProperties: defineProperties,
 	deepExtend: deepExtend,
 	allKeys: Object.getOwnPropertyNames.bind(Object),
 	keyOf: keyOf,
@@ -2984,6 +2987,36 @@ function extend(self, obj, onlyEnumerable) {
 }
 
 
+function clone(obj) {
+	var clonedObject = Object.create(obj.constructor.prototype);
+	_.extend(clonedObject, obj);
+	return clonedObject;
+}
+
+
+function defineProperty(self, propertyName, value, enumerable, configurable, writable) {
+	Object.defineProperty(self, propertyName, {
+		enumerable: enumerable,
+		configurable: configurable,
+		writable: writable,
+		value: value
+	});
+}
+
+
+function defineProperties(self, propertyValues, enumerable, configurable, writable) {
+	var descriptors = _.mapKeys(propertyValues, function(value) {
+		return {
+			enumerable: enumerable,
+			configurable: configurable,
+			writable: writable,
+			value: value
+		};		
+	});
+	Object.defineProperties(self, descriptors);
+}
+
+
 function deepExtend(self, obj, onlyEnumerable) {
 	return _extendTree(self, obj, onlyEnumerable, []);
 }
@@ -3005,13 +3038,6 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
 	}, this, onlyEnumerable);
 
 	return selfNode;
-}
-
-
-function clone(obj) {
-	var clonedObject = Object.create(obj.constructor.prototype);
-	_.extend(clonedObject, obj);
-	return clonedObject;
 }
 
 
