@@ -1,6 +1,6 @@
 {
   "name": "mol-milo",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "A minimalist browser framework that binds HTML elements to JS components",
   "main": "lib/milo.js",
   "scripts": {
@@ -27,6 +27,6 @@
     "grunt-contrib-watch": "~0.5.3"
   },
   "dependencies": {
-    "mol-proto": "~0.0.5"
+    "mol-proto": "git://github.com/MailOnline/proto.git"
   }
 }
