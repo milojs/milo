@@ -39,6 +39,7 @@ function _createProxyMethod(mixinMethodName, proxyMethodName, hostObject) {
 
 	check(this[mixinMethodName], Function);
 
+	// Bind proxied messenger's method to messenger
 	var boundMethod = this[mixinMethodName].bind(this);
 
 	Object.defineProperty(hostObject, proxyMethodName,
@@ -863,7 +864,7 @@ function startDropFacet() {
 	this.on('dragenter dragover', onDragging);
 
 	function onDragging(eventType, event) {
-		var dataTypes = event.dataTransfer.types
+		var dataTypes = event.dataTransfer.types;
 		if (dataTypes.indexOf('text/html') >= 0
 				|| dataTypes.indexOf('x-application/milo-component') >= 0) {
 			event.dataTransfer.dropEffect = 'move';
@@ -1077,7 +1078,7 @@ module.exports = ModelFacet;
 
 
 function initModelFacet() {
-	this.m = new Model;
+	this.m = new Model(this);
 
 	ComponentFacet.prototype.init.apply(this, arguments);
 }
@@ -2169,7 +2170,7 @@ function registerSubscribers(messageSubscribers) {
 	check(messageSubscribers, Match.ObjectHash(Function));
 
 	var notYetRegisteredMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
-		return this.onMessage(messages, subscriber)
+		return this.onMessage(messages, subscriber);
 	}, this);
 
 	return notYetRegisteredMap;
@@ -2233,7 +2234,7 @@ function removeSubscribers(messageSubscribers) {
 	check(messageSubscribers, Match.ObjectHash(Function));
 
 	var subscriberRemovedMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
-		return this.offMessages(messages, subscriber)
+		return this.offMessages(messages, subscriber);
 	}, this);
 
 	return subscriberRemovedMap;	
@@ -2497,6 +2498,8 @@ function Model(scope, schema, name, data) {
 	var messenger = new Messenger(model, Messenger.defaultMethods); //, messageSource);
 
 	_.defineProperties(model, {
+		scope: scope,
+		name: name,
 		_schema: schema,
 		_data: data || {},
 		_messenger: messenger,
@@ -2641,20 +2644,26 @@ function compileModelSetter(path, parsedPath) {
 	}
 
 	var lastProperty = parsedPath[count].property;
+
+	// check if property is defined
+	setterCode += 'var wasDef = m' + modelDataProperty + '.hasOwnProperty("' + lastProperty.slice(1) + '");\n '
+
+	// get old property value
+				+ 'var old = m' + modelDataProperty + lastProperty + ';\n '
+
+	// set property to new value
+				+ 'm' + modelDataProperty + lastProperty + ' = value;\n '	
+
 	// check if property does not exists
-	setterCode += 'if (! m' + modelDataProperty + '.hasOwnProperty("' + lastProperty.slice(1) + '"))\n  ';
+				+ 'if (! wasDef)\n  ';
 
 	modelDataProperty += lastProperty;
 	// post message after it was added
 	setterCode += modelPostMessageCode + '"' + modelDataProperty + '", { type: "added", newValue: value });\n '
 	// else check if the value has changed ...
-				+ 'else {\n  var old = m' + modelDataProperty
-				+ ';\n  if (old != value)\n   '
+				+ 'else if (old != value)\n   '
 	// ... and post message if it did
 				+ modelPostMessageCode + '"' + modelDataProperty + '", { type: "changed", oldValue: old, newValue: value});\n }\n '
-
-	// set property to new value
-	setterCode += 'm' + modelDataProperty + ' = value;\n};';
 
 	try {
 		eval(setterCode);

@@ -198,4 +198,20 @@ describe('Model class', function() {
 
 		// m('.list').off('', postLogger);
 	});
+
+
+	it('should post message AFTER model was changed', function() {
+		var m = new Model()
+			, posted = {};
+
+		function postLogger(message, data) {
+			assert.equal(m, this, 'should set message handler context to model');
+
+			// main thing in this test!
+			assert.equal(m('.list[0].info.name').value(), 'Jason', 'should set model BEFORE posting message');
+			posted[message] = data;
+		}
+
+		m('.list[0].info.name').setValue('Jason');
+	});
 });
