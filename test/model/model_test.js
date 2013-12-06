@@ -141,20 +141,10 @@ describe('Model class', function() {
 		var m = new Model()
 			, posted = {};
 
-		m.on([
-				'.list',
-				'.list[0]',
-				'.list[0].info',
-				'.list[0].info.name',
-				'.list[0].info.surname',
-				'.list[0].extra',
-				'.list[0].extra[0]',
-				'.list[0].extra[1]',
-			],
-			function(message, data) {
-				posted[message] = data;
-			}
-		);
+		m.on(/.*/, function(message, data) {
+			assert.equal(m, this, 'should set message handler context to model');
+			posted[message] = data;
+		});
 
 		m('.list[0].info.name').setValue('Jason');
 
@@ -185,5 +175,27 @@ describe('Model class', function() {
 				'.list[0].extra[0]': { type: 'added', newValue: 'extra0' },
   				'.list[0].extra[1]': { type: 'added', newValue: 'extra1' }
 			}, 'should not post messages on model when property traversed');
+	});
+
+
+	it('should allow message subsciption on model path with a depth indicated by stars', function() {
+		var m = new Model()
+			, posted = {};
+
+		function postLogger(message, data) {
+			assert.equal(m, this, 'should set message handler context to model');
+			posted[message] = data;
+		}
+
+		m('.list').on('', postLogger);
+
+		m('.list[0].info.name').setValue('Jason');
+
+			assert.deepEqual(posted, {
+				'.list': { type: 'added', newValue: [] },
+			}, 'should post messages on model when property added');
+
+
+		// m('.list').off('', postLogger);
 	});
 });
