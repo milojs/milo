@@ -2023,10 +2023,10 @@ var Mixin = require('../abstract/mixin')
 	, MessengerError = require('../util/error').Messenger;
 
 
-var eventsSplitRegExp = /\s*(?:\,|\s)\s*/;
-
-
 var Messenger = _.createSubclass(Mixin, 'Messenger');
+
+var messagesSplitRegExp = Messenger.messagesSplitRegExp = /\s*(?:\,|\s)\s*/;
+
 
 _.extendProto(Messenger, {
 	init: initMessenger, // called by Mixin (superclass)
@@ -2080,7 +2080,7 @@ function registerSubscriber(messages, subscriber) {
 	check(subscriber, Function); 
 
 	if (typeof messages == 'string')
-		messages = messages.split(eventsSplitRegExp);
+		messages = messages.split(messagesSplitRegExp);
 
 	var subscribersHash = this._chooseSubscribersHash(messages);
 
@@ -2135,7 +2135,7 @@ function removeSubscriber(messages, subscriber) {
 	check(subscriber, Match.Optional(Function)); 
 
 	if (typeof messages == 'string')
-		messages = messages.split(eventsSplitRegExp);
+		messages = messages.split(messagesSplitRegExp);
 
 	var subscribersHash = this._chooseSubscribersHash(messages);
 
@@ -2212,6 +2212,7 @@ function postMessage(message, data) {
 function _callPatternSubscribers(message, data) {
 	_.eachKey(this._patternMessageSubscribers, 
 		function(patternSubscribers, pattern) {
+			pattern = RegExp(pattern);
 			if (pattern.test(message))
 				this._callSubscribers(message, data, patternSubscribers);
 		}
