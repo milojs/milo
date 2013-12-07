@@ -27,6 +27,7 @@
     "grunt-contrib-watch": "~0.5.3"
   },
   "dependencies": {
-    "mol-proto": "git://github.com/MailOnline/proto.git"
+    "mol-proto": "git://github.com/MailOnline/proto.git",
+    "dot": "~1.0.2"
   }
 }
