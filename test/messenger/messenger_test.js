@@ -117,6 +117,28 @@ describe('Messenger class', function() {
         assert(Match.test(messenger._patternMessageSubscribers['/test1/'], undefined), 'pattern event is undefined');
     });
 
+    it('should add and remove subscribers with correct context', function() {
+        var result = getHostWithMessenger()
+            , host = result.host
+            , messenger = result.messenger;
+
+        function localHandler(message, data) {
+            assert.equal(this, host, 'should pass correct context');
+        }
+
+
+        host.on('event', localHandler);
+        host.on('event', handler1);
+            var subscribers = host.getListeners('event');
+            assert.deepEqual(subscribers, [localHandler, handler1], 'should have 2 subscribers');
+
+        host.post('event');
+
+        host.off('event', localHandler);
+            var subscribers = host.getListeners('event');
+            assert.deepEqual(subscribers, [handler1], 'should have 1 subscribers');
+    });
+
     it('should define onEvents method', function() {
     	var result = getHostWithMessenger()
             , host = result.host

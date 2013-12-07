@@ -30,26 +30,31 @@ _.extendProto(Mixin, {
 });
 
 
-function _createProxyMethod(mixinMethodName, proxyMethodName) {
-	if (this._hostObject[proxyMethodName])
+function _createProxyMethod(mixinMethodName, proxyMethodName, hostObject) {
+	hostObject = hostObject || this._hostObject;
+
+	if (hostObject[proxyMethodName])
 		throw new MixinError('method ' + proxyMethodName +
 								 ' already defined in host object');
 
 	check(this[mixinMethodName], Function);
 
+	// Bind proxied messenger's method to messenger
 	var boundMethod = this[mixinMethodName].bind(this);
 
-	Object.defineProperty(this._hostObject, proxyMethodName,
+	Object.defineProperty(hostObject, proxyMethodName,
 		{ value: boundMethod });
 }
 
 
-function _createProxyMethods(proxyMethods) {
+function _createProxyMethods(proxyMethods, hostObject) {
 	// creating and binding proxy methods on the host object
-	_.eachKey(proxyMethods, _createProxyMethod, this);
+	_.eachKey(proxyMethods, function(mixinMethodName, proxyMethodName) {
+		this._createProxyMethod(mixinMethodName, proxyMethodName, hostObject);
+	}, this);
 }
 
-},{"../util/check":38,"../util/error":39,"mol-proto":44}],2:[function(require,module,exports){
+},{"../util/check":41,"../util/error":42,"mol-proto":50}],2:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -133,7 +138,7 @@ function unregisterAllClasses() {
 	this.__registeredClasses = {};
 };
 
-},{"../util/check":38,"mol-proto":44}],3:[function(require,module,exports){
+},{"../util/check":41,"mol-proto":50}],3:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./index')
@@ -202,7 +207,7 @@ function validateAttribute() {
 	return this;
 }
 
-},{"../config":29,"../util/check":38,"../util/error":39,"./index":5,"mol-proto":44}],4:[function(require,module,exports){
+},{"../config":30,"../util/check":41,"../util/error":42,"./index":5,"mol-proto":50}],4:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./index')
@@ -243,7 +248,7 @@ function validateAttribute() {
 
 	return this;
 }
-},{"../config":29,"../util/error":39,"./index":5,"mol-proto":44}],5:[function(require,module,exports){
+},{"../config":30,"../util/error":42,"./index":5,"mol-proto":50}],5:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -281,7 +286,7 @@ function setAttributeValue(value) {
 	this.el.setAttribute(this.name, value);
 }
 
-},{"../util/check":38,"../util/error":39,"mol-proto":44}],6:[function(require,module,exports){
+},{"../util/check":41,"../util/error":42,"mol-proto":50}],6:[function(require,module,exports){
 'use strict';
 
 var miloMail = require('./mail')
@@ -388,7 +393,7 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 	}
 }
 
-},{"./attribute/a_bind":3,"./components/c_facets/cf_registry":19,"./components/c_info":20,"./components/c_registry":26,"./components/scope":28,"./mail":33,"./util/check":38,"./util/error":39,"mol-proto":44}],7:[function(require,module,exports){
+},{"./attribute/a_bind":3,"./components/c_facets/cf_registry":20,"./components/c_info":21,"./components/c_registry":27,"./components/scope":29,"./mail":34,"./util/check":41,"./util/error":42,"mol-proto":50}],7:[function(require,module,exports){
 'use strict';
 
 var classes = {
@@ -402,7 +407,7 @@ var classes = {
 
 module.exports = classes;
 
-},{"./abstract/registry":2,"./components/c_class":8,"./components/c_facet":9,"./components/c_facets/cf_registry":19,"./components/c_registry":26,"./facets/f_class":30}],8:[function(require,module,exports){
+},{"./abstract/registry":2,"./components/c_class":8,"./components/c_facet":9,"./components/c_facets/cf_registry":20,"./components/c_registry":27,"./facets/f_class":31}],8:[function(require,module,exports){
 'use strict';
 
 var FacetedObject = require('../facets/f_object')
@@ -530,7 +535,7 @@ function removeComponentFromScope() {
 		delete this.scope[this.name];
 }
 
-},{"../facets/f_object":31,"../messenger":35,"../util/check":38,"./c_facet":9,"./c_facets/cf_registry":19,"mol-proto":44}],9:[function(require,module,exports){
+},{"../facets/f_object":32,"../messenger":36,"../util/check":41,"./c_facet":9,"./c_facets/cf_registry":20,"mol-proto":50}],9:[function(require,module,exports){
 'use strict';
 
 var Facet = require('../facets/f_class')
@@ -547,12 +552,18 @@ _.extendProto(ComponentFacet, {
 	init: initComponentFacet,
 	start: startComponentFacet,
 	check: checkDependencies,
+	_createMessenger: _createMessenger,
 	_setMessageSource: _setMessageSource,
 	_createMessageSource: _createMessageSource
 });
 
 
 function initComponentFacet() {
+	this._createMessenger();
+}
+
+
+function _createMessenger(){
 	var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
 
 	_.defineProperties(this, {
@@ -589,7 +600,7 @@ function _createMessageSource(MessageSourceClass, options) {
 
 	_.defineProperty(this, '_messageSource', messageSource);
 }
-},{"../facets/f_class":30,"../messenger":35,"../util/error":39,"mol-proto":44}],10:[function(require,module,exports){
+},{"../facets/f_class":31,"../messenger":36,"../util/error":42,"mol-proto":50}],10:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -633,7 +644,7 @@ function addChildComponents(childComponents) {
 	_.extend(this.scope, childComponents);
 }
 
-},{"../../binder":6,"../c_facet":9,"./cf_registry":19,"mol-proto":44}],11:[function(require,module,exports){
+},{"../../binder":6,"../c_facet":9,"./cf_registry":20,"mol-proto":50}],11:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -676,7 +687,7 @@ function initDataFacet() {
 	});
 }
 
-},{"../../messenger":35,"../c_facet":9,"../c_message_sources/component_data_source":21,"./cf_registry":19,"mol-proto":44}],12:[function(require,module,exports){
+},{"../../messenger":36,"../c_facet":9,"../c_message_sources/component_data_source":22,"./cf_registry":20,"mol-proto":50}],12:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -744,7 +755,7 @@ function prependInsideElement(el) {
 }
 
 
-},{"../../binder":6,"../../util/check":38,"../c_facet":9,"./cf_registry":19,"mol-proto":44}],13:[function(require,module,exports){
+},{"../../binder":6,"../../util/check":41,"../c_facet":9,"./cf_registry":20,"mol-proto":50}],13:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -818,7 +829,7 @@ function startDragFacet() {
 	}
 }
 
-},{"../c_facet":9,"../c_message_sources/dom_events_source":23,"./cf_registry":19,"mol-proto":44}],14:[function(require,module,exports){
+},{"../c_facet":9,"../c_message_sources/dom_events_source":24,"./cf_registry":20,"mol-proto":50}],14:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -853,7 +864,7 @@ function startDropFacet() {
 	this.on('dragenter dragover', onDragging);
 
 	function onDragging(eventType, event) {
-		var dataTypes = event.dataTransfer.types
+		var dataTypes = event.dataTransfer.types;
 		if (dataTypes.indexOf('text/html') >= 0
 				|| dataTypes.indexOf('x-application/milo-component') >= 0) {
 			event.dataTransfer.dropEffect = 'move';
@@ -861,7 +872,7 @@ function startDropFacet() {
 		}
 	}
 }
-},{"../c_facet":9,"../c_message_sources/dom_events_source":23,"./cf_registry":19,"mol-proto":44}],15:[function(require,module,exports){
+},{"../c_facet":9,"../c_message_sources/dom_events_source":24,"./cf_registry":20,"mol-proto":50}],15:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -963,7 +974,7 @@ function makePreviousComponentEditable(eventType, event) {
 }
 
 
-},{"../c_facet":9,"../c_message_sources/editable_events_source":24,"./cf_registry":19,"mol-proto":44}],16:[function(require,module,exports){
+},{"../c_facet":9,"../c_message_sources/editable_events_source":25,"./cf_registry":20,"mol-proto":50}],16:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -1001,7 +1012,7 @@ function initEventsFacet() {
 	});
 }
 
-},{"../../messenger":35,"../c_facet":9,"../c_message_sources/dom_events_source":23,"./cf_registry":19,"mol-proto":44}],17:[function(require,module,exports){
+},{"../../messenger":36,"../c_facet":9,"../c_message_sources/dom_events_source":24,"./cf_registry":20,"mol-proto":50}],17:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -1042,7 +1053,41 @@ function initFrameFacet() {
 		_messageSource: { value: messageSource }
 	});
 }
-},{"../../messenger":35,"../c_facet":9,"../c_message_sources/iframe_message_source":25,"./cf_registry":19,"mol-proto":44}],18:[function(require,module,exports){
+},{"../../messenger":36,"../c_facet":9,"../c_message_sources/iframe_message_source":26,"./cf_registry":20,"mol-proto":50}],18:[function(require,module,exports){
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+	, facetsRegistry = require('./cf_registry')
+	, Model = require('../../model')
+
+	, _ = require('mol-proto');
+
+
+// generic drag handler, should be overridden
+var ModelFacet = _.createSubclass(ComponentFacet, 'Model');
+
+_.extendProto(ModelFacet, {
+	init: initModelFacet,
+	_createMessenger: _createMessenger
+	// _reattach: _reattachEventsOnElementChange
+});
+
+facetsRegistry.add(ModelFacet);
+
+module.exports = ModelFacet;
+
+
+function initModelFacet() {
+	this.m = new Model(this);
+
+	ComponentFacet.prototype.init.apply(this, arguments);
+}
+
+function _createMessenger() { // Called by inherited init
+	this.m.proxyMessenger(this); // Creates messenger's methods directly on facet
+}
+
+},{"../../model":39,"../c_facet":9,"./cf_registry":20,"mol-proto":50}],19:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -1111,7 +1156,7 @@ function bindInnerComponents() {
 	this.owner.container.scope = thisScope[this.owner.name].container.scope;
 }
 
-},{"../../binder":6,"../../util/check":38,"../c_facet":9,"./cf_registry":19,"mol-proto":44}],19:[function(require,module,exports){
+},{"../../binder":6,"../../util/check":41,"../c_facet":9,"./cf_registry":20,"mol-proto":50}],20:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../abstract/registry')
@@ -1126,11 +1171,12 @@ module.exports = facetsRegistry;
 // TODO - refactor components registry test into a function
 // that tests a registry with a given foundation class
 // Make test for this registry based on this function
-},{"../../abstract/registry":2,"../c_facet":9}],20:[function(require,module,exports){
+},{"../../abstract/registry":2,"../c_facet":9}],21:[function(require,module,exports){
 'use strict';
 
 var componentsRegistry = require('./c_registry')
-	, facetsRegistry = require('./c_facets/cf_registry');
+	, facetsRegistry = require('./c_facets/cf_registry')
+	, BinderError = require('../util/error').Binder;
 
 
 module.exports = ComponentInfo;
@@ -1185,7 +1231,7 @@ function ComponentInfo(scope, el, attr) {
 	}
 }
 
-},{"./c_facets/cf_registry":19,"./c_registry":26}],21:[function(require,module,exports){
+},{"../util/error":42,"./c_facets/cf_registry":20,"./c_registry":27}],22:[function(require,module,exports){
 'use strict';
 
 var DOMEventsSource = require('./dom_events_source')
@@ -1278,7 +1324,7 @@ function triggerDataMessage(message, data) {
 	// TODO - opposite translation + event trigger 
 }
 
-},{"../../util/check":38,"../../util/error":39,"../c_class":8,"./dom_events_source":23,"mol-proto":44}],22:[function(require,module,exports){
+},{"../../util/check":41,"../../util/error":42,"../c_class":8,"./dom_events_source":24,"mol-proto":50}],23:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1330,7 +1376,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"mol-proto":44}],23:[function(require,module,exports){
+},{"mol-proto":50}],24:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../../messenger/message_source')
@@ -1430,7 +1476,7 @@ function triggerDomEvent(eventType, properties) {
 
 	return notCancelled;
 }
-},{"../../messenger/message_source":36,"../../util/check":38,"../c_class":8,"./dom_events_constructors":22,"mol-proto":44}],24:[function(require,module,exports){
+},{"../../messenger/message_source":37,"../../util/check":41,"../c_class":8,"./dom_events_constructors":23,"mol-proto":50}],25:[function(require,module,exports){
 'use strict';
 
 var DOMEventsSource = require('./dom_events_source')
@@ -1539,7 +1585,7 @@ function triggerEditableEvent(message, data) {
 	// TODO - opposite translation + event trigger 
 }
 
-},{"../../util/check":38,"../../util/error":39,"../c_class":8,"./dom_events_source":23,"mol-proto":44}],25:[function(require,module,exports){
+},{"../../util/check":41,"../../util/error":42,"../c_class":8,"./dom_events_source":24,"mol-proto":50}],26:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../../messenger/message_source')
@@ -1607,7 +1653,7 @@ function handleEvent(event) {
 	this.dispatchMessage(event.type, event);
 }
 
-},{"../../messenger/message_source":36,"../../util/check":38,"mol-proto":44}],26:[function(require,module,exports){
+},{"../../messenger/message_source":37,"../../util/check":41,"mol-proto":50}],27:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -1619,7 +1665,7 @@ componentsRegistry.add(Component);
 
 module.exports = componentsRegistry;
 
-},{"../abstract/registry":2,"./c_class":8}],27:[function(require,module,exports){
+},{"../abstract/registry":2,"./c_class":8}],28:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -1632,7 +1678,7 @@ componentsRegistry.add(View);
 
 module.exports = View;
 
-},{"../c_class":8,"../c_registry":26}],28:[function(require,module,exports){
+},{"../c_class":8,"../c_registry":27}],29:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -1711,7 +1757,7 @@ function _getScopeLength() {
 	return Object.keys(this).length;
 }
 
-},{"../util/check":38,"../util/error":39,"mol-proto":44}],29:[function(require,module,exports){
+},{"../util/check":41,"../util/error":42,"mol-proto":50}],30:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1730,7 +1776,7 @@ config({
 	}
 });
 
-},{"mol-proto":44}],30:[function(require,module,exports){
+},{"mol-proto":50}],31:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -1747,7 +1793,7 @@ _.extendProto(Facet, {
 	init: function() {}
 });
 
-},{"mol-proto":44}],31:[function(require,module,exports){
+},{"mol-proto":50}],32:[function(require,module,exports){
 'use strict';
 
 var Facet = require('./f_class')
@@ -1851,7 +1897,7 @@ FacetedObject.createFacetedClass = function (name, facetsClasses, facetsConfig) 
 	return FacetedClass;
 };
 
-},{"../util/check":38,"../util/error":39,"./f_class":30,"mol-proto":44}],32:[function(require,module,exports){
+},{"../util/check":41,"../util/error":42,"./f_class":31,"mol-proto":50}],33:[function(require,module,exports){
 'use strict';
 
 var miloMail = require('./mail')
@@ -1925,7 +1971,7 @@ function loadView(el, callback) {
 	});
 }
 
-},{"./attribute/a_load":4,"./config":29,"./mail":33,"./util/error":39,"./util/logger":41,"./util/request":43}],33:[function(require,module,exports){
+},{"./attribute/a_load":4,"./config":30,"./mail":34,"./util/error":42,"./util/logger":44,"./util/request":46}],34:[function(require,module,exports){
 'use strict';
 
 var Messenger = require('../messenger')
@@ -1938,7 +1984,7 @@ var miloMail = new Messenger(undefined, undefined, mailMsgSource);
 
 module.exports = miloMail;
 
-},{"../messenger":35,"./mail_source":34}],34:[function(require,module,exports){
+},{"../messenger":36,"./mail_source":35}],35:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../messenger/message_source')
@@ -2012,7 +2058,7 @@ function handleEvent(event) {
 	this.dispatchMessage(event.type, event);
 }
 
-},{"../components/c_message_sources/dom_events_constructors":22,"../messenger/message_source":36,"../util/check":38,"../util/error":39,"mol-proto":44}],35:[function(require,module,exports){
+},{"../components/c_message_sources/dom_events_constructors":23,"../messenger/message_source":37,"../util/check":41,"../util/error":42,"mol-proto":50}],36:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -2124,7 +2170,7 @@ function registerSubscribers(messageSubscribers) {
 	check(messageSubscribers, Match.ObjectHash(Function));
 
 	var notYetRegisteredMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
-		return this.onMessage(messages, subscriber)
+		return this.onMessage(messages, subscriber);
 	}, this);
 
 	return notYetRegisteredMap;
@@ -2188,7 +2234,7 @@ function removeSubscribers(messageSubscribers) {
 	check(messageSubscribers, Match.ObjectHash(Function));
 
 	var subscriberRemovedMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
-		return this.offMessages(messages, subscriber)
+		return this.offMessages(messages, subscriber);
 	}, this);
 
 	return subscriberRemovedMap;	
@@ -2273,7 +2319,7 @@ function _setMessageSource(messageSource) {
 }
 
 
-},{"../abstract/mixin":1,"../util/check":38,"../util/error":39,"./message_source":36,"mol-proto":44}],36:[function(require,module,exports){
+},{"../abstract/mixin":1,"../util/check":41,"../util/error":42,"./message_source":37,"mol-proto":50}],37:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -2387,7 +2433,7 @@ function dispatchAllSourceMessages(sourceMessage, message, data) {
 	return true;
 }
 
-},{"../abstract/mixin":1,"../util/error":39,"../util/logger":41,"mol-proto":44}],37:[function(require,module,exports){
+},{"../abstract/mixin":1,"../util/error":42,"../util/logger":44,"mol-proto":50}],38:[function(require,module,exports){
 'use strict';
 
 var milo = {
@@ -2407,6 +2453,7 @@ require('./components/c_facets/Frame');
 require('./components/c_facets/Events');
 require('./components/c_facets/Template');
 require('./components/c_facets/Container');
+require('./components/c_facets/ModelFacet');
 require('./components/c_facets/Drag');
 require('./components/c_facets/Drop');
 require('./components/c_facets/Editable');
@@ -2423,7 +2470,284 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./binder":6,"./classes":7,"./components/c_facets/Container":10,"./components/c_facets/Data":11,"./components/c_facets/Dom":12,"./components/c_facets/Drag":13,"./components/c_facets/Drop":14,"./components/c_facets/Editable":15,"./components/c_facets/Events":16,"./components/c_facets/Frame":17,"./components/c_facets/Template":18,"./components/classes/View":27,"./config":29,"./loader":32,"./mail":33,"./util":40}],38:[function(require,module,exports){
+},{"./binder":6,"./classes":7,"./components/c_facets/Container":10,"./components/c_facets/Data":11,"./components/c_facets/Dom":12,"./components/c_facets/Drag":13,"./components/c_facets/Drop":14,"./components/c_facets/Editable":15,"./components/c_facets/Events":16,"./components/c_facets/Frame":17,"./components/c_facets/ModelFacet":18,"./components/c_facets/Template":19,"./components/classes/View":28,"./config":30,"./loader":33,"./mail":34,"./util":43}],39:[function(require,module,exports){
+'use strict';
+
+var Messenger = require('../messenger')
+	, ModelMessageSource = require('./m_message_source')
+	, ModelError = require('../util/error').Model
+	, Mixin = require('../abstract/mixin')
+	, dot = require('dot')
+	, _ = require('mol-proto')
+	, check = require('../util/check')
+	, Match = check.Match;
+
+module.exports = Model;
+
+
+function Model(scope, schema, name, data) {
+	// modelPath should return a ModelPath object with "compiled" methods
+	// to get/set model properties, to subscribe to property changes, etc.
+	// "it" parameter is the object which properties can be referenced in path.
+	// These references will be evaluated at run rather than at compile time
+	var model = function modelPath(path, it) {
+		return new ModelPath(model, path, it);
+	}
+	model.__proto__ = Model.prototype;
+
+	// var messageSource = new ModelMessageSource(model);
+	var messenger = new Messenger(model, Messenger.defaultMethods); //, messageSource);
+
+	_.defineProperties(model, {
+		scope: scope,
+		name: name,
+		_schema: schema,
+		_data: data || {},
+		_messenger: messenger,
+		// _messageSource: messageSource,
+		__pathsCache: {}
+	});
+
+	return model;
+}
+
+Model.prototype.__proto__ = Model.__proto__;
+
+_.extendProto(Model, {
+	proxyMessenger: proxyMessenger
+});
+
+
+function proxyMessenger(modelHostObject) {
+	Mixin.prototype._createProxyMethods.call(this._messenger, Messenger.defaultMethods, modelHostObject);
+}
+
+
+Model.Path = ModelPath;
+
+function ModelPath(model, path, it) {
+	check(model, Model);
+	check(path, String);
+	check(it, Match.Optional(Object));
+
+	_.defineProperties(this, {
+		_model: model,
+		_path: path,
+		_it: it
+	});
+
+	// compiling getter and setter
+	var methods = compilePathMethods(path);
+
+	// adding methods to model path
+	_.defineProperties(this, methods);
+
+	Object.freeze(this);
+}
+
+
+// adding messaging methods to ModelPath prototype
+_.extendProto(ModelPath, {
+	on: registerModelPathSubscriber,
+	// off: offModelPath,
+});
+
+var subscriptionDepthPattern = /^\*{0,4}$/;
+function registerModelPathSubscriber(depth, subscriber) {
+	if (! subscriptionDepthPattern.test(depth))
+		throw new ModelError('incorrect subscription depth: ' + depth);
+
+	this._model.on(this._path, subscriber);
+}
+
+
+// cache of compiled ModelPath methods
+var __compiledPathsMethods = {};
+
+
+function compilePathMethods(path) {
+	if (__compiledPathsMethods.hasOwnProperty(path))
+		return __compiledPathsMethods[path];
+
+	var parsedPath = parseModelPath(path);
+
+	var methods = {
+		value: compileModelGetter(path, parsedPath),
+		setValue: compileModelSetter(path, parsedPath)
+	};
+
+	__compiledPathsMethods[path] = methods;
+
+	return methods;
+}
+
+
+// TODO parse array syntax for paths
+var pathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]/g
+	, modelPostMessageCode = 'this._model.postMessage('
+	, modelAccessPrefix = 'this._model._data';
+
+function parseModelPath(path) {
+	var parsedPath = [];
+	var unparsed = path.replace(pathParsePattern, function(nodeStr) {
+		parsedPath.push({
+			property: nodeStr,
+			empty: nodeStr[0] == '.' ? '{}' : '[]'
+		});
+		return '';
+	});
+	if (unparsed)
+		throw new ModelError('incorrect model path: ' + path);
+
+	return parsedPath;
+}
+
+var dotDef = {
+	modelAccessPrefix: 'this._model._data',
+	modelPostMessageCode: 'this._model.postMessage'
+};
+
+var getterTemplate = 'method = function value() { \
+	var m = {{# def.modelAccessPrefix }}; \
+	{{ var modelDataProperty = "m"; }} \
+	return {{ \
+		for (var i = 0, count = it.parsedPath.length - 1; i < count; i++) { \
+			modelDataProperty += it.parsedPath[i].property; \
+	}} {{= modelDataProperty }} && {{ \
+		} \
+	}} {{= modelDataProperty }}{{= it.parsedPath[count].property }} ; \
+}';
+
+// var getterSynthesizer = dot.compile(getterTemplate, dotDef);
+
+function synthesizeGetter(path, parsedPath) {
+	return synthesizeMethod(getterSynthesizer, path, parsedPath);
+}
+
+function synthesizeSetter(path, parsedPath) {
+	return synthesizeMethod(setterSynthesizer, path, parsedPath);
+}
+
+function synthesizeMethod(synthesizer, path, parsedPath) {
+	var method
+		, methodCode = synthesizer({ parsedPath: parsedPath });
+
+	try {
+		eval(methodCode);
+	} catch (e) {
+		throw ModelError('ModelPath method compilation error; path: ' + path + ', code: ' + methodCode);
+	}
+
+	return method;
+}
+
+
+function compileModelGetter(path, parsedPath) {
+	var getter 
+		, getterCode = 'getter = function value() {\n var m = ' + modelAccessPrefix + ';\n return '
+		, modelDataProperty = 'm';
+
+	for (var i = 0, count = parsedPath.length - 1; i < count; i++) {
+		modelDataProperty += parsedPath[i].property;
+		getterCode += modelDataProperty + ' && ';
+	}
+
+	getterCode += modelDataProperty + parsedPath[count].property + ';\n };';
+
+	try {
+		eval(getterCode);
+	} catch (e) {
+		throw ModelError('ModelPath getter compilation error; path: ' + path + ', code: ' + getterCode);
+	}
+
+	return getter;
+}
+
+
+var setterTemplate = 'method = function setValue(value) { \
+	var m = {{# def.modelAccessPrefix }}; \
+	{{  var modelDataProperty = ""; \
+		for (var i = 0, count = it.parsedPath.length - 1; i < count; i++) { \
+\
+			var currProp = it.parsedPath[i].property; \
+			var emptyProp = it.parsedPath[i + 1].empty; \
+	}} \
+		if (! m{{= modelDataProperty }}.hasOwnProperty("{{= currProp }}")) { \
+		{{ modelDataProperty += it.parsedPath[i].property; }} \
+			m{{= modelDataProperty }} = {{= emptyProp }}; \
+			{{# def.modelPostMessageCode }} ( {{= modelDataProperty }}, \
+				{ type: "added", newValue: {{= emptyProp }} } ); \
+		} \
+	{{ } }} \
+\
+\
+\
+}'; // not finished, need to pull first
+
+// var setterSynthesizer = dot.compile(setterTemplate, dotDef);
+
+function compileModelSetter(path, parsedPath) {
+	var setter
+		, setterCode = 'setter = function setValue(value) {\n var m = ' + modelAccessPrefix + ';\n '
+		, modelDataProperty = '';
+
+	for (var i = 0, count = parsedPath.length - 1; i < count; i++) {
+		modelDataProperty += parsedPath[i].property						
+		var emptyProp = parsedPath[i + 1].empty
+									// if property does not exist
+			, createPropertyCode = 'if (! m' + modelDataProperty + ') {\n  '
+									// assign empty object or array to it
+									+ 'm' + modelDataProperty + ' = ' + emptyProp + ';\n  '
+									// postMessage 'added' on model for property path path
+									+ modelPostMessageCode 
+										+ '"' + modelDataProperty + '", { type: "added", newValue: ' + emptyProp + ' });\n }\n '
+		
+		setterCode += createPropertyCode;
+	}
+
+	var lastProperty = parsedPath[count].property;
+
+	// check if property is defined
+	setterCode += 'var wasDef = m' + modelDataProperty + '.hasOwnProperty("' + lastProperty.slice(1) + '");\n '
+
+	// get old property value
+				+ 'var old = m' + modelDataProperty + lastProperty + ';\n '
+
+	// set property to new value
+				+ 'm' + modelDataProperty + lastProperty + ' = value;\n '	
+
+	// check if property does not exists
+				+ 'if (! wasDef)\n  ';
+
+	modelDataProperty += lastProperty;
+	// post message after it was added
+	setterCode += modelPostMessageCode + '"' + modelDataProperty + '", { type: "added", newValue: value });\n '
+	// else check if the value has changed ...
+				+ 'else if (old != value)\n   '
+	// ... and post message if it did
+				+ modelPostMessageCode + '"' + modelDataProperty + '", { type: "changed", oldValue: old, newValue: value});\n }\n '
+
+	try {
+		eval(setterCode);
+	} catch (e) {
+		throw ModelError('ModelPath setter compilation error; path: ' + path + ', code: ' + setterCode);
+	}
+
+	return setter;
+}
+
+},{"../abstract/mixin":1,"../messenger":36,"../util/check":41,"../util/error":42,"./m_message_source":40,"dot":49,"mol-proto":50}],40:[function(require,module,exports){
+'use strict';
+
+var MessageSource = require('../messenger/message_source')
+	, _ = require('mol-proto');
+
+
+var ModelMessageSource = _.createSubclass(MessageSource, 'ModelMessageSource');
+
+module.exports = ModelMessageSource;
+
+},{"../messenger/message_source":37,"mol-proto":50}],41:[function(require,module,exports){
 'use strict';
 
 // XXX docs
@@ -2731,7 +3055,7 @@ function _prependPath(key, base) {
 };
 
 
-},{"mol-proto":44}],39:[function(require,module,exports){
+},{"mol-proto":50}],42:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -2770,7 +3094,7 @@ function toBeImplemented() {
 	throw new error.AbstractClass('calling the method of an absctract class MessageSource');
 }
 
-},{"mol-proto":44}],40:[function(require,module,exports){
+},{"mol-proto":50}],43:[function(require,module,exports){
 'use strict';
 
 var util = {
@@ -2782,7 +3106,7 @@ var util = {
 
 module.exports = util;
 
-},{"./check":38,"./error":39,"./logger":41,"./request":43}],41:[function(require,module,exports){
+},{"./check":41,"./error":42,"./logger":44,"./request":46}],44:[function(require,module,exports){
 'use strict';
 
 var Logger = require('./logger_class');
@@ -2791,7 +3115,7 @@ var logger = new Logger({ level: 3 });
 
 module.exports = logger;
 
-},{"./logger_class":42}],42:[function(require,module,exports){
+},{"./logger_class":45}],45:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -2887,7 +3211,7 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"mol-proto":44}],43:[function(require,module,exports){
+},{"mol-proto":50}],46:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -2920,7 +3244,295 @@ function get(url, callback) {
 	request(url, { method: 'GET' }, callback);
 }
 
-},{"mol-proto":44}],44:[function(require,module,exports){
+},{"mol-proto":50}],47:[function(require,module,exports){
+
+// not implemented
+// The reason for having an empty file and not throwing is to allow
+// untraditional implementation of this module.
+
+},{}],48:[function(require,module,exports){
+// doT.js
+// 2011, Laura Doktorova, https://github.com/olado/doT
+// Licensed under the MIT license.
+
+(function() {
+	"use strict";
+
+	var doT = {
+		version: '1.0.1',
+		templateSettings: {
+			evaluate:    /\{\{([\s\S]+?(\}?)+)\}\}/g,
+			interpolate: /\{\{=([\s\S]+?)\}\}/g,
+			encode:      /\{\{!([\s\S]+?)\}\}/g,
+			use:         /\{\{#([\s\S]+?)\}\}/g,
+			useParams:   /(^|[^\w$])def(?:\.|\[[\'\"])([\w$\.]+)(?:[\'\"]\])?\s*\:\s*([\w$\.]+|\"[^\"]+\"|\'[^\']+\'|\{[^\}]+\})/g,
+			define:      /\{\{##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\}\}/g,
+			defineParams:/^\s*([\w$]+):([\s\S]+)/,
+			conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g,
+			iterate:     /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g,
+			varname:	'it',
+			strip:		true,
+			append:		true,
+			selfcontained: false
+		},
+		template: undefined, //fn, compile template
+		compile:  undefined  //fn, for express
+	};
+
+	if (typeof module !== 'undefined' && module.exports) {
+		module.exports = doT;
+	} else if (typeof define === 'function' && define.amd) {
+		define(function(){return doT;});
+	} else {
+		(function(){ return this || (0,eval)('this'); }()).doT = doT;
+	}
+
+	function encodeHTMLSource() {
+		var encodeHTMLRules = { "&": "&#38;", "<": "&#60;", ">": "&#62;", '"': '&#34;', "'": '&#39;', "/": '&#47;' },
+			matchHTML = /&(?!#?\w+;)|<|>|"|'|\//g;
+		return function() {
+			return this ? this.replace(matchHTML, function(m) {return encodeHTMLRules[m] || m;}) : this;
+		};
+	}
+	String.prototype.encodeHTML = encodeHTMLSource();
+
+	var startend = {
+		append: { start: "'+(",      end: ")+'",      endencode: "||'').toString().encodeHTML()+'" },
+		split:  { start: "';out+=(", end: ");out+='", endencode: "||'').toString().encodeHTML();out+='"}
+	}, skip = /$^/;
+
+	function resolveDefs(c, block, def) {
+		return ((typeof block === 'string') ? block : block.toString())
+		.replace(c.define || skip, function(m, code, assign, value) {
+			if (code.indexOf('def.') === 0) {
+				code = code.substring(4);
+			}
+			if (!(code in def)) {
+				if (assign === ':') {
+					if (c.defineParams) value.replace(c.defineParams, function(m, param, v) {
+						def[code] = {arg: param, text: v};
+					});
+					if (!(code in def)) def[code]= value;
+				} else {
+					new Function("def", "def['"+code+"']=" + value)(def);
+				}
+			}
+			return '';
+		})
+		.replace(c.use || skip, function(m, code) {
+			if (c.useParams) code = code.replace(c.useParams, function(m, s, d, param) {
+				if (def[d] && def[d].arg && param) {
+					var rw = (d+":"+param).replace(/'|\\/g, '_');
+					def.__exp = def.__exp || {};
+					def.__exp[rw] = def[d].text.replace(new RegExp("(^|[^\\w$])" + def[d].arg + "([^\\w$])", "g"), "$1" + param + "$2");
+					return s + "def.__exp['"+rw+"']";
+				}
+			});
+			var v = new Function("def", "return " + code)(def);
+			return v ? resolveDefs(c, v, def) : v;
+		});
+	}
+
+	function unescape(code) {
+		return code.replace(/\\('|\\)/g, "$1").replace(/[\r\t\n]/g, ' ');
+	}
+
+	doT.template = function(tmpl, c, def) {
+		c = c || doT.templateSettings;
+		var cse = c.append ? startend.append : startend.split, needhtmlencode, sid = 0, indv,
+			str  = (c.use || c.define) ? resolveDefs(c, tmpl, def || {}) : tmpl;
+
+		str = ("var out='" + (c.strip ? str.replace(/(^|\r|\n)\t* +| +\t*(\r|\n|$)/g,' ')
+					.replace(/\r|\n|\t|\/\*[\s\S]*?\*\//g,''): str)
+			.replace(/'|\\/g, '\\$&')
+			.replace(c.interpolate || skip, function(m, code) {
+				return cse.start + unescape(code) + cse.end;
+			})
+			.replace(c.encode || skip, function(m, code) {
+				needhtmlencode = true;
+				return cse.start + unescape(code) + cse.endencode;
+			})
+			.replace(c.conditional || skip, function(m, elsecase, code) {
+				return elsecase ?
+					(code ? "';}else if(" + unescape(code) + "){out+='" : "';}else{out+='") :
+					(code ? "';if(" + unescape(code) + "){out+='" : "';}out+='");
+			})
+			.replace(c.iterate || skip, function(m, iterate, vname, iname) {
+				if (!iterate) return "';} } out+='";
+				sid+=1; indv=iname || "i"+sid; iterate=unescape(iterate);
+				return "';var arr"+sid+"="+iterate+";if(arr"+sid+"){var "+vname+","+indv+"=-1,l"+sid+"=arr"+sid+".length-1;while("+indv+"<l"+sid+"){"
+					+vname+"=arr"+sid+"["+indv+"+=1];out+='";
+			})
+			.replace(c.evaluate || skip, function(m, code) {
+				return "';" + unescape(code) + "out+='";
+			})
+			+ "';return out;")
+			.replace(/\n/g, '\\n').replace(/\t/g, '\\t').replace(/\r/g, '\\r')
+			.replace(/(\s|;|\}|^|\{)out\+='';/g, '$1').replace(/\+''/g, '')
+			.replace(/(\s|;|\}|^|\{)out\+=''\+/g,'$1out+=');
+
+		if (needhtmlencode && c.selfcontained) {
+			str = "String.prototype.encodeHTML=(" + encodeHTMLSource.toString() + "());" + str;
+		}
+		try {
+			return new Function(c.varname, str);
+		} catch (e) {
+			if (typeof console !== 'undefined') console.log("Could not create a template function: " + str);
+			throw e;
+		}
+	};
+
+	doT.compile = function(tmpl, def) {
+		return doT.template(tmpl, null, def);
+	};
+}());
+
+},{}],49:[function(require,module,exports){
+/* doT + auto-compilation of doT templates
+ *
+ * 2012, Laura Doktorova, https://github.com/olado/doT
+ * Licensed under the MIT license
+ *
+ * Compiles .def, .dot, .jst files found under the specified path.
+ * It ignores sub-directories.
+ * Template files can have multiple extensions at the same time.
+ * Files with .def extension can be included in other files via {{#def.name}}
+ * Files with .dot extension are compiled into functions with the same name and
+ * can be accessed as renderer.filename
+ * Files with .jst extension are compiled into .js files. Produced .js file can be
+ * loaded as a commonJS, AMD module, or just installed into a global variable
+ * (default is set to window.render).
+ * All inline defines defined in the .jst file are
+ * compiled into separate functions and are available via _render.filename.definename
+ *
+ * Basic usage:
+ * var dots = require("dot").process({path: "./views"});
+ * dots.mytemplate({foo:"hello world"});
+ *
+ * The above snippet will:
+ * 1. Compile all templates in views folder (.dot, .def, .jst)
+ * 2. Place .js files compiled from .jst templates into the same folder.
+ *    These files can be used with require, i.e. require("./views/mytemplate").
+ * 3. Return an object with functions compiled from .dot templates as its properties.
+ * 4. Render mytemplate template.
+ */
+
+var fs = require("fs"),
+	doT = module.exports = require("./doT");
+
+doT.process = function(options) {
+	//path, destination, global, rendermodule, templateSettings
+	return new InstallDots(options).compileAll();
+};
+
+function InstallDots(o) {
+	this.__path 		= o.path || "./";
+	if (this.__path[this.__path.length-1] !== '/') this.__path += '/';
+	this.__destination	= o.destination || this.__path;
+	if (this.__destination[this.__destination.length-1] !== '/') this.__destination += '/';
+	this.__global		= o.global || "window.render";
+	this.__rendermodule	= o.rendermodule || {};
+	this.__settings 	= o.templateSettings ? copy(o.templateSettings, copy(doT.templateSettings)) : undefined;
+	this.__includes		= {};
+}
+
+InstallDots.prototype.compileToFile = function(path, template, def) {
+	def = def || {};
+	var modulename = path.substring(path.lastIndexOf("/")+1, path.lastIndexOf("."))
+		, defs = copy(this.__includes, copy(def))
+		, settings = this.__settings || doT.templateSettings
+		, compileoptions = copy(settings)
+		, defaultcompiled = doT.template(template, settings, defs)
+		, exports = []
+		, compiled = ""
+		, fn;
+
+	for (var property in defs) {
+		if (defs[property] !== def[property] && defs[property] !== this.__includes[property]) {
+			fn = undefined;
+			if (typeof defs[property] === 'string') {
+				fn = doT.template(defs[property], settings, defs);
+			} else if (typeof defs[property] === 'function') {
+				fn = defs[property];
+			} else if (defs[property].arg) {
+				compileoptions.varname = defs[property].arg;
+				fn = doT.template(defs[property].text, compileoptions, defs);
+			}
+			if (fn) {
+				compiled += fn.toString().replace('anonymous', property);
+				exports.push(property);
+			}
+		}
+	}
+	compiled += defaultcompiled.toString().replace('anonymous', modulename);
+	fs.writeFileSync(path, "(function(){" + compiled
+		+ "var itself=" + modulename + ";"
+		+ addexports(exports)
+		+ "if(typeof module!=='undefined' && module.exports) module.exports=itself;else if(typeof define==='function')define(function(){return itself;});else {"
+		+ this.__global + "=" + this.__global + "||{};" + this.__global + "['" + modulename + "']=itself;}}());");
+};
+
+function addexports(exports) {
+	for (var ret ='', i=0; i< exports.length; i++) {
+		ret += "itself." + exports[i]+ "=" + exports[i]+";";
+	}
+	return ret;
+}
+
+function copy(o, to) {
+	to = to || {};
+	for (var property in o) {
+		to[property] = o[property];
+	}
+	return to;
+}
+
+function readdata(path) {
+	var data = fs.readFileSync(path);
+	if (data) return data.toString();
+	console.log("problems with " + path);
+}
+
+InstallDots.prototype.compilePath = function(path) {
+	var data = readdata(path);
+	if (data) {
+		return doT.template(data,
+					this.__settings || doT.templateSettings,
+					copy(this.__includes));
+	}
+};
+
+InstallDots.prototype.compileAll = function() {
+	console.log("Compiling all doT templates...");
+
+	var defFolder = this.__path,
+		sources = fs.readdirSync(defFolder),
+		k, l, name;
+
+	for( k = 0, l = sources.length; k < l; k++) {
+		name = sources[k];
+		if (/\.def(\.dot|\.jst)?$/.test(name)) {
+			console.log("Loaded def " + name);
+			this.__includes[name.substring(0, name.indexOf('.'))] = readdata(defFolder + name);
+		}
+	}
+
+	for( k = 0, l = sources.length; k < l; k++) {
+		name = sources[k];
+		if (/\.dot(\.def|\.jst)?$/.test(name)) {
+			console.log("Compiling " + name + " to function");
+			this.__rendermodule[name.substring(0, name.indexOf('.'))] = this.compilePath(defFolder + name);
+		}
+		if (/\.jst(\.dot|\.def)?$/.test(name)) {
+			console.log("Compiling " + name + " to file");
+			this.compileToFile(this.__destination + name.substring(0, name.indexOf('.')) + '.js',
+					readdata(defFolder + name));
+		}
+	}
+	return this.__rendermodule;
+};
+
+},{"./doT":48,"fs":47}],50:[function(require,module,exports){
 'use strict';
 
 var _;
@@ -3172,5 +3784,5 @@ function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
 }
 
-},{}]},{},[37])
+},{}]},{},[38])
 ;
