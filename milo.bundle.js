@@ -2514,8 +2514,14 @@ function Model(scope, schema, name, data) {
 Model.prototype.__proto__ = Model.__proto__;
 
 _.extendProto(Model, {
+	value: value,
 	proxyMessenger: proxyMessenger
 });
+
+
+function value() {
+	return this._data;
+}
 
 
 function proxyMessenger(modelHostObject) {
