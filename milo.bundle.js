@@ -2572,7 +2572,7 @@ function compilePathMethods(path) {
 	var parsedPath = parseModelPath(path);
 
 	var methods = {
-		value: compileModelGetter(path, parsedPath),
+		value: synthesizeGetter(path, parsedPath),
 		setValue: compileModelSetter(path, parsedPath)
 	};
 
@@ -2618,7 +2618,8 @@ var getterTemplate = 'method = function value() { \
 	}} {{= modelDataProperty }}{{= it.parsedPath[count].property }} ; \
 }';
 
-// var getterSynthesizer = dot.compile(getterTemplate, dotDef);
+var getterSynthesizer = dot.compile(getterTemplate, dotDef);
+
 
 function synthesizeGetter(path, parsedPath) {
 	return synthesizeMethod(getterSynthesizer, path, parsedPath);
@@ -2641,29 +2642,6 @@ function synthesizeMethod(synthesizer, path, parsedPath) {
 	return method;
 }
 
-
-function compileModelGetter(path, parsedPath) {
-	var getter 
-		, getterCode = 'getter = function value() {\n var m = ' + modelAccessPrefix + ';\n return '
-		, modelDataProperty = 'm';
-
-	for (var i = 0, count = parsedPath.length - 1; i < count; i++) {
-		modelDataProperty += parsedPath[i].property;
-		getterCode += modelDataProperty + ' && ';
-	}
-
-	getterCode += modelDataProperty + parsedPath[count].property + ';\n };';
-
-	try {
-		eval(getterCode);
-	} catch (e) {
-		throw ModelError('ModelPath getter compilation error; path: ' + path + ', code: ' + getterCode);
-	}
-
-	return getter;
-}
-
-
 var setterTemplate = 'method = function setValue(value) { \
 	var m = {{# def.modelAccessPrefix }}; \
 	{{  var modelDataProperty = ""; \
@@ -2685,6 +2663,7 @@ var setterTemplate = 'method = function setValue(value) { \
 }'; // not finished, need to pull first
 
 // var setterSynthesizer = dot.compile(setterTemplate, dotDef);
+
 
 function compileModelSetter(path, parsedPath) {
 	var setter
