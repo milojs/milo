@@ -2578,8 +2578,8 @@ function synthesizePathMethods(path) {
 	var parsedPath = parseModelPath(path);
 
 	var methods = {
-		value: synthesizeGetter(path, parsedPath),
-		setValue: synthesizeSetter(path, parsedPath)
+		value: synthesizeMethod(getterSynthesizer, path, parsedPath),
+		setValue: synthesizeMethod(setterSynthesizer, path, parsedPath)
 	};
 
 	__synthesizedPathsMethods[path] = methods;
@@ -2607,6 +2607,7 @@ function parseModelPath(path) {
 
 	return parsedPath;
 }
+
 
 var dotDef = {
 	modelAccessPrefix: 'this._model._data',
@@ -2653,14 +2654,6 @@ var setterTemplate = 'method = function setValue(value) { \
 
 var getterSynthesizer = dot.compile(getterTemplate, dotDef)
 	, setterSynthesizer = dot.compile(setterTemplate, dotDef);
-
-function synthesizeGetter(path, parsedPath) {
-	return synthesizeMethod(getterSynthesizer, path, parsedPath);
-}
-
-function synthesizeSetter(path, parsedPath) {
-	return synthesizeMethod(setterSynthesizer, path, parsedPath);
-}
 
 function synthesizeMethod(synthesizer, path, parsedPath) {
 	var method
