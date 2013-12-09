@@ -772,7 +772,8 @@ _.extendProto(Drag, {
 	init: initDragFacet,
 	start: startDragFacet,
 
-	setHandle: setDragHandle
+	setHandle: setDragHandle,
+	setDragData: setDragData
 	// _reattach: _reattachEventsOnElementChange
 });
 
@@ -784,6 +785,7 @@ module.exports = Drag;
 function initDragFacet() {
 	ComponentFacet.prototype.init.apply(this, arguments);	
 	this._createMessageSource(DOMEventsSource);
+	this._dragData = {};
 }
 
 
@@ -791,6 +793,10 @@ function setDragHandle(handleEl) {
 	if (! this.owner.el.contains(handleEl))
 		return logger.warn('drag handle should be inside element to be dragged')
 	this._dragHandle = handleEl;
+}
+
+function setDragData(data) {
+	this._dragData = data;
 }
 
 
@@ -819,7 +825,7 @@ function startDragFacet() {
 		if (targetInDragHandle(event)) {
 			var dt = event.dataTransfer;
 			dt.setData('text/html', self.owner.el.outerHTML);
-			dt.setData('x-application/milo-component', self.owner);
+			dt.setData('x-application/milo-component', JSON.stringify(self._dragData));
 		} else
 			event.preventDefault();
 	}
