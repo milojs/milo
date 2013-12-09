@@ -402,12 +402,13 @@ var classes = {
 	ComponentFacet: require('./components/c_facet'),
 	ClassRegistry: require('./abstract/registry'),
 	facetsRegistry: require('./components/c_facets/cf_registry'),
-	componentsRegistry: require('./components/c_registry')
+	componentsRegistry: require('./components/c_registry'),
+	Model: require('./model')
 };
 
 module.exports = classes;
 
-},{"./abstract/registry":2,"./components/c_class":8,"./components/c_facet":9,"./components/c_facets/cf_registry":20,"./components/c_registry":27,"./facets/f_class":31}],8:[function(require,module,exports){
+},{"./abstract/registry":2,"./components/c_class":8,"./components/c_facet":9,"./components/c_facets/cf_registry":20,"./components/c_registry":27,"./facets/f_class":31,"./model":39}],8:[function(require,module,exports){
 'use strict';
 
 var FacetedObject = require('../facets/f_object')
