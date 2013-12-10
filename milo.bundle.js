@@ -432,10 +432,10 @@ Component.create = createComponent;
 
 
 _.extendProto(Component, {
-	init: initComponent,
+	init: init,
 	addFacet: addFacet,
-	allFacets: envokeMethodOnAllFacets,
-	remove: removeComponentFromScope
+	allFacets: allFacets,
+	remove: remove
 });
 
 
@@ -482,7 +482,12 @@ function createComponentClass(name, facetsConfig) {
 //
 // instance methods
 //
-function initComponent(scope, element, name) {
+
+// initializes component
+// Automatically called by inherited constructor of FacetedObject
+// Subclasses should call inherited init methods:
+// Component.prototype.init.apply(this, arguments)
+function init(scope, element, name) {
 	this.el = element;
 
 	_.defineProperties(this, {
@@ -520,8 +525,8 @@ function addFacet(facetNameOrClass, facetOpts, facetName) {
 	newFacet.start && newFacet.start();
 }
 
-
-function envokeMethodOnAllFacets(method /* , ... */) {
+// envoke given method with optional parameters on all facets
+function allFacets(method /* , ... */) {
 	var args = Array.prototype.slice.call(arguments, 1);
 
 	_.eachKey(this.facets, function(facet, fctName) {
@@ -530,8 +535,8 @@ function envokeMethodOnAllFacets(method /* , ... */) {
 	});
 }
 
-
-function removeComponentFromScope() {
+// remove component from it's scope
+function remove() {
 	if (this.scope)
 		delete this.scope[this.name];
 }
