@@ -162,21 +162,23 @@ var attrRegExp= /^([^\:\[\]]*)(?:\[([^\:\[\]]*)\])?\:?([^:]*)$/
 var BindAttribute = _.createSubclass(Attribute, 'BindAttribute', true);
 
 _.extendProto(BindAttribute, {
-	attrName: getAttributeName,
-	parse: parseAttribute,
-	validate: validateAttribute
+	attrName: attrName,
+	parse: parse,
+	validate: validate
 });
 
 
 module.exports = BindAttribute;
 
 
-function getAttributeName() {
+// get attribute name
+function attrName() {
 	return config.attrs['bind'];
 }
 
 
-function parseAttribute() {
+// parse attribute
+function parse() {
 	if (! this.node) return;
 
 	var value = this.get();
@@ -195,7 +197,8 @@ function parseAttribute() {
 }
 
 
-function validateAttribute() {
+// validate attribute
+function validate() {
 	var compName = this.compName;
 	check(compName, Match.Where(function() {
   		return typeof compName == 'string' && compName != '';
@@ -701,22 +704,27 @@ var ComponentFacet = require('../c_facet')
 	, _ = require('mol-proto')
 	, check = require('../../util/check')
 	, Match = check.Match
-	, binder = require('../../binder');
+	, binder = require('../../binder')
+	, BindAttribute = require('../../attribute/a_bind')
+	, DomFacetError = require('../../util/error').DomFacet;
 
 
 // data model connection facet
 var Dom = _.createSubclass(ComponentFacet, 'Dom');
 
 _.extendProto(Dom, {
-	init: initDomFacet,
-	start: startDomFacet,
+	init: init,
+	start: start,
 
-	show: showElement,
-	hide: hideElement,
-	remove: removeElement,
-	append: appendInsideElement,
-	prepend: prependInsideElement,
+	show: show,
+	hide: hide,
+	remove: remove,
+	append: append,
+	prepend: prepend,
+	appendChildren: appendChildren,
+	prependChildren: prependChildren,
 
+	find: find
 	// _reattach: _reattachEventsOnElementChange
 });
 
@@ -725,33 +733,50 @@ facetsRegistry.add(Dom);
 module.exports = Dom;
 
 
-function initDomFacet() {
+// initialize Dom facet
+function init() {
 	ComponentFacet.prototype.init.apply(this, arguments);
 }
 
-function startDomFacet() {
+// start Dom facet
+function start() {
 	if (this.config.cls)
 		this.owner.el.classList.add(this.config.cls);
 }
 
-function showElement() {
+// show HTML element of component
+function show() {
 	this.owner.el.style.display = 'block';
 }
 
-function hideElement() {
+// hide HTML element of component
+function hide() {
 	this.owner.el.style.display = 'none';
 }
 
-function removeElement() {
+// remove HTML element of component
+function remove() {
 	var thisEl = this.owner.el;
 	thisEl.parentNode.removeChild(thisEl);
 }
 
-function appendInsideElement(el) {
+// append inside HTML element of component
+function append(el) {
 	this.owner.el.appendChild(el)
 }
 
-function prependInsideElement(el) {
+// appends children of element inside this component's element
+function appendChildren(el) {
+	Array.prototype.forEach.call(el.childNodes, append, this);
+}
+
+// prepends children of element inside this component's element
+function prependChildren(el) {
+	Array.prototype.forEach.call(el.childNodes, append, this);
+}
+
+// prepend inside HTML element of component
+function prepend(el) {
 	var thisEl = this.owner.el
 		, firstChild = thisEl.firstChild;
 	if (firstChild)
@@ -761,7 +786,49 @@ function prependInsideElement(el) {
 }
 
 
-},{"../../binder":6,"../../util/check":41,"../c_facet":9,"./cf_registry":20,"mol-proto":51}],13:[function(require,module,exports){
+var findDirections = {
+	'up': 'previousNode',
+	'down': 'nextNode'
+};
+
+// Finds component passing optional iterator's test
+// in the same scope as the current component (this)
+// by traversing DOM tree upwards (direction = "up")
+// or downwards (direction = "down")
+function find(direction, iterator) {
+	if (! findDirections.hasOwnProperty(direction))
+		throw new DomFacetError('incorrect find direction: ' + direction);
+
+	var el = this.owner.el
+		, scope = this.owner.scope
+		, treeWalker = document.createTreeWalker(scope._rootEl, NodeFilter.SHOW_ELEMENT);
+
+	treeWalker.currentNode = el;
+	var nextNode = treeWalker[findDirections[direction]]()
+		, componentsNames = Object.keys(scope)
+		, found = false;
+
+	while (nextNode) {
+		var attr = new BindAttribute(nextNode);
+		if (attr.node) {
+			attr.parse().validate();
+			if (scope.hasOwnProperty(attr.compName)) {
+				var component = scope[attr.compName];
+				if (! iterator || iterator(component)) {
+					found = true;
+					break;
+				}
+			}
+		}
+		treeWalker.currentNode = nextNode;
+		nextNode = treeWalker[findDirections[direction]]();
+	}
+
+	if (found) return component;
+}
+
+
+},{"../../attribute/a_bind":3,"../../binder":6,"../../util/check":41,"../../util/error":43,"../c_facet":9,"./cf_registry":20,"mol-proto":51}],13:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -890,7 +957,7 @@ function startDropFacet() {
 var ComponentFacet = require('../c_facet')
 	, facetsRegistry = require('./cf_registry')
 	, EditableEventsSource = require('../c_message_sources/editable_events_source')
-
+	, logger = require('../../util/logger')
 	, _ = require('mol-proto');
 
 
@@ -898,8 +965,8 @@ var ComponentFacet = require('../c_facet')
 var Editable = _.createSubclass(ComponentFacet, 'Editable');
 
 _.extendProto(Editable, {
-	init: initEditableFacet,
-	start: startEditableFacet,
+	init: init,
+	start: start,
 	makeEditable: makeEditable
 
 	// _reattach: _reattachEventsOnElementChange
@@ -910,7 +977,8 @@ facetsRegistry.add(Editable);
 module.exports = Editable;
 
 
-function initEditableFacet() {
+// init Editable facets
+function init() {
 	ComponentFacet.prototype.init.apply(this, arguments);
 
 	this._createMessageSource(EditableEventsSource, {
@@ -929,7 +997,8 @@ function makeEditable(editable) {
 }
 
 
-function startEditableFacet() {
+// start Editable facet
+function start() {
 	ComponentFacet.prototype.start.apply(this, arguments);
 	
 	if (this._editable) {
@@ -941,7 +1010,13 @@ function startEditableFacet() {
 		'editstart': onEditStart,
 		'editend': onEditEnd,
 		'previouseditable': makePreviousComponentEditable,
-		'nexteditable': makePreviousComponentEditable
+		'nexteditable': makeNextComponentEditable,
+		'previousmerge': mergeToPreviousEditable,
+		'nextmerge': mergeToNextEditable,
+		'requestmerge': onRequestMerge,
+		'mergeaccepted': onMergeAccepted,
+		'performmerge': onPerformMerge,
+		'mergeremove': onMergeRemove
 	});
 }
 
@@ -957,36 +1032,93 @@ function onEditEnd(eventType, event) {
 
 
 function makePreviousComponentEditable(eventType, event) {
-	var el = this.owner.el
-			, scope = this.owner.scope
-			, treeWalker = document.createTreeWalker(scope._rootEl, NodeFilter.SHOW_ELEMENT);
+	makeAdjacentComponentEditable(this.owner, 'up');
+}
 
-	treeWalker.currentNode = el;
-	var prevNode = treeWalker.previousNode();
+function makeNextComponentEditable(eventType, event) {
+	makeAdjacentComponentEditable(this.owner, 'down');
+}
 
-	outer: while (prevNode) {
-		var componentsNames = Object.keys(scope);
+function makeAdjacentComponentEditable(component, direction) {
+	var adjacentComp = component.dom.find(direction, function(comp) {
+		return comp.editable;
+	});
 
-		for (var i = 0; i < componentsNames.length; i++) {
-			var component = scope[componentsNames[i]];
-			if (component.el == prevNode && component.editable) {
-				var found = true;
-				break outer;
-			}
-		}
-
-		treeWalker.currentNode = prevNode;
-		prevNode = treeWalker.previousNode();
-	}
-
-	if (found) {
-		component.editable.postMessage('editstart');
-		component.el.focus();
+	if (adjacentComp) {
+		adjacentComp.editable.postMessage('editstart');
+		adjacentComp.el.focus();
 	}
 }
 
 
-},{"../c_facet":9,"../c_message_sources/editable_events_source":25,"./cf_registry":20,"mol-proto":51}],16:[function(require,module,exports){
+//
+// merge functionality
+//
+function mergeToPreviousEditable(eventType, event) {
+	mergeToAdjacentEditable(this.owner, 'up');
+}
+
+function mergeToNextEditable(eventType, event) {
+	mergeToAdjacentEditable(this.owner, 'down');
+}
+
+function mergeToAdjacentEditable(component, direction) {
+	var adjacentComp = component.dom.find(direction, function(comp) {
+		return comp.editable;
+	});
+
+	if (adjacentComp)
+		adjacentComp.editable.postMessage('requestmerge', { sender: component });
+}
+
+function onRequestMerge(message, data) {
+	check(data, Match.ObjectIncluding({ sender: Component }));
+
+	var mergeComponent = data.sender;
+	if (this.config.acceptMerge)
+		mergeComponent.editable.postMessage('mergeaccepted', { sender: this.owner });
+}
+
+function onMergeAccepted(message, data) {
+	check(data, Match.ObjectIncluding({ sender: Component }));
+
+	var targetComponent = data.sender;
+
+	this.owner.allFacets('clean');
+	targetComponent.editable.postMessage('performmerge', { sender: this.owner });
+}
+
+function onPerformMerge(message, data) {
+	check(data, Match.ObjectIncluding({ sender: Component }));
+	if (! this.config.acceptMerge) {
+		logger.error('performmerge message received by component that doesn\'t accept merge');
+		return;
+	}
+
+	var mergeComponent = data.sender;
+
+	// merge scopes
+	this.owner.container.scope.merge(mergeComponent.container.scope);
+
+	// merge DOM
+	this.owner.dom.appendChildren(mergeComponent.el);
+
+	// send remove message
+	mergeComponent.editable.postMessage('mergeremove');
+}
+
+
+function onMergeRemove(message, data) {
+	if (! this.config.allowMerge) {
+		logger.error('mergeremove message received by component that doesn\'t allow merge');
+		return;
+	}
+
+	this.owner.dom.remove();
+	this.owner.remove();
+}
+
+},{"../../util/logger":45,"../c_facet":9,"../c_message_sources/editable_events_source":25,"./cf_registry":20,"mol-proto":51}],16:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -1530,9 +1662,14 @@ var editableEventsMap = {
 	'enterkey': 'keypress',
 	'editstart': 'mousedown',
 	'editend': 'blur',
+	// move events
 	'nexteditable': 'keydown',
 	'previouseditable': 'keydown',	
 	'adjacenteditable': 'keydown',
+	// merge events
+	'nextmerge': 'keydown',
+	'previousmerge': 'keydown',
+	'adjacentmerge': 'keydown',
 };
 
 // TODO: this function should return relevant DOM event dependent on element tag
@@ -1556,9 +1693,13 @@ function removeDomEventListener(eventType) {
 
 
 function filterEditableMessage(eventType, message, data) {
+	var self = this;
+
 	switch (message) {
 		case 'enterkey':
 		 	return data.keyCode == 13;
+
+		// move to adjacent editable events
 		case 'previouseditable':
 			return this.options.moveToAdjacentEditable
 				&& movedToPrevious(data);
@@ -1568,6 +1709,16 @@ function filterEditableMessage(eventType, message, data) {
 		case 'adjacenteditable':
 			return this.options.moveToAdjacentEditable
 				&& (movedToPrevious(data) || movedToNext(data));
+
+		// merge adjacent editable events
+		case 'previousmerge': // merge current one into previous on backspace key
+			return this.options.allowMerge && mergeToPrevious(data)
+		case 'nextmerge': // merge current one into previous on backspace key
+			return this.options.allowMerge && mergeToNext(data)
+		case 'adjacentmerge':
+			return this.options.allowMerge
+				&& (mergeToPrevious(data) || mergeToNext(data));
+
 		case 'editstart':
 		case 'editend':
 			return this.options.editableOnClick;
@@ -1577,12 +1728,36 @@ function filterEditableMessage(eventType, message, data) {
 
 	function movedToPrevious(data) {
 		return (data.keyCode == 37 || data.keyCode == 38) // up and left
-			&& window.getSelection().anchorOffset == 0;
+			&& noTextBeforeSelection(self.component);
 	}
 
 	function movedToNext(data) {
 		return (data.keyCode == 39 || data.keyCode == 40) // down and right
-			&& window.getSelection().anchorOffset == 0;
+			&& noTextAfterSelection(self.component);
+	} 
+
+	function mergeToPrevious(data) {
+		return data.keyCode == 8 // backspace
+			&& noTextBeforeSelection(self.component);
+	}
+
+	function mergeToNext(data) {
+		return data.keyCode == 46 // delete
+			&& noTextAfterSelection(self.component);
+	}
+
+	function noTextBeforeSelection(component) {
+		var selection = window.getSelection();
+		if (! selection.isCollapsed) return;
+		if (selection.anchorOffset) return;
+
+		// walk up the DOM tree to check if there are text nodes before cursor
+		var treeWalker = document.createTreeWalker(component.el, NodeFilter.SHOW_TEXT);
+		return ! treeWalker.previousNode();
+	};
+
+	function noTextAfterSelection(component) {
+		return window.getSelection().anchorOffset == 0;
 	}
 }
 
@@ -1707,11 +1882,13 @@ function Scope(rootEl) {
 };
 
 _.extendProto(Scope, {
-	_add: _addToScope,
-	_copy: _copyFromScope,
+	_add: _add,
+	_copy: _copy,
 	_each: _each,
+	_addNew: _addNew,
+	_merge: _merge,
 	_uniqueName: _uniqueName,
-	_length: _getScopeLength,
+	_length: _length
 });
 
 module.exports = Scope;
@@ -1719,7 +1896,9 @@ module.exports = Scope;
 
 var allowedNamePattern = /^[A-Za-z][A-Za-z0-9\_\$]*$/;
 
-function _addToScope(object, name) {
+
+// adds object to scope throwing if name is notyunique
+function _add(object, name) {
 	if (this[name])
 		throw new ScopeError('duplicate object name: ' + name);
 
@@ -1729,10 +1908,24 @@ function _addToScope(object, name) {
 }
 
 
-function _copyFromScope(aScope) {
+
+
+// copies all objects from one scope to another,
+// throwing if some object is not unique
+function _copy(aScope) {
 	check(aScope, Scope);
 
-	aScope._each(_addToScope, this);
+	aScope._each(_add, this);
+}
+
+
+function _addNew(object, name) {
+// TODO
+}
+
+
+function _merge(scope) {
+// TODO
 }
 
 
@@ -1748,7 +1941,7 @@ function checkName(name) {
 
 
 function _uniqueName(prefix) {
-	var prefixes = uniqueName.prefixes || (uniqueName.prefixes = {})
+	var prefixes = _uniqueName.prefixes || (_uniqueName.prefixes = {})
 		, prefixStr = prefix + '_';
 	
 	if (prefixes[prefix])
@@ -1765,7 +1958,8 @@ function _uniqueName(prefix) {
 }
 
 
-function _getScopeLength() {
+// returns the number of objects in scope
+function _length() {
 	return Object.keys(this).length;
 }
 
@@ -2990,7 +3184,7 @@ var _ = require('mol-proto');
 // module exports error classes for all names defined in this array
 var errorClassNames = ['AbstractClass', 'Mixin', 'Messenger', 'ComponentDataSource',
 					   'Attribute', 'Binder', 'Loader', 'MailMessageSource', 'Facet',
-					   'Scope', 'EditableEventsSource', 'Model'];
+					   'Scope', 'EditableEventsSource', 'Model', 'DomFacet', 'EditableFacet'];
 
 var error = {
 	toBeImplemented: toBeImplemented,
