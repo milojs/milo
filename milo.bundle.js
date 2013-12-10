@@ -2491,7 +2491,8 @@ var Messenger = require('../messenger')
 	, dot = require('dot')
 	, _ = require('mol-proto')
 	, check = require('../util/check')
-	, Match = check.Match;
+	, Match = check.Match
+	, fs = require('fs');
 
 module.exports = Model;
 
@@ -2625,46 +2626,12 @@ var dotDef = {
 	modelPostMessageCode: 'this._model.postMessage'
 };
 
-var getterTemplate = 'method = function value() { \
-	var m = {{# def.modelAccessPrefix }}; \
-	{{ var modelDataProperty = "m"; }} \
-	return {{ \
-		for (var i = 0, count = it.parsedPath.length - 1; i < count; i++) { \
-			modelDataProperty += it.parsedPath[i].property; \
-	}} {{= modelDataProperty }} && {{ \
-		} \
-	}} {{= modelDataProperty }}{{= it.parsedPath[count].property }} ; \
-}';
-
-var setterTemplate = 'method = function setValue(value) { \
-	var m = {{# def.modelAccessPrefix }}; \
-	{{  var modelDataProperty = ""; \
-		for (var i = 0, count = it.parsedPath.length - 1; i < count; i++) { \
-			modelDataProperty += it.parsedPath[i].property; \
-			var emptyProp = it.parsedPath[i + 1].empty; \
-	}} \
-			if (! m{{= modelDataProperty }}) { \
-				m{{= modelDataProperty }} = {{= emptyProp }}; \
-				{{# def.modelPostMessageCode }}( "{{= modelDataProperty }}", \
-					{ type: "added", newValue: {{= emptyProp }} } ); \
-			} \n\
-	{{  } \
-		var lastProp = it.parsedPath[count].property; \
-	}} \
-	var wasDef = m{{= modelDataProperty }}.hasOwnProperty("{{= lastProp.slice(1) }}"); \
-	{{ modelDataProperty += lastProp; }} \
-	var old = m{{= modelDataProperty }}; \
-	m{{= modelDataProperty }} = value; \n\
-	if (! wasDef) \
-		{{# def.modelPostMessageCode }}( "{{= modelDataProperty }}", \
-			{ type: "added", newValue: value } ); \n\
-	else if (old != value) \
-		{{# def.modelPostMessageCode }}( "{{= modelDataProperty }}", \
-			{ type: "changed", oldValue: old, newValue: value} ); \
-}';
+var getterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\nmethod = function value() {\n\tvar m = {{# def.modelAccessPrefix }};\n\t{{ var modelDataProperty = 'm'; }}\n\treturn {{\n\t\tfor (var i = 0, count = it.parsedPath.length - 1; i < count; i++) {\n\t\t\tmodelDataProperty += it.parsedPath[i].property;\n\t}} {{= modelDataProperty }} && {{\n\t\t}\n\t}} {{= modelDataProperty }}{{= it.parsedPath[count].property }} ;\n}\n"
+	, setterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\nmethod = function setValue(value) {\n\tvar m = {{# def.modelAccessPrefix }};\n\t{{  var modelDataProperty = \"\";\n\t\tfor (var i = 0, count = it.parsedPath.length - 1; i < count; i++) {\n\t\t\tmodelDataProperty += it.parsedPath[i].property;\n\t\t\tvar emptyProp = it.parsedPath[i + 1].empty;\n\t}}\n\t\t\tif (! m{{= modelDataProperty }}) {\n\t\t\t\tm{{= modelDataProperty }} = {{= emptyProp }};\n\t\t\t\t{{# def.modelPostMessageCode }}( \"{{= modelDataProperty }}\",\n\t\t\t\t\t{ type: \"added\", newValue: {{= emptyProp }} } );\n\t\t\t}\n\t{{  }\n\t\tvar lastProp = it.parsedPath[count].property;\n\t}}\n\tvar wasDef = m{{= modelDataProperty }}.hasOwnProperty(\"{{= lastProp.slice(1) }}\");\n\t{{ modelDataProperty += lastProp; }}\n\tvar old = m{{= modelDataProperty }};\n\tm{{= modelDataProperty }} = value;\n\tif (! wasDef)\n\t\t{{# def.modelPostMessageCode }}( \"{{= modelDataProperty }}\",\n\t\t\t{ type: \"added\", newValue: value } );\n\telse if (old != value)\n\t\t{{# def.modelPostMessageCode }}( \"{{= modelDataProperty }}\",\n\t\t\t{ type: \"changed\", oldValue: old, newValue: value} );\n}\n";
 
 var getterSynthesizer = dot.compile(getterTemplate, dotDef)
 	, setterSynthesizer = dot.compile(setterTemplate, dotDef);
+
 
 function synthesizeMethod(synthesizer, path, parsedPath) {
 	var method
@@ -2679,7 +2646,7 @@ function synthesizeMethod(synthesizer, path, parsedPath) {
 	return method;
 }
 
-},{"../abstract/mixin":1,"../messenger":36,"../util/check":41,"../util/error":43,"./m_message_source":40,"dot":50,"mol-proto":51}],40:[function(require,module,exports){
+},{"../abstract/mixin":1,"../messenger":36,"../util/check":41,"../util/error":43,"./m_message_source":40,"dot":50,"fs":48,"mol-proto":51}],40:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../messenger/message_source')

@@ -24,6 +24,9 @@ module.exports = function(grunt) {
 			milo: {
 				files: {
 					'milo.bundle.js': 'lib/milo.js'
+				},
+				options: {
+					transform: ['brfs']
 				}
 			},
 			test1: {
