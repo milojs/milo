@@ -1,9 +1,8 @@
 'use strict';
+// won't work in node - only in browser
 
 describe('milo binder', function() {
     it('should bind components based on ml-bind attribute', function() {
-    	var milo = require('../../lib/milo');
-
 		expect({p: 1}).property('p', 1);
 
         console.log(milo.binder.scan());
