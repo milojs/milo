@@ -420,7 +420,8 @@ var FacetedObject = require('../facets/f_object')
 	, Messenger = require('../messenger')
 	, _ = require('mol-proto')
 	, check = require('../util/check')
-	, Match = check.Match;
+	, Match = check.Match
+	, config = require('../config');
 
 var Component = _.createSubclass(FacetedObject, 'Component', true);
 
@@ -431,9 +432,14 @@ Component.createComponentClass = createComponentClass;
 delete Component.createFacetedClass;
 
 
-Component.create = createComponent;
+// class methods
+_.extend(Component, {
+	create: create,
+	isComponent: isComponent,
+	getComponent: getComponent
+});
 
-
+// instance methods
 _.extendProto(Component, {
 	init: init,
 	addFacet: addFacet,
@@ -445,7 +451,9 @@ _.extendProto(Component, {
 //
 // class methods
 //
-function createComponent(info) {
+
+// create component from ComponentInfo
+function create(info) {
 	var ComponentClass = info.ComponentClass;
 	var aComponent = new ComponentClass(info.scope, info.el, info.name);
 
@@ -455,6 +463,16 @@ function createComponent(info) {
 		});
 
 	return aComponent;
+}
+
+// checks if element is bound to a component
+function isComponent(element) {
+	return config.componentRef in element;
+}
+
+// gets the element bound the component
+function getComponent(element) {
+	return element[config.componentRef];
 }
 
 
@@ -492,6 +510,8 @@ function createComponentClass(name, facetsConfig) {
 // Component.prototype.init.apply(this, arguments)
 function init(scope, element, name) {
 	this.el = element;
+	if (element)
+		element[config.componentRef] = this;
 
 	_.defineProperties(this, {
 		name: name,
@@ -544,7 +564,7 @@ function remove() {
 		delete this.scope[this.name];
 }
 
-},{"../facets/f_object":32,"../messenger":36,"../util/check":41,"./c_facet":9,"./c_facets/cf_registry":20,"mol-proto":51}],9:[function(require,module,exports){
+},{"../config":30,"../facets/f_object":32,"../messenger":36,"../util/check":41,"./c_facet":9,"./c_facets/cf_registry":20,"mol-proto":51}],9:[function(require,module,exports){
 'use strict';
 
 var Facet = require('../facets/f_class')
@@ -725,7 +745,8 @@ _.extendProto(Dom, {
 	prependChildren: prependChildren,
 	setStyle: setStyle,
 
-	find: find
+	find: find,
+	hasTextBeforeSelection: hasTextBeforeSelection
 	// _reattach: _reattachEventsOnElementChange
 });
 
@@ -770,20 +791,6 @@ function append(el) {
 	this.owner.el.appendChild(el)
 }
 
-// appends children of element inside this component's element
-function appendChildren(el) {
-	while(el.childNodes.length > 0) {
-		append.call(this, el.childNodes[0]);
-	}
-}
-
-// prepends children of element inside this component's element
-function prependChildren(el) {
-	while(el.childNodes.length > 0) {
-		prepend.call(this, el.childNodes[el.childNodes.length - 1]);
-	}
-}
-
 // prepend inside HTML element of component
 function prepend(el) {
 	var thisEl = this.owner.el
@@ -794,6 +801,17 @@ function prepend(el) {
 		thisEl.appendChild(el);
 }
 
+// appends children of element inside this component's element
+function appendChildren(el) {
+	while(el.childNodes.length)
+		this.append(el.childNodes[0]);
+}
+
+// prepends children of element inside this component's element
+function prependChildren(el) {
+	while(el.childNodes.length)
+		this.prepend(el.childNodes[el.childNodes.length - 1]);
+}
 
 var findDirections = {
 	'up': 'previousNode',
@@ -834,6 +852,18 @@ function find(direction, iterator) {
 	}
 
 	if (found) return component;
+}
+
+
+// returns true if the element has text before selection
+function hasTextBeforeSelection() {
+	var selection = window.getSelection();
+	if (! selection.isCollapsed) return;
+	if (selection.anchorOffset) return;
+
+	// walk up the DOM tree to check if there are text nodes before cursor
+	var treeWalker = document.createTreeWalker(component.el, NodeFilter.SHOW_TEXT);
+	return treeWalker.previousNode();
 }
 
 
@@ -1167,7 +1197,7 @@ var ComponentFacet = require('../c_facet')
 var Events = _.createSubclass(ComponentFacet, 'Events');
 
 _.extendProto(Events, {
-	init: initEventsFacet,
+	init: init,
 
 	// _reattach: _reattachEventsOnElementChange
 });
@@ -1177,7 +1207,8 @@ facetsRegistry.add(Events);
 module.exports = Events;
 
 
-function initEventsFacet() {
+// init Events facet
+function init() {
 	ComponentFacet.prototype.init.apply(this, arguments);
 
 	var domEventsSource = new DOMEventsSource(this, { trigger: 'trigger' }, this.owner);
@@ -1785,13 +1816,7 @@ function filterEditableMessage(eventType, message, data) {
 	}
 
 	function noTextBeforeSelection(component) {
-		var selection = window.getSelection();
-		if (! selection.isCollapsed) return;
-		if (selection.anchorOffset) return;
-
-		// walk up the DOM tree to check if there are text nodes before cursor
-		var treeWalker = document.createTreeWalker(component.el, NodeFilter.SHOW_TEXT);
-		return ! treeWalker.previousNode();
+		return ! component.dom.hasTextBeforeSelection();
 	};
 
 	function noTextAfterSelection(component) {
@@ -2017,7 +2042,8 @@ config({
 	attrs: {
 		bind: 'ml-bind',
 		load: 'ml-load'
-	}
+	},
+	componentRef: '___milo_component'
 });
 
 },{"mol-proto":51}],31:[function(require,module,exports){
