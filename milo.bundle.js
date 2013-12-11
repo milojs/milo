@@ -1076,6 +1076,8 @@ function mergeToAdjacentEditable(component, direction) {
 		adjacentComp.editable.postMessage('requestmerge', { sender: component });
 }
 
+
+// merge messages
 function onRequestMerge(message, data) {
 	check(data, Match.ObjectIncluding({ sender: Component }));
 
@@ -1540,14 +1542,14 @@ var DOMEventsSource = _.createSubclass(MessageSource, 'DOMMessageSource', true);
 
 _.extendProto(DOMEventsSource, {
 	// implementing MessageSource interface
-	init: initDomEventsSource,
-	translateToSourceMessage: translateToDomEvent,
- 	addSourceListener: addDomEventListener,
- 	removeSourceListener: removeDomEventListener,
+	init: init,
+	translateToSourceMessage: translateToSourceMessage,
+ 	addSourceListener: addSourceListener,
+ 	removeSourceListener: removeSourceListener,
  	filterSourceMessage: filterCapturedDomEvent,
 
  	// class specific methods
- 	dom: getDomElement,
+ 	dom: dom,
  	handleEvent: handleEvent,  // event dispatcher - as defined by Event DOM API
  	trigger: triggerDomEvent
 });
@@ -1558,7 +1560,8 @@ module.exports = DOMEventsSource;
 var useCapturePattern = /__capture$/;
 
 
-function initDomEventsSource(hostObject, proxyMethods, component) {
+// init DOM event source
+function init(hostObject, proxyMethods, component) {
 	check(component, Component);
 	MessageSource.prototype.init.apply(this, arguments);
 
@@ -1568,24 +1571,28 @@ function initDomEventsSource(hostObject, proxyMethods, component) {
 }
 
 
-function getDomElement() {
+// get DOM element of component
+function dom() {
 	return this.component.el;
 }
 
 
-function translateToDomEvent(message) {
+// translate to DOM event
+function translateToSourceMessage(message) {
 	if (useCapturePattern.test(message))
 		message = message.replace(useCapturePattern, '');
 	return message;
 }
 
 
-function addDomEventListener(eventType) {
+// add listener to DOM event
+function addSourceListener(eventType) {
 	this.dom().addEventListener(eventType, this, false);
 }
 
 
-function removeDomEventListener(eventType) {
+// remove listener from DOM event
+function removeSourceListener(eventType) {
 	this.dom().removeEventListener(eventType, this, false);
 }
 
