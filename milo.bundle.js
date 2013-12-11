@@ -1113,13 +1113,28 @@ function onPerformMerge(message, data) {
 		return;
 	}
 
-	var mergeComponent = data.sender;
+	var mergeComponent = data.sender,
+			windowSelection = window.getSelection(),
+			selectionRange = document.createRange();
 
 	// merge scopes
 	this.owner.container.scope._merge(mergeComponent.container.scope);
 
+	//Reference first element to be merged
+	var firstMergeEl = mergeComponent.el.childNodes[0];
+
 	// merge DOM
 	this.owner.dom.appendChildren(mergeComponent.el);
+
+	//Make the interface editable again like expected
+	this.makeEditable(true);
+	this.owner.el.focus();
+
+	//Set the selection where it should be
+	selectionRange.setStart(firstMergeEl);
+	selectionRange.setEnd(firstMergeEl);
+	windowSelection.removeAllRanges();
+	windowSelection.addRange(selectionRange);
 
 	// send remove message
 	mergeComponent.editable.postMessage('mergeremove');
