@@ -858,12 +858,12 @@ function find(direction, iterator) {
 // returns true if the element has text before selection
 function hasTextBeforeSelection() {
 	var selection = window.getSelection();
-	if (! selection.isCollapsed) return;
-	if (selection.anchorOffset) return;
+	if (! selection.isCollapsed) return true;
+	if (selection.anchorOffset) return true;
 
 	// walk up the DOM tree to check if there are text nodes before cursor
-	var treeWalker = document.createTreeWalker(component.el, NodeFilter.SHOW_TEXT);
-	return treeWalker.previousNode();
+	var treeWalker = document.createTreeWalker(this.owner.el, NodeFilter.SHOW_TEXT);
+	return !! treeWalker.previousNode();
 }
 
 
