@@ -367,7 +367,7 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 				, isContainer = typeof scopeObject != 'undefined' && scopeObject.container;
 		}
 
-		if (el.children && el.children.length) {
+		if (el.childNodes && el.childNodes.length) {
 			var innerScope = createScopeForChildren(el);
 
 			if (innerScope._length()) {
@@ -389,8 +389,8 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 
 	function createScopeForChildren(containerEl) {
 		var scope = new Scope(containerEl);
-		Array.prototype.forEach.call(containerEl.children, function(el) {
-			createScopeForElement(scope, el)
+		Array.prototype.forEach.call(_.filterNodeListByType(containerEl.childNodes, 1), function(node) {
+			createScopeForElement(scope, node);
 		});
 		return scope;
 	}
@@ -2221,7 +2221,7 @@ function _loader(rootEl, callback) {
 
 
 function loadView(el, callback) {
-	if (el.children.length)
+	if (_.filterNodeListByType(el.childNodes, 1).length)
 		throw new LoaderError('can\'t load html into element that is not empty');
 
 	var attr = new LoadAttribute(el);
@@ -3739,7 +3739,8 @@ var proto = _ = {
 	prependArray: prependArray,
 	toArray: toArray,
 	firstUpperCase: firstUpperCase,
-	firstLowerCase: firstLowerCase
+	firstLowerCase: firstLowerCase,
+	filterNodeListByType: filterNodeListByType
 };
 
 
@@ -3968,6 +3969,18 @@ function firstUpperCase(str) {
 function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
 }
+
+
+// type 1: html element, type 3: text
+function filterNodeListByType(nodeList, type) {
+	var filteredNodes = [];
+	Array.prototype.forEach.call(nodeList, function (node) {
+		if (node.nodeType == type)
+			filteredNodes.push(node);
+	});
+	return filteredNodes;
+}
+
 
 },{}]},{},[38])
 ;
