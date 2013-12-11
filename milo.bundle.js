@@ -723,6 +723,7 @@ _.extendProto(Dom, {
 	prepend: prepend,
 	appendChildren: appendChildren,
 	prependChildren: prependChildren,
+	setStyle: setStyle,
 
 	find: find
 	// _reattach: _reattachEventsOnElementChange
@@ -754,6 +755,10 @@ function hide() {
 	this.owner.el.style.display = 'none';
 }
 
+function setStyle(property, value) {
+	this.owner.el.style[property] = value;
+}
+
 // remove HTML element of component
 function remove() {
 	var thisEl = this.owner.el;
@@ -767,12 +772,16 @@ function append(el) {
 
 // appends children of element inside this component's element
 function appendChildren(el) {
-	Array.prototype.forEach.call(el.childNodes, append, this);
+	while(el.childNodes.length > 0) {
+		append.call(this, el.childNodes[0]);
+	}
 }
 
 // prepends children of element inside this component's element
 function prependChildren(el) {
-	Array.prototype.forEach.call(el.childNodes, append, this);
+	while(el.childNodes.length > 0) {
+		prepend.call(this, el.childNodes[el.childNodes.length - 1]);
+	}
 }
 
 // prepend inside HTML element of component
@@ -1060,6 +1069,7 @@ function makeAdjacentComponentEditable(component, direction) {
 // merge functionality
 //
 function mergeToPreviousEditable(eventType, event) {
+	event.preventDefault();
 	mergeToAdjacentEditable(this.owner, 'up');
 }
 
@@ -1092,6 +1102,7 @@ function onMergeAccepted(message, data) {
 	var targetComponent = data.sender;
 
 	this.owner.allFacets('clean');
+	
 	targetComponent.editable.postMessage('performmerge', { sender: this.owner });
 }
 
@@ -1105,7 +1116,7 @@ function onPerformMerge(message, data) {
 	var mergeComponent = data.sender;
 
 	// merge scopes
-	this.owner.container.scope.merge(mergeComponent.container.scope);
+	this.owner.container.scope._merge(mergeComponent.container.scope);
 
 	// merge DOM
 	this.owner.dom.appendChildren(mergeComponent.el);
