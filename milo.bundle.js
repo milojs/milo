@@ -955,10 +955,13 @@ function startDropFacet() {
 'use strict';
 
 var ComponentFacet = require('../c_facet')
+	, Component = require('../c_class')
 	, facetsRegistry = require('./cf_registry')
 	, EditableEventsSource = require('../c_message_sources/editable_events_source')
 	, logger = require('../../util/logger')
-	, _ = require('mol-proto');
+	, _ = require('mol-proto')
+	, check = require('../../util').check
+	, Match = check.Match;
 
 
 // generic drag handler, should be overridden
@@ -983,7 +986,9 @@ function init() {
 
 	this._createMessageSource(EditableEventsSource, {
 		editableOnClick: this.config.editableOnClick,
-		moveToAdjacentEditable: this.config.moveToAdjacentEditable
+		moveToAdjacentEditable: this.config.moveToAdjacentEditable,
+		allowMerge: this.config.allowMerge,
+		acceptMerge: this.config.acceptMerge
 	});
 
 	this._editable = typeof this.config.editable != 'undefined'
@@ -1118,7 +1123,7 @@ function onMergeRemove(message, data) {
 	this.owner.remove();
 }
 
-},{"../../util/logger":45,"../c_facet":9,"../c_message_sources/editable_events_source":25,"./cf_registry":20,"mol-proto":51}],16:[function(require,module,exports){
+},{"../../util":44,"../../util/logger":45,"../c_class":8,"../c_facet":9,"../c_message_sources/editable_events_source":25,"./cf_registry":20,"mol-proto":51}],16:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -1757,7 +1762,7 @@ function filterEditableMessage(eventType, message, data) {
 	};
 
 	function noTextAfterSelection(component) {
-		return window.getSelection().anchorOffset == 0;
+		return false;//window.getSelection().anchorOffset == 0; //TODO: not working
 	}
 }
 
