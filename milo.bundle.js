@@ -949,7 +949,7 @@ function hasTextBeforeSelection() {
 
 	// walk up the DOM tree to check if there are text nodes before cursor
 	var treeWalker = document.createTreeWalker(this.owner.el, NodeFilter.SHOW_TEXT);
-	return !! treeWalker.previousNode();
+	return treeWalker.previousNode();
 }
 
 
@@ -1168,10 +1168,12 @@ function onEditEnd(eventType, event) {
 // Move caret to another editable
 //
 function makePreviousComponentEditable(eventType, event) {
+	event.preventDefault();
 	makeAdjacentComponentEditable(this.owner, 'up');
 }
 
 function makeNextComponentEditable(eventType, event) {
+	event.preventDefault();
 	makeAdjacentComponentEditable(this.owner, 'down');
 }
 
@@ -1183,12 +1185,14 @@ function makeAdjacentComponentEditable(component, direction) {
 	if (adjacentComp) {
 		adjacentComp.editable.postMessage('editstart');
 		adjacentComp.el.focus();
-
+		
 		var windowSelection = window.getSelection()
 			, selectionRange = document.createRange();
-
 		selectionRange.selectNodeContents(adjacentComp.el);
-		selectionRange.collapse(false);
+		if (direction == 'up')
+			selectionRange.collapse(false);
+		else
+			selectionRange.collapse(true);
         windowSelection.removeAllRanges();
         windowSelection.addRange(selectionRange);
 	}
@@ -2044,7 +2048,14 @@ function filterEditableMessage(eventType, message, data) {
 	};
 
 	function noTextAfterSelection(component) {
-		return false;//window.getSelection().anchorOffset == 0; //TODO: not working
+		var sel = window.getSelection();
+		if (sel.anchorOffset == sel.anchorNode.length) {
+			if (sel.anchorNode.nextSibling) {
+				return false;
+			} else {
+				return true;
+			}
+		}
 	}
 }
 
