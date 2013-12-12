@@ -156,7 +156,8 @@ var Attribute = require('./index')
 // View[Events]:myView - class, facet(s) and component name
 
 var attrRegExp= /^([^\:\[\]]*)(?:\[([^\:\[\]]*)\])?\:?([^:]*)$/
-	, facetsSplitRegExp = /\s*(?:\,|\s)\s*/;
+	, facetsSplitRegExp = /\s*(?:\,|\s)\s*/
+	, attrTemplate = '%compClass%compFacets:%compName';
 
 
 var BindAttribute = _.createSubclass(Attribute, 'BindAttribute', true);
@@ -164,7 +165,8 @@ var BindAttribute = _.createSubclass(Attribute, 'BindAttribute', true);
 _.extendProto(BindAttribute, {
 	attrName: attrName,
 	parse: parse,
-	validate: validate
+	validate: validate,
+	render: render
 });
 
 
@@ -208,6 +210,16 @@ function validate() {
 		throw new AttributeError('empty component class name ' + this.compClass);
 
 	return this;
+}
+
+
+function render() {
+	return attrTemplate
+				.replace('%compClass', this.compClass)
+				.replace('%compFacets', this.compFacets
+											? '[' + this.compFacets.join(', ') + ']'
+											: '')
+				.replace('%compName', this.compName);
 }
 
 },{"../config":31,"../util/check":42,"../util/error":44,"./index":5,"mol-proto":52}],4:[function(require,module,exports){
@@ -271,22 +283,29 @@ function Attribute(el, name) {
 }
 
 _.extendProto(Attribute, {
-	get: getAttributeValue,
-	set: setAttributeValue,
+	get: get,
+	set: set,
 
 	// should be defined in subclass
 	attrName: toBeImplemented,
 	parse: toBeImplemented,
 	validate: toBeImplemented,
+	render: toBeImplemented,
+	decorate: decorate
 });
 
-
-function getAttributeValue() {
+// get attribute value
+function get() {
 	return this.el.getAttribute(this.name);
 }
 
-function setAttributeValue(value) {
+// set attribute value
+function set(value) {
 	this.el.setAttribute(this.name, value);
+}
+
+function decorate() {
+	this.set(this.render());
 }
 
 },{"../util/check":42,"../util/error":44,"mol-proto":52}],6:[function(require,module,exports){
@@ -421,7 +440,8 @@ var FacetedObject = require('../facets/f_object')
 	, _ = require('mol-proto')
 	, check = require('../util/check')
 	, Match = check.Match
-	, config = require('../config');
+	, config = require('../config')
+	, miloCount = require('../util/count');
 
 var Component = _.createSubclass(FacetedObject, 'Component', true);
 
@@ -468,25 +488,30 @@ function create(info) {
 
 
 // creates a new instance with the same state but different element
-var prefixPattern = /^([^_]*)_/;
-
 function copy(component) {
 	var ComponentClass = component.constructor
-		, match = prefixPattern.exec(component.name)
-		, namePrefix = match ? match[1] : ''
-		, newName = component.scope._uniqueName(namePrefix)
-		, newEl = this.dom 
-					? this.dom.copy()
-					: this.el.cloneNode(false)
-		, newInfo = _.clone(this.componentInfo);
+		, newName = 'milo_' + miloCount()
+		, newEl = component.dom 
+					? component.dom.copy()
+					: component.el.cloneNode(false)
+		, newInfo = _.clone(component.componentInfo)
+		, attr = _.clone(newInfo.attr);
+
+	_.extend(attr, {
+		el: newEl,
+		compName: newName
+	});
+
+	attr.decorate();
 
 	_.extend(newInfo, {
 		el: newEl,
-		name: newName
+		name: newName,
+		attr: attr
 	});
 
 	var aComponent = Component.create(newInfo);
-
+	component.scope._add(aComponent, aComponent.name);
 	return aComponent;
 }
 
@@ -498,7 +523,7 @@ function isComponent(element) {
 
 // gets the element bound the component
 function getComponent(element) {
-	return element[config.componentRef];
+	return element && element[config.componentRef];
 }
 
 
@@ -591,7 +616,7 @@ function remove() {
 		delete this.scope[this.name];
 }
 
-},{"../config":31,"../facets/f_object":33,"../messenger":37,"../util/check":42,"./c_facet":9,"./c_facets/cf_registry":21,"mol-proto":52}],9:[function(require,module,exports){
+},{"../config":31,"../facets/f_object":33,"../messenger":37,"../util/check":42,"../util/count":43,"./c_facet":9,"./c_facets/cf_registry":21,"mol-proto":52}],9:[function(require,module,exports){
 'use strict';
 
 var Facet = require('../facets/f_class')
@@ -773,6 +798,7 @@ _.extendProto(Dom, {
 	insertAfter: insertAfter,
 	insertBefore: insertBefore,
 	setStyle: setStyle,
+	copy: copy,
 
 	find: find,
 	hasTextBeforeSelection: hasTextBeforeSelection
@@ -862,11 +888,15 @@ function prependChildren(el) {
 }
 
 function insertAfter(el) {
-	this.owner.el.parentNode.insertAfter(el);
+	var thisEl = this.owner.el
+		, parent = thisEl.parentNode;
+	parent.insertBefore(el, thisEl.nextSibling);
 }
 
 function insertBefore(el) {
-	this.owner.el.parentNode.insertBefore(el);
+	var thisEl = this.owner.el
+		, parent = thisEl.parentNode;
+	parent.insertBefore(el, thisEl);
 }
 
 var findDirections = {
@@ -1242,10 +1272,14 @@ function onMergeRemove(message, data) {
 }
 
 
-function onEnterSplit() {
+function onEnterSplit(message, event) {
 	var splitFacet = this.owner.split;
-	if (splitFacet)
-		splitFacet.make();
+	if (splitFacet) {
+		var newComp = splitFacet.make();
+		event.preventDefault();
+		newComp.editable.postMessage('editstart');
+		newComp.el.focus();
+	}
 }
 
 },{"../../util":45,"../../util/logger":46,"../c_class":8,"../c_facet":9,"../c_message_sources/editable_events_source":26,"./cf_registry":21,"mol-proto":52}],16:[function(require,module,exports){
@@ -1371,12 +1405,13 @@ var ComponentFacet = require('../c_facet')
 
 var Split = _.createSubclass(ComponentFacet, 'Split');
 
-_.extendProto(Events, {
+_.extendProto(Split, {
 	init: init,
 	start: start,
 	make: make,
 
 	isSplittable: isSplittable,
+	_makeSplit: _makeSplit,
 
 	require: ['Dom']
 
@@ -1410,7 +1445,7 @@ function make() {
 	if (! this.owner.dom.hasTextBeforeSelection())
 		return; // should simply create empty component before
 
-	this._makeSplit();
+	return this._makeSplit();
 }
 
 
@@ -1418,10 +1453,12 @@ function _makeSplit() {
 	var thisComp = this.owner;
 
 	// clone itself
-	var newComp = Component.copy(thisComp); // TODO
+	var newComp = Component.copy(thisComp);
 	thisComp.dom.insertAfter(newComp.el);
 
 	splitElement(thisComp.el, newComp.el);
+
+	return newComp;
 }
 
 
@@ -1436,8 +1473,15 @@ function splitElement(thisEl, newEl) {
 			if (comp)
 				comp.split._makeSplit();
 			else {
-				var newChildEl = childNode.cloneNode(false);
-				splitElement(childNode, newChildEl);
+				if (childNode.nodeType == Node.TEXT_NODE) {
+					var selPos = selection.anchorOffset;
+					var newText = childNode.splitText(selPos);
+					newEl.appendChild(newText);
+				} else {
+					var newChildEl = childNode.cloneNode(false);
+					newEl.appendChild(newChildEl);
+					splitElement(childNode, newChildEl);
+				}
 			}
 
 			selFound = true;
@@ -1460,7 +1504,7 @@ function isSplittable() {
 		var comp = Component.getComponent(el);
 		if (comp && ! comp.split)
 			return false;
-		el = el.parent;
+		el = el.parentNode;
 	}
 
 	return true;
@@ -1567,15 +1611,14 @@ function ComponentInfo(scope, el, attr) {
 	attr.parse().validate();
 
 	this.scope = scope;
-	this.name = attr.compName;
 	this.el = el;
+	this.attr = attr;
+	this.name = attr.compName;
 	this.ComponentClass = getComponentClass(attr);
 	this.extraFacetsClasses = getComponentExtraFacets(this.ComponentClass, attr);
 
 	if (hasContainerFacet(this.ComponentClass, attr))
 		this.container = {};
-
-	Object.freeze(this);
 
 
 	function getComponentClass(attr) {
@@ -2121,7 +2164,6 @@ _.extendProto(Scope, {
 	_each: _each,
 	_addNew: _addNew,
 	_merge: _merge,
-	_uniqueName: _uniqueName,
 	_length: _length
 });
 
@@ -2171,25 +2213,6 @@ function _each(callback, thisArg) {
 function checkName(name) {
 	if (! allowedNamePattern.test(name))
 		throw new ScopeError('name should start from letter, this name is not allowed: ' + name);
-}
-
-
-var prefixPattern = /^([^_]*)_/;
-function _uniqueName(prefix) {
-	var prefixes = _uniqueName.prefixes || (_uniqueName.prefixes = {})
-		, prefixStr = prefix + '_';
-	
-	if (prefixes[prefix])
-		return prefixStr + prefixes[prefix]++;
-
-	var uniqueNum = 0
-		, prefixLen = prefixStr.length;
-
-	_.eachKey(this, function(obj, name) {
-		if (name.indexOf(prefixStr) == -1) return;
-		var num = name.slice(prefixLen);
-		if (num == uniqueNum) uniqueNum++ ;
-	});
 }
 
 
@@ -3912,7 +3935,8 @@ var proto = _ = {
 	prependArray: prependArray,
 	toArray: toArray,
 	firstUpperCase: firstUpperCase,
-	firstLowerCase: firstLowerCase
+	firstLowerCase: firstLowerCase,
+	filterNodeListByType: filterNodeListByType
 };
 
 
@@ -4141,6 +4165,18 @@ function firstUpperCase(str) {
 function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
 }
+
+
+// type 1: html element, type 3: text
+function filterNodeListByType(nodeList, type) {
+	var filteredNodes = [];
+	Array.prototype.forEach.call(nodeList, function (node) {
+		if (node.nodeType == type)
+			filteredNodes.push(node);
+	});
+	return filteredNodes;
+}
+
 
 },{}]},{},[39])
 ;
