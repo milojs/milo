@@ -1086,14 +1086,14 @@ function init() {
 		acceptMerge: this.config.acceptMerge
 	});
 
-	this._editable = typeof this.config.editable != 'undefined'
-						? this.config.editable
-						: true;
+	// this._editable = typeof this.config.editable != 'undefined'
+	// 					? this.config.editable
+	// 					: true;
 }
 
 
 function makeEditable(editable) {
-	this.owner.el.setAttribute('contenteditable', editable);
+	//this.owner.el.setAttribute('contenteditable', editable);
 }
 
 
@@ -1110,8 +1110,8 @@ function start() {
 		'editstart': onEditStart,
 		'editend': onEditEnd,
 		// arrow keys events
-		'previouseditable': makePreviousComponentEditable,
-		'nexteditable': makeNextComponentEditable,
+		//'previouseditable': makePreviousComponentEditable,
+		//'nexteditable': makeNextComponentEditable,
 		// merge events
 		'previousmerge': mergeToPreviousEditable,
 		'nextmerge': mergeToNextEditable,
@@ -1134,7 +1134,9 @@ function onEditEnd(eventType, event) {
 	this.makeEditable(false);
 }
 
-
+//
+// Move caret to another editable
+//
 function makePreviousComponentEditable(eventType, event) {
 	makeAdjacentComponentEditable(this.owner, 'up');
 }
@@ -1151,6 +1153,14 @@ function makeAdjacentComponentEditable(component, direction) {
 	if (adjacentComp) {
 		adjacentComp.editable.postMessage('editstart');
 		adjacentComp.el.focus();
+
+		var windowSelection = window.getSelection()
+			, selectionRange = document.createRange();
+
+		selectionRange.selectNodeContents(adjacentComp.el);
+		selectionRange.collapse(false);
+        windowSelection.removeAllRanges();
+        windowSelection.addRange(selectionRange);
 	}
 }
 
@@ -1203,9 +1213,9 @@ function onPerformMerge(message, data) {
 		return;
 	}
 
-	var mergeComponent = data.sender,
-			windowSelection = window.getSelection(),
-			selectionRange = document.createRange();
+	var mergeComponent = data.sender
+		, windowSelection = window.getSelection()
+		, selectionRange = document.createRange();
 
 	// merge scopes
 	this.owner.container.scope._merge(mergeComponent.container.scope);
@@ -1371,7 +1381,7 @@ var ComponentFacet = require('../c_facet')
 
 var Split = _.createSubclass(ComponentFacet, 'Split');
 
-_.extendProto(Events, {
+_.extendProto(Split, {
 	init: init,
 	start: start,
 	make: make,
@@ -3912,7 +3922,8 @@ var proto = _ = {
 	prependArray: prependArray,
 	toArray: toArray,
 	firstUpperCase: firstUpperCase,
-	firstLowerCase: firstLowerCase
+	firstLowerCase: firstLowerCase,
+	filterNodeListByType: filterNodeListByType
 };
 
 
@@ -4141,6 +4152,18 @@ function firstUpperCase(str) {
 function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
 }
+
+
+// type 1: html element, type 3: text
+function filterNodeListByType(nodeList, type) {
+	var filteredNodes = [];
+	Array.prototype.forEach.call(nodeList, function (node) {
+		if (node.nodeType == type)
+			filteredNodes.push(node);
+	});
+	return filteredNodes;
+}
+
 
 },{}]},{},[39])
 ;
