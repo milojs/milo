@@ -12,8 +12,8 @@ describe('Model class', function() {
 
 		var modelPath = m('.info.name');
 
-		assert(modelPath.value instanceof Function, 'getter should be function');
-		assert(modelPath.setValue instanceof Function, 'setter should be function');
+		assert(modelPath.get instanceof Function, 'getter should be function');
+		assert(modelPath.set instanceof Function, 'setter should be function');
 	});
 
 
@@ -27,8 +27,8 @@ describe('Model class', function() {
 			name: 'Milo'
 		};
 
-			assert.equal(modelPath.value(), 'Milo');
-			assert.equal(m('.info.name').value(), 'Milo');
+			assert.equal(modelPath.get(), 'Milo');
+			assert.equal(m('.info.name').get(), 'Milo');
 
 		m._data.info = {
 			name: 'Jason',
@@ -38,27 +38,27 @@ describe('Model class', function() {
 				year: 1982
 			}
 		};
-			assert.equal(modelPath.value(), 'Jason');
-			assert.equal(m('.info.DOB.year').value(), 1982);
+			assert.equal(modelPath.get(), 'Jason');
+			assert.equal(m('.info.DOB.year').get(), 1982);
 
 		assert.throws(function() {
 			var id = m._data.info.person.id;
 		}, 'direct access to property of undefined should throw')
 
 		assert.doesNotThrow(function() {
-			var id = m('.info.person.id').value();
+			var id = m('.info.person.id').get();
 		}, 'access to property of undefined should not throw');
 		
-			assert.equal(m('.info.person.id').value(), undefined,
+			assert.equal(m('.info.person.id').get(), undefined,
 				'access to property of undefined should return "undefined"');
 	});
 
 
-	it('should return ModelPath that has compiled setter "setValue()"', function() {
+	it('should return ModelPath that has compiled setter "set()"', function() {
 		var m = new Model();
 
-		m('.info.name').setValue('Jason');
-		m('.info.DOB.year').setValue(1982);
+		m('.info.name').set('Jason');
+		m('.info.DOB.year').set(1982);
 
 			// accessing model directly, should not be done this way in application
 			assert.deepEqual(m._data, {
@@ -70,7 +70,7 @@ describe('Model class', function() {
 				}
 			}, 'should correctly assign properties of undefined by defining them')
 
-		m('.info.DOB.month').setValue(2);
+		m('.info.DOB.month').set(2);
 
 			assert.deepEqual(m._data, {
 				info: {
@@ -83,7 +83,7 @@ describe('Model class', function() {
 			}, 'should correctly assign properties of undefined by defining them')
 
 
-		m('.info.DOB').setValue({
+		m('.info.DOB').set({
 			date: 1,
 			month: 2,
 			year: 1982
@@ -102,15 +102,15 @@ describe('Model class', function() {
 	});
 
 
-	it('should support array syntax for property access paths for value() and setValue()', function() {
+	it('should support array syntax for property access paths for get() and set()', function() {
 		var m = new Model();
 
-		m('.list[0].info.name').setValue('Jason');
-		m('.list[0].extra[0]').setValue('extra0');
-		m('.list[0].extra[1]').setValue('extra1');
-		m('.list[1].info.name').setValue('Evgeny');
-		m('.list[1].added[1]').setValue(10);
-		m('.list[1].added[2]').setValue(20);
+		m('.list[0].info.name').set('Jason');
+		m('.list[0].extra[0]').set('extra0');
+		m('.list[0].extra[1]').set('extra1');
+		m('.list[1].info.name').set('Evgeny');
+		m('.list[1].added[1]').set(10);
+		m('.list[1].added[2]').set(20);
 
 			// accessing model directly, should not be done this way in application
 			assert.deepEqual(m._data, {
@@ -130,9 +130,9 @@ describe('Model class', function() {
 				]
 			}, 'should correctly assign properties of undefined by defining them');
 
-			assert.equal(m('.list[0].info.name').value(), 'Jason', 'getter should return correct value');
-			assert.equal(m('.list[0].extra[1]').value(), 'extra1', 'getter should return correct value');
-			assert.deepEqual(m('.list[1].added').value(), [, 10, 20],
+			assert.equal(m('.list[0].info.name').get(), 'Jason', 'getter should return correct value');
+			assert.equal(m('.list[0].extra[1]').get(), 'extra1', 'getter should return correct value');
+			assert.deepEqual(m('.list[1].added').get(), [, 10, 20],
 				'getter should return correct value for arrays in properties too');
 	});
 
@@ -146,7 +146,7 @@ describe('Model class', function() {
 			posted[message] = data;
 		});
 
-		m('.list[0].info.name').setValue('Jason');
+		m('.list[0].info.name').set('Jason');
 
 			assert.deepEqual(posted, {
 				'.list': { type: 'added', newValue: [] },
@@ -157,8 +157,8 @@ describe('Model class', function() {
 
 		var posted = {}
 
-		m('.list[0].info.name').setValue('Evgeny');
-		m('.list[0].info.surname').setValue('Poberezkin');
+		m('.list[0].info.name').set('Evgeny');
+		m('.list[0].info.surname').set('Poberezkin');
 
 			assert.deepEqual(posted, {
 				'.list[0].info.name': { type: 'changed', oldValue: 'Jason', newValue: 'Evgeny' },
@@ -167,8 +167,8 @@ describe('Model class', function() {
 
 		var posted = {}
 
-		m('.list[0].extra[0]').setValue('extra0');
-		m('.list[0].extra[1]').setValue('extra1');
+		m('.list[0].extra[0]').set('extra0');
+		m('.list[0].extra[1]').set('extra1');
 
 			assert.deepEqual(posted, {
 				'.list[0].extra': { type: 'added', newValue: [] },
@@ -189,7 +189,7 @@ describe('Model class', function() {
 
 		m('.list').on('', postLogger);
 
-		m('.list[0].info.name').setValue('Jason');
+		m('.list[0].info.name').set('Jason');
 
 			assert.deepEqual(posted, {
 				'.list': { type: 'added', newValue: [] },
@@ -208,10 +208,10 @@ describe('Model class', function() {
 			assert.equal(m, this, 'should set message handler context to model');
 
 			// main thing in this test!
-			assert.equal(m('.list[0].info.name').value(), 'Jason', 'should set model BEFORE posting message');
+			assert.equal(m('.list[0].info.name').get(), 'Jason', 'should set model BEFORE posting message');
 			posted[message] = data;
 		}
 
-		m('.list[0].info.name').setValue('Jason');
+		m('.list[0].info.name').set('Jason');
 	});
 });
