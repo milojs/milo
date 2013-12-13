@@ -2991,11 +2991,12 @@ function Model(scope, schema, name, data) {
 		scope: scope,
 		name: name,
 		_schema: schema,
-		_data: data || {},
 		_messenger: messenger,
 		// _messageSource: messageSource,
 		__pathsCache: {}
 	});
+
+	model._data = data;
 
 	return model;
 }
@@ -3006,6 +3007,32 @@ _.extendProto(Model, {
 	get: get,
 	proxyMessenger: proxyMessenger
 });
+
+// cache of compiled ModelPath methods
+var __synthesizedPathsMethods = {};
+
+// path node syntax
+var pathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]/g;
+
+var dotDef = {
+	modelAccessPrefix: 'this._model._data',
+	modelRef: 'this._model',
+	modelData: '._data',
+	modelPostMessageCode: 'this._model.postMessage'
+};
+
+var getterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\nmethod = function get() {\n\tvar m = {{# def.modelAccessPrefix }};\n\t{{ var modelDataProperty = 'm'; }}\n\treturn m {{\n\t\tfor (var i = 0, len = it.parsedPath.length; i < len; i++) {\n\t\t\tmodelDataProperty += it.parsedPath[i].property;\n\t}} && {{= modelDataProperty }} {{\n\t\t}\n\t}};\n}\n"
+	, setterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\nmethod = function set(value) {\n\tvar m = {{# def.modelAccessPrefix }};\n\tvar messages = [], messagesHash = {};\n\tif (! m) {\n\t\t{{ var emptyProp = it.parsedPath[0].empty; }}\n\t\tm = {{# def.modelAccessPrefix }} = {{= emptyProp }};\n\n\t\taddChangeMessage(messages, messagesHash,\n\t\t\t{ path: \"\", type: \"added\", newValue: m });\n\t}\n\n\t{{  var modelDataProperty = \"\";\n\t\tfor (var i = 0, count = it.parsedPath.length - 1; i < count; i++) {\n\t\t\tvar currProp = it.parsedPath[i].property;\n\t\t\tvar emptyProp = it.parsedPath[i + 1].empty;\n\t}}\n\n\t\t\tif (! m{{= modelDataProperty }}.hasOwnProperty(\"{{= getCleanProperty(currProp) }}\")) { \n\n\t\t{{ modelDataProperty += currProp; }} \n\t\t\t\tm{{= modelDataProperty }} = {{= emptyProp }};\n\n\t\t\t\taddChangeMessage(messages, messagesHash,\n\t\t\t\t\t{ path: \"{{= modelDataProperty }}\", type: \"added\", \n\t\t\t\t\t  newValue: m{{= modelDataProperty }} });\n\n\t\t\t} else if (typeof m{{= modelDataProperty }} != 'object') {\n\t\t\t\tvar old = m{{= modelDataProperty }};\n\t\t\t\tm{{= modelDataProperty }} = {{= emptyProp }};\n\n\t\t\t\taddChangeMessage(messages, messagesHash,\n\t\t\t\t\t{ path: \"{{= modelDataProperty }}\", type: \"changed\", \n\t\t\t\t\t  oldValue: old, newValue: m{{= modelDataProperty }} });\n\t\t\t}\n\t{{  }\n\t\tvar lastProp = it.parsedPath[count].property;\n\t}}\n\n\tvar wasDef = m{{= modelDataProperty }}.hasOwnProperty(\"{{= getCleanProperty(lastProp) }}\");\n\t{{ modelDataProperty += lastProp; }}\n\tvar old = m{{= modelDataProperty }};\n\tm{{= modelDataProperty }} = value;\n\tif (! wasDef)\n\t\taddChangeMessage(messages, messagesHash,\n\t\t\t{ path: \"{{= modelDataProperty }}\", type: \"added\",\n\t\t\t  newValue: value });\n\telse if (old != value) {\n\t\taddChangeMessage(messages, messagesHash,\n\t\t\t{ path: \"{{= modelDataProperty }}\", type: \"changed\",\n\t\t\t  oldValue: old, newValue: value });\n\n\t\taddTreeChangesMessages(messages, messagesHash,\n\t\t\t\"{{= modelDataProperty }}\", old, value); /* defined in the function that synthesizes ModelPath setter */\n\t}\n\n\tpostMessages.call(this, messages); /* as above */\n\n\t{{\n\t\tfunction getCleanProperty(prop) {\n\t\t\tif (prop[0] == \".\")\n\t\t\t\treturn prop.slice(1);\n\t\t\telse\n\t\t\t\treturn prop.slice(1, prop.length - 1);\n\t\t}\n\t}}\n}\n";
+
+doT.templateSettings.strip = false;
+
+var getterSynthesizer = doT.compile(getterTemplate, dotDef)
+	, setterSynthesizer = doT.compile(setterTemplate, dotDef);
+
+
+// var methods = synthesizePathMethods('');
+
+// logger.log(methods.get.toString());
 
 
 function get() {
@@ -3056,10 +3083,6 @@ function registerModelPathSubscriber(depth, subscriber) {
 }
 
 
-// cache of compiled ModelPath methods
-var __synthesizedPathsMethods = {};
-
-
 function synthesizePathMethods(path) {
 	if (__synthesizedPathsMethods.hasOwnProperty(path))
 		return __synthesizedPathsMethods[path];
@@ -3077,13 +3100,12 @@ function synthesizePathMethods(path) {
 }
 
 
-// TODO parse array syntax for paths
-var pathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]/g
-	, modelPostMessageCode = 'this._model.postMessage('
-	, modelAccessPrefix = 'this._model._data';
-
 function parseModelPath(path) {
 	var parsedPath = [];
+
+	if (path == '')
+		return parsedPath;
+
 	var unparsed = path.replace(pathParsePattern, function(nodeStr) {
 		parsedPath.push({
 			property: nodeStr,
@@ -3098,20 +3120,6 @@ function parseModelPath(path) {
 }
 
 
-var dotDef = {
-	modelAccessPrefix: 'this._model._data',
-	modelPostMessageCode: 'this._model.postMessage'
-};
-
-var getterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\nmethod = function get() {\n\tvar m = {{# def.modelAccessPrefix }};\n\t{{ var modelDataProperty = 'm'; }}\n\treturn {{\n\t\tfor (var i = 0, count = it.parsedPath.length - 1; i < count; i++) {\n\t\t\tmodelDataProperty += it.parsedPath[i].property;\n\t}} {{= modelDataProperty }} && {{\n\t\t}\n\t}} {{= modelDataProperty }}{{= it.parsedPath[count].property }} ;\n}\n"
-	, setterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\nmethod = function set(value) {\n\tvar m = {{# def.modelAccessPrefix }};\n\t{{  var modelDataProperty = \"\";\n\t\tfor (var i = 0, count = it.parsedPath.length - 1; i < count; i++) {\n\t\t\tvar currProp = it.parsedPath[i].property;\n\t\t\tvar emptyProp = it.parsedPath[i + 1].empty;\n\t}}\n\t\t\tif (! m{{= modelDataProperty }}.hasOwnProperty(\"{{= getCleanProperty(currProp) }}\")) { \n\t\t{{ modelDataProperty += currProp; }} \n\t\t\t\tm{{= modelDataProperty }} = {{= emptyProp }};\n\t\t\t\t{{# def.modelPostMessageCode }}( \"{{= modelDataProperty }}\",\n\t\t\t\t\t{ type: \"added\", newValue: {{= emptyProp }} } );\n\t\t\t}\n\t{{  }\n\t\tvar lastProp = it.parsedPath[count].property;\n\t}}\n\tvar wasDef = m{{= modelDataProperty }}.hasOwnProperty(\"{{= getCleanProperty(lastProp) }}\");\n\t{{ modelDataProperty += lastProp; }}\n\tvar old = m{{= modelDataProperty }};\n\tm{{= modelDataProperty }} = value;\n\tif (! wasDef)\n\t\t{{# def.modelPostMessageCode }}( \"{{= modelDataProperty }}\",\n\t\t\t{ type: \"added\", newValue: value } );\n\telse if (old != value) {\n\t\t{{# def.modelPostMessageCode }}( \"{{= modelDataProperty }}\",\n\t\t\t{ type: \"changed\", oldValue: old, newValue: value} );\n\t\tif (typeof old == \"object\" && Object.keys(old).length)\n\t\t\tpostTreeChanges.call(this, old, \"removed\");\n\t\tif (typeof value == \"object\" && Object.keys(value).length)\n\t\t\tpostTreeChanges.call(this, value, \"added\");\n\t}\n\n\t{{\n\t\tfunction getCleanProperty(prop) {\n\t\t\tif (prop[0] == \".\")\n\t\t\t\treturn prop.slice(1);\n\t\t\telse\n\t\t\t\treturn prop.slice(1, prop.length - 1);\n\t\t}\n\t}}\n}\n";
-
-doT.templateSettings.strip = false;
-
-var getterSynthesizer = doT.compile(getterTemplate, dotDef)
-	, setterSynthesizer = doT.compile(setterTemplate, dotDef);
-
-
 function synthesizeMethod(synthesizer, path, parsedPath) {
 	var method
 		, methodCode = synthesizer({ parsedPath: parsedPath });
@@ -3124,8 +3132,68 @@ function synthesizeMethod(synthesizer, path, parsedPath) {
 
 	return method;
 
-	function postTreeChanges(obj, message) {
-		// logger.info('postTreeChanges', obj, message);
+	// functions used by ModelPath setter (synthesized by template)
+	function postMessages(messages) {
+		messages.forEach(function(msg) {
+			this._model.postMessage(msg.path, msg);
+		}, this);
+	}
+
+	function addChangeMessage(messages, messagesHash, msg) {
+		messages.push(msg);
+		messagesHash[msg.path] = msg;
+	}
+
+	function addTreeChangesMessages(messages, messagesHash, rootPath, oldValue, newValue) {
+		var oldIsTree = valueIsTree(oldValue)
+			, newIsTree = valueIsTree(newValue);
+
+		if (newIsTree)
+			addMessages(rootPath, newValue, 'added', 'newValue');
+		
+		if (oldIsTree)
+			addMessages(rootPath, oldValue, 'removed', 'oldValue');
+
+
+		function addMessages(rootPath, obj, msgType, valueProp) {
+			if (Array.isArray(obj)) {
+				var pathSyntax = rootPath + '[$$]';
+				obj.forEach(function(value, index) {
+					addMessage(value, index, pathSyntax);
+				});
+			} else {
+				var pathSyntax = rootPath + '.$$';
+				_.eachKey(obj, function(value, key) {
+					addMessage(value, key, pathSyntax);
+				});
+			}
+
+
+			function addMessage(value, key, pathSyntax) {
+				var path = pathSyntax.replace('$$', key)
+					, existingMsg = messagesHash[path];
+
+				if (existingMsg) {
+					if (existingMsg.type == msgType)
+						logger.error('setter error: same message type posted on the same path')
+					else {
+						existingMsg.type = 'changed';
+						existingMsg[valueProp] = value;
+					}
+				} else {
+					var msg = { path: path, type: msgType };
+					msg[valueProp] = value;
+					addChangeMessage(messages, messagesHash, msg)
+				}
+
+				if (valueIsTree(value))
+					addMessages(path, value, msgType, valueProp);
+			}
+		}
+	}
+
+	function valueIsTree(value) {
+		return typeof value == "object" && Object.keys(value).length;
 	}
 }
 
