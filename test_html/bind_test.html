@@ -16,6 +16,12 @@
         </div>
 
         <div ml-bind="[Container, Template, Events, Drag]:myTemplate"></div>
+        <div ml-bind="[Container, Dom, List]:myList">
+            <button ml-bind="[Events]:listButton">Click</button>
+            <div ml-bind="[Container, Dom, ListItem]:myListItem">
+                <p ml-bind="[Data]:text">placeholder</p>
+            </div>
+        </div>
     </div>
 
     <!-- Required for browser reporter -->

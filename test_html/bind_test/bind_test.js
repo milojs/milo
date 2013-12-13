@@ -36,5 +36,19 @@ describe('milo binder', function() {
 
         var innerPara = ctrl.myTemplate.container.scope.innerPara;
         innerPara.el.innerHTML += ', then bound and changed via component inside template';
+
+        var myList = ctrl.myList;
+        var listArray = [
+            {text: 'para 1'},
+            {text: 'para 2'},
+            {text: 'para 3'},
+            {text: 'para 4'},
+            {text: 'para 5'}
+        ];
+
+        setTimeout(function(){
+            myList.list.m('.list').set(listArray);
+        }, 1000);
+        console.log('myList', myList);
     });
 });
