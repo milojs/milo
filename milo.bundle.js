@@ -3003,12 +3003,12 @@ function Model(scope, schema, name, data) {
 Model.prototype.__proto__ = Model.__proto__;
 
 _.extendProto(Model, {
-	value: value,
+	get: get,
 	proxyMessenger: proxyMessenger
 });
 
 
-function value() {
+function get() {
 	return this._data;
 }
 
@@ -3067,8 +3067,8 @@ function synthesizePathMethods(path) {
 	var parsedPath = parseModelPath(path);
 
 	var methods = {
-		value: synthesizeMethod(getterSynthesizer, path, parsedPath),
-		setValue: synthesizeMethod(setterSynthesizer, path, parsedPath)
+		get: synthesizeMethod(getterSynthesizer, path, parsedPath),
+		set: synthesizeMethod(setterSynthesizer, path, parsedPath)
 	};
 
 	__synthesizedPathsMethods[path] = methods;
@@ -3103,8 +3103,8 @@ var dotDef = {
 	modelPostMessageCode: 'this._model.postMessage'
 };
 
-var getterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\nmethod = function value() {\n\tvar m = {{# def.modelAccessPrefix }};\n\t{{ var modelDataProperty = 'm'; }}\n\treturn {{\n\t\tfor (var i = 0, count = it.parsedPath.length - 1; i < count; i++) {\n\t\t\tmodelDataProperty += it.parsedPath[i].property;\n\t}} {{= modelDataProperty }} && {{\n\t\t}\n\t}} {{= modelDataProperty }}{{= it.parsedPath[count].property }} ;\n}\n"
-	, setterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\nmethod = function setValue(value) {\n\tvar m = {{# def.modelAccessPrefix }};\n\t{{  var modelDataProperty = \"\";\n\t\tfor (var i = 0, count = it.parsedPath.length - 1; i < count; i++) {\n\t\t\tvar currProp = it.parsedPath[i].property;\n\t\t\tvar emptyProp = it.parsedPath[i + 1].empty;\n\t}}\n\t\t\tif (! m{{= modelDataProperty }}.hasOwnProperty(\"{{= getCleanProperty(currProp) }}\")) { \n\t\t{{ modelDataProperty += currProp; }} \n\t\t\t\tm{{= modelDataProperty }} = {{= emptyProp }};\n\t\t\t\t{{# def.modelPostMessageCode }}( \"{{= modelDataProperty }}\",\n\t\t\t\t\t{ type: \"added\", newValue: {{= emptyProp }} } );\n\t\t\t}\n\t{{  }\n\t\tvar lastProp = it.parsedPath[count].property;\n\t}}\n\tvar wasDef = m{{= modelDataProperty }}.hasOwnProperty(\"{{= getCleanProperty(lastProp) }}\");\n\t{{ modelDataProperty += lastProp; }}\n\tvar old = m{{= modelDataProperty }};\n\tm{{= modelDataProperty }} = value;\n\tif (! wasDef)\n\t\t{{# def.modelPostMessageCode }}( \"{{= modelDataProperty }}\",\n\t\t\t{ type: \"added\", newValue: value } );\n\telse if (old != value) {\n\t\t{{# def.modelPostMessageCode }}( \"{{= modelDataProperty }}\",\n\t\t\t{ type: \"changed\", oldValue: old, newValue: value} );\n\t\tif (typeof old == \"object\" && Object.keys(old).length)\n\t\t\tpostTreeChanges.call(this, old, \"removed\");\n\t\tif (typeof value == \"object\" && Object.keys(value).length)\n\t\t\tpostTreeChanges.call(this, value, \"added\");\n\t}\n\n\t{{\n\t\tfunction getCleanProperty(prop) {\n\t\t\tif (prop[0] == \".\")\n\t\t\t\treturn prop.slice(1);\n\t\t\telse\n\t\t\t\treturn prop.slice(1, prop.length - 1);\n\t\t}\n\t}}\n}\n";
+var getterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\nmethod = function get() {\n\tvar m = {{# def.modelAccessPrefix }};\n\t{{ var modelDataProperty = 'm'; }}\n\treturn {{\n\t\tfor (var i = 0, count = it.parsedPath.length - 1; i < count; i++) {\n\t\t\tmodelDataProperty += it.parsedPath[i].property;\n\t}} {{= modelDataProperty }} && {{\n\t\t}\n\t}} {{= modelDataProperty }}{{= it.parsedPath[count].property }} ;\n}\n"
+	, setterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\nmethod = function set(value) {\n\tvar m = {{# def.modelAccessPrefix }};\n\t{{  var modelDataProperty = \"\";\n\t\tfor (var i = 0, count = it.parsedPath.length - 1; i < count; i++) {\n\t\t\tvar currProp = it.parsedPath[i].property;\n\t\t\tvar emptyProp = it.parsedPath[i + 1].empty;\n\t}}\n\t\t\tif (! m{{= modelDataProperty }}.hasOwnProperty(\"{{= getCleanProperty(currProp) }}\")) { \n\t\t{{ modelDataProperty += currProp; }} \n\t\t\t\tm{{= modelDataProperty }} = {{= emptyProp }};\n\t\t\t\t{{# def.modelPostMessageCode }}( \"{{= modelDataProperty }}\",\n\t\t\t\t\t{ type: \"added\", newValue: {{= emptyProp }} } );\n\t\t\t}\n\t{{  }\n\t\tvar lastProp = it.parsedPath[count].property;\n\t}}\n\tvar wasDef = m{{= modelDataProperty }}.hasOwnProperty(\"{{= getCleanProperty(lastProp) }}\");\n\t{{ modelDataProperty += lastProp; }}\n\tvar old = m{{= modelDataProperty }};\n\tm{{= modelDataProperty }} = value;\n\tif (! wasDef)\n\t\t{{# def.modelPostMessageCode }}( \"{{= modelDataProperty }}\",\n\t\t\t{ type: \"added\", newValue: value } );\n\telse if (old != value) {\n\t\t{{# def.modelPostMessageCode }}( \"{{= modelDataProperty }}\",\n\t\t\t{ type: \"changed\", oldValue: old, newValue: value} );\n\t\tif (typeof old == \"object\" && Object.keys(old).length)\n\t\t\tpostTreeChanges.call(this, old, \"removed\");\n\t\tif (typeof value == \"object\" && Object.keys(value).length)\n\t\t\tpostTreeChanges.call(this, value, \"added\");\n\t}\n\n\t{{\n\t\tfunction getCleanProperty(prop) {\n\t\t\tif (prop[0] == \".\")\n\t\t\t\treturn prop.slice(1);\n\t\t\telse\n\t\t\t\treturn prop.slice(1, prop.length - 1);\n\t\t}\n\t}}\n}\n";
 
 doT.templateSettings.strip = false;
 
