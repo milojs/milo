@@ -229,8 +229,33 @@ describe('Model class', function() {
 	});
 
 
-	it.skip('should define setter for model', function() {
+	it('should define setter for model', function() {
+		var m = new Model;
 
+		m.set({ info: { name: 'Milo' } });
+
+		assert.deepEqual(m.get(), { info: { name: 'Milo' } });
+	});
+
+
+	it('should postMessage when model is set', function() {
+		var m = new Model
+			, posted = {};
+
+		m.on(/.*/, function(path, message) {
+			assert(typeof posted[path] == 'undefined');
+			posted[path] = message;
+		});
+
+		m.set({ info: { name: 'Milo' } });
+
+			assert.deepEqual(m.get(), { info: { name: 'Milo' } });
+
+			assert.deepEqual(posted, {
+				'': { path: '', type: 'added', newValue: { info: { name: 'Milo' } } },
+  				'.info': { path: '.info', type: 'added', newValue: { name: 'Milo' } },
+  				'.info.name': { path: '.info.name', type: 'added', newValue: 'Milo' } 
+  			});
 	});
 
 
@@ -291,6 +316,31 @@ describe('Model class', function() {
 			'[0][1].info':  { path: '[0][1].info', type: 'added', newValue: { name: 'Jason' } },
 			'[0][1].info.name': { path: '[0][1].info.name', type: 'added', newValue: 'Jason' }
 		}
+			assert.deepEqual(posted, shouldBePosted);
+	});
+
+
+	it('should post "added" messages for all properties of subtrees that are set for previously undefined properties', function() {
+		var m = new Model()
+			, posted = {};
+
+		m.on(/.*/, function(message, data) {
+			posted[message] = data;
+		});
+
+		var shouldBePosted = {
+
+
+			'': { path: '', type: 'added', newValue: [ [ , { info: { name: 'Jason', surname: 'Green' } } ] ] },
+  			'[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] },
+  			'[0][1]': { path: '[0][1]', type: 'added', newValue: { info: { name: 'Jason', surname: 'Green' } } },
+			'[0][1].info':  { path: '[0][1].info', type: 'added', newValue: { name: 'Jason', surname: 'Green' } },
+			'[0][1].info.name': { path: '[0][1].info.name', type: 'added', newValue: 'Jason' },
+			'[0][1].info.surname': { path: '[0][1].info.surname', type: 'added', newValue: 'Green' }
+		};
+
+		m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
+
 			assert.deepEqual(posted, shouldBePosted);
 	});
 
