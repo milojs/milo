@@ -743,9 +743,8 @@ var ComponentFacet = require('../c_facet')
 var Data = _.createSubclass(ComponentFacet, 'Data');
 
 _.extendProto(Data, {
-	init: initDataFacet,
-
-	// _reattach: _reattachEventsOnElementChange
+	init: init,
+	set: set
 });
 
 facetsRegistry.add(Data);
@@ -753,7 +752,8 @@ facetsRegistry.add(Data);
 module.exports = Data;
 
 
-function initDataFacet() {
+// Initialize Data Facet
+function init() {
 	ComponentFacet.prototype.init.apply(this, arguments);
 
 	var proxyCompDataSourceMethods = {
@@ -768,6 +768,42 @@ function initDataFacet() {
 	Object.defineProperties(this, {
 		_compDataSource: { value: compDataSource }
 	});
+}
+
+
+// Set components dom value
+function set(value) {
+	tags[this.owner.el.tagName](this.owner.el, value);
+}
+
+
+// Set value rules
+var tags = {
+	'P': 		innerHtml,
+	'H1': 		innerHtml,
+	'H2': 		innerHtml,
+	'H3': 		innerHtml,
+	'H4': 		innerHtml,
+	'H5': 		innerHtml,
+	'H6': 		innerHtml,
+	'LI': 		innerHtml,
+	'SPAN': 	innerHtml,
+	'DIV': 		innerHtml,
+	'STRONG': 	innerHtml,
+	'EM': 		innerHtml,
+	'INPUT': 	inputValue
+}
+
+
+// Set value with innerHTML
+function innerHtml(el, value) {
+	el.innerHTML = value;
+}
+
+
+// Set value of input
+function inputValue(el, value) {
+	el.value = value;
 }
 
 },{"../../messenger":39,"../c_facet":9,"../c_message_sources/component_data_source":25,"./cf_registry":23,"mol-proto":55}],12:[function(require,module,exports){
@@ -1382,23 +1418,24 @@ function initFrameFacet() {
 'use strict';
 
 var ComponentFacet = require('../c_facet')
-  , Component = require('../c_class')
-  , facetsRegistry = require('./cf_registry')
-  , Model = require('../../model')
-  , _ = require('mol-proto')
-  , miloMail = require('../../mail')
-  , binder = require('../../binder');
+    , Component = require('../c_class')
+    , facetsRegistry = require('./cf_registry')
+    , Model = require('../../model')
+    , _ = require('mol-proto')
+    , miloMail = require('../../mail')
+    , binder = require('../../binder')
+    , ListError = require('../../util/error').List;
 
 
 // data model connection facet
 var List = _.createSubclass(ComponentFacet, 'List');
 
 _.extendProto(List, {
-  init: init,
-  start: start,
-  update: update,
-  require: ['Container', 'Dom']
-  // _reattach: _reattachEventsOnElementChange
+    init: init,
+    start: start,
+    update: update,
+    require: ['Container', 'Dom']
+    // _reattach: _reattachEventsOnElementChange
 });
 
 facetsRegistry.add(List);
@@ -1408,84 +1445,95 @@ module.exports = List;
 
 // initialize List facet
 function init() {
-  ComponentFacet.prototype.init.apply(this, arguments);
-  var model = new Model()
-    , self = this;
+    ComponentFacet.prototype.init.apply(this, arguments);
+    var model = new Model()
+        , self = this;
 
-  _.defineProperty(this, 'm', model);
-  _.defineProperty(this, 'listItems', {});
-  this.m.on('.list', function (eventType, event) {
-    self.update();
-  });
+    _.defineProperty(this, 'm', model);
+    _.defineProperty(this, 'listItems', {});
+    _.defineProperty(this, 'listItemType', null, false, false, true);
+
+    this.m.on(/.*/, function (eventType, data) {
+        self.update(eventType, data);
+    });
 }
 
 
 //start List facet
 function start() {
-  var self = this;
+    var self = this;
 
-  function onScopeReady() {
-    var foundChild;
+    function onScopeReady() {
+        var foundChild;
 
-    _.eachKey(self.owner.container.scope, function(child, name) {
-      if (child.listItem) {
-        foundChild = child;
-      }
-    }, self, true);
+        _.eachKey(self.owner.container.scope, function(child, name) {
+            if (child.listItem) {
+                if (foundChild) throw new ListError('More than one child component has ListItem Facet')
+                foundChild = child;
+            }
+        }, self, true);
 
-    if (! foundChild) throw new ListError('No child component has ListItem Facet');
+        if (! foundChild) throw new ListError('No child component has ListItem Facet');
 
-    self.listItemType = foundChild;  
-    self.listItemType.dom.hide();
-  }
+        self.listItemType = foundChild;    
+        self.listItemType.dom.hide();
 
-  miloMail.onMessage('scopeready', onScopeReady);
+        //TODO: think about how to manage "scope ready" with multiple binds
+        miloMail.offMessage('scopeready', onScopeReady);
+    }
+
+    miloMail.onMessage('scopeready', onScopeReady);
 }
 
 //update list
-function update() {
-  var itemModels = this.m('.list').get();
-  var self = this;
-  for (var i = 0; i < itemModels.length; i++) {
-    var itemModel = itemModels[i];
+function update(eventType, data) {
+    var itemModels = data.newValue;
 
-    var component = Component.copy(this.listItemType, true);
-    
-    var temp = binder.twoPass(component.el)[component.name];
-    component.container.scope = temp.container.scope;
-    
-    component.listItem.setData(itemModel);
-    this.owner.dom.append(component.el);
-    this.owner.container.scope._add(component, component.name);
-    this.listItems[component.name] = component;
-    
-    
-  };
-  _.eachKey(this.listItems, function(item) {
-    item.dom.show();
-  });
+    for (var i = 0; i < itemModels.length; i++) {
+        var itemModel = itemModels[i];
+
+        // Copy component
+        var component = Component.copy(this.listItemType, true);
+        
+        // Bind contents of component
+        var temp = binder(component.el)[component.name];
+
+        // Set new component scope to bind result
+        component.container.scope = temp.container.scope;
+        
+        // Set list item data of component
+        component.listItem.setData(itemModel);
+
+        // Add it to the dom
+        this.owner.dom.append(component.el);
+
+        // Add to list items hash
+        this.listItems[component.name] = component;
+
+        // Show the list item component
+        component.dom.show();
+    };
 }
 
-},{"../../binder":6,"../../mail":37,"../../model":42,"../c_class":8,"../c_facet":9,"./cf_registry":23,"mol-proto":55}],19:[function(require,module,exports){
+},{"../../binder":6,"../../mail":37,"../../model":42,"../../util/error":47,"../c_class":8,"../c_facet":9,"./cf_registry":23,"mol-proto":55}],19:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
-  , facetsRegistry = require('./cf_registry')
-  , Model = require('../../model')
-  , _ = require('mol-proto')
-  , miloMail = require('../../mail');
+    , facetsRegistry = require('./cf_registry')
+    , Model = require('../../model')
+    , _ = require('mol-proto')
+    , miloMail = require('../../mail');
 
 
 // data model connection facet
 var ListItem = _.createSubclass(ComponentFacet, 'ListItem');
 
 _.extendProto(ListItem, {
-  init: init,
-  start: start,
-  setData: setData,
-  update: update,
-  require: ['Container', 'Dom']
-  // _reattach: _reattachEventsOnElementChange
+    init: init,
+    start: start,
+    setData: setData,
+    update: update,
+    require: ['Container', 'Dom']
 });
 
 facetsRegistry.add(ListItem);
@@ -1495,31 +1543,28 @@ module.exports = ListItem;
 
 // initialize ListItem facet
 function init() {
-  ComponentFacet.prototype.init.apply(this, arguments);
-  
+    ComponentFacet.prototype.init.apply(this, arguments);
 }
 
 
 //start ListItem facet
 function start() {
-  var self = this;
-  miloMail.onMessage('scopeready', function(){
-});
-
-  
+    _.defineProperty(this, '_data', null, false, false, true);
 }
 
 
 function setData(data) {
-  _.defineProperty(this, '_data', data);
-  this.update();
+    this._data = data;
+    this.update();
 }
 
+
 function update() {
-  _.eachKey(this.owner.container.scope, function(scopeItem, name) {
-    scopeItem.el.innerHTML = this._data[name];
-  }, this, true);
+    _.eachKey(this.owner.container.scope, function(child, name) {
+        child.data.set(this._data[name]);
+    }, this, true);
 }
+
 },{"../../mail":37,"../../model":42,"../c_facet":9,"./cf_registry":23,"mol-proto":55}],20:[function(require,module,exports){
 'use strict';
 
@@ -3704,7 +3749,8 @@ var _ = require('mol-proto');
 // module exports error classes for all names defined in this array
 var errorClassNames = ['AbstractClass', 'Mixin', 'Messenger', 'ComponentDataSource',
 					   'Attribute', 'Binder', 'Loader', 'MailMessageSource', 'Facet',
-					   'Scope', 'EditableEventsSource', 'Model', 'DomFacet', 'EditableFacet'];
+					   'Scope', 'EditableEventsSource', 'Model', 'DomFacet', 'EditableFacet',
+					   'List'];
 
 var error = {
 	toBeImplemented: toBeImplemented,
