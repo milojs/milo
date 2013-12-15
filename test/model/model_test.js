@@ -231,10 +231,15 @@ describe('Model class', function() {
 
 	it('should define setter for model', function() {
 		var m = new Model;
+		var m2 = new Model;
 
 		m.set({ info: { name: 'Milo' } });
 
 		assert.deepEqual(m.get(), { info: { name: 'Milo' } });
+
+		m2.set([{name: 'test', desc: 'desc'}, {name: 'test2', desc: 'desc2'}]);
+
+		assert.deepEqual(m2('[1]').get(), {name: 'test2', desc: 'desc2'});
 	});
 
 
