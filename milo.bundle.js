@@ -377,10 +377,7 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 	var scopeEl = scopeEl || document.body
 		, scope = new Scope(scopeEl);
 
-	var elScopeObj = createScopeForElement(scope, scopeEl);
-
-	if (elScopeObj.postMessage)
-		elScopeObj.postMessage('childrenbound');
+	createScopeForElement(scope, scopeEl);
 	
 	return scope;
 
@@ -412,7 +409,16 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 		if (scopeObject)
 			scope._add(scopeObject, attr.compName);
 
+		postChildrenBoundMessage(el);
+
 		return scopeObject;
+
+
+		function postChildrenBoundMessage(el) {
+			var elComp = Component.getComponent(el);
+			if (elComp)
+				elComp.postMessage('childrenbound');
+		}
 	}
 
 
@@ -452,6 +458,7 @@ var FacetedObject = require('../facets/f_object')
 	, Match = check.Match
 	, config = require('../config')
 	, miloCount = require('../util/count');
+
 
 var Component = _.createSubclass(FacetedObject, 'Component', true);
 
@@ -499,12 +506,12 @@ function create(info) {
 
 
 // creates a new instance with the same state but different element
-function copy(component, isDeep) {
+function copy(component, deepCopyDOM) {
 	var ComponentClass = component.constructor
 		, newName = 'milo_' + miloCount()
 		, newEl = component.dom 
-					? component.dom.copy(isDeep)
-					: component.el.cloneNode(isDeep)
+					? component.dom.copy(deepCopyDOM)
+					: component.el.cloneNode(deepCopyDOM)
 		, newInfo = _.clone(component.componentInfo)
 		, attr = _.clone(newInfo.attr);
 
@@ -523,6 +530,7 @@ function copy(component, isDeep) {
 
 	var aComponent = Component.create(newInfo);
 	component.scope._add(aComponent, aComponent.name);
+
 	return aComponent;
 }
 
@@ -610,13 +618,6 @@ function init(scope, element, name, componentInfo) {
 	// start all facets
 	this.allFacets('check');
 	this.allFacets('start');
-
-	this.on('childrenbound', onChildrenBound);
-}
-
-
-function onChildrenBound(msgType, message) {
-	this.allFacets('childrenBound');
 }
 
 
@@ -775,7 +776,8 @@ var ComponentFacet = require('../c_facet')
 	, ComponentDataSource = require('../c_message_sources/component_data_source')
 	, pathUtils = require('../../model/path_utils')
 
-	, _ = require('mol-proto');
+	, _ = require('mol-proto')
+	, logger = require('../../util/logger');
 
 
 // data model connection facet
@@ -783,7 +785,10 @@ var Data = _.createSubclass(ComponentFacet, 'Data');
 
 _.extendProto(Data, {
 	init: init,
-	set: set
+	get: get,
+	set: set,
+	path: path,
+	_setScalarValue: _setScalarValue
 });
 
 facetsRegistry.add(Data);
@@ -819,7 +824,7 @@ function set(value) {
 				if (childDataFacet)
 					childDataFacet.set(item);
 				else
-					logger.warn('attempt to set data on path: ' + '[' + index + ']');
+					logger.warn('attempt to set data on path that does not exist: ' + '[' + index + ']');
 			}, this);
 		else
 			_.eachKey(value, function(item, key) {
@@ -827,7 +832,7 @@ function set(value) {
 				if (childDataFacet)
 					childDataFacet.set(item);
 				else
-					logger.warn('attempt to set data on path: ' + '.' + key);
+					logger.warn('attempt to set data on path that does not exist: ' + '.' + key);
 			}, this);
 	} else
 		this._setScalarValue(value);
@@ -881,10 +886,12 @@ function path(accessPath, createItem) {
 		var pathNode = parsedPath[i]
 			, nodeKey = pathUtils.getPathNodeKey(pathNode);
 		if (pathNode.syntax == 'array' && currentComponent.list) {
-			currentComponent = currentComponent.list.item(nodeKey);
-			if (! currentComponent && createItem)
-				currentComponent.list.addItem(nodeKey);
-		} else if (currentDataFacet.owner.container)
+			var itemComponent = currentComponent.list.item(nodeKey);
+			if (! itemComponent && createItem)
+				itemComponent = currentComponent.list.addItem(nodeKey);
+			if (itemComponent)
+				currentComponent = itemComponent;
+		} else if (currentComponent.container)
 			currentComponent = currentComponent.container.scope[nodeKey];
 
 		if (! currentComponent || ! currentComponent.data)
@@ -924,7 +931,7 @@ function inputValue(el, value) {
 	el.value = value;
 }
 
-},{"../../messenger":39,"../../model/path_utils":43,"../c_facet":9,"../c_message_sources/component_data_source":25,"./cf_registry":23,"mol-proto":55}],12:[function(require,module,exports){
+},{"../../messenger":39,"../../model/path_utils":43,"../../util/logger":49,"../c_facet":9,"../c_message_sources/component_data_source":25,"./cf_registry":23,"mol-proto":55}],12:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -1536,13 +1543,35 @@ function initFrameFacet() {
 'use strict';
 
 var ComponentFacet = require('../c_facet')
+    , facetsRegistry = require('./cf_registry')
+    , Model = require('../../model')
+    , _ = require('mol-proto')
+    , miloMail = require('../../mail');
+
+
+// data model connection facet
+var ItemFacet = _.createSubclass(ComponentFacet, 'Item');
+
+_.extendProto(ItemFacet, {
+    require: ['Container', 'Dom', 'Data']
+});
+
+facetsRegistry.add(ItemFacet);
+
+module.exports = ItemFacet;
+
+},{"../../mail":37,"../../model":42,"../c_facet":9,"./cf_registry":23,"mol-proto":55}],19:[function(require,module,exports){
+'use strict';
+
+var ComponentFacet = require('../c_facet')
     , Component = require('../c_class')
     , facetsRegistry = require('./cf_registry')
     , Model = require('../../model')
     , _ = require('mol-proto')
     , miloMail = require('../../mail')
     , binder = require('../../binder')
-    , ListError = require('../../util/error').List;
+    , ListError = require('../../util/error').List
+    , logger = require('../../util/logger');
 
 
 // data model connection facet
@@ -1550,11 +1579,17 @@ var List = _.createSubclass(ComponentFacet, 'List');
 
 _.extendProto(List, {
     init: init,
-    start: start,
-    update: update,
+    // update: update,
     require: ['Container', 'Dom', 'Data'],
-    childrenBound: childrenBound,
-    _itemPreviousComponent: _itemPreviousComponent
+    _itemPreviousComponent: _itemPreviousComponent,
+
+    item: item,
+    count: count,
+    _setItem: _setItem,
+    contains: contains,
+    addItem: addItem,
+    removeItem: removeItem,
+    each: each
     // _reattach: _reattachEventsOnElementChange
 });
 
@@ -1573,61 +1608,49 @@ function init() {
         _listItems: [],
         _listItemsHash: {}
     });
-    _.defineProperty(this, 'listItemType', null, false, false, true);
+    _.defineProperty(this, 'itemSample', null, false, false, true);
 
-    this.m.on(/.*/, function (eventType, data) {
-        self.update(eventType, data);
-    });
-}
-
-
-//start List facet
-function start() {
-    
-}
-
-
-function onChildrenBound(msgTtype, data) {
-
+    this.owner.on('childrenbound', onChildrenBound);
 }
 
 
 //update list
-function update(eventType, data) {
-    var itemModels = data.newValue;
+// function update(eventType, data) {
+//     var itemModels = data.newValue;
 
-    for (var i = 0; i < itemModels.length; i++) {
-        var itemModel = itemModels[i];
+//     for (var i = 0; i < itemModels.length; i++) {
+//         var itemModel = itemModels[i];
 
-        // Copy component
-        var component = Component.copy(this.listItemType, true);
+//         // Copy component
+//         var component = Component.copy(this.listItemType, true);
         
-        // Bind contents of component
-        var temp = binder(component.el)[component.name];
+//         // Bind contents of component
+//         var temp = binder(component.el)[component.name];
 
-        // Set new component scope to bind result
-        component.container.scope = temp.container.scope;
+//         // Set new component scope to bind result
+//         component.container.scope = temp.container.scope;
         
-        // Set list item data of component
-        component.listItem.setData(itemModel);
+//         // Set list item data of component
+//         component.listItem.setData(itemModel);
 
-        // Add it to the dom
-        this.owner.dom.append(component.el);
+//         // Add it to the dom
+//         this.owner.dom.append(component.el);
 
-        // Add to list items hash
-        this.listItems[component.name] = component;
+//         // Add to list items hash
+//         this.listItems[component.name] = component;
 
-        // Show the list item component
-        component.dom.show();
-    };
-}
+//         // Show the list item component
+//         component.dom.show();
+//     };
+// }
 
 
-function childrenBound() {
+function onChildrenBound() {
     var foundItem;
 
-    this.owner.container.scope._each(function(childComp, name) {
-        if (childComp.listItem) {
+    // "this" is a component here, as a message dispatched on component
+    this.container.scope._each(function(childComp, name) {
+        if (childComp.item) {
             if (foundItem) throw new ListError('More than one child component has ListItem Facet')
             foundItem = childComp;
         }
@@ -1635,108 +1658,92 @@ function childrenBound() {
 
     if (! foundItem) throw new ListError('No child component has ListItem Facet');
 
-    this.itemSample = foundItem;
+    this.list.itemSample = foundItem;
 
-    this.itemSample.dom.hide();
-    this.itemSample.remove();
+    this.list.itemSample.dom.hide();
+    this.list.itemSample.remove();
 }
 
 
-function item(itemNo) {
-    return this._listItems[itemNo];
+function item(index) {
+    return this._listItems[index];
 }
 
 
-function addItem(itemNo) {
-    itemNo = itemNo || this._listItems.length;
-    if (this.item(itemNo))
-        throw ListError('attempt to create item with id of existing item');
+function count() {
+    return this._listItems.length
+}
+
+
+function _setItem(index, component) {
+    this._listItems[index] = component;
+    this._listItemsHash[component.name] = component
+}
+
+
+function contains(component){
+    return this._listItemsHash[component.name] == component;
+}
+
+
+function addItem(index) {
+    index = index || this.count();
+    if (this.item(index))
+        throw ListError('attempt to create item with ID of existing item');
 
     // Copy component
     var component = Component.copy(this.itemSample, true);
 
-    // Bind contents of component
-    component = binder(component.el)[component.name];
+    var tempComp = binder(component.el)[component.name]
+        , innerScope = tempComp.container.scope;
+    component.container.scope = innerScope;
 
     // Add it to the DOM
-    this._itemPreviousComponent(itemNo).dom.insertAfter(component.el)
+    this._itemPreviousComponent(index).dom.insertAfter(component.el)
 
-    // Add to list items hash
-    this._listItems[itemNo] = component;
+    // Add to list items
+    this._setItem(index, component);
 
+    // Show the list item component
+    component.dom.show();
+
+    return component;
 }
 
 
-function _itemPreviousComponent(itemNo) {
-    while (itemNo >= 0 && ! this._listItems[itemNo])
-        itemNo--;
+function removeItem(index, doSplice) {
+    var comp = this.item(index);
 
-    return itemNo >= 0
-                ? this._listItems[itemNo]
+    if (! comp)
+        logger.warn('attempt to remove list item with id that does not exist');
+
+    this._listItems[index] = undefined;
+    delete this._listItemsHash[comp.name];
+    comp.dom.remove();
+    comp.remove();
+
+    if (doSplice)
+        this._listItems.splice(index, 1);
+}
+
+
+function _itemPreviousComponent(index) {
+    while (index >= 0 && ! this._listItems[index])
+        index--;
+
+    return index >= 0
+                ? this._listItems[index]
                 : this.itemSample;
 }
 
 
 function each(callback, thisArg) {
-
+    this._listItems.forEach(function(item) {
+        if (item) callback.apply(this, arguments);
+    }, thisArg || this);
 }
 
-
-function contains(comp) {
-
-}
-
-},{"../../binder":6,"../../mail":37,"../../model":42,"../../util/error":47,"../c_class":8,"../c_facet":9,"./cf_registry":23,"mol-proto":55}],19:[function(require,module,exports){
-'use strict';
-
-var ComponentFacet = require('../c_facet')
-    , facetsRegistry = require('./cf_registry')
-    , Model = require('../../model')
-    , _ = require('mol-proto')
-    , miloMail = require('../../mail');
-
-
-// data model connection facet
-var ListItem = _.createSubclass(ComponentFacet, 'ListItem');
-
-_.extendProto(ListItem, {
-    init: init,
-    start: start,
-    setData: setData,
-    update: update,
-    require: ['Container', 'Dom']
-});
-
-facetsRegistry.add(ListItem);
-
-module.exports = ListItem;
-
-
-// initialize ListItem facet
-function init() {
-    ComponentFacet.prototype.init.apply(this, arguments);
-}
-
-
-//start ListItem facet
-function start() {
-    _.defineProperty(this, '_data', null, false, false, true);
-}
-
-
-function setData(data) {
-    this._data = data;
-    this.update();
-}
-
-
-function update() {
-    _.eachKey(this.owner.container.scope, function(child, name) {
-        child.data.set(this._data[name]);
-    }, this, true);
-}
-
-},{"../../mail":37,"../../model":42,"../c_facet":9,"./cf_registry":23,"mol-proto":55}],20:[function(require,module,exports){
+},{"../../binder":6,"../../mail":37,"../../model":42,"../../util/error":47,"../../util/logger":49,"../c_class":8,"../c_facet":9,"./cf_registry":23,"mol-proto":55}],20:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -3306,7 +3313,7 @@ require('./components/c_facets/Drop');
 require('./components/c_facets/Editable');
 require('./components/c_facets/Split');
 require('./components/c_facets/List');
-require('./components/c_facets/ListItem');
+require('./components/c_facets/Item');
 
 // used components
 require('./components/classes/View');
@@ -3319,7 +3326,7 @@ if (typeof module == 'object' && module.exports)
 // global milo for browser
 if (typeof window == 'object')
 	window.milo = milo;
-},{"./binder":6,"./classes":7,"./components/c_facets/Container":10,"./components/c_facets/Data":11,"./components/c_facets/Dom":12,"./components/c_facets/Drag":13,"./components/c_facets/Drop":14,"./components/c_facets/Editable":15,"./components/c_facets/Events":16,"./components/c_facets/Frame":17,"./components/c_facets/List":18,"./components/c_facets/ListItem":19,"./components/c_facets/ModelFacet":20,"./components/c_facets/Split":21,"./components/c_facets/Template":22,"./components/classes/View":31,"./config":33,"./loader":36,"./mail":37,"./util":48}],42:[function(require,module,exports){
+},{"./binder":6,"./classes":7,"./components/c_facets/Container":10,"./components/c_facets/Data":11,"./components/c_facets/Dom":12,"./components/c_facets/Drag":13,"./components/c_facets/Drop":14,"./components/c_facets/Editable":15,"./components/c_facets/Events":16,"./components/c_facets/Frame":17,"./components/c_facets/Item":18,"./components/c_facets/List":19,"./components/c_facets/ModelFacet":20,"./components/c_facets/Split":21,"./components/c_facets/Template":22,"./components/classes/View":31,"./config":33,"./loader":36,"./mail":37,"./util":48}],42:[function(require,module,exports){
 'use strict';
 
 var pathUtils = require('./path_utils')
@@ -4486,7 +4493,8 @@ var proto = _ = {
 	prependArray: prependArray,
 	toArray: toArray,
 	firstUpperCase: firstUpperCase,
-	firstLowerCase: firstLowerCase
+	firstLowerCase: firstLowerCase,
+	filterNodeListByType: filterNodeListByType
 };
 
 
@@ -4714,6 +4722,17 @@ function firstUpperCase(str) {
 
 function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
+}
+
+
+// type 1: html element, type 3: text
+function filterNodeListByType(nodeList, type) {
+	var filteredNodes = [];
+	Array.prototype.forEach.call(nodeList, function (node) {
+		if (node.nodeType == type)
+			filteredNodes.push(node);
+	});
+	return filteredNodes;
 }
 
 

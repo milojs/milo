@@ -16,9 +16,9 @@
         </div>
 
         <div ml-bind="[Container, Template, Events, Drag]:myTemplate"></div>
-        <div ml-bind="[Container, Dom, List]:myList">
+        <div ml-bind="[Container, Dom, Data, List]:myList">
             <button ml-bind="[Events]:listButton">Change list data</button>
-            <div ml-bind="[Container, Dom, ListItem]:myListItem">
+            <div ml-bind="[Container, Dom, Data, Item]:myListItem">
                 <span ml-bind="[Data]:title"></span>
                 <input ml-bind="[Data]:desc" type="text" value="" />
             </div>

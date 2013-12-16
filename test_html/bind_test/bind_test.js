@@ -8,12 +8,12 @@ describe('milo binder', function() {
         console.log(milo.binder.scan());
 
         console.log('one pass binding');
-    	var ctrl1 = milo.binder();
-        console.log(ctrl1);
-
-        console.log('two pass binding');
-        var ctrl = milo.binder.twoPass();
+    	var ctrl = milo.binder();
         console.log(ctrl);
+
+        // console.log('two pass binding');
+        // var ctrl2 = milo.binder.twoPass();
+        // console.log(ctrl);
 
     	ctrl.articleButton.events.on('click mouseenter', function(eType, evt) {
     		console.log('button', eType, evt);
@@ -52,10 +52,13 @@ describe('milo binder', function() {
             {title: 'Title 5', desc: 'Description 5'}
         ];
 
-        myList.list.m('.list').set(listArray);
+        myList.data.set(listArray);
 
         listButton.events.on('mousedown', function (eventType, event) {
-            myList.list.m('.list[2]').set({title: 'New Title', desc: 'New Description'});
+
+            console.log(myList.data.path('[2]'));
+
+            myList.data.path('[2]').set({title: 'New Title', desc: 'New Description'});
         });
     });
 });
