@@ -750,6 +750,7 @@ var ComponentFacet = require('../c_facet')
 
 	, Messenger = require('../../messenger')
 	, ComponentDataSource = require('../c_message_sources/component_data_source')
+	, pathUtils = require('../../model/path_utils')
 
 	, _ = require('mol-proto');
 
@@ -786,9 +787,88 @@ function init() {
 }
 
 
-// Set components dom value
+// Set components DOM value
 function set(value) {
+	if (typeof value == 'object') {
+		if (Array.isArray(value))
+			value.forEach(function(item, index) {
+				var childDataFacet = this.path('[' + index + ']', true); // true will create item in list
+				if (childDataFacet)
+					childDataFacet.set(item);
+				else
+					logger.warn('attempt to set data on path: ' + '[' + index + ']');
+			}, this);
+		else
+			_.eachKey(value, function(item, key) {
+				var childDataFacet = this.path('.' + key);
+				if (childDataFacet)
+					childDataFacet.set(item);
+				else
+					logger.warn('attempt to set data on path: ' + '.' + key);
+			}, this);
+	} else
+		this._setScalarValue(value);
+}
+
+
+function _setScalarValue(value) {
 	tags[this.owner.el.tagName](this.owner.el, value);
+}
+
+
+// get structured data from scope hierarchy
+function get() {
+	var comp = this.owner
+		, scopeData;
+
+	if (comp.list) {
+		scopeData = [];
+		comp.list.each(function(listItem, index) {
+			scopeData[index] = listItem.data.get();
+		});
+
+		if (comp.container)
+			comp.container.scope._each(function(scopeItem, name) {
+				if (! comp.list.contains(scopeItem))
+					scopeData[name] = scopeItem.data.get();
+			});
+	} else if (comp.container) {
+		scopeData = {};
+		comp.container.scope._each(function(scopeItem, name) {
+			scopeData[name] = scopeItem.data.get();
+		});
+	} else
+		return _getScalarValue(value);
+
+	return scopeData;
+}
+
+
+function _getScalarValue(value) {
+	// tags[this.owner.el.tagName](this.owner.el); ???
+}
+
+
+// returns data facet of a child component (by scopes) corresponding to the path
+function path(accessPath, createItem) {
+	var parsedPath = pathUtils.parseAccessPath(accessPath)
+		, currentComponent = this.owner;
+
+	for (var i = 0, len = parsedPath.length; i < len; i++) {
+		var pathNode = parsedPath[i]
+			, nodeKey = pathUtils.getPathNodeKey(pathNode);
+		if (pathNode.syntax == 'array' && currentComponent.list) {
+			currentComponent = currentComponent.list.item(nodeKey);
+			if (! currentComponent && createItem)
+				currentComponent.list.addItem(nodeKey);
+		} else if (currentDataFacet.owner.container)
+			currentComponent = currentComponent.container.scope[nodeKey];
+
+		if (! currentComponent || ! currentComponent.data)
+			break;
+	}
+
+	return currentComponent && currentComponent.data;
 }
 
 
@@ -821,7 +901,7 @@ function inputValue(el, value) {
 	el.value = value;
 }
 
-},{"../../messenger":39,"../c_facet":9,"../c_message_sources/component_data_source":25,"./cf_registry":23,"mol-proto":55}],12:[function(require,module,exports){
+},{"../../messenger":39,"../../model/path_utils":43,"../c_facet":9,"../c_message_sources/component_data_source":25,"./cf_registry":23,"mol-proto":55}],12:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -1449,7 +1529,9 @@ _.extendProto(List, {
     init: init,
     start: start,
     update: update,
-    require: ['Container', 'Dom']
+    require: ['Container', 'Dom', 'Data'],
+    childrenBound: childrenBound,
+    _itemPreviousComponent: _itemPreviousComponent
     // _reattach: _reattachEventsOnElementChange
 });
 
@@ -1464,8 +1546,10 @@ function init() {
     var model = new Model()
         , self = this;
 
-    _.defineProperty(this, 'm', model);
-    _.defineProperty(this, 'listItems', {});
+    _.defineProperties(this, {
+        _listItems: [],
+        _listItemsHash: {}
+    });
     _.defineProperty(this, 'listItemType', null, false, false, true);
 
     this.m.on(/.*/, function (eventType, data) {
@@ -1478,6 +1562,12 @@ function init() {
 function start() {
     
 }
+
+
+function onChildrenBound(msgTtype, data) {
+
+}
+
 
 //update list
 function update(eventType, data) {
@@ -1511,21 +1601,67 @@ function update(eventType, data) {
 
 
 function childrenBound() {
-    var foundChild;
+    var foundItem;
 
-    _.eachKey(self.owner.container.scope, function(child, name) {
-        if (child.listItem) {
-            if (foundChild) throw new ListError('More than one child component has ListItem Facet')
-            foundChild = child;
+    this.owner.container.scope._each(function(childComp, name) {
+        if (childComp.listItem) {
+            if (foundItem) throw new ListError('More than one child component has ListItem Facet')
+            foundItem = childComp;
         }
-    }, self, true);
+    });
 
-    if (! foundChild) throw new ListError('No child component has ListItem Facet');
+    if (! foundItem) throw new ListError('No child component has ListItem Facet');
 
-    self.listItemType = foundChild;    
-    self.listItemType.dom.hide();
+    this.itemSample = foundItem;
+
+    this.itemSample.dom.hide();
+    this.itemSample.remove();
 }
 
+
+function item(itemNo) {
+    return this._listItems[itemNo];
+}
+
+
+function addItem(itemNo) {
+    itemNo = itemNo || this._listItems.length;
+    if (this.item(itemNo))
+        throw ListError('attempt to create item with id of existing item');
+
+    // Copy component
+    var component = Component.copy(this.itemSample, true);
+
+    // Bind contents of component
+    component = binder(component.el)[component.name];
+
+    // Add it to the DOM
+    this._itemPreviousComponent(itemNo).dom.insertAfter(component.el)
+
+    // Add to list items hash
+    this._listItems[itemNo] = component;
+
+}
+
+
+function _itemPreviousComponent(itemNo) {
+    while (itemNo >= 0 && ! this._listItems[itemNo])
+        itemNo--;
+
+    return itemNo >= 0
+                ? this._listItems[itemNo]
+                : this.itemSample;
+}
+
+
+function each(callback, thisArg) {
+
+}
+
+
+function contains(comp) {
+
+}
 
 },{"../../binder":6,"../../mail":37,"../../model":42,"../../util/error":47,"../c_class":8,"../c_facet":9,"./cf_registry":23,"mol-proto":55}],19:[function(require,module,exports){
 'use strict';
@@ -3163,8 +3299,8 @@ if (typeof window == 'object')
 },{"./binder":6,"./classes":7,"./components/c_facets/Container":10,"./components/c_facets/Data":11,"./components/c_facets/Dom":12,"./components/c_facets/Drag":13,"./components/c_facets/Drop":14,"./components/c_facets/Editable":15,"./components/c_facets/Events":16,"./components/c_facets/Frame":17,"./components/c_facets/List":18,"./components/c_facets/ListItem":19,"./components/c_facets/ModelFacet":20,"./components/c_facets/Split":21,"./components/c_facets/Template":22,"./components/classes/View":31,"./config":33,"./loader":36,"./mail":37,"./util":48}],42:[function(require,module,exports){
 'use strict';
 
-var Messenger = require('../messenger')
-	, ModelMessageSource = require('./m_message_source')
+var pathUtils = require('./path_utils')
+	, Messenger = require('../messenger')
 	, ModelError = require('../util/error').Model
 	, Mixin = require('../abstract/mixin')
 	, doT = require('dot')
@@ -3186,15 +3322,13 @@ function Model(scope, schema, name, data) {
 	}
 	model.__proto__ = Model.prototype;
 
-	// var messageSource = new ModelMessageSource(model);
-	var messenger = new Messenger(model, Messenger.defaultMethods); //, messageSource);
+	var messenger = new Messenger(model, Messenger.defaultMethods);
 
 	_.defineProperties(model, {
 		scope: scope,
 		name: name,
 		_schema: schema,
 		_messenger: messenger,
-		// _messageSource: messageSource,
 		__pathsCache: {}
 	});
 
@@ -3211,22 +3345,20 @@ Model.prototype.__proto__ = Model.__proto__;
 // cache of compiled ModelPath methods
 var __synthesizedPathsMethods = {};
 
-// path node syntax
-var pathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]/g
-	, deepPathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]|\.\*|\[\*\]|\*/g;
-
 var dotDef = {
 	modelAccessPrefix: 'this._model._data',
-	modelPostMessageCode: 'this._model.postMessage'
+	modelPostMessageCode: 'this._model.postMessage',
+	getPathNodeKey: pathUtils.getPathNodeKey
 };
 
 var modelSetterDotDef = {
 	modelAccessPrefix: 'this._data',
-	modelPostMessageCode: 'this.postMessage'
+	modelPostMessageCode: 'this.postMessage',
+	getPathNodeKey: pathUtils.getPathNodeKey
 };
 
 var getterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\nmethod = function get() {\n\tvar m = {{# def.modelAccessPrefix }};\n\t{{ var modelDataProperty = 'm'; }}\n\treturn m {{~ it.parsedPath :pathNode }}\n\t\t&& {{= modelDataProperty += pathNode.property }} {{~}};\n}\n"
-	, setterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\nmethod = function set(value) {\n\tvar m = {{# def.modelAccessPrefix }};\n\tvar messages = [], messagesHash = {};\n\tvar wasDef = true;\n\tvar old = m;\n\n\tif (! m) {\n\t\t{{ var emptyProp = it.parsedPath[0] && it.parsedPath[0].empty; }}\n\t\tm = {{# def.modelAccessPrefix }} = {{= emptyProp || 'value' }};\n\t\twasDef = false;\n\n\t\t{{? emptyProp }}\n\t\t\t{{# def.addMsg }} \"\", type: \"added\",\n\t\t\t\t  newValue: m });\n\t\t{{?}}\n\t}\n\n\t{{  var modelDataProperty = \"\";\n\t\tfor (var i = 0, count = it.parsedPath.length - 1; i < count; i++) {\n\t\t\tvar currProp = it.parsedPath[i].property;\n\t\t\tvar emptyProp = it.parsedPath[i + 1] && it.parsedPath[i + 1].empty;\n\t}}\n\n\t\t\tif (! m{{= modelDataProperty }}.hasOwnProperty(\"{{= getCleanProperty(currProp) }}\")) { \n\n\t\t{{ modelDataProperty += currProp; }} \n\t\t\t\tm{{= modelDataProperty }} = {{= emptyProp }};\n\n\t\t\t\t{{# def.addMsg }} \"{{= modelDataProperty }}\", type: \"added\", \n\t\t\t\t\t  newValue: m{{= modelDataProperty }} });\n\n\t\t\t} else if (typeof m{{= modelDataProperty }} != 'object') {\n\t\t\t\tvar old = m{{= modelDataProperty }};\n\t\t\t\tm{{= modelDataProperty }} = {{= emptyProp }};\n\n\t\t\t\t{{# def.addMsg }} \"{{= modelDataProperty }}\", type: \"changed\", \n\t\t\t\t\t  oldValue: old, newValue: m{{= modelDataProperty }} });\n\t\t\t}\n\t{{  }\n\t\tvar lastProp = it.parsedPath[count] && it.parsedPath[count].property;\n\t}}\n\n\t{{? lastProp }}\n\t\twasDef = m{{= modelDataProperty }}.hasOwnProperty(\"{{= getCleanProperty(lastProp) }}\");\n\t\t{{ modelDataProperty += lastProp; }}\n\t\tvar old = m{{= modelDataProperty }};\n\t\tm{{= modelDataProperty }} = value;\n\t{{?}}\n\n\tif (! wasDef)\n\t\t{{# def.addMsg }} \"{{= modelDataProperty }}\", type: \"added\",\n\t\t\t  newValue: value });\n\telse if (old != value)\n\t\t{{# def.addMsg }} \"{{= modelDataProperty }}\", type: \"changed\",\n\t\t\t  oldValue: old, newValue: value });\n\n\tif (! wasDef || old != value)\t\n\t\taddTreeChangesMessages(messages, messagesHash,\n\t\t\t\"{{= modelDataProperty }}\", old, value); /* defined in the function that synthesizes ModelPath setter */\n\n\tmessages.forEach(function(msg) {\n\t\t{{# def.modelPostMessageCode }}(msg.path, msg);\n\t}, this);\n\n\n\t{{\n\t\tfunction getCleanProperty(prop) {\n\t\t\tif (prop[0] == \".\")\n\t\t\t\treturn prop.slice(1);\n\t\t\telse\n\t\t\t\treturn prop.slice(1, prop.length - 1);\n\t\t}\n\t}}\n}\n";
+	, setterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\nmethod = function set(value) {\n\tvar m = {{# def.modelAccessPrefix }};\n\tvar messages = [], messagesHash = {};\n\tvar wasDef = true;\n\tvar old = m;\n\n\tif (! m) {\n\t\t{{ var emptyProp = it.parsedPath[0] && it.parsedPath[0].empty; }}\n\t\tm = {{# def.modelAccessPrefix }} = {{= emptyProp || 'value' }};\n\t\twasDef = false;\n\n\t\t{{? emptyProp }}\n\t\t\t{{# def.addMsg }} \"\", type: \"added\",\n\t\t\t\t  newValue: m });\n\t\t{{?}}\n\t}\n\n\t{{  var modelDataProperty = \"\";\n\t\tfor (var i = 0, count = it.parsedPath.length - 1; i < count; i++) {\n\t\t\tvar currProp = it.parsedPath[i].property;\n\t\t\tvar emptyProp = it.parsedPath[i + 1] && it.parsedPath[i + 1].empty;\n\t}}\n\n\t\t\tif (! m{{= modelDataProperty }}.hasOwnProperty(\"{{= getCleanProperty(currProp) }}\")) { \n\t\t\t\t/* TODO refactor to use getPathNodeKey from pathUtils */\n\n\t\t{{ modelDataProperty += currProp; }} \n\t\t\t\tm{{= modelDataProperty }} = {{= emptyProp }};\n\n\t\t\t\t{{# def.addMsg }} \"{{= modelDataProperty }}\", type: \"added\", \n\t\t\t\t\t  newValue: m{{= modelDataProperty }} });\n\n\t\t\t} else if (typeof m{{= modelDataProperty }} != 'object') {\n\t\t\t\tvar old = m{{= modelDataProperty }};\n\t\t\t\tm{{= modelDataProperty }} = {{= emptyProp }};\n\n\t\t\t\t{{# def.addMsg }} \"{{= modelDataProperty }}\", type: \"changed\", \n\t\t\t\t\t  oldValue: old, newValue: m{{= modelDataProperty }} });\n\t\t\t}\n\t{{  }\n\t\tvar lastProp = it.parsedPath[count] && it.parsedPath[count].property;\n\t}}\n\n\t{{? lastProp }}\n\t\twasDef = m{{= modelDataProperty }}.hasOwnProperty(\"{{= getCleanProperty(lastProp) }}\");\n\t\t{{ modelDataProperty += lastProp; }}\n\t\tvar old = m{{= modelDataProperty }};\n\t\tm{{= modelDataProperty }} = value;\n\t{{?}}\n\n\tif (! wasDef)\n\t\t{{# def.addMsg }} \"{{= modelDataProperty }}\", type: \"added\",\n\t\t\t  newValue: value });\n\telse if (old != value)\n\t\t{{# def.addMsg }} \"{{= modelDataProperty }}\", type: \"changed\",\n\t\t\t  oldValue: old, newValue: value });\n\n\tif (! wasDef || old != value)\t\n\t\taddTreeChangesMessages(messages, messagesHash,\n\t\t\t\"{{= modelDataProperty }}\", old, value); /* defined in the function that synthesizes ModelPath setter */\n\n\tmessages.forEach(function(msg) {\n\t\t{{# def.modelPostMessageCode }}(msg.path, msg);\n\t}, this);\n\n\n\t{{\n\t\tfunction getCleanProperty(prop) {\n\t\t\treturn prop[0] == \".\"\n\t\t\t\t? prop.slice(1)\n\t\t\t\t: prop.slice(1, prop.length - 1);\n\t\t}\n\t}}\n}\n";
 
 doT.templateSettings.strip = false;
 
@@ -3252,66 +3384,22 @@ function proxyMessenger(modelHostObject) {
 }
 
 
-var modelMethodsToWrap = ['on', 'off'];
+// TODO allow for multiple messages in a string
+var modelMethodsToWrap = ['on', 'off', 'onMessages', 'offMessages'];
 function _wrapMessengerMethods() {
 	modelMethodsToWrap.forEach(function(methodName) {
 		var origMethod = this[methodName];
 		// replacing message subsribe/unsubscribe/etc. to convert "*" message patterns to regexps
 		this[methodName] = function(path, subscriber) {
-			var regexPath = createRegexPath(path);
+			var regexPath = pathUtils.createRegexPath(path);
 			origMethod.call(this, regexPath, subscriber);
 		};
 	}, this);
 }
 
 
-var nodeRegex = {
-	'.*': '\\.[A-Za-z][A-Za-z0-9_]*',
-	'[*]': '\\[[0-9]+\\]'
-};
-nodeRegex['*'] = nodeRegex['.*'] + '|' + nodeRegex['[*]'];
-
-function createRegexPath(path) {
-	check(path, Match.OneOf(String, RegExp));
-
-	if (path instanceof RegExp || path.indexOf('*') == -1)
-		return path;
-
-	var parsedPath = parseModelPath(path, deepPathParsePattern)
-		, regexStr = '^'
-		, regexStrEnd = ''
-		, patternsStarted = false;
-
-	parsedPath.forEach(function(pathNode) {
-		var prop = pathNode.property
-			, regex = nodeRegex[prop];
-		
-		if (regex) {
-			// regexStr += '(' + regex;
-			// regexStrEnd += '|)';
-			regexStr += '(' + regex + '|)';
-			// regexStrEnd += '|)';
-			patternsStarted = true;
-		} else {
-			if (patternsStarted)
-				throw new ModelError('"*" path segment cannot be in the middle of the path: ' + path);
-			regexStr += prop.replace(/(\.|\[|\])/g, '\\$1');
-		}
-	});
-
-	regexStr += /* regexStrEnd + */ '$';
-
-	try {
-		return new RegExp(regexStr);
-	} catch (e) {
-		throw new ModelError('can\'t construct regex for path pattern: ' + path);
-	}
-}
-
-
 _.extend(Model, {
-	Path: ModelPath,
-	createRegexPath: createRegexPath // for testing only
+	Path: ModelPath
 });
 
 function ModelPath(model, path, it) {
@@ -3352,7 +3440,7 @@ function synthesizePathMethods(path) {
 	if (__synthesizedPathsMethods.hasOwnProperty(path))
 		return __synthesizedPathsMethods[path];
 
-	var parsedPath = parseModelPath(path, pathParsePattern);
+	var parsedPath = pathUtils.parseAccessPath(path);
 
 	var methods = {
 		get: synthesizeMethod(getterSynthesizer, path, parsedPath),
@@ -3362,28 +3450,6 @@ function synthesizePathMethods(path) {
 	__synthesizedPathsMethods[path] = methods;
 
 	return methods;
-}
-
-
-function parseModelPath(path, nodeParsePattern) {
-	var parsedPath = [];
-
-	if (! path)
-		return parsedPath;
-
-	var unparsed = path.replace(nodeParsePattern, function(nodeStr) {
-		parsedPath.push({
-			property: nodeStr,
-			empty: nodeStr[0] == '.' || nodeStr[0] == '*'
-				? '{}'
-				:  '[]'
-		});
-		return '';
-	});
-	if (unparsed)
-		throw new ModelError('incorrect model path: ' + path);
-
-	return parsedPath;
 }
 
 
@@ -3459,18 +3525,101 @@ function synthesizeMethod(synthesizer, path, parsedPath) {
 	}
 }
 
-},{"../abstract/mixin":1,"../messenger":39,"../util/check":44,"../util/error":47,"./m_message_source":43,"dot":54,"fs":52,"mol-proto":55}],43:[function(require,module,exports){
+},{"../abstract/mixin":1,"../messenger":39,"../util/check":44,"../util/error":47,"./path_utils":43,"dot":54,"fs":52,"mol-proto":55}],43:[function(require,module,exports){
 'use strict';
 
-var MessageSource = require('../messenger/message_source')
+
+var check = require('../util/check')
+	, Match = check.Match
 	, _ = require('mol-proto');
 
+var pathUtils = module.exports = {
+	parseAccessPath: parseAccessPath,
+	createRegexPath: createRegexPath,
+	getPathNodeKey: getPathNodeKey
+};
 
-var ModelMessageSource = _.createSubclass(MessageSource, 'ModelMessageSource');
 
-module.exports = ModelMessageSource;
+var pathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]/g
+	, patternPathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]|\.\*|\[\*\]|\*/g
+	, pathNodeTypes = {
+		'.': { syntax: 'object', empty: '{}' },
+		'[': { syntax: 'array', empty: '[]'},
+		'*': { syntax: 'star', empty: '{}'}
+	};
 
-},{"../messenger/message_source":40,"mol-proto":55}],44:[function(require,module,exports){
+function parseAccessPath(path, nodeParsePattern) {
+	nodeParsePattern = nodeParsePattern || pathParsePattern;
+
+	var parsedPath = [];
+
+	if (! path)
+		return parsedPath;
+
+	var unparsed = path.replace(nodeParsePattern, function(nodeStr) {
+		var pathNode = { property: nodeStr };
+		_.extend(pathNode, pathNodeTypes[nodeStr[0]]); // TODO maybe do some default value if not in map
+		parsedPath.push(pathNode);
+		return '';
+	});
+	if (unparsed)
+		throw new ModelError('incorrect model path: ' + path);
+
+	return parsedPath;
+}
+
+
+var nodeRegex = {
+	'.*': '\\.[A-Za-z][A-Za-z0-9_]*',
+	'[*]': '\\[[0-9]+\\]'
+};
+nodeRegex['*'] = nodeRegex['.*'] + '|' + nodeRegex['[*]'];
+function createRegexPath(path) {
+	check(path, Match.OneOf(String, RegExp));
+
+	if (path instanceof RegExp || path.indexOf('*') == -1)
+		return path;
+
+	var parsedPath = pathUtils.parseAccessPath(path, patternPathParsePattern)
+		, regexStr = '^'
+		, regexStrEnd = ''
+		, patternsStarted = false;
+
+	parsedPath.forEach(function(pathNode) {
+		var prop = pathNode.property
+			, regex = nodeRegex[prop];
+		
+		if (regex) {
+			// regexStr += '(' + regex;
+			// regexStrEnd += '|)';
+			regexStr += '(' + regex + '|)';
+			// regexStrEnd += '|)';
+			patternsStarted = true;
+		} else {
+			if (patternsStarted)
+				throw new ModelError('"*" path segment cannot be in the middle of the path: ' + path);
+			regexStr += prop.replace(/(\.|\[|\])/g, '\\$1');
+		}
+	});
+
+	regexStr += /* regexStrEnd + */ '$';
+
+	try {
+		return new RegExp(regexStr);
+	} catch (e) {
+		throw new ModelError('can\'t construct regex for path pattern: ' + path);
+	}
+}
+
+
+function getPathNodeKey(pathNode) {
+	var prop = pathNode.property;
+	return pathNode.syntax == 'array'
+		? prop.slice(1, prop.length - 1)
+		: prop.slice(1);
+}
+
+},{"../util/check":44,"mol-proto":55}],44:[function(require,module,exports){
 'use strict';
 
 // XXX docs
