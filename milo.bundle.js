@@ -459,7 +459,8 @@ _.extend(Component, {
 	create: create,
 	copy: copy,
 	isComponent: isComponent,
-	getComponent: getComponent
+	getComponent: getComponent,
+	getContainingComponent: getContainingComponent
 });
 
 // instance methods
@@ -528,6 +529,28 @@ function getComponent(element) {
 	return element && element[config.componentRef];
 }
 
+/**
+ * Returns the closest component which contains the specified node
+ *
+ * This will return the current component of the node if it is a component.
+ * 
+ * @param {Node} node DOM Node
+ * @return {Component|null}
+ */
+function getContainingComponent(node) {
+	// Where the current node is a component it's component should be returned
+	if (isComponent(node)) {
+		return getComponent(node);
+	}
+
+	// Where there is no parent node, this function will return null
+	if (!node.parentNode) {
+		return null;
+	}
+
+	// The parent node is checked recursively
+	return getContainingComponent(node.parentNode);
+}
 
 function createComponentClass(name, facetsConfig) {
 	var facetsClasses = {};
@@ -4238,8 +4261,7 @@ var proto = _ = {
 	prependArray: prependArray,
 	toArray: toArray,
 	firstUpperCase: firstUpperCase,
-	firstLowerCase: firstLowerCase,
-	filterNodeListByType: filterNodeListByType
+	firstLowerCase: firstLowerCase
 };
 
 
@@ -4467,17 +4489,6 @@ function firstUpperCase(str) {
 
 function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
-}
-
-
-// type 1: html element, type 3: text
-function filterNodeListByType(nodeList, type) {
-	var filteredNodes = [];
-	Array.prototype.forEach.call(nodeList, function (node) {
-		if (node.nodeType == type)
-			filteredNodes.push(node);
-	});
-	return filteredNodes;
 }
 
 
