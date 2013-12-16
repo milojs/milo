@@ -43,7 +43,7 @@ function _createProxyMethod(mixinMethodName, proxyMethodName, hostObject) {
 	var boundMethod = this[mixinMethodName].bind(this);
 
 	Object.defineProperty(hostObject, proxyMethodName,
-		{ value: boundMethod });
+		{ value: boundMethod, writable: true });
 }
 
 
@@ -325,9 +325,9 @@ var miloMail = require('./mail')
 	, Match =  check.Match;
 
 
-binder.scan = scanDomForBindAttribute;
-binder.create = createBoundComponents;
-binder.twoPass = binderTwoPass;
+binder.scan = scan;
+binder.create = create;
+binder.twoPass = twoPass;
 
 
 module.exports = binder;
@@ -341,21 +341,24 @@ function binder(scopeEl) {
 }
 
 
-function binderTwoPass(scopeEl) {
+// bind in two passes
+function twoPass(scopeEl) {
 	var scopeEl = scopeEl || document.body;
 	var scanScope = binder.scan(scopeEl);
 	return binder.create(scanScope);
 }
 
 
-function scanDomForBindAttribute(scopeEl) {
+// scan DOM for BindAttribute
+function scan(scopeEl) {
 	return createBinderScope(scopeEl, function(scope, el, attr) {
 		return new ComponentInfo(scope, el, attr);
 	});
 }
 
 
-function createBoundComponents(scanScope) {
+// create bound components
+function create(scanScope) {
 	var scope = new Scope(scanScope._rootEl);
 
 	scanScope._each(function(compInfo) {
@@ -363,7 +366,7 @@ function createBoundComponents(scanScope) {
 
 		scope._add(aComponent, aComponent.name);
 		if (aComponent.container)
-			aComponent.container.scope = createBoundComponents(compInfo.container.scope);
+			aComponent.container.scope = create(compInfo.container.scope);
 	});
 
 	return scope;
@@ -374,8 +377,11 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 	var scopeEl = scopeEl || document.body
 		, scope = new Scope(scopeEl);
 
-	createScopeForElement(scope, scopeEl);
-	miloMail.postMessage('scopeready');
+	var elScopeObj = createScopeForElement(scope, scopeEl);
+
+	if (elScopeObj.postMessage)
+		elScopeObj.postMessage('childrenbound');
+	
 	return scope;
 
 
@@ -405,6 +411,8 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 
 		if (scopeObject)
 			scope._add(scopeObject, attr.compName);
+
+		return scopeObject;
 	}
 
 
@@ -579,6 +587,13 @@ function init(scope, element, name, componentInfo) {
 	// start all facets
 	this.allFacets('check');
 	this.allFacets('start');
+
+	this.on('childrenbound', onChildrenBound);
+}
+
+
+function onChildrenBound(msgType, message) {
+	this.allFacets('childrenBound');
 }
 
 
@@ -1461,28 +1476,7 @@ function init() {
 
 //start List facet
 function start() {
-    var self = this;
-
-    function onScopeReady() {
-        var foundChild;
-
-        _.eachKey(self.owner.container.scope, function(child, name) {
-            if (child.listItem) {
-                if (foundChild) throw new ListError('More than one child component has ListItem Facet')
-                foundChild = child;
-            }
-        }, self, true);
-
-        if (! foundChild) throw new ListError('No child component has ListItem Facet');
-
-        self.listItemType = foundChild;    
-        self.listItemType.dom.hide();
-
-        //TODO: think about how to manage "scope ready" with multiple binds
-        miloMail.offMessage('scopeready', onScopeReady);
-    }
-
-    miloMail.onMessage('scopeready', onScopeReady);
+    
 }
 
 //update list
@@ -1514,6 +1508,24 @@ function update(eventType, data) {
         component.dom.show();
     };
 }
+
+
+function childrenBound() {
+    var foundChild;
+
+    _.eachKey(self.owner.container.scope, function(child, name) {
+        if (child.listItem) {
+            if (foundChild) throw new ListError('More than one child component has ListItem Facet')
+            foundChild = child;
+        }
+    }, self, true);
+
+    if (! foundChild) throw new ListError('No child component has ListItem Facet');
+
+    self.listItemType = foundChild;    
+    self.listItemType.dom.hide();
+}
+
 
 },{"../../binder":6,"../../mail":37,"../../model":42,"../../util/error":47,"../c_class":8,"../c_facet":9,"./cf_registry":23,"mol-proto":55}],19:[function(require,module,exports){
 'use strict';
@@ -3186,6 +3198,8 @@ function Model(scope, schema, name, data) {
 		__pathsCache: {}
 	});
 
+	model._wrapMessengerMethods();
+
 	model._data = data;
 
 	return model;
@@ -3198,7 +3212,8 @@ Model.prototype.__proto__ = Model.__proto__;
 var __synthesizedPathsMethods = {};
 
 // path node syntax
-var pathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]/g;
+var pathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]/g
+	, deepPathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]|\.\*|\[\*\]|\*/g;
 
 var dotDef = {
 	modelAccessPrefix: 'this._model._data',
@@ -3223,7 +3238,8 @@ var getterSynthesizer = doT.compile(getterTemplate, dotDef)
 _.extendProto(Model, {
 	get: get,
 	set: synthesizeMethod(modelSetterSynthesizer, '', []),
-	proxyMessenger: proxyMessenger
+	proxyMessenger: proxyMessenger,
+	_wrapMessengerMethods: _wrapMessengerMethods
 });
 
 function get() {
@@ -3236,7 +3252,67 @@ function proxyMessenger(modelHostObject) {
 }
 
 
-Model.Path = ModelPath;
+var modelMethodsToWrap = ['on', 'off'];
+function _wrapMessengerMethods() {
+	modelMethodsToWrap.forEach(function(methodName) {
+		var origMethod = this[methodName];
+		// replacing message subsribe/unsubscribe/etc. to convert "*" message patterns to regexps
+		this[methodName] = function(path, subscriber) {
+			var regexPath = createRegexPath(path);
+			origMethod.call(this, regexPath, subscriber);
+		};
+	}, this);
+}
+
+
+var nodeRegex = {
+	'.*': '\\.[A-Za-z][A-Za-z0-9_]*',
+	'[*]': '\\[[0-9]+\\]'
+};
+nodeRegex['*'] = nodeRegex['.*'] + '|' + nodeRegex['[*]'];
+
+function createRegexPath(path) {
+	check(path, Match.OneOf(String, RegExp));
+
+	if (path instanceof RegExp || path.indexOf('*') == -1)
+		return path;
+
+	var parsedPath = parseModelPath(path, deepPathParsePattern)
+		, regexStr = '^'
+		, regexStrEnd = ''
+		, patternsStarted = false;
+
+	parsedPath.forEach(function(pathNode) {
+		var prop = pathNode.property
+			, regex = nodeRegex[prop];
+		
+		if (regex) {
+			// regexStr += '(' + regex;
+			// regexStrEnd += '|)';
+			regexStr += '(' + regex + '|)';
+			// regexStrEnd += '|)';
+			patternsStarted = true;
+		} else {
+			if (patternsStarted)
+				throw new ModelError('"*" path segment cannot be in the middle of the path: ' + path);
+			regexStr += prop.replace(/(\.|\[|\])/g, '\\$1');
+		}
+	});
+
+	regexStr += /* regexStrEnd + */ '$';
+
+	try {
+		return new RegExp(regexStr);
+	} catch (e) {
+		throw new ModelError('can\'t construct regex for path pattern: ' + path);
+	}
+}
+
+
+_.extend(Model, {
+	Path: ModelPath,
+	createRegexPath: createRegexPath // for testing only
+});
 
 function ModelPath(model, path, it) {
 	check(model, Model);
@@ -3260,25 +3336,23 @@ function ModelPath(model, path, it) {
 
 
 // adding messaging methods to ModelPath prototype
-_.extendProto(ModelPath, {
-	on: registerModelPathSubscriber,
-	// off: offModelPath,
-});
+var modelPathMethodsMap = {};
 
-var subscriptionDepthPattern = /^\*{0,4}$/;
-function registerModelPathSubscriber(depth, subscriber) {
-	if (! subscriptionDepthPattern.test(depth))
-		throw new ModelError('incorrect subscription depth: ' + depth);
+modelMethodsToWrap.forEach(function(methodName) {
+	// creating subscribe/unsubscribe/etc. methods for ModelPath class
+	modelPathMethodsMap[methodName] = function(path, subscriber) {
+		this._model[methodName](this._path + path, subscriber);
+	};
+})
 
-	this._model.on(this._path, subscriber);
-}
+_.extendProto(ModelPath, modelPathMethodsMap);
 
 
 function synthesizePathMethods(path) {
 	if (__synthesizedPathsMethods.hasOwnProperty(path))
 		return __synthesizedPathsMethods[path];
 
-	var parsedPath = parseModelPath(path);
+	var parsedPath = parseModelPath(path, pathParsePattern);
 
 	var methods = {
 		get: synthesizeMethod(getterSynthesizer, path, parsedPath),
@@ -3291,16 +3365,18 @@ function synthesizePathMethods(path) {
 }
 
 
-function parseModelPath(path) {
+function parseModelPath(path, nodeParsePattern) {
 	var parsedPath = [];
 
 	if (! path)
 		return parsedPath;
 
-	var unparsed = path.replace(pathParsePattern, function(nodeStr) {
+	var unparsed = path.replace(nodeParsePattern, function(nodeStr) {
 		parsedPath.push({
 			property: nodeStr,
-			empty: nodeStr[0] == '.' ? '{}' : '[]'
+			empty: nodeStr[0] == '.' || nodeStr[0] == '*'
+				? '{}'
+				:  '[]'
 		});
 		return '';
 	});
@@ -4238,8 +4314,7 @@ var proto = _ = {
 	prependArray: prependArray,
 	toArray: toArray,
 	firstUpperCase: firstUpperCase,
-	firstLowerCase: firstLowerCase,
-	filterNodeListByType: filterNodeListByType
+	firstLowerCase: firstLowerCase
 };
 
 
@@ -4467,17 +4542,6 @@ function firstUpperCase(str) {
 
 function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
-}
-
-
-// type 1: html element, type 3: text
-function filterNodeListByType(nodeList, type) {
-	var filteredNodes = [];
-	Array.prototype.forEach.call(nodeList, function (node) {
-		if (node.nodeType == type)
-			filteredNodes.push(node);
-	});
-	return filteredNodes;
 }
 
 

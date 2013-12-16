@@ -403,4 +403,128 @@ describe('Model class', function() {
 
 			assert.deepEqual(posted, shouldBePosted);
 	});
+
+
+	it('should support subscriptions with "*" syntax for paths', function() {
+		var m = new Model()
+			, posted = {};
+
+		// should dispatch property change one level deep for both array and property syntax
+		m.on('[0]*', function(message, data) {
+			posted[message] = data;
+		}); 
+
+		m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
+
+			assert.deepEqual(posted, {
+				'[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] },
+				'[0][1]': { path: '[0][1]', type: 'added', newValue: { info: { name: 'Jason', surname: 'Green' } } }
+			});
+
+
+		var m = new Model()
+			, posted = {};
+
+		// should dispatch property change up to one level deep for property syntax only
+		m.on('[0].*', function(message, data) {
+			posted[message] = data;
+		}); 
+
+		m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
+
+			assert.deepEqual(posted, {
+				'[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] }
+			});
+
+		var m = new Model()
+			, posted = {};
+
+
+		// should dispatch property change up to one level deep for array syntax only
+		m.on('[0][*]', function(message, data) {
+			posted[message] = data;
+		}); 
+
+		m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
+
+			assert.deepEqual(posted, {
+				'[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] },
+				'[0][1]': { path: '[0][1]', type: 'added', newValue: { info: { name: 'Jason', surname: 'Green' } } }
+			});
+
+
+		var m = new Model()
+			, posted = {};
+
+
+		// should dispatch property change up to two levels deep for both array and property syntax
+		m.on('[0]**', function(message, data) {
+			posted[message] = data;
+		}); 
+
+		m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
+
+			assert.deepEqual(posted, {
+				'[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] },
+				'[0][1]': { path: '[0][1]', type: 'added', newValue: { info: { name: 'Jason', surname: 'Green' } } },
+				'[0][1].info': { path: '[0][1].info', type: 'added', newValue: { name: 'Jason', surname: 'Green' } }
+			});
+
+
+		var m = new Model()
+			, posted = {};
+
+		// should dispatch property change up to two levels deep for strict array/property syntax
+		m.on('[0][*].*', function(message, data) {
+			posted[message] = data;
+		}); 
+
+		m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
+
+			assert.deepEqual(posted, {
+				'[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] },
+				'[0][1]': { path: '[0][1]', type: 'added', newValue: { info: { name: 'Jason', surname: 'Green' } } },
+				'[0][1].info': { path: '[0][1].info', type: 'added', newValue: { name: 'Jason', surname: 'Green' } }
+			});
+
+
+		var m = new Model()
+			, posted = {};
+
+		// should NOT dispatch property change up to two levels deep for incorrect strict array/property syntax
+		m.on('[0].*.*', function(message, data) {
+			posted[message] = data;
+		}); 
+
+		m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
+
+			assert.deepEqual(posted, {
+				'[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] }
+			});
+
+
+		var m = new Model()
+			, posted = {};
+
+		// should dispatch property change up to two levels deep for both array and property syntax
+		m.on('[0]***', function(message, data) {
+			posted[message] = data;
+		}); 
+
+		m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
+
+			assert.deepEqual(posted, {
+				'[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] },
+				'[0][1]': { path: '[0][1]', type: 'added', newValue: { info: { name: 'Jason', surname: 'Green' } } },
+				'[0][1].info': { path: '[0][1].info', type: 'added', newValue: { name: 'Jason', surname: 'Green' } },
+				'[0][1].info.name': { path: '[0][1].info.name', type: 'added', newValue: 'Jason' },
+				'[0][1].info.surname': { path: '[0][1].info.surname', type: 'added', newValue: 'Green' }
+			});
+ 	})
 });
+
+
+
+
+
+
