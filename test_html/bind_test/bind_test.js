@@ -54,8 +54,11 @@ describe('milo binder', function() {
 
         myList.data.set(listArray);
 
+        console.log(myList.data.get());
+
         listButton.events.on('mousedown', function (eventType, event) {
             myList.data.path('[2]').set({title: 'New Title', desc: 'New Description'});
+            console.log(myList.data.get());
         });
     });
 });

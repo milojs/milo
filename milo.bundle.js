@@ -788,7 +788,8 @@ _.extendProto(Data, {
 	get: get,
 	set: set,
 	path: path,
-	_setScalarValue: _setScalarValue
+	_setScalarValue: _setScalarValue,
+	_getScalarValue: _getScalarValue
 });
 
 facetsRegistry.add(Data);
@@ -840,7 +841,12 @@ function set(value) {
 
 
 function _setScalarValue(value) {
-	tags[this.owner.el.tagName](this.owner.el, value);
+	var el = this.owner.el
+		, setter = tags[el.tagName.toLowerCase()];
+	if (setter)
+		setter(el, value);
+	else
+		el.innerHTML = value;
 }
 
 
@@ -857,7 +863,7 @@ function get() {
 
 		if (comp.container)
 			comp.container.scope._each(function(scopeItem, name) {
-				if (! comp.list.contains(scopeItem))
+				if (! comp.list.contains(scopeItem) && scopeItem.data)
 					scopeData[name] = scopeItem.data.get();
 			});
 	} else if (comp.container) {
@@ -866,14 +872,18 @@ function get() {
 			scopeData[name] = scopeItem.data.get();
 		});
 	} else
-		return _getScalarValue(value);
+		return this._getScalarValue();
 
 	return scopeData;
 }
 
 
-function _getScalarValue(value) {
-	// tags[this.owner.el.tagName](this.owner.el); ???
+function _getScalarValue() {
+	var el = this.owner.el
+		, getter = tags[el.tagName.toLowerCase()];
+	return getter
+			 ? getter(el)
+			 : el.innerHTML;
 }
 
 
@@ -904,31 +914,16 @@ function path(accessPath, createItem) {
 
 // Set value rules
 var tags = {
-	'P': 		innerHtml,
-	'H1': 		innerHtml,
-	'H2': 		innerHtml,
-	'H3': 		innerHtml,
-	'H4': 		innerHtml,
-	'H5': 		innerHtml,
-	'H6': 		innerHtml,
-	'LI': 		innerHtml,
-	'SPAN': 	innerHtml,
-	'DIV': 		innerHtml,
-	'STRONG': 	innerHtml,
-	'EM': 		innerHtml,
-	'INPUT': 	inputValue
+	'input': inputValue
 }
 
 
-// Set value with innerHTML
-function innerHtml(el, value) {
-	el.innerHTML = value;
-}
-
-
-// Set value of input
+// Set and get value of input
 function inputValue(el, value) {
-	el.value = value;
+	if (value)
+		el.value = value;
+	else
+		return el.value;
 }
 
 },{"../../messenger":39,"../../model/path_utils":43,"../../util/logger":49,"../c_facet":9,"../c_message_sources/component_data_source":25,"./cf_registry":23,"mol-proto":55}],12:[function(require,module,exports){
