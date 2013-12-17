@@ -110,6 +110,7 @@ module.exports = function(grunt) {
 	function getBundles() {
         return {
         	docs: [
+        		//These could be broken up into seperate pages
         		'lib/milo.js',
 
         		'lib/loader.js',
@@ -132,11 +133,32 @@ module.exports = function(grunt) {
 				'lib/facets/f_class.js',
 				'lib/facets/f_object.js',
 
+				'lib/components/c_facets/cf_registry.js',
+				'lib/components/c_facets/Container.js',
+				'lib/components/c_facets/Data.js',
+				'lib/components/c_facets/Dom.js',
+				'lib/components/c_facets/Drag.js',
+				'lib/components/c_facets/Drop.js',
+				'lib/components/c_facets/Editable.js',
+				'lib/components/c_facets/Events.js',
+				'lib/components/c_facets/Frame.js',
+				'lib/components/c_facets/Item.js',
+				'lib/components/c_facets/List.js',
+				'lib/components/c_facets/ModelFacet.js',
+				'lib/components/c_facets/Split.js',
+				'lib/components/c_facets/Template.js',
+
 				'lib/components/c_class.js',
 				'lib/components/c_facet.js',
 				'lib/components/c_info.js',
 				'lib/components/c_registry.js',
 				'lib/components/scope.js',
+
+				'lib/components/c_message_sources/component_data_source.js',
+				'lib/components/c_message_sources/dom_events_source.js',
+				'lib/components/c_message_sources/dom_events_constructors.js',
+				'lib/components/c_message_sources/editable_events_source.js',
+				'lib/components/c_message_sources/iframe_message_source.js',
 
 				'lib/model/index.js',
 				'lib/model/connector.js',

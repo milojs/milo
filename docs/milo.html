@@ -2008,10 +2008,22 @@ these classes inherit from FacetedObject</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-77">&#182;</a>
               </div>
-              <p><a name="components"></a></p>
-<h2 id="component-class">component class</h2>
+              <p><a name="components-facet-registry"></a></p>
+<h3 id="component-facet-registry">component facet registry</h3>
+<p>An instance of ClassRegistry class that is used by milo to register and find facets.</p>
 
             </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> ClassRegistry = require(<span class="string">'../../abstract/registry'</span>)
+	, ComponentFacet = require(<span class="string">'../c_facet'</span>);
+
+<span class="keyword">var</span> facetsRegistry = <span class="keyword">new</span> ClassRegistry(ComponentFacet);
+
+facetsRegistry.add(ComponentFacet);
+
+module.exports = facetsRegistry;</pre></div></div>
             
         </li>
         
@@ -2021,6 +2033,2298 @@ these classes inherit from FacetedObject</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-78">&#182;</a>
+              </div>
+              <p>TODO - refactor components registry test into a function
+that tests a registry with a given foundation class
+Make test for this registry based on this function</p>
+<p><a name="components-facets-container"></a></p>
+<h3 id="container-facet">container facet</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> ComponentFacet = require(<span class="string">'../c_facet'</span>)
+	, binder = require(<span class="string">'../../binder'</span>)
+	, _ = require(<span class="string">'mol-proto'</span>)
+	, facetsRegistry = require(<span class="string">'./cf_registry'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-79">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-79">&#182;</a>
+              </div>
+              <p>container facet</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> Container = _.createSubclass(ComponentFacet, <span class="string">'Container'</span>);
+
+_.extendProto(Container, {
+	init: initContainer,
+	_bind: _bindComponents,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-80">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-80">&#182;</a>
+              </div>
+              <p>add: addChildComponents</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>});
+
+facetsRegistry.add(Container);
+
+module.exports = Container;
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">initContainer</span><span class="params">()</span> {</span>
+	ComponentFacet.prototype.init.apply(<span class="keyword">this</span>, arguments);
+	<span class="keyword">this</span>.scope = {};
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_bindComponents</span><span class="params">()</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-81">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-81">&#182;</a>
+              </div>
+              <p>TODO
+this function should re-bind rather than bind all internal elements</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">this</span>.scope = binder(<span class="keyword">this</span>.owner.el);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">addChildComponents</span><span class="params">(childComponents)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-82">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-82">&#182;</a>
+              </div>
+              <p>TODO
+this function should intelligently re-bind existing components to
+new elements (if they changed) and re-bind previously bound events to the same
+event handlers
+or maybe not, if this function is only used by binder to add new elements...</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	_.extend(<span class="keyword">this</span>.scope, childComponents);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-83">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-83">&#182;</a>
+              </div>
+              <p><a name="components-facets-data"></a></p>
+<h3 id="data-facet">data facet</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> ComponentFacet = require(<span class="string">'../c_facet'</span>)
+	, facetsRegistry = require(<span class="string">'./cf_registry'</span>)
+
+	, Messenger = require(<span class="string">'../../messenger'</span>)
+	, ComponentDataSource = require(<span class="string">'../c_message_sources/component_data_source'</span>)
+	, pathUtils = require(<span class="string">'../../model/path_utils'</span>)
+
+	, _ = require(<span class="string">'mol-proto'</span>)
+	, logger = require(<span class="string">'../../util/logger'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-84">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-84">&#182;</a>
+              </div>
+              <p>data model connection facet</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> Data = _.createSubclass(ComponentFacet, <span class="string">'Data'</span>);
+
+_.extendProto(Data, {
+	init: init,
+	get: get,
+	set: set,
+	path: path,
+	_setScalarValue: _setScalarValue,
+	_getScalarValue: _getScalarValue
+});
+
+facetsRegistry.add(Data);
+
+module.exports = Data;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-85">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-85">&#182;</a>
+              </div>
+              <p>Initialize Data Facet</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">init</span><span class="params">()</span> {</span>
+	ComponentFacet.prototype.init.apply(<span class="keyword">this</span>, arguments);
+
+	<span class="keyword">var</span> proxyCompDataSourceMethods = {
+		value: <span class="string">'value'</span>,
+		trigger: <span class="string">'trigger'</span>
+	};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-86">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-86">&#182;</a>
+              </div>
+              <p>instead of this.owner should pass model? Where it is set?</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">var</span> compDataSource = <span class="keyword">new</span> ComponentDataSource(<span class="keyword">this</span>, proxyCompDataSourceMethods, <span class="keyword">this</span>.owner);
+	<span class="keyword">this</span>._setMessageSource(compDataSource);
+
+	Object.defineProperties(<span class="keyword">this</span>, {
+		_compDataSource: { value: compDataSource }
+	});
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-87">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-87">&#182;</a>
+              </div>
+              <p>Set components DOM value</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">set</span><span class="params">(value)</span> {</span>
+	<span class="keyword">if</span> (<span class="keyword">typeof</span> value == <span class="string">'object'</span>) {
+		<span class="keyword">if</span> (Array.isArray(value))
+			value.forEach(<span class="function"><span class="keyword">function</span><span class="params">(item, index)</span> {</span>
+				<span class="keyword">var</span> childDataFacet = <span class="keyword">this</span>.path(<span class="string">'['</span> + index + <span class="string">']'</span>, <span class="literal">true</span>); <span class="comment">// true will create item in list</span>
+				<span class="keyword">if</span> (childDataFacet)
+					childDataFacet.set(item);
+				<span class="keyword">else</span>
+					logger.warn(<span class="string">'attempt to set data on path that does not exist: '</span> + <span class="string">'['</span> + index + <span class="string">']'</span>);
+			}, <span class="keyword">this</span>);
+		<span class="keyword">else</span>
+			_.eachKey(value, <span class="function"><span class="keyword">function</span><span class="params">(item, key)</span> {</span>
+				<span class="keyword">var</span> childDataFacet = <span class="keyword">this</span>.path(<span class="string">'.'</span> + key);
+				<span class="keyword">if</span> (childDataFacet)
+					childDataFacet.set(item);
+				<span class="keyword">else</span>
+					logger.warn(<span class="string">'attempt to set data on path that does not exist: '</span> + <span class="string">'.'</span> + key);
+			}, <span class="keyword">this</span>);
+	} <span class="keyword">else</span>
+		<span class="keyword">this</span>._setScalarValue(value);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_setScalarValue</span><span class="params">(value)</span> {</span>
+	<span class="keyword">var</span> el = <span class="keyword">this</span>.owner.el
+		, setter = tags[el.tagName.toLowerCase()];
+	<span class="keyword">if</span> (setter)
+		setter(el, value);
+	<span class="keyword">else</span>
+		el.innerHTML = value;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-88">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-88">&#182;</a>
+              </div>
+              <p>get structured data from scope hierarchy</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">get</span><span class="params">()</span> {</span>
+	<span class="keyword">var</span> comp = <span class="keyword">this</span>.owner
+		, scopeData;
+
+	<span class="keyword">if</span> (comp.list) {
+		scopeData = [];
+		comp.list.each(<span class="function"><span class="keyword">function</span><span class="params">(listItem, index)</span> {</span>
+			scopeData[index] = listItem.data.get();
+		});
+
+		<span class="keyword">if</span> (comp.container)
+			comp.container.scope._each(<span class="function"><span class="keyword">function</span><span class="params">(scopeItem, name)</span> {</span>
+				<span class="keyword">if</span> (! comp.list.contains(scopeItem) &amp;&amp; scopeItem.data)
+					scopeData[name] = scopeItem.data.get();
+			});
+	} <span class="keyword">else</span> <span class="keyword">if</span> (comp.container) {
+		scopeData = {};
+		comp.container.scope._each(<span class="function"><span class="keyword">function</span><span class="params">(scopeItem, name)</span> {</span>
+			scopeData[name] = scopeItem.data.get();
+		});
+	} <span class="keyword">else</span>
+		<span class="keyword">return</span> <span class="keyword">this</span>._getScalarValue();
+
+	<span class="keyword">return</span> scopeData;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_getScalarValue</span><span class="params">()</span> {</span>
+	<span class="keyword">var</span> el = <span class="keyword">this</span>.owner.el
+		, getter = tags[el.tagName.toLowerCase()];
+	<span class="keyword">return</span> getter
+			 ? getter(el)
+			 : el.innerHTML;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-89">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-89">&#182;</a>
+              </div>
+              <p>returns data facet of a child component (by scopes) corresponding to the path</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">path</span><span class="params">(accessPath, createItem)</span> {</span>
+	<span class="keyword">var</span> parsedPath = pathUtils.parseAccessPath(accessPath)
+		, currentComponent = <span class="keyword">this</span>.owner;
+
+	<span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>, len = parsedPath.length; i &lt; len; i++) {
+		<span class="keyword">var</span> pathNode = parsedPath[i]
+			, nodeKey = pathUtils.getPathNodeKey(pathNode);
+		<span class="keyword">if</span> (pathNode.syntax == <span class="string">'array'</span> &amp;&amp; currentComponent.list) {
+			<span class="keyword">var</span> itemComponent = currentComponent.list.item(nodeKey);
+			<span class="keyword">if</span> (! itemComponent &amp;&amp; createItem)
+				itemComponent = currentComponent.list.addItem(nodeKey);
+			<span class="keyword">if</span> (itemComponent)
+				currentComponent = itemComponent;
+		} <span class="keyword">else</span> <span class="keyword">if</span> (currentComponent.container)
+			currentComponent = currentComponent.container.scope[nodeKey];
+
+		<span class="keyword">if</span> (! currentComponent || ! currentComponent.data)
+			<span class="keyword">break</span>;
+	}
+
+	<span class="keyword">return</span> currentComponent &amp;&amp; currentComponent.data;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-90">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-90">&#182;</a>
+              </div>
+              <p>Set value rules</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> tags = {
+	<span class="string">'input'</span>: inputValue
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-91">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-91">&#182;</a>
+              </div>
+              <p>Set and get value of input</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">inputValue</span><span class="params">(el, value)</span> {</span>
+	<span class="keyword">if</span> (value)
+		el.value = value;
+	<span class="keyword">else</span>
+		<span class="keyword">return</span> el.value;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-92">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-92">&#182;</a>
+              </div>
+              <p><a name="components-facets-dom"></a></p>
+<h3 id="dom-facet">dom facet</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> ComponentFacet = require(<span class="string">'../c_facet'</span>)
+	, facetsRegistry = require(<span class="string">'./cf_registry'</span>)	
+	, _ = require(<span class="string">'mol-proto'</span>)
+	, check = require(<span class="string">'../../util/check'</span>)
+	, Match = check.Match
+	, binder = require(<span class="string">'../../binder'</span>)
+	, BindAttribute = require(<span class="string">'../../attribute/a_bind'</span>)
+	, DomFacetError = require(<span class="string">'../../util/error'</span>).DomFacet;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-93">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-93">&#182;</a>
+              </div>
+              <p>data model connection facet</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> Dom = _.createSubclass(ComponentFacet, <span class="string">'Dom'</span>);
+
+_.extendProto(Dom, {
+	init: init,
+	start: start,
+
+	show: show,
+	hide: hide,
+	remove: remove,
+	append: append,
+	prepend: prepend,
+	appendChildren: appendChildren,
+	prependChildren: prependChildren,
+	insertAfter: insertAfter,
+	insertBefore: insertBefore,
+	setStyle: setStyle,
+	copy: copy,
+
+	find: find,
+	hasTextBeforeSelection: hasTextBeforeSelection</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-94">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-94">&#182;</a>
+              </div>
+              <p>_reattach: _reattachEventsOnElementChange</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>});
+
+facetsRegistry.add(Dom);
+
+module.exports = Dom;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-95">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-95">&#182;</a>
+              </div>
+              <p>initialize Dom facet</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">init</span><span class="params">()</span> {</span>
+	ComponentFacet.prototype.init.apply(<span class="keyword">this</span>, arguments);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-96">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-96">&#182;</a>
+              </div>
+              <p>start Dom facet</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">start</span><span class="params">()</span> {</span>
+	<span class="keyword">if</span> (<span class="keyword">this</span>.config.cls)
+		<span class="keyword">this</span>.owner.el.classList.add(<span class="keyword">this</span>.config.cls);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-97">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-97">&#182;</a>
+              </div>
+              <p>show HTML element of component</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">show</span><span class="params">()</span> {</span>
+	<span class="keyword">this</span>.owner.el.style.display = <span class="string">'block'</span>;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-98">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-98">&#182;</a>
+              </div>
+              <p>hide HTML element of component</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">hide</span><span class="params">()</span> {</span>
+	<span class="keyword">this</span>.owner.el.style.display = <span class="string">'none'</span>;
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">setStyle</span><span class="params">(property, value)</span> {</span>
+	<span class="keyword">this</span>.owner.el.style[property] = value;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-99">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-99">&#182;</a>
+              </div>
+              <p>create a copy of DOM element using facet config if set</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">copy</span><span class="params">(isDeep)</span> {</span>
+	<span class="keyword">var</span> tagName = <span class="keyword">this</span>.config.tagName;
+	<span class="keyword">if</span> (! <span class="keyword">this</span>.config.tagName)
+		<span class="keyword">return</span> <span class="keyword">this</span>.owner.el.cloneNode(isDeep);
+
+	<span class="keyword">var</span> newEl = document.createElement(tagName);
+
+	<span class="keyword">var</span> attributes = <span class="keyword">this</span>.config.attributes;
+	<span class="keyword">if</span> (attributes)
+		_.eachKey(attributes, <span class="function"><span class="keyword">function</span><span class="params">(attrValue, attrName)</span> {</span>
+			newEl.setAttribute(attrName, attrValue);
+		});
+
+	<span class="keyword">return</span> newEl;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-100">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-100">&#182;</a>
+              </div>
+              <p>remove HTML element of component</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">remove</span><span class="params">()</span> {</span>
+	<span class="keyword">var</span> thisEl = <span class="keyword">this</span>.owner.el;
+	thisEl.parentNode.removeChild(thisEl);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-101">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-101">&#182;</a>
+              </div>
+              <p>append inside HTML element of component</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">append</span><span class="params">(el)</span> {</span>
+	<span class="keyword">this</span>.owner.el.appendChild(el)
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-102">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-102">&#182;</a>
+              </div>
+              <p>prepend inside HTML element of component</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">prepend</span><span class="params">(el)</span> {</span>
+	<span class="keyword">var</span> thisEl = <span class="keyword">this</span>.owner.el
+		, firstChild = thisEl.firstChild;
+	<span class="keyword">if</span> (firstChild)
+		thisEl.insertBefore(el, firstChild);
+	<span class="keyword">else</span>
+		thisEl.appendChild(el);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-103">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-103">&#182;</a>
+              </div>
+              <p>appends children of element inside this component&#39;s element</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">appendChildren</span><span class="params">(el)</span> {</span>
+	<span class="keyword">while</span>(el.childNodes.length)
+		<span class="keyword">this</span>.append(el.childNodes[<span class="number">0</span>]);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-104">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-104">&#182;</a>
+              </div>
+              <p>prepends children of element inside this component&#39;s element</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">prependChildren</span><span class="params">(el)</span> {</span>
+	<span class="keyword">while</span>(el.childNodes.length)
+		<span class="keyword">this</span>.prepend(el.childNodes[el.childNodes.length - <span class="number">1</span>]);
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">insertAfter</span><span class="params">(el)</span> {</span>
+	<span class="keyword">var</span> thisEl = <span class="keyword">this</span>.owner.el
+		, parent = thisEl.parentNode;
+	parent.insertBefore(el, thisEl.nextSibling);
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">insertBefore</span><span class="params">(el)</span> {</span>
+	<span class="keyword">var</span> thisEl = <span class="keyword">this</span>.owner.el
+		, parent = thisEl.parentNode;
+	parent.insertBefore(el, thisEl);
+}
+
+<span class="keyword">var</span> findDirections = {
+	<span class="string">'up'</span>: <span class="string">'previousNode'</span>,
+	<span class="string">'down'</span>: <span class="string">'nextNode'</span>
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-105">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-105">&#182;</a>
+              </div>
+              <p>Finds component passing optional iterator&#39;s test
+in the same scope as the current component (this)
+by traversing DOM tree upwards (direction = &quot;up&quot;)
+or downwards (direction = &quot;down&quot;)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">find</span><span class="params">(direction, iterator)</span> {</span>
+	<span class="keyword">if</span> (! findDirections.hasOwnProperty(direction))
+		<span class="keyword">throw</span> <span class="keyword">new</span> DomFacetError(<span class="string">'incorrect find direction: '</span> + direction);
+
+	<span class="keyword">var</span> el = <span class="keyword">this</span>.owner.el
+		, scope = <span class="keyword">this</span>.owner.scope
+		, treeWalker = document.createTreeWalker(scope._rootEl, NodeFilter.SHOW_ELEMENT);
+
+	treeWalker.currentNode = el;
+	<span class="keyword">var</span> nextNode = treeWalker[findDirections[direction]]()
+		, componentsNames = Object.keys(scope)
+		, found = <span class="literal">false</span>;
+
+	<span class="keyword">while</span> (nextNode) {
+		<span class="keyword">var</span> attr = <span class="keyword">new</span> BindAttribute(nextNode);
+		<span class="keyword">if</span> (attr.node) {
+			attr.parse().validate();
+			<span class="keyword">if</span> (scope.hasOwnProperty(attr.compName)) {
+				<span class="keyword">var</span> component = scope[attr.compName];
+				<span class="keyword">if</span> (! iterator || iterator(component)) {
+					found = <span class="literal">true</span>;
+					<span class="keyword">break</span>;
+				}
+			}
+		}
+		treeWalker.currentNode = nextNode;
+		nextNode = treeWalker[findDirections[direction]]();
+	}
+
+	<span class="keyword">if</span> (found) <span class="keyword">return</span> component;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-106">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-106">&#182;</a>
+              </div>
+              <p>returns true if the element has text before selection</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">hasTextBeforeSelection</span><span class="params">()</span> {</span>
+	<span class="keyword">var</span> selection = window.getSelection();
+	<span class="keyword">if</span> (! selection.isCollapsed) <span class="keyword">return</span> <span class="literal">true</span>;
+	<span class="keyword">if</span> (selection.anchorOffset &gt; <span class="number">1</span>) <span class="keyword">return</span> <span class="literal">true</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-107">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-107">&#182;</a>
+              </div>
+              <p>walk up the DOM tree to check if there are text nodes before cursor</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">var</span> treeWalker = document.createTreeWalker(<span class="keyword">this</span>.owner.el, NodeFilter.SHOW_TEXT);
+	<span class="keyword">return</span> treeWalker.previousNode();
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-108">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-108">&#182;</a>
+              </div>
+              <p><a name="components-facets-drag"></a></p>
+<h3 id="drag-facet">drag facet</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> ComponentFacet = require(<span class="string">'../c_facet'</span>)
+	, facetsRegistry = require(<span class="string">'./cf_registry'</span>)
+	, DOMEventsSource = require(<span class="string">'../c_message_sources/dom_events_source'</span>)
+
+	, _ = require(<span class="string">'mol-proto'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-109">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-109">&#182;</a>
+              </div>
+              <p>generic drag handler, should be overridden</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> Drag = _.createSubclass(ComponentFacet, <span class="string">'Drag'</span>);
+
+_.extendProto(Drag, {
+	init: initDragFacet,
+	start: startDragFacet,
+
+	setHandle: setDragHandle,
+	setDragData: setDragData</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-110">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-110">&#182;</a>
+              </div>
+              <p>_reattach: _reattachEventsOnElementChange</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>});
+
+facetsRegistry.add(Drag);
+
+module.exports = Drag;
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">initDragFacet</span><span class="params">()</span> {</span>
+	ComponentFacet.prototype.init.apply(<span class="keyword">this</span>, arguments);	
+	<span class="keyword">this</span>._createMessageSource(DOMEventsSource);
+	<span class="keyword">this</span>._dragData = {};
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">setDragHandle</span><span class="params">(handleEl)</span> {</span>
+	<span class="keyword">if</span> (! <span class="keyword">this</span>.owner.el.contains(handleEl))
+		<span class="keyword">return</span> logger.warn(<span class="string">'drag handle should be inside element to be dragged'</span>)
+	<span class="keyword">this</span>._dragHandle = handleEl;
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">setDragData</span><span class="params">(data)</span> {</span>
+	<span class="keyword">this</span>._dragData = data;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">startDragFacet</span><span class="params">()</span> {</span>
+	ComponentFacet.prototype.start.apply(<span class="keyword">this</span>, arguments);
+	<span class="keyword">this</span>.owner.el.setAttribute(<span class="string">'draggable'</span>, <span class="literal">true</span>);
+
+	<span class="keyword">this</span>.on(<span class="string">'mousedown'</span>, onMouseDown);
+	<span class="keyword">this</span>.on(<span class="string">'mouseenter mouseleave mousemove'</span>, onMouseMovement);
+	<span class="keyword">this</span>.on(<span class="string">'dragstart drag'</span>, onDragging);
+
+	<span class="keyword">var</span> self = <span class="keyword">this</span>;
+
+	<span class="function"><span class="keyword">function</span> <span class="title">onMouseDown</span><span class="params">(eventType, event)</span> {</span>
+		self._target = event.target;
+		<span class="keyword">if</span> (targetInDragHandle(event))
+			window.getSelection().empty();
+	}
+
+	<span class="function"><span class="keyword">function</span> <span class="title">onMouseMovement</span><span class="params">(eventType, event)</span> {</span>
+		<span class="keyword">var</span> shouldBeDraggable = targetInDragHandle(event);
+		self.owner.el.setAttribute(<span class="string">'draggable'</span>, shouldBeDraggable);
+	}
+
+	<span class="function"><span class="keyword">function</span> <span class="title">onDragging</span><span class="params">(eventType, event)</span> {</span>
+		<span class="keyword">if</span> (targetInDragHandle(event)) {
+			<span class="keyword">var</span> dt = event.dataTransfer;
+			dt.setData(<span class="string">'text/html'</span>, self.owner.el.outerHTML);
+			dt.setData(<span class="string">'x-application/milo-component'</span>, JSON.stringify(self._dragData));
+		} <span class="keyword">else</span>
+			event.preventDefault();
+	}
+
+	<span class="function"><span class="keyword">function</span> <span class="title">targetInDragHandle</span><span class="params">(event)</span> {</span>
+		<span class="keyword">return</span> ! self._dragHandle || self._dragHandle.contains(self._target);
+	}
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-111">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-111">&#182;</a>
+              </div>
+              <p><a name="components-facets-drop"></a></p>
+<h3 id="drop-facet">drop facet</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> ComponentFacet = require(<span class="string">'../c_facet'</span>)
+	, facetsRegistry = require(<span class="string">'./cf_registry'</span>)
+	, DOMEventsSource = require(<span class="string">'../c_message_sources/dom_events_source'</span>)
+
+	, _ = require(<span class="string">'mol-proto'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-112">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-112">&#182;</a>
+              </div>
+              <p>generic drag handler, should be overridden</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> Drop = _.createSubclass(ComponentFacet, <span class="string">'Drop'</span>);
+
+_.extendProto(Drop, {
+	init: initDropFacet,
+	start: startDropFacet</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-113">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-113">&#182;</a>
+              </div>
+              <p>_reattach: _reattachEventsOnElementChange</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>});
+
+facetsRegistry.add(Drop);
+
+module.exports = Drop;
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">initDropFacet</span><span class="params">()</span> {</span>
+	ComponentFacet.prototype.init.apply(<span class="keyword">this</span>, arguments);
+	<span class="keyword">this</span>._createMessageSource(DOMEventsSource);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">startDropFacet</span><span class="params">()</span> {</span>
+	ComponentFacet.prototype.start.apply(<span class="keyword">this</span>, arguments);
+	<span class="keyword">this</span>.on(<span class="string">'dragenter dragover'</span>, onDragging);
+
+	<span class="function"><span class="keyword">function</span> <span class="title">onDragging</span><span class="params">(eventType, event)</span> {</span>
+		<span class="keyword">var</span> dataTypes = event.dataTransfer.types;
+		<span class="keyword">if</span> (dataTypes.indexOf(<span class="string">'text/html'</span>) &gt;= <span class="number">0</span>
+				|| dataTypes.indexOf(<span class="string">'x-application/milo-component'</span>) &gt;= <span class="number">0</span>) {
+			event.dataTransfer.dropEffect = <span class="string">'move'</span>;
+			event.preventDefault();
+		}
+	}
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-114">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-114">&#182;</a>
+              </div>
+              <p><a name="components-facets-editable"></a></p>
+<h3 id="editable-facet">editable facet</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> ComponentFacet = require(<span class="string">'../c_facet'</span>)
+	, Component = require(<span class="string">'../c_class'</span>)
+	, facetsRegistry = require(<span class="string">'./cf_registry'</span>)
+	, EditableEventsSource = require(<span class="string">'../c_message_sources/editable_events_source'</span>)
+	, logger = require(<span class="string">'../../util/logger'</span>)
+	, _ = require(<span class="string">'mol-proto'</span>)
+	, check = require(<span class="string">'../../util'</span>).check
+	, Match = check.Match;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-115">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-115">&#182;</a>
+              </div>
+              <p>generic drag handler, should be overridden</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> Editable = _.createSubclass(ComponentFacet, <span class="string">'Editable'</span>);
+
+_.extendProto(Editable, {
+	init: init,
+	start: start,
+	makeEditable: makeEditable</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-116">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-116">&#182;</a>
+              </div>
+              <p>_reattach: _reattachEventsOnElementChange</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>});
+
+facetsRegistry.add(Editable);
+
+module.exports = Editable;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-117">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-117">&#182;</a>
+              </div>
+              <p>init Editable facets</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">init</span><span class="params">()</span> {</span>
+	ComponentFacet.prototype.init.apply(<span class="keyword">this</span>, arguments);
+
+	<span class="keyword">this</span>._createMessageSource(EditableEventsSource, {
+		editableOnClick: <span class="keyword">this</span>.config.editableOnClick,
+		moveToAdjacentEditable: <span class="keyword">this</span>.config.moveToAdjacentEditable,
+		allowMerge: <span class="keyword">this</span>.config.allowMerge,
+		acceptMerge: <span class="keyword">this</span>.config.acceptMerge
+	});
+
+	<span class="keyword">this</span>._editable = <span class="keyword">typeof</span> <span class="keyword">this</span>.config.editable != <span class="string">'undefined'</span>
+						? <span class="keyword">this</span>.config.editable
+						: <span class="literal">true</span>;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">makeEditable</span><span class="params">(editable)</span> {</span>
+	<span class="keyword">this</span>.owner.el.setAttribute(<span class="string">'contenteditable'</span>, editable);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-118">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-118">&#182;</a>
+              </div>
+              <p>start Editable facet</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">start</span><span class="params">()</span> {</span>
+	ComponentFacet.prototype.start.apply(<span class="keyword">this</span>, arguments);
+	
+	<span class="keyword">if</span> (<span class="keyword">this</span>._editable) {
+		<span class="keyword">this</span>.makeEditable(<span class="literal">true</span>);
+		<span class="keyword">this</span>.postMessage(<span class="string">'editstart'</span>);
+	}
+	
+	<span class="keyword">this</span>.onMessages({
+		<span class="string">'editstart'</span>: onEditStart,
+		<span class="string">'editend'</span>: onEditEnd,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-119">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-119">&#182;</a>
+              </div>
+              <p>arrow keys events</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		<span class="string">'previouseditable'</span>: makePreviousComponentEditable,
+		<span class="string">'nexteditable'</span>: makeNextComponentEditable,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-120">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-120">&#182;</a>
+              </div>
+              <p>merge events</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		<span class="string">'previousmerge'</span>: mergeToPreviousEditable,
+		<span class="string">'nextmerge'</span>: mergeToNextEditable,
+		<span class="string">'requestmerge'</span>: onRequestMerge,
+		<span class="string">'mergeaccepted'</span>: onMergeAccepted,
+		<span class="string">'performmerge'</span>: onPerformMerge,
+		<span class="string">'mergeremove'</span>: onMergeRemove,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-121">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-121">&#182;</a>
+              </div>
+              <p>split events</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		<span class="string">'enterkey'</span>: onEnterSplit
+	});
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">onEditStart</span><span class="params">(eventType, event)</span> {</span>
+	<span class="keyword">this</span>.makeEditable(<span class="literal">true</span>);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">onEditEnd</span><span class="params">(eventType, event)</span> {</span>
+	<span class="keyword">this</span>.makeEditable(<span class="literal">false</span>);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-122">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-122">&#182;</a>
+              </div>
+              <p>Move caret to another editable</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">makePreviousComponentEditable</span><span class="params">(eventType, event)</span> {</span>
+	event.preventDefault();
+	makeAdjacentComponentEditable(<span class="keyword">this</span>.owner, <span class="string">'up'</span>);
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">makeNextComponentEditable</span><span class="params">(eventType, event)</span> {</span>
+	event.preventDefault();
+	makeAdjacentComponentEditable(<span class="keyword">this</span>.owner, <span class="string">'down'</span>);
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">makeAdjacentComponentEditable</span><span class="params">(component, direction)</span> {</span>
+	<span class="keyword">var</span> adjacentComp = component.dom.find(direction, <span class="function"><span class="keyword">function</span><span class="params">(comp)</span> {</span>
+		<span class="keyword">return</span> comp.editable;
+	});
+
+	<span class="keyword">if</span> (adjacentComp) {
+		adjacentComp.editable.postMessage(<span class="string">'editstart'</span>);
+		adjacentComp.el.focus();
+		
+		<span class="keyword">var</span> windowSelection = window.getSelection()
+			, selectionRange = document.createRange();
+		selectionRange.selectNodeContents(adjacentComp.el);
+		<span class="keyword">if</span> (direction == <span class="string">'up'</span>)
+			selectionRange.collapse(<span class="literal">false</span>);
+		<span class="keyword">else</span>
+			selectionRange.collapse(<span class="literal">true</span>);
+        windowSelection.removeAllRanges();
+        windowSelection.addRange(selectionRange);
+	}
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-123">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-123">&#182;</a>
+              </div>
+              <p>merge functionality</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">mergeToPreviousEditable</span><span class="params">(eventType, event)</span> {</span>
+	event.preventDefault();
+	mergeToAdjacentEditable(<span class="keyword">this</span>.owner, <span class="string">'up'</span>);
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">mergeToNextEditable</span><span class="params">(eventType, event)</span> {</span>
+	mergeToAdjacentEditable(<span class="keyword">this</span>.owner, <span class="string">'down'</span>);
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">mergeToAdjacentEditable</span><span class="params">(component, direction)</span> {</span>
+	<span class="keyword">var</span> adjacentComp = component.dom.find(direction, <span class="function"><span class="keyword">function</span><span class="params">(comp)</span> {</span>
+		<span class="keyword">return</span> comp.editable;
+	});
+
+	<span class="keyword">if</span> (adjacentComp)
+		adjacentComp.editable.postMessage(<span class="string">'requestmerge'</span>, { sender: component });
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-124">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-124">&#182;</a>
+              </div>
+              <p>merge messages</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">onRequestMerge</span><span class="params">(message, data)</span> {</span>
+	check(data, Match.ObjectIncluding({ sender: Component }));
+
+	<span class="keyword">var</span> mergeComponent = data.sender;
+	<span class="keyword">if</span> (<span class="keyword">this</span>.config.acceptMerge)
+		mergeComponent.editable.postMessage(<span class="string">'mergeaccepted'</span>, { sender: <span class="keyword">this</span>.owner });
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">onMergeAccepted</span><span class="params">(message, data)</span> {</span>
+	check(data, Match.ObjectIncluding({ sender: Component }));
+
+	<span class="keyword">var</span> targetComponent = data.sender;
+
+	<span class="keyword">this</span>.owner.allFacets(<span class="string">'clean'</span>);
+	
+	targetComponent.editable.postMessage(<span class="string">'performmerge'</span>, { sender: <span class="keyword">this</span>.owner });
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">onPerformMerge</span><span class="params">(message, data)</span> {</span>
+	check(data, Match.ObjectIncluding({ sender: Component }));
+	<span class="keyword">if</span> (! <span class="keyword">this</span>.config.acceptMerge) {
+		logger.error(<span class="string">'performmerge message received by component that doesn\'t accept merge'</span>);
+		<span class="keyword">return</span>;
+	}
+
+	<span class="keyword">var</span> mergeComponent = data.sender
+		, windowSelection = window.getSelection()
+		, selectionRange = document.createRange();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-125">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-125">&#182;</a>
+              </div>
+              <p>merge scopes</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">this</span>.owner.container.scope._merge(mergeComponent.container.scope);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-126">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-126">&#182;</a>
+              </div>
+              <p>Reference first element to be merged</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">var</span> firstMergeEl = mergeComponent.el.childNodes[<span class="number">0</span>];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-127">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-127">&#182;</a>
+              </div>
+              <p>merge DOM</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">this</span>.owner.dom.appendChildren(mergeComponent.el);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-128">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-128">&#182;</a>
+              </div>
+              <p>Make the interface editable again like expected</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">this</span>.makeEditable(<span class="literal">true</span>);
+	<span class="keyword">this</span>.owner.el.focus();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-129">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-129">&#182;</a>
+              </div>
+              <p>Set the selection where it should be</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	selectionRange.setStart(firstMergeEl);
+	selectionRange.setEnd(firstMergeEl);
+	windowSelection.removeAllRanges();
+	windowSelection.addRange(selectionRange);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-130">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-130">&#182;</a>
+              </div>
+              <p>send remove message</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	mergeComponent.editable.postMessage(<span class="string">'mergeremove'</span>);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">onMergeRemove</span><span class="params">(message, data)</span> {</span>
+	<span class="keyword">if</span> (! <span class="keyword">this</span>.config.allowMerge) {
+		logger.error(<span class="string">'mergeremove message received by component that doesn\'t allow merge'</span>);
+		<span class="keyword">return</span>;
+	}
+
+	<span class="keyword">this</span>.owner.dom.remove();
+	<span class="keyword">this</span>.owner.remove();
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">onEnterSplit</span><span class="params">(message, event)</span> {</span>
+	<span class="keyword">var</span> splitFacet = <span class="keyword">this</span>.owner.split;
+	<span class="keyword">if</span> (splitFacet) {
+		<span class="keyword">var</span> newComp = splitFacet.make();
+		event.preventDefault();
+		newComp.editable.postMessage(<span class="string">'editstart'</span>);
+		newComp.el.focus();
+	}
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-131">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-131">&#182;</a>
+              </div>
+              <p><a name="components-facets-events"></a></p>
+<h3 id="events-facet">events facet</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> ComponentFacet = require(<span class="string">'../c_facet'</span>)
+	, facetsRegistry = require(<span class="string">'./cf_registry'</span>)
+
+	, Messenger = require(<span class="string">'../../messenger'</span>)
+	, DOMEventsSource = require(<span class="string">'../c_message_sources/dom_events_source'</span>)
+
+	, _ = require(<span class="string">'mol-proto'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-132">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-132">&#182;</a>
+              </div>
+              <p>events facet</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> Events = _.createSubclass(ComponentFacet, <span class="string">'Events'</span>);
+
+_.extendProto(Events, {
+	init: init,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-133">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-133">&#182;</a>
+              </div>
+              <p>_reattach: _reattachEventsOnElementChange</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>});
+
+facetsRegistry.add(Events);
+
+module.exports = Events;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-134">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-134">&#182;</a>
+              </div>
+              <p>init Events facet</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">init</span><span class="params">()</span> {</span>
+	ComponentFacet.prototype.init.apply(<span class="keyword">this</span>, arguments);
+
+	<span class="keyword">var</span> domEventsSource = <span class="keyword">new</span> DOMEventsSource(<span class="keyword">this</span>, { trigger: <span class="string">'trigger'</span> }, <span class="keyword">this</span>.owner);
+
+	<span class="keyword">this</span>._setMessageSource(domEventsSource)
+
+	Object.defineProperties(<span class="keyword">this</span>, {
+		_domEventsSource: { value: domEventsSource }
+	});
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-135">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-135">&#182;</a>
+              </div>
+              <p><a name="components-facets-frame"></a></p>
+<h3 id="frame-facet">frame facet</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> ComponentFacet = require(<span class="string">'../c_facet'</span>)
+	, facetsRegistry = require(<span class="string">'./cf_registry'</span>)
+
+	, Messenger = require(<span class="string">'../../messenger'</span>)
+	, iFrameMessageSource = require(<span class="string">'../c_message_sources/iframe_message_source'</span>)
+
+	, _ = require(<span class="string">'mol-proto'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-136">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-136">&#182;</a>
+              </div>
+              <p>data model connection facet</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> Frame = _.createSubclass(ComponentFacet, <span class="string">'Frame'</span>);
+
+_.extendProto(Frame, {
+	init: initFrameFacet</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-137">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-137">&#182;</a>
+              </div>
+              <p>_reattach: _reattachEventsOnElementChange</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>});
+
+
+facetsRegistry.add(Frame);
+
+module.exports = Frame;
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">initFrameFacet</span><span class="params">()</span> {</span>
+	ComponentFacet.prototype.init.apply(<span class="keyword">this</span>, arguments);
+	
+	<span class="keyword">var</span> iFrameMessageSourceProxy = {
+		post: <span class="string">'post'</span>
+	};
+	<span class="keyword">var</span> messageSource = <span class="keyword">new</span> iFrameMessageSource(<span class="keyword">this</span>, iFrameMessageSourceProxy);
+
+	<span class="keyword">this</span>._setMessageSource(messageSource);
+
+	Object.defineProperties(<span class="keyword">this</span>, {
+		_messageSource: { value: messageSource }
+	});
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-138">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-138">&#182;</a>
+              </div>
+              <p><a name="components-facets-item"></a></p>
+<h3 id="item-facet">item facet</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> ComponentFacet = require(<span class="string">'../c_facet'</span>)
+    , facetsRegistry = require(<span class="string">'./cf_registry'</span>)
+    , Model = require(<span class="string">'../../model'</span>)
+    , _ = require(<span class="string">'mol-proto'</span>)
+    , miloMail = require(<span class="string">'../../mail'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-139">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-139">&#182;</a>
+              </div>
+              <p>data model connection facet</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> ItemFacet = _.createSubclass(ComponentFacet, <span class="string">'Item'</span>);
+
+_.extendProto(ItemFacet, {
+    require: [<span class="string">'Container'</span>, <span class="string">'Dom'</span>, <span class="string">'Data'</span>]
+});
+
+facetsRegistry.add(ItemFacet);
+
+module.exports = ItemFacet;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-140">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-140">&#182;</a>
+              </div>
+              <p><a name="components-facets-list"></a></p>
+<h3 id="list-facet">list facet</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> ComponentFacet = require(<span class="string">'../c_facet'</span>)
+    , Component = require(<span class="string">'../c_class'</span>)
+    , facetsRegistry = require(<span class="string">'./cf_registry'</span>)
+    , Model = require(<span class="string">'../../model'</span>)
+    , _ = require(<span class="string">'mol-proto'</span>)
+    , miloMail = require(<span class="string">'../../mail'</span>)
+    , binder = require(<span class="string">'../../binder'</span>)
+    , ListError = require(<span class="string">'../../util/error'</span>).List
+    , logger = require(<span class="string">'../../util/logger'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-141">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-141">&#182;</a>
+              </div>
+              <p>data model connection facet</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> List = _.createSubclass(ComponentFacet, <span class="string">'List'</span>);
+
+_.extendProto(List, {
+    init: init,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-142">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-142">&#182;</a>
+              </div>
+              <p>update: update,</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    require: [<span class="string">'Container'</span>, <span class="string">'Dom'</span>, <span class="string">'Data'</span>],
+    _itemPreviousComponent: _itemPreviousComponent,
+
+    item: item,
+    count: count,
+    _setItem: _setItem,
+    contains: contains,
+    addItem: addItem,
+    removeItem: removeItem,
+    each: each</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-143">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-143">&#182;</a>
+              </div>
+              <p>_reattach: _reattachEventsOnElementChange</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>});
+
+facetsRegistry.add(List);
+
+module.exports = List;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-144">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-144">&#182;</a>
+              </div>
+              <p>initialize List facet</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">init</span><span class="params">()</span> {</span>
+    ComponentFacet.prototype.init.apply(<span class="keyword">this</span>, arguments);
+    <span class="keyword">var</span> model = <span class="keyword">new</span> Model()
+        , self = <span class="keyword">this</span>;
+
+    _.defineProperties(<span class="keyword">this</span>, {
+        _listItems: [],
+        _listItemsHash: {}
+    });
+    _.defineProperty(<span class="keyword">this</span>, <span class="string">'itemSample'</span>, <span class="literal">null</span>, <span class="literal">false</span>, <span class="literal">false</span>, <span class="literal">true</span>);
+
+    <span class="keyword">this</span>.owner.on(<span class="string">'childrenbound'</span>, onChildrenBound);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-145">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-145">&#182;</a>
+              </div>
+              <p>update list
+function update(eventType, data) {
+    var itemModels = data.newValue;</p>
+<pre><code>for (var i = 0; i &lt; itemModels.length; i++) {
+    var itemModel = itemModels[i];
+
+    // Copy component
+    var component = Component.copy(this.listItemType, true);</code></pre>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-146">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-146">&#182;</a>
+              </div>
+              <pre><code>    // Bind contents of component
+    var temp = binder(component.el)[component.name];
+
+    // Set new component scope to bind result
+    component.container.scope = temp.container.scope;</code></pre>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-147">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-147">&#182;</a>
+              </div>
+              <pre><code>    // Set list item data of component
+    component.listItem.setData(itemModel);
+
+    // Add it to the dom
+    this.owner.dom.append(component.el);
+
+    // Add to list items hash
+    this.listItems[component.name] = component;
+
+    // Show the list item component
+    component.dom.show();
+};</code></pre>
+<p>}</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">onChildrenBound</span><span class="params">()</span> {</span>
+    <span class="keyword">var</span> foundItem;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-148">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-148">&#182;</a>
+              </div>
+              <p>&quot;this&quot; is a component here, as a message dispatched on component</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.container.scope._each(<span class="function"><span class="keyword">function</span><span class="params">(childComp, name)</span> {</span>
+        <span class="keyword">if</span> (childComp.item) {
+            <span class="keyword">if</span> (foundItem) <span class="keyword">throw</span> <span class="keyword">new</span> ListError(<span class="string">'More than one child component has ListItem Facet'</span>)
+            foundItem = childComp;
+        }
+    });
+
+    <span class="keyword">if</span> (! foundItem) <span class="keyword">throw</span> <span class="keyword">new</span> ListError(<span class="string">'No child component has ListItem Facet'</span>);
+
+    <span class="keyword">this</span>.list.itemSample = foundItem;
+
+    <span class="keyword">this</span>.list.itemSample.dom.hide();
+    <span class="keyword">this</span>.list.itemSample.remove();
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">item</span><span class="params">(index)</span> {</span>
+    <span class="keyword">return</span> <span class="keyword">this</span>._listItems[index];
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">count</span><span class="params">()</span> {</span>
+    <span class="keyword">return</span> <span class="keyword">this</span>._listItems.length
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_setItem</span><span class="params">(index, component)</span> {</span>
+    <span class="keyword">this</span>._listItems[index] = component;
+    <span class="keyword">this</span>._listItemsHash[component.name] = component
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">contains</span><span class="params">(component)</span>{</span>
+    <span class="keyword">return</span> <span class="keyword">this</span>._listItemsHash[component.name] == component;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">addItem</span><span class="params">(index)</span> {</span>
+    index = index || <span class="keyword">this</span>.count();
+    <span class="keyword">if</span> (<span class="keyword">this</span>.item(index))
+        <span class="keyword">throw</span> ListError(<span class="string">'attempt to create item with ID of existing item'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-149">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-149">&#182;</a>
+              </div>
+              <p>Copy component</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> component = Component.copy(<span class="keyword">this</span>.itemSample, <span class="literal">true</span>);
+
+    <span class="keyword">var</span> tempComp = binder(component.el)[component.name]
+        , innerScope = tempComp.container.scope;
+    component.container.scope = innerScope;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-150">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-150">&#182;</a>
+              </div>
+              <p>Add it to the DOM</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>._itemPreviousComponent(index).dom.insertAfter(component.el)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-151">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-151">&#182;</a>
+              </div>
+              <p>Add to list items</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>._setItem(index, component);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-152">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-152">&#182;</a>
+              </div>
+              <p>Show the list item component</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    component.dom.show();
+
+    <span class="keyword">return</span> component;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">removeItem</span><span class="params">(index, doSplice)</span> {</span>
+    <span class="keyword">var</span> comp = <span class="keyword">this</span>.item(index);
+
+    <span class="keyword">if</span> (! comp)
+        logger.warn(<span class="string">'attempt to remove list item with id that does not exist'</span>);
+
+    <span class="keyword">this</span>._listItems[index] = <span class="literal">undefined</span>;
+    <span class="keyword">delete</span> <span class="keyword">this</span>._listItemsHash[comp.name];
+    comp.dom.remove();
+    comp.remove();
+
+    <span class="keyword">if</span> (doSplice)
+        <span class="keyword">this</span>._listItems.splice(index, <span class="number">1</span>);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_itemPreviousComponent</span><span class="params">(index)</span> {</span>
+    <span class="keyword">while</span> (index &gt;= <span class="number">0</span> &amp;&amp; ! <span class="keyword">this</span>._listItems[index])
+        index--;
+
+    <span class="keyword">return</span> index &gt;= <span class="number">0</span>
+                ? <span class="keyword">this</span>._listItems[index]
+                : <span class="keyword">this</span>.itemSample;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">each</span><span class="params">(callback, thisArg)</span> {</span>
+    <span class="keyword">this</span>._listItems.forEach(<span class="function"><span class="keyword">function</span><span class="params">(item)</span> {</span>
+        <span class="keyword">if</span> (item) callback.apply(<span class="keyword">this</span>, arguments);
+    }, thisArg || <span class="keyword">this</span>);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-153">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-153">&#182;</a>
+              </div>
+              <p><a name="components-facets-model"></a></p>
+<h3 id="model-facet">model facet</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> ComponentFacet = require(<span class="string">'../c_facet'</span>)
+	, facetsRegistry = require(<span class="string">'./cf_registry'</span>)
+	, Model = require(<span class="string">'../../model'</span>)
+
+	, _ = require(<span class="string">'mol-proto'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-154">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-154">&#182;</a>
+              </div>
+              <p>generic drag handler, should be overridden</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> ModelFacet = _.createSubclass(ComponentFacet, <span class="string">'Model'</span>);
+
+_.extendProto(ModelFacet, {
+	init: initModelFacet,
+	_createMessenger: _createMessenger</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-155">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-155">&#182;</a>
+              </div>
+              <p>_reattach: _reattachEventsOnElementChange</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>});
+
+facetsRegistry.add(ModelFacet);
+
+module.exports = ModelFacet;
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">initModelFacet</span><span class="params">()</span> {</span>
+	<span class="keyword">this</span>.m = <span class="keyword">new</span> Model(<span class="keyword">this</span>);
+
+	ComponentFacet.prototype.init.apply(<span class="keyword">this</span>, arguments);
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">_createMessenger</span><span class="params">()</span> {</span> <span class="comment">// Called by inherited init</span>
+	<span class="keyword">this</span>.m.proxyMessenger(<span class="keyword">this</span>); <span class="comment">// Creates messenger's methods directly on facet</span>
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-156">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-156">&#182;</a>
+              </div>
+              <p><a name="components-facets-split"></a></p>
+<h3 id="split-facet">split facet</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> ComponentFacet = require(<span class="string">'../c_facet'</span>)
+	, Component = require(<span class="string">'../c_class'</span>)
+	, facetsRegistry = require(<span class="string">'./cf_registry'</span>);
+
+<span class="keyword">var</span> Split = _.createSubclass(ComponentFacet, <span class="string">'Split'</span>);
+
+_.extendProto(Split, {
+	init: init,
+	start: start,
+	make: make,
+
+	isSplittable: isSplittable,
+	_makeSplit: _makeSplit,
+
+	require: [<span class="string">'Dom'</span>]</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-157">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-157">&#182;</a>
+              </div>
+              <p>_reattach: _reattachEventsOnElementChange</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>});
+
+facetsRegistry.add(Split);
+
+module.exports = Split;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-158">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-158">&#182;</a>
+              </div>
+              <p>init Split facet</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">init</span><span class="params">()</span> {</span>
+	ComponentFacet.prototype.init.apply(<span class="keyword">this</span>, arguments);
+
+	<span class="keyword">this</span>._splitSender = <span class="literal">undefined</span>;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-159">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-159">&#182;</a>
+              </div>
+              <p>start Split facet</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">start</span><span class="params">()</span> {</span>
+	ComponentFacet.prototype.start.apply(<span class="keyword">this</span>, arguments);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-160">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-160">&#182;</a>
+              </div>
+              <p>performs the split on selection</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">make</span><span class="params">()</span> {</span>
+	<span class="keyword">if</span> (! <span class="keyword">this</span>.isSplittable())
+		<span class="keyword">return</span>;
+
+	<span class="keyword">if</span> (! <span class="keyword">this</span>.owner.dom.hasTextBeforeSelection())
+		<span class="keyword">return</span>; <span class="comment">// should simply create empty component before</span>
+
+	<span class="keyword">return</span> <span class="keyword">this</span>._makeSplit();
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_makeSplit</span><span class="params">()</span> {</span>
+	<span class="keyword">var</span> thisComp = <span class="keyword">this</span>.owner;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-161">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-161">&#182;</a>
+              </div>
+              <p>clone itself</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">var</span> newComp = Component.copy(thisComp);
+	thisComp.dom.insertAfter(newComp.el);
+
+	splitElement(thisComp.el, newComp.el);
+
+	<span class="keyword">return</span> newComp;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">splitElement</span><span class="params">(thisEl, newEl)</span> {</span>
+	<span class="keyword">var</span> selection = window.getSelection()
+		, selNode = selection.anchorNode
+		, selFound = <span class="literal">false</span>;
+
+	Array.prototype.forEach.call(thisEl.childNodes, <span class="function"><span class="keyword">function</span><span class="params">(childNode)</span> {</span>
+		<span class="keyword">if</span> (childNode.contains(selNode) || childNode == selNode) {
+			<span class="keyword">var</span> comp = Component.getComponent(childNode);
+			<span class="keyword">if</span> (comp)
+				comp.split._makeSplit();
+			<span class="keyword">else</span> {
+				<span class="keyword">if</span> (childNode.nodeType == Node.TEXT_NODE) {
+					<span class="keyword">var</span> selPos = selection.anchorOffset;
+					<span class="keyword">var</span> newText = childNode.splitText(selPos);
+					newEl.appendChild(newText);
+				} <span class="keyword">else</span> {
+					<span class="keyword">var</span> newChildEl = childNode.cloneNode(<span class="literal">false</span>);
+					newEl.appendChild(newChildEl);
+					splitElement(childNode, newChildEl);
+				}
+			}
+
+			selFound = <span class="literal">true</span>;
+		} <span class="keyword">else</span> <span class="keyword">if</span> (selFound)
+			newEl.appendChild(childNode);
+	});
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">isSplittable</span><span class="params">()</span> {</span>
+	<span class="keyword">var</span> selection = window.getSelection()
+		, el = selection.anchorNode;
+
+	<span class="keyword">if</span> (! <span class="keyword">this</span>.owner.el.contains(el)) {
+		logger.warn(<span class="string">'selection is outside this component'</span>);
+		<span class="keyword">return</span> <span class="literal">false</span>;
+	}
+
+	<span class="keyword">while</span> (el != <span class="keyword">this</span>.owner.el) {
+		<span class="keyword">var</span> comp = Component.getComponent(el);
+		<span class="keyword">if</span> (comp &amp;&amp; ! comp.split)
+			<span class="keyword">return</span> <span class="literal">false</span>;
+		el = el.parentNode;
+	}
+
+	<span class="keyword">return</span> <span class="literal">true</span>;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-162">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-162">&#182;</a>
+              </div>
+              <p><a name="components-facets-template"></a></p>
+<h3 id="template-facet">template facet</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> ComponentFacet = require(<span class="string">'../c_facet'</span>)
+	, facetsRegistry = require(<span class="string">'./cf_registry'</span>)	
+	, _ = require(<span class="string">'mol-proto'</span>)
+	, check = require(<span class="string">'../../util/check'</span>)
+	, Match = check.Match
+	, binder = require(<span class="string">'../../binder'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-163">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-163">&#182;</a>
+              </div>
+              <p>data model connection facet</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> Template = _.createSubclass(ComponentFacet, <span class="string">'Template'</span>);
+
+_.extendProto(Template, {
+	init: initTemplateFacet,
+	set: setTemplate,
+	render: renderTemplate,
+	binder: bindInnerComponents,
+	require: [<span class="string">'Container'</span>]</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-164">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-164">&#182;</a>
+              </div>
+              <p>_reattach: _reattachEventsOnElementChange</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>});
+
+facetsRegistry.add(Template);
+
+module.exports = Template;
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">initTemplateFacet</span><span class="params">()</span> {</span>
+	ComponentFacet.prototype.init.apply(<span class="keyword">this</span>, arguments);
+
+	<span class="keyword">this</span>._templateStr = <span class="keyword">this</span>.config.template;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">setTemplate</span><span class="params">(templateStr, compile)</span> {</span>
+	check(templateStr, String);
+	check(compile, Match.Optional(Function));
+
+	<span class="keyword">this</span>._templateStr = templateStr;
+	<span class="keyword">if</span> (compile)
+		<span class="keyword">this</span>._compile = compile
+
+	compile = compile || <span class="keyword">this</span>._compile; <span class="comment">// || milo.config.template.compile;</span>
+
+	<span class="keyword">if</span> (compile)
+		<span class="keyword">this</span>._template = compile(templateStr);
+
+	<span class="keyword">return</span> <span class="keyword">this</span>;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">renderTemplate</span><span class="params">(data)</span> {</span> <span class="comment">// we need data only if use templating engine</span>
+	<span class="keyword">this</span>.owner.el.innerHTML = <span class="keyword">this</span>._template
+								? <span class="keyword">this</span>._template(data)
+								: <span class="keyword">this</span>._templateStr;
+
+	<span class="keyword">return</span> <span class="keyword">this</span>;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">bindInnerComponents</span><span class="params">()</span> {</span>
+	<span class="keyword">var</span> thisScope = binder(<span class="keyword">this</span>.owner.el);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-165">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-165">&#182;</a>
+              </div>
+              <p>TODO should be changed to reconcillation of existing children with new</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">this</span>.owner.container.scope = thisScope[<span class="keyword">this</span>.owner.name].container.scope;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-166">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-166">&#182;</a>
+              </div>
+              <p><a name="components"></a></p>
+<h2 id="component-class">component class</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-167">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-167">&#182;</a>
               </div>
               <p>Basic component class.</p>
 <p>It&#39;s constructor accepts DOM element and component name as paramenters.</p>
@@ -2055,11 +4359,11 @@ Component.createComponentClass = createComponentClass;
         </li>
         
         
-        <li id="section-79">
+        <li id="section-168">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-79">&#182;</a>
+                <a class="pilcrow" href="#section-168">&#182;</a>
               </div>
               <p>class methods</p>
 
@@ -2076,11 +4380,11 @@ Component.createComponentClass = createComponentClass;
         </li>
         
         
-        <li id="section-80">
+        <li id="section-169">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-80">&#182;</a>
+                <a class="pilcrow" href="#section-169">&#182;</a>
               </div>
               <p>instance methods</p>
 
@@ -2096,11 +4400,11 @@ Component.createComponentClass = createComponentClass;
         </li>
         
         
-        <li id="section-81">
+        <li id="section-170">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-81">&#182;</a>
+                <a class="pilcrow" href="#section-170">&#182;</a>
               </div>
               <p>class methods</p>
 <p>create component from ComponentInfo</p>
@@ -2122,11 +4426,11 @@ Component.createComponentClass = createComponentClass;
         </li>
         
         
-        <li id="section-82">
+        <li id="section-171">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-82">&#182;</a>
+                <a class="pilcrow" href="#section-171">&#182;</a>
               </div>
               <p>creates a new instance with the same state but different element</p>
 
@@ -2163,11 +4467,11 @@ Component.createComponentClass = createComponentClass;
         </li>
         
         
-        <li id="section-83">
+        <li id="section-172">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-83">&#182;</a>
+                <a class="pilcrow" href="#section-172">&#182;</a>
               </div>
               <p>checks if element is bound to a component</p>
 
@@ -2180,11 +4484,11 @@ Component.createComponentClass = createComponentClass;
         </li>
         
         
-        <li id="section-84">
+        <li id="section-173">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-84">&#182;</a>
+                <a class="pilcrow" href="#section-173">&#182;</a>
               </div>
               <p>gets the element bound the component</p>
 
@@ -2207,11 +4511,11 @@ Component.createComponentClass = createComponentClass;
         </li>
         
         
-        <li id="section-85">
+        <li id="section-174">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-85">&#182;</a>
+                <a class="pilcrow" href="#section-174">&#182;</a>
               </div>
               <p>Where the current node is a component it&#39;s component should be returned</p>
 
@@ -2224,11 +4528,11 @@ Component.createComponentClass = createComponentClass;
         </li>
         
         
-        <li id="section-86">
+        <li id="section-175">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-86">&#182;</a>
+                <a class="pilcrow" href="#section-175">&#182;</a>
               </div>
               <p>Where there is no parent node, this function will return null</p>
 
@@ -2241,11 +4545,11 @@ Component.createComponentClass = createComponentClass;
         </li>
         
         
-        <li id="section-87">
+        <li id="section-176">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-87">&#182;</a>
+                <a class="pilcrow" href="#section-176">&#182;</a>
               </div>
               <p>The parent node is checked recursively</p>
 
@@ -2280,11 +4584,11 @@ Component.createComponentClass = createComponentClass;
         </li>
         
         
-        <li id="section-88">
+        <li id="section-177">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-88">&#182;</a>
+                <a class="pilcrow" href="#section-177">&#182;</a>
               </div>
               <p>instance methods</p>
 <p>initializes component
@@ -2312,11 +4616,11 @@ Component.prototype.init.apply(this, arguments)</p>
         </li>
         
         
-        <li id="section-89">
+        <li id="section-178">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-89">&#182;</a>
+                <a class="pilcrow" href="#section-178">&#182;</a>
               </div>
               <p>start all facets</p>
 
@@ -2345,11 +4649,11 @@ Component.prototype.init.apply(this, arguments)</p>
         </li>
         
         
-        <li id="section-90">
+        <li id="section-179">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-90">&#182;</a>
+                <a class="pilcrow" href="#section-179">&#182;</a>
               </div>
               <p>start facet</p>
 
@@ -2362,11 +4666,11 @@ Component.prototype.init.apply(this, arguments)</p>
         </li>
         
         
-        <li id="section-91">
+        <li id="section-180">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-91">&#182;</a>
+                <a class="pilcrow" href="#section-180">&#182;</a>
               </div>
               <p>envoke given method with optional parameters on all facets</p>
 
@@ -2384,11 +4688,11 @@ Component.prototype.init.apply(this, arguments)</p>
         </li>
         
         
-        <li id="section-92">
+        <li id="section-181">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-92">&#182;</a>
+                <a class="pilcrow" href="#section-181">&#182;</a>
               </div>
               <p>remove component from it&#39;s scope</p>
 
@@ -2402,11 +4706,11 @@ Component.prototype.init.apply(this, arguments)</p>
         </li>
         
         
-        <li id="section-93">
+        <li id="section-182">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-93">&#182;</a>
+                <a class="pilcrow" href="#section-182">&#182;</a>
               </div>
               <p><a name="components-facet"></a></p>
 <h3 id="component-facet-class">component facet class</h3>
@@ -2489,11 +4793,11 @@ _.extendProto(ComponentFacet, {
         </li>
         
         
-        <li id="section-94">
+        <li id="section-183">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-94">&#182;</a>
+                <a class="pilcrow" href="#section-183">&#182;</a>
               </div>
               <p><a name="components-info"></a></p>
 <h3 id="component-info-class">component info class</h3>
@@ -2512,11 +4816,11 @@ module.exports = ComponentInfo;</pre></div></div>
         </li>
         
         
-        <li id="section-95">
+        <li id="section-184">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-95">&#182;</a>
+                <a class="pilcrow" href="#section-184">&#182;</a>
               </div>
               <p>Component information class</p>
 
@@ -2571,11 +4875,11 @@ module.exports = ComponentInfo;</pre></div></div>
         </li>
         
         
-        <li id="section-96">
+        <li id="section-185">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-96">&#182;</a>
+                <a class="pilcrow" href="#section-185">&#182;</a>
               </div>
               <p><a name="components-registry"></a></p>
 <h3 id="component-registry-class">component registry class</h3>
@@ -2597,11 +4901,11 @@ module.exports = componentsRegistry;</pre></div></div>
         </li>
         
         
-        <li id="section-97">
+        <li id="section-186">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-97">&#182;</a>
+                <a class="pilcrow" href="#section-186">&#182;</a>
               </div>
               <p><a name="scope"></a></p>
 <h2 id="scope-class">scope class</h2>
@@ -2611,11 +4915,11 @@ module.exports = componentsRegistry;</pre></div></div>
         </li>
         
         
-        <li id="section-98">
+        <li id="section-187">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-98">&#182;</a>
+                <a class="pilcrow" href="#section-187">&#182;</a>
               </div>
               
             </div>
@@ -2630,11 +4934,11 @@ module.exports = componentsRegistry;</pre></div></div>
         </li>
         
         
-        <li id="section-99">
+        <li id="section-188">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-99">&#182;</a>
+                <a class="pilcrow" href="#section-188">&#182;</a>
               </div>
               <p>Scope class</p>
 
@@ -2663,11 +4967,11 @@ module.exports = Scope;
         </li>
         
         
-        <li id="section-100">
+        <li id="section-189">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-100">&#182;</a>
+                <a class="pilcrow" href="#section-189">&#182;</a>
               </div>
               <p>adds object to scope throwing if name is notyunique</p>
 
@@ -2685,11 +4989,11 @@ module.exports = Scope;
         </li>
         
         
-        <li id="section-101">
+        <li id="section-190">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-101">&#182;</a>
+                <a class="pilcrow" href="#section-190">&#182;</a>
               </div>
               <p>copies all objects from one scope to another,
 throwing if some object is not unique</p>
@@ -2708,11 +5012,11 @@ throwing if some object is not unique</p>
         </li>
         
         
-        <li id="section-102">
+        <li id="section-191">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-102">&#182;</a>
+                <a class="pilcrow" href="#section-191">&#182;</a>
               </div>
               <p>TODO</p>
 
@@ -2726,11 +5030,11 @@ throwing if some object is not unique</p>
         </li>
         
         
-        <li id="section-103">
+        <li id="section-192">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-103">&#182;</a>
+                <a class="pilcrow" href="#section-192">&#182;</a>
               </div>
               <p>TODO</p>
 
@@ -2752,11 +5056,11 @@ throwing if some object is not unique</p>
         </li>
         
         
-        <li id="section-104">
+        <li id="section-193">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-104">&#182;</a>
+                <a class="pilcrow" href="#section-193">&#182;</a>
               </div>
               <p>returns the number of objects in scope</p>
 
@@ -2769,11 +5073,924 @@ throwing if some object is not unique</p>
         </li>
         
         
-        <li id="section-105">
+        <li id="section-194">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-105">&#182;</a>
+                <a class="pilcrow" href="#section-194">&#182;</a>
+              </div>
+              <p><a name="components-source-data"></a></p>
+<h3 id="component-data-source">component data source</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> DOMEventsSource = require(<span class="string">'./dom_events_source'</span>)
+	, Component = require(<span class="string">'../c_class'</span>)
+	, ComponentDataSourceError = require(<span class="string">'../../util/error'</span>).ComponentDataSource
+	, _ = require(<span class="string">'mol-proto'</span>)
+	, check = require(<span class="string">'../../util/check'</span>)
+	, Match = check.Match;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-195">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-195">&#182;</a>
+              </div>
+              <p>class to handle subscribtions to changes in DOM for UI (maybe also content editable) elements</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> ComponentDataSource = _.createSubclass(DOMEventsSource, <span class="string">'ComponentDataSource'</span>, <span class="literal">true</span>);
+
+
+_.extendProto(ComponentDataSource, {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-196">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-196">&#182;</a>
+              </div>
+              <p>implementing MessageSource interface</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	init: initComponentDataSource,
+	translateToSourceMessage: translateToDomEvent,
+ 	addSourceListener: addDomEventListener,
+ 	removeSourceListener: removeDomEventListener,
+ 	filterSourceMessage: filterDataMessage,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-197">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-197">&#182;</a>
+              </div>
+              <p>class specific methods
+dom: implemented in DOMEventsSource</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre> 	value: getDomElementDataValue,
+ 	handleEvent: handleEvent,  <span class="comment">// event dispatcher - as defined by Event DOM API</span>
+ 	trigger: triggerDataMessage <span class="comment">// redefines method of superclass DOMEventsSource</span>
+});
+
+module.exports = ComponentDataSource;
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">initComponentDataSource</span><span class="params">()</span> {</span>
+	DOMEventsSource.prototype.init.apply(<span class="keyword">this</span>, arguments);
+
+	<span class="keyword">this</span>.value(); <span class="comment">// stores current component data value in this._value</span>
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-198">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-198">&#182;</a>
+              </div>
+              <p>TODO: should return value dependent on element tag</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">getDomElementDataValue</span><span class="params">()</span> {</span> <span class="comment">// value method</span>
+	<span class="keyword">var</span> newValue = <span class="keyword">this</span>.component.el.value;
+
+	Object.defineProperty(<span class="keyword">this</span>, <span class="string">'_value'</span>, {
+		configurable: <span class="literal">true</span>,
+		value: newValue
+	});
+
+	<span class="keyword">return</span> newValue;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-199">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-199">&#182;</a>
+              </div>
+              <p>TODO: this function should return relevant DOM event dependent on element tag
+Can also implement beforedatachanged event to allow preventing the change</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">translateToDomEvent</span><span class="params">(message)</span> {</span>
+	<span class="keyword">if</span> (message == <span class="string">'datachanged'</span>)
+		<span class="keyword">return</span> <span class="string">'input'</span>;
+	<span class="keyword">else</span>
+		<span class="keyword">throw</span> <span class="keyword">new</span> ComponentDataSourceError(<span class="string">'unknown component data event'</span>);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">addDomEventListener</span><span class="params">(eventType)</span> {</span>
+	<span class="keyword">this</span>.dom().addEventListener(eventType, <span class="keyword">this</span>, <span class="literal">false</span>); <span class="comment">// no capturing</span>
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">removeDomEventListener</span><span class="params">(eventType)</span> {</span>
+	<span class="keyword">this</span>.dom().removeEventListener(eventType, <span class="keyword">this</span>, <span class="literal">false</span>); <span class="comment">// no capturing</span>
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">filterDataMessage</span><span class="params">(eventType, message, data)</span> {</span>
+	<span class="keyword">return</span> data.newValue != data.oldValue;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-200">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-200">&#182;</a>
+              </div>
+              <p>event dispatcher - as defined by Event DOM API</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">handleEvent</span><span class="params">(event)</span> {</span>
+	<span class="keyword">var</span> oldValue = <span class="keyword">this</span>._value;
+
+	<span class="keyword">this</span>.dispatchMessage(event.type, {
+		oldValue: oldValue,
+		newValue: <span class="keyword">this</span>.value()
+	});
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">triggerDataMessage</span><span class="params">(message, data)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-201">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-201">&#182;</a>
+              </div>
+              <p>TODO - opposite translation + event trigger </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-202">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-202">&#182;</a>
+              </div>
+              <p><a name="components-source-dom"></a></p>
+<h3 id="component-dom-events-source">component dom events source</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> MessageSource = require(<span class="string">'../../messenger/message_source'</span>)
+	, Component = require(<span class="string">'../c_class'</span>)
+	, domEventsConstructors = require(<span class="string">'./dom_events_constructors'</span>) <span class="comment">// TODO merge with DOMEventSource ??</span>
+	, _ = require(<span class="string">'mol-proto'</span>)
+	, check = require(<span class="string">'../../util/check'</span>)
+	, Match = check.Match;
+
+<span class="keyword">var</span> DOMEventsSource = _.createSubclass(MessageSource, <span class="string">'DOMMessageSource'</span>, <span class="literal">true</span>);
+
+
+_.extendProto(DOMEventsSource, {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-203">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-203">&#182;</a>
+              </div>
+              <p>implementing MessageSource interface</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	init: init,
+	translateToSourceMessage: translateToSourceMessage,
+ 	addSourceListener: addSourceListener,
+ 	removeSourceListener: removeSourceListener,
+ 	filterSourceMessage: filterCapturedDomEvent,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-204">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-204">&#182;</a>
+              </div>
+              <p>class specific methods</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre> 	dom: dom,
+ 	handleEvent: handleEvent,  <span class="comment">// event dispatcher - as defined by Event DOM API</span>
+ 	trigger: triggerDomEvent
+});
+
+module.exports = DOMEventsSource;
+
+
+<span class="keyword">var</span> useCapturePattern = <span class="regexp">/__capture$/</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-205">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-205">&#182;</a>
+              </div>
+              <p>init DOM event source</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">init</span><span class="params">(hostObject, proxyMethods, component)</span> {</span>
+	check(component, Component);
+	MessageSource.prototype.init.apply(<span class="keyword">this</span>, arguments);
+
+	<span class="keyword">this</span>.component = component;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-206">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-206">&#182;</a>
+              </div>
+              <p>this.messenger is set by Messenger class</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-207">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-207">&#182;</a>
+              </div>
+              <p>get DOM element of component</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">dom</span><span class="params">()</span> {</span>
+	<span class="keyword">return</span> <span class="keyword">this</span>.component.el;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-208">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-208">&#182;</a>
+              </div>
+              <p>translate to DOM event</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">translateToSourceMessage</span><span class="params">(message)</span> {</span>
+	<span class="keyword">if</span> (useCapturePattern.test(message))
+		message = message.replace(useCapturePattern, <span class="string">''</span>);
+	<span class="keyword">return</span> message;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-209">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-209">&#182;</a>
+              </div>
+              <p>add listener to DOM event</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">addSourceListener</span><span class="params">(eventType)</span> {</span>
+	<span class="keyword">this</span>.dom().addEventListener(eventType, <span class="keyword">this</span>, <span class="literal">false</span>);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-210">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-210">&#182;</a>
+              </div>
+              <p>remove listener from DOM event</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">removeSourceListener</span><span class="params">(eventType)</span> {</span>
+	<span class="keyword">this</span>.dom().removeEventListener(eventType, <span class="keyword">this</span>, <span class="literal">false</span>);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">filterCapturedDomEvent</span><span class="params">(eventType, message, event)</span> {</span>
+	<span class="keyword">var</span> isCapturePhase;
+	<span class="keyword">if</span> (<span class="keyword">typeof</span> window != <span class="string">'undefined'</span>)
+		isCapturePhase = event.eventPhase == window.Event.CAPTURING_PHASE;
+
+	<span class="keyword">return</span> (! isCapturePhase || (isCapturePhase &amp;&amp; useCapturePattern.test(message)));
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-211">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-211">&#182;</a>
+              </div>
+              <p>event dispatcher - as defined by Event DOM API</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">handleEvent</span><span class="params">(event)</span> {</span>
+	<span class="keyword">this</span>.dispatchMessage(event.type, event);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-212">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-212">&#182;</a>
+              </div>
+              <p>TODO make work with messages (with _capture)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">triggerDomEvent</span><span class="params">(eventType, properties)</span> {</span>
+	check(eventType, String);
+	check(properties, Match.Optional(Object));
+
+	<span class="keyword">var</span> EventConstructor = domEventsConstructors[eventType];
+
+	<span class="keyword">if</span> (<span class="keyword">typeof</span> eventConstructor != <span class="string">'function'</span>)
+		<span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">'unsupported event type'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-213">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-213">&#182;</a>
+              </div>
+              <p>check if it is correct</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">if</span> (<span class="keyword">typeof</span> properties != <span class="string">'undefined'</span>)
+		properties.type = eventType;
+
+	<span class="keyword">var</span> domEvent = EventConstructor(eventType, properties);
+
+	<span class="keyword">var</span> notCancelled = <span class="keyword">this</span>.dom().dispatchEvent(domEvent);
+
+	<span class="keyword">return</span> notCancelled;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-214">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-214">&#182;</a>
+              </div>
+              <p><a name="components-dom-constructors"></a></p>
+<h3 id="dom-events-constructors">dom events constructors</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> _ = require(<span class="string">'mol-proto'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-215">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-215">&#182;</a>
+              </div>
+              <p><a href="https://developer.mozilla.org/en-US/docs/Web/Reference/Events">https://developer.mozilla.org/en-US/docs/Web/Reference/Events</a></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> eventTypes = {
+	ClipboardEvent: [<span class="string">'copy'</span>, <span class="string">'cut'</span>, <span class="string">'paste'</span>, <span class="string">'beforecopy'</span>, <span class="string">'beforecut'</span>, <span class="string">'beforepaste'</span>],
+	Event: [<span class="string">'input'</span>, <span class="string">'readystatechange'</span>],
+	FocusEvent: [<span class="string">'focus'</span>, <span class="string">'blur'</span>, <span class="string">'focusin'</span>, <span class="string">'focusout'</span>],
+	KeyboardEvent: [<span class="string">'keydown'</span>, <span class="string">'keypress'</span>,  <span class="string">'keyup'</span>],
+	MouseEvent: [<span class="string">'click'</span>, <span class="string">'contextmenu'</span>, <span class="string">'dblclick'</span>, <span class="string">'mousedown'</span>, <span class="string">'mouseup'</span>,
+				 <span class="string">'mouseenter'</span>, <span class="string">'mouseleave'</span>, <span class="string">'mousemove'</span>, <span class="string">'mouseout'</span>, <span class="string">'mouseover'</span>,
+				 <span class="string">'show'</span> <span class="comment">/* context menu */</span>],
+	TouchEvent: [<span class="string">'touchstart'</span>, <span class="string">'touchend'</span>, <span class="string">'touchmove'</span>, <span class="string">'touchenter'</span>, <span class="string">'touchleave'</span>, <span class="string">'touchcancel'</span>],
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-216">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-216">&#182;</a>
+              </div>
+              <p>mock window and event constructors for testing</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">if</span> (<span class="keyword">typeof</span> window != <span class="string">'undefined'</span>)
+	<span class="keyword">var</span> global = window;
+<span class="keyword">else</span> {
+	global = {};
+	_.eachKey(eventTypes, <span class="function"><span class="keyword">function</span><span class="params">(eTypes, eventConstructorName)</span> {</span>
+		<span class="keyword">var</span> eventsConstructor;
+		eval(
+			<span class="string">'eventsConstructor = function '</span> + eventConstructorName + <span class="string">'(type, properties) { \
+				this.type = type; \
+				_.extend(this, properties); \
+			};'</span>
+		);
+		global[eventConstructorName] = eventsConstructor;
+	});
+}
+
+
+<span class="keyword">var</span> domEventsConstructors = {};
+
+_.eachKey(eventTypes, <span class="function"><span class="keyword">function</span><span class="params">(eTypes, eventConstructorName)</span> {</span>
+	eTypes.forEach(<span class="function"><span class="keyword">function</span><span class="params">(type)</span> {</span>
+		<span class="keyword">if</span> (Object.hasOwnProperty(domEventsConstructors, type))
+			<span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">'duplicate event type '</span> + type);
+
+		domEventsConstructors[type] = global[eventConstructorName];
+	});
+});
+
+
+module.exports = domEventsConstructors;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-217">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-217">&#182;</a>
+              </div>
+              <p><a name="components-source-editable"></a></p>
+<h3 id="component-editable-events-source">component editable events source</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> DOMEventsSource = require(<span class="string">'./dom_events_source'</span>)
+	, Component = require(<span class="string">'../c_class'</span>)
+	, EditableEventsSourceError = require(<span class="string">'../../util/error'</span>).EditableEventsSource
+	, _ = require(<span class="string">'mol-proto'</span>)
+	, check = require(<span class="string">'../../util/check'</span>)
+	, Match = check.Match;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-218">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-218">&#182;</a>
+              </div>
+              <p>class to handle subscribtions to changes in DOM for UI (maybe also content editable) elements</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> EditableEventsSource = _.createSubclass(DOMEventsSource, <span class="string">'EditableEventsSource'</span>, <span class="literal">true</span>);
+
+
+_.extendProto(EditableEventsSource, {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-219">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-219">&#182;</a>
+              </div>
+              <p>implementing MessageSource interface</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	init: initEditableEventsSource,
+	translateToSourceMessage: translateToDomEvent,
+ 	addSourceListener: addDomEventListener,
+ 	removeSourceListener: removeDomEventListener,
+ 	filterSourceMessage: filterEditableMessage,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-220">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-220">&#182;</a>
+              </div>
+              <p>class specific methods
+dom: implemented in DOMEventsSource</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre> 	handleEvent: handleEvent,  <span class="comment">// event dispatcher - as defined by Event DOM API</span>
+ 	trigger: triggerEditableEvent <span class="comment">// redefines method of superclass DOMEventsSource</span>
+});
+
+module.exports = EditableEventsSource;
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">initEditableEventsSource</span><span class="params">(hostObject, proxyMethods, component, options)</span> {</span>
+	DOMEventsSource.prototype.init.apply(<span class="keyword">this</span>, arguments);
+	<span class="keyword">this</span>.options = options;
+}
+
+
+<span class="keyword">var</span> editableEventsMap = {
+	<span class="string">'enterkey'</span>: <span class="string">'keypress'</span>,
+	<span class="string">'editstart'</span>: <span class="string">'mousedown'</span>,
+	<span class="string">'editend'</span>: <span class="string">'blur'</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-221">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-221">&#182;</a>
+              </div>
+              <p>move events</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="string">'nexteditable'</span>: <span class="string">'keydown'</span>,
+	<span class="string">'previouseditable'</span>: <span class="string">'keydown'</span>,	
+	<span class="string">'adjacenteditable'</span>: <span class="string">'keydown'</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-222">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-222">&#182;</a>
+              </div>
+              <p>merge events</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="string">'nextmerge'</span>: <span class="string">'keydown'</span>,
+	<span class="string">'previousmerge'</span>: <span class="string">'keydown'</span>,
+	<span class="string">'adjacentmerge'</span>: <span class="string">'keydown'</span>,
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-223">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-223">&#182;</a>
+              </div>
+              <p>TODO: this function should return relevant DOM event dependent on element tag
+Can also implement beforedatachanged event to allow preventing the change</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">translateToDomEvent</span><span class="params">(message)</span> {</span>
+	<span class="keyword">if</span> (editableEventsMap.hasOwnProperty(message))
+		<span class="keyword">return</span> editableEventsMap[message];
+	<span class="keyword">else</span>
+		<span class="keyword">return</span> DOMEventsSource.prototype.translateToSourceMessage.call(<span class="keyword">this</span>, message);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">addDomEventListener</span><span class="params">(eventType)</span> {</span>
+	<span class="keyword">this</span>.dom().addEventListener(eventType, <span class="keyword">this</span>, <span class="literal">false</span>); <span class="comment">// no capturing</span>
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">removeDomEventListener</span><span class="params">(eventType)</span> {</span>
+	<span class="keyword">this</span>.dom().removeEventListener(eventType, <span class="keyword">this</span>, <span class="literal">false</span>); <span class="comment">// no capturing</span>
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">filterEditableMessage</span><span class="params">(eventType, message, data)</span> {</span>
+	<span class="keyword">var</span> self = <span class="keyword">this</span>;
+
+	<span class="keyword">switch</span> (message) {
+		<span class="keyword">case</span> <span class="string">'enterkey'</span>:
+		 	<span class="keyword">return</span> data.keyCode == <span class="number">13</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-224">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-224">&#182;</a>
+              </div>
+              <p>move to adjacent editable events</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		<span class="keyword">case</span> <span class="string">'previouseditable'</span>:
+			<span class="keyword">return</span> <span class="keyword">this</span>.options.moveToAdjacentEditable
+				&amp;&amp; movedToPrevious(data);
+		<span class="keyword">case</span> <span class="string">'nexteditable'</span>:
+			<span class="keyword">return</span> <span class="keyword">this</span>.options.moveToAdjacentEditable
+				&amp;&amp; movedToNext(data);
+		<span class="keyword">case</span> <span class="string">'adjacenteditable'</span>:
+			<span class="keyword">return</span> <span class="keyword">this</span>.options.moveToAdjacentEditable
+				&amp;&amp; (movedToPrevious(data) || movedToNext(data));</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-225">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-225">&#182;</a>
+              </div>
+              <p>merge adjacent editable events</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		<span class="keyword">case</span> <span class="string">'previousmerge'</span>: <span class="comment">// merge current one into previous on backspace key</span>
+			<span class="keyword">return</span> <span class="keyword">this</span>.options.allowMerge &amp;&amp; mergeToPrevious(data)
+		<span class="keyword">case</span> <span class="string">'nextmerge'</span>: <span class="comment">// merge current one into previous on backspace key</span>
+			<span class="keyword">return</span> <span class="keyword">this</span>.options.allowMerge &amp;&amp; mergeToNext(data)
+		<span class="keyword">case</span> <span class="string">'adjacentmerge'</span>:
+			<span class="keyword">return</span> <span class="keyword">this</span>.options.allowMerge
+				&amp;&amp; (mergeToPrevious(data) || mergeToNext(data));
+
+		<span class="keyword">case</span> <span class="string">'editstart'</span>:
+		<span class="keyword">case</span> <span class="string">'editend'</span>:
+			<span class="keyword">return</span> <span class="keyword">this</span>.options.editableOnClick;
+		<span class="keyword">default</span>:
+			<span class="keyword">return</span> <span class="literal">true</span>;
+	}
+
+	<span class="function"><span class="keyword">function</span> <span class="title">movedToPrevious</span><span class="params">(data)</span> {</span>
+		<span class="keyword">return</span> (data.keyCode == <span class="number">37</span> || data.keyCode == <span class="number">38</span>) <span class="comment">// up and left</span>
+			&amp;&amp; noTextBeforeSelection(self.component);
+	}
+
+	<span class="function"><span class="keyword">function</span> <span class="title">movedToNext</span><span class="params">(data)</span> {</span>
+		<span class="keyword">return</span> (data.keyCode == <span class="number">39</span> || data.keyCode == <span class="number">40</span>) <span class="comment">// down and right</span>
+			&amp;&amp; noTextAfterSelection(self.component);
+	} 
+
+	<span class="function"><span class="keyword">function</span> <span class="title">mergeToPrevious</span><span class="params">(data)</span> {</span>
+		<span class="keyword">return</span> data.keyCode == <span class="number">8</span> <span class="comment">// backspace</span>
+			&amp;&amp; noTextBeforeSelection(self.component);
+	}
+
+	<span class="function"><span class="keyword">function</span> <span class="title">mergeToNext</span><span class="params">(data)</span> {</span>
+		<span class="keyword">return</span> data.keyCode == <span class="number">46</span> <span class="comment">// delete</span>
+			&amp;&amp; noTextAfterSelection(self.component);
+	}
+
+	<span class="function"><span class="keyword">function</span> <span class="title">noTextBeforeSelection</span><span class="params">(component)</span> {</span>
+		<span class="keyword">return</span> ! component.dom.hasTextBeforeSelection();
+	};
+
+	<span class="function"><span class="keyword">function</span> <span class="title">noTextAfterSelection</span><span class="params">(component)</span> {</span>
+		<span class="keyword">var</span> sel = window.getSelection();
+		<span class="keyword">if</span> (sel.anchorOffset == sel.anchorNode.length) {
+			<span class="keyword">if</span> (sel.anchorNode.nextSibling) {
+				<span class="keyword">return</span> <span class="literal">false</span>;
+			} <span class="keyword">else</span> {
+				<span class="keyword">return</span> <span class="literal">true</span>;
+			}
+		}
+	}
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-226">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-226">&#182;</a>
+              </div>
+              <p>event dispatcher - as defined by Event DOM API</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">handleEvent</span><span class="params">(event)</span> {</span>
+	<span class="keyword">this</span>.dispatchMessage(event.type, event);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">triggerEditableEvent</span><span class="params">(message, data)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-227">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-227">&#182;</a>
+              </div>
+              <p>TODO - opposite translation + event trigger </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-228">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-228">&#182;</a>
+              </div>
+              <p><a name="components-source-iframe"></a></p>
+<h3 id="component-iframe-source">component iframe source</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> MessageSource = require(<span class="string">'../../messenger/message_source'</span>)
+	, _ = require(<span class="string">'mol-proto'</span>)
+	, check = require(<span class="string">'../../util/check'</span>)
+	, Match = check.Match;
+
+<span class="keyword">var</span> iFrameMessageSource = _.createSubclass(MessageSource, <span class="string">'iFrameMessageSource'</span>, <span class="literal">true</span>);
+
+
+_.extendProto(iFrameMessageSource, {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-229">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-229">&#182;</a>
+              </div>
+              <p>implementing MessageSource interface</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	init: initIFrameMessageSource,
+	translateToSourceMessage: translateToIFrameMessage,
+ 	addSourceListener: addIFrameMessageListener,
+ 	removeSourceListener: removeIFrameMessageListener,
+ 	filterSourceMessage: filterRecievedIFrameMessage,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-230">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-230">&#182;</a>
+              </div>
+              <p>class specific methods</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre> 	post: postToOtherWindow,
+ 	handleEvent: handleEvent  <span class="comment">// event dispatcher - as defined by Event DOM API</span>
+});
+
+module.exports = iFrameMessageSource;
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">initIFrameMessageSource</span><span class="params">(hostObject, proxyMethods)</span> {</span>
+	check(hostObject, Object);
+	MessageSource.prototype.init.apply(<span class="keyword">this</span>, arguments);
+
+	<span class="keyword">if</span> (hostObject.owner.el.nodeName == <span class="string">'IFRAME'</span>)
+		<span class="keyword">this</span>._postTo = hostObject.owner.el.contentWindow;
+	<span class="keyword">else</span>
+		<span class="keyword">this</span>._postTo = window.parent;
+
+	<span class="keyword">this</span>._listenTo = window;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">translateToIFrameMessage</span><span class="params">(message)</span> {</span>
+	<span class="keyword">return</span> <span class="string">'message'</span>; <span class="comment">// sourceMessage</span>
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">addIFrameMessageListener</span><span class="params">(eventType)</span> {</span>
+	<span class="keyword">this</span>._listenTo.addEventListener(eventType, <span class="keyword">this</span>, <span class="literal">false</span>);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">removeIFrameMessageListener</span><span class="params">(eventType)</span> {</span>
+	<span class="keyword">this</span>._listenTo.removeEventListener(eventType, <span class="keyword">this</span>, <span class="literal">false</span>);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">filterRecievedIFrameMessage</span><span class="params">(eventType, message, event)</span> {</span>
+	<span class="keyword">return</span> <span class="literal">true</span>;
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">postToOtherWindow</span><span class="params">(eventType, message)</span> {</span>
+	message.type = eventType;
+	<span class="keyword">this</span>._postTo.postMessage(message, <span class="string">'*'</span>);
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">handleEvent</span><span class="params">(event)</span> {</span>
+	<span class="keyword">this</span>.dispatchMessage(event.type, event);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-231">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-231">&#182;</a>
               </div>
               <p><a name="model"></a></p>
 <h2 id="milo-model">milo model</h2>
@@ -2783,11 +6000,11 @@ throwing if some object is not unique</p>
         </li>
         
         
-        <li id="section-106">
+        <li id="section-232">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-106">&#182;</a>
+                <a class="pilcrow" href="#section-232">&#182;</a>
               </div>
               
             </div>
@@ -2812,11 +6029,11 @@ module.exports = Model;
         </li>
         
         
-        <li id="section-107">
+        <li id="section-233">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-107">&#182;</a>
+                <a class="pilcrow" href="#section-233">&#182;</a>
               </div>
               <p>modelPath should return a ModelPath object with &quot;compiled&quot; methods
 to get/set model properties, to subscribe to property changes, etc.
@@ -2852,11 +6069,11 @@ Model.prototype.__proto__ = Model.__proto__;</pre></div></div>
         </li>
         
         
-        <li id="section-108">
+        <li id="section-234">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-108">&#182;</a>
+                <a class="pilcrow" href="#section-234">&#182;</a>
               </div>
               <p>cache of compiled ModelPath methods</p>
 
@@ -2901,11 +6118,11 @@ _.extendProto(Model, {
         </li>
         
         
-        <li id="section-109">
+        <li id="section-235">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-109">&#182;</a>
+                <a class="pilcrow" href="#section-235">&#182;</a>
               </div>
               <p>returns ModelPath object</p>
 
@@ -2923,11 +6140,11 @@ _.extendProto(Model, {
         </li>
         
         
-        <li id="section-110">
+        <li id="section-236">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-110">&#182;</a>
+                <a class="pilcrow" href="#section-236">&#182;</a>
               </div>
               <p>TODO allow for multiple messages in a string</p>
 
@@ -2941,11 +6158,11 @@ _.extendProto(Model, {
         </li>
         
         
-        <li id="section-111">
+        <li id="section-237">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-111">&#182;</a>
+                <a class="pilcrow" href="#section-237">&#182;</a>
               </div>
               <p>replacing message subsribe/unsubscribe/etc. to convert &quot;*&quot; message patterns to regexps</p>
 
@@ -2977,11 +6194,11 @@ _.extend(Model, {
         </li>
         
         
-        <li id="section-112">
+        <li id="section-238">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-112">&#182;</a>
+                <a class="pilcrow" href="#section-238">&#182;</a>
               </div>
               <p>compiling getter and setter</p>
 
@@ -2992,11 +6209,11 @@ _.extend(Model, {
         </li>
         
         
-        <li id="section-113">
+        <li id="section-239">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-113">&#182;</a>
+                <a class="pilcrow" href="#section-239">&#182;</a>
               </div>
               <p>adding methods to model path</p>
 
@@ -3010,11 +6227,11 @@ _.extend(Model, {
         </li>
         
         
-        <li id="section-114">
+        <li id="section-240">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-114">&#182;</a>
+                <a class="pilcrow" href="#section-240">&#182;</a>
               </div>
               <p>adding messaging methods to ModelPath prototype</p>
 
@@ -3027,11 +6244,11 @@ modelMethodsToWrap.forEach(<span class="function"><span class="keyword">function
         </li>
         
         
-        <li id="section-115">
+        <li id="section-241">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-115">&#182;</a>
+                <a class="pilcrow" href="#section-241">&#182;</a>
               </div>
               <p>creating subscribe/unsubscribe/etc. methods for ModelPath class</p>
 
@@ -3077,11 +6294,11 @@ _.extendProto(ModelPath, modelPathMethodsMap);
         </li>
         
         
-        <li id="section-116">
+        <li id="section-242">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-116">&#182;</a>
+                <a class="pilcrow" href="#section-242">&#182;</a>
               </div>
               <p>functions used by ModelPath setter (synthesized by template)</p>
 
@@ -3148,11 +6365,11 @@ _.extendProto(ModelPath, modelPathMethodsMap);
         </li>
         
         
-        <li id="section-117">
+        <li id="section-243">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-117">&#182;</a>
+                <a class="pilcrow" href="#section-243">&#182;</a>
               </div>
               <p><a name="model-connector"></a></p>
 <h3 id="model-connector">model connector</h3>
@@ -3168,11 +6385,11 @@ _.extendProto(ModelPath, modelPathMethodsMap);
         </li>
         
         
-        <li id="section-118">
+        <li id="section-244">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-118">&#182;</a>
+                <a class="pilcrow" href="#section-244">&#182;</a>
               </div>
               <p>Class that creates connector object for data connection between
 two data-sources
@@ -3227,11 +6444,11 @@ _.extendProto(Connector, {
         </li>
         
         
-        <li id="section-119">
+        <li id="section-245">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-119">&#182;</a>
+                <a class="pilcrow" href="#section-245">&#182;</a>
               </div>
               <p>create connection</p>
 
@@ -3280,11 +6497,11 @@ _.extendProto(Connector, {
         </li>
         
         
-        <li id="section-120">
+        <li id="section-246">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-120">&#182;</a>
+                <a class="pilcrow" href="#section-246">&#182;</a>
               </div>
               <p><a name="model-demo"></a></p>
 <h3 id="model-demo">model demo</h3>
@@ -3302,11 +6519,11 @@ _.extendProto(Connector, {
         </li>
         
         
-        <li id="section-121">
+        <li id="section-247">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-121">&#182;</a>
+                <a class="pilcrow" href="#section-247">&#182;</a>
               </div>
               <p>undefined, but doesn&#39;t fail, like in Angular</p>
 
@@ -3319,11 +6536,11 @@ _.extendProto(Connector, {
         </li>
         
         
-        <li id="section-122">
+        <li id="section-248">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-122">&#182;</a>
+                <a class="pilcrow" href="#section-248">&#182;</a>
               </div>
               <p>1982</p>
 
@@ -3334,11 +6551,11 @@ _.extendProto(Connector, {
         </li>
         
         
-        <li id="section-123">
+        <li id="section-249">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-123">&#182;</a>
+                <a class="pilcrow" href="#section-249">&#182;</a>
               </div>
               <p>{ DOB: { year: 1982 } }</p>
 
@@ -3349,11 +6566,11 @@ _.extendProto(Connector, {
         </li>
         
         
-        <li id="section-124">
+        <li id="section-250">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-124">&#182;</a>
+                <a class="pilcrow" href="#section-250">&#182;</a>
               </div>
               <p>{ info: { DOB: { year: 1982 } } }</p>
 
@@ -3368,11 +6585,11 @@ m.on(<span class="regexp">/.*/</span>, onChange);
         </li>
         
         
-        <li id="section-125">
+        <li id="section-251">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-125">&#182;</a>
+                <a class="pilcrow" href="#section-251">&#182;</a>
               </div>
               <p>should be replaced with console if this demo is used</p>
 
@@ -3386,11 +6603,11 @@ m(<span class="string">'.list[0].info.name'</span>).set(<span class="string">'Cl
         </li>
         
         
-        <li id="section-126">
+        <li id="section-252">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-126">&#182;</a>
+                <a class="pilcrow" href="#section-252">&#182;</a>
               </div>
               <p>logged:
 .list  :  { type: &#39;added&#39;, newValue: [] }
@@ -3405,11 +6622,11 @@ m(<span class="string">'.list[0].info.name'</span>).set(<span class="string">'Cl
         </li>
         
         
-        <li id="section-127">
+        <li id="section-253">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-127">&#182;</a>
+                <a class="pilcrow" href="#section-253">&#182;</a>
               </div>
               <p>logged:
 .list[0].info.name  :  { type: &#39;changed&#39;,
@@ -3423,11 +6640,11 @@ m(<span class="string">'.list[0].info.name'</span>).set(<span class="string">'Cl
         </li>
         
         
-        <li id="section-128">
+        <li id="section-254">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-128">&#182;</a>
+                <a class="pilcrow" href="#section-254">&#182;</a>
               </div>
               <p>&#39;Clifton Cunnigham&#39;</p>
 <p>m(&#39;.list[0].info.name&#39;).get.toString() :</p>
@@ -3442,11 +6659,11 @@ m(<span class="string">'.list[0].info.name'</span>).set(<span class="string">'Cl
         </li>
         
         
-        <li id="section-129">
+        <li id="section-255">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-129">&#182;</a>
+                <a class="pilcrow" href="#section-255">&#182;</a>
               </div>
               <p>m(&#39;.list[0].info.name&#39;).set.toString() :</p>
 
@@ -3480,11 +6697,11 @@ m(<span class="string">'.list[0].info.name'</span>).set(<span class="string">'Cl
         </li>
         
         
-        <li id="section-130">
+        <li id="section-256">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-130">&#182;</a>
+                <a class="pilcrow" href="#section-256">&#182;</a>
               </div>
               <p><a name="model-path"></a></p>
 <h3 id="model-path-utils">model path utils</h3>
@@ -3559,11 +6776,11 @@ nodeRegex[<span class="string">'*'</span>] = nodeRegex[<span class="string">'.*'
         </li>
         
         
-        <li id="section-131">
+        <li id="section-257">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-131">&#182;</a>
+                <a class="pilcrow" href="#section-257">&#182;</a>
               </div>
               <p>regexStr += &#39;(&#39; + regex;
 regexStrEnd += &#39;|)&#39;;</p>
@@ -3575,11 +6792,11 @@ regexStrEnd += &#39;|)&#39;;</p>
         </li>
         
         
-        <li id="section-132">
+        <li id="section-258">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-132">&#182;</a>
+                <a class="pilcrow" href="#section-258">&#182;</a>
               </div>
               <p>regexStrEnd += &#39;|)&#39;;</p>
 
@@ -3613,11 +6830,11 @@ regexStrEnd += &#39;|)&#39;;</p>
         </li>
         
         
-        <li id="section-133">
+        <li id="section-259">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-133">&#182;</a>
+                <a class="pilcrow" href="#section-259">&#182;</a>
               </div>
               <p><a name="messenger"></a></p>
 <h2 id="milo-messenger">milo messenger</h2>
@@ -3627,11 +6844,11 @@ regexStrEnd += &#39;|)&#39;;</p>
         </li>
         
         
-        <li id="section-134">
+        <li id="section-260">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-134">&#182;</a>
+                <a class="pilcrow" href="#section-260">&#182;</a>
               </div>
               
             </div>
@@ -3688,11 +6905,11 @@ module.exports = Messenger;
         </li>
         
         
-        <li id="section-135">
+        <li id="section-261">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-135">&#182;</a>
+                <a class="pilcrow" href="#section-261">&#182;</a>
               </div>
               <p>hostObject and proxyMethods are used in Mixin
 messenger data</p>
@@ -3768,11 +6985,11 @@ messenger data</p>
         </li>
         
         
-        <li id="section-136">
+        <li id="section-262">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-136">&#182;</a>
+                <a class="pilcrow" href="#section-262">&#182;</a>
               </div>
               <p>removes all subscribers for the message if subscriber isn&#39;t supplied</p>
 
@@ -3843,11 +7060,11 @@ messenger data</p>
         </li>
         
         
-        <li id="section-137">
+        <li id="section-263">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-137">&#182;</a>
+                <a class="pilcrow" href="#section-263">&#182;</a>
               </div>
               <p>TODO - send event to messageSource</p>
 
@@ -3897,11 +7114,11 @@ messenger data</p>
         </li>
         
         
-        <li id="section-138">
+        <li id="section-264">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-138">&#182;</a>
+                <a class="pilcrow" href="#section-264">&#182;</a>
               </div>
               <p>pattern subscribers are incuded by default</p>
 
@@ -3942,11 +7159,11 @@ messenger data</p>
         </li>
         
         
-        <li id="section-139">
+        <li id="section-265">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-139">&#182;</a>
+                <a class="pilcrow" href="#section-265">&#182;</a>
               </div>
               <p><a name="messenger-source"></a></p>
 <h3 id="messenger-source">messenger source</h3>
@@ -3963,11 +7180,11 @@ messenger data</p>
         </li>
         
         
-        <li id="section-140">
+        <li id="section-266">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-140">&#182;</a>
+                <a class="pilcrow" href="#section-266">&#182;</a>
               </div>
               <p>an abstract class for dispatching external to internal events</p>
 
@@ -3983,11 +7200,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-141">
+        <li id="section-267">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-141">&#182;</a>
+                <a class="pilcrow" href="#section-267">&#182;</a>
               </div>
               <p>initializes messageSource - called by Mixin superclass</p>
 
@@ -3998,11 +7215,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-142">
+        <li id="section-268">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-142">&#182;</a>
+                <a class="pilcrow" href="#section-268">&#182;</a>
               </div>
               <p>called by Messenger to notify when the first subscriber for an internal message was added</p>
 
@@ -4013,11 +7230,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-143">
+        <li id="section-269">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-143">&#182;</a>
+                <a class="pilcrow" href="#section-269">&#182;</a>
               </div>
               <p>called by Messenger to notify when the last subscriber for an internal message was removed</p>
 
@@ -4028,11 +7245,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-144">
+        <li id="section-270">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-144">&#182;</a>
+                <a class="pilcrow" href="#section-270">&#182;</a>
               </div>
               <p>dispatches source message</p>
 
@@ -4043,11 +7260,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-145">
+        <li id="section-271">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-145">&#182;</a>
+                <a class="pilcrow" href="#section-271">&#182;</a>
               </div>
               <p>filters source message based on the data of the message - should be implemented in subclass</p>
 
@@ -4058,11 +7275,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-146">
+        <li id="section-272">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-146">&#182;</a>
+                <a class="pilcrow" href="#section-272">&#182;</a>
               </div>
               <hr>
 <p>Methods below must be implemented in subclass</p>
@@ -4072,11 +7289,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-147">
+        <li id="section-273">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-147">&#182;</a>
+                <a class="pilcrow" href="#section-273">&#182;</a>
               </div>
               <p>converts internal message type to external message type - should be implemented in subclass</p>
 
@@ -4087,11 +7304,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-148">
+        <li id="section-274">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-148">&#182;</a>
+                <a class="pilcrow" href="#section-274">&#182;</a>
               </div>
               <p>adds listener to external message - should be implemented by subclass</p>
 
@@ -4102,11 +7319,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-149">
+        <li id="section-275">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-149">&#182;</a>
+                <a class="pilcrow" href="#section-275">&#182;</a>
               </div>
               <p>removes listener from external message - should be implemented by subclass</p>
 
@@ -4183,11 +7400,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-150">
+        <li id="section-276">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-150">&#182;</a>
+                <a class="pilcrow" href="#section-276">&#182;</a>
               </div>
               <p>can be overridden in subclass to implement filtering based on message data</p>
 
@@ -4200,11 +7417,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-151">
+        <li id="section-277">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-151">&#182;</a>
+                <a class="pilcrow" href="#section-277">&#182;</a>
               </div>
               <p><a name="messenger-message"></a></p>
 <h3 id="messenger-message-class">messenger message class</h3>
@@ -4244,11 +7461,11 @@ module.exports = Message;
         </li>
         
         
-        <li id="section-152">
+        <li id="section-278">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-152">&#182;</a>
+                <a class="pilcrow" href="#section-278">&#182;</a>
               </div>
               <p><a name="attribute"></a></p>
 <h2 id="attribute-class">attribute class</h2>
@@ -4258,11 +7475,11 @@ module.exports = Message;
         </li>
         
         
-        <li id="section-153">
+        <li id="section-279">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-153">&#182;</a>
+                <a class="pilcrow" href="#section-279">&#182;</a>
               </div>
               
             </div>
@@ -4277,11 +7494,11 @@ module.exports = Message;
         </li>
         
         
-        <li id="section-154">
+        <li id="section-280">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-154">&#182;</a>
+                <a class="pilcrow" href="#section-280">&#182;</a>
               </div>
               <p>an abstract attribute class for attribute parsing and validation</p>
 
@@ -4302,11 +7519,11 @@ _.extendProto(Attribute, {
         </li>
         
         
-        <li id="section-155">
+        <li id="section-281">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-155">&#182;</a>
+                <a class="pilcrow" href="#section-281">&#182;</a>
               </div>
               <p>should be defined in subclass</p>
 
@@ -4322,11 +7539,11 @@ _.extendProto(Attribute, {
         </li>
         
         
-        <li id="section-156">
+        <li id="section-282">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-156">&#182;</a>
+                <a class="pilcrow" href="#section-282">&#182;</a>
               </div>
               <p>get attribute value</p>
 
@@ -4339,11 +7556,11 @@ _.extendProto(Attribute, {
         </li>
         
         
-        <li id="section-157">
+        <li id="section-283">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-157">&#182;</a>
+                <a class="pilcrow" href="#section-283">&#182;</a>
               </div>
               <p>set attribute value</p>
 
@@ -4360,11 +7577,11 @@ _.extendProto(Attribute, {
         </li>
         
         
-        <li id="section-158">
+        <li id="section-284">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-158">&#182;</a>
+                <a class="pilcrow" href="#section-284">&#182;</a>
               </div>
               <p><a name="attribute-bind"></a></p>
 <h3 id="bind-attribute-class">bind attribute class</h3>
@@ -4383,11 +7600,11 @@ _.extendProto(Attribute, {
         </li>
         
         
-        <li id="section-159">
+        <li id="section-285">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-159">&#182;</a>
+                <a class="pilcrow" href="#section-285">&#182;</a>
               </div>
               <p>Matches;
 :myView - only component name
@@ -4417,11 +7634,11 @@ module.exports = BindAttribute;</pre></div></div>
         </li>
         
         
-        <li id="section-160">
+        <li id="section-286">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-160">&#182;</a>
+                <a class="pilcrow" href="#section-286">&#182;</a>
               </div>
               <p>get attribute name</p>
 
@@ -4434,11 +7651,11 @@ module.exports = BindAttribute;</pre></div></div>
         </li>
         
         
-        <li id="section-161">
+        <li id="section-287">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-161">&#182;</a>
+                <a class="pilcrow" href="#section-287">&#182;</a>
               </div>
               <p>parse attribute</p>
 
@@ -4465,11 +7682,11 @@ module.exports = BindAttribute;</pre></div></div>
         </li>
         
         
-        <li id="section-162">
+        <li id="section-288">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-162">&#182;</a>
+                <a class="pilcrow" href="#section-288">&#182;</a>
               </div>
               <p>validate attribute</p>
 
@@ -4500,11 +7717,11 @@ module.exports = BindAttribute;</pre></div></div>
         </li>
         
         
-        <li id="section-163">
+        <li id="section-289">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-163">&#182;</a>
+                <a class="pilcrow" href="#section-289">&#182;</a>
               </div>
               <p><a name="attribute-load"></a></p>
 <h3 id="load-attribute-class">load attribute class</h3>
@@ -4551,11 +7768,11 @@ module.exports = LoadAttribute;
         </li>
         
         
-        <li id="section-164">
+        <li id="section-290">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-164">&#182;</a>
+                <a class="pilcrow" href="#section-290">&#182;</a>
               </div>
               <p>TODO url validation</p>
 
@@ -4567,11 +7784,11 @@ module.exports = LoadAttribute;
         </li>
         
         
-        <li id="section-165">
+        <li id="section-291">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-165">&#182;</a>
+                <a class="pilcrow" href="#section-291">&#182;</a>
               </div>
               <p><a name="mixin"></a></p>
 <h2 id="mixin-abstract-class">mixin abstract class</h2>
@@ -4581,11 +7798,11 @@ module.exports = LoadAttribute;
         </li>
         
         
-        <li id="section-166">
+        <li id="section-292">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-166">&#182;</a>
+                <a class="pilcrow" href="#section-292">&#182;</a>
               </div>
               
             </div>
@@ -4603,11 +7820,11 @@ module.exports = Mixin;</pre></div></div>
         </li>
         
         
-        <li id="section-167">
+        <li id="section-293">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-167">&#182;</a>
+                <a class="pilcrow" href="#section-293">&#182;</a>
               </div>
               <p>an abstract class for mixin pattern - adding proxy methods to host objects</p>
 
@@ -4618,11 +7835,11 @@ module.exports = Mixin;</pre></div></div>
         </li>
         
         
-        <li id="section-168">
+        <li id="section-294">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-168">&#182;</a>
+                <a class="pilcrow" href="#section-294">&#182;</a>
               </div>
               <p>TODO - moce checks from Messenger here</p>
 
@@ -4638,11 +7855,11 @@ module.exports = Mixin;</pre></div></div>
         </li>
         
         
-        <li id="section-169">
+        <li id="section-295">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-169">&#182;</a>
+                <a class="pilcrow" href="#section-295">&#182;</a>
               </div>
               <p>calling init if it is defined in the class</p>
 
@@ -4670,11 +7887,11 @@ _.extendProto(Mixin, {
         </li>
         
         
-        <li id="section-170">
+        <li id="section-296">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-170">&#182;</a>
+                <a class="pilcrow" href="#section-296">&#182;</a>
               </div>
               <p>Bind proxied messenger&#39;s method to messenger</p>
 
@@ -4692,11 +7909,11 @@ _.extendProto(Mixin, {
         </li>
         
         
-        <li id="section-171">
+        <li id="section-297">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-171">&#182;</a>
+                <a class="pilcrow" href="#section-297">&#182;</a>
               </div>
               <p>creating and binding proxy methods on the host object</p>
 
@@ -4710,11 +7927,11 @@ _.extendProto(Mixin, {
         </li>
         
         
-        <li id="section-172">
+        <li id="section-298">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-172">&#182;</a>
+                <a class="pilcrow" href="#section-298">&#182;</a>
               </div>
               <p><a name="registry"></a></p>
 <h2 id="registry-abstract-class">registry abstract class</h2>
@@ -4724,11 +7941,11 @@ _.extendProto(Mixin, {
         </li>
         
         
-        <li id="section-173">
+        <li id="section-299">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-173">&#182;</a>
+                <a class="pilcrow" href="#section-299">&#182;</a>
               </div>
               
             </div>
@@ -4748,11 +7965,11 @@ module.exports = ClassRegistry;
         </li>
         
         
-        <li id="section-174">
+        <li id="section-300">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-174">&#182;</a>
+                <a class="pilcrow" href="#section-300">&#182;</a>
               </div>
               <p>Object.defineProperty(this, &#39;__registeredClasses&#39;, {
         enumerable: false,

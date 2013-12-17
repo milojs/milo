@@ -1136,6 +1136,1298 @@ FacetedObject.createFacetedClass = function (name, facetsClasses, facetsConfig) 
 };
 
 
+// <a name="components-facet-registry"></a>
+// ###component facet registry
+
+// An instance of ClassRegistry class that is used by milo to register and find facets.
+
+'use strict';
+
+var ClassRegistry = require('../../abstract/registry')
+	, ComponentFacet = require('../c_facet');
+
+var facetsRegistry = new ClassRegistry(ComponentFacet);
+
+facetsRegistry.add(ComponentFacet);
+
+module.exports = facetsRegistry;
+
+// TODO - refactor components registry test into a function
+// that tests a registry with a given foundation class
+// Make test for this registry based on this function
+
+// <a name="components-facets-container"></a>
+// ###container facet
+
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+	, binder = require('../../binder')
+	, _ = require('mol-proto')
+	, facetsRegistry = require('./cf_registry');
+
+// container facet
+var Container = _.createSubclass(ComponentFacet, 'Container');
+
+_.extendProto(Container, {
+	init: initContainer,
+	_bind: _bindComponents,
+	// add: addChildComponents
+});
+
+facetsRegistry.add(Container);
+
+module.exports = Container;
+
+
+function initContainer() {
+	ComponentFacet.prototype.init.apply(this, arguments);
+	this.scope = {};
+}
+
+
+function _bindComponents() {
+	// TODO
+	// this function should re-bind rather than bind all internal elements
+	this.scope = binder(this.owner.el);
+}
+
+
+function addChildComponents(childComponents) {
+	// TODO
+	// this function should intelligently re-bind existing components to
+	// new elements (if they changed) and re-bind previously bound events to the same
+	// event handlers
+	// or maybe not, if this function is only used by binder to add new elements...
+	_.extend(this.scope, childComponents);
+}
+
+
+// <a name="components-facets-data"></a>
+// ###data facet
+
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+	, facetsRegistry = require('./cf_registry')
+
+	, Messenger = require('../../messenger')
+	, ComponentDataSource = require('../c_message_sources/component_data_source')
+	, pathUtils = require('../../model/path_utils')
+
+	, _ = require('mol-proto')
+	, logger = require('../../util/logger');
+
+
+// data model connection facet
+var Data = _.createSubclass(ComponentFacet, 'Data');
+
+_.extendProto(Data, {
+	init: init,
+	get: get,
+	set: set,
+	path: path,
+	_setScalarValue: _setScalarValue,
+	_getScalarValue: _getScalarValue
+});
+
+facetsRegistry.add(Data);
+
+module.exports = Data;
+
+
+// Initialize Data Facet
+function init() {
+	ComponentFacet.prototype.init.apply(this, arguments);
+
+	var proxyCompDataSourceMethods = {
+		value: 'value',
+		trigger: 'trigger'
+	};
+
+	// instead of this.owner should pass model? Where it is set?
+	var compDataSource = new ComponentDataSource(this, proxyCompDataSourceMethods, this.owner);
+	this._setMessageSource(compDataSource);
+
+	Object.defineProperties(this, {
+		_compDataSource: { value: compDataSource }
+	});
+}
+
+
+// Set components DOM value
+function set(value) {
+	if (typeof value == 'object') {
+		if (Array.isArray(value))
+			value.forEach(function(item, index) {
+				var childDataFacet = this.path('[' + index + ']', true); // true will create item in list
+				if (childDataFacet)
+					childDataFacet.set(item);
+				else
+					logger.warn('attempt to set data on path that does not exist: ' + '[' + index + ']');
+			}, this);
+		else
+			_.eachKey(value, function(item, key) {
+				var childDataFacet = this.path('.' + key);
+				if (childDataFacet)
+					childDataFacet.set(item);
+				else
+					logger.warn('attempt to set data on path that does not exist: ' + '.' + key);
+			}, this);
+	} else
+		this._setScalarValue(value);
+}
+
+
+function _setScalarValue(value) {
+	var el = this.owner.el
+		, setter = tags[el.tagName.toLowerCase()];
+	if (setter)
+		setter(el, value);
+	else
+		el.innerHTML = value;
+}
+
+
+// get structured data from scope hierarchy
+function get() {
+	var comp = this.owner
+		, scopeData;
+
+	if (comp.list) {
+		scopeData = [];
+		comp.list.each(function(listItem, index) {
+			scopeData[index] = listItem.data.get();
+		});
+
+		if (comp.container)
+			comp.container.scope._each(function(scopeItem, name) {
+				if (! comp.list.contains(scopeItem) && scopeItem.data)
+					scopeData[name] = scopeItem.data.get();
+			});
+	} else if (comp.container) {
+		scopeData = {};
+		comp.container.scope._each(function(scopeItem, name) {
+			scopeData[name] = scopeItem.data.get();
+		});
+	} else
+		return this._getScalarValue();
+
+	return scopeData;
+}
+
+
+function _getScalarValue() {
+	var el = this.owner.el
+		, getter = tags[el.tagName.toLowerCase()];
+	return getter
+			 ? getter(el)
+			 : el.innerHTML;
+}
+
+
+// returns data facet of a child component (by scopes) corresponding to the path
+function path(accessPath, createItem) {
+	var parsedPath = pathUtils.parseAccessPath(accessPath)
+		, currentComponent = this.owner;
+
+	for (var i = 0, len = parsedPath.length; i < len; i++) {
+		var pathNode = parsedPath[i]
+			, nodeKey = pathUtils.getPathNodeKey(pathNode);
+		if (pathNode.syntax == 'array' && currentComponent.list) {
+			var itemComponent = currentComponent.list.item(nodeKey);
+			if (! itemComponent && createItem)
+				itemComponent = currentComponent.list.addItem(nodeKey);
+			if (itemComponent)
+				currentComponent = itemComponent;
+		} else if (currentComponent.container)
+			currentComponent = currentComponent.container.scope[nodeKey];
+
+		if (! currentComponent || ! currentComponent.data)
+			break;
+	}
+
+	return currentComponent && currentComponent.data;
+}
+
+
+// Set value rules
+var tags = {
+	'input': inputValue
+}
+
+
+// Set and get value of input
+function inputValue(el, value) {
+	if (value)
+		el.value = value;
+	else
+		return el.value;
+}
+
+
+// <a name="components-facets-dom"></a>
+// ###dom facet
+
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+	, facetsRegistry = require('./cf_registry')	
+	, _ = require('mol-proto')
+	, check = require('../../util/check')
+	, Match = check.Match
+	, binder = require('../../binder')
+	, BindAttribute = require('../../attribute/a_bind')
+	, DomFacetError = require('../../util/error').DomFacet;
+
+
+// data model connection facet
+var Dom = _.createSubclass(ComponentFacet, 'Dom');
+
+_.extendProto(Dom, {
+	init: init,
+	start: start,
+
+	show: show,
+	hide: hide,
+	remove: remove,
+	append: append,
+	prepend: prepend,
+	appendChildren: appendChildren,
+	prependChildren: prependChildren,
+	insertAfter: insertAfter,
+	insertBefore: insertBefore,
+	setStyle: setStyle,
+	copy: copy,
+
+	find: find,
+	hasTextBeforeSelection: hasTextBeforeSelection
+	// _reattach: _reattachEventsOnElementChange
+});
+
+facetsRegistry.add(Dom);
+
+module.exports = Dom;
+
+
+// initialize Dom facet
+function init() {
+	ComponentFacet.prototype.init.apply(this, arguments);
+}
+
+// start Dom facet
+function start() {
+	if (this.config.cls)
+		this.owner.el.classList.add(this.config.cls);
+}
+
+// show HTML element of component
+function show() {
+	this.owner.el.style.display = 'block';
+}
+
+// hide HTML element of component
+function hide() {
+	this.owner.el.style.display = 'none';
+}
+
+function setStyle(property, value) {
+	this.owner.el.style[property] = value;
+}
+
+
+// create a copy of DOM element using facet config if set
+function copy(isDeep) {
+	var tagName = this.config.tagName;
+	if (! this.config.tagName)
+		return this.owner.el.cloneNode(isDeep);
+
+	var newEl = document.createElement(tagName);
+
+	var attributes = this.config.attributes;
+	if (attributes)
+		_.eachKey(attributes, function(attrValue, attrName) {
+			newEl.setAttribute(attrName, attrValue);
+		});
+
+	return newEl;
+}
+
+
+// remove HTML element of component
+function remove() {
+	var thisEl = this.owner.el;
+	thisEl.parentNode.removeChild(thisEl);
+}
+
+// append inside HTML element of component
+function append(el) {
+	this.owner.el.appendChild(el)
+}
+
+// prepend inside HTML element of component
+function prepend(el) {
+	var thisEl = this.owner.el
+		, firstChild = thisEl.firstChild;
+	if (firstChild)
+		thisEl.insertBefore(el, firstChild);
+	else
+		thisEl.appendChild(el);
+}
+
+// appends children of element inside this component's element
+function appendChildren(el) {
+	while(el.childNodes.length)
+		this.append(el.childNodes[0]);
+}
+
+// prepends children of element inside this component's element
+function prependChildren(el) {
+	while(el.childNodes.length)
+		this.prepend(el.childNodes[el.childNodes.length - 1]);
+}
+
+function insertAfter(el) {
+	var thisEl = this.owner.el
+		, parent = thisEl.parentNode;
+	parent.insertBefore(el, thisEl.nextSibling);
+}
+
+function insertBefore(el) {
+	var thisEl = this.owner.el
+		, parent = thisEl.parentNode;
+	parent.insertBefore(el, thisEl);
+}
+
+var findDirections = {
+	'up': 'previousNode',
+	'down': 'nextNode'
+};
+
+// Finds component passing optional iterator's test
+// in the same scope as the current component (this)
+// by traversing DOM tree upwards (direction = "up")
+// or downwards (direction = "down")
+function find(direction, iterator) {
+	if (! findDirections.hasOwnProperty(direction))
+		throw new DomFacetError('incorrect find direction: ' + direction);
+
+	var el = this.owner.el
+		, scope = this.owner.scope
+		, treeWalker = document.createTreeWalker(scope._rootEl, NodeFilter.SHOW_ELEMENT);
+
+	treeWalker.currentNode = el;
+	var nextNode = treeWalker[findDirections[direction]]()
+		, componentsNames = Object.keys(scope)
+		, found = false;
+
+	while (nextNode) {
+		var attr = new BindAttribute(nextNode);
+		if (attr.node) {
+			attr.parse().validate();
+			if (scope.hasOwnProperty(attr.compName)) {
+				var component = scope[attr.compName];
+				if (! iterator || iterator(component)) {
+					found = true;
+					break;
+				}
+			}
+		}
+		treeWalker.currentNode = nextNode;
+		nextNode = treeWalker[findDirections[direction]]();
+	}
+
+	if (found) return component;
+}
+
+
+// returns true if the element has text before selection
+function hasTextBeforeSelection() {
+	var selection = window.getSelection();
+	if (! selection.isCollapsed) return true;
+	if (selection.anchorOffset > 1) return true;
+
+	// walk up the DOM tree to check if there are text nodes before cursor
+	var treeWalker = document.createTreeWalker(this.owner.el, NodeFilter.SHOW_TEXT);
+	return treeWalker.previousNode();
+}
+
+
+
+// <a name="components-facets-drag"></a>
+// ###drag facet
+
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+	, facetsRegistry = require('./cf_registry')
+	, DOMEventsSource = require('../c_message_sources/dom_events_source')
+
+	, _ = require('mol-proto');
+
+
+// generic drag handler, should be overridden
+var Drag = _.createSubclass(ComponentFacet, 'Drag');
+
+_.extendProto(Drag, {
+	init: initDragFacet,
+	start: startDragFacet,
+
+	setHandle: setDragHandle,
+	setDragData: setDragData
+	// _reattach: _reattachEventsOnElementChange
+});
+
+facetsRegistry.add(Drag);
+
+module.exports = Drag;
+
+
+function initDragFacet() {
+	ComponentFacet.prototype.init.apply(this, arguments);	
+	this._createMessageSource(DOMEventsSource);
+	this._dragData = {};
+}
+
+
+function setDragHandle(handleEl) {
+	if (! this.owner.el.contains(handleEl))
+		return logger.warn('drag handle should be inside element to be dragged')
+	this._dragHandle = handleEl;
+}
+
+function setDragData(data) {
+	this._dragData = data;
+}
+
+
+function startDragFacet() {
+	ComponentFacet.prototype.start.apply(this, arguments);
+	this.owner.el.setAttribute('draggable', true);
+
+	this.on('mousedown', onMouseDown);
+	this.on('mouseenter mouseleave mousemove', onMouseMovement);
+	this.on('dragstart drag', onDragging);
+
+	var self = this;
+
+	function onMouseDown(eventType, event) {
+		self._target = event.target;
+		if (targetInDragHandle(event))
+			window.getSelection().empty();
+	}
+
+	function onMouseMovement(eventType, event) {
+		var shouldBeDraggable = targetInDragHandle(event);
+		self.owner.el.setAttribute('draggable', shouldBeDraggable);
+	}
+
+	function onDragging(eventType, event) {
+		if (targetInDragHandle(event)) {
+			var dt = event.dataTransfer;
+			dt.setData('text/html', self.owner.el.outerHTML);
+			dt.setData('x-application/milo-component', JSON.stringify(self._dragData));
+		} else
+			event.preventDefault();
+	}
+
+	function targetInDragHandle(event) {
+		return ! self._dragHandle || self._dragHandle.contains(self._target);
+	}
+}
+
+
+// <a name="components-facets-drop"></a>
+// ###drop facet
+
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+	, facetsRegistry = require('./cf_registry')
+	, DOMEventsSource = require('../c_message_sources/dom_events_source')
+
+	, _ = require('mol-proto');
+
+
+// generic drag handler, should be overridden
+var Drop = _.createSubclass(ComponentFacet, 'Drop');
+
+_.extendProto(Drop, {
+	init: initDropFacet,
+	start: startDropFacet
+	// _reattach: _reattachEventsOnElementChange
+});
+
+facetsRegistry.add(Drop);
+
+module.exports = Drop;
+
+
+function initDropFacet() {
+	ComponentFacet.prototype.init.apply(this, arguments);
+	this._createMessageSource(DOMEventsSource);
+}
+
+
+function startDropFacet() {
+	ComponentFacet.prototype.start.apply(this, arguments);
+	this.on('dragenter dragover', onDragging);
+
+	function onDragging(eventType, event) {
+		var dataTypes = event.dataTransfer.types;
+		if (dataTypes.indexOf('text/html') >= 0
+				|| dataTypes.indexOf('x-application/milo-component') >= 0) {
+			event.dataTransfer.dropEffect = 'move';
+			event.preventDefault();
+		}
+	}
+}
+
+// <a name="components-facets-editable"></a>
+// ###editable facet
+
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+	, Component = require('../c_class')
+	, facetsRegistry = require('./cf_registry')
+	, EditableEventsSource = require('../c_message_sources/editable_events_source')
+	, logger = require('../../util/logger')
+	, _ = require('mol-proto')
+	, check = require('../../util').check
+	, Match = check.Match;
+
+
+// generic drag handler, should be overridden
+var Editable = _.createSubclass(ComponentFacet, 'Editable');
+
+_.extendProto(Editable, {
+	init: init,
+	start: start,
+	makeEditable: makeEditable
+
+	// _reattach: _reattachEventsOnElementChange
+});
+
+facetsRegistry.add(Editable);
+
+module.exports = Editable;
+
+
+// init Editable facets
+function init() {
+	ComponentFacet.prototype.init.apply(this, arguments);
+
+	this._createMessageSource(EditableEventsSource, {
+		editableOnClick: this.config.editableOnClick,
+		moveToAdjacentEditable: this.config.moveToAdjacentEditable,
+		allowMerge: this.config.allowMerge,
+		acceptMerge: this.config.acceptMerge
+	});
+
+	this._editable = typeof this.config.editable != 'undefined'
+						? this.config.editable
+						: true;
+}
+
+
+function makeEditable(editable) {
+	this.owner.el.setAttribute('contenteditable', editable);
+}
+
+
+// start Editable facet
+function start() {
+	ComponentFacet.prototype.start.apply(this, arguments);
+	
+	if (this._editable) {
+		this.makeEditable(true);
+		this.postMessage('editstart');
+	}
+	
+	this.onMessages({
+		'editstart': onEditStart,
+		'editend': onEditEnd,
+		// arrow keys events
+		'previouseditable': makePreviousComponentEditable,
+		'nexteditable': makeNextComponentEditable,
+		// merge events
+		'previousmerge': mergeToPreviousEditable,
+		'nextmerge': mergeToNextEditable,
+		'requestmerge': onRequestMerge,
+		'mergeaccepted': onMergeAccepted,
+		'performmerge': onPerformMerge,
+		'mergeremove': onMergeRemove,
+		// split events
+		'enterkey': onEnterSplit
+	});
+}
+
+
+function onEditStart(eventType, event) {
+	this.makeEditable(true);
+}
+
+
+function onEditEnd(eventType, event) {
+	this.makeEditable(false);
+}
+
+//
+// Move caret to another editable
+//
+function makePreviousComponentEditable(eventType, event) {
+	event.preventDefault();
+	makeAdjacentComponentEditable(this.owner, 'up');
+}
+
+function makeNextComponentEditable(eventType, event) {
+	event.preventDefault();
+	makeAdjacentComponentEditable(this.owner, 'down');
+}
+
+function makeAdjacentComponentEditable(component, direction) {
+	var adjacentComp = component.dom.find(direction, function(comp) {
+		return comp.editable;
+	});
+
+	if (adjacentComp) {
+		adjacentComp.editable.postMessage('editstart');
+		adjacentComp.el.focus();
+		
+		var windowSelection = window.getSelection()
+			, selectionRange = document.createRange();
+		selectionRange.selectNodeContents(adjacentComp.el);
+		if (direction == 'up')
+			selectionRange.collapse(false);
+		else
+			selectionRange.collapse(true);
+        windowSelection.removeAllRanges();
+        windowSelection.addRange(selectionRange);
+	}
+}
+
+
+//
+// merge functionality
+//
+function mergeToPreviousEditable(eventType, event) {
+	event.preventDefault();
+	mergeToAdjacentEditable(this.owner, 'up');
+}
+
+function mergeToNextEditable(eventType, event) {
+	mergeToAdjacentEditable(this.owner, 'down');
+}
+
+function mergeToAdjacentEditable(component, direction) {
+	var adjacentComp = component.dom.find(direction, function(comp) {
+		return comp.editable;
+	});
+
+	if (adjacentComp)
+		adjacentComp.editable.postMessage('requestmerge', { sender: component });
+}
+
+
+// merge messages
+function onRequestMerge(message, data) {
+	check(data, Match.ObjectIncluding({ sender: Component }));
+
+	var mergeComponent = data.sender;
+	if (this.config.acceptMerge)
+		mergeComponent.editable.postMessage('mergeaccepted', { sender: this.owner });
+}
+
+function onMergeAccepted(message, data) {
+	check(data, Match.ObjectIncluding({ sender: Component }));
+
+	var targetComponent = data.sender;
+
+	this.owner.allFacets('clean');
+	
+	targetComponent.editable.postMessage('performmerge', { sender: this.owner });
+}
+
+function onPerformMerge(message, data) {
+	check(data, Match.ObjectIncluding({ sender: Component }));
+	if (! this.config.acceptMerge) {
+		logger.error('performmerge message received by component that doesn\'t accept merge');
+		return;
+	}
+
+	var mergeComponent = data.sender
+		, windowSelection = window.getSelection()
+		, selectionRange = document.createRange();
+
+	// merge scopes
+	this.owner.container.scope._merge(mergeComponent.container.scope);
+
+	//Reference first element to be merged
+	var firstMergeEl = mergeComponent.el.childNodes[0];
+
+	// merge DOM
+	this.owner.dom.appendChildren(mergeComponent.el);
+
+	//Make the interface editable again like expected
+	this.makeEditable(true);
+	this.owner.el.focus();
+
+	//Set the selection where it should be
+	selectionRange.setStart(firstMergeEl);
+	selectionRange.setEnd(firstMergeEl);
+	windowSelection.removeAllRanges();
+	windowSelection.addRange(selectionRange);
+
+	// send remove message
+	mergeComponent.editable.postMessage('mergeremove');
+}
+
+
+function onMergeRemove(message, data) {
+	if (! this.config.allowMerge) {
+		logger.error('mergeremove message received by component that doesn\'t allow merge');
+		return;
+	}
+
+	this.owner.dom.remove();
+	this.owner.remove();
+}
+
+
+function onEnterSplit(message, event) {
+	var splitFacet = this.owner.split;
+	if (splitFacet) {
+		var newComp = splitFacet.make();
+		event.preventDefault();
+		newComp.editable.postMessage('editstart');
+		newComp.el.focus();
+	}
+}
+
+
+// <a name="components-facets-events"></a>
+// ###events facet
+
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+	, facetsRegistry = require('./cf_registry')
+
+	, Messenger = require('../../messenger')
+	, DOMEventsSource = require('../c_message_sources/dom_events_source')
+
+	, _ = require('mol-proto');
+
+
+// events facet
+var Events = _.createSubclass(ComponentFacet, 'Events');
+
+_.extendProto(Events, {
+	init: init,
+
+	// _reattach: _reattachEventsOnElementChange
+});
+
+facetsRegistry.add(Events);
+
+module.exports = Events;
+
+
+// init Events facet
+function init() {
+	ComponentFacet.prototype.init.apply(this, arguments);
+
+	var domEventsSource = new DOMEventsSource(this, { trigger: 'trigger' }, this.owner);
+
+	this._setMessageSource(domEventsSource)
+
+	Object.defineProperties(this, {
+		_domEventsSource: { value: domEventsSource }
+	});
+}
+
+
+// <a name="components-facets-frame"></a>
+// ###frame facet
+
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+	, facetsRegistry = require('./cf_registry')
+
+	, Messenger = require('../../messenger')
+	, iFrameMessageSource = require('../c_message_sources/iframe_message_source')
+
+	, _ = require('mol-proto');
+
+
+// data model connection facet
+var Frame = _.createSubclass(ComponentFacet, 'Frame');
+
+_.extendProto(Frame, {
+	init: initFrameFacet
+
+	// _reattach: _reattachEventsOnElementChange
+});
+
+
+facetsRegistry.add(Frame);
+
+module.exports = Frame;
+
+
+function initFrameFacet() {
+	ComponentFacet.prototype.init.apply(this, arguments);
+	
+	var iFrameMessageSourceProxy = {
+		post: 'post'
+	};
+	var messageSource = new iFrameMessageSource(this, iFrameMessageSourceProxy);
+
+	this._setMessageSource(messageSource);
+
+	Object.defineProperties(this, {
+		_messageSource: { value: messageSource }
+	});
+}
+
+// <a name="components-facets-item"></a>
+// ###item facet
+
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+    , facetsRegistry = require('./cf_registry')
+    , Model = require('../../model')
+    , _ = require('mol-proto')
+    , miloMail = require('../../mail');
+
+
+// data model connection facet
+var ItemFacet = _.createSubclass(ComponentFacet, 'Item');
+
+_.extendProto(ItemFacet, {
+    require: ['Container', 'Dom', 'Data']
+});
+
+facetsRegistry.add(ItemFacet);
+
+module.exports = ItemFacet;
+
+
+// <a name="components-facets-list"></a>
+// ###list facet
+
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+    , Component = require('../c_class')
+    , facetsRegistry = require('./cf_registry')
+    , Model = require('../../model')
+    , _ = require('mol-proto')
+    , miloMail = require('../../mail')
+    , binder = require('../../binder')
+    , ListError = require('../../util/error').List
+    , logger = require('../../util/logger');
+
+
+// data model connection facet
+var List = _.createSubclass(ComponentFacet, 'List');
+
+_.extendProto(List, {
+    init: init,
+    // update: update,
+    require: ['Container', 'Dom', 'Data'],
+    _itemPreviousComponent: _itemPreviousComponent,
+
+    item: item,
+    count: count,
+    _setItem: _setItem,
+    contains: contains,
+    addItem: addItem,
+    removeItem: removeItem,
+    each: each
+    // _reattach: _reattachEventsOnElementChange
+});
+
+facetsRegistry.add(List);
+
+module.exports = List;
+
+
+// initialize List facet
+function init() {
+    ComponentFacet.prototype.init.apply(this, arguments);
+    var model = new Model()
+        , self = this;
+
+    _.defineProperties(this, {
+        _listItems: [],
+        _listItemsHash: {}
+    });
+    _.defineProperty(this, 'itemSample', null, false, false, true);
+
+    this.owner.on('childrenbound', onChildrenBound);
+}
+
+
+//update list
+// function update(eventType, data) {
+//     var itemModels = data.newValue;
+
+//     for (var i = 0; i < itemModels.length; i++) {
+//         var itemModel = itemModels[i];
+
+//         // Copy component
+//         var component = Component.copy(this.listItemType, true);
+        
+//         // Bind contents of component
+//         var temp = binder(component.el)[component.name];
+
+//         // Set new component scope to bind result
+//         component.container.scope = temp.container.scope;
+        
+//         // Set list item data of component
+//         component.listItem.setData(itemModel);
+
+//         // Add it to the dom
+//         this.owner.dom.append(component.el);
+
+//         // Add to list items hash
+//         this.listItems[component.name] = component;
+
+//         // Show the list item component
+//         component.dom.show();
+//     };
+// }
+
+
+function onChildrenBound() {
+    var foundItem;
+
+    // "this" is a component here, as a message dispatched on component
+    this.container.scope._each(function(childComp, name) {
+        if (childComp.item) {
+            if (foundItem) throw new ListError('More than one child component has ListItem Facet')
+            foundItem = childComp;
+        }
+    });
+
+    if (! foundItem) throw new ListError('No child component has ListItem Facet');
+
+    this.list.itemSample = foundItem;
+
+    this.list.itemSample.dom.hide();
+    this.list.itemSample.remove();
+}
+
+
+function item(index) {
+    return this._listItems[index];
+}
+
+
+function count() {
+    return this._listItems.length
+}
+
+
+function _setItem(index, component) {
+    this._listItems[index] = component;
+    this._listItemsHash[component.name] = component
+}
+
+
+function contains(component){
+    return this._listItemsHash[component.name] == component;
+}
+
+
+function addItem(index) {
+    index = index || this.count();
+    if (this.item(index))
+        throw ListError('attempt to create item with ID of existing item');
+
+    // Copy component
+    var component = Component.copy(this.itemSample, true);
+
+    var tempComp = binder(component.el)[component.name]
+        , innerScope = tempComp.container.scope;
+    component.container.scope = innerScope;
+
+    // Add it to the DOM
+    this._itemPreviousComponent(index).dom.insertAfter(component.el)
+
+    // Add to list items
+    this._setItem(index, component);
+
+    // Show the list item component
+    component.dom.show();
+
+    return component;
+}
+
+
+function removeItem(index, doSplice) {
+    var comp = this.item(index);
+
+    if (! comp)
+        logger.warn('attempt to remove list item with id that does not exist');
+
+    this._listItems[index] = undefined;
+    delete this._listItemsHash[comp.name];
+    comp.dom.remove();
+    comp.remove();
+
+    if (doSplice)
+        this._listItems.splice(index, 1);
+}
+
+
+function _itemPreviousComponent(index) {
+    while (index >= 0 && ! this._listItems[index])
+        index--;
+
+    return index >= 0
+                ? this._listItems[index]
+                : this.itemSample;
+}
+
+
+function each(callback, thisArg) {
+    this._listItems.forEach(function(item) {
+        if (item) callback.apply(this, arguments);
+    }, thisArg || this);
+}
+
+
+// <a name="components-facets-model"></a>
+// ###model facet
+
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+	, facetsRegistry = require('./cf_registry')
+	, Model = require('../../model')
+
+	, _ = require('mol-proto');
+
+
+// generic drag handler, should be overridden
+var ModelFacet = _.createSubclass(ComponentFacet, 'Model');
+
+_.extendProto(ModelFacet, {
+	init: initModelFacet,
+	_createMessenger: _createMessenger
+	// _reattach: _reattachEventsOnElementChange
+});
+
+facetsRegistry.add(ModelFacet);
+
+module.exports = ModelFacet;
+
+
+function initModelFacet() {
+	this.m = new Model(this);
+
+	ComponentFacet.prototype.init.apply(this, arguments);
+}
+
+function _createMessenger() { // Called by inherited init
+	this.m.proxyMessenger(this); // Creates messenger's methods directly on facet
+}
+
+
+// <a name="components-facets-split"></a>
+// ###split facet
+
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+	, Component = require('../c_class')
+	, facetsRegistry = require('./cf_registry');
+
+var Split = _.createSubclass(ComponentFacet, 'Split');
+
+_.extendProto(Split, {
+	init: init,
+	start: start,
+	make: make,
+
+	isSplittable: isSplittable,
+	_makeSplit: _makeSplit,
+
+	require: ['Dom']
+
+	// _reattach: _reattachEventsOnElementChange
+});
+
+facetsRegistry.add(Split);
+
+module.exports = Split;
+
+
+// init Split facet
+function init() {
+	ComponentFacet.prototype.init.apply(this, arguments);
+
+	this._splitSender = undefined;
+}
+
+
+// start Split facet
+function start() {
+	ComponentFacet.prototype.start.apply(this, arguments);
+}
+
+
+// performs the split on selection
+function make() {
+	if (! this.isSplittable())
+		return;
+
+	if (! this.owner.dom.hasTextBeforeSelection())
+		return; // should simply create empty component before
+
+	return this._makeSplit();
+}
+
+
+function _makeSplit() {
+	var thisComp = this.owner;
+
+	// clone itself
+	var newComp = Component.copy(thisComp);
+	thisComp.dom.insertAfter(newComp.el);
+
+	splitElement(thisComp.el, newComp.el);
+
+	return newComp;
+}
+
+
+function splitElement(thisEl, newEl) {
+	var selection = window.getSelection()
+		, selNode = selection.anchorNode
+		, selFound = false;
+
+	Array.prototype.forEach.call(thisEl.childNodes, function(childNode) {
+		if (childNode.contains(selNode) || childNode == selNode) {
+			var comp = Component.getComponent(childNode);
+			if (comp)
+				comp.split._makeSplit();
+			else {
+				if (childNode.nodeType == Node.TEXT_NODE) {
+					var selPos = selection.anchorOffset;
+					var newText = childNode.splitText(selPos);
+					newEl.appendChild(newText);
+				} else {
+					var newChildEl = childNode.cloneNode(false);
+					newEl.appendChild(newChildEl);
+					splitElement(childNode, newChildEl);
+				}
+			}
+
+			selFound = true;
+		} else if (selFound)
+			newEl.appendChild(childNode);
+	});
+}
+
+
+function isSplittable() {
+	var selection = window.getSelection()
+		, el = selection.anchorNode;
+
+	if (! this.owner.el.contains(el)) {
+		logger.warn('selection is outside this component');
+		return false;
+	}
+
+	while (el != this.owner.el) {
+		var comp = Component.getComponent(el);
+		if (comp && ! comp.split)
+			return false;
+		el = el.parentNode;
+	}
+
+	return true;
+}
+
+
+// <a name="components-facets-template"></a>
+// ###template facet
+
+'use strict';
+
+var ComponentFacet = require('../c_facet')
+	, facetsRegistry = require('./cf_registry')	
+	, _ = require('mol-proto')
+	, check = require('../../util/check')
+	, Match = check.Match
+	, binder = require('../../binder');
+
+
+// data model connection facet
+var Template = _.createSubclass(ComponentFacet, 'Template');
+
+_.extendProto(Template, {
+	init: initTemplateFacet,
+	set: setTemplate,
+	render: renderTemplate,
+	binder: bindInnerComponents,
+	require: ['Container']
+
+	// _reattach: _reattachEventsOnElementChange
+});
+
+facetsRegistry.add(Template);
+
+module.exports = Template;
+
+
+function initTemplateFacet() {
+	ComponentFacet.prototype.init.apply(this, arguments);
+
+	this._templateStr = this.config.template;
+}
+
+
+function setTemplate(templateStr, compile) {
+	check(templateStr, String);
+	check(compile, Match.Optional(Function));
+
+	this._templateStr = templateStr;
+	if (compile)
+		this._compile = compile
+
+	compile = compile || this._compile; // || milo.config.template.compile;
+
+	if (compile)
+		this._template = compile(templateStr);
+
+	return this;
+}
+
+
+function renderTemplate(data) { // we need data only if use templating engine
+	this.owner.el.innerHTML = this._template
+								? this._template(data)
+								: this._templateStr;
+
+	return this;
+}
+
+
+function bindInnerComponents() {
+	var thisScope = binder(this.owner.el);
+
+	// TODO should be changed to reconcillation of existing children with new
+	this.owner.container.scope = thisScope[this.owner.name].container.scope;
+}
+
+
 // <a name="components"></a>
 // component class
 // --------------
@@ -1597,6 +2889,492 @@ function checkName(name) {
 // returns the number of objects in scope
 function _length() {
 	return Object.keys(this).length;
+}
+
+
+// <a name="components-source-data"></a>
+// ###component data source
+
+'use strict';
+
+var DOMEventsSource = require('./dom_events_source')
+	, Component = require('../c_class')
+	, ComponentDataSourceError = require('../../util/error').ComponentDataSource
+	, _ = require('mol-proto')
+	, check = require('../../util/check')
+	, Match = check.Match;
+
+
+// class to handle subscribtions to changes in DOM for UI (maybe also content editable) elements
+var ComponentDataSource = _.createSubclass(DOMEventsSource, 'ComponentDataSource', true);
+
+
+_.extendProto(ComponentDataSource, {
+	// implementing MessageSource interface
+	init: initComponentDataSource,
+	translateToSourceMessage: translateToDomEvent,
+ 	addSourceListener: addDomEventListener,
+ 	removeSourceListener: removeDomEventListener,
+ 	filterSourceMessage: filterDataMessage,
+
+ 	// class specific methods
+ 	// dom: implemented in DOMEventsSource
+ 	value: getDomElementDataValue,
+ 	handleEvent: handleEvent,  // event dispatcher - as defined by Event DOM API
+ 	trigger: triggerDataMessage // redefines method of superclass DOMEventsSource
+});
+
+module.exports = ComponentDataSource;
+
+
+function initComponentDataSource() {
+	DOMEventsSource.prototype.init.apply(this, arguments);
+
+	this.value(); // stores current component data value in this._value
+}
+
+
+// TODO: should return value dependent on element tag
+function getDomElementDataValue() { // value method
+	var newValue = this.component.el.value;
+
+	Object.defineProperty(this, '_value', {
+		configurable: true,
+		value: newValue
+	});
+
+	return newValue;
+}
+
+
+// TODO: this function should return relevant DOM event dependent on element tag
+// Can also implement beforedatachanged event to allow preventing the change
+function translateToDomEvent(message) {
+	if (message == 'datachanged')
+		return 'input';
+	else
+		throw new ComponentDataSourceError('unknown component data event');
+}
+
+
+function addDomEventListener(eventType) {
+	this.dom().addEventListener(eventType, this, false); // no capturing
+}
+
+
+function removeDomEventListener(eventType) {
+	this.dom().removeEventListener(eventType, this, false); // no capturing
+}
+
+
+function filterDataMessage(eventType, message, data) {
+	return data.newValue != data.oldValue;
+};
+
+
+ // event dispatcher - as defined by Event DOM API
+function handleEvent(event) {
+	var oldValue = this._value;
+
+	this.dispatchMessage(event.type, {
+		oldValue: oldValue,
+		newValue: this.value()
+	});
+}
+
+
+function triggerDataMessage(message, data) {
+	// TODO - opposite translation + event trigger 
+}
+
+
+// <a name="components-source-dom"></a>
+// ###component dom events source
+
+'use strict';
+
+var MessageSource = require('../../messenger/message_source')
+	, Component = require('../c_class')
+	, domEventsConstructors = require('./dom_events_constructors') // TODO merge with DOMEventSource ??
+	, _ = require('mol-proto')
+	, check = require('../../util/check')
+	, Match = check.Match;
+
+var DOMEventsSource = _.createSubclass(MessageSource, 'DOMMessageSource', true);
+
+
+_.extendProto(DOMEventsSource, {
+	// implementing MessageSource interface
+	init: init,
+	translateToSourceMessage: translateToSourceMessage,
+ 	addSourceListener: addSourceListener,
+ 	removeSourceListener: removeSourceListener,
+ 	filterSourceMessage: filterCapturedDomEvent,
+
+ 	// class specific methods
+ 	dom: dom,
+ 	handleEvent: handleEvent,  // event dispatcher - as defined by Event DOM API
+ 	trigger: triggerDomEvent
+});
+
+module.exports = DOMEventsSource;
+
+
+var useCapturePattern = /__capture$/;
+
+
+// init DOM event source
+function init(hostObject, proxyMethods, component) {
+	check(component, Component);
+	MessageSource.prototype.init.apply(this, arguments);
+
+	this.component = component;
+
+	// this.messenger is set by Messenger class
+}
+
+
+// get DOM element of component
+function dom() {
+	return this.component.el;
+}
+
+
+// translate to DOM event
+function translateToSourceMessage(message) {
+	if (useCapturePattern.test(message))
+		message = message.replace(useCapturePattern, '');
+	return message;
+}
+
+
+// add listener to DOM event
+function addSourceListener(eventType) {
+	this.dom().addEventListener(eventType, this, false);
+}
+
+
+// remove listener from DOM event
+function removeSourceListener(eventType) {
+	this.dom().removeEventListener(eventType, this, false);
+}
+
+
+function filterCapturedDomEvent(eventType, message, event) {
+	var isCapturePhase;
+	if (typeof window != 'undefined')
+		isCapturePhase = event.eventPhase == window.Event.CAPTURING_PHASE;
+
+	return (! isCapturePhase || (isCapturePhase && useCapturePattern.test(message)));
+}
+
+
+// event dispatcher - as defined by Event DOM API
+function handleEvent(event) {
+	this.dispatchMessage(event.type, event);
+}
+
+
+// TODO make work with messages (with _capture)
+function triggerDomEvent(eventType, properties) {
+	check(eventType, String);
+	check(properties, Match.Optional(Object));
+
+	var EventConstructor = domEventsConstructors[eventType];
+
+	if (typeof eventConstructor != 'function')
+		throw new Error('unsupported event type');
+
+	// check if it is correct
+	if (typeof properties != 'undefined')
+		properties.type = eventType;
+
+	var domEvent = EventConstructor(eventType, properties);
+
+	var notCancelled = this.dom().dispatchEvent(domEvent);
+
+	return notCancelled;
+}
+
+// <a name="components-dom-constructors"></a>
+// ###dom events constructors
+
+'use strict';
+
+var _ = require('mol-proto');
+
+
+// https://developer.mozilla.org/en-US/docs/Web/Reference/Events
+
+var eventTypes = {
+	ClipboardEvent: ['copy', 'cut', 'paste', 'beforecopy', 'beforecut', 'beforepaste'],
+	Event: ['input', 'readystatechange'],
+	FocusEvent: ['focus', 'blur', 'focusin', 'focusout'],
+	KeyboardEvent: ['keydown', 'keypress',  'keyup'],
+	MouseEvent: ['click', 'contextmenu', 'dblclick', 'mousedown', 'mouseup',
+				 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover',
+				 'show' /* context menu */],
+	TouchEvent: ['touchstart', 'touchend', 'touchmove', 'touchenter', 'touchleave', 'touchcancel'],
+};
+
+
+// mock window and event constructors for testing
+if (typeof window != 'undefined')
+	var global = window;
+else {
+	global = {};
+	_.eachKey(eventTypes, function(eTypes, eventConstructorName) {
+		var eventsConstructor;
+		eval(
+			'eventsConstructor = function ' + eventConstructorName + '(type, properties) { \
+				this.type = type; \
+				_.extend(this, properties); \
+			};'
+		);
+		global[eventConstructorName] = eventsConstructor;
+	});
+}
+
+
+var domEventsConstructors = {};
+
+_.eachKey(eventTypes, function(eTypes, eventConstructorName) {
+	eTypes.forEach(function(type) {
+		if (Object.hasOwnProperty(domEventsConstructors, type))
+			throw new Error('duplicate event type ' + type);
+
+		domEventsConstructors[type] = global[eventConstructorName];
+	});
+});
+
+
+module.exports = domEventsConstructors;
+
+
+// <a name="components-source-editable"></a>
+// ###component editable events source
+
+'use strict';
+
+var DOMEventsSource = require('./dom_events_source')
+	, Component = require('../c_class')
+	, EditableEventsSourceError = require('../../util/error').EditableEventsSource
+	, _ = require('mol-proto')
+	, check = require('../../util/check')
+	, Match = check.Match;
+
+
+// class to handle subscribtions to changes in DOM for UI (maybe also content editable) elements
+var EditableEventsSource = _.createSubclass(DOMEventsSource, 'EditableEventsSource', true);
+
+
+_.extendProto(EditableEventsSource, {
+	// implementing MessageSource interface
+	init: initEditableEventsSource,
+	translateToSourceMessage: translateToDomEvent,
+ 	addSourceListener: addDomEventListener,
+ 	removeSourceListener: removeDomEventListener,
+ 	filterSourceMessage: filterEditableMessage,
+
+ 	// class specific methods
+ 	// dom: implemented in DOMEventsSource
+ 	handleEvent: handleEvent,  // event dispatcher - as defined by Event DOM API
+ 	trigger: triggerEditableEvent // redefines method of superclass DOMEventsSource
+});
+
+module.exports = EditableEventsSource;
+
+
+function initEditableEventsSource(hostObject, proxyMethods, component, options) {
+	DOMEventsSource.prototype.init.apply(this, arguments);
+	this.options = options;
+}
+
+
+var editableEventsMap = {
+	'enterkey': 'keypress',
+	'editstart': 'mousedown',
+	'editend': 'blur',
+	// move events
+	'nexteditable': 'keydown',
+	'previouseditable': 'keydown',	
+	'adjacenteditable': 'keydown',
+	// merge events
+	'nextmerge': 'keydown',
+	'previousmerge': 'keydown',
+	'adjacentmerge': 'keydown',
+};
+
+// TODO: this function should return relevant DOM event dependent on element tag
+// Can also implement beforedatachanged event to allow preventing the change
+function translateToDomEvent(message) {
+	if (editableEventsMap.hasOwnProperty(message))
+		return editableEventsMap[message];
+	else
+		return DOMEventsSource.prototype.translateToSourceMessage.call(this, message);
+}
+
+
+function addDomEventListener(eventType) {
+	this.dom().addEventListener(eventType, this, false); // no capturing
+}
+
+
+function removeDomEventListener(eventType) {
+	this.dom().removeEventListener(eventType, this, false); // no capturing
+}
+
+
+function filterEditableMessage(eventType, message, data) {
+	var self = this;
+
+	switch (message) {
+		case 'enterkey':
+		 	return data.keyCode == 13;
+
+		// move to adjacent editable events
+		case 'previouseditable':
+			return this.options.moveToAdjacentEditable
+				&& movedToPrevious(data);
+		case 'nexteditable':
+			return this.options.moveToAdjacentEditable
+				&& movedToNext(data);
+		case 'adjacenteditable':
+			return this.options.moveToAdjacentEditable
+				&& (movedToPrevious(data) || movedToNext(data));
+
+		// merge adjacent editable events
+		case 'previousmerge': // merge current one into previous on backspace key
+			return this.options.allowMerge && mergeToPrevious(data)
+		case 'nextmerge': // merge current one into previous on backspace key
+			return this.options.allowMerge && mergeToNext(data)
+		case 'adjacentmerge':
+			return this.options.allowMerge
+				&& (mergeToPrevious(data) || mergeToNext(data));
+
+		case 'editstart':
+		case 'editend':
+			return this.options.editableOnClick;
+		default:
+			return true;
+	}
+
+	function movedToPrevious(data) {
+		return (data.keyCode == 37 || data.keyCode == 38) // up and left
+			&& noTextBeforeSelection(self.component);
+	}
+
+	function movedToNext(data) {
+		return (data.keyCode == 39 || data.keyCode == 40) // down and right
+			&& noTextAfterSelection(self.component);
+	} 
+
+	function mergeToPrevious(data) {
+		return data.keyCode == 8 // backspace
+			&& noTextBeforeSelection(self.component);
+	}
+
+	function mergeToNext(data) {
+		return data.keyCode == 46 // delete
+			&& noTextAfterSelection(self.component);
+	}
+
+	function noTextBeforeSelection(component) {
+		return ! component.dom.hasTextBeforeSelection();
+	};
+
+	function noTextAfterSelection(component) {
+		var sel = window.getSelection();
+		if (sel.anchorOffset == sel.anchorNode.length) {
+			if (sel.anchorNode.nextSibling) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+	}
+}
+
+
+ // event dispatcher - as defined by Event DOM API
+function handleEvent(event) {
+	this.dispatchMessage(event.type, event);
+}
+
+
+function triggerEditableEvent(message, data) {
+	// TODO - opposite translation + event trigger 
+}
+
+
+// <a name="components-source-iframe"></a>
+// ###component iframe source
+
+'use strict';
+
+var MessageSource = require('../../messenger/message_source')
+	, _ = require('mol-proto')
+	, check = require('../../util/check')
+	, Match = check.Match;
+
+var iFrameMessageSource = _.createSubclass(MessageSource, 'iFrameMessageSource', true);
+
+
+_.extendProto(iFrameMessageSource, {
+	// implementing MessageSource interface
+	init: initIFrameMessageSource,
+	translateToSourceMessage: translateToIFrameMessage,
+ 	addSourceListener: addIFrameMessageListener,
+ 	removeSourceListener: removeIFrameMessageListener,
+ 	filterSourceMessage: filterRecievedIFrameMessage,
+
+ 	//class specific methods
+ 	post: postToOtherWindow,
+ 	handleEvent: handleEvent  // event dispatcher - as defined by Event DOM API
+});
+
+module.exports = iFrameMessageSource;
+
+
+function initIFrameMessageSource(hostObject, proxyMethods) {
+	check(hostObject, Object);
+	MessageSource.prototype.init.apply(this, arguments);
+
+	if (hostObject.owner.el.nodeName == 'IFRAME')
+		this._postTo = hostObject.owner.el.contentWindow;
+	else
+		this._postTo = window.parent;
+
+	this._listenTo = window;
+}
+
+
+function translateToIFrameMessage(message) {
+	return 'message'; // sourceMessage
+}
+
+
+function addIFrameMessageListener(eventType) {
+	this._listenTo.addEventListener(eventType, this, false);
+}
+
+
+function removeIFrameMessageListener(eventType) {
+	this._listenTo.removeEventListener(eventType, this, false);
+}
+
+
+function filterRecievedIFrameMessage(eventType, message, event) {
+	return true;
+}
+
+function postToOtherWindow(eventType, message) {
+	message.type = eventType;
+	this._postTo.postMessage(message, '*');
+}
+
+function handleEvent(event) {
+	this.dispatchMessage(event.type, event);
 }
 
 

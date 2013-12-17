@@ -800,6 +800,9 @@ function _createMessageSource(MessageSourceClass, options) {
 	_.defineProperty(this, '_messageSource', messageSource);
 }
 },{"../facets/f_class":34,"../messenger":39,"../util/error":47,"mol-proto":55}],10:[function(require,module,exports){
+// <a name="components-facets-container"></a>
+// ###container facet
+
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -844,6 +847,9 @@ function addChildComponents(childComponents) {
 }
 
 },{"../../binder":6,"../c_facet":9,"./cf_registry":23,"mol-proto":55}],11:[function(require,module,exports){
+// <a name="components-facets-data"></a>
+// ###data facet
+
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -1004,6 +1010,9 @@ function inputValue(el, value) {
 }
 
 },{"../../messenger":39,"../../model/path_utils":43,"../../util/logger":49,"../c_facet":9,"../c_message_sources/component_data_source":25,"./cf_registry":23,"mol-proto":55}],12:[function(require,module,exports){
+// <a name="components-facets-dom"></a>
+// ###dom facet
+
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -1189,6 +1198,9 @@ function hasTextBeforeSelection() {
 
 
 },{"../../attribute/a_bind":3,"../../binder":6,"../../util/check":44,"../../util/error":47,"../c_facet":9,"./cf_registry":23,"mol-proto":55}],13:[function(require,module,exports){
+// <a name="components-facets-drag"></a>
+// ###drag facet
+
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -1269,6 +1281,9 @@ function startDragFacet() {
 }
 
 },{"../c_facet":9,"../c_message_sources/dom_events_source":27,"./cf_registry":23,"mol-proto":55}],14:[function(require,module,exports){
+// <a name="components-facets-drop"></a>
+// ###drop facet
+
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -1312,6 +1327,9 @@ function startDropFacet() {
 	}
 }
 },{"../c_facet":9,"../c_message_sources/dom_events_source":27,"./cf_registry":23,"mol-proto":55}],15:[function(require,module,exports){
+// <a name="components-facets-editable"></a>
+// ###editable facet
+
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -1532,6 +1550,9 @@ function onEnterSplit(message, event) {
 }
 
 },{"../../util":48,"../../util/logger":49,"../c_class":8,"../c_facet":9,"../c_message_sources/editable_events_source":28,"./cf_registry":23,"mol-proto":55}],16:[function(require,module,exports){
+// <a name="components-facets-events"></a>
+// ###events facet
+
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -1571,6 +1592,9 @@ function init() {
 }
 
 },{"../../messenger":39,"../c_facet":9,"../c_message_sources/dom_events_source":27,"./cf_registry":23,"mol-proto":55}],17:[function(require,module,exports){
+// <a name="components-facets-frame"></a>
+// ###frame facet
+
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -1612,6 +1636,9 @@ function initFrameFacet() {
 	});
 }
 },{"../../messenger":39,"../c_facet":9,"../c_message_sources/iframe_message_source":29,"./cf_registry":23,"mol-proto":55}],18:[function(require,module,exports){
+// <a name="components-facets-item"></a>
+// ###item facet
+
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -1633,6 +1660,9 @@ facetsRegistry.add(ItemFacet);
 module.exports = ItemFacet;
 
 },{"../../mail":37,"../../model":42,"../c_facet":9,"./cf_registry":23,"mol-proto":55}],19:[function(require,module,exports){
+// <a name="components-facets-list"></a>
+// ###list facet
+
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -1816,6 +1846,9 @@ function each(callback, thisArg) {
 }
 
 },{"../../binder":6,"../../mail":37,"../../model":42,"../../util/error":47,"../../util/logger":49,"../c_class":8,"../c_facet":9,"./cf_registry":23,"mol-proto":55}],20:[function(require,module,exports){
+// <a name="components-facets-model"></a>
+// ###model facet
+
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -1850,6 +1883,9 @@ function _createMessenger() { // Called by inherited init
 }
 
 },{"../../model":42,"../c_facet":9,"./cf_registry":23,"mol-proto":55}],21:[function(require,module,exports){
+// <a name="components-facets-split"></a>
+// ###split facet
+
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -1964,6 +2000,9 @@ function isSplittable() {
 }
 
 },{"../c_class":8,"../c_facet":9,"./cf_registry":23}],22:[function(require,module,exports){
+// <a name="components-facets-template"></a>
+// ###template facet
+
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -2115,6 +2154,9 @@ function ComponentInfo(scope, el, attr) {
 }
 
 },{"../util/error":47,"./c_facets/cf_registry":23,"./c_registry":30}],25:[function(require,module,exports){
+// <a name="components-source-data"></a>
+// ###component data source
+
 'use strict';
 
 var DOMEventsSource = require('./dom_events_source')
@@ -2208,6 +2250,9 @@ function triggerDataMessage(message, data) {
 }
 
 },{"../../util/check":44,"../../util/error":47,"../c_class":8,"./dom_events_source":27,"mol-proto":55}],26:[function(require,module,exports){
+// <a name="components-dom-constructors"></a>
+// ###dom events constructors
+
 'use strict';
 
 var _ = require('mol-proto');
@@ -2260,6 +2305,9 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 module.exports = domEventsConstructors;
 
 },{"mol-proto":55}],27:[function(require,module,exports){
+// <a name="components-source-dom"></a>
+// ###component dom events source
+
 'use strict';
 
 var MessageSource = require('../../messenger/message_source')
@@ -2365,6 +2413,9 @@ function triggerDomEvent(eventType, properties) {
 	return notCancelled;
 }
 },{"../../messenger/message_source":40,"../../util/check":44,"../c_class":8,"./dom_events_constructors":26,"mol-proto":55}],28:[function(require,module,exports){
+// <a name="components-source-editable"></a>
+// ###component editable events source
+
 'use strict';
 
 var DOMEventsSource = require('./dom_events_source')
@@ -2518,6 +2569,9 @@ function triggerEditableEvent(message, data) {
 }
 
 },{"../../util/check":44,"../../util/error":47,"../c_class":8,"./dom_events_source":27,"mol-proto":55}],29:[function(require,module,exports){
+// <a name="components-source-iframe"></a>
+// ###component iframe source
+
 'use strict';
 
 var MessageSource = require('../../messenger/message_source')
