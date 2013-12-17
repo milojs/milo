@@ -3400,12 +3400,18 @@ var getterSynthesizer = doT.compile(getterTemplate, dotDef)
 _.extendProto(Model, {
 	get: get,
 	set: synthesizeMethod(modelSetterSynthesizer, '', []),
+	path: path,
 	proxyMessenger: proxyMessenger,
 	_wrapMessengerMethods: _wrapMessengerMethods
 });
 
 function get() {
 	return this._data;
+}
+
+// returns ModelPath object
+function path(accessPath) {
+	return this(accessPath);
 }
 
 
@@ -4001,7 +4007,7 @@ var _ = require('mol-proto');
 var errorClassNames = ['AbstractClass', 'Mixin', 'Messenger', 'ComponentDataSource',
 					   'Attribute', 'Binder', 'Loader', 'MailMessageSource', 'Facet',
 					   'Scope', 'EditableEventsSource', 'Model', 'DomFacet', 'EditableFacet',
-					   'List'];
+					   'List', 'Connector'];
 
 var error = {
 	toBeImplemented: toBeImplemented,
