@@ -25,7 +25,8 @@
     "grunt-contrib-uglify": "~0.2.7",
     "grunt-contrib-concat": "~0.3.0",
     "grunt-contrib-watch": "~0.5.3",
-    "brfs": "0.0.8"
+    "brfs": "0.0.8",
+    "grunt-docco": "~0.3.0"
   },
   "dependencies": {
     "mol-proto": "git://github.com/MailOnline/proto.git",

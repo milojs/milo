@@ -309,6 +309,33 @@ function decorate() {
 }
 
 },{"../util/check":44,"../util/error":47,"mol-proto":55}],6:[function(require,module,exports){
+// <a name="binder"></a>
+// milo.binder
+// -----------
+
+// milo.binder recursively scans the document tree inside scopeElement
+// (document.body by default) looking for __ml-bind__ attribute that should
+// contain the class, additional facets and the name of the component
+// that should be created and bound to the element.
+
+// Possible values of __ml-bind__ attribute:
+
+// - :myView - only component name. An instance of Component class will be
+//   created without any facets.
+// - View:myView - class and component name. An instance of View class will be
+//   created.
+// - [Events, Data]:myView - facets and component name. An instance of Component
+//   class will be created with the addition of facets Events and Data.
+// - View[Events, Data]:myView - class, facet(s) and component name. An instance of
+//   View class will be created with the addition of facets Events and Data.
+
+// Created components will be returned as map with their names used as keys.
+// Names within the scope should be therefore unique.
+
+// If the component has _Scope_ facet, children of this element will be stored on the _Scope_ facet of this element as properties. Names of components within
+// the scope whould be unique, but they can be the same as the names of components
+// in outer scope (or some other).
+
 'use strict';
 
 var miloMail = require('./mail')
@@ -432,6 +459,10 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 }
 
 },{"./attribute/a_bind":3,"./components/c_facets/cf_registry":23,"./components/c_info":24,"./components/c_registry":30,"./components/scope":32,"./mail":37,"./util/check":44,"./util/dom":46,"./util/error":47,"mol-proto":55}],7:[function(require,module,exports){
+// <a name="classes"></a>
+// milo.classes
+// -----------
+
 'use strict';
 
 var classes = {
@@ -2605,6 +2636,22 @@ function _length() {
 }
 
 },{"../util/check":44,"../util/error":47,"mol-proto":55}],33:[function(require,module,exports){
+// <a name="config"></a>
+// milo.config
+// -----------
+
+// It is the function that allows to change milo configurations and also
+// access them on config's properties.
+
+// ```javascript
+// milo.config({
+//     attrs: {
+//         bind: 'ml-bind',
+//         load: 'ml-load'
+//     }
+// });
+// ```
+
 'use strict';
 
 var _ = require('mol-proto');
@@ -2746,6 +2793,38 @@ FacetedObject.createFacetedClass = function (name, facetsClasses, facetsConfig) 
 };
 
 },{"../util/check":44,"../util/error":47,"./f_class":34,"mol-proto":55}],36:[function(require,module,exports){
+// <a name="loader"></a>
+// milo.loader
+// -----------
+
+// milo.loader loads subviews into the page. It scans the document inside rootElement looking for ml-load attribute that should contain URL of HTML fragment that will be loaded inside the element with this attribute.
+
+// milo.loader returns the map of references to elements with their IDs used as keys.
+
+// ### Example
+
+// html
+
+// ```html
+// <body>
+//     <div id="view1" ml-load="view1.html"></div>
+//     <div>
+//         <div id="view2" ml-load="view3.html"></div>
+//     </div>
+// </body>
+// ```
+
+// javascript
+
+// ```javascript
+// var views = milo.loader(); // document.body is used by default
+// log(views);
+// // {
+// //     view1: div with id="view1"
+// //     view2: div with id="view2"
+// // }
+// ```
+
 'use strict';
 
 var miloMail = require('./mail')
@@ -2821,6 +2900,19 @@ function loadView(el, callback) {
 }
 
 },{"./attribute/a_load":4,"./config":33,"./mail":37,"./util/dom":46,"./util/error":47,"./util/logger":49,"./util/request":51}],37:[function(require,module,exports){
+// <a name="mail"></a>
+// milo.mail
+// -----------
+
+// It is an application level messenger that is an instance of Messenger class.
+
+// At the moment, in addition to application messages that you define, you can subscribe to __domready__ message that is guaranteed to fire once,
+// even if DOM was ready at the time of the subscription.
+
+// Messaging between frames is likely to be exposed via milo.mail.
+
+// See Messenger.
+
 'use strict';
 
 var Messenger = require('../messenger')
@@ -3283,7 +3375,18 @@ function dispatchAllSourceMessages(sourceMessage, message, data) {
 }
 
 },{"../abstract/mixin":1,"../util/error":47,"../util/logger":49,"mol-proto":55}],41:[function(require,module,exports){
+// A minimalist browser framework that binds HTML elements to JS components and components to models.
 'use strict';
+
+// Main Modules
+// ------------
+// - .[loader](#loader) - loading subviews into page
+// - .[binder](#binder) - components instantiation and binding of DOM elements to them
+// - .[minder](#minder) - data reactivity, one or two way, shallow or deep, as you like it
+// - .[mail](#mail) - applicaiton level messenger
+// - .[config](#config) - milo configuration
+// - .[utils](#utils) - logger, request, check, etc.
+// - .[classes](#classes) - foundation classes and class registries
 
 var milo = {
 	loader: require('./loader'),
@@ -3295,7 +3398,7 @@ var milo = {
 }
 
 
-// used facets
+// included facets
 require('./components/c_facets/Dom');
 require('./components/c_facets/Data');
 require('./components/c_facets/Frame');
@@ -3310,7 +3413,7 @@ require('./components/c_facets/Split');
 require('./components/c_facets/List');
 require('./components/c_facets/Item');
 
-// used components
+// included components
 require('./components/classes/View');
 
 
@@ -3651,9 +3754,11 @@ function getPathNodeKey(pathNode) {
 }
 
 },{"../util/check":44,"mol-proto":55}],44:[function(require,module,exports){
-'use strict';
+// <a name="utils-check"></a>
+// milo.utils.check
+// -----------
 
-// XXX docs
+'use strict';
 
 // Things we explicitly do NOT support:
 //    - heterogenous arrays
@@ -3959,6 +4064,10 @@ function _prependPath(key, base) {
 
 
 },{"mol-proto":55}],45:[function(require,module,exports){
+// <a name="utils-count"></a>
+// milo.utils.count
+// -----------
+
 'use strict';
 
 var count = 0;
@@ -3975,6 +4084,10 @@ componentCount.get = function() {
 module.exports = componentCount;
 
 },{}],46:[function(require,module,exports){
+// <a name="utils-dom"></a>
+// milo.utils.dom
+// -----------
+
 'use strict';
 
 
@@ -3993,6 +4106,10 @@ function filterNodeListByType(nodeList, type) {
 }
 
 },{}],47:[function(require,module,exports){
+// <a name="utils-error"></a>
+// milo.utils.error
+// -----------
+
 'use strict';
 
 var _ = require('mol-proto');
@@ -4033,6 +4150,10 @@ function toBeImplemented() {
 }
 
 },{"mol-proto":55}],48:[function(require,module,exports){
+// <a name="utils"></a>
+// milo.utils
+// -----------
+
 'use strict';
 
 var util = {
@@ -4047,6 +4168,13 @@ var util = {
 module.exports = util;
 
 },{"./check":44,"./count":45,"./dom":46,"./error":47,"./logger":49,"./request":51}],49:[function(require,module,exports){
+// <a name="utils-logger"></a>
+// milo.utils.logger
+// -----------
+
+// Application logger that has error, warn, info and debug
+// methods, that can be suppressed by setting log level.
+
 'use strict';
 
 var Logger = require('./logger_class');
@@ -4056,6 +4184,21 @@ var logger = new Logger({ level: 3 });
 module.exports = logger;
 
 },{"./logger_class":50}],50:[function(require,module,exports){
+// ### Logger Class
+
+// Properties:
+
+// - level
+
+//   - 0 - error
+//   - 1 - warn
+//   - 2 - info
+//   - 3 - debug (default)
+
+// - enabled
+
+//   true by default. Set to false to disable all logging in browser console.
+
 'use strict';
 
 var _ = require('mol-proto');
@@ -4152,6 +4295,10 @@ levels.forEach(function (name) {
 module.exports = Logger;
 
 },{"mol-proto":55}],51:[function(require,module,exports){
+// <a name="utils-request"></a>
+// milo.utils.request
+// -----------
+
 'use strict';
 
 var _ = require('mol-proto');
@@ -4494,8 +4641,7 @@ var proto = _ = {
 	prependArray: prependArray,
 	toArray: toArray,
 	firstUpperCase: firstUpperCase,
-	firstLowerCase: firstLowerCase,
-	filterNodeListByType: filterNodeListByType
+	firstLowerCase: firstLowerCase
 };
 
 
@@ -4723,17 +4869,6 @@ function firstUpperCase(str) {
 
 function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
-}
-
-
-// type 1: html element, type 3: text
-function filterNodeListByType(nodeList, type) {
-	var filteredNodes = [];
-	Array.prototype.forEach.call(nodeList, function (node) {
-		if (node.nodeType == type)
-			filteredNodes.push(node);
-	});
-	return filteredNodes;
 }
 
 

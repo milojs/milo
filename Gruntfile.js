@@ -2,6 +2,23 @@ module.exports = function(grunt) {
 	var bundles = getBundles();
 
 	grunt.initConfig({
+		concat: {
+			options: {
+				separator: '\n\n',
+			},
+			dist: {
+				src: bundles.docs,
+				dest: 'docs/milo.js'
+			}
+		},
+		docco: {
+			build: {
+				src: ['docs/milo.js'],
+				options: {
+					output: 'docs/'
+				}
+			}
+		},
 		mochaTest: {
 			test: {
 				options: {
@@ -52,15 +69,6 @@ module.exports = function(grunt) {
 				tasks: 'browserify:test1'
 			}
 		}
-		// concat: {
-		// 	options: {
-		// 		separator: ';',
-		// 	},
-		// 	dist: {
-		// 		src: ['lib/bndr.js'],
-		// 		dest: 'bndr.js'
-		// 	}
-		// },
 		// uglify: {
 		// 	build: {
 		// 		src: 'bndr.js',
@@ -70,20 +78,42 @@ module.exports = function(grunt) {
 
 	});
 
-	//grunt.loadNpmTasks('grunt-contrib-concat');
+	grunt.loadNpmTasks('grunt-contrib-concat');
 	//grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-browserify');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-mocha-test');
 	grunt.loadNpmTasks('grunt-mocha');
+	grunt.loadNpmTasks('grunt-docco');
 
 	grunt.registerTask('test', 'mochaTest');
+	grunt.registerTask('docs', ['concat', 'docco']);
 	grunt.registerTask('htmltest', ['browserify:test1', 'watch']);
 	grunt.registerTask('default', ['test', 'browserify', 'watch']);
 	grunt.registerTask('skiptest', ['browserify', 'watch']);
 
 	function getBundles() {
         return {
+        	docs: [
+        		'lib/milo.js',
+
+        		'lib/loader.js',
+        		'lib/binder.js',
+				'lib/classes.js',
+				'lib/config.js',
+				'lib/minder.js',
+
+				'lib/mail/index.js',
+
+				'lib/util/index.js',
+				'lib/util/logger.js',
+				'lib/util/logger_class.js',
+				'lib/util/count.js',
+				'lib/util/dom.js',
+				'lib/util/error.js',
+				'lib/util/check.js',
+				'lib/util/request.js'
+        	]
         };
     }
 };

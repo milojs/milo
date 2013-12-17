@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>milo.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>milo.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>A minimalist browser framework that binds HTML elements to JS components and components to models.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <h2 id="main-modules">Main Modules</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <ul>
+<li>.<a href="#loader">loader</a> - loading subviews into page</li>
+<li>.<a href="#binder">binder</a> - components instantiation and binding of DOM elements to them</li>
+<li>.<a href="#minder">minder</a> - data reactivity, one or two way, shallow or deep, as you like it</li>
+<li>.<a href="#mail">mail</a> - applicaiton level messenger</li>
+<li>.<a href="#config">config</a> - milo configuration</li>
+<li>.<a href="#utils">utils</a> - logger, request, check, etc.</li>
+<li>.<a href="#classes">classes</a> - foundation classes and class registries</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> milo = {
+	loader: require(<span class="string">'./loader'</span>),
+	binder: require(<span class="string">'./binder'</span>),
+	mail: require(<span class="string">'./mail'</span>),
+	config: require(<span class="string">'./config'</span>),
+	util: require(<span class="string">'./util'</span>),
+	classes: require(<span class="string">'./classes'</span>)
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>included facets</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>require(<span class="string">'./components/c_facets/Dom'</span>);
+require(<span class="string">'./components/c_facets/Data'</span>);
+require(<span class="string">'./components/c_facets/Frame'</span>);
+require(<span class="string">'./components/c_facets/Events'</span>);
+require(<span class="string">'./components/c_facets/Template'</span>);
+require(<span class="string">'./components/c_facets/Container'</span>);
+require(<span class="string">'./components/c_facets/ModelFacet'</span>);
+require(<span class="string">'./components/c_facets/Drag'</span>);
+require(<span class="string">'./components/c_facets/Drop'</span>);
+require(<span class="string">'./components/c_facets/Editable'</span>);
+require(<span class="string">'./components/c_facets/Split'</span>);
+require(<span class="string">'./components/c_facets/List'</span>);
+require(<span class="string">'./components/c_facets/Item'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>included components</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>require(<span class="string">'./components/classes/View'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>export for node/browserify</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">if</span> (<span class="keyword">typeof</span> module == <span class="string">'object'</span> &amp;&amp; module.exports)	
+	module.exports = milo;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>global milo for browser</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">if</span> (<span class="keyword">typeof</span> window == <span class="string">'object'</span>)
+	window.milo = milo;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p><a name="loader"></a></p>
+<h2 id="milo-loader">milo.loader</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>milo.loader loads subviews into the page. It scans the document inside rootElement looking for ml-load attribute that should contain URL of HTML fragment that will be loaded inside the element with this attribute.</p>
+<p>milo.loader returns the map of references to elements with their IDs used as keys.</p>
+<h3 id="example">Example</h3>
+<p>html</p>
+<pre><code class="lang-html">&lt;body&gt;
+    &lt;div id=&quot;view1&quot; ml-load=&quot;view1.html&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;
+        &lt;div id=&quot;view2&quot; ml-load=&quot;view3.html&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/body&gt;</code></pre>
+<p>javascript</p>
+<pre><code class="lang-javascript">var views = milo.loader(); // document.body is used by default
+log(views);
+// {
+//     view1: div with id=&quot;view1&quot;
+//     view2: div with id=&quot;view2&quot;
+// }</code></pre>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> miloMail = require(<span class="string">'./mail'</span>)
+	, request = require(<span class="string">'./util/request'</span>)
+	, logger = require(<span class="string">'./util/logger'</span>)
+	, utilDom = require(<span class="string">'./util/dom'</span>)
+	, config = require(<span class="string">'./config'</span>)
+	, LoadAttribute = require(<span class="string">'./attribute/a_load'</span>)
+	, LoaderError = require(<span class="string">'./util/error'</span>).Loader;
+
+
+module.exports = loader;
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">loader</span><span class="params">(rootEl, callback)</span> {</span>	
+	miloMail.onMessage(<span class="string">'domready'</span>, <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+		<span class="keyword">if</span> (<span class="keyword">typeof</span> rootEl == <span class="string">'function'</span>) {
+			callback = rootEl;
+			rootEl = <span class="literal">undefined</span>;
+		}
+
+		rootEl = rootEl || document.body;
+
+		miloMail.postMessage(<span class="string">'loader'</span>, { state: <span class="string">'started'</span> });
+		_loader(rootEl, <span class="function"><span class="keyword">function</span><span class="params">(views)</span> {</span>
+			miloMail.postMessage(<span class="string">'loader'</span>, { 
+				state: <span class="string">'finished'</span>,
+				views: views
+			});
+			callback(views);
+		});
+	});
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_loader</span><span class="params">(rootEl, callback)</span> {</span>
+	<span class="keyword">var</span> loadElements = rootEl.querySelectorAll(<span class="string">'['</span> + config.attrs.load + <span class="string">']'</span>);
+
+	<span class="keyword">var</span> views = {}
+		, totalCount = loadElements.length
+		, loadedCount = <span class="number">0</span>;
+
+	Array.prototype.forEach.call(loadElements, <span class="function"><span class="keyword">function</span> <span class="params">(el)</span> {</span>
+		loadView(el, <span class="function"><span class="keyword">function</span><span class="params">(err)</span> {</span>
+			views[el.id] = err || el;
+			loadedCount++;
+			<span class="keyword">if</span> (loadedCount == totalCount)
+				callback(views);
+		});
+	});
+};
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">loadView</span><span class="params">(el, callback)</span> {</span>
+	<span class="keyword">if</span> (utilDom.filterNodeListByType(el.childNodes, <span class="number">1</span>).length)
+		<span class="keyword">throw</span> <span class="keyword">new</span> LoaderError(<span class="string">'can\'t load html into element that is not empty'</span>);
+
+	<span class="keyword">var</span> attr = <span class="keyword">new</span> LoadAttribute(el);
+
+	attr.parse().validate();
+
+	request.get(attr.loadUrl, <span class="function"><span class="keyword">function</span><span class="params">(err, html)</span> {</span>
+		<span class="keyword">if</span> (err) {
+			err.message = err.message || <span class="string">'can\'t load file '</span> + attr.loadUrl;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>logger.error(err.message);</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>			callback(err);
+			<span class="keyword">return</span>;
+		}
+
+		el.innerHTML = html;
+		callback(<span class="literal">null</span>);
+	});
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p><a name="binder"></a></p>
+<h2 id="milo-binder">milo.binder</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>milo.binder recursively scans the document tree inside scopeElement
+(document.body by default) looking for <strong>ml-bind</strong> attribute that should
+contain the class, additional facets and the name of the component
+that should be created and bound to the element.</p>
+<p>Possible values of <strong>ml-bind</strong> attribute:</p>
+<ul>
+<li>:myView - only component name. An instance of Component class will be
+created without any facets.</li>
+<li>View:myView - class and component name. An instance of View class will be
+created.</li>
+<li>[Events, Data]:myView - facets and component name. An instance of Component
+class will be created with the addition of facets Events and Data.</li>
+<li>View[Events, Data]:myView - class, facet(s) and component name. An instance of
+View class will be created with the addition of facets Events and Data.</li>
+</ul>
+<p>Created components will be returned as map with their names used as keys.
+Names within the scope should be therefore unique.</p>
+<p>If the component has <em>Scope</em> facet, children of this element will be stored on the <em>Scope</em> facet of this element as properties. Names of components within
+the scope whould be unique, but they can be the same as the names of components
+in outer scope (or some other).</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> miloMail = require(<span class="string">'./mail'</span>)
+	, componentsRegistry = require(<span class="string">'./components/c_registry'</span>)
+	, facetsRegistry = require(<span class="string">'./components/c_facets/cf_registry'</span>)
+	, Component = componentsRegistry.get(<span class="string">'Component'</span>)
+	, ComponentInfo = require(<span class="string">'./components/c_info'</span>)
+	, Scope = require(<span class="string">'./components/scope'</span>)
+	, BindAttribute = require(<span class="string">'./attribute/a_bind'</span>)
+	, BinderError = require(<span class="string">'./util/error'</span>).Binder
+	, _ = require(<span class="string">'mol-proto'</span>)
+	, check = require(<span class="string">'./util/check'</span>)
+	, utilDom = require(<span class="string">'./util/dom'</span>)
+	, Match =  check.Match;
+
+
+binder.scan = scan;
+binder.create = create;
+binder.twoPass = twoPass;
+
+
+module.exports = binder;
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">binder</span><span class="params">(scopeEl)</span> {</span>
+	<span class="keyword">return</span> createBinderScope(scopeEl, <span class="function"><span class="keyword">function</span><span class="params">(scope, el, attr)</span> {</span>
+		<span class="keyword">var</span> info = <span class="keyword">new</span> ComponentInfo(scope, el, attr);
+		<span class="keyword">return</span> Component.create(info);
+	});
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>bind in two passes</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">twoPass</span><span class="params">(scopeEl)</span> {</span>
+	<span class="keyword">var</span> scopeEl = scopeEl || document.body;
+	<span class="keyword">var</span> scanScope = binder.scan(scopeEl);
+	<span class="keyword">return</span> binder.create(scanScope);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>scan DOM for BindAttribute</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">scan</span><span class="params">(scopeEl)</span> {</span>
+	<span class="keyword">return</span> createBinderScope(scopeEl, <span class="function"><span class="keyword">function</span><span class="params">(scope, el, attr)</span> {</span>
+		<span class="keyword">return</span> <span class="keyword">new</span> ComponentInfo(scope, el, attr);
+	});
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>create bound components</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">create</span><span class="params">(scanScope)</span> {</span>
+	<span class="keyword">var</span> scope = <span class="keyword">new</span> Scope(scanScope._rootEl);
+
+	scanScope._each(<span class="function"><span class="keyword">function</span><span class="params">(compInfo)</span> {</span>
+		<span class="keyword">var</span> aComponent = Component.create(compInfo);
+
+		scope._add(aComponent, aComponent.name);
+		<span class="keyword">if</span> (aComponent.container)
+			aComponent.container.scope = create(compInfo.container.scope);
+	});
+
+	<span class="keyword">return</span> scope;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">createBinderScope</span><span class="params">(scopeEl, scopeObjectFactory)</span> {</span>
+	<span class="keyword">var</span> scopeEl = scopeEl || document.body
+		, scope = <span class="keyword">new</span> Scope(scopeEl);
+
+	createScopeForElement(scope, scopeEl);
+	
+	<span class="keyword">return</span> scope;
+
+
+	<span class="function"><span class="keyword">function</span> <span class="title">createScopeForElement</span><span class="params">(scope, el)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>get element&#39;s binding attribute (ml-bind by default)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		<span class="keyword">var</span> attr = <span class="keyword">new</span> BindAttribute(el);
+
+		<span class="keyword">if</span> (attr.node) {
+			<span class="keyword">var</span> scopeObject = scopeObjectFactory(scope, el, attr)
+				, isContainer = <span class="keyword">typeof</span> scopeObject != <span class="string">'undefined'</span> &amp;&amp; scopeObject.container;
+		}
+
+		<span class="keyword">if</span> (el.childNodes &amp;&amp; el.childNodes.length) {
+			<span class="keyword">var</span> innerScope = createScopeForChildren(el);
+
+			<span class="keyword">if</span> (innerScope._length()) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>attach inner attributes to the current one (create a new scope) ...</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>				<span class="keyword">if</span> (isContainer)
+					scopeObject.container.scope = innerScope;
+				<span class="keyword">else</span> <span class="comment">// or keep them in the current scope</span>
+					scope._copy(innerScope);;
+			}
+		}
+
+		<span class="keyword">if</span> (isContainer &amp;&amp; ! scopeObject.container.scope)
+			scopeObject.container.scope = <span class="keyword">new</span> Scope(el);
+
+		<span class="keyword">if</span> (scopeObject)
+			scope._add(scopeObject, attr.compName);
+
+		postChildrenBoundMessage(el);
+
+		<span class="keyword">return</span> scopeObject;
+
+
+		<span class="function"><span class="keyword">function</span> <span class="title">postChildrenBoundMessage</span><span class="params">(el)</span> {</span>
+			<span class="keyword">var</span> elComp = Component.getComponent(el);
+			<span class="keyword">if</span> (elComp)
+				elComp.postMessage(<span class="string">'childrenbound'</span>);
+		}
+	}
+
+
+	<span class="function"><span class="keyword">function</span> <span class="title">createScopeForChildren</span><span class="params">(containerEl)</span> {</span>
+		<span class="keyword">var</span> scope = <span class="keyword">new</span> Scope(containerEl);
+		Array.prototype.forEach.call(utilDom.filterNodeListByType(containerEl.childNodes, <span class="number">1</span>), <span class="function"><span class="keyword">function</span><span class="params">(node)</span> {</span>
+			createScopeForElement(scope, node);
+		});
+		<span class="keyword">return</span> scope;
+	}
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p><a name="classes"></a></p>
+<h2 id="milo-classes">milo.classes</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> classes = {
+	Facet: require(<span class="string">'./facets/f_class'</span>),
+	Component: require(<span class="string">'./components/c_class'</span>),
+	ComponentFacet: require(<span class="string">'./components/c_facet'</span>),
+	ClassRegistry: require(<span class="string">'./abstract/registry'</span>),
+	facetsRegistry: require(<span class="string">'./components/c_facets/cf_registry'</span>),
+	componentsRegistry: require(<span class="string">'./components/c_registry'</span>),
+	Model: require(<span class="string">'./model'</span>)
+};
+
+module.exports = classes;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p><a name="config"></a></p>
+<h2 id="milo-config">milo.config</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>It is the function that allows to change milo configurations and also
+access them on config&#39;s properties.</p>
+<pre><code class="lang-javascript">milo.config({
+    attrs: {
+        bind: &#39;ml-bind&#39;,
+        load: &#39;ml-load&#39;
+    }
+});</code></pre>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> _ = require(<span class="string">'mol-proto'</span>);
+
+
+module.exports = config;
+
+<span class="function"><span class="keyword">function</span> <span class="title">config</span><span class="params">(options)</span> {</span>
+	_.deepExtend(config, options);
+}
+
+config({
+	attrs: {
+		bind: <span class="string">'ml-bind'</span>,
+		load: <span class="string">'ml-load'</span>
+	},
+	componentRef: <span class="string">'___milo_component'</span>
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p><a name="minder"></a></p>
+<h2 id="milo-minder">milo.minder</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>This module will be used to create and manage reactive connections between 
+components and models (and, potentially, other models).</p>
+<p>It is not developed yet.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> Connector = require(<span class="string">'./model/connector'</span>);
+
+
+model.exports = minder;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>can accept array pf arrays to set up many</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">minder</span><span class="params">(ds1, mode, ds2, options)</span> {</span>
+	<span class="keyword">if</span> (Array.isArray(ds1)) {
+		<span class="keyword">var</span> connDescriptions = ds1;
+		<span class="keyword">var</span> connectors = connDescriptions.map(<span class="function"><span class="keyword">function</span><span class="params">(descr)</span> {</span>
+			<span class="keyword">return</span> <span class="keyword">new</span> Connector(descr[<span class="number">0</span>], descr[<span class="number">1</span>], descr[<span class="number">2</span>], descr[<span class="number">3</span>]);
+		});
+	} <span class="keyword">else</span>
+		<span class="keyword">return</span> <span class="keyword">new</span> Connector(ds1, mode, ds2, options);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p><a name="mail"></a></p>
+<h2 id="milo-mail">milo.mail</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p>It is an application level messenger that is an instance of Messenger class.</p>
+<p>At the moment, in addition to application messages that you define, you can subscribe to <strong>domready</strong> message that is guaranteed to fire once,
+even if DOM was ready at the time of the subscription.</p>
+<p>Messaging between frames is likely to be exposed via milo.mail.</p>
+<p>See Messenger.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> Messenger = require(<span class="string">'../messenger'</span>)
+	, MailMessageSource = require(<span class="string">'./mail_source'</span>);
+
+
+<span class="keyword">var</span> mailMsgSource = <span class="keyword">new</span> MailMessageSource();
+
+<span class="keyword">var</span> miloMail = <span class="keyword">new</span> Messenger(<span class="literal">undefined</span>, <span class="literal">undefined</span>, mailMsgSource);
+
+module.exports = miloMail;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <p><a name="utils"></a></p>
+<h2 id="milo-utils">milo.utils</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> util = {
+	logger: require(<span class="string">'./logger'</span>),
+	request: require(<span class="string">'./request'</span>),
+	check: require(<span class="string">'./check'</span>),
+	error: require(<span class="string">'./error'</span>),
+	count: require(<span class="string">'./count'</span>),
+	dom: require(<span class="string">'./dom'</span>)
+};
+
+module.exports = util;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <p><a name="utils-logger"></a></p>
+<h2 id="milo-utils-logger">milo.utils.logger</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p>Application logger that has error, warn, info and debug
+methods, that can be suppressed by setting log level.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> Logger = require(<span class="string">'./logger_class'</span>);
+
+<span class="keyword">var</span> logger = <span class="keyword">new</span> Logger({ level: <span class="number">3</span> });
+
+module.exports = logger;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <h3 id="logger-class">Logger Class</h3>
+<p>Properties:</p>
+<ul>
+<li><p>level</p>
+<ul>
+<li>0 - error</li>
+<li>1 - warn</li>
+<li>2 - info</li>
+<li>3 - debug (default)</li>
+</ul>
+</li>
+<li><p>enabled</p>
+<p>true by default. Set to false to disable all logging in browser console.</p>
+</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> _ = require(<span class="string">'mol-proto'</span>);
+
+
+<span class="comment">/**
+ * Log levels.
+ */</span>
+
+<span class="keyword">var</span> levels = [
+    <span class="string">'error'</span>,
+    <span class="string">'warn'</span>,
+    <span class="string">'info'</span>,
+    <span class="string">'debug'</span>
+];
+
+<span class="keyword">var</span> maxLevelLength = Math.max.apply(Math, levels.map(<span class="function"><span class="keyword">function</span><span class="params">(level)</span> {</span> <span class="keyword">return</span> level.length; }));
+
+<span class="comment">/**
+ * Colors for log levels.
+ */</span>
+
+<span class="keyword">var</span> colors = [
+    <span class="number">31</span>,
+    <span class="number">33</span>,
+    <span class="number">36</span>,
+    <span class="number">90</span>
+];
+
+<span class="comment">/**
+ * Pads the nice output to the longest log level.
+ */</span>
+
+<span class="function"><span class="keyword">function</span> <span class="title">pad</span> <span class="params">(str)</span> {</span>
+    <span class="keyword">if</span> (str.length &lt; maxLevelLength)
+        <span class="keyword">return</span> str + <span class="keyword">new</span> Array(maxLevelLength - str.length + <span class="number">1</span>).join(<span class="string">' '</span>);
+
+    <span class="keyword">return</span> str;
+};
+
+<span class="comment">/**
+ * Logger (console).
+ *
+ * @api public
+ */</span>
+
+<span class="keyword">var</span> Logger = <span class="function"><span class="keyword">function</span> <span class="params">(opts)</span> {</span>
+    opts = opts || {}
+    <span class="keyword">this</span>.colors = opts.colors;
+    <span class="keyword">this</span>.level = opts.level || <span class="number">3</span>;
+    <span class="keyword">this</span>.enabled = opts.enabled || <span class="literal">true</span>;
+    <span class="keyword">this</span>.logPrefix = opts.logPrefix || <span class="string">''</span>;
+    <span class="keyword">this</span>.logPrefixColor = opts.logPrefixColor;
+};
+
+
+<span class="comment">/**
+ * Log method.
+ *
+ * @api public
+ */</span>
+
+Logger.prototype.log = <span class="function"><span class="keyword">function</span> <span class="params">(type)</span> {</span>
+    <span class="keyword">var</span> index = levels.indexOf(type);
+
+    <span class="keyword">if</span> (index &gt; <span class="keyword">this</span>.level || ! <span class="keyword">this</span>.enabled)
+        <span class="keyword">return</span> <span class="keyword">this</span>;
+
+    console.log.apply(
+          console
+        , [<span class="keyword">this</span>.logPrefixColor
+             ? <span class="string">'   \x1B['</span> + <span class="keyword">this</span>.logPrefixColor + <span class="string">'m'</span> + <span class="keyword">this</span>.logPrefix + <span class="string">'  -\x1B[39m'</span>
+             : <span class="keyword">this</span>.logPrefix
+          ,<span class="keyword">this</span>.colors
+             ? <span class="string">' \x1B['</span> + colors[index] + <span class="string">'m'</span> + pad(type) + <span class="string">' -\x1B[39m'</span>
+             : type + <span class="string">':'</span>
+          ].concat(_.toArray(arguments).slice(<span class="number">1</span>))
+    );
+
+    <span class="keyword">return</span> <span class="keyword">this</span>;
+};
+
+<span class="comment">/**
+ * Generate methods.
+ */</span>
+
+levels.forEach(<span class="function"><span class="keyword">function</span> <span class="params">(name)</span> {</span>
+    Logger.prototype[name] = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+        <span class="keyword">this</span>.log.apply(<span class="keyword">this</span>, [name].concat(_.toArray(arguments)));
+    };
+});
+
+
+module.exports = Logger;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-32">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <p><a name="utils-count"></a></p>
+<h2 id="milo-utils-count">milo.utils.count</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-33">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-33">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> count = <span class="number">0</span>;
+
+<span class="function"><span class="keyword">function</span> <span class="title">componentCount</span><span class="params">()</span> {</span>
+	count++;
+	<span class="keyword">return</span> count;
+}
+
+componentCount.get = <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+	<span class="keyword">return</span> count;
+}
+
+module.exports = componentCount;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-34">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-34">&#182;</a>
+              </div>
+              <p><a name="utils-dom"></a></p>
+<h2 id="milo-utils-dom">milo.utils.dom</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-35">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-35">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+
+module.exports = {
+	filterNodeListByType: filterNodeListByType
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-36">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-36">&#182;</a>
+              </div>
+              <p>type 1: html element, type 3: text</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">filterNodeListByType</span><span class="params">(nodeList, type)</span> {</span>
+	<span class="keyword">var</span> filteredNodes = [];
+	Array.prototype.forEach.call(nodeList, <span class="function"><span class="keyword">function</span> <span class="params">(node)</span> {</span>
+		<span class="keyword">if</span> (node.nodeType == type)
+			filteredNodes.push(node);
+	});
+	<span class="keyword">return</span> filteredNodes;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-37">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-37">&#182;</a>
+              </div>
+              <p><a name="utils-error"></a></p>
+<h2 id="milo-utils-error">milo.utils.error</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-38">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-38">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> _ = require(<span class="string">'mol-proto'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-39">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-39">&#182;</a>
+              </div>
+              <p>module exports error classes for all names defined in this array</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> errorClassNames = [<span class="string">'AbstractClass'</span>, <span class="string">'Mixin'</span>, <span class="string">'Messenger'</span>, <span class="string">'ComponentDataSource'</span>,
+					   <span class="string">'Attribute'</span>, <span class="string">'Binder'</span>, <span class="string">'Loader'</span>, <span class="string">'MailMessageSource'</span>, <span class="string">'Facet'</span>,
+					   <span class="string">'Scope'</span>, <span class="string">'EditableEventsSource'</span>, <span class="string">'Model'</span>, <span class="string">'DomFacet'</span>, <span class="string">'EditableFacet'</span>,
+					   <span class="string">'List'</span>, <span class="string">'Connector'</span>];
+
+<span class="keyword">var</span> error = {
+	toBeImplemented: toBeImplemented,
+	createClass: createErrorClass
+};
+
+errorClassNames.forEach(<span class="function"><span class="keyword">function</span><span class="params">(name)</span> {</span>
+	error[name] = createErrorClass(name + <span class="string">'Error'</span>);
+});
+
+module.exports = error;
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">createErrorClass</span><span class="params">(errorClassName)</span> {</span>
+	<span class="keyword">var</span> ErrorClass;
+	eval(<span class="string">'ErrorClass = function '</span> + errorClassName + <span class="string">'(message) { \
+			this.name = "'</span> + errorClassName + <span class="string">'"; \
+			this.message = message || "There was an error"; \
+		}'</span>);
+	_.makeSubclass(ErrorClass, Error);
+
+	<span class="keyword">return</span> ErrorClass;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">toBeImplemented</span><span class="params">()</span> {</span>
+	<span class="keyword">throw</span> <span class="keyword">new</span> error.AbstractClass(<span class="string">'calling the method of an absctract class MessageSource'</span>);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-40">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-40">&#182;</a>
+              </div>
+              <p><a name="utils-check"></a></p>
+<h2 id="milo-utils-check">milo.utils.check</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-41">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-41">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-42">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-42">&#182;</a>
+              </div>
+              <p>Things we explicitly do NOT support:</p>
+<ul>
+<li>heterogenous arrays</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> _ = require(<span class="string">'mol-proto'</span>);
+
+<span class="keyword">var</span> check = <span class="function"><span class="keyword">function</span> <span class="params">(value, pattern)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-43">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-43">&#182;</a>
+              </div>
+              <p>Record that check got called, if somebody cared.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">try</span> {
+    checkSubtree(value, pattern);
+  } <span class="keyword">catch</span> (err) {
+    <span class="keyword">if</span> ((err <span class="keyword">instanceof</span> Match.Error) &amp;&amp; err.path)
+      err.message += <span class="string">" in field "</span> + err.path;
+    <span class="keyword">throw</span> err;
+  }
+};
+module.exports = check;
+
+<span class="keyword">var</span> Match = check.Match = {
+  Optional: <span class="function"><span class="keyword">function</span> <span class="params">(pattern)</span> {</span>
+    <span class="keyword">return</span> <span class="keyword">new</span> Optional(pattern);
+  },
+  OneOf: <span class="function"><span class="keyword">function</span> <span class="params">(<span class="comment">/*arguments*/</span>)</span> {</span>
+    <span class="keyword">return</span> <span class="keyword">new</span> OneOf(arguments);
+  },
+  Any: [<span class="string">'__any__'</span>],
+  Where: <span class="function"><span class="keyword">function</span> <span class="params">(condition)</span> {</span>
+    <span class="keyword">return</span> <span class="keyword">new</span> Where(condition);
+  },
+  ObjectIncluding: <span class="function"><span class="keyword">function</span> <span class="params">(pattern)</span> {</span>
+    <span class="keyword">return</span> <span class="keyword">new</span> ObjectIncluding(pattern);
+  },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-44">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-44">&#182;</a>
+              </div>
+              <p>Matches only signed 32-bit integers</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Integer: [<span class="string">'__integer__'</span>],</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-45">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-45">&#182;</a>
+              </div>
+              <p>Matches hash (object) with values matching pattern</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  ObjectHash: <span class="function"><span class="keyword">function</span><span class="params">(pattern)</span> {</span>
+    <span class="keyword">return</span> <span class="keyword">new</span> ObjectHash(pattern);
+  },
+
+  Subclass: <span class="function"><span class="keyword">function</span><span class="params">(Superclass, matchSuperclassToo)</span> {</span>
+    <span class="keyword">return</span> <span class="keyword">new</span> Subclass(Superclass, matchSuperclassToo);
+  },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-46">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-46">&#182;</a>
+              </div>
+              <p>XXX matchers should know how to describe themselves for errors</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Error: TypeError,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-47">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-47">&#182;</a>
+              </div>
+              <p>Meteor.makeErrorType(&quot;Match.Error&quot;, function (msg) {
+this.message = &quot;Match error: &quot; + msg;
+The path of the value that failed to match. Initially empty, this gets
+populated by catching and rethrowing the exception as it goes back up the
+stack.
+E.g.: &quot;vals[3].entity.created&quot;
+this.path = &quot;&quot;;
+If this gets sent over DDP, don&#39;t give full internal details but at least
+provide something better than 500 Internal server error.
+  this.sanitizedError = new Meteor.Error(400, &quot;Match failed&quot;);
+}),</p>
+<p>Tests to see if value matches pattern. Unlike check, it merely returns true
+or false (unless an error other than Match.Error was thrown).</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  test: <span class="function"><span class="keyword">function</span> <span class="params">(value, pattern)</span> {</span>
+    <span class="keyword">try</span> {
+      checkSubtree(value, pattern);
+      <span class="keyword">return</span> <span class="literal">true</span>;
+    } <span class="keyword">catch</span> (e) {
+      <span class="keyword">if</span> (e <span class="keyword">instanceof</span> Match.Error)
+        <span class="keyword">return</span> <span class="literal">false</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-48">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-48">&#182;</a>
+              </div>
+              <p>Rethrow other errors.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">throw</span> e;
+    }
+  }
+};
+
+<span class="function"><span class="keyword">function</span> <span class="title">Optional</span><span class="params">(pattern)</span> {</span>
+  <span class="keyword">this</span>.pattern = pattern;
+};
+
+<span class="function"><span class="keyword">function</span> <span class="title">OneOf</span><span class="params">(choices)</span> {</span>
+  <span class="keyword">if</span> (choices.length == <span class="number">0</span>)
+    <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">"Must provide at least one choice to Match.OneOf"</span>);
+  <span class="keyword">this</span>.choices = choices;
+};
+
+<span class="function"><span class="keyword">function</span> <span class="title">Where</span><span class="params">(condition)</span> {</span>
+  <span class="keyword">this</span>.condition = condition;
+};
+
+<span class="function"><span class="keyword">function</span> <span class="title">ObjectIncluding</span><span class="params">(pattern)</span> {</span>
+  <span class="keyword">this</span>.pattern = pattern;
+};
+
+<span class="function"><span class="keyword">function</span> <span class="title">ObjectHash</span><span class="params">(pattern)</span> {</span>
+  <span class="keyword">this</span>.pattern = pattern;
+};
+
+<span class="function"><span class="keyword">function</span> <span class="title">Subclass</span><span class="params">(Superclass, matchSuperclassToo)</span> {</span>
+  <span class="keyword">this</span>.Superclass = Superclass;
+  <span class="keyword">this</span>.matchSuperclass = matchSuperclassToo;
+};
+
+<span class="keyword">var</span> typeofChecks = [
+  [String, <span class="string">"string"</span>],
+  [Number, <span class="string">"number"</span>],
+  [Boolean, <span class="string">"boolean"</span>],</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-49">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-49">&#182;</a>
+              </div>
+              <p>While we don&#39;t allow undefined in JSON, this is good for optional
+arguments with OneOf.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  [<span class="literal">undefined</span>, <span class="string">"undefined"</span>]
+];
+
+<span class="function"><span class="keyword">function</span> <span class="title">checkSubtree</span><span class="params">(value, pattern)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-50">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-50">&#182;</a>
+              </div>
+              <p>Match anything!</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">if</span> (pattern === Match.Any)
+    <span class="keyword">return</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-51">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-51">&#182;</a>
+              </div>
+              <p>Basic atomic types.
+Do not match boxed objects (e.g. String, Boolean)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; typeofChecks.length; ++i) {
+    <span class="keyword">if</span> (pattern === typeofChecks[i][<span class="number">0</span>]) {
+      <span class="keyword">if</span> (<span class="keyword">typeof</span> value === typeofChecks[i][<span class="number">1</span>])
+        <span class="keyword">return</span>;
+      <span class="keyword">throw</span> <span class="keyword">new</span> Match.Error(<span class="string">"Expected "</span> + typeofChecks[i][<span class="number">1</span>] + <span class="string">", got "</span> +
+                            <span class="keyword">typeof</span> value);
+    }
+  }
+  <span class="keyword">if</span> (pattern === <span class="literal">null</span>) {
+    <span class="keyword">if</span> (value === <span class="literal">null</span>)
+      <span class="keyword">return</span>;
+    <span class="keyword">throw</span> <span class="keyword">new</span> Match.Error(<span class="string">"Expected null, got "</span> + JSON.stringify(value));
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-52">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-52">&#182;</a>
+              </div>
+              <p>Match.Integer is special type encoded with array</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">if</span> (pattern === Match.Integer) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-53">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-53">&#182;</a>
+              </div>
+              <p>There is no consistent and reliable way to check if variable is a 64-bit
+integer. One of the popular solutions is to get reminder of division by 1
+but this method fails on really large floats with big precision.
+E.g.: 1.348192308491824e+23 % 1 === 0 in V8
+Bitwise operators work consistantly but always cast variable to 32-bit
+signed integer according to JavaScript specs.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">if</span> (<span class="keyword">typeof</span> value === <span class="string">"number"</span> &amp;&amp; (value | <span class="number">0</span>) === value)
+      <span class="keyword">return</span>
+    <span class="keyword">throw</span> <span class="keyword">new</span> Match.Error(<span class="string">"Expected Integer, got "</span>
+                + (value <span class="keyword">instanceof</span> Object ? JSON.stringify(value) : value));
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-54">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-54">&#182;</a>
+              </div>
+              <p>&quot;Object&quot; is shorthand for Match.ObjectIncluding({});</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">if</span> (pattern === Object)
+    pattern = Match.ObjectIncluding({});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-55">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-55">&#182;</a>
+              </div>
+              <p>Array (checked AFTER Any, which is implemented as an Array).</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">if</span> (pattern <span class="keyword">instanceof</span> Array) {
+    <span class="keyword">if</span> (pattern.length !== <span class="number">1</span>)
+      <span class="keyword">throw</span> Error(<span class="string">"Bad pattern: arrays must have one type element"</span> +
+                  JSON.stringify(pattern));
+    <span class="keyword">if</span> (!Array.isArray(value)) {
+      <span class="keyword">throw</span> <span class="keyword">new</span> Match.Error(<span class="string">"Expected array, got "</span> + JSON.stringify(value));
+    }
+
+    value.forEach(<span class="function"><span class="keyword">function</span> <span class="params">(valueElement, index)</span> {</span>
+      <span class="keyword">try</span> {
+        checkSubtree(valueElement, pattern[<span class="number">0</span>]);
+      } <span class="keyword">catch</span> (err) {
+        <span class="keyword">if</span> (err <span class="keyword">instanceof</span> Match.Error) {
+          err.path = _prependPath(index, err.path);
+        }
+        <span class="keyword">throw</span> err;
+      }
+    });
+    <span class="keyword">return</span>;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-56">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-56">&#182;</a>
+              </div>
+              <p>Arbitrary validation checks. The condition can return false or throw a
+Match.Error (ie, it can internally use check()) to fail.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">if</span> (pattern <span class="keyword">instanceof</span> Where) {
+    <span class="keyword">if</span> (pattern.condition(value))
+      <span class="keyword">return</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-57">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-57">&#182;</a>
+              </div>
+              <p>XXX this error is terrible</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">throw</span> <span class="keyword">new</span> Match.Error(<span class="string">"Failed Match.Where validation"</span>);
+  }
+
+
+  <span class="keyword">if</span> (pattern <span class="keyword">instanceof</span> Optional)
+    pattern = Match.OneOf(<span class="literal">undefined</span>, pattern.pattern);
+
+  <span class="keyword">if</span> (pattern <span class="keyword">instanceof</span> OneOf) {
+    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; pattern.choices.length; ++i) {
+      <span class="keyword">try</span> {
+        checkSubtree(value, pattern.choices[i]);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-58">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-58">&#182;</a>
+              </div>
+              <p>No error? Yay, return.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">return</span>;
+      } <span class="keyword">catch</span> (err) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-59">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-59">&#182;</a>
+              </div>
+              <p>Other errors should be thrown. Match errors just mean try another
+choice.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (!(err <span class="keyword">instanceof</span> Match.Error))
+          <span class="keyword">throw</span> err;
+      }
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-60">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-60">&#182;</a>
+              </div>
+              <p>XXX this error is terrible</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">throw</span> <span class="keyword">new</span> Match.Error(<span class="string">"Failed Match.OneOf or Match.Optional validation"</span>);
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-61">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-61">&#182;</a>
+              </div>
+              <p>A function that isn&#39;t something we special-case is assumed to be a
+constructor.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">if</span> (pattern <span class="keyword">instanceof</span> Function) {
+    <span class="keyword">if</span> (value <span class="keyword">instanceof</span> pattern)
+      <span class="keyword">return</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-62">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-62">&#182;</a>
+              </div>
+              <p>XXX what if .name isn&#39;t defined</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">throw</span> <span class="keyword">new</span> Match.Error(<span class="string">"Expected "</span> + pattern.constructor.name);
+  }
+
+  <span class="keyword">var</span> unknownKeysAllowed = <span class="literal">false</span>;
+  <span class="keyword">if</span> (pattern <span class="keyword">instanceof</span> ObjectIncluding) {
+    unknownKeysAllowed = <span class="literal">true</span>;
+    pattern = pattern.pattern;
+  }
+
+  <span class="keyword">if</span> (pattern <span class="keyword">instanceof</span> ObjectHash) {
+    <span class="keyword">var</span> keyPattern = pattern.pattern;
+    <span class="keyword">var</span> emptyHash = <span class="literal">true</span>;
+    <span class="keyword">for</span> (<span class="keyword">var</span> key <span class="keyword">in</span> value) {
+      emptyHash = <span class="literal">false</span>;
+      check(value[key], keyPattern);
+    }
+    <span class="keyword">if</span> (emptyHash)
+      <span class="keyword">throw</span> <span class="keyword">new</span> Match.Error(<span class="string">"Expected "</span> + pattern.constructor.name);
+    <span class="keyword">return</span>;
+  }
+
+  <span class="keyword">if</span> (pattern <span class="keyword">instanceof</span> Subclass) {
+    <span class="keyword">var</span> Superclass = pattern.Superclass;
+    <span class="keyword">if</span> (pattern.matchSuperclass &amp;&amp; value == Superclass) 
+      <span class="keyword">return</span>;
+    <span class="keyword">if</span> (! (value.prototype <span class="keyword">instanceof</span> Superclass))
+      <span class="keyword">throw</span> <span class="keyword">new</span> Match.Error(<span class="string">"Expected "</span> + pattern.constructor.name + <span class="string">" of "</span> + Superclass.name);
+    <span class="keyword">return</span>;
+  }
+
+  <span class="keyword">if</span> (<span class="keyword">typeof</span> pattern !== <span class="string">"object"</span>)
+    <span class="keyword">throw</span> Error(<span class="string">"Bad pattern: unknown pattern type"</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-63">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-63">&#182;</a>
+              </div>
+              <p>An object, with required and optional keys. Note that this does NOT do
+structural matches against objects of special types that happen to match
+the pattern: this really needs to be a plain old {Object}!</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">if</span> (<span class="keyword">typeof</span> value !== <span class="string">'object'</span>)
+    <span class="keyword">throw</span> <span class="keyword">new</span> Match.Error(<span class="string">"Expected object, got "</span> + <span class="keyword">typeof</span> value);
+  <span class="keyword">if</span> (value === <span class="literal">null</span>)
+    <span class="keyword">throw</span> <span class="keyword">new</span> Match.Error(<span class="string">"Expected object, got null"</span>);
+
+  <span class="keyword">var</span> requiredPatterns = {};
+  <span class="keyword">var</span> optionalPatterns = {};
+
+  _.eachKey(pattern, <span class="function"><span class="keyword">function</span><span class="params">(subPattern, key)</span> {</span>
+    <span class="keyword">if</span> (pattern[key] <span class="keyword">instanceof</span> Optional)
+      optionalPatterns[key] = pattern[key].pattern;
+    <span class="keyword">else</span>
+      requiredPatterns[key] = pattern[key];
+  }, <span class="keyword">this</span>, <span class="literal">true</span>);
+
+  _.eachKey(value, <span class="function"><span class="keyword">function</span><span class="params">(subValue, key)</span> {</span>
+    <span class="keyword">var</span> subValue = value[key];
+    <span class="keyword">try</span> {
+      <span class="keyword">if</span> (requiredPatterns.hasOwnProperty(key)) {
+        checkSubtree(subValue, requiredPatterns[key]);
+        <span class="keyword">delete</span> requiredPatterns[key];
+      } <span class="keyword">else</span> <span class="keyword">if</span> (optionalPatterns.hasOwnProperty(key)) {
+        checkSubtree(subValue, optionalPatterns[key]);
+      } <span class="keyword">else</span> {
+        <span class="keyword">if</span> (!unknownKeysAllowed)
+          <span class="keyword">throw</span> <span class="keyword">new</span> Match.Error(<span class="string">"Unknown key"</span>);
+      }
+    } <span class="keyword">catch</span> (err) {
+      <span class="keyword">if</span> (err <span class="keyword">instanceof</span> Match.Error)
+        err.path = _prependPath(key, err.path);
+      <span class="keyword">throw</span> err;
+    }
+  }, <span class="keyword">this</span>, <span class="literal">true</span>);
+
+  _.eachKey(requiredPatterns, <span class="function"><span class="keyword">function</span><span class="params">(value, key)</span> {</span>
+    <span class="keyword">throw</span> <span class="keyword">new</span> Match.Error(<span class="string">"Missing key '"</span> + key + <span class="string">"'"</span>);
+  }, <span class="keyword">this</span>, <span class="literal">true</span>);
+};
+
+
+<span class="keyword">var</span> _jsKeywords = [<span class="string">"do"</span>, <span class="string">"if"</span>, <span class="string">"in"</span>, <span class="string">"for"</span>, <span class="string">"let"</span>, <span class="string">"new"</span>, <span class="string">"try"</span>, <span class="string">"var"</span>, <span class="string">"case"</span>,
+  <span class="string">"else"</span>, <span class="string">"enum"</span>, <span class="string">"eval"</span>, <span class="string">"false"</span>, <span class="string">"null"</span>, <span class="string">"this"</span>, <span class="string">"true"</span>, <span class="string">"void"</span>, <span class="string">"with"</span>,
+  <span class="string">"break"</span>, <span class="string">"catch"</span>, <span class="string">"class"</span>, <span class="string">"const"</span>, <span class="string">"super"</span>, <span class="string">"throw"</span>, <span class="string">"while"</span>, <span class="string">"yield"</span>,
+  <span class="string">"delete"</span>, <span class="string">"export"</span>, <span class="string">"import"</span>, <span class="string">"public"</span>, <span class="string">"return"</span>, <span class="string">"static"</span>, <span class="string">"switch"</span>,
+  <span class="string">"typeof"</span>, <span class="string">"default"</span>, <span class="string">"extends"</span>, <span class="string">"finally"</span>, <span class="string">"package"</span>, <span class="string">"private"</span>, <span class="string">"continue"</span>,
+  <span class="string">"debugger"</span>, <span class="string">"function"</span>, <span class="string">"arguments"</span>, <span class="string">"interface"</span>, <span class="string">"protected"</span>, <span class="string">"implements"</span>,
+  <span class="string">"instanceof"</span>];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-64">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-64">&#182;</a>
+              </div>
+              <p>Assumes the base of path is already escaped properly
+returns key + base</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">_prependPath</span><span class="params">(key, base)</span> {</span>
+  <span class="keyword">if</span> ((<span class="keyword">typeof</span> key) === <span class="string">"number"</span> || key.match(<span class="regexp">/^[0-9]+$/</span>))
+    key = <span class="string">"["</span> + key + <span class="string">"]"</span>;
+  <span class="keyword">else</span> <span class="keyword">if</span> (!key.match(<span class="regexp">/^[a-z_$][0-9a-z_$]*$/i</span>) || _jsKeywords.indexOf(key) != -<span class="number">1</span>)
+    key = JSON.stringify([key]);
+
+  <span class="keyword">if</span> (base &amp;&amp; base[<span class="number">0</span>] !== <span class="string">"["</span>)
+    <span class="keyword">return</span> key + <span class="string">'.'</span> + base;
+  <span class="keyword">return</span> key + base;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-65">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-65">&#182;</a>
+              </div>
+              <p><a name="utils-request"></a></p>
+<h2 id="milo-utils-request">milo.utils.request</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-66">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-66">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> _ = require(<span class="string">'mol-proto'</span>);
+
+module.exports = request;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-67">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-67">&#182;</a>
+              </div>
+              <p>TODO add error statuses</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> okStatuses = [<span class="string">'200'</span>, <span class="string">'304'</span>];
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">request</span><span class="params">(url, opts, callback)</span> {</span>
+	<span class="keyword">var</span> req = <span class="keyword">new</span> XMLHttpRequest();
+	req.open(opts.method, url, <span class="literal">true</span>); <span class="comment">// what true means?</span>
+	req.onreadystatechange = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+		<span class="keyword">if</span> (req.readyState == <span class="number">4</span> &amp;&amp; req.statusText.toUpperCase() == <span class="string">'OK'</span> )
+			callback(<span class="literal">null</span>, req.responseText, req);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-68">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-68">&#182;</a>
+              </div>
+              <p>else
+    callback(req.status, req.responseText, req);</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	};
+	req.send(<span class="literal">null</span>);
+}
+
+_.extend(request, {
+	get: get
+});
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">get</span><span class="params">(url, callback)</span> {</span>
+	request(url, { method: <span class="string">'GET'</span> }, callback);
+}</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
