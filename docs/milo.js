@@ -309,6 +309,8 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 // milo.classes
 // -----------
 
+// This module contains foundation classes and class registries.
+
 'use strict';
 
 var classes = {
@@ -562,7 +564,7 @@ module.exports = Logger;
 
 // <a name="utils-count"></a>
 // milo.utils.count
-// -----------
+// ----------------
 
 'use strict';
 
@@ -991,3 +993,1877 @@ _.extend(request, {
 function get(url, callback) {
 	request(url, { method: 'GET' }, callback);
 }
+
+
+// <a name="facet-c"></a>
+// facet class
+// --------------
+
+'use strict';
+
+var _ = require('mol-proto');
+
+module.exports = Facet;
+
+function Facet(owner, config) {
+	this.owner = owner;
+	this.config = config || {};
+	this.init.apply(this, arguments);
+}
+
+_.extendProto(Facet, {
+	init: function() {}
+});
+
+
+// <a name="facet-o"></a>
+// facetted object class
+// --------------
+
+// Component class is based on an abstract ```FacetedObject``` class that can be
+// applied to any domain where objects can be represented via collection of facets
+// (a facet is an object of a certain class, it holds its own configuration,
+// data and methods).
+
+// In a way, facets pattern is an inversion of adapter pattern - while the latter
+// allows finding a class/methods that has specific functionality, faceted object
+// is simply constructed to have these functionalities. In this way it is possible
+// to create a virtually unlimited number of component classes with a very limited
+// number of building blocks without having any hierarchy of classes - all components
+// inherit directly from Component class.
+
+'use strict';
+
+var Facet = require('./f_class')
+	, _ = require('mol-proto')
+	, check = require('../util/check')
+	, Match = check.Match
+	, FacetError = require('../util/error').Facet;
+
+module.exports = FacetedObject;
+
+
+// abstract class for faceted object
+function FacetedObject() {
+	// TODO write a test to check that facets are created if configuration isn't passed
+	var facetsConfig = this.facetsConfig || {};
+
+	var facetsDescriptors = {}
+		, facets = {};
+
+	if (this.constructor == FacetedObject)		
+		throw new FacetError('FacetedObject is an abstract class, can\'t be instantiated');
+
+	if (this.facetsClasses)
+		_.eachKey(this.facetsClasses, instantiateFacet, this, true);
+
+	Object.defineProperties(this, facetsDescriptors);
+	Object.defineProperty(this, 'facets', { value: facets });	
+
+	// calling init if it is defined in the class
+	if (this.init)
+		this.init.apply(this, arguments);
+
+	function instantiateFacet(FacetClass, fct) {
+		var facetOpts = facetsConfig[fct];
+
+		facets[fct] = new FacetClass(this, facetOpts);
+
+		facetsDescriptors[fct] = {
+			enumerable: true,
+			value: facets[fct]
+		};
+	}
+}
+
+_.extendProto(FacetedObject, {
+	addFacet: addFacet
+});
+
+
+function addFacet(FacetClass, facetOpts, facetName) {
+	check(FacetClass, Function);
+	check(facetName, Match.Optional(String));
+
+	facetName = _.firstLowerCase(facetName || FacetClass.name);
+
+	var protoFacets = this.constructor.prototype.facetsClasses;
+
+	if (protoFacets && protoFacets[facetName])
+		throw new FacetError('facet ' + facetName + ' is already part of the class ' + this.constructor.name);
+
+	if (this[facetName])
+		throw new FacetError('facet ' + facetName + ' is already present in object');
+
+	var newFacet = this.facets[facetName] = new FacetClass(this, facetOpts);
+
+	Object.defineProperty(this, facetName, {
+		enumerable: true,
+		value: newFacet
+	});
+
+	return newFacet;
+}
+
+
+FacetedObject.hasFacet = function hasFacet(facetName) {
+	var protoFacets = this.prototype.facetsClasses;
+	return protoFacets && protoFacets[facetName];
+}
+
+
+
+// factory that creates classes (constructors) from the map of facets
+// these classes inherit from FacetedObject
+FacetedObject.createFacetedClass = function (name, facetsClasses, facetsConfig) {
+	check(name, String);
+	check(facetsClasses, Match.ObjectHash(Match.Subclass(Facet, true)));
+	check(facetsConfig, Match.Optional(Object));
+
+	if (facetsConfig)
+		_.eachKey(facetsConfig, function(fctConfig, fctName) {
+			if (! facetsClasses.hasOwnProperty(fctName))
+				throw new FacetError('configuration for facet (' + fctName + ') passed that is not in class');
+		});
+
+	var FacetedClass = _.createSubclass(this, name, true);
+
+	_.extendProto(FacetedClass, {
+		facetsClasses: facetsClasses,
+		facetsConfig: facetsConfig
+	});
+	return FacetedClass;
+};
+
+
+// <a name="components"></a>
+// component class
+// --------------
+
+// Basic component class.
+
+// It's constructor accepts DOM element and component name as paramenters.
+
+// You do not need to use its constructor directly as binder module creates
+// components when it scans DOM tree.
+
+// You should use Component.createComponentClass method when you want to create
+// a new component class from facets and their configuration.
+
+'use strict';
+
+var FacetedObject = require('../facets/f_object')
+	, facetsRegistry = require('./c_facets/cf_registry')
+	, ComponentFacet = require('./c_facet')
+	, Messenger = require('../messenger')
+	, _ = require('mol-proto')
+	, check = require('../util/check')
+	, Match = check.Match
+	, config = require('../config')
+	, miloCount = require('../util/count');
+
+
+var Component = _.createSubclass(FacetedObject, 'Component', true);
+
+module.exports = Component;
+
+
+Component.createComponentClass = createComponentClass;
+delete Component.createFacetedClass;
+
+
+// class methods
+_.extend(Component, {
+	create: create,
+	copy: copy,
+	isComponent: isComponent,
+	getComponent: getComponent,
+	getContainingComponent: getContainingComponent
+});
+
+// instance methods
+_.extendProto(Component, {
+	init: init,
+	addFacet: addFacet,
+	allFacets: allFacets,
+	remove: remove
+});
+
+
+//
+// class methods
+//
+
+// create component from ComponentInfo
+function create(info) {
+	var ComponentClass = info.ComponentClass;
+	var aComponent = new ComponentClass(info.scope, info.el, info.name, info);
+
+	if (info.extraFacetsClasses)
+		_.eachKey(info.extraFacetsClasses, function(FacetClass) {
+			aComponent.addFacet(FacetClass);
+		});
+
+	return aComponent;
+}
+
+
+// creates a new instance with the same state but different element
+function copy(component, deepCopyDOM) {
+	var ComponentClass = component.constructor
+		, newName = 'milo_' + miloCount()
+		, newEl = component.dom 
+					? component.dom.copy(deepCopyDOM)
+					: component.el.cloneNode(deepCopyDOM)
+		, newInfo = _.clone(component.componentInfo)
+		, attr = _.clone(newInfo.attr);
+
+	_.extend(attr, {
+		el: newEl,
+		compName: newName
+	});
+
+	attr.decorate();
+
+	_.extend(newInfo, {
+		el: newEl,
+		name: newName,
+		attr: attr
+	});
+
+	var aComponent = Component.create(newInfo);
+	component.scope._add(aComponent, aComponent.name);
+
+	return aComponent;
+}
+
+
+// checks if element is bound to a component
+function isComponent(element) {
+	return config.componentRef in element;
+}
+
+// gets the element bound the component
+function getComponent(element) {
+	return element && element[config.componentRef];
+}
+
+/**
+ * Returns the closest component which contains the specified node
+ *
+ * This will return the current component of the node if it is a component.
+ * 
+ * @param {Node} node DOM Node
+ * @return {Component|null}
+ */
+function getContainingComponent(node) {
+	// Where the current node is a component it's component should be returned
+	if (isComponent(node)) {
+		return getComponent(node);
+	}
+
+	// Where there is no parent node, this function will return null
+	if (!node.parentNode) {
+		return null;
+	}
+
+	// The parent node is checked recursively
+	return getContainingComponent(node.parentNode);
+}
+
+function createComponentClass(name, facetsConfig) {
+	var facetsClasses = {};
+
+	if (Array.isArray(facetsConfig)) {
+		var configMap = {};
+		facetsConfig.forEach(function(fct) {
+			var fctName = _.firstLowerCase(fct);
+			configMap[fctName] = {};
+		});
+		facetsConfig = configMap;
+	}
+
+	_.eachKey(facetsConfig, function(fctConfig, fct) {
+		var fctName = _.firstLowerCase(fct);
+		var fctClassName = _.firstUpperCase(fct);
+		facetsClasses[fctName] = facetsRegistry.get(fctClassName);
+	});
+
+	var ComponentClass = FacetedObject.createFacetedClass.call(this, name, facetsClasses, facetsConfig);
+	
+	return ComponentClass;
+};
+
+
+//
+// instance methods
+//
+
+// initializes component
+// Automatically called by inherited constructor of FacetedObject
+// Subclasses should call inherited init methods:
+// Component.prototype.init.apply(this, arguments)
+function init(scope, element, name, componentInfo) {
+	this.el = element;
+	if (element)
+		element[config.componentRef] = this;
+
+	_.defineProperties(this, {
+		name: name,
+		scope: scope,
+		componentInfo: componentInfo
+	}, true);
+
+	var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
+
+	_.defineProperty(this, '_messenger', messenger);
+
+	// start all facets
+	this.allFacets('check');
+	this.allFacets('start');
+}
+
+
+function addFacet(facetNameOrClass, facetOpts, facetName) {
+	check(facetNameOrClass, Match.OneOf(String, Match.Subclass(ComponentFacet)));
+	check(facetOpts, Match.Optional(Object));
+	check(facetName, Match.Optional(String));
+
+	if (typeof facetNameOrClass == 'string') {
+		var facetClassName = _.firstUpperCase(facetNameOrClass);
+		var FacetClass = facetsRegistry.get(facetClassName);
+	} else 
+		FacetClass = facetNameOrClass;
+
+	facetName = facetName || _.firstLowerCase(FacetClass.name);
+
+	var newFacet = FacetedObject.prototype.addFacet.call(this, FacetClass, facetOpts, facetName);
+
+	// start facet
+	newFacet.check && newFacet.check();
+	newFacet.start && newFacet.start();
+}
+
+// envoke given method with optional parameters on all facets
+function allFacets(method /* , ... */) {
+	var args = Array.prototype.slice.call(arguments, 1);
+
+	_.eachKey(this.facets, function(facet, fctName) {
+		if (facet && typeof facet[method] == 'function')
+			facet[method].apply(facet, args);
+	});
+}
+
+// remove component from it's scope
+function remove() {
+	if (this.scope)
+		delete this.scope[this.name];
+}
+
+
+// <a name="components-facet"></a>
+// ###component facet class
+
+// The class fot the facet of component. When a component is created, it
+// creates all its facets.
+
+// See Facets section on information about available facets and on 
+// how to create new facets classes.
+
+// - Component - basic compponent class
+// - ComponentFacet - basic 
+
+'use strict';
+
+var Facet = require('../facets/f_class')
+	, Messenger = require('../messenger')
+	, FacetError = require('../util/error').Facet
+	, _ = require('mol-proto');
+
+var ComponentFacet = _.createSubclass(Facet, 'ComponentFacet');
+
+module.exports = ComponentFacet;
+
+
+_.extendProto(ComponentFacet, {
+	init: initComponentFacet,
+	start: startComponentFacet,
+	check: checkDependencies,
+	_createMessenger: _createMessenger,
+	_setMessageSource: _setMessageSource,
+	_createMessageSource: _createMessageSource
+});
+
+
+function initComponentFacet() {
+	this._createMessenger();
+}
+
+
+function _createMessenger(){
+	var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
+
+	_.defineProperties(this, {
+		_messenger: messenger
+	});
+}
+
+
+function startComponentFacet() {
+	if (this.config.messages)
+		this.onMessages(this.config.messages);
+}
+
+
+function checkDependencies() {
+	if (this.require) {
+		this.require.forEach(function(reqFacet) {
+			var facetName = _.firstLowerCase(reqFacet);
+			if (! (this.owner[facetName] instanceof ComponentFacet))
+				throw new FacetError('facet ' + this.constructor.name + ' requires facet ' + reqFacet);
+		}, this);
+	}
+}
+
+
+function _setMessageSource(messageSource) {
+	this._messenger._setMessageSource(messageSource);
+}
+
+
+function _createMessageSource(MessageSourceClass, options) {
+	var messageSource = new MessageSourceClass(this, undefined, this.owner, options);
+	this._setMessageSource(messageSource)
+
+	_.defineProperty(this, '_messageSource', messageSource);
+}
+
+// <a name="components-info"></a>
+// ###component info class
+
+'use strict';
+
+var componentsRegistry = require('./c_registry')
+	, facetsRegistry = require('./c_facets/cf_registry')
+	, BinderError = require('../util/error').Binder;
+
+
+module.exports = ComponentInfo;
+
+// 
+// Component information class
+//
+function ComponentInfo(scope, el, attr) {
+	attr.parse().validate();
+
+	this.scope = scope;
+	this.el = el;
+	this.attr = attr;
+	this.name = attr.compName;
+	this.ComponentClass = getComponentClass(attr);
+	this.extraFacetsClasses = getComponentExtraFacets(this.ComponentClass, attr);
+
+	if (hasContainerFacet(this.ComponentClass, attr))
+		this.container = {};
+
+
+	function getComponentClass(attr) {
+		var ComponentClass = componentsRegistry.get(attr.compClass);
+		if (! ComponentClass)
+			throw new BinderError('class ' + attr.compClass + ' is not registered');
+		return ComponentClass;
+	}
+
+	function getComponentExtraFacets(ComponentClass, attr) {
+		var facets = attr.compFacets
+			, extraFacetsClasses = {};
+
+		if (Array.isArray(facets))
+			facets.forEach(function(fctName) {
+				if (ComponentClass.hasFacet(fctName))
+					throw new BinderError('class ' + ComponentClass.name
+										  + ' already has facet ' + fctName);
+				if (extraFacetsClasses[fctName])
+					throw new BinderError('component ' + attr.compName
+										  + ' already has facet ' + fctName);
+				var FacetClass = facetsRegistry.get(fctName);
+				extraFacetsClasses[fctName] = FacetClass;
+			});
+
+		return extraFacetsClasses;
+	}
+
+	function hasContainerFacet(ComponentClass, attr) {
+		return (ComponentClass.hasFacet('container')
+			|| (Array.isArray(attr.compFacets) && attr.compFacets.indexOf('Container') >= 0));
+	}
+}
+
+
+// <a name="components-registry"></a>
+// ###component registry class
+
+// An instance of ClassRegistry class that is used by milo to register and find components.
+
+'use strict';
+
+var ClassRegistry = require('../abstract/registry')
+	, Component = require('./c_class');
+
+var componentsRegistry = new ClassRegistry(Component);
+
+componentsRegistry.add(Component);
+
+module.exports = componentsRegistry;
+
+
+// <a name="scope"></a>
+// scope class
+// -----------
+
+'use strict';
+
+var _ = require('mol-proto')
+	, check = require('../util/check')
+	, Match = check.Match
+	, ScopeError = require('../util/error').Scope;
+
+
+// Scope class
+function Scope(rootEl) {
+	Object.defineProperties(this, {
+		_rootEl: { value: rootEl }
+	})
+};
+
+_.extendProto(Scope, {
+	_add: _add,
+	_copy: _copy,
+	_each: _each,
+	_addNew: _addNew,
+	_merge: _merge,
+	_length: _length
+});
+
+module.exports = Scope;
+
+
+var allowedNamePattern = /^[A-Za-z][A-Za-z0-9\_\$]*$/;
+
+
+// adds object to scope throwing if name is notyunique
+function _add(object, name) {
+	if (this[name])
+		throw new ScopeError('duplicate object name: ' + name);
+
+	checkName(name);
+
+	this[name] = object;
+}
+
+
+
+
+// copies all objects from one scope to another,
+// throwing if some object is not unique
+function _copy(aScope) {
+	check(aScope, Scope);
+
+	aScope._each(_add, this);
+}
+
+
+function _addNew(object, name) {
+// TODO
+}
+
+
+function _merge(scope) {
+// TODO
+}
+
+
+function _each(callback, thisArg) {
+	_.eachKey(this, callback, thisArg || this, true); // enumerates enumerable properties only
+}
+
+
+function checkName(name) {
+	if (! allowedNamePattern.test(name))
+		throw new ScopeError('name should start from letter, this name is not allowed: ' + name);
+}
+
+
+// returns the number of objects in scope
+function _length() {
+	return Object.keys(this).length;
+}
+
+
+// <a name="model"></a>
+// milo model
+// -----------
+
+'use strict';
+
+var pathUtils = require('./path_utils')
+	, Messenger = require('../messenger')
+	, ModelError = require('../util/error').Model
+	, Mixin = require('../abstract/mixin')
+	, doT = require('dot')
+	, _ = require('mol-proto')
+	, check = require('../util/check')
+	, Match = check.Match
+	, fs = require('fs');
+
+module.exports = Model;
+
+
+function Model(scope, schema, name, data) {
+	// modelPath should return a ModelPath object with "compiled" methods
+	// to get/set model properties, to subscribe to property changes, etc.
+	// "it" parameter is the object which properties can be referenced in path.
+	// These references will be evaluated at run rather than at compile time
+	var model = function modelPath(path, it) {
+		return new ModelPath(model, path, it);
+	}
+	model.__proto__ = Model.prototype;
+
+	var messenger = new Messenger(model, Messenger.defaultMethods);
+
+	_.defineProperties(model, {
+		scope: scope,
+		name: name,
+		_schema: schema,
+		_messenger: messenger,
+		__pathsCache: {}
+	});
+
+	model._wrapMessengerMethods();
+
+	model._data = data;
+
+	return model;
+}
+
+Model.prototype.__proto__ = Model.__proto__;
+
+
+// cache of compiled ModelPath methods
+var __synthesizedPathsMethods = {};
+
+var dotDef = {
+	modelAccessPrefix: 'this._model._data',
+	modelPostMessageCode: 'this._model.postMessage',
+	getPathNodeKey: pathUtils.getPathNodeKey
+};
+
+var modelSetterDotDef = {
+	modelAccessPrefix: 'this._data',
+	modelPostMessageCode: 'this.postMessage',
+	getPathNodeKey: pathUtils.getPathNodeKey
+};
+
+var getterTemplate = fs.readFileSync(__dirname + '/getter_template.js')
+	, setterTemplate = fs.readFileSync(__dirname + '/setter_template.js');
+
+doT.templateSettings.strip = false;
+
+var getterSynthesizer = doT.compile(getterTemplate, dotDef)
+	, setterSynthesizer = doT.compile(setterTemplate, dotDef)
+	, modelSetterSynthesizer = doT.compile(setterTemplate, modelSetterDotDef);
+
+
+_.extendProto(Model, {
+	get: get,
+	set: synthesizeMethod(modelSetterSynthesizer, '', []),
+	path: path,
+	proxyMessenger: proxyMessenger,
+	_wrapMessengerMethods: _wrapMessengerMethods
+});
+
+function get() {
+	return this._data;
+}
+
+// returns ModelPath object
+function path(accessPath) {
+	return this(accessPath);
+}
+
+
+function proxyMessenger(modelHostObject) {
+	Mixin.prototype._createProxyMethods.call(this._messenger, Messenger.defaultMethods, modelHostObject);
+}
+
+
+// TODO allow for multiple messages in a string
+var modelMethodsToWrap = ['on', 'off', 'onMessages', 'offMessages'];
+function _wrapMessengerMethods() {
+	modelMethodsToWrap.forEach(function(methodName) {
+		var origMethod = this[methodName];
+		// replacing message subsribe/unsubscribe/etc. to convert "*" message patterns to regexps
+		this[methodName] = function(path, subscriber) {
+			var regexPath = pathUtils.createRegexPath(path);
+			origMethod.call(this, regexPath, subscriber);
+		};
+	}, this);
+}
+
+
+_.extend(Model, {
+	Path: ModelPath
+});
+
+function ModelPath(model, path, it) {
+	check(model, Model);
+	check(path, String);
+	check(it, Match.Optional(Object));
+
+	_.defineProperties(this, {
+		_model: model,
+		_path: path,
+		_it: it
+	});
+
+	// compiling getter and setter
+	var methods = synthesizePathMethods(path);
+
+	// adding methods to model path
+	_.defineProperties(this, methods);
+
+	Object.freeze(this);
+}
+
+
+// adding messaging methods to ModelPath prototype
+var modelPathMethodsMap = {};
+
+modelMethodsToWrap.forEach(function(methodName) {
+	// creating subscribe/unsubscribe/etc. methods for ModelPath class
+	modelPathMethodsMap[methodName] = function(path, subscriber) {
+		this._model[methodName](this._path + path, subscriber);
+	};
+})
+
+_.extendProto(ModelPath, modelPathMethodsMap);
+
+
+function synthesizePathMethods(path) {
+	if (__synthesizedPathsMethods.hasOwnProperty(path))
+		return __synthesizedPathsMethods[path];
+
+	var parsedPath = pathUtils.parseAccessPath(path);
+
+	var methods = {
+		get: synthesizeMethod(getterSynthesizer, path, parsedPath),
+		set: synthesizeMethod(setterSynthesizer, path, parsedPath)
+	};
+
+	__synthesizedPathsMethods[path] = methods;
+
+	return methods;
+}
+
+
+function synthesizeMethod(synthesizer, path, parsedPath) {
+	var method
+		, methodCode = synthesizer({ parsedPath: parsedPath });
+
+	try {
+		eval(methodCode);
+	} catch (e) {
+		throw ModelError('ModelPath method compilation error; path: ' + path + ', code: ' + methodCode);
+	}
+
+	return method;
+
+
+	// functions used by ModelPath setter (synthesized by template)
+	function addChangeMessage(messages, messagesHash, msg) {
+		messages.push(msg);
+		messagesHash[msg.path] = msg;
+	}
+
+	function addTreeChangesMessages(messages, messagesHash, rootPath, oldValue, newValue) {
+		var oldIsTree = valueIsTree(oldValue)
+			, newIsTree = valueIsTree(newValue);
+
+		if (newIsTree)
+			addMessages(rootPath, newValue, 'added', 'newValue');
+		
+		if (oldIsTree)
+			addMessages(rootPath, oldValue, 'removed', 'oldValue');
+
+
+		function addMessages(rootPath, obj, msgType, valueProp) {
+			if (Array.isArray(obj)) {
+				var pathSyntax = rootPath + '[$$]';
+				obj.forEach(function(value, index) {
+					addMessage(value, index, pathSyntax);
+				});
+			} else {
+				var pathSyntax = rootPath + '.$$';
+				_.eachKey(obj, function(value, key) {
+					addMessage(value, key, pathSyntax);
+				});
+			}
+
+
+			function addMessage(value, key, pathSyntax) {
+				var path = pathSyntax.replace('$$', key)
+					, existingMsg = messagesHash[path];
+
+				if (existingMsg) {
+					if (existingMsg.type == msgType)
+						logger.error('setter error: same message type posted on the same path')
+					else {
+						existingMsg.type = 'changed';
+						existingMsg[valueProp] = value;
+					}
+				} else {
+					var msg = { path: path, type: msgType };
+					msg[valueProp] = value;
+					addChangeMessage(messages, messagesHash, msg)
+				}
+
+				if (valueIsTree(value))
+					addMessages(path, value, msgType, valueProp);
+			}
+		}
+	}
+
+	function valueIsTree(value) {
+		return typeof value == "object" && Object.keys(value).length;
+	}
+}
+
+
+// <a name="model-connector"></a>
+// ### model connector
+
+'use strict';
+
+var ConnectorError = require('../util/error').Connector
+	, _ = require('mol-proto')
+	, logger = require('../util/logger');
+
+// Class that creates connector object for data connection between
+// two data-sources
+// Data-sources should implement the following API:
+// get() - get value
+// set(value) - set value
+// on(path, subscriber) - subscription to data changes with "*" support
+// off(path, subscriber)
+// path(accessPath) - to return the object that complies with that api too
+
+
+var modePattern = /^(\<*)\-+(\>*)$/;
+
+function Connector(ds1, mode, ds2, options) {
+	var parsedMode = mode.match(modePattern);
+
+	if (! parsedMode)
+		modeParseError();
+
+	var depth1 = parsedMode[1].length
+		, depth2 = parsedMode[2].length;
+
+	if (depth1 && depth2 && depth1 != depth2)
+		modeParseError();
+
+	if (! depth1 && ! depth2)
+		modeParseError();
+
+	_.extend(this, {
+		ds1: ds1,
+		ds2: ds2,
+		mode: mode,
+		depth1: depth1,
+		depth2: depth2,
+		isOn: false	
+	});
+
+	this.on();
+
+	function modeParseError() {
+		throw new ConnectorError('invalid Connector mode: ' + mode);
+	}
+}
+
+
+_.extendProto(Connector, {
+	on: on,
+	off: off
+});
+
+
+// create connection
+function on() {
+	if (this.isOn)
+		return logger.warn('data sources are already connected');
+
+	var subscriptionPath = this._subscriptionPath =
+		new Array((this.depth1 || this.depth2) + 1).join('*');
+
+	if (this.depth1)
+		this._link1 = linkDataSource(this.ds1, this.ds2, subscriptionPath);
+	if (this.depth2)
+		this._link2 = linkDataSource(this.ds2, this.ds1, subscriptionPath);
+
+	this.isOn = true;
+
+
+	function linkDataSource(linkTo, linked, subscriptionPath) {
+		var onData = function(path, data) {
+			linkTo.path(path).set(data.newValue);
+		};
+
+		linked.on(subscriptionPath, onData);
+
+		return onData;
+	}
+}
+
+
+function off() {
+	if (! this.isOn)
+		return logger.warn('data sources are already connected');
+
+	if (this._link1)
+		this.ds2.off(this._subscriptionPath, this._link1);
+
+	if (this._link2)
+		this.ds2.off(this._subscriptionPath, this._link2);
+
+	this.isOn = false;
+}
+
+
+// <a name="model-demo"></a>
+// ### model demo
+
+'use strict';
+var Model = require('./index');
+
+
+var m = new Model;
+
+var year = m('.info.DOB.year').get();
+// undefined, but doesn't fail, like in Angular
+
+m('.info.DOB.year').set(1982);
+
+var year = m('.info.DOB.year').get();
+// 1982
+
+var data = m('.info').get();
+// { DOB: { year: 1982 } }
+
+var mData = m.get();
+// { info: { DOB: { year: 1982 } } }
+
+
+
+var m = new Model;
+
+m.on(/.*/, onChange);
+
+function onChange(msg, data) {
+	// should be replaced with console if this demo is used
+	logger.log(msg, ' : ', data);
+}
+
+m('.list[0].info.name').set('Clifton');
+// logged:
+// .list  :  { type: 'added', newValue: [] }
+// .list[0]  :  { type: 'added', newValue: {} }
+// .list[0].info  :  { type: 'added', newValue: {} }
+// .list[0].info.name  :  { type: 'added', newValue: 'Clifton' }
+
+m('.list[0].info.name').set('Clifton Cunnigham');
+// logged:
+// .list[0].info.name  :  { type: 'changed',
+//   oldValue: 'Clifton',
+//   newValue: 'Clifton Cunnigham' }
+
+var name = m('.list[0].info.name').get();
+// 'Clifton Cunnigham'
+
+
+
+// m('.list[0].info.name').get.toString() :
+
+function get() {
+	var m = this._model._data;
+	return m.list && m.list[0] && m.list[0].info && m.list[0].info.name;
+}
+
+
+// m('.list[0].info.name').set.toString() :
+
+function set(value) {
+	var m = this._model._data;
+	if (! m.list) {
+		m.list = [];
+		this._model.postMessage(".list", { type: "added", newValue: [] } );
+	}
+	if (! m.list[0]) {
+		m.list[0] = {};
+		this._model.postMessage( ".list[0]", { type: "added", newValue: {} } );
+	}
+	if (! m.list[0].info) {
+		m.list[0].info = {};
+		this._model.postMessage(".list[0].info", { type: "added", newValue: {} } );
+	} 
+	var wasDef = m.list[0].info.hasOwnProperty("name");
+	var old = m.list[0].info.name;
+	m.list[0].info.name = value;
+	if (! wasDef)
+		this._model.postMessage(".list[0].info.name",
+			{ type: "added", newValue: value } );
+	else if (old != value)
+		this._model.postMessage( ".list[0].info.name",
+			{ type: "changed", oldValue: old, newValue: value} );
+}
+
+
+// <a name="model-path"></a>
+// ### model path utils
+
+'use strict';
+
+
+var check = require('../util/check')
+	, Match = check.Match
+	, _ = require('mol-proto');
+
+var pathUtils = module.exports = {
+	parseAccessPath: parseAccessPath,
+	createRegexPath: createRegexPath,
+	getPathNodeKey: getPathNodeKey
+};
+
+
+var pathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]/g
+	, patternPathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]|\.\*|\[\*\]|\*/g
+	, pathNodeTypes = {
+		'.': { syntax: 'object', empty: '{}' },
+		'[': { syntax: 'array', empty: '[]'},
+		'*': { syntax: 'star', empty: '{}'}
+	};
+
+function parseAccessPath(path, nodeParsePattern) {
+	nodeParsePattern = nodeParsePattern || pathParsePattern;
+
+	var parsedPath = [];
+
+	if (! path)
+		return parsedPath;
+
+	var unparsed = path.replace(nodeParsePattern, function(nodeStr) {
+		var pathNode = { property: nodeStr };
+		_.extend(pathNode, pathNodeTypes[nodeStr[0]]); // TODO maybe do some default value if not in map
+		parsedPath.push(pathNode);
+		return '';
+	});
+	if (unparsed)
+		throw new ModelError('incorrect model path: ' + path);
+
+	return parsedPath;
+}
+
+
+var nodeRegex = {
+	'.*': '\\.[A-Za-z][A-Za-z0-9_]*',
+	'[*]': '\\[[0-9]+\\]'
+};
+nodeRegex['*'] = nodeRegex['.*'] + '|' + nodeRegex['[*]'];
+function createRegexPath(path) {
+	check(path, Match.OneOf(String, RegExp));
+
+	if (path instanceof RegExp || path.indexOf('*') == -1)
+		return path;
+
+	var parsedPath = pathUtils.parseAccessPath(path, patternPathParsePattern)
+		, regexStr = '^'
+		, regexStrEnd = ''
+		, patternsStarted = false;
+
+	parsedPath.forEach(function(pathNode) {
+		var prop = pathNode.property
+			, regex = nodeRegex[prop];
+		
+		if (regex) {
+			// regexStr += '(' + regex;
+			// regexStrEnd += '|)';
+			regexStr += '(' + regex + '|)';
+			// regexStrEnd += '|)';
+			patternsStarted = true;
+		} else {
+			if (patternsStarted)
+				throw new ModelError('"*" path segment cannot be in the middle of the path: ' + path);
+			regexStr += prop.replace(/(\.|\[|\])/g, '\\$1');
+		}
+	});
+
+	regexStr += /* regexStrEnd + */ '$';
+
+	try {
+		return new RegExp(regexStr);
+	} catch (e) {
+		throw new ModelError('can\'t construct regex for path pattern: ' + path);
+	}
+}
+
+
+function getPathNodeKey(pathNode) {
+	var prop = pathNode.property;
+	return pathNode.syntax == 'array'
+		? prop.slice(1, prop.length - 1)
+		: prop.slice(1);
+}
+
+
+// <a name="messenger"></a>
+// milo messenger
+// --------------
+
+'use strict';
+
+var Mixin = require('../abstract/mixin')
+	, MessageSource = require('./message_source')
+	, _ = require('mol-proto')
+	, check = require('../util/check')
+	, Match = check.Match
+	, MessengerError = require('../util/error').Messenger;
+
+
+var Messenger = _.createSubclass(Mixin, 'Messenger');
+
+var messagesSplitRegExp = Messenger.messagesSplitRegExp = /\s*(?:\,|\s)\s*/;
+
+
+_.extendProto(Messenger, {
+	init: initMessenger, // called by Mixin (superclass)
+	onMessage: registerSubscriber,
+	offMessage: removeSubscriber,
+	onMessages: registerSubscribers,
+	offMessages: removeSubscribers,
+	postMessage: postMessage,
+	getSubscribers: getMessageSubscribers,
+	_chooseSubscribersHash: _chooseSubscribersHash,
+	_registerSubscriber: _registerSubscriber,
+	_removeSubscriber: _removeSubscriber,
+	_removeAllSubscribers: _removeAllSubscribers,
+	_callPatternSubscribers: _callPatternSubscribers,
+	_callSubscribers: _callSubscribers,
+	_setMessageSource: _setMessageSource
+});
+
+
+Messenger.defaultMethods = {
+	on: 'onMessage',
+	off: 'offMessage',
+	onMessages: 'onMessages',
+	offMessages: 'offMessages',
+	postMessage: 'postMessage',
+	getSubscribers: 'getSubscribers'
+};
+
+
+module.exports = Messenger;
+
+
+function initMessenger(hostObject, proxyMethods, messageSource) {
+	check(messageSource, Match.Optional(MessageSource));
+
+	// hostObject and proxyMethods are used in Mixin
+ 	// messenger data
+ 	Object.defineProperties(this, {
+ 		_messageSubscribers: { value: {} },
+ 		_patternMessageSubscribers: { value: {} },
+ 		_messageSource: { value: messageSource, writable: true }
+ 	});
+
+ 	if (messageSource)
+ 		messageSource.messenger = this;
+}
+
+
+function registerSubscriber(messages, subscriber) {
+	check(messages, Match.OneOf(String, [String], RegExp));
+	check(subscriber, Function); 
+
+	if (typeof messages == 'string')
+		messages = messages.split(messagesSplitRegExp);
+
+	var subscribersHash = this._chooseSubscribersHash(messages);
+
+	if (messages instanceof RegExp)
+		return this._registerSubscriber(subscribersHash, messages, subscriber);
+
+	else {
+		var wasRegistered = false;
+
+		messages.forEach(function(message) {
+			var notYetRegistered = this._registerSubscriber(subscribersHash, message, subscriber);			
+			wasRegistered = wasRegistered || notYetRegistered;			
+		}, this);
+
+		return wasRegistered;
+	}
+}
+
+
+function _registerSubscriber(subscribersHash, message, subscriber) {
+	if (! (subscribersHash[message] && subscribersHash[message].length)) {
+		subscribersHash[message] = [];
+		if (message instanceof RegExp)
+			subscribersHash[message].pattern = message;
+		var noSubscribers = true;
+		if (this._messageSource)
+			this._messageSource.onSubscriberAdded(message);
+	}
+
+	var msgSubscribers = subscribersHash[message];
+	var notYetRegistered = noSubscribers || msgSubscribers.indexOf(subscriber) == -1;
+
+	if (notYetRegistered)
+		msgSubscribers.push(subscriber);
+
+	return notYetRegistered;
+}
+
+
+function registerSubscribers(messageSubscribers) {
+	check(messageSubscribers, Match.ObjectHash(Function));
+
+	var notYetRegisteredMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
+		return this.onMessage(messages, subscriber);
+	}, this);
+
+	return notYetRegisteredMap;
+}
+
+
+// removes all subscribers for the message if subscriber isn't supplied
+function removeSubscriber(messages, subscriber) {
+	check(messages, Match.OneOf(String, [String], RegExp));
+	check(subscriber, Match.Optional(Function)); 
+
+	if (typeof messages == 'string')
+		messages = messages.split(messagesSplitRegExp);
+
+	var subscribersHash = this._chooseSubscribersHash(messages);
+
+	if (messages instanceof RegExp)
+		return this._removeSubscriber(subscribersHash, messages, subscriber);
+
+	else {
+		var wasRemoved = false;
+
+		messages.forEach(function(message) {
+			var subscriberRemoved = this._removeSubscriber(subscribersHash, message, subscriber);			
+			wasRemoved = wasRemoved || subscriberRemoved;			
+		}, this);
+
+		return wasRemoved;
+	}
+}
+
+
+function _removeSubscriber(subscribersHash, message, subscriber) {
+	var msgSubscribers = subscribersHash[message];
+	if (! msgSubscribers || ! msgSubscribers.length)
+		return false; // nothing removed
+
+	if (subscriber) {
+		var subscriberIndex = msgSubscribers.indexOf(subscriber);
+		if (subscriberIndex == -1) 
+			return false; // nothing removed
+		msgSubscribers.splice(subscriberIndex, 1);
+		if (! msgSubscribers.length)
+			this._removeAllSubscribers(subscribersHash, message);
+
+	} else 
+		this._removeAllSubscribers(subscribersHash, message);
+
+	return true; // subscriber(s) removed
+}
+
+
+function _removeAllSubscribers(subscribersHash, message) {
+	delete subscribersHash[message];
+	if (this._messageSource)
+		this._messageSource.onSubscriberRemoved(message);
+}
+
+
+function removeSubscribers(messageSubscribers) {
+	check(messageSubscribers, Match.ObjectHash(Function));
+
+	var subscriberRemovedMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
+		return this.offMessages(messages, subscriber);
+	}, this);
+
+	return subscriberRemovedMap;	
+}
+
+
+// TODO - send event to messageSource
+
+
+function postMessage(message, data) {
+	check(message, Match.OneOf(String, RegExp));
+
+	var subscribersHash = this._chooseSubscribersHash(message);
+	var msgSubscribers = subscribersHash[message];
+
+	this._callSubscribers(message, data, msgSubscribers);
+
+	if (typeof message == 'string')
+		this._callPatternSubscribers(message, data);
+}
+
+
+var regexpFlagsPattern = /\/((?:g|i|m|y)*)$/;
+function _callPatternSubscribers(message, data) {
+	_.eachKey(this._patternMessageSubscribers, 
+		function(patternSubscribers) {
+			var pattern = patternSubscribers.pattern;
+			if (pattern.test(message))
+				this._callSubscribers(message, data, patternSubscribers);
+		}
+	, this);
+}
+
+
+function _callSubscribers(message, data, msgSubscribers) {
+	if (msgSubscribers && msgSubscribers.length)
+		msgSubscribers.forEach(function(subscriber) {
+			subscriber.call(this._hostObject, message, data);
+		}, this);
+}
+
+
+function getMessageSubscribers(message, includePatternSubscribers) {
+	check(message, Match.OneOf(String, RegExp));
+
+	var subscribersHash = this._chooseSubscribersHash(message);
+	var msgSubscribers = subscribersHash[message]
+							? [].concat(subscribersHash[message])
+							: [];
+
+	// pattern subscribers are incuded by default
+	if (includePatternSubscribers !== false && typeof message == 'string') {
+		_.eachKey(this._patternMessageSubscribers, 
+			function(patternSubscribers, pattern) {
+				if (patternSubscribers && patternSubscribers.length
+						&& pattern.test(message))
+					_.appendArray(msgSubscribers, patternSubscribers);
+			}
+		);
+	}
+
+	return msgSubscribers.length
+				? msgSubscribers
+				: undefined;
+}
+
+
+function _chooseSubscribersHash(message) {
+	return message instanceof RegExp
+				? this._patternMessageSubscribers
+				: this._messageSubscribers;
+}
+
+
+function _setMessageSource(messageSource) {
+	check(messageSource, MessageSource);
+
+ 	Object.defineProperties(this, {
+ 		_messageSource: { value: messageSource }
+ 	});
+ 	messageSource.messenger = this;
+}
+
+
+
+// <a name="messenger-source"></a>
+// ###messenger source
+
+'use strict';
+
+var Mixin = require('../abstract/mixin')
+	, logger = require('../util/logger')
+	, toBeImplemented = require('../util/error').toBeImplemented
+	, _ = require('mol-proto');
+
+// an abstract class for dispatching external to internal events
+var MessageSource = _.createSubclass(Mixin, 'MessageSource', true);
+
+module.exports = MessageSource;
+
+
+_.extendProto(MessageSource, {
+	// initializes messageSource - called by Mixin superclass
+	init: initMessageSource,
+
+	// called by Messenger to notify when the first subscriber for an internal message was added
+	onSubscriberAdded: onSubscriberAdded,
+
+	// called by Messenger to notify when the last subscriber for an internal message was removed
+ 	onSubscriberRemoved: onSubscriberRemoved, 
+
+ 	// dispatches source message
+ 	dispatchMessage: dispatchSourceMessage,
+
+	// filters source message based on the data of the message - should be implemented in subclass
+	filterSourceMessage: dispatchAllSourceMessages,
+
+ 	// ***
+ 	// Methods below must be implemented in subclass
+ 	
+	// converts internal message type to external message type - should be implemented in subclass
+	translateToSourceMessage: toBeImplemented,
+
+ 	// adds listener to external message - should be implemented by subclass
+ 	addSourceListener: toBeImplemented,
+
+ 	// removes listener from external message - should be implemented by subclass
+ 	removeSourceListener: toBeImplemented,
+});
+
+
+function initMessageSource() {
+	Object.defineProperty(this, '_internalMessages', { value: {} });
+}
+
+
+function onSubscriberAdded(message) {
+	var sourceMessage = this.translateToSourceMessage(message);
+
+	if (! sourceMessage) return;
+
+	if (! this._internalMessages.hasOwnProperty(sourceMessage)) {
+		this.addSourceListener(sourceMessage);
+		this._internalMessages[sourceMessage] = [];
+	}
+	var internalMsgs = this._internalMessages[sourceMessage];
+
+	if (internalMsgs.indexOf(message) == -1)
+		internalMsgs.push(message);
+	else
+		logger.warn('Duplicate notification received: for subscribe to internal message ' + message);
+}
+
+
+function onSubscriberRemoved(message) {
+	var sourceMessage = this.translateToSourceMessage(message);
+
+	if (! sourceMessage) return;
+
+	var internalMsgs = this._internalMessages[sourceMessage];
+
+	if (internalMsgs && internalMsgs.length) {
+		messageIndex = internalMsgs.indexOf(message);
+		if (messageIndex >= 0) {
+			internalMsgs.splice(messageIndex, 1);
+			if (internalMsgs.length == 0) {
+				delete this._internalMessages[sourceMessage];
+				this.removeSourceListener(sourceMessage);
+			}
+		} else
+			unexpectedNotificationWarning();
+	} else
+		unexpectedNotificationWarning();
+
+
+	function unexpectedNotificationWarning() {
+		logger.warn('notification received: un-subscribe from internal message ' + message
+					 + ' without previous subscription notification');
+	}
+}
+
+
+function dispatchSourceMessage(sourceMessage, data) {
+	var internalMsgs = this._internalMessages[sourceMessage];
+
+	if (internalMsgs && internalMsgs.length)
+		internalMsgs.forEach(function(message) {
+			if (this.filterSourceMessage
+					&& this.filterSourceMessage(sourceMessage, message, data))
+				this.messenger.postMessage(message, data);
+		}, this);
+	else
+		logger.warn('source message received for which there is no mapped internal message');
+}
+
+
+// can be overridden in subclass to implement filtering based on message data
+function dispatchAllSourceMessages(sourceMessage, message, data) {
+	return true;
+}
+
+
+// <a name="messenger-message"></a>
+// ###messenger message class
+
+// Not currently used
+
+'use strict';
+
+var check = require('../util/check')
+	, Match = check.Match;
+
+module.exports = Message;
+
+function Message(message) {
+	check(message, Object);
+	check(message.type, Match.Where(IsNonEmptyString));
+	check(message.sender, Match.Optional(Object));
+	check(message.stack, Match.Optional([Object]));
+	check(message.data, Match.Optional(Object));
+	check(message.reciever, Match.Optional(Object));
+	check(message.event, Match.Optional(Object));
+
+	this.type = message.type;
+	this.sender = message.sender;
+	this.stack = message.stack;
+	this.data = message.data;
+	this.reciever = message.reciever;
+	this.event = message.event;
+}
+
+function IsNonEmptyString(str) {
+	check(str, String);
+	return str.length > 0;
+}
+
+// <a name="attribute"></a>
+// attribute class
+// ---------
+
+'use strict';
+
+var _ = require('mol-proto')
+	, check = require('../util/check')
+	, Match = check.Match
+	, toBeImplemented = require('../util/error').toBeImplemented;
+
+
+// an abstract attribute class for attribute parsing and validation
+
+module.exports = Attribute;
+
+function Attribute(el, name) {
+	this.name = name || this.attrName();
+	this.el = el;
+	this.node = el.attributes[this.name];
+}
+
+_.extendProto(Attribute, {
+	get: get,
+	set: set,
+
+	// should be defined in subclass
+	attrName: toBeImplemented,
+	parse: toBeImplemented,
+	validate: toBeImplemented,
+	render: toBeImplemented,
+	decorate: decorate
+});
+
+// get attribute value
+function get() {
+	return this.el.getAttribute(this.name);
+}
+
+// set attribute value
+function set(value) {
+	this.el.setAttribute(this.name, value);
+}
+
+function decorate() {
+	this.set(this.render());
+}
+
+
+// <a name="attribute-bind"></a>
+// ###bind attribute class
+
+'use strict';
+
+var Attribute = require('./index')
+	, AttributeError = require('../util/error').Attribute
+	, config = require('../config')
+	, _ = require('mol-proto')
+	, check = require('../util/check')
+	, Match = check.Match;
+
+
+// Matches;
+// :myView - only component name
+// View:myView - class and component name
+// [Events, Data]:myView - facets and component name
+// View[Events]:myView - class, facet(s) and component name
+
+var attrRegExp= /^([^\:\[\]]*)(?:\[([^\:\[\]]*)\])?\:?([^:]*)$/
+	, facetsSplitRegExp = /\s*(?:\,|\s)\s*/
+	, attrTemplate = '%compClass%compFacets:%compName';
+
+
+var BindAttribute = _.createSubclass(Attribute, 'BindAttribute', true);
+
+_.extendProto(BindAttribute, {
+	attrName: attrName,
+	parse: parse,
+	validate: validate,
+	render: render
+});
+
+
+module.exports = BindAttribute;
+
+
+// get attribute name
+function attrName() {
+	return config.attrs['bind'];
+}
+
+
+// parse attribute
+function parse() {
+	if (! this.node) return;
+
+	var value = this.get();
+
+	if (value)
+		var bindTo = value.match(attrRegExp);
+
+	if (! bindTo)
+		throw new AttributeError('invalid bind attribute ' + value);
+
+	this.compClass = bindTo[1] || 'Component';
+	this.compFacets = (bindTo[2] && bindTo[2].split(facetsSplitRegExp)) || undefined;
+	this.compName = bindTo[3] || undefined;
+
+	return this;
+}
+
+
+// validate attribute
+function validate() {
+	var compName = this.compName;
+	check(compName, Match.Where(function() {
+  		return typeof compName == 'string' && compName != '';
+	}), 'empty component name');
+
+	if (! this.compClass)
+		throw new AttributeError('empty component class name ' + this.compClass);
+
+	return this;
+}
+
+
+function render() {
+	return attrTemplate
+				.replace('%compClass', this.compClass)
+				.replace('%compFacets', this.compFacets
+											? '[' + this.compFacets.join(', ') + ']'
+											: '')
+				.replace('%compName', this.compName);
+}
+
+
+// <a name="attribute-load"></a>
+// ###load attribute class
+
+'use strict';
+
+var Attribute = require('./index')
+	, AttributeError = require('../util/error').Attribute
+	, config = require('../config')
+	, _ = require('mol-proto');
+
+
+var LoadAttribute = _.createSubclass(Attribute, 'LoadAttribute', true);
+
+_.extendProto(LoadAttribute, {
+	attrName: getAttributeName,
+	parse: parseAttribute,
+	validate: validateAttribute
+});
+
+module.exports = LoadAttribute;
+
+
+function getAttributeName() {
+	return config.attrs.load;
+}
+
+
+function parseAttribute() {
+	if (! this.node) return;
+
+	var value = this.get();
+
+	this.loadUrl = value;
+
+	return this;
+}
+
+
+function validateAttribute() {
+	// TODO url validation
+
+	return this;
+}
+
+// <a name="mixin"></a>
+// mixin abstract class
+// --------------
+
+'use strict';
+
+var _ = require('mol-proto')
+	, check = require('../util/check')
+	, Match = check.Match
+	, MixinError = require('../util/error').Mixin;
+
+
+module.exports = Mixin;
+
+// an abstract class for mixin pattern - adding proxy methods to host objects
+function Mixin(hostObject, proxyMethods /*, other args - passed to init method */) {
+	// TODO - moce checks from Messenger here
+	check(hostObject, Match.Optional(Match.OneOf(Object, Function)));
+	check(proxyMethods, Match.Optional(Match.ObjectHash(String)));
+
+	Object.defineProperty(this, '_hostObject', { value: hostObject });
+	if (proxyMethods)
+		this._createProxyMethods(proxyMethods);
+
+	// calling init if it is defined in the class
+	if (this.init)
+		this.init.apply(this, arguments);
+}
+
+_.extendProto(Mixin, {
+	_createProxyMethod: _createProxyMethod,
+	_createProxyMethods: _createProxyMethods
+});
+
+
+function _createProxyMethod(mixinMethodName, proxyMethodName, hostObject) {
+	hostObject = hostObject || this._hostObject;
+
+	if (hostObject[proxyMethodName])
+		throw new MixinError('method ' + proxyMethodName +
+								 ' already defined in host object');
+
+	check(this[mixinMethodName], Function);
+
+	// Bind proxied messenger's method to messenger
+	var boundMethod = this[mixinMethodName].bind(this);
+
+	Object.defineProperty(hostObject, proxyMethodName,
+		{ value: boundMethod, writable: true });
+}
+
+
+function _createProxyMethods(proxyMethods, hostObject) {
+	// creating and binding proxy methods on the host object
+	_.eachKey(proxyMethods, function(mixinMethodName, proxyMethodName) {
+		this._createProxyMethod(mixinMethodName, proxyMethodName, hostObject);
+	}, this);
+}
+
+
+// <a name="registry"></a>
+// registry abstract class
+// --------------
+
+'use strict';
+
+var _ = require('mol-proto')
+	, check = require('../util/check')
+	, Match = check.Match;
+
+module.exports = ClassRegistry;
+
+function ClassRegistry (FoundationClass) {
+	if (FoundationClass)
+		this.setClass(FoundationClass);
+
+	// Object.defineProperty(this, '__registeredClasses', {
+	// 		enumerable: false,
+	// 		writable: true,
+	// 		configurable: true,
+	// 		value: {}
+	// });
+
+	this.__registeredClasses = {};
+}
+
+_.extendProto(ClassRegistry, {
+	add: registerClass,
+	get: getClass,
+	remove: unregisterClass,
+	clean: unregisterAllClasses,
+	setClass: setFoundationClass
+});
+
+
+function setFoundationClass(FoundationClass) {
+	check(FoundationClass, Function);
+	Object.defineProperty(this, 'FoundationClass', {
+		enumerable: true,
+		value: FoundationClass
+	});
+}
+
+function registerClass(aClass, name) {
+	name = name || aClass.name;
+
+	check(name, String, 'class name must be string');
+	check(name, Match.Where(function() {
+		return typeof name == 'string' && name != '';
+	}), 'class name must be string');
+	if (this.FoundationClass) {
+		if (aClass != this.FoundationClass)
+			check(aClass, Match.Subclass(this.FoundationClass), 'class must be a sub(class) of a foundation class');
+	} else
+		throw new TypeError('foundation class must be set before adding classes to registry');
+
+	if (this.__registeredClasses[name])
+		throw new TypeError('is already registered');
+
+	this.__registeredClasses[name] = aClass;
+};
+
+
+function getClass(name) {
+	check(name, String, 'class name must be string');
+	return this.__registeredClasses[name];
+};
+
+
+function unregisterClass(nameOrClass) {
+	check(nameOrClass, Match.OneOf(String, Function), 'class or name must be supplied');
+
+	var name = typeof nameOrClass == 'string'
+						? nameOrClass
+						: nameOrClass.name;
+						
+	if (! this.__registeredClasses[name])
+		throw new TypeError('class is not registered');
+
+	delete this.__registeredClasses[name];
+};
+
+
+function unregisterAllClasses() {
+	this.__registeredClasses = {};
+};

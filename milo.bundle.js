@@ -1,4 +1,8 @@
 ;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+// <a name="mixin"></a>
+// mixin abstract class
+// --------------
+
 'use strict';
 
 var _ = require('mol-proto')
@@ -55,6 +59,10 @@ function _createProxyMethods(proxyMethods, hostObject) {
 }
 
 },{"../util/check":44,"../util/error":47,"mol-proto":55}],2:[function(require,module,exports){
+// <a name="registry"></a>
+// registry abstract class
+// --------------
+
 'use strict';
 
 var _ = require('mol-proto')
@@ -139,6 +147,9 @@ function unregisterAllClasses() {
 };
 
 },{"../util/check":44,"mol-proto":55}],3:[function(require,module,exports){
+// <a name="attribute-bind"></a>
+// ###bind attribute class
+
 'use strict';
 
 var Attribute = require('./index')
@@ -223,6 +234,9 @@ function render() {
 }
 
 },{"../config":33,"../util/check":44,"../util/error":47,"./index":5,"mol-proto":55}],4:[function(require,module,exports){
+// <a name="attribute-load"></a>
+// ###load attribute class
+
 'use strict';
 
 var Attribute = require('./index')
@@ -264,6 +278,10 @@ function validateAttribute() {
 	return this;
 }
 },{"../config":33,"../util/error":47,"./index":5,"mol-proto":55}],5:[function(require,module,exports){
+// <a name="attribute"></a>
+// attribute class
+// ---------
+
 'use strict';
 
 var _ = require('mol-proto')
@@ -463,6 +481,8 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 // milo.classes
 // -----------
 
+// This module contains foundation classes and class registries.
+
 'use strict';
 
 var classes = {
@@ -478,6 +498,20 @@ var classes = {
 module.exports = classes;
 
 },{"./abstract/registry":2,"./components/c_class":8,"./components/c_facet":9,"./components/c_facets/cf_registry":23,"./components/c_registry":30,"./facets/f_class":34,"./model":42}],8:[function(require,module,exports){
+// <a name="components"></a>
+// component class
+// --------------
+
+// Basic component class.
+
+// It's constructor accepts DOM element and component name as paramenters.
+
+// You do not need to use its constructor directly as binder module creates
+// components when it scans DOM tree.
+
+// You should use Component.createComponentClass method when you want to create
+// a new component class from facets and their configuration.
+
 'use strict';
 
 var FacetedObject = require('../facets/f_object')
@@ -689,6 +723,18 @@ function remove() {
 }
 
 },{"../config":33,"../facets/f_object":35,"../messenger":39,"../util/check":44,"../util/count":45,"./c_facet":9,"./c_facets/cf_registry":23,"mol-proto":55}],9:[function(require,module,exports){
+// <a name="components-facet"></a>
+// ###component facet class
+
+// The class fot the facet of component. When a component is created, it
+// creates all its facets.
+
+// See Facets section on information about available facets and on 
+// how to create new facets classes.
+
+// - Component - basic compponent class
+// - ComponentFacet - basic 
+
 'use strict';
 
 var Facet = require('../facets/f_class')
@@ -1987,6 +2033,11 @@ function bindInnerComponents() {
 }
 
 },{"../../binder":6,"../../util/check":44,"../c_facet":9,"./cf_registry":23,"mol-proto":55}],23:[function(require,module,exports){
+// <a name="components-facet-registry"></a>
+// ###component facet registry
+
+// An instance of ClassRegistry class that is used by milo to register and find facets.
+
 'use strict';
 
 var ClassRegistry = require('../../abstract/registry')
@@ -2002,6 +2053,9 @@ module.exports = facetsRegistry;
 // that tests a registry with a given foundation class
 // Make test for this registry based on this function
 },{"../../abstract/registry":2,"../c_facet":9}],24:[function(require,module,exports){
+// <a name="components-info"></a>
+// ###component info class
+
 'use strict';
 
 var componentsRegistry = require('./c_registry')
@@ -2532,6 +2586,11 @@ function handleEvent(event) {
 }
 
 },{"../../messenger/message_source":40,"../../util/check":44,"mol-proto":55}],30:[function(require,module,exports){
+// <a name="components-registry"></a>
+// ###component registry class
+
+// An instance of ClassRegistry class that is used by milo to register and find components.
+
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -2557,6 +2616,10 @@ componentsRegistry.add(View);
 module.exports = View;
 
 },{"../c_class":8,"../c_registry":30}],32:[function(require,module,exports){
+// <a name="scope"></a>
+// scope class
+// -----------
+
 'use strict';
 
 var _ = require('mol-proto')
@@ -2672,6 +2735,10 @@ config({
 });
 
 },{"mol-proto":55}],34:[function(require,module,exports){
+// <a name="facet-c"></a>
+// facet class
+// --------------
+
 'use strict';
 
 var _ = require('mol-proto');
@@ -2689,6 +2756,22 @@ _.extendProto(Facet, {
 });
 
 },{"mol-proto":55}],35:[function(require,module,exports){
+// <a name="facet-o"></a>
+// facetted object class
+// --------------
+
+// Component class is based on an abstract ```FacetedObject``` class that can be
+// applied to any domain where objects can be represented via collection of facets
+// (a facet is an object of a certain class, it holds its own configuration,
+// data and methods).
+
+// In a way, facets pattern is an inversion of adapter pattern - while the latter
+// allows finding a class/methods that has specific functionality, faceted object
+// is simply constructed to have these functionalities. In this way it is possible
+// to create a virtually unlimited number of component classes with a very limited
+// number of building blocks without having any hierarchy of classes - all components
+// inherit directly from Component class.
+
 'use strict';
 
 var Facet = require('./f_class')
@@ -3000,6 +3083,10 @@ function handleEvent(event) {
 }
 
 },{"../components/c_message_sources/dom_events_constructors":26,"../messenger/message_source":40,"../util/check":44,"../util/error":47,"mol-proto":55}],39:[function(require,module,exports){
+// <a name="messenger"></a>
+// milo messenger
+// --------------
+
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -3261,6 +3348,9 @@ function _setMessageSource(messageSource) {
 
 
 },{"../abstract/mixin":1,"../util/check":44,"../util/error":47,"./message_source":40,"mol-proto":55}],40:[function(require,module,exports){
+// <a name="messenger-source"></a>
+// ###messenger source
+
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -3425,6 +3515,10 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 },{"./binder":6,"./classes":7,"./components/c_facets/Container":10,"./components/c_facets/Data":11,"./components/c_facets/Dom":12,"./components/c_facets/Drag":13,"./components/c_facets/Drop":14,"./components/c_facets/Editable":15,"./components/c_facets/Events":16,"./components/c_facets/Frame":17,"./components/c_facets/Item":18,"./components/c_facets/List":19,"./components/c_facets/ModelFacet":20,"./components/c_facets/Split":21,"./components/c_facets/Template":22,"./components/classes/View":31,"./config":33,"./loader":36,"./mail":37,"./util":48}],42:[function(require,module,exports){
+// <a name="model"></a>
+// milo model
+// -----------
+
 'use strict';
 
 var pathUtils = require('./path_utils')
@@ -3660,6 +3754,9 @@ function synthesizeMethod(synthesizer, path, parsedPath) {
 }
 
 },{"../abstract/mixin":1,"../messenger":39,"../util/check":44,"../util/error":47,"./path_utils":43,"dot":54,"fs":52,"mol-proto":55}],43:[function(require,module,exports){
+// <a name="model-path"></a>
+// ### model path utils
+
 'use strict';
 
 
@@ -4066,7 +4163,7 @@ function _prependPath(key, base) {
 },{"mol-proto":55}],45:[function(require,module,exports){
 // <a name="utils-count"></a>
 // milo.utils.count
-// -----------
+// ----------------
 
 'use strict';
 

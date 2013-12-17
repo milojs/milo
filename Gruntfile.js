@@ -127,7 +127,32 @@ module.exports = function(grunt) {
 				'lib/util/dom.js',
 				'lib/util/error.js',
 				'lib/util/check.js',
-				'lib/util/request.js'
+				'lib/util/request.js',
+
+				'lib/facets/f_class.js',
+				'lib/facets/f_object.js',
+
+				'lib/components/c_class.js',
+				'lib/components/c_facet.js',
+				'lib/components/c_info.js',
+				'lib/components/c_registry.js',
+				'lib/components/scope.js',
+
+				'lib/model/index.js',
+				'lib/model/connector.js',
+				'lib/model/demo.js',
+				'lib/model/path_utils.js',
+
+				'lib/messenger/index.js',
+				'lib/messenger/message_source.js',
+				'lib/messenger/message.js',
+
+				'lib/attribute/index.js',
+				'lib/attribute/a_bind.js',
+				'lib/attribute/a_load.js',
+
+				'lib/abstract/mixin.js',
+				'lib/abstract/registry.js'
         	]
         };
     }

@@ -530,7 +530,8 @@ module.exports = binder;
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
-              
+              <p>This module contains foundation classes and class registries.</p>
+
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
@@ -1770,6 +1771,3061 @@ _.extend(request, {
 <span class="function"><span class="keyword">function</span> <span class="title">get</span><span class="params">(url, callback)</span> {</span>
 	request(url, { method: <span class="string">'GET'</span> }, callback);
 }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-69">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-69">&#182;</a>
+              </div>
+              <p><a name="facet-c"></a></p>
+<h2 id="facet-class">facet class</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-70">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-70">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> _ = require(<span class="string">'mol-proto'</span>);
+
+module.exports = Facet;
+
+<span class="function"><span class="keyword">function</span> <span class="title">Facet</span><span class="params">(owner, config)</span> {</span>
+	<span class="keyword">this</span>.owner = owner;
+	<span class="keyword">this</span>.config = config || {};
+	<span class="keyword">this</span>.init.apply(<span class="keyword">this</span>, arguments);
+}
+
+_.extendProto(Facet, {
+	init: <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>}
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-71">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-71">&#182;</a>
+              </div>
+              <p><a name="facet-o"></a></p>
+<h2 id="facetted-object-class">facetted object class</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-72">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-72">&#182;</a>
+              </div>
+              <p>Component class is based on an abstract <code>FacetedObject</code> class that can be
+applied to any domain where objects can be represented via collection of facets
+(a facet is an object of a certain class, it holds its own configuration,
+data and methods).</p>
+<p>In a way, facets pattern is an inversion of adapter pattern - while the latter
+allows finding a class/methods that has specific functionality, faceted object
+is simply constructed to have these functionalities. In this way it is possible
+to create a virtually unlimited number of component classes with a very limited
+number of building blocks without having any hierarchy of classes - all components
+inherit directly from Component class.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> Facet = require(<span class="string">'./f_class'</span>)
+	, _ = require(<span class="string">'mol-proto'</span>)
+	, check = require(<span class="string">'../util/check'</span>)
+	, Match = check.Match
+	, FacetError = require(<span class="string">'../util/error'</span>).Facet;
+
+module.exports = FacetedObject;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-73">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-73">&#182;</a>
+              </div>
+              <p>abstract class for faceted object</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">FacetedObject</span><span class="params">()</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-74">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-74">&#182;</a>
+              </div>
+              <p>TODO write a test to check that facets are created if configuration isn&#39;t passed</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">var</span> facetsConfig = <span class="keyword">this</span>.facetsConfig || {};
+
+	<span class="keyword">var</span> facetsDescriptors = {}
+		, facets = {};
+
+	<span class="keyword">if</span> (<span class="keyword">this</span>.constructor == FacetedObject)		
+		<span class="keyword">throw</span> <span class="keyword">new</span> FacetError(<span class="string">'FacetedObject is an abstract class, can\'t be instantiated'</span>);
+
+	<span class="keyword">if</span> (<span class="keyword">this</span>.facetsClasses)
+		_.eachKey(<span class="keyword">this</span>.facetsClasses, instantiateFacet, <span class="keyword">this</span>, <span class="literal">true</span>);
+
+	Object.defineProperties(<span class="keyword">this</span>, facetsDescriptors);
+	Object.defineProperty(<span class="keyword">this</span>, <span class="string">'facets'</span>, { value: facets });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-75">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-75">&#182;</a>
+              </div>
+              <p>calling init if it is defined in the class</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">if</span> (<span class="keyword">this</span>.init)
+		<span class="keyword">this</span>.init.apply(<span class="keyword">this</span>, arguments);
+
+	<span class="function"><span class="keyword">function</span> <span class="title">instantiateFacet</span><span class="params">(FacetClass, fct)</span> {</span>
+		<span class="keyword">var</span> facetOpts = facetsConfig[fct];
+
+		facets[fct] = <span class="keyword">new</span> FacetClass(<span class="keyword">this</span>, facetOpts);
+
+		facetsDescriptors[fct] = {
+			enumerable: <span class="literal">true</span>,
+			value: facets[fct]
+		};
+	}
+}
+
+_.extendProto(FacetedObject, {
+	addFacet: addFacet
+});
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">addFacet</span><span class="params">(FacetClass, facetOpts, facetName)</span> {</span>
+	check(FacetClass, Function);
+	check(facetName, Match.Optional(String));
+
+	facetName = _.firstLowerCase(facetName || FacetClass.name);
+
+	<span class="keyword">var</span> protoFacets = <span class="keyword">this</span>.constructor.prototype.facetsClasses;
+
+	<span class="keyword">if</span> (protoFacets &amp;&amp; protoFacets[facetName])
+		<span class="keyword">throw</span> <span class="keyword">new</span> FacetError(<span class="string">'facet '</span> + facetName + <span class="string">' is already part of the class '</span> + <span class="keyword">this</span>.constructor.name);
+
+	<span class="keyword">if</span> (<span class="keyword">this</span>[facetName])
+		<span class="keyword">throw</span> <span class="keyword">new</span> FacetError(<span class="string">'facet '</span> + facetName + <span class="string">' is already present in object'</span>);
+
+	<span class="keyword">var</span> newFacet = <span class="keyword">this</span>.facets[facetName] = <span class="keyword">new</span> FacetClass(<span class="keyword">this</span>, facetOpts);
+
+	Object.defineProperty(<span class="keyword">this</span>, facetName, {
+		enumerable: <span class="literal">true</span>,
+		value: newFacet
+	});
+
+	<span class="keyword">return</span> newFacet;
+}
+
+
+FacetedObject.hasFacet = <span class="function"><span class="keyword">function</span> <span class="title">hasFacet</span><span class="params">(facetName)</span> {</span>
+	<span class="keyword">var</span> protoFacets = <span class="keyword">this</span>.prototype.facetsClasses;
+	<span class="keyword">return</span> protoFacets &amp;&amp; protoFacets[facetName];
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-76">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-76">&#182;</a>
+              </div>
+              <p>factory that creates classes (constructors) from the map of facets
+these classes inherit from FacetedObject</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>FacetedObject.createFacetedClass = <span class="function"><span class="keyword">function</span> <span class="params">(name, facetsClasses, facetsConfig)</span> {</span>
+	check(name, String);
+	check(facetsClasses, Match.ObjectHash(Match.Subclass(Facet, <span class="literal">true</span>)));
+	check(facetsConfig, Match.Optional(Object));
+
+	<span class="keyword">if</span> (facetsConfig)
+		_.eachKey(facetsConfig, <span class="function"><span class="keyword">function</span><span class="params">(fctConfig, fctName)</span> {</span>
+			<span class="keyword">if</span> (! facetsClasses.hasOwnProperty(fctName))
+				<span class="keyword">throw</span> <span class="keyword">new</span> FacetError(<span class="string">'configuration for facet ('</span> + fctName + <span class="string">') passed that is not in class'</span>);
+		});
+
+	<span class="keyword">var</span> FacetedClass = _.createSubclass(<span class="keyword">this</span>, name, <span class="literal">true</span>);
+
+	_.extendProto(FacetedClass, {
+		facetsClasses: facetsClasses,
+		facetsConfig: facetsConfig
+	});
+	<span class="keyword">return</span> FacetedClass;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-77">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-77">&#182;</a>
+              </div>
+              <p><a name="components"></a></p>
+<h2 id="component-class">component class</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-78">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-78">&#182;</a>
+              </div>
+              <p>Basic component class.</p>
+<p>It&#39;s constructor accepts DOM element and component name as paramenters.</p>
+<p>You do not need to use its constructor directly as binder module creates
+components when it scans DOM tree.</p>
+<p>You should use Component.createComponentClass method when you want to create
+a new component class from facets and their configuration.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> FacetedObject = require(<span class="string">'../facets/f_object'</span>)
+	, facetsRegistry = require(<span class="string">'./c_facets/cf_registry'</span>)
+	, ComponentFacet = require(<span class="string">'./c_facet'</span>)
+	, Messenger = require(<span class="string">'../messenger'</span>)
+	, _ = require(<span class="string">'mol-proto'</span>)
+	, check = require(<span class="string">'../util/check'</span>)
+	, Match = check.Match
+	, config = require(<span class="string">'../config'</span>)
+	, miloCount = require(<span class="string">'../util/count'</span>);
+
+
+<span class="keyword">var</span> Component = _.createSubclass(FacetedObject, <span class="string">'Component'</span>, <span class="literal">true</span>);
+
+module.exports = Component;
+
+
+Component.createComponentClass = createComponentClass;
+<span class="keyword">delete</span> Component.createFacetedClass;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-79">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-79">&#182;</a>
+              </div>
+              <p>class methods</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>_.extend(Component, {
+	create: create,
+	copy: copy,
+	isComponent: isComponent,
+	getComponent: getComponent,
+	getContainingComponent: getContainingComponent
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-80">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-80">&#182;</a>
+              </div>
+              <p>instance methods</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>_.extendProto(Component, {
+	init: init,
+	addFacet: addFacet,
+	allFacets: allFacets,
+	remove: remove
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-81">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-81">&#182;</a>
+              </div>
+              <p>class methods</p>
+<p>create component from ComponentInfo</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">create</span><span class="params">(info)</span> {</span>
+	<span class="keyword">var</span> ComponentClass = info.ComponentClass;
+	<span class="keyword">var</span> aComponent = <span class="keyword">new</span> ComponentClass(info.scope, info.el, info.name, info);
+
+	<span class="keyword">if</span> (info.extraFacetsClasses)
+		_.eachKey(info.extraFacetsClasses, <span class="function"><span class="keyword">function</span><span class="params">(FacetClass)</span> {</span>
+			aComponent.addFacet(FacetClass);
+		});
+
+	<span class="keyword">return</span> aComponent;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-82">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-82">&#182;</a>
+              </div>
+              <p>creates a new instance with the same state but different element</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">copy</span><span class="params">(component, deepCopyDOM)</span> {</span>
+	<span class="keyword">var</span> ComponentClass = component.constructor
+		, newName = <span class="string">'milo_'</span> + miloCount()
+		, newEl = component.dom 
+					? component.dom.copy(deepCopyDOM)
+					: component.el.cloneNode(deepCopyDOM)
+		, newInfo = _.clone(component.componentInfo)
+		, attr = _.clone(newInfo.attr);
+
+	_.extend(attr, {
+		el: newEl,
+		compName: newName
+	});
+
+	attr.decorate();
+
+	_.extend(newInfo, {
+		el: newEl,
+		name: newName,
+		attr: attr
+	});
+
+	<span class="keyword">var</span> aComponent = Component.create(newInfo);
+	component.scope._add(aComponent, aComponent.name);
+
+	<span class="keyword">return</span> aComponent;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-83">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-83">&#182;</a>
+              </div>
+              <p>checks if element is bound to a component</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">isComponent</span><span class="params">(element)</span> {</span>
+	<span class="keyword">return</span> config.componentRef <span class="keyword">in</span> element;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-84">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-84">&#182;</a>
+              </div>
+              <p>gets the element bound the component</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">getComponent</span><span class="params">(element)</span> {</span>
+	<span class="keyword">return</span> element &amp;&amp; element[config.componentRef];
+}
+
+<span class="comment">/**
+ * Returns the closest component which contains the specified node
+ *
+ * This will return the current component of the node if it is a component.
+ * 
+ * @param {Node} node DOM Node
+ * @return {Component|null}
+ */</span>
+<span class="function"><span class="keyword">function</span> <span class="title">getContainingComponent</span><span class="params">(node)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-85">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-85">&#182;</a>
+              </div>
+              <p>Where the current node is a component it&#39;s component should be returned</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">if</span> (isComponent(node)) {
+		<span class="keyword">return</span> getComponent(node);
+	}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-86">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-86">&#182;</a>
+              </div>
+              <p>Where there is no parent node, this function will return null</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">if</span> (!node.parentNode) {
+		<span class="keyword">return</span> <span class="literal">null</span>;
+	}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-87">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-87">&#182;</a>
+              </div>
+              <p>The parent node is checked recursively</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">return</span> getContainingComponent(node.parentNode);
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">createComponentClass</span><span class="params">(name, facetsConfig)</span> {</span>
+	<span class="keyword">var</span> facetsClasses = {};
+
+	<span class="keyword">if</span> (Array.isArray(facetsConfig)) {
+		<span class="keyword">var</span> configMap = {};
+		facetsConfig.forEach(<span class="function"><span class="keyword">function</span><span class="params">(fct)</span> {</span>
+			<span class="keyword">var</span> fctName = _.firstLowerCase(fct);
+			configMap[fctName] = {};
+		});
+		facetsConfig = configMap;
+	}
+
+	_.eachKey(facetsConfig, <span class="function"><span class="keyword">function</span><span class="params">(fctConfig, fct)</span> {</span>
+		<span class="keyword">var</span> fctName = _.firstLowerCase(fct);
+		<span class="keyword">var</span> fctClassName = _.firstUpperCase(fct);
+		facetsClasses[fctName] = facetsRegistry.get(fctClassName);
+	});
+
+	<span class="keyword">var</span> ComponentClass = FacetedObject.createFacetedClass.call(<span class="keyword">this</span>, name, facetsClasses, facetsConfig);
+	
+	<span class="keyword">return</span> ComponentClass;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-88">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-88">&#182;</a>
+              </div>
+              <p>instance methods</p>
+<p>initializes component
+Automatically called by inherited constructor of FacetedObject
+Subclasses should call inherited init methods:
+Component.prototype.init.apply(this, arguments)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">init</span><span class="params">(scope, element, name, componentInfo)</span> {</span>
+	<span class="keyword">this</span>.el = element;
+	<span class="keyword">if</span> (element)
+		element[config.componentRef] = <span class="keyword">this</span>;
+
+	_.defineProperties(<span class="keyword">this</span>, {
+		name: name,
+		scope: scope,
+		componentInfo: componentInfo
+	}, <span class="literal">true</span>);
+
+	<span class="keyword">var</span> messenger = <span class="keyword">new</span> Messenger(<span class="keyword">this</span>, Messenger.defaultMethods, <span class="literal">undefined</span> <span class="comment">/* no messageSource */</span>);
+
+	_.defineProperty(<span class="keyword">this</span>, <span class="string">'_messenger'</span>, messenger);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-89">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-89">&#182;</a>
+              </div>
+              <p>start all facets</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">this</span>.allFacets(<span class="string">'check'</span>);
+	<span class="keyword">this</span>.allFacets(<span class="string">'start'</span>);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">addFacet</span><span class="params">(facetNameOrClass, facetOpts, facetName)</span> {</span>
+	check(facetNameOrClass, Match.OneOf(String, Match.Subclass(ComponentFacet)));
+	check(facetOpts, Match.Optional(Object));
+	check(facetName, Match.Optional(String));
+
+	<span class="keyword">if</span> (<span class="keyword">typeof</span> facetNameOrClass == <span class="string">'string'</span>) {
+		<span class="keyword">var</span> facetClassName = _.firstUpperCase(facetNameOrClass);
+		<span class="keyword">var</span> FacetClass = facetsRegistry.get(facetClassName);
+	} <span class="keyword">else</span> 
+		FacetClass = facetNameOrClass;
+
+	facetName = facetName || _.firstLowerCase(FacetClass.name);
+
+	<span class="keyword">var</span> newFacet = FacetedObject.prototype.addFacet.call(<span class="keyword">this</span>, FacetClass, facetOpts, facetName);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-90">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-90">&#182;</a>
+              </div>
+              <p>start facet</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	newFacet.check &amp;&amp; newFacet.check();
+	newFacet.start &amp;&amp; newFacet.start();
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-91">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-91">&#182;</a>
+              </div>
+              <p>envoke given method with optional parameters on all facets</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">allFacets</span><span class="params">(method <span class="comment">/* , ... */</span>)</span> {</span>
+	<span class="keyword">var</span> args = Array.prototype.slice.call(arguments, <span class="number">1</span>);
+
+	_.eachKey(<span class="keyword">this</span>.facets, <span class="function"><span class="keyword">function</span><span class="params">(facet, fctName)</span> {</span>
+		<span class="keyword">if</span> (facet &amp;&amp; <span class="keyword">typeof</span> facet[method] == <span class="string">'function'</span>)
+			facet[method].apply(facet, args);
+	});
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-92">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-92">&#182;</a>
+              </div>
+              <p>remove component from it&#39;s scope</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">remove</span><span class="params">()</span> {</span>
+	<span class="keyword">if</span> (<span class="keyword">this</span>.scope)
+		<span class="keyword">delete</span> <span class="keyword">this</span>.scope[<span class="keyword">this</span>.name];
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-93">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-93">&#182;</a>
+              </div>
+              <p><a name="components-facet"></a></p>
+<h3 id="component-facet-class">component facet class</h3>
+<p>The class fot the facet of component. When a component is created, it
+creates all its facets.</p>
+<p>See Facets section on information about available facets and on 
+how to create new facets classes.</p>
+<ul>
+<li>Component - basic compponent class</li>
+<li>ComponentFacet - basic </li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> Facet = require(<span class="string">'../facets/f_class'</span>)
+	, Messenger = require(<span class="string">'../messenger'</span>)
+	, FacetError = require(<span class="string">'../util/error'</span>).Facet
+	, _ = require(<span class="string">'mol-proto'</span>);
+
+<span class="keyword">var</span> ComponentFacet = _.createSubclass(Facet, <span class="string">'ComponentFacet'</span>);
+
+module.exports = ComponentFacet;
+
+
+_.extendProto(ComponentFacet, {
+	init: initComponentFacet,
+	start: startComponentFacet,
+	check: checkDependencies,
+	_createMessenger: _createMessenger,
+	_setMessageSource: _setMessageSource,
+	_createMessageSource: _createMessageSource
+});
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">initComponentFacet</span><span class="params">()</span> {</span>
+	<span class="keyword">this</span>._createMessenger();
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_createMessenger</span><span class="params">()</span>{</span>
+	<span class="keyword">var</span> messenger = <span class="keyword">new</span> Messenger(<span class="keyword">this</span>, Messenger.defaultMethods, <span class="literal">undefined</span> <span class="comment">/* no messageSource */</span>);
+
+	_.defineProperties(<span class="keyword">this</span>, {
+		_messenger: messenger
+	});
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">startComponentFacet</span><span class="params">()</span> {</span>
+	<span class="keyword">if</span> (<span class="keyword">this</span>.config.messages)
+		<span class="keyword">this</span>.onMessages(<span class="keyword">this</span>.config.messages);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">checkDependencies</span><span class="params">()</span> {</span>
+	<span class="keyword">if</span> (<span class="keyword">this</span>.require) {
+		<span class="keyword">this</span>.require.forEach(<span class="function"><span class="keyword">function</span><span class="params">(reqFacet)</span> {</span>
+			<span class="keyword">var</span> facetName = _.firstLowerCase(reqFacet);
+			<span class="keyword">if</span> (! (<span class="keyword">this</span>.owner[facetName] <span class="keyword">instanceof</span> ComponentFacet))
+				<span class="keyword">throw</span> <span class="keyword">new</span> FacetError(<span class="string">'facet '</span> + <span class="keyword">this</span>.constructor.name + <span class="string">' requires facet '</span> + reqFacet);
+		}, <span class="keyword">this</span>);
+	}
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_setMessageSource</span><span class="params">(messageSource)</span> {</span>
+	<span class="keyword">this</span>._messenger._setMessageSource(messageSource);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_createMessageSource</span><span class="params">(MessageSourceClass, options)</span> {</span>
+	<span class="keyword">var</span> messageSource = <span class="keyword">new</span> MessageSourceClass(<span class="keyword">this</span>, <span class="literal">undefined</span>, <span class="keyword">this</span>.owner, options);
+	<span class="keyword">this</span>._setMessageSource(messageSource)
+
+	_.defineProperty(<span class="keyword">this</span>, <span class="string">'_messageSource'</span>, messageSource);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-94">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-94">&#182;</a>
+              </div>
+              <p><a name="components-info"></a></p>
+<h3 id="component-info-class">component info class</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> componentsRegistry = require(<span class="string">'./c_registry'</span>)
+	, facetsRegistry = require(<span class="string">'./c_facets/cf_registry'</span>)
+	, BinderError = require(<span class="string">'../util/error'</span>).Binder;
+
+
+module.exports = ComponentInfo;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-95">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-95">&#182;</a>
+              </div>
+              <p>Component information class</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">ComponentInfo</span><span class="params">(scope, el, attr)</span> {</span>
+	attr.parse().validate();
+
+	<span class="keyword">this</span>.scope = scope;
+	<span class="keyword">this</span>.el = el;
+	<span class="keyword">this</span>.attr = attr;
+	<span class="keyword">this</span>.name = attr.compName;
+	<span class="keyword">this</span>.ComponentClass = getComponentClass(attr);
+	<span class="keyword">this</span>.extraFacetsClasses = getComponentExtraFacets(<span class="keyword">this</span>.ComponentClass, attr);
+
+	<span class="keyword">if</span> (hasContainerFacet(<span class="keyword">this</span>.ComponentClass, attr))
+		<span class="keyword">this</span>.container = {};
+
+
+	<span class="function"><span class="keyword">function</span> <span class="title">getComponentClass</span><span class="params">(attr)</span> {</span>
+		<span class="keyword">var</span> ComponentClass = componentsRegistry.get(attr.compClass);
+		<span class="keyword">if</span> (! ComponentClass)
+			<span class="keyword">throw</span> <span class="keyword">new</span> BinderError(<span class="string">'class '</span> + attr.compClass + <span class="string">' is not registered'</span>);
+		<span class="keyword">return</span> ComponentClass;
+	}
+
+	<span class="function"><span class="keyword">function</span> <span class="title">getComponentExtraFacets</span><span class="params">(ComponentClass, attr)</span> {</span>
+		<span class="keyword">var</span> facets = attr.compFacets
+			, extraFacetsClasses = {};
+
+		<span class="keyword">if</span> (Array.isArray(facets))
+			facets.forEach(<span class="function"><span class="keyword">function</span><span class="params">(fctName)</span> {</span>
+				<span class="keyword">if</span> (ComponentClass.hasFacet(fctName))
+					<span class="keyword">throw</span> <span class="keyword">new</span> BinderError(<span class="string">'class '</span> + ComponentClass.name
+										  + <span class="string">' already has facet '</span> + fctName);
+				<span class="keyword">if</span> (extraFacetsClasses[fctName])
+					<span class="keyword">throw</span> <span class="keyword">new</span> BinderError(<span class="string">'component '</span> + attr.compName
+										  + <span class="string">' already has facet '</span> + fctName);
+				<span class="keyword">var</span> FacetClass = facetsRegistry.get(fctName);
+				extraFacetsClasses[fctName] = FacetClass;
+			});
+
+		<span class="keyword">return</span> extraFacetsClasses;
+	}
+
+	<span class="function"><span class="keyword">function</span> <span class="title">hasContainerFacet</span><span class="params">(ComponentClass, attr)</span> {</span>
+		<span class="keyword">return</span> (ComponentClass.hasFacet(<span class="string">'container'</span>)
+			|| (Array.isArray(attr.compFacets) &amp;&amp; attr.compFacets.indexOf(<span class="string">'Container'</span>) &gt;= <span class="number">0</span>));
+	}
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-96">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-96">&#182;</a>
+              </div>
+              <p><a name="components-registry"></a></p>
+<h3 id="component-registry-class">component registry class</h3>
+<p>An instance of ClassRegistry class that is used by milo to register and find components.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> ClassRegistry = require(<span class="string">'../abstract/registry'</span>)
+	, Component = require(<span class="string">'./c_class'</span>);
+
+<span class="keyword">var</span> componentsRegistry = <span class="keyword">new</span> ClassRegistry(Component);
+
+componentsRegistry.add(Component);
+
+module.exports = componentsRegistry;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-97">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-97">&#182;</a>
+              </div>
+              <p><a name="scope"></a></p>
+<h2 id="scope-class">scope class</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-98">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-98">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> _ = require(<span class="string">'mol-proto'</span>)
+	, check = require(<span class="string">'../util/check'</span>)
+	, Match = check.Match
+	, ScopeError = require(<span class="string">'../util/error'</span>).Scope;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-99">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-99">&#182;</a>
+              </div>
+              <p>Scope class</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">Scope</span><span class="params">(rootEl)</span> {</span>
+	Object.defineProperties(<span class="keyword">this</span>, {
+		_rootEl: { value: rootEl }
+	})
+};
+
+_.extendProto(Scope, {
+	_add: _add,
+	_copy: _copy,
+	_each: _each,
+	_addNew: _addNew,
+	_merge: _merge,
+	_length: _length
+});
+
+module.exports = Scope;
+
+
+<span class="keyword">var</span> allowedNamePattern = <span class="regexp">/^[A-Za-z][A-Za-z0-9\_\$]*$/</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-100">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-100">&#182;</a>
+              </div>
+              <p>adds object to scope throwing if name is notyunique</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">_add</span><span class="params">(object, name)</span> {</span>
+	<span class="keyword">if</span> (<span class="keyword">this</span>[name])
+		<span class="keyword">throw</span> <span class="keyword">new</span> ScopeError(<span class="string">'duplicate object name: '</span> + name);
+
+	checkName(name);
+
+	<span class="keyword">this</span>[name] = object;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-101">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-101">&#182;</a>
+              </div>
+              <p>copies all objects from one scope to another,
+throwing if some object is not unique</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">_copy</span><span class="params">(aScope)</span> {</span>
+	check(aScope, Scope);
+
+	aScope._each(_add, <span class="keyword">this</span>);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_addNew</span><span class="params">(object, name)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-102">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-102">&#182;</a>
+              </div>
+              <p>TODO</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_merge</span><span class="params">(scope)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-103">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-103">&#182;</a>
+              </div>
+              <p>TODO</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_each</span><span class="params">(callback, thisArg)</span> {</span>
+	_.eachKey(<span class="keyword">this</span>, callback, thisArg || <span class="keyword">this</span>, <span class="literal">true</span>); <span class="comment">// enumerates enumerable properties only</span>
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">checkName</span><span class="params">(name)</span> {</span>
+	<span class="keyword">if</span> (! allowedNamePattern.test(name))
+		<span class="keyword">throw</span> <span class="keyword">new</span> ScopeError(<span class="string">'name should start from letter, this name is not allowed: '</span> + name);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-104">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-104">&#182;</a>
+              </div>
+              <p>returns the number of objects in scope</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">_length</span><span class="params">()</span> {</span>
+	<span class="keyword">return</span> Object.keys(<span class="keyword">this</span>).length;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-105">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-105">&#182;</a>
+              </div>
+              <p><a name="model"></a></p>
+<h2 id="milo-model">milo model</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-106">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-106">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> pathUtils = require(<span class="string">'./path_utils'</span>)
+	, Messenger = require(<span class="string">'../messenger'</span>)
+	, ModelError = require(<span class="string">'../util/error'</span>).Model
+	, Mixin = require(<span class="string">'../abstract/mixin'</span>)
+	, doT = require(<span class="string">'dot'</span>)
+	, _ = require(<span class="string">'mol-proto'</span>)
+	, check = require(<span class="string">'../util/check'</span>)
+	, Match = check.Match
+	, fs = require(<span class="string">'fs'</span>);
+
+module.exports = Model;
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">Model</span><span class="params">(scope, schema, name, data)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-107">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-107">&#182;</a>
+              </div>
+              <p>modelPath should return a ModelPath object with &quot;compiled&quot; methods
+to get/set model properties, to subscribe to property changes, etc.
+&quot;it&quot; parameter is the object which properties can be referenced in path.
+These references will be evaluated at run rather than at compile time</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">var</span> model = <span class="function"><span class="keyword">function</span> <span class="title">modelPath</span><span class="params">(path, it)</span> {</span>
+		<span class="keyword">return</span> <span class="keyword">new</span> ModelPath(model, path, it);
+	}
+	model.__proto__ = Model.prototype;
+
+	<span class="keyword">var</span> messenger = <span class="keyword">new</span> Messenger(model, Messenger.defaultMethods);
+
+	_.defineProperties(model, {
+		scope: scope,
+		name: name,
+		_schema: schema,
+		_messenger: messenger,
+		__pathsCache: {}
+	});
+
+	model._wrapMessengerMethods();
+
+	model._data = data;
+
+	<span class="keyword">return</span> model;
+}
+
+Model.prototype.__proto__ = Model.__proto__;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-108">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-108">&#182;</a>
+              </div>
+              <p>cache of compiled ModelPath methods</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> __synthesizedPathsMethods = {};
+
+<span class="keyword">var</span> dotDef = {
+	modelAccessPrefix: <span class="string">'this._model._data'</span>,
+	modelPostMessageCode: <span class="string">'this._model.postMessage'</span>,
+	getPathNodeKey: pathUtils.getPathNodeKey
+};
+
+<span class="keyword">var</span> modelSetterDotDef = {
+	modelAccessPrefix: <span class="string">'this._data'</span>,
+	modelPostMessageCode: <span class="string">'this.postMessage'</span>,
+	getPathNodeKey: pathUtils.getPathNodeKey
+};
+
+<span class="keyword">var</span> getterTemplate = fs.readFileSync(__dirname + <span class="string">'/getter_template.js'</span>)
+	, setterTemplate = fs.readFileSync(__dirname + <span class="string">'/setter_template.js'</span>);
+
+doT.templateSettings.strip = <span class="literal">false</span>;
+
+<span class="keyword">var</span> getterSynthesizer = doT.compile(getterTemplate, dotDef)
+	, setterSynthesizer = doT.compile(setterTemplate, dotDef)
+	, modelSetterSynthesizer = doT.compile(setterTemplate, modelSetterDotDef);
+
+
+_.extendProto(Model, {
+	get: get,
+	set: synthesizeMethod(modelSetterSynthesizer, <span class="string">''</span>, []),
+	path: path,
+	proxyMessenger: proxyMessenger,
+	_wrapMessengerMethods: _wrapMessengerMethods
+});
+
+<span class="function"><span class="keyword">function</span> <span class="title">get</span><span class="params">()</span> {</span>
+	<span class="keyword">return</span> <span class="keyword">this</span>._data;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-109">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-109">&#182;</a>
+              </div>
+              <p>returns ModelPath object</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">path</span><span class="params">(accessPath)</span> {</span>
+	<span class="keyword">return</span> <span class="keyword">this</span>(accessPath);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">proxyMessenger</span><span class="params">(modelHostObject)</span> {</span>
+	Mixin.prototype._createProxyMethods.call(<span class="keyword">this</span>._messenger, Messenger.defaultMethods, modelHostObject);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-110">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-110">&#182;</a>
+              </div>
+              <p>TODO allow for multiple messages in a string</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> modelMethodsToWrap = [<span class="string">'on'</span>, <span class="string">'off'</span>, <span class="string">'onMessages'</span>, <span class="string">'offMessages'</span>];
+<span class="function"><span class="keyword">function</span> <span class="title">_wrapMessengerMethods</span><span class="params">()</span> {</span>
+	modelMethodsToWrap.forEach(<span class="function"><span class="keyword">function</span><span class="params">(methodName)</span> {</span>
+		<span class="keyword">var</span> origMethod = <span class="keyword">this</span>[methodName];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-111">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-111">&#182;</a>
+              </div>
+              <p>replacing message subsribe/unsubscribe/etc. to convert &quot;*&quot; message patterns to regexps</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		<span class="keyword">this</span>[methodName] = <span class="function"><span class="keyword">function</span><span class="params">(path, subscriber)</span> {</span>
+			<span class="keyword">var</span> regexPath = pathUtils.createRegexPath(path);
+			origMethod.call(<span class="keyword">this</span>, regexPath, subscriber);
+		};
+	}, <span class="keyword">this</span>);
+}
+
+
+_.extend(Model, {
+	Path: ModelPath
+});
+
+<span class="function"><span class="keyword">function</span> <span class="title">ModelPath</span><span class="params">(model, path, it)</span> {</span>
+	check(model, Model);
+	check(path, String);
+	check(it, Match.Optional(Object));
+
+	_.defineProperties(<span class="keyword">this</span>, {
+		_model: model,
+		_path: path,
+		_it: it
+	});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-112">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-112">&#182;</a>
+              </div>
+              <p>compiling getter and setter</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">var</span> methods = synthesizePathMethods(path);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-113">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-113">&#182;</a>
+              </div>
+              <p>adding methods to model path</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	_.defineProperties(<span class="keyword">this</span>, methods);
+
+	Object.freeze(<span class="keyword">this</span>);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-114">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-114">&#182;</a>
+              </div>
+              <p>adding messaging methods to ModelPath prototype</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> modelPathMethodsMap = {};
+
+modelMethodsToWrap.forEach(<span class="function"><span class="keyword">function</span><span class="params">(methodName)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-115">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-115">&#182;</a>
+              </div>
+              <p>creating subscribe/unsubscribe/etc. methods for ModelPath class</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	modelPathMethodsMap[methodName] = <span class="function"><span class="keyword">function</span><span class="params">(path, subscriber)</span> {</span>
+		<span class="keyword">this</span>._model[methodName](<span class="keyword">this</span>._path + path, subscriber);
+	};
+})
+
+_.extendProto(ModelPath, modelPathMethodsMap);
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">synthesizePathMethods</span><span class="params">(path)</span> {</span>
+	<span class="keyword">if</span> (__synthesizedPathsMethods.hasOwnProperty(path))
+		<span class="keyword">return</span> __synthesizedPathsMethods[path];
+
+	<span class="keyword">var</span> parsedPath = pathUtils.parseAccessPath(path);
+
+	<span class="keyword">var</span> methods = {
+		get: synthesizeMethod(getterSynthesizer, path, parsedPath),
+		set: synthesizeMethod(setterSynthesizer, path, parsedPath)
+	};
+
+	__synthesizedPathsMethods[path] = methods;
+
+	<span class="keyword">return</span> methods;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">synthesizeMethod</span><span class="params">(synthesizer, path, parsedPath)</span> {</span>
+	<span class="keyword">var</span> method
+		, methodCode = synthesizer({ parsedPath: parsedPath });
+
+	<span class="keyword">try</span> {
+		eval(methodCode);
+	} <span class="keyword">catch</span> (e) {
+		<span class="keyword">throw</span> ModelError(<span class="string">'ModelPath method compilation error; path: '</span> + path + <span class="string">', code: '</span> + methodCode);
+	}
+
+	<span class="keyword">return</span> method;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-116">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-116">&#182;</a>
+              </div>
+              <p>functions used by ModelPath setter (synthesized by template)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="function"><span class="keyword">function</span> <span class="title">addChangeMessage</span><span class="params">(messages, messagesHash, msg)</span> {</span>
+		messages.push(msg);
+		messagesHash[msg.path] = msg;
+	}
+
+	<span class="function"><span class="keyword">function</span> <span class="title">addTreeChangesMessages</span><span class="params">(messages, messagesHash, rootPath, oldValue, newValue)</span> {</span>
+		<span class="keyword">var</span> oldIsTree = valueIsTree(oldValue)
+			, newIsTree = valueIsTree(newValue);
+
+		<span class="keyword">if</span> (newIsTree)
+			addMessages(rootPath, newValue, <span class="string">'added'</span>, <span class="string">'newValue'</span>);
+		
+		<span class="keyword">if</span> (oldIsTree)
+			addMessages(rootPath, oldValue, <span class="string">'removed'</span>, <span class="string">'oldValue'</span>);
+
+
+		<span class="function"><span class="keyword">function</span> <span class="title">addMessages</span><span class="params">(rootPath, obj, msgType, valueProp)</span> {</span>
+			<span class="keyword">if</span> (Array.isArray(obj)) {
+				<span class="keyword">var</span> pathSyntax = rootPath + <span class="string">'[$$]'</span>;
+				obj.forEach(<span class="function"><span class="keyword">function</span><span class="params">(value, index)</span> {</span>
+					addMessage(value, index, pathSyntax);
+				});
+			} <span class="keyword">else</span> {
+				<span class="keyword">var</span> pathSyntax = rootPath + <span class="string">'.$$'</span>;
+				_.eachKey(obj, <span class="function"><span class="keyword">function</span><span class="params">(value, key)</span> {</span>
+					addMessage(value, key, pathSyntax);
+				});
+			}
+
+
+			<span class="function"><span class="keyword">function</span> <span class="title">addMessage</span><span class="params">(value, key, pathSyntax)</span> {</span>
+				<span class="keyword">var</span> path = pathSyntax.replace(<span class="string">'$$'</span>, key)
+					, existingMsg = messagesHash[path];
+
+				<span class="keyword">if</span> (existingMsg) {
+					<span class="keyword">if</span> (existingMsg.type == msgType)
+						logger.error(<span class="string">'setter error: same message type posted on the same path'</span>)
+					<span class="keyword">else</span> {
+						existingMsg.type = <span class="string">'changed'</span>;
+						existingMsg[valueProp] = value;
+					}
+				} <span class="keyword">else</span> {
+					<span class="keyword">var</span> msg = { path: path, type: msgType };
+					msg[valueProp] = value;
+					addChangeMessage(messages, messagesHash, msg)
+				}
+
+				<span class="keyword">if</span> (valueIsTree(value))
+					addMessages(path, value, msgType, valueProp);
+			}
+		}
+	}
+
+	<span class="function"><span class="keyword">function</span> <span class="title">valueIsTree</span><span class="params">(value)</span> {</span>
+		<span class="keyword">return</span> <span class="keyword">typeof</span> value == <span class="string">"object"</span> &amp;&amp; Object.keys(value).length;
+	}
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-117">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-117">&#182;</a>
+              </div>
+              <p><a name="model-connector"></a></p>
+<h3 id="model-connector">model connector</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> ConnectorError = require(<span class="string">'../util/error'</span>).Connector
+	, _ = require(<span class="string">'mol-proto'</span>)
+	, logger = require(<span class="string">'../util/logger'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-118">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-118">&#182;</a>
+              </div>
+              <p>Class that creates connector object for data connection between
+two data-sources
+Data-sources should implement the following API:
+get() - get value
+set(value) - set value
+on(path, subscriber) - subscription to data changes with &quot;*&quot; support
+off(path, subscriber)
+path(accessPath) - to return the object that complies with that api too</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> modePattern = <span class="regexp">/^(\&lt;*)\-+(\&gt;*)$/</span>;
+
+<span class="function"><span class="keyword">function</span> <span class="title">Connector</span><span class="params">(ds1, mode, ds2, options)</span> {</span>
+	<span class="keyword">var</span> parsedMode = mode.match(modePattern);
+
+	<span class="keyword">if</span> (! parsedMode)
+		modeParseError();
+
+	<span class="keyword">var</span> depth1 = parsedMode[<span class="number">1</span>].length
+		, depth2 = parsedMode[<span class="number">2</span>].length;
+
+	<span class="keyword">if</span> (depth1 &amp;&amp; depth2 &amp;&amp; depth1 != depth2)
+		modeParseError();
+
+	<span class="keyword">if</span> (! depth1 &amp;&amp; ! depth2)
+		modeParseError();
+
+	_.extend(<span class="keyword">this</span>, {
+		ds1: ds1,
+		ds2: ds2,
+		mode: mode,
+		depth1: depth1,
+		depth2: depth2,
+		isOn: <span class="literal">false</span>	
+	});
+
+	<span class="keyword">this</span>.on();
+
+	<span class="function"><span class="keyword">function</span> <span class="title">modeParseError</span><span class="params">()</span> {</span>
+		<span class="keyword">throw</span> <span class="keyword">new</span> ConnectorError(<span class="string">'invalid Connector mode: '</span> + mode);
+	}
+}
+
+
+_.extendProto(Connector, {
+	on: on,
+	off: off
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-119">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-119">&#182;</a>
+              </div>
+              <p>create connection</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">on</span><span class="params">()</span> {</span>
+	<span class="keyword">if</span> (<span class="keyword">this</span>.isOn)
+		<span class="keyword">return</span> logger.warn(<span class="string">'data sources are already connected'</span>);
+
+	<span class="keyword">var</span> subscriptionPath = <span class="keyword">this</span>._subscriptionPath =
+		<span class="keyword">new</span> Array((<span class="keyword">this</span>.depth1 || <span class="keyword">this</span>.depth2) + <span class="number">1</span>).join(<span class="string">'*'</span>);
+
+	<span class="keyword">if</span> (<span class="keyword">this</span>.depth1)
+		<span class="keyword">this</span>._link1 = linkDataSource(<span class="keyword">this</span>.ds1, <span class="keyword">this</span>.ds2, subscriptionPath);
+	<span class="keyword">if</span> (<span class="keyword">this</span>.depth2)
+		<span class="keyword">this</span>._link2 = linkDataSource(<span class="keyword">this</span>.ds2, <span class="keyword">this</span>.ds1, subscriptionPath);
+
+	<span class="keyword">this</span>.isOn = <span class="literal">true</span>;
+
+
+	<span class="function"><span class="keyword">function</span> <span class="title">linkDataSource</span><span class="params">(linkTo, linked, subscriptionPath)</span> {</span>
+		<span class="keyword">var</span> onData = <span class="function"><span class="keyword">function</span><span class="params">(path, data)</span> {</span>
+			linkTo.path(path).set(data.newValue);
+		};
+
+		linked.on(subscriptionPath, onData);
+
+		<span class="keyword">return</span> onData;
+	}
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">off</span><span class="params">()</span> {</span>
+	<span class="keyword">if</span> (! <span class="keyword">this</span>.isOn)
+		<span class="keyword">return</span> logger.warn(<span class="string">'data sources are already connected'</span>);
+
+	<span class="keyword">if</span> (<span class="keyword">this</span>._link1)
+		<span class="keyword">this</span>.ds2.off(<span class="keyword">this</span>._subscriptionPath, <span class="keyword">this</span>._link1);
+
+	<span class="keyword">if</span> (<span class="keyword">this</span>._link2)
+		<span class="keyword">this</span>.ds2.off(<span class="keyword">this</span>._subscriptionPath, <span class="keyword">this</span>._link2);
+
+	<span class="keyword">this</span>.isOn = <span class="literal">false</span>;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-120">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-120">&#182;</a>
+              </div>
+              <p><a name="model-demo"></a></p>
+<h3 id="model-demo">model demo</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+<span class="keyword">var</span> Model = require(<span class="string">'./index'</span>);
+
+
+<span class="keyword">var</span> m = <span class="keyword">new</span> Model;
+
+<span class="keyword">var</span> year = m(<span class="string">'.info.DOB.year'</span>).get();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-121">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-121">&#182;</a>
+              </div>
+              <p>undefined, but doesn&#39;t fail, like in Angular</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>m(<span class="string">'.info.DOB.year'</span>).set(<span class="number">1982</span>);
+
+<span class="keyword">var</span> year = m(<span class="string">'.info.DOB.year'</span>).get();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-122">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-122">&#182;</a>
+              </div>
+              <p>1982</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> data = m(<span class="string">'.info'</span>).get();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-123">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-123">&#182;</a>
+              </div>
+              <p>{ DOB: { year: 1982 } }</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> mData = m.get();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-124">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-124">&#182;</a>
+              </div>
+              <p>{ info: { DOB: { year: 1982 } } }</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> m = <span class="keyword">new</span> Model;
+
+m.on(<span class="regexp">/.*/</span>, onChange);
+
+<span class="function"><span class="keyword">function</span> <span class="title">onChange</span><span class="params">(msg, data)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-125">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-125">&#182;</a>
+              </div>
+              <p>should be replaced with console if this demo is used</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	logger.log(msg, <span class="string">' : '</span>, data);
+}
+
+m(<span class="string">'.list[0].info.name'</span>).set(<span class="string">'Clifton'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-126">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-126">&#182;</a>
+              </div>
+              <p>logged:
+.list  :  { type: &#39;added&#39;, newValue: [] }
+.list[0]  :  { type: &#39;added&#39;, newValue: {} }
+.list[0].info  :  { type: &#39;added&#39;, newValue: {} }
+.list[0].info.name  :  { type: &#39;added&#39;, newValue: &#39;Clifton&#39; }</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>m(<span class="string">'.list[0].info.name'</span>).set(<span class="string">'Clifton Cunnigham'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-127">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-127">&#182;</a>
+              </div>
+              <p>logged:
+.list[0].info.name  :  { type: &#39;changed&#39;,
+  oldValue: &#39;Clifton&#39;,
+  newValue: &#39;Clifton Cunnigham&#39; }</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> name = m(<span class="string">'.list[0].info.name'</span>).get();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-128">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-128">&#182;</a>
+              </div>
+              <p>&#39;Clifton Cunnigham&#39;</p>
+<p>m(&#39;.list[0].info.name&#39;).get.toString() :</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">get</span><span class="params">()</span> {</span>
+	<span class="keyword">var</span> m = <span class="keyword">this</span>._model._data;
+	<span class="keyword">return</span> m.list &amp;&amp; m.list[<span class="number">0</span>] &amp;&amp; m.list[<span class="number">0</span>].info &amp;&amp; m.list[<span class="number">0</span>].info.name;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-129">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-129">&#182;</a>
+              </div>
+              <p>m(&#39;.list[0].info.name&#39;).set.toString() :</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">set</span><span class="params">(value)</span> {</span>
+	<span class="keyword">var</span> m = <span class="keyword">this</span>._model._data;
+	<span class="keyword">if</span> (! m.list) {
+		m.list = [];
+		<span class="keyword">this</span>._model.postMessage(<span class="string">".list"</span>, { type: <span class="string">"added"</span>, newValue: [] } );
+	}
+	<span class="keyword">if</span> (! m.list[<span class="number">0</span>]) {
+		m.list[<span class="number">0</span>] = {};
+		<span class="keyword">this</span>._model.postMessage( <span class="string">".list[0]"</span>, { type: <span class="string">"added"</span>, newValue: {} } );
+	}
+	<span class="keyword">if</span> (! m.list[<span class="number">0</span>].info) {
+		m.list[<span class="number">0</span>].info = {};
+		<span class="keyword">this</span>._model.postMessage(<span class="string">".list[0].info"</span>, { type: <span class="string">"added"</span>, newValue: {} } );
+	} 
+	<span class="keyword">var</span> wasDef = m.list[<span class="number">0</span>].info.hasOwnProperty(<span class="string">"name"</span>);
+	<span class="keyword">var</span> old = m.list[<span class="number">0</span>].info.name;
+	m.list[<span class="number">0</span>].info.name = value;
+	<span class="keyword">if</span> (! wasDef)
+		<span class="keyword">this</span>._model.postMessage(<span class="string">".list[0].info.name"</span>,
+			{ type: <span class="string">"added"</span>, newValue: value } );
+	<span class="keyword">else</span> <span class="keyword">if</span> (old != value)
+		<span class="keyword">this</span>._model.postMessage( <span class="string">".list[0].info.name"</span>,
+			{ type: <span class="string">"changed"</span>, oldValue: old, newValue: value} );
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-130">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-130">&#182;</a>
+              </div>
+              <p><a name="model-path"></a></p>
+<h3 id="model-path-utils">model path utils</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+
+<span class="keyword">var</span> check = require(<span class="string">'../util/check'</span>)
+	, Match = check.Match
+	, _ = require(<span class="string">'mol-proto'</span>);
+
+<span class="keyword">var</span> pathUtils = module.exports = {
+	parseAccessPath: parseAccessPath,
+	createRegexPath: createRegexPath,
+	getPathNodeKey: getPathNodeKey
+};
+
+
+<span class="keyword">var</span> pathParsePattern = <span class="regexp">/\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]/g</span>
+	, patternPathParsePattern = <span class="regexp">/\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]|\.\*|\[\*\]|\*/g</span>
+	, pathNodeTypes = {
+		<span class="string">'.'</span>: { syntax: <span class="string">'object'</span>, empty: <span class="string">'{}'</span> },
+		<span class="string">'['</span>: { syntax: <span class="string">'array'</span>, empty: <span class="string">'[]'</span>},
+		<span class="string">'*'</span>: { syntax: <span class="string">'star'</span>, empty: <span class="string">'{}'</span>}
+	};
+
+<span class="function"><span class="keyword">function</span> <span class="title">parseAccessPath</span><span class="params">(path, nodeParsePattern)</span> {</span>
+	nodeParsePattern = nodeParsePattern || pathParsePattern;
+
+	<span class="keyword">var</span> parsedPath = [];
+
+	<span class="keyword">if</span> (! path)
+		<span class="keyword">return</span> parsedPath;
+
+	<span class="keyword">var</span> unparsed = path.replace(nodeParsePattern, <span class="function"><span class="keyword">function</span><span class="params">(nodeStr)</span> {</span>
+		<span class="keyword">var</span> pathNode = { property: nodeStr };
+		_.extend(pathNode, pathNodeTypes[nodeStr[<span class="number">0</span>]]); <span class="comment">// TODO maybe do some default value if not in map</span>
+		parsedPath.push(pathNode);
+		<span class="keyword">return</span> <span class="string">''</span>;
+	});
+	<span class="keyword">if</span> (unparsed)
+		<span class="keyword">throw</span> <span class="keyword">new</span> ModelError(<span class="string">'incorrect model path: '</span> + path);
+
+	<span class="keyword">return</span> parsedPath;
+}
+
+
+<span class="keyword">var</span> nodeRegex = {
+	<span class="string">'.*'</span>: <span class="string">'\\.[A-Za-z][A-Za-z0-9_]*'</span>,
+	<span class="string">'[*]'</span>: <span class="string">'\\[[0-9]+\\]'</span>
+};
+nodeRegex[<span class="string">'*'</span>] = nodeRegex[<span class="string">'.*'</span>] + <span class="string">'|'</span> + nodeRegex[<span class="string">'[*]'</span>];
+<span class="function"><span class="keyword">function</span> <span class="title">createRegexPath</span><span class="params">(path)</span> {</span>
+	check(path, Match.OneOf(String, RegExp));
+
+	<span class="keyword">if</span> (path <span class="keyword">instanceof</span> RegExp || path.indexOf(<span class="string">'*'</span>) == -<span class="number">1</span>)
+		<span class="keyword">return</span> path;
+
+	<span class="keyword">var</span> parsedPath = pathUtils.parseAccessPath(path, patternPathParsePattern)
+		, regexStr = <span class="string">'^'</span>
+		, regexStrEnd = <span class="string">''</span>
+		, patternsStarted = <span class="literal">false</span>;
+
+	parsedPath.forEach(<span class="function"><span class="keyword">function</span><span class="params">(pathNode)</span> {</span>
+		<span class="keyword">var</span> prop = pathNode.property
+			, regex = nodeRegex[prop];
+		
+		<span class="keyword">if</span> (regex) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-131">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-131">&#182;</a>
+              </div>
+              <p>regexStr += &#39;(&#39; + regex;
+regexStrEnd += &#39;|)&#39;;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>			regexStr += <span class="string">'('</span> + regex + <span class="string">'|)'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-132">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-132">&#182;</a>
+              </div>
+              <p>regexStrEnd += &#39;|)&#39;;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>			patternsStarted = <span class="literal">true</span>;
+		} <span class="keyword">else</span> {
+			<span class="keyword">if</span> (patternsStarted)
+				<span class="keyword">throw</span> <span class="keyword">new</span> ModelError(<span class="string">'"*" path segment cannot be in the middle of the path: '</span> + path);
+			regexStr += prop.replace(<span class="regexp">/(\.|\[|\])/g</span>, <span class="string">'\\$1'</span>);
+		}
+	});
+
+	regexStr += <span class="comment">/* regexStrEnd + */</span> <span class="string">'$'</span>;
+
+	<span class="keyword">try</span> {
+		<span class="keyword">return</span> <span class="keyword">new</span> RegExp(regexStr);
+	} <span class="keyword">catch</span> (e) {
+		<span class="keyword">throw</span> <span class="keyword">new</span> ModelError(<span class="string">'can\'t construct regex for path pattern: '</span> + path);
+	}
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">getPathNodeKey</span><span class="params">(pathNode)</span> {</span>
+	<span class="keyword">var</span> prop = pathNode.property;
+	<span class="keyword">return</span> pathNode.syntax == <span class="string">'array'</span>
+		? prop.slice(<span class="number">1</span>, prop.length - <span class="number">1</span>)
+		: prop.slice(<span class="number">1</span>);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-133">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-133">&#182;</a>
+              </div>
+              <p><a name="messenger"></a></p>
+<h2 id="milo-messenger">milo messenger</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-134">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-134">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> Mixin = require(<span class="string">'../abstract/mixin'</span>)
+	, MessageSource = require(<span class="string">'./message_source'</span>)
+	, _ = require(<span class="string">'mol-proto'</span>)
+	, check = require(<span class="string">'../util/check'</span>)
+	, Match = check.Match
+	, MessengerError = require(<span class="string">'../util/error'</span>).Messenger;
+
+
+<span class="keyword">var</span> Messenger = _.createSubclass(Mixin, <span class="string">'Messenger'</span>);
+
+<span class="keyword">var</span> messagesSplitRegExp = Messenger.messagesSplitRegExp = <span class="regexp">/\s*(?:\,|\s)\s*/</span>;
+
+
+_.extendProto(Messenger, {
+	init: initMessenger, <span class="comment">// called by Mixin (superclass)</span>
+	onMessage: registerSubscriber,
+	offMessage: removeSubscriber,
+	onMessages: registerSubscribers,
+	offMessages: removeSubscribers,
+	postMessage: postMessage,
+	getSubscribers: getMessageSubscribers,
+	_chooseSubscribersHash: _chooseSubscribersHash,
+	_registerSubscriber: _registerSubscriber,
+	_removeSubscriber: _removeSubscriber,
+	_removeAllSubscribers: _removeAllSubscribers,
+	_callPatternSubscribers: _callPatternSubscribers,
+	_callSubscribers: _callSubscribers,
+	_setMessageSource: _setMessageSource
+});
+
+
+Messenger.defaultMethods = {
+	on: <span class="string">'onMessage'</span>,
+	off: <span class="string">'offMessage'</span>,
+	onMessages: <span class="string">'onMessages'</span>,
+	offMessages: <span class="string">'offMessages'</span>,
+	postMessage: <span class="string">'postMessage'</span>,
+	getSubscribers: <span class="string">'getSubscribers'</span>
+};
+
+
+module.exports = Messenger;
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">initMessenger</span><span class="params">(hostObject, proxyMethods, messageSource)</span> {</span>
+	check(messageSource, Match.Optional(MessageSource));</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-135">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-135">&#182;</a>
+              </div>
+              <p>hostObject and proxyMethods are used in Mixin
+messenger data</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre> 	Object.defineProperties(<span class="keyword">this</span>, {
+ 		_messageSubscribers: { value: {} },
+ 		_patternMessageSubscribers: { value: {} },
+ 		_messageSource: { value: messageSource, writable: <span class="literal">true</span> }
+ 	});
+
+ 	<span class="keyword">if</span> (messageSource)
+ 		messageSource.messenger = <span class="keyword">this</span>;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">registerSubscriber</span><span class="params">(messages, subscriber)</span> {</span>
+	check(messages, Match.OneOf(String, [String], RegExp));
+	check(subscriber, Function); 
+
+	<span class="keyword">if</span> (<span class="keyword">typeof</span> messages == <span class="string">'string'</span>)
+		messages = messages.split(messagesSplitRegExp);
+
+	<span class="keyword">var</span> subscribersHash = <span class="keyword">this</span>._chooseSubscribersHash(messages);
+
+	<span class="keyword">if</span> (messages <span class="keyword">instanceof</span> RegExp)
+		<span class="keyword">return</span> <span class="keyword">this</span>._registerSubscriber(subscribersHash, messages, subscriber);
+
+	<span class="keyword">else</span> {
+		<span class="keyword">var</span> wasRegistered = <span class="literal">false</span>;
+
+		messages.forEach(<span class="function"><span class="keyword">function</span><span class="params">(message)</span> {</span>
+			<span class="keyword">var</span> notYetRegistered = <span class="keyword">this</span>._registerSubscriber(subscribersHash, message, subscriber);			
+			wasRegistered = wasRegistered || notYetRegistered;			
+		}, <span class="keyword">this</span>);
+
+		<span class="keyword">return</span> wasRegistered;
+	}
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_registerSubscriber</span><span class="params">(subscribersHash, message, subscriber)</span> {</span>
+	<span class="keyword">if</span> (! (subscribersHash[message] &amp;&amp; subscribersHash[message].length)) {
+		subscribersHash[message] = [];
+		<span class="keyword">if</span> (message <span class="keyword">instanceof</span> RegExp)
+			subscribersHash[message].pattern = message;
+		<span class="keyword">var</span> noSubscribers = <span class="literal">true</span>;
+		<span class="keyword">if</span> (<span class="keyword">this</span>._messageSource)
+			<span class="keyword">this</span>._messageSource.onSubscriberAdded(message);
+	}
+
+	<span class="keyword">var</span> msgSubscribers = subscribersHash[message];
+	<span class="keyword">var</span> notYetRegistered = noSubscribers || msgSubscribers.indexOf(subscriber) == -<span class="number">1</span>;
+
+	<span class="keyword">if</span> (notYetRegistered)
+		msgSubscribers.push(subscriber);
+
+	<span class="keyword">return</span> notYetRegistered;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">registerSubscribers</span><span class="params">(messageSubscribers)</span> {</span>
+	check(messageSubscribers, Match.ObjectHash(Function));
+
+	<span class="keyword">var</span> notYetRegisteredMap = _.mapKeys(messageSubscribers, <span class="function"><span class="keyword">function</span><span class="params">(subscriber, messages)</span> {</span>
+		<span class="keyword">return</span> <span class="keyword">this</span>.onMessage(messages, subscriber);
+	}, <span class="keyword">this</span>);
+
+	<span class="keyword">return</span> notYetRegisteredMap;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-136">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-136">&#182;</a>
+              </div>
+              <p>removes all subscribers for the message if subscriber isn&#39;t supplied</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">removeSubscriber</span><span class="params">(messages, subscriber)</span> {</span>
+	check(messages, Match.OneOf(String, [String], RegExp));
+	check(subscriber, Match.Optional(Function)); 
+
+	<span class="keyword">if</span> (<span class="keyword">typeof</span> messages == <span class="string">'string'</span>)
+		messages = messages.split(messagesSplitRegExp);
+
+	<span class="keyword">var</span> subscribersHash = <span class="keyword">this</span>._chooseSubscribersHash(messages);
+
+	<span class="keyword">if</span> (messages <span class="keyword">instanceof</span> RegExp)
+		<span class="keyword">return</span> <span class="keyword">this</span>._removeSubscriber(subscribersHash, messages, subscriber);
+
+	<span class="keyword">else</span> {
+		<span class="keyword">var</span> wasRemoved = <span class="literal">false</span>;
+
+		messages.forEach(<span class="function"><span class="keyword">function</span><span class="params">(message)</span> {</span>
+			<span class="keyword">var</span> subscriberRemoved = <span class="keyword">this</span>._removeSubscriber(subscribersHash, message, subscriber);			
+			wasRemoved = wasRemoved || subscriberRemoved;			
+		}, <span class="keyword">this</span>);
+
+		<span class="keyword">return</span> wasRemoved;
+	}
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_removeSubscriber</span><span class="params">(subscribersHash, message, subscriber)</span> {</span>
+	<span class="keyword">var</span> msgSubscribers = subscribersHash[message];
+	<span class="keyword">if</span> (! msgSubscribers || ! msgSubscribers.length)
+		<span class="keyword">return</span> <span class="literal">false</span>; <span class="comment">// nothing removed</span>
+
+	<span class="keyword">if</span> (subscriber) {
+		<span class="keyword">var</span> subscriberIndex = msgSubscribers.indexOf(subscriber);
+		<span class="keyword">if</span> (subscriberIndex == -<span class="number">1</span>) 
+			<span class="keyword">return</span> <span class="literal">false</span>; <span class="comment">// nothing removed</span>
+		msgSubscribers.splice(subscriberIndex, <span class="number">1</span>);
+		<span class="keyword">if</span> (! msgSubscribers.length)
+			<span class="keyword">this</span>._removeAllSubscribers(subscribersHash, message);
+
+	} <span class="keyword">else</span> 
+		<span class="keyword">this</span>._removeAllSubscribers(subscribersHash, message);
+
+	<span class="keyword">return</span> <span class="literal">true</span>; <span class="comment">// subscriber(s) removed</span>
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_removeAllSubscribers</span><span class="params">(subscribersHash, message)</span> {</span>
+	<span class="keyword">delete</span> subscribersHash[message];
+	<span class="keyword">if</span> (<span class="keyword">this</span>._messageSource)
+		<span class="keyword">this</span>._messageSource.onSubscriberRemoved(message);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">removeSubscribers</span><span class="params">(messageSubscribers)</span> {</span>
+	check(messageSubscribers, Match.ObjectHash(Function));
+
+	<span class="keyword">var</span> subscriberRemovedMap = _.mapKeys(messageSubscribers, <span class="function"><span class="keyword">function</span><span class="params">(subscriber, messages)</span> {</span>
+		<span class="keyword">return</span> <span class="keyword">this</span>.offMessages(messages, subscriber);
+	}, <span class="keyword">this</span>);
+
+	<span class="keyword">return</span> subscriberRemovedMap;	
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-137">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-137">&#182;</a>
+              </div>
+              <p>TODO - send event to messageSource</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">postMessage</span><span class="params">(message, data)</span> {</span>
+	check(message, Match.OneOf(String, RegExp));
+
+	<span class="keyword">var</span> subscribersHash = <span class="keyword">this</span>._chooseSubscribersHash(message);
+	<span class="keyword">var</span> msgSubscribers = subscribersHash[message];
+
+	<span class="keyword">this</span>._callSubscribers(message, data, msgSubscribers);
+
+	<span class="keyword">if</span> (<span class="keyword">typeof</span> message == <span class="string">'string'</span>)
+		<span class="keyword">this</span>._callPatternSubscribers(message, data);
+}
+
+
+<span class="keyword">var</span> regexpFlagsPattern = <span class="regexp">/\/((?:g|i|m|y)*)$/</span>;
+<span class="function"><span class="keyword">function</span> <span class="title">_callPatternSubscribers</span><span class="params">(message, data)</span> {</span>
+	_.eachKey(<span class="keyword">this</span>._patternMessageSubscribers, 
+		<span class="function"><span class="keyword">function</span><span class="params">(patternSubscribers)</span> {</span>
+			<span class="keyword">var</span> pattern = patternSubscribers.pattern;
+			<span class="keyword">if</span> (pattern.test(message))
+				<span class="keyword">this</span>._callSubscribers(message, data, patternSubscribers);
+		}
+	, <span class="keyword">this</span>);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_callSubscribers</span><span class="params">(message, data, msgSubscribers)</span> {</span>
+	<span class="keyword">if</span> (msgSubscribers &amp;&amp; msgSubscribers.length)
+		msgSubscribers.forEach(<span class="function"><span class="keyword">function</span><span class="params">(subscriber)</span> {</span>
+			subscriber.call(<span class="keyword">this</span>._hostObject, message, data);
+		}, <span class="keyword">this</span>);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">getMessageSubscribers</span><span class="params">(message, includePatternSubscribers)</span> {</span>
+	check(message, Match.OneOf(String, RegExp));
+
+	<span class="keyword">var</span> subscribersHash = <span class="keyword">this</span>._chooseSubscribersHash(message);
+	<span class="keyword">var</span> msgSubscribers = subscribersHash[message]
+							? [].concat(subscribersHash[message])
+							: [];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-138">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-138">&#182;</a>
+              </div>
+              <p>pattern subscribers are incuded by default</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">if</span> (includePatternSubscribers !== <span class="literal">false</span> &amp;&amp; <span class="keyword">typeof</span> message == <span class="string">'string'</span>) {
+		_.eachKey(<span class="keyword">this</span>._patternMessageSubscribers, 
+			<span class="function"><span class="keyword">function</span><span class="params">(patternSubscribers, pattern)</span> {</span>
+				<span class="keyword">if</span> (patternSubscribers &amp;&amp; patternSubscribers.length
+						&amp;&amp; pattern.test(message))
+					_.appendArray(msgSubscribers, patternSubscribers);
+			}
+		);
+	}
+
+	<span class="keyword">return</span> msgSubscribers.length
+				? msgSubscribers
+				: <span class="literal">undefined</span>;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_chooseSubscribersHash</span><span class="params">(message)</span> {</span>
+	<span class="keyword">return</span> message <span class="keyword">instanceof</span> RegExp
+				? <span class="keyword">this</span>._patternMessageSubscribers
+				: <span class="keyword">this</span>._messageSubscribers;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_setMessageSource</span><span class="params">(messageSource)</span> {</span>
+	check(messageSource, MessageSource);
+
+ 	Object.defineProperties(<span class="keyword">this</span>, {
+ 		_messageSource: { value: messageSource }
+ 	});
+ 	messageSource.messenger = <span class="keyword">this</span>;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-139">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-139">&#182;</a>
+              </div>
+              <p><a name="messenger-source"></a></p>
+<h3 id="messenger-source">messenger source</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> Mixin = require(<span class="string">'../abstract/mixin'</span>)
+	, logger = require(<span class="string">'../util/logger'</span>)
+	, toBeImplemented = require(<span class="string">'../util/error'</span>).toBeImplemented
+	, _ = require(<span class="string">'mol-proto'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-140">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-140">&#182;</a>
+              </div>
+              <p>an abstract class for dispatching external to internal events</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> MessageSource = _.createSubclass(Mixin, <span class="string">'MessageSource'</span>, <span class="literal">true</span>);
+
+module.exports = MessageSource;
+
+
+_.extendProto(MessageSource, {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-141">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-141">&#182;</a>
+              </div>
+              <p>initializes messageSource - called by Mixin superclass</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	init: initMessageSource,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-142">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-142">&#182;</a>
+              </div>
+              <p>called by Messenger to notify when the first subscriber for an internal message was added</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	onSubscriberAdded: onSubscriberAdded,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-143">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-143">&#182;</a>
+              </div>
+              <p>called by Messenger to notify when the last subscriber for an internal message was removed</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre> 	onSubscriberRemoved: onSubscriberRemoved,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-144">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-144">&#182;</a>
+              </div>
+              <p>dispatches source message</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre> 	dispatchMessage: dispatchSourceMessage,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-145">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-145">&#182;</a>
+              </div>
+              <p>filters source message based on the data of the message - should be implemented in subclass</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	filterSourceMessage: dispatchAllSourceMessages,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-146">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-146">&#182;</a>
+              </div>
+              <hr>
+<p>Methods below must be implemented in subclass</p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-147">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-147">&#182;</a>
+              </div>
+              <p>converts internal message type to external message type - should be implemented in subclass</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	translateToSourceMessage: toBeImplemented,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-148">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-148">&#182;</a>
+              </div>
+              <p>adds listener to external message - should be implemented by subclass</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre> 	addSourceListener: toBeImplemented,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-149">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-149">&#182;</a>
+              </div>
+              <p>removes listener from external message - should be implemented by subclass</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre> 	removeSourceListener: toBeImplemented,
+});
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">initMessageSource</span><span class="params">()</span> {</span>
+	Object.defineProperty(<span class="keyword">this</span>, <span class="string">'_internalMessages'</span>, { value: {} });
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">onSubscriberAdded</span><span class="params">(message)</span> {</span>
+	<span class="keyword">var</span> sourceMessage = <span class="keyword">this</span>.translateToSourceMessage(message);
+
+	<span class="keyword">if</span> (! sourceMessage) <span class="keyword">return</span>;
+
+	<span class="keyword">if</span> (! <span class="keyword">this</span>._internalMessages.hasOwnProperty(sourceMessage)) {
+		<span class="keyword">this</span>.addSourceListener(sourceMessage);
+		<span class="keyword">this</span>._internalMessages[sourceMessage] = [];
+	}
+	<span class="keyword">var</span> internalMsgs = <span class="keyword">this</span>._internalMessages[sourceMessage];
+
+	<span class="keyword">if</span> (internalMsgs.indexOf(message) == -<span class="number">1</span>)
+		internalMsgs.push(message);
+	<span class="keyword">else</span>
+		logger.warn(<span class="string">'Duplicate notification received: for subscribe to internal message '</span> + message);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">onSubscriberRemoved</span><span class="params">(message)</span> {</span>
+	<span class="keyword">var</span> sourceMessage = <span class="keyword">this</span>.translateToSourceMessage(message);
+
+	<span class="keyword">if</span> (! sourceMessage) <span class="keyword">return</span>;
+
+	<span class="keyword">var</span> internalMsgs = <span class="keyword">this</span>._internalMessages[sourceMessage];
+
+	<span class="keyword">if</span> (internalMsgs &amp;&amp; internalMsgs.length) {
+		messageIndex = internalMsgs.indexOf(message);
+		<span class="keyword">if</span> (messageIndex &gt;= <span class="number">0</span>) {
+			internalMsgs.splice(messageIndex, <span class="number">1</span>);
+			<span class="keyword">if</span> (internalMsgs.length == <span class="number">0</span>) {
+				<span class="keyword">delete</span> <span class="keyword">this</span>._internalMessages[sourceMessage];
+				<span class="keyword">this</span>.removeSourceListener(sourceMessage);
+			}
+		} <span class="keyword">else</span>
+			unexpectedNotificationWarning();
+	} <span class="keyword">else</span>
+		unexpectedNotificationWarning();
+
+
+	<span class="function"><span class="keyword">function</span> <span class="title">unexpectedNotificationWarning</span><span class="params">()</span> {</span>
+		logger.warn(<span class="string">'notification received: un-subscribe from internal message '</span> + message
+					 + <span class="string">' without previous subscription notification'</span>);
+	}
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">dispatchSourceMessage</span><span class="params">(sourceMessage, data)</span> {</span>
+	<span class="keyword">var</span> internalMsgs = <span class="keyword">this</span>._internalMessages[sourceMessage];
+
+	<span class="keyword">if</span> (internalMsgs &amp;&amp; internalMsgs.length)
+		internalMsgs.forEach(<span class="function"><span class="keyword">function</span><span class="params">(message)</span> {</span>
+			<span class="keyword">if</span> (<span class="keyword">this</span>.filterSourceMessage
+					&amp;&amp; <span class="keyword">this</span>.filterSourceMessage(sourceMessage, message, data))
+				<span class="keyword">this</span>.messenger.postMessage(message, data);
+		}, <span class="keyword">this</span>);
+	<span class="keyword">else</span>
+		logger.warn(<span class="string">'source message received for which there is no mapped internal message'</span>);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-150">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-150">&#182;</a>
+              </div>
+              <p>can be overridden in subclass to implement filtering based on message data</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">dispatchAllSourceMessages</span><span class="params">(sourceMessage, message, data)</span> {</span>
+	<span class="keyword">return</span> <span class="literal">true</span>;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-151">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-151">&#182;</a>
+              </div>
+              <p><a name="messenger-message"></a></p>
+<h3 id="messenger-message-class">messenger message class</h3>
+<p>Not currently used</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> check = require(<span class="string">'../util/check'</span>)
+	, Match = check.Match;
+
+module.exports = Message;
+
+<span class="function"><span class="keyword">function</span> <span class="title">Message</span><span class="params">(message)</span> {</span>
+	check(message, Object);
+	check(message.type, Match.Where(IsNonEmptyString));
+	check(message.sender, Match.Optional(Object));
+	check(message.stack, Match.Optional([Object]));
+	check(message.data, Match.Optional(Object));
+	check(message.reciever, Match.Optional(Object));
+	check(message.event, Match.Optional(Object));
+
+	<span class="keyword">this</span>.type = message.type;
+	<span class="keyword">this</span>.sender = message.sender;
+	<span class="keyword">this</span>.stack = message.stack;
+	<span class="keyword">this</span>.data = message.data;
+	<span class="keyword">this</span>.reciever = message.reciever;
+	<span class="keyword">this</span>.event = message.event;
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">IsNonEmptyString</span><span class="params">(str)</span> {</span>
+	check(str, String);
+	<span class="keyword">return</span> str.length &gt; <span class="number">0</span>;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-152">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-152">&#182;</a>
+              </div>
+              <p><a name="attribute"></a></p>
+<h2 id="attribute-class">attribute class</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-153">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-153">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> _ = require(<span class="string">'mol-proto'</span>)
+	, check = require(<span class="string">'../util/check'</span>)
+	, Match = check.Match
+	, toBeImplemented = require(<span class="string">'../util/error'</span>).toBeImplemented;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-154">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-154">&#182;</a>
+              </div>
+              <p>an abstract attribute class for attribute parsing and validation</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>module.exports = Attribute;
+
+<span class="function"><span class="keyword">function</span> <span class="title">Attribute</span><span class="params">(el, name)</span> {</span>
+	<span class="keyword">this</span>.name = name || <span class="keyword">this</span>.attrName();
+	<span class="keyword">this</span>.el = el;
+	<span class="keyword">this</span>.node = el.attributes[<span class="keyword">this</span>.name];
+}
+
+_.extendProto(Attribute, {
+	get: get,
+	set: set,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-155">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-155">&#182;</a>
+              </div>
+              <p>should be defined in subclass</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	attrName: toBeImplemented,
+	parse: toBeImplemented,
+	validate: toBeImplemented,
+	render: toBeImplemented,
+	decorate: decorate
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-156">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-156">&#182;</a>
+              </div>
+              <p>get attribute value</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">get</span><span class="params">()</span> {</span>
+	<span class="keyword">return</span> <span class="keyword">this</span>.el.getAttribute(<span class="keyword">this</span>.name);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-157">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-157">&#182;</a>
+              </div>
+              <p>set attribute value</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">set</span><span class="params">(value)</span> {</span>
+	<span class="keyword">this</span>.el.setAttribute(<span class="keyword">this</span>.name, value);
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">decorate</span><span class="params">()</span> {</span>
+	<span class="keyword">this</span>.set(<span class="keyword">this</span>.render());
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-158">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-158">&#182;</a>
+              </div>
+              <p><a name="attribute-bind"></a></p>
+<h3 id="bind-attribute-class">bind attribute class</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> Attribute = require(<span class="string">'./index'</span>)
+	, AttributeError = require(<span class="string">'../util/error'</span>).Attribute
+	, config = require(<span class="string">'../config'</span>)
+	, _ = require(<span class="string">'mol-proto'</span>)
+	, check = require(<span class="string">'../util/check'</span>)
+	, Match = check.Match;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-159">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-159">&#182;</a>
+              </div>
+              <p>Matches;
+:myView - only component name
+View:myView - class and component name
+[Events, Data]:myView - facets and component name
+View[Events]:myView - class, facet(s) and component name</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> attrRegExp= <span class="regexp">/^([^\:\[\]]*)(?:\[([^\:\[\]]*)\])?\:?([^:]*)$/</span>
+	, facetsSplitRegExp = <span class="regexp">/\s*(?:\,|\s)\s*/</span>
+	, attrTemplate = <span class="string">'%compClass%compFacets:%compName'</span>;
+
+
+<span class="keyword">var</span> BindAttribute = _.createSubclass(Attribute, <span class="string">'BindAttribute'</span>, <span class="literal">true</span>);
+
+_.extendProto(BindAttribute, {
+	attrName: attrName,
+	parse: parse,
+	validate: validate,
+	render: render
+});
+
+
+module.exports = BindAttribute;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-160">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-160">&#182;</a>
+              </div>
+              <p>get attribute name</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">attrName</span><span class="params">()</span> {</span>
+	<span class="keyword">return</span> config.attrs[<span class="string">'bind'</span>];
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-161">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-161">&#182;</a>
+              </div>
+              <p>parse attribute</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">parse</span><span class="params">()</span> {</span>
+	<span class="keyword">if</span> (! <span class="keyword">this</span>.node) <span class="keyword">return</span>;
+
+	<span class="keyword">var</span> value = <span class="keyword">this</span>.get();
+
+	<span class="keyword">if</span> (value)
+		<span class="keyword">var</span> bindTo = value.match(attrRegExp);
+
+	<span class="keyword">if</span> (! bindTo)
+		<span class="keyword">throw</span> <span class="keyword">new</span> AttributeError(<span class="string">'invalid bind attribute '</span> + value);
+
+	<span class="keyword">this</span>.compClass = bindTo[<span class="number">1</span>] || <span class="string">'Component'</span>;
+	<span class="keyword">this</span>.compFacets = (bindTo[<span class="number">2</span>] &amp;&amp; bindTo[<span class="number">2</span>].split(facetsSplitRegExp)) || <span class="literal">undefined</span>;
+	<span class="keyword">this</span>.compName = bindTo[<span class="number">3</span>] || <span class="literal">undefined</span>;
+
+	<span class="keyword">return</span> <span class="keyword">this</span>;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-162">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-162">&#182;</a>
+              </div>
+              <p>validate attribute</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">validate</span><span class="params">()</span> {</span>
+	<span class="keyword">var</span> compName = <span class="keyword">this</span>.compName;
+	check(compName, Match.Where(<span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+  		<span class="keyword">return</span> <span class="keyword">typeof</span> compName == <span class="string">'string'</span> &amp;&amp; compName != <span class="string">''</span>;
+	}), <span class="string">'empty component name'</span>);
+
+	<span class="keyword">if</span> (! <span class="keyword">this</span>.compClass)
+		<span class="keyword">throw</span> <span class="keyword">new</span> AttributeError(<span class="string">'empty component class name '</span> + <span class="keyword">this</span>.compClass);
+
+	<span class="keyword">return</span> <span class="keyword">this</span>;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">render</span><span class="params">()</span> {</span>
+	<span class="keyword">return</span> attrTemplate
+				.replace(<span class="string">'%compClass'</span>, <span class="keyword">this</span>.compClass)
+				.replace(<span class="string">'%compFacets'</span>, <span class="keyword">this</span>.compFacets
+											? <span class="string">'['</span> + <span class="keyword">this</span>.compFacets.join(<span class="string">', '</span>) + <span class="string">']'</span>
+											: <span class="string">''</span>)
+				.replace(<span class="string">'%compName'</span>, <span class="keyword">this</span>.compName);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-163">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-163">&#182;</a>
+              </div>
+              <p><a name="attribute-load"></a></p>
+<h3 id="load-attribute-class">load attribute class</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> Attribute = require(<span class="string">'./index'</span>)
+	, AttributeError = require(<span class="string">'../util/error'</span>).Attribute
+	, config = require(<span class="string">'../config'</span>)
+	, _ = require(<span class="string">'mol-proto'</span>);
+
+
+<span class="keyword">var</span> LoadAttribute = _.createSubclass(Attribute, <span class="string">'LoadAttribute'</span>, <span class="literal">true</span>);
+
+_.extendProto(LoadAttribute, {
+	attrName: getAttributeName,
+	parse: parseAttribute,
+	validate: validateAttribute
+});
+
+module.exports = LoadAttribute;
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">getAttributeName</span><span class="params">()</span> {</span>
+	<span class="keyword">return</span> config.attrs.load;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">parseAttribute</span><span class="params">()</span> {</span>
+	<span class="keyword">if</span> (! <span class="keyword">this</span>.node) <span class="keyword">return</span>;
+
+	<span class="keyword">var</span> value = <span class="keyword">this</span>.get();
+
+	<span class="keyword">this</span>.loadUrl = value;
+
+	<span class="keyword">return</span> <span class="keyword">this</span>;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">validateAttribute</span><span class="params">()</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-164">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-164">&#182;</a>
+              </div>
+              <p>TODO url validation</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">return</span> <span class="keyword">this</span>;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-165">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-165">&#182;</a>
+              </div>
+              <p><a name="mixin"></a></p>
+<h2 id="mixin-abstract-class">mixin abstract class</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-166">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-166">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> _ = require(<span class="string">'mol-proto'</span>)
+	, check = require(<span class="string">'../util/check'</span>)
+	, Match = check.Match
+	, MixinError = require(<span class="string">'../util/error'</span>).Mixin;
+
+
+module.exports = Mixin;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-167">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-167">&#182;</a>
+              </div>
+              <p>an abstract class for mixin pattern - adding proxy methods to host objects</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">Mixin</span><span class="params">(hostObject, proxyMethods <span class="comment">/*, other args - passed to init method */</span>)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-168">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-168">&#182;</a>
+              </div>
+              <p>TODO - moce checks from Messenger here</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	check(hostObject, Match.Optional(Match.OneOf(Object, Function)));
+	check(proxyMethods, Match.Optional(Match.ObjectHash(String)));
+
+	Object.defineProperty(<span class="keyword">this</span>, <span class="string">'_hostObject'</span>, { value: hostObject });
+	<span class="keyword">if</span> (proxyMethods)
+		<span class="keyword">this</span>._createProxyMethods(proxyMethods);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-169">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-169">&#182;</a>
+              </div>
+              <p>calling init if it is defined in the class</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">if</span> (<span class="keyword">this</span>.init)
+		<span class="keyword">this</span>.init.apply(<span class="keyword">this</span>, arguments);
+}
+
+_.extendProto(Mixin, {
+	_createProxyMethod: _createProxyMethod,
+	_createProxyMethods: _createProxyMethods
+});
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_createProxyMethod</span><span class="params">(mixinMethodName, proxyMethodName, hostObject)</span> {</span>
+	hostObject = hostObject || <span class="keyword">this</span>._hostObject;
+
+	<span class="keyword">if</span> (hostObject[proxyMethodName])
+		<span class="keyword">throw</span> <span class="keyword">new</span> MixinError(<span class="string">'method '</span> + proxyMethodName +
+								 <span class="string">' already defined in host object'</span>);
+
+	check(<span class="keyword">this</span>[mixinMethodName], Function);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-170">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-170">&#182;</a>
+              </div>
+              <p>Bind proxied messenger&#39;s method to messenger</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">var</span> boundMethod = <span class="keyword">this</span>[mixinMethodName].bind(<span class="keyword">this</span>);
+
+	Object.defineProperty(hostObject, proxyMethodName,
+		{ value: boundMethod, writable: <span class="literal">true</span> });
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_createProxyMethods</span><span class="params">(proxyMethods, hostObject)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-171">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-171">&#182;</a>
+              </div>
+              <p>creating and binding proxy methods on the host object</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	_.eachKey(proxyMethods, <span class="function"><span class="keyword">function</span><span class="params">(mixinMethodName, proxyMethodName)</span> {</span>
+		<span class="keyword">this</span>._createProxyMethod(mixinMethodName, proxyMethodName, hostObject);
+	}, <span class="keyword">this</span>);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-172">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-172">&#182;</a>
+              </div>
+              <p><a name="registry"></a></p>
+<h2 id="registry-abstract-class">registry abstract class</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-173">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-173">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
+
+<span class="keyword">var</span> _ = require(<span class="string">'mol-proto'</span>)
+	, check = require(<span class="string">'../util/check'</span>)
+	, Match = check.Match;
+
+module.exports = ClassRegistry;
+
+<span class="function"><span class="keyword">function</span> <span class="title">ClassRegistry</span> <span class="params">(FoundationClass)</span> {</span>
+	<span class="keyword">if</span> (FoundationClass)
+		<span class="keyword">this</span>.setClass(FoundationClass);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-174">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-174">&#182;</a>
+              </div>
+              <p>Object.defineProperty(this, &#39;__registeredClasses&#39;, {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value: {}
+});</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">this</span>.__registeredClasses = {};
+}
+
+_.extendProto(ClassRegistry, {
+	add: registerClass,
+	get: getClass,
+	remove: unregisterClass,
+	clean: unregisterAllClasses,
+	setClass: setFoundationClass
+});
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">setFoundationClass</span><span class="params">(FoundationClass)</span> {</span>
+	check(FoundationClass, Function);
+	Object.defineProperty(<span class="keyword">this</span>, <span class="string">'FoundationClass'</span>, {
+		enumerable: <span class="literal">true</span>,
+		value: FoundationClass
+	});
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">registerClass</span><span class="params">(aClass, name)</span> {</span>
+	name = name || aClass.name;
+
+	check(name, String, <span class="string">'class name must be string'</span>);
+	check(name, Match.Where(<span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+		<span class="keyword">return</span> <span class="keyword">typeof</span> name == <span class="string">'string'</span> &amp;&amp; name != <span class="string">''</span>;
+	}), <span class="string">'class name must be string'</span>);
+	<span class="keyword">if</span> (<span class="keyword">this</span>.FoundationClass) {
+		<span class="keyword">if</span> (aClass != <span class="keyword">this</span>.FoundationClass)
+			check(aClass, Match.Subclass(<span class="keyword">this</span>.FoundationClass), <span class="string">'class must be a sub(class) of a foundation class'</span>);
+	} <span class="keyword">else</span>
+		<span class="keyword">throw</span> <span class="keyword">new</span> TypeError(<span class="string">'foundation class must be set before adding classes to registry'</span>);
+
+	<span class="keyword">if</span> (<span class="keyword">this</span>.__registeredClasses[name])
+		<span class="keyword">throw</span> <span class="keyword">new</span> TypeError(<span class="string">'is already registered'</span>);
+
+	<span class="keyword">this</span>.__registeredClasses[name] = aClass;
+};
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">getClass</span><span class="params">(name)</span> {</span>
+	check(name, String, <span class="string">'class name must be string'</span>);
+	<span class="keyword">return</span> <span class="keyword">this</span>.__registeredClasses[name];
+};
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">unregisterClass</span><span class="params">(nameOrClass)</span> {</span>
+	check(nameOrClass, Match.OneOf(String, Function), <span class="string">'class or name must be supplied'</span>);
+
+	<span class="keyword">var</span> name = <span class="keyword">typeof</span> nameOrClass == <span class="string">'string'</span>
+						? nameOrClass
+						: nameOrClass.name;
+						
+	<span class="keyword">if</span> (! <span class="keyword">this</span>.__registeredClasses[name])
+		<span class="keyword">throw</span> <span class="keyword">new</span> TypeError(<span class="string">'class is not registered'</span>);
+
+	<span class="keyword">delete</span> <span class="keyword">this</span>.__registeredClasses[name];
+};
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">unregisterAllClasses</span><span class="params">()</span> {</span>
+	<span class="keyword">this</span>.__registeredClasses = {};
+};</pre></div></div>
             
         </li>
         
