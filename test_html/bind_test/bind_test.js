@@ -45,15 +45,20 @@ describe('milo binder', function() {
         var listButton = myList.container.scope.listButton;
 
         var listArray = [
-            {title: 'Title 1', desc: 'Description 1'},
-            {title: 'Title 2', desc: 'Description 2'},
-            {title: 'Title 3', desc: 'Description 3'},
-            {title: 'Title 4', desc: 'Description 4'},
-            {title: 'Title 5', desc: 'Description 5'}
+            {title: 'Title 1', desc: 'Description 1', notUsed: 1},
+            {title: 'Title 2', desc: 'Description 2', notUsed: 2},
+            {title: 'Title 3', desc: 'Description 3', notUsed: 3},
+            {title: 'Title 4', desc: 'Description 4', notUsed: 4},
+            {title: 'Title 5', desc: 'Description 5', notUsed: 5}
         ];
 
-        myList.data.set(listArray);
+        myList.data.on(/.*/, function(msgType, data) {
+            console.log(msgType, data);
+        })
 
+        var used = myList.data.set(listArray);
+
+        console.log(used);
         console.log(myList.data.get());
 
         listButton.events.on('mousedown', function (eventType, event) {

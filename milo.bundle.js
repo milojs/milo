@@ -441,9 +441,10 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 
 			if (innerScope._length()) {
 				// attach inner attributes to the current one (create a new scope) ...
-				if (isContainer)
+				if (isContainer) {
 					scopeObject.container.scope = innerScope;
-				else // or keep them in the current scope
+					innerScope._hostObject = scopeObject.container;
+				} else // or keep them in the current scope
 					scope._copy(innerScope);;
 			}
 		}
@@ -625,7 +626,7 @@ function getContainingComponent(node) {
 	}
 
 	// Where there is no parent node, this function will return null
-	if (!node.parentNode) {
+	if (! node.parentNode) {
 		return null;
 	}
 
@@ -872,12 +873,18 @@ _.extendProto(Data, {
 	set: set,
 	path: path,
 	_setScalarValue: _setScalarValue,
-	_getScalarValue: _getScalarValue
+	_getScalarValue: _getScalarValue,
+	_postDataChanged: _postDataChanged,
+	_wrapMessengerMethods: pathUtils.wrapMessengerMethods
 });
 
 facetsRegistry.add(Data);
 
 module.exports = Data;
+
+
+// these methods will be wrapped to support "*" pattern subscriptions
+var dataFacetMethodsToWrap = ['on', 'off', 'onMessages', 'offMessages'];
 
 
 // Initialize Data Facet
@@ -893,43 +900,81 @@ function init() {
 	var compDataSource = new ComponentDataSource(this, proxyCompDataSourceMethods, this.owner);
 	this._setMessageSource(compDataSource);
 
-	Object.defineProperties(this, {
-		_compDataSource: { value: compDataSource }
-	});
+	_.defineProperty(this, '_compDataSource', compDataSource);
+
+	this._path = '.' + this.owner.name;
+
+	this._wrapMessengerMethods(dataFacetMethodsToWrap);
+
+	this.on('childdata', onChildData);
 }
 
 
-// Set components DOM value
+// Set component DOM value
 function set(value) {
+	if (value == this._value)
+		return value;
+
+	var valueSet;
 	if (typeof value == 'object') {
-		if (Array.isArray(value))
+		if (Array.isArray(value)) {
+			valueSet = [];
 			value.forEach(function(item, index) {
 				var childDataFacet = this.path('[' + index + ']', true); // true will create item in list
-				if (childDataFacet)
-					childDataFacet.set(item);
-				else
+				if (childDataFacet) {
+					valueSet[index] = childDataFacet.set(item);
+				} else
 					logger.warn('attempt to set data on path that does not exist: ' + '[' + index + ']');
 			}, this);
-		else
+		} else {
+			valueSet = {};
 			_.eachKey(value, function(item, key) {
 				var childDataFacet = this.path('.' + key);
-				if (childDataFacet)
-					childDataFacet.set(item);
-				else
+				if (childDataFacet) {
+					valueSet[key] = childDataFacet.set(item);
+				} else
 					logger.warn('attempt to set data on path that does not exist: ' + '.' + key);
 			}, this);
+		}
 	} else
-		this._setScalarValue(value);
+		valueSet = this._setScalarValue(value);
+
+	var oldValue = this._value;
+	this._value = valueSet;
+	this._postDataChanged({ path: '', type: 'changed',
+							newValue: valueSet, oldValue: oldValue });
+	
+	return valueSet;
 }
 
 
 function _setScalarValue(value) {
 	var el = this.owner.el
 		, setter = tags[el.tagName.toLowerCase()];
-	if (setter)
-		setter(el, value);
-	else
-		el.innerHTML = value;
+	return setter
+			? setter(el, value)
+			: (el.innerHTML = value);
+}
+
+
+function _postDataChanged(message) {
+	// TODO compare with old value
+	this.postMessage(message.path, message);
+
+	var thisComp = this.owner
+		, parentContainer = thisComp.scope._hostObject
+		, parentData = parentContainer && parentContainer.owner.data;
+	
+	if (parentData) {
+		var parentMsg = _.clone(message);
+		parentMsg.path = (this._path || ('.' + thisComp.name))  + parentMsg.path;
+		parentData.postMessage('childdata', parentMsg);
+	}
+}
+
+
+function onChildData(msgType, message) {
+	this._postDataChanged(message);
 }
 
 
@@ -980,8 +1025,10 @@ function path(accessPath, createItem) {
 			, nodeKey = pathUtils.getPathNodeKey(pathNode);
 		if (pathNode.syntax == 'array' && currentComponent.list) {
 			var itemComponent = currentComponent.list.item(nodeKey);
-			if (! itemComponent && createItem)
+			if (! itemComponent && createItem) {
 				itemComponent = currentComponent.list.addItem(nodeKey);
+				itemComponent.data._path = pathNode.property;
+			}
 			if (itemComponent)
 				currentComponent = itemComponent;
 		} else if (currentComponent.container)
@@ -1004,7 +1051,7 @@ var tags = {
 // Set and get value of input
 function inputValue(el, value) {
 	if (value)
-		el.value = value;
+		return (el.value = value);
 	else
 		return el.value;
 }
@@ -1716,37 +1763,6 @@ function init() {
 }
 
 
-//update list
-// function update(eventType, data) {
-//     var itemModels = data.newValue;
-
-//     for (var i = 0; i < itemModels.length; i++) {
-//         var itemModel = itemModels[i];
-
-//         // Copy component
-//         var component = Component.copy(this.listItemType, true);
-        
-//         // Bind contents of component
-//         var temp = binder(component.el)[component.name];
-
-//         // Set new component scope to bind result
-//         component.container.scope = temp.container.scope;
-        
-//         // Set list item data of component
-//         component.listItem.setData(itemModel);
-
-//         // Add it to the dom
-//         this.owner.dom.append(component.el);
-
-//         // Add to list items hash
-//         this.listItems[component.name] = component;
-
-//         // Show the list item component
-//         component.dom.show();
-//     };
-// }
-
-
 function onChildrenBound() {
     var foundItem;
 
@@ -1798,6 +1814,11 @@ function addItem(index) {
 
     var tempComp = binder(component.el)[component.name]
         , innerScope = tempComp.container.scope;
+
+    // set reference to component container facet on scope
+    innerScope._hostObject = component.container;
+
+    // copy bound scope to component
     component.container.scope = innerScope;
 
     // Add it to the DOM
@@ -2215,17 +2236,19 @@ function translateToDomEvent(message) {
 	if (message == 'datachanged')
 		return 'input';
 	else
-		throw new ComponentDataSourceError('unknown component data event');
+		return '';
 }
 
 
 function addDomEventListener(eventType) {
-	this.dom().addEventListener(eventType, this, false); // no capturing
+	if (eventType)
+		this.dom().addEventListener(eventType, this, false); // no capturing
 }
 
 
 function removeDomEventListener(eventType) {
-	this.dom().removeEventListener(eventType, this, false); // no capturing
+	if (eventType)
+		this.dom().removeEventListener(eventType, this, false); // no capturing
 }
 
 
@@ -2683,10 +2706,11 @@ var _ = require('mol-proto')
 
 
 // Scope class
-function Scope(rootEl) {
-	Object.defineProperties(this, {
-		_rootEl: { value: rootEl }
-	})
+function Scope(rootEl, hostObject) {
+	_.defineProperties(this, {
+		_rootEl: rootEl,
+		_hostObject: hostObject
+	}, false, false, true); // writable
 };
 
 _.extendProto(Scope, {
@@ -3608,7 +3632,7 @@ function Model(scope, schema, name, data) {
 		__pathsCache: {}
 	});
 
-	model._wrapMessengerMethods();
+	model._wrapMessengerMethods(modelMethodsToWrap);
 
 	model._data = data;
 
@@ -3616,6 +3640,10 @@ function Model(scope, schema, name, data) {
 }
 
 Model.prototype.__proto__ = Model.__proto__;
+
+
+// these methods will be wrapped to support "*" pattern subscriptions
+var modelMethodsToWrap = ['on', 'off', 'onMessages', 'offMessages'];
 
 
 // cache of compiled ModelPath methods
@@ -3648,7 +3676,7 @@ _.extendProto(Model, {
 	set: synthesizeMethod(modelSetterSynthesizer, '', []),
 	path: path,
 	proxyMessenger: proxyMessenger,
-	_wrapMessengerMethods: _wrapMessengerMethods
+	_wrapMessengerMethods: pathUtils.wrapMessengerMethods
 });
 
 function get() {
@@ -3663,20 +3691,6 @@ function path(accessPath) {
 
 function proxyMessenger(modelHostObject) {
 	Mixin.prototype._createProxyMethods.call(this._messenger, Messenger.defaultMethods, modelHostObject);
-}
-
-
-// TODO allow for multiple messages in a string
-var modelMethodsToWrap = ['on', 'off', 'onMessages', 'offMessages'];
-function _wrapMessengerMethods() {
-	modelMethodsToWrap.forEach(function(methodName) {
-		var origMethod = this[methodName];
-		// replacing message subsribe/unsubscribe/etc. to convert "*" message patterns to regexps
-		this[methodName] = function(path, subscriber) {
-			var regexPath = pathUtils.createRegexPath(path);
-			origMethod.call(this, regexPath, subscriber);
-		};
-	}, this);
 }
 
 
@@ -3821,7 +3835,8 @@ var check = require('../util/check')
 var pathUtils = module.exports = {
 	parseAccessPath: parseAccessPath,
 	createRegexPath: createRegexPath,
-	getPathNodeKey: getPathNodeKey
+	getPathNodeKey: getPathNodeKey,
+	wrapMessengerMethods: wrapMessengerMethods
 };
 
 
@@ -3902,6 +3917,19 @@ function getPathNodeKey(pathNode) {
 	return pathNode.syntax == 'array'
 		? prop.slice(1, prop.length - 1)
 		: prop.slice(1);
+}
+
+
+// TODO allow for multiple messages in a string
+function wrapMessengerMethods(methodsNames) {
+	methodsNames.forEach(function(methodName) {
+		var origMethod = this[methodName];
+		// replacing message subsribe/unsubscribe/etc. to convert "*" message patterns to regexps
+		this[methodName] = function(path, subscriber) {
+			var regexPath = createRegexPath(path);
+			origMethod.call(this, regexPath, subscriber);
+		};
+	}, this);
 }
 
 },{"../util/check":44,"mol-proto":55}],44:[function(require,module,exports){
@@ -4855,7 +4883,8 @@ var proto = _ = {
 	prependArray: prependArray,
 	toArray: toArray,
 	firstUpperCase: firstUpperCase,
-	firstLowerCase: firstLowerCase
+	firstLowerCase: firstLowerCase,
+	filterNodeListByType: filterNodeListByType
 };
 
 
@@ -5083,6 +5112,17 @@ function firstUpperCase(str) {
 
 function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
+}
+
+
+// type 1: html element, type 3: text
+function filterNodeListByType(nodeList, type) {
+	var filteredNodes = [];
+	Array.prototype.forEach.call(nodeList, function (node) {
+		if (node.nodeType == type)
+			filteredNodes.push(node);
+	});
+	return filteredNodes;
 }
 
 
