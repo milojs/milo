@@ -3,6 +3,11 @@
 // mixin abstract class
 // --------------
 
+// We also use Mixin pattern, but Mixin in milo is implemented as a separate object
+// that is stored on the property of the host object and can create proxy methods on
+// the host object if required. Classes Messenger, MessageSource and DataSource are
+// subclasses of Mixin abstract class.
+
 'use strict';
 
 var _ = require('mol-proto')
@@ -63,6 +68,11 @@ function _createProxyMethods(proxyMethods, hostObject) {
 // registry abstract class
 // --------------
 
+// __Dependency inversion__
+
+// Components and Facets register themselves in registries that allows to avoid 
+// requiring them from one module. It prevents circular dependencies between modules.
+
 'use strict';
 
 var _ = require('mol-proto')
@@ -74,13 +84,6 @@ module.exports = ClassRegistry;
 function ClassRegistry (FoundationClass) {
 	if (FoundationClass)
 		this.setClass(FoundationClass);
-
-	// Object.defineProperty(this, '__registeredClasses', {
-	// 		enumerable: false,
-	// 		writable: true,
-	// 		configurable: true,
-	// 		value: {}
-	// });
 
 	this.__registeredClasses = {};
 }
@@ -1340,7 +1343,7 @@ var ComponentFacet = require('../c_facet')
 	, _ = require('mol-proto');
 
 
-// generic drag handler, should be overridden
+// generic drop handler, should be overridden
 var Drop = _.createSubclass(ComponentFacet, 'Drop');
 
 _.extendProto(Drop, {
@@ -1389,7 +1392,6 @@ var ComponentFacet = require('../c_facet')
 	, Match = check.Match;
 
 
-// generic drag handler, should be overridden
 var Editable = _.createSubclass(ComponentFacet, 'Editable');
 
 _.extendProto(Editable, {
@@ -1723,12 +1725,12 @@ var ComponentFacet = require('../c_facet')
     , logger = require('../../util/logger');
 
 
-// data model connection facet
+// Data model connection facet
 var List = _.createSubclass(ComponentFacet, 'List');
 
 _.extendProto(List, {
     init: init,
-    // update: update,
+    /* update: update, */
     require: ['Container', 'Dom', 'Data'],
     _itemPreviousComponent: _itemPreviousComponent,
 
@@ -1739,7 +1741,7 @@ _.extendProto(List, {
     addItem: addItem,
     removeItem: removeItem,
     each: each
-    // _reattach: _reattachEventsOnElementChange
+    /* _reattach: _reattachEventsOnElementChange */
 });
 
 facetsRegistry.add(List);
@@ -1747,7 +1749,7 @@ facetsRegistry.add(List);
 module.exports = List;
 
 
-// initialize List facet
+// Initialize List facet
 function init() {
     ComponentFacet.prototype.init.apply(this, arguments);
     var model = new Model()
@@ -1759,6 +1761,7 @@ function init() {
     });
     _.defineProperty(this, 'itemSample', null, false, false, true);
 
+    // Fired by __binder__ when all children of component are bound
     this.owner.on('childrenbound', onChildrenBound);
 }
 
@@ -1766,28 +1769,30 @@ function init() {
 function onChildrenBound() {
     var foundItem;
 
-    // "this" is a component here, as a message dispatched on component
+    // `this` is a component here, as the message was dispatched on a component
     this.container.scope._each(function(childComp, name) {
         if (childComp.item) {
             if (foundItem) throw new ListError('More than one child component has ListItem Facet')
             foundItem = childComp;
         }
     });
-
+    
+    // Component must have one and only one child with a List facet 
     if (! foundItem) throw new ListError('No child component has ListItem Facet');
 
     this.list.itemSample = foundItem;
 
+    // After keeping a reference to the item sample, it must be hidden and removed from scope
     this.list.itemSample.dom.hide();
     this.list.itemSample.remove();
 }
 
-
+// Return a list item by it's index
 function item(index) {
     return this._listItems[index];
 }
 
-
+// Get total number of list items
 function count() {
     return this._listItems.length
 }
@@ -1798,12 +1803,12 @@ function _setItem(index, component) {
     this._listItemsHash[component.name] = component
 }
 
-
+// Does the list contain a particular list item component
 function contains(component){
     return this._listItemsHash[component.name] == component;
 }
 
-
+// Add a new list item at a particular index
 function addItem(index) {
     index = index || this.count();
     if (this.item(index))
@@ -1815,10 +1820,10 @@ function addItem(index) {
     var tempComp = binder(component.el)[component.name]
         , innerScope = tempComp.container.scope;
 
-    // set reference to component container facet on scope
+    // Set reference to component container facet on scope
     innerScope._hostObject = component.container;
 
-    // copy bound scope to component
+    // Copy bound scope to component
     component.container.scope = innerScope;
 
     // Add it to the DOM
@@ -1833,7 +1838,8 @@ function addItem(index) {
     return component;
 }
 
-
+// Remove item from a particular index,
+// `doSplice` determines if the empty space should be removed
 function removeItem(index, doSplice) {
     var comp = this.item(index);
 
@@ -1849,7 +1855,7 @@ function removeItem(index, doSplice) {
         this._listItems.splice(index, 1);
 }
 
-
+// Returns the previous item component given an index
 function _itemPreviousComponent(index) {
     while (index >= 0 && ! this._listItems[index])
         index--;
@@ -1859,7 +1865,7 @@ function _itemPreviousComponent(index) {
                 : this.itemSample;
 }
 
-
+// Performs a callback on each list item
 function each(callback, thisArg) {
     this._listItems.forEach(function(item) {
         if (item) callback.apply(this, arguments);
@@ -4883,8 +4889,7 @@ var proto = _ = {
 	prependArray: prependArray,
 	toArray: toArray,
 	firstUpperCase: firstUpperCase,
-	firstLowerCase: firstLowerCase,
-	filterNodeListByType: filterNodeListByType
+	firstLowerCase: firstLowerCase
 };
 
 
@@ -5112,17 +5117,6 @@ function firstUpperCase(str) {
 
 function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
-}
-
-
-// type 1: html element, type 3: text
-function filterNodeListByType(nodeList, type) {
-	var filteredNodes = [];
-	Array.prototype.forEach.call(nodeList, function (node) {
-		if (node.nodeType == type)
-			filteredNodes.push(node);
-	});
-	return filteredNodes;
 }
 
 

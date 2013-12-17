@@ -269,9 +269,10 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 
 			if (innerScope._length()) {
 				// attach inner attributes to the current one (create a new scope) ...
-				if (isContainer)
+				if (isContainer) {
 					scopeObject.container.scope = innerScope;
-				else // or keep them in the current scope
+					innerScope._hostObject = scopeObject.container;
+				} else // or keep them in the current scope
 					scope._copy(innerScope);;
 			}
 		}
@@ -1291,12 +1292,18 @@ _.extendProto(Data, {
 	set: set,
 	path: path,
 	_setScalarValue: _setScalarValue,
-	_getScalarValue: _getScalarValue
+	_getScalarValue: _getScalarValue,
+	_postDataChanged: _postDataChanged,
+	_wrapMessengerMethods: pathUtils.wrapMessengerMethods
 });
 
 facetsRegistry.add(Data);
 
 module.exports = Data;
+
+
+// these methods will be wrapped to support "*" pattern subscriptions
+var dataFacetMethodsToWrap = ['on', 'off', 'onMessages', 'offMessages'];
 
 
 // Initialize Data Facet
@@ -1312,43 +1319,81 @@ function init() {
 	var compDataSource = new ComponentDataSource(this, proxyCompDataSourceMethods, this.owner);
 	this._setMessageSource(compDataSource);
 
-	Object.defineProperties(this, {
-		_compDataSource: { value: compDataSource }
-	});
+	_.defineProperty(this, '_compDataSource', compDataSource);
+
+	this._path = '.' + this.owner.name;
+
+	this._wrapMessengerMethods(dataFacetMethodsToWrap);
+
+	this.on('childdata', onChildData);
 }
 
 
-// Set components DOM value
+// Set component DOM value
 function set(value) {
+	if (value == this._value)
+		return value;
+
+	var valueSet;
 	if (typeof value == 'object') {
-		if (Array.isArray(value))
+		if (Array.isArray(value)) {
+			valueSet = [];
 			value.forEach(function(item, index) {
 				var childDataFacet = this.path('[' + index + ']', true); // true will create item in list
-				if (childDataFacet)
-					childDataFacet.set(item);
-				else
+				if (childDataFacet) {
+					valueSet[index] = childDataFacet.set(item);
+				} else
 					logger.warn('attempt to set data on path that does not exist: ' + '[' + index + ']');
 			}, this);
-		else
+		} else {
+			valueSet = {};
 			_.eachKey(value, function(item, key) {
 				var childDataFacet = this.path('.' + key);
-				if (childDataFacet)
-					childDataFacet.set(item);
-				else
+				if (childDataFacet) {
+					valueSet[key] = childDataFacet.set(item);
+				} else
 					logger.warn('attempt to set data on path that does not exist: ' + '.' + key);
 			}, this);
+		}
 	} else
-		this._setScalarValue(value);
+		valueSet = this._setScalarValue(value);
+
+	var oldValue = this._value;
+	this._value = valueSet;
+	this._postDataChanged({ path: '', type: 'changed',
+							newValue: valueSet, oldValue: oldValue });
+	
+	return valueSet;
 }
 
 
 function _setScalarValue(value) {
 	var el = this.owner.el
 		, setter = tags[el.tagName.toLowerCase()];
-	if (setter)
-		setter(el, value);
-	else
-		el.innerHTML = value;
+	return setter
+			? setter(el, value)
+			: (el.innerHTML = value);
+}
+
+
+function _postDataChanged(message) {
+	// TODO compare with old value
+	this.postMessage(message.path, message);
+
+	var thisComp = this.owner
+		, parentContainer = thisComp.scope._hostObject
+		, parentData = parentContainer && parentContainer.owner.data;
+	
+	if (parentData) {
+		var parentMsg = _.clone(message);
+		parentMsg.path = (this._path || ('.' + thisComp.name))  + parentMsg.path;
+		parentData.postMessage('childdata', parentMsg);
+	}
+}
+
+
+function onChildData(msgType, message) {
+	this._postDataChanged(message);
 }
 
 
@@ -1399,8 +1444,10 @@ function path(accessPath, createItem) {
 			, nodeKey = pathUtils.getPathNodeKey(pathNode);
 		if (pathNode.syntax == 'array' && currentComponent.list) {
 			var itemComponent = currentComponent.list.item(nodeKey);
-			if (! itemComponent && createItem)
+			if (! itemComponent && createItem) {
 				itemComponent = currentComponent.list.addItem(nodeKey);
+				itemComponent.data._path = pathNode.property;
+			}
 			if (itemComponent)
 				currentComponent = itemComponent;
 		} else if (currentComponent.container)
@@ -1423,7 +1470,7 @@ var tags = {
 // Set and get value of input
 function inputValue(el, value) {
 	if (value)
-		el.value = value;
+		return (el.value = value);
 	else
 		return el.value;
 }
@@ -1712,7 +1759,7 @@ var ComponentFacet = require('../c_facet')
 	, _ = require('mol-proto');
 
 
-// generic drag handler, should be overridden
+// generic drop handler, should be overridden
 var Drop = _.createSubclass(ComponentFacet, 'Drop');
 
 _.extendProto(Drop, {
@@ -1761,7 +1808,6 @@ var ComponentFacet = require('../c_facet')
 	, Match = check.Match;
 
 
-// generic drag handler, should be overridden
 var Editable = _.createSubclass(ComponentFacet, 'Editable');
 
 _.extendProto(Editable, {
@@ -2095,12 +2141,12 @@ var ComponentFacet = require('../c_facet')
     , logger = require('../../util/logger');
 
 
-// data model connection facet
+// Data model connection facet
 var List = _.createSubclass(ComponentFacet, 'List');
 
 _.extendProto(List, {
     init: init,
-    // update: update,
+    /* update: update, */
     require: ['Container', 'Dom', 'Data'],
     _itemPreviousComponent: _itemPreviousComponent,
 
@@ -2111,7 +2157,7 @@ _.extendProto(List, {
     addItem: addItem,
     removeItem: removeItem,
     each: each
-    // _reattach: _reattachEventsOnElementChange
+    /* _reattach: _reattachEventsOnElementChange */
 });
 
 facetsRegistry.add(List);
@@ -2119,7 +2165,7 @@ facetsRegistry.add(List);
 module.exports = List;
 
 
-// initialize List facet
+// Initialize List facet
 function init() {
     ComponentFacet.prototype.init.apply(this, arguments);
     var model = new Model()
@@ -2131,66 +2177,38 @@ function init() {
     });
     _.defineProperty(this, 'itemSample', null, false, false, true);
 
+    // Fired by __binder__ when all children of component are bound
     this.owner.on('childrenbound', onChildrenBound);
 }
-
-
-//update list
-// function update(eventType, data) {
-//     var itemModels = data.newValue;
-
-//     for (var i = 0; i < itemModels.length; i++) {
-//         var itemModel = itemModels[i];
-
-//         // Copy component
-//         var component = Component.copy(this.listItemType, true);
-        
-//         // Bind contents of component
-//         var temp = binder(component.el)[component.name];
-
-//         // Set new component scope to bind result
-//         component.container.scope = temp.container.scope;
-        
-//         // Set list item data of component
-//         component.listItem.setData(itemModel);
-
-//         // Add it to the dom
-//         this.owner.dom.append(component.el);
-
-//         // Add to list items hash
-//         this.listItems[component.name] = component;
-
-//         // Show the list item component
-//         component.dom.show();
-//     };
-// }
 
 
 function onChildrenBound() {
     var foundItem;
 
-    // "this" is a component here, as a message dispatched on component
+    // `this` is a component here, as the message was dispatched on a component
     this.container.scope._each(function(childComp, name) {
         if (childComp.item) {
             if (foundItem) throw new ListError('More than one child component has ListItem Facet')
             foundItem = childComp;
         }
     });
-
+    
+    // Component must have one and only one child with a List facet 
     if (! foundItem) throw new ListError('No child component has ListItem Facet');
 
     this.list.itemSample = foundItem;
 
+    // After keeping a reference to the item sample, it must be hidden and removed from scope
     this.list.itemSample.dom.hide();
     this.list.itemSample.remove();
 }
 
-
+// Return a list item by it's index
 function item(index) {
     return this._listItems[index];
 }
 
-
+// Get total number of list items
 function count() {
     return this._listItems.length
 }
@@ -2201,12 +2219,12 @@ function _setItem(index, component) {
     this._listItemsHash[component.name] = component
 }
 
-
+// Does the list contain a particular list item component
 function contains(component){
     return this._listItemsHash[component.name] == component;
 }
 
-
+// Add a new list item at a particular index
 function addItem(index) {
     index = index || this.count();
     if (this.item(index))
@@ -2217,6 +2235,11 @@ function addItem(index) {
 
     var tempComp = binder(component.el)[component.name]
         , innerScope = tempComp.container.scope;
+
+    // Set reference to component container facet on scope
+    innerScope._hostObject = component.container;
+
+    // Copy bound scope to component
     component.container.scope = innerScope;
 
     // Add it to the DOM
@@ -2231,7 +2254,8 @@ function addItem(index) {
     return component;
 }
 
-
+// Remove item from a particular index,
+// `doSplice` determines if the empty space should be removed
 function removeItem(index, doSplice) {
     var comp = this.item(index);
 
@@ -2247,7 +2271,7 @@ function removeItem(index, doSplice) {
         this._listItems.splice(index, 1);
 }
 
-
+// Returns the previous item component given an index
 function _itemPreviousComponent(index) {
     while (index >= 0 && ! this._listItems[index])
         index--;
@@ -2257,7 +2281,7 @@ function _itemPreviousComponent(index) {
                 : this.itemSample;
 }
 
-
+// Performs a callback on each list item
 function each(callback, thisArg) {
     this._listItems.forEach(function(item) {
         if (item) callback.apply(this, arguments);
@@ -2618,7 +2642,7 @@ function getContainingComponent(node) {
 	}
 
 	// Where there is no parent node, this function will return null
-	if (!node.parentNode) {
+	if (! node.parentNode) {
 		return null;
 	}
 
@@ -2885,10 +2909,11 @@ var _ = require('mol-proto')
 
 
 // Scope class
-function Scope(rootEl) {
-	Object.defineProperties(this, {
-		_rootEl: { value: rootEl }
-	})
+function Scope(rootEl, hostObject) {
+	_.defineProperties(this, {
+		_rootEl: rootEl,
+		_hostObject: hostObject
+	}, false, false, true); // writable
 };
 
 _.extendProto(Scope, {
@@ -3016,17 +3041,19 @@ function translateToDomEvent(message) {
 	if (message == 'datachanged')
 		return 'input';
 	else
-		throw new ComponentDataSourceError('unknown component data event');
+		return '';
 }
 
 
 function addDomEventListener(eventType) {
-	this.dom().addEventListener(eventType, this, false); // no capturing
+	if (eventType)
+		this.dom().addEventListener(eventType, this, false); // no capturing
 }
 
 
 function removeDomEventListener(eventType) {
-	this.dom().removeEventListener(eventType, this, false); // no capturing
+	if (eventType)
+		this.dom().removeEventListener(eventType, this, false); // no capturing
 }
 
 
@@ -3480,7 +3507,7 @@ function Model(scope, schema, name, data) {
 		__pathsCache: {}
 	});
 
-	model._wrapMessengerMethods();
+	model._wrapMessengerMethods(modelMethodsToWrap);
 
 	model._data = data;
 
@@ -3488,6 +3515,10 @@ function Model(scope, schema, name, data) {
 }
 
 Model.prototype.__proto__ = Model.__proto__;
+
+
+// these methods will be wrapped to support "*" pattern subscriptions
+var modelMethodsToWrap = ['on', 'off', 'onMessages', 'offMessages'];
 
 
 // cache of compiled ModelPath methods
@@ -3520,7 +3551,7 @@ _.extendProto(Model, {
 	set: synthesizeMethod(modelSetterSynthesizer, '', []),
 	path: path,
 	proxyMessenger: proxyMessenger,
-	_wrapMessengerMethods: _wrapMessengerMethods
+	_wrapMessengerMethods: pathUtils.wrapMessengerMethods
 });
 
 function get() {
@@ -3535,20 +3566,6 @@ function path(accessPath) {
 
 function proxyMessenger(modelHostObject) {
 	Mixin.prototype._createProxyMethods.call(this._messenger, Messenger.defaultMethods, modelHostObject);
-}
-
-
-// TODO allow for multiple messages in a string
-var modelMethodsToWrap = ['on', 'off', 'onMessages', 'offMessages'];
-function _wrapMessengerMethods() {
-	modelMethodsToWrap.forEach(function(methodName) {
-		var origMethod = this[methodName];
-		// replacing message subsribe/unsubscribe/etc. to convert "*" message patterns to regexps
-		this[methodName] = function(path, subscriber) {
-			var regexPath = pathUtils.createRegexPath(path);
-			origMethod.call(this, regexPath, subscriber);
-		};
-	}, this);
 }
 
 
@@ -3882,7 +3899,8 @@ var check = require('../util/check')
 var pathUtils = module.exports = {
 	parseAccessPath: parseAccessPath,
 	createRegexPath: createRegexPath,
-	getPathNodeKey: getPathNodeKey
+	getPathNodeKey: getPathNodeKey,
+	wrapMessengerMethods: wrapMessengerMethods
 };
 
 
@@ -3963,6 +3981,19 @@ function getPathNodeKey(pathNode) {
 	return pathNode.syntax == 'array'
 		? prop.slice(1, prop.length - 1)
 		: prop.slice(1);
+}
+
+
+// TODO allow for multiple messages in a string
+function wrapMessengerMethods(methodsNames) {
+	methodsNames.forEach(function(methodName) {
+		var origMethod = this[methodName];
+		// replacing message subsribe/unsubscribe/etc. to convert "*" message patterns to regexps
+		this[methodName] = function(path, subscriber) {
+			var regexPath = createRegexPath(path);
+			origMethod.call(this, regexPath, subscriber);
+		};
+	}, this);
 }
 
 
@@ -4566,6 +4597,11 @@ function validateAttribute() {
 // mixin abstract class
 // --------------
 
+// We also use Mixin pattern, but Mixin in milo is implemented as a separate object
+// that is stored on the property of the host object and can create proxy methods on
+// the host object if required. Classes Messenger, MessageSource and DataSource are
+// subclasses of Mixin abstract class.
+
 'use strict';
 
 var _ = require('mol-proto')
@@ -4626,6 +4662,11 @@ function _createProxyMethods(proxyMethods, hostObject) {
 // registry abstract class
 // --------------
 
+// __Dependency inversion__
+
+// Components and Facets register themselves in registries that allows to avoid 
+// requiring them from one module. It prevents circular dependencies between modules.
+
 'use strict';
 
 var _ = require('mol-proto')
@@ -4637,13 +4678,6 @@ module.exports = ClassRegistry;
 function ClassRegistry (FoundationClass) {
 	if (FoundationClass)
 		this.setClass(FoundationClass);
-
-	// Object.defineProperty(this, '__registeredClasses', {
-	// 		enumerable: false,
-	// 		writable: true,
-	// 		configurable: true,
-	// 		value: {}
-	// });
 
 	this.__registeredClasses = {};
 }

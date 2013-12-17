@@ -472,9 +472,10 @@ module.exports = binder;
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>				<span class="keyword">if</span> (isContainer)
+            <div class="content"><div class='highlight'><pre>				<span class="keyword">if</span> (isContainer) {
 					scopeObject.container.scope = innerScope;
-				<span class="keyword">else</span> <span class="comment">// or keep them in the current scope</span>
+					innerScope._hostObject = scopeObject.container;
+				} <span class="keyword">else</span> <span class="comment">// or keep them in the current scope</span>
 					scope._copy(innerScope);;
 			}
 		}
@@ -2229,7 +2230,9 @@ _.extendProto(Data, {
 	set: set,
 	path: path,
 	_setScalarValue: _setScalarValue,
-	_getScalarValue: _getScalarValue
+	_getScalarValue: _getScalarValue,
+	_postDataChanged: _postDataChanged,
+	_wrapMessengerMethods: pathUtils.wrapMessengerMethods
 });
 
 facetsRegistry.add(Data);
@@ -2244,6 +2247,21 @@ module.exports = Data;</pre></div></div>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-85">&#182;</a>
+              </div>
+              <p>these methods will be wrapped to support &quot;*&quot; pattern subscriptions</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> dataFacetMethodsToWrap = [<span class="string">'on'</span>, <span class="string">'off'</span>, <span class="string">'onMessages'</span>, <span class="string">'offMessages'</span>];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-86">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-86">&#182;</a>
               </div>
               <p>Initialize Data Facet</p>
 
@@ -2260,11 +2278,11 @@ module.exports = Data;</pre></div></div>
         </li>
         
         
-        <li id="section-86">
+        <li id="section-87">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-86">&#182;</a>
+                <a class="pilcrow" href="#section-87">&#182;</a>
               </div>
               <p>instead of this.owner should pass model? Where it is set?</p>
 
@@ -2273,54 +2291,13 @@ module.exports = Data;</pre></div></div>
             <div class="content"><div class='highlight'><pre>	<span class="keyword">var</span> compDataSource = <span class="keyword">new</span> ComponentDataSource(<span class="keyword">this</span>, proxyCompDataSourceMethods, <span class="keyword">this</span>.owner);
 	<span class="keyword">this</span>._setMessageSource(compDataSource);
 
-	Object.defineProperties(<span class="keyword">this</span>, {
-		_compDataSource: { value: compDataSource }
-	});
-}</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-87">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-87">&#182;</a>
-              </div>
-              <p>Set components DOM value</p>
+	_.defineProperty(<span class="keyword">this</span>, <span class="string">'_compDataSource'</span>, compDataSource);
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">set</span><span class="params">(value)</span> {</span>
-	<span class="keyword">if</span> (<span class="keyword">typeof</span> value == <span class="string">'object'</span>) {
-		<span class="keyword">if</span> (Array.isArray(value))
-			value.forEach(<span class="function"><span class="keyword">function</span><span class="params">(item, index)</span> {</span>
-				<span class="keyword">var</span> childDataFacet = <span class="keyword">this</span>.path(<span class="string">'['</span> + index + <span class="string">']'</span>, <span class="literal">true</span>); <span class="comment">// true will create item in list</span>
-				<span class="keyword">if</span> (childDataFacet)
-					childDataFacet.set(item);
-				<span class="keyword">else</span>
-					logger.warn(<span class="string">'attempt to set data on path that does not exist: '</span> + <span class="string">'['</span> + index + <span class="string">']'</span>);
-			}, <span class="keyword">this</span>);
-		<span class="keyword">else</span>
-			_.eachKey(value, <span class="function"><span class="keyword">function</span><span class="params">(item, key)</span> {</span>
-				<span class="keyword">var</span> childDataFacet = <span class="keyword">this</span>.path(<span class="string">'.'</span> + key);
-				<span class="keyword">if</span> (childDataFacet)
-					childDataFacet.set(item);
-				<span class="keyword">else</span>
-					logger.warn(<span class="string">'attempt to set data on path that does not exist: '</span> + <span class="string">'.'</span> + key);
-			}, <span class="keyword">this</span>);
-	} <span class="keyword">else</span>
-		<span class="keyword">this</span>._setScalarValue(value);
-}
+	<span class="keyword">this</span>._path = <span class="string">'.'</span> + <span class="keyword">this</span>.owner.name;
 
+	<span class="keyword">this</span>._wrapMessengerMethods(dataFacetMethodsToWrap);
 
-<span class="function"><span class="keyword">function</span> <span class="title">_setScalarValue</span><span class="params">(value)</span> {</span>
-	<span class="keyword">var</span> el = <span class="keyword">this</span>.owner.el
-		, setter = tags[el.tagName.toLowerCase()];
-	<span class="keyword">if</span> (setter)
-		setter(el, value);
-	<span class="keyword">else</span>
-		el.innerHTML = value;
+	<span class="keyword">this</span>.on(<span class="string">'childdata'</span>, onChildData);
 }</pre></div></div>
             
         </li>
@@ -2331,6 +2308,98 @@ module.exports = Data;</pre></div></div>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-88">&#182;</a>
+              </div>
+              <p>Set component DOM value</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">set</span><span class="params">(value)</span> {</span>
+	<span class="keyword">if</span> (value == <span class="keyword">this</span>._value)
+		<span class="keyword">return</span> value;
+
+	<span class="keyword">var</span> valueSet;
+	<span class="keyword">if</span> (<span class="keyword">typeof</span> value == <span class="string">'object'</span>) {
+		<span class="keyword">if</span> (Array.isArray(value)) {
+			valueSet = [];
+			value.forEach(<span class="function"><span class="keyword">function</span><span class="params">(item, index)</span> {</span>
+				<span class="keyword">var</span> childDataFacet = <span class="keyword">this</span>.path(<span class="string">'['</span> + index + <span class="string">']'</span>, <span class="literal">true</span>); <span class="comment">// true will create item in list</span>
+				<span class="keyword">if</span> (childDataFacet) {
+					valueSet[index] = childDataFacet.set(item);
+				} <span class="keyword">else</span>
+					logger.warn(<span class="string">'attempt to set data on path that does not exist: '</span> + <span class="string">'['</span> + index + <span class="string">']'</span>);
+			}, <span class="keyword">this</span>);
+		} <span class="keyword">else</span> {
+			valueSet = {};
+			_.eachKey(value, <span class="function"><span class="keyword">function</span><span class="params">(item, key)</span> {</span>
+				<span class="keyword">var</span> childDataFacet = <span class="keyword">this</span>.path(<span class="string">'.'</span> + key);
+				<span class="keyword">if</span> (childDataFacet) {
+					valueSet[key] = childDataFacet.set(item);
+				} <span class="keyword">else</span>
+					logger.warn(<span class="string">'attempt to set data on path that does not exist: '</span> + <span class="string">'.'</span> + key);
+			}, <span class="keyword">this</span>);
+		}
+	} <span class="keyword">else</span>
+		valueSet = <span class="keyword">this</span>._setScalarValue(value);
+
+	<span class="keyword">var</span> oldValue = <span class="keyword">this</span>._value;
+	<span class="keyword">this</span>._value = valueSet;
+	<span class="keyword">this</span>._postDataChanged({ path: <span class="string">''</span>, type: <span class="string">'changed'</span>,
+							newValue: valueSet, oldValue: oldValue });
+	
+	<span class="keyword">return</span> valueSet;
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_setScalarValue</span><span class="params">(value)</span> {</span>
+	<span class="keyword">var</span> el = <span class="keyword">this</span>.owner.el
+		, setter = tags[el.tagName.toLowerCase()];
+	<span class="keyword">return</span> setter
+			? setter(el, value)
+			: (el.innerHTML = value);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">_postDataChanged</span><span class="params">(message)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-89">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-89">&#182;</a>
+              </div>
+              <p>TODO compare with old value</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">this</span>.postMessage(message.path, message);
+
+	<span class="keyword">var</span> thisComp = <span class="keyword">this</span>.owner
+		, parentContainer = thisComp.scope._hostObject
+		, parentData = parentContainer &amp;&amp; parentContainer.owner.data;
+	
+	<span class="keyword">if</span> (parentData) {
+		<span class="keyword">var</span> parentMsg = _.clone(message);
+		parentMsg.path = (<span class="keyword">this</span>._path || (<span class="string">'.'</span> + thisComp.name))  + parentMsg.path;
+		parentData.postMessage(<span class="string">'childdata'</span>, parentMsg);
+	}
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">onChildData</span><span class="params">(msgType, message)</span> {</span>
+	<span class="keyword">this</span>._postDataChanged(message);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-90">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-90">&#182;</a>
               </div>
               <p>get structured data from scope hierarchy</p>
 
@@ -2374,11 +2443,11 @@ module.exports = Data;</pre></div></div>
         </li>
         
         
-        <li id="section-89">
+        <li id="section-91">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-89">&#182;</a>
+                <a class="pilcrow" href="#section-91">&#182;</a>
               </div>
               <p>returns data facet of a child component (by scopes) corresponding to the path</p>
 
@@ -2393,8 +2462,10 @@ module.exports = Data;</pre></div></div>
 			, nodeKey = pathUtils.getPathNodeKey(pathNode);
 		<span class="keyword">if</span> (pathNode.syntax == <span class="string">'array'</span> &amp;&amp; currentComponent.list) {
 			<span class="keyword">var</span> itemComponent = currentComponent.list.item(nodeKey);
-			<span class="keyword">if</span> (! itemComponent &amp;&amp; createItem)
+			<span class="keyword">if</span> (! itemComponent &amp;&amp; createItem) {
 				itemComponent = currentComponent.list.addItem(nodeKey);
+				itemComponent.data._path = pathNode.property;
+			}
 			<span class="keyword">if</span> (itemComponent)
 				currentComponent = itemComponent;
 		} <span class="keyword">else</span> <span class="keyword">if</span> (currentComponent.container)
@@ -2410,11 +2481,11 @@ module.exports = Data;</pre></div></div>
         </li>
         
         
-        <li id="section-90">
+        <li id="section-92">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-90">&#182;</a>
+                <a class="pilcrow" href="#section-92">&#182;</a>
               </div>
               <p>Set value rules</p>
 
@@ -2427,11 +2498,11 @@ module.exports = Data;</pre></div></div>
         </li>
         
         
-        <li id="section-91">
+        <li id="section-93">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-91">&#182;</a>
+                <a class="pilcrow" href="#section-93">&#182;</a>
               </div>
               <p>Set and get value of input</p>
 
@@ -2439,7 +2510,7 @@ module.exports = Data;</pre></div></div>
             
             <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">inputValue</span><span class="params">(el, value)</span> {</span>
 	<span class="keyword">if</span> (value)
-		el.value = value;
+		<span class="keyword">return</span> (el.value = value);
 	<span class="keyword">else</span>
 		<span class="keyword">return</span> el.value;
 }</pre></div></div>
@@ -2447,11 +2518,11 @@ module.exports = Data;</pre></div></div>
         </li>
         
         
-        <li id="section-92">
+        <li id="section-94">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-92">&#182;</a>
+                <a class="pilcrow" href="#section-94">&#182;</a>
               </div>
               <p><a name="components-facets-dom"></a></p>
 <h3 id="dom-facet">dom facet</h3>
@@ -2472,11 +2543,11 @@ module.exports = Data;</pre></div></div>
         </li>
         
         
-        <li id="section-93">
+        <li id="section-95">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-93">&#182;</a>
+                <a class="pilcrow" href="#section-95">&#182;</a>
               </div>
               <p>data model connection facet</p>
 
@@ -2506,11 +2577,11 @@ _.extendProto(Dom, {
         </li>
         
         
-        <li id="section-94">
+        <li id="section-96">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-94">&#182;</a>
+                <a class="pilcrow" href="#section-96">&#182;</a>
               </div>
               <p>_reattach: _reattachEventsOnElementChange</p>
 
@@ -2525,11 +2596,11 @@ module.exports = Dom;</pre></div></div>
         </li>
         
         
-        <li id="section-95">
+        <li id="section-97">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-95">&#182;</a>
+                <a class="pilcrow" href="#section-97">&#182;</a>
               </div>
               <p>initialize Dom facet</p>
 
@@ -2542,11 +2613,11 @@ module.exports = Dom;</pre></div></div>
         </li>
         
         
-        <li id="section-96">
+        <li id="section-98">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-96">&#182;</a>
+                <a class="pilcrow" href="#section-98">&#182;</a>
               </div>
               <p>start Dom facet</p>
 
@@ -2560,11 +2631,11 @@ module.exports = Dom;</pre></div></div>
         </li>
         
         
-        <li id="section-97">
+        <li id="section-99">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-97">&#182;</a>
+                <a class="pilcrow" href="#section-99">&#182;</a>
               </div>
               <p>show HTML element of component</p>
 
@@ -2577,11 +2648,11 @@ module.exports = Dom;</pre></div></div>
         </li>
         
         
-        <li id="section-98">
+        <li id="section-100">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-98">&#182;</a>
+                <a class="pilcrow" href="#section-100">&#182;</a>
               </div>
               <p>hide HTML element of component</p>
 
@@ -2598,11 +2669,11 @@ module.exports = Dom;</pre></div></div>
         </li>
         
         
-        <li id="section-99">
+        <li id="section-101">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-99">&#182;</a>
+                <a class="pilcrow" href="#section-101">&#182;</a>
               </div>
               <p>create a copy of DOM element using facet config if set</p>
 
@@ -2627,11 +2698,11 @@ module.exports = Dom;</pre></div></div>
         </li>
         
         
-        <li id="section-100">
+        <li id="section-102">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-100">&#182;</a>
+                <a class="pilcrow" href="#section-102">&#182;</a>
               </div>
               <p>remove HTML element of component</p>
 
@@ -2645,11 +2716,11 @@ module.exports = Dom;</pre></div></div>
         </li>
         
         
-        <li id="section-101">
+        <li id="section-103">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-101">&#182;</a>
+                <a class="pilcrow" href="#section-103">&#182;</a>
               </div>
               <p>append inside HTML element of component</p>
 
@@ -2662,11 +2733,11 @@ module.exports = Dom;</pre></div></div>
         </li>
         
         
-        <li id="section-102">
+        <li id="section-104">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-102">&#182;</a>
+                <a class="pilcrow" href="#section-104">&#182;</a>
               </div>
               <p>prepend inside HTML element of component</p>
 
@@ -2684,11 +2755,11 @@ module.exports = Dom;</pre></div></div>
         </li>
         
         
-        <li id="section-103">
+        <li id="section-105">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-103">&#182;</a>
+                <a class="pilcrow" href="#section-105">&#182;</a>
               </div>
               <p>appends children of element inside this component&#39;s element</p>
 
@@ -2702,11 +2773,11 @@ module.exports = Dom;</pre></div></div>
         </li>
         
         
-        <li id="section-104">
+        <li id="section-106">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-104">&#182;</a>
+                <a class="pilcrow" href="#section-106">&#182;</a>
               </div>
               <p>prepends children of element inside this component&#39;s element</p>
 
@@ -2737,11 +2808,11 @@ module.exports = Dom;</pre></div></div>
         </li>
         
         
-        <li id="section-105">
+        <li id="section-107">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-105">&#182;</a>
+                <a class="pilcrow" href="#section-107">&#182;</a>
               </div>
               <p>Finds component passing optional iterator&#39;s test
 in the same scope as the current component (this)
@@ -2785,11 +2856,11 @@ or downwards (direction = &quot;down&quot;)</p>
         </li>
         
         
-        <li id="section-106">
+        <li id="section-108">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-106">&#182;</a>
+                <a class="pilcrow" href="#section-108">&#182;</a>
               </div>
               <p>returns true if the element has text before selection</p>
 
@@ -2803,11 +2874,11 @@ or downwards (direction = &quot;down&quot;)</p>
         </li>
         
         
-        <li id="section-107">
+        <li id="section-109">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-107">&#182;</a>
+                <a class="pilcrow" href="#section-109">&#182;</a>
               </div>
               <p>walk up the DOM tree to check if there are text nodes before cursor</p>
 
@@ -2820,11 +2891,11 @@ or downwards (direction = &quot;down&quot;)</p>
         </li>
         
         
-        <li id="section-108">
+        <li id="section-110">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-108">&#182;</a>
+                <a class="pilcrow" href="#section-110">&#182;</a>
               </div>
               <p><a name="components-facets-drag"></a></p>
 <h3 id="drag-facet">drag facet</h3>
@@ -2842,11 +2913,11 @@ or downwards (direction = &quot;down&quot;)</p>
         </li>
         
         
-        <li id="section-109">
+        <li id="section-111">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-109">&#182;</a>
+                <a class="pilcrow" href="#section-111">&#182;</a>
               </div>
               <p>generic drag handler, should be overridden</p>
 
@@ -2864,11 +2935,11 @@ _.extendProto(Drag, {
         </li>
         
         
-        <li id="section-110">
+        <li id="section-112">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-110">&#182;</a>
+                <a class="pilcrow" href="#section-112">&#182;</a>
               </div>
               <p>_reattach: _reattachEventsOnElementChange</p>
 
@@ -2937,11 +3008,11 @@ module.exports = Drag;
         </li>
         
         
-        <li id="section-111">
+        <li id="section-113">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-111">&#182;</a>
+                <a class="pilcrow" href="#section-113">&#182;</a>
               </div>
               <p><a name="components-facets-drop"></a></p>
 <h3 id="drop-facet">drop facet</h3>
@@ -2959,13 +3030,13 @@ module.exports = Drag;
         </li>
         
         
-        <li id="section-112">
+        <li id="section-114">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-112">&#182;</a>
+                <a class="pilcrow" href="#section-114">&#182;</a>
               </div>
-              <p>generic drag handler, should be overridden</p>
+              <p>generic drop handler, should be overridden</p>
 
             </div>
             
@@ -2978,11 +3049,11 @@ _.extendProto(Drop, {
         </li>
         
         
-        <li id="section-113">
+        <li id="section-115">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-113">&#182;</a>
+                <a class="pilcrow" href="#section-115">&#182;</a>
               </div>
               <p>_reattach: _reattachEventsOnElementChange</p>
 
@@ -3018,11 +3089,11 @@ module.exports = Drop;
         </li>
         
         
-        <li id="section-114">
+        <li id="section-116">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-114">&#182;</a>
+                <a class="pilcrow" href="#section-116">&#182;</a>
               </div>
               <p><a name="components-facets-editable"></a></p>
 <h3 id="editable-facet">editable facet</h3>
@@ -3038,22 +3109,10 @@ module.exports = Drop;
 	, logger = require(<span class="string">'../../util/logger'</span>)
 	, _ = require(<span class="string">'mol-proto'</span>)
 	, check = require(<span class="string">'../../util'</span>).check
-	, Match = check.Match;</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-115">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-115">&#182;</a>
-              </div>
-              <p>generic drag handler, should be overridden</p>
+	, Match = check.Match;
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> Editable = _.createSubclass(ComponentFacet, <span class="string">'Editable'</span>);
+
+<span class="keyword">var</span> Editable = _.createSubclass(ComponentFacet, <span class="string">'Editable'</span>);
 
 _.extendProto(Editable, {
 	init: init,
@@ -3063,11 +3122,11 @@ _.extendProto(Editable, {
         </li>
         
         
-        <li id="section-116">
+        <li id="section-117">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-116">&#182;</a>
+                <a class="pilcrow" href="#section-117">&#182;</a>
               </div>
               <p>_reattach: _reattachEventsOnElementChange</p>
 
@@ -3082,11 +3141,11 @@ module.exports = Editable;</pre></div></div>
         </li>
         
         
-        <li id="section-117">
+        <li id="section-118">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-117">&#182;</a>
+                <a class="pilcrow" href="#section-118">&#182;</a>
               </div>
               <p>init Editable facets</p>
 
@@ -3115,11 +3174,11 @@ module.exports = Editable;</pre></div></div>
         </li>
         
         
-        <li id="section-118">
+        <li id="section-119">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-118">&#182;</a>
+                <a class="pilcrow" href="#section-119">&#182;</a>
               </div>
               <p>start Editable facet</p>
 
@@ -3140,11 +3199,11 @@ module.exports = Editable;</pre></div></div>
         </li>
         
         
-        <li id="section-119">
+        <li id="section-120">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-119">&#182;</a>
+                <a class="pilcrow" href="#section-120">&#182;</a>
               </div>
               <p>arrow keys events</p>
 
@@ -3156,11 +3215,11 @@ module.exports = Editable;</pre></div></div>
         </li>
         
         
-        <li id="section-120">
+        <li id="section-121">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-120">&#182;</a>
+                <a class="pilcrow" href="#section-121">&#182;</a>
               </div>
               <p>merge events</p>
 
@@ -3176,11 +3235,11 @@ module.exports = Editable;</pre></div></div>
         </li>
         
         
-        <li id="section-121">
+        <li id="section-122">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-121">&#182;</a>
+                <a class="pilcrow" href="#section-122">&#182;</a>
               </div>
               <p>split events</p>
 
@@ -3203,11 +3262,11 @@ module.exports = Editable;</pre></div></div>
         </li>
         
         
-        <li id="section-122">
+        <li id="section-123">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-122">&#182;</a>
+                <a class="pilcrow" href="#section-123">&#182;</a>
               </div>
               <p>Move caret to another editable</p>
 
@@ -3247,11 +3306,11 @@ module.exports = Editable;</pre></div></div>
         </li>
         
         
-        <li id="section-123">
+        <li id="section-124">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-123">&#182;</a>
+                <a class="pilcrow" href="#section-124">&#182;</a>
               </div>
               <p>merge functionality</p>
 
@@ -3278,11 +3337,11 @@ module.exports = Editable;</pre></div></div>
         </li>
         
         
-        <li id="section-124">
+        <li id="section-125">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-124">&#182;</a>
+                <a class="pilcrow" href="#section-125">&#182;</a>
               </div>
               <p>merge messages</p>
 
@@ -3320,11 +3379,11 @@ module.exports = Editable;</pre></div></div>
         </li>
         
         
-        <li id="section-125">
+        <li id="section-126">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-125">&#182;</a>
+                <a class="pilcrow" href="#section-126">&#182;</a>
               </div>
               <p>merge scopes</p>
 
@@ -3335,11 +3394,11 @@ module.exports = Editable;</pre></div></div>
         </li>
         
         
-        <li id="section-126">
+        <li id="section-127">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-126">&#182;</a>
+                <a class="pilcrow" href="#section-127">&#182;</a>
               </div>
               <p>Reference first element to be merged</p>
 
@@ -3350,11 +3409,11 @@ module.exports = Editable;</pre></div></div>
         </li>
         
         
-        <li id="section-127">
+        <li id="section-128">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-127">&#182;</a>
+                <a class="pilcrow" href="#section-128">&#182;</a>
               </div>
               <p>merge DOM</p>
 
@@ -3365,11 +3424,11 @@ module.exports = Editable;</pre></div></div>
         </li>
         
         
-        <li id="section-128">
+        <li id="section-129">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-128">&#182;</a>
+                <a class="pilcrow" href="#section-129">&#182;</a>
               </div>
               <p>Make the interface editable again like expected</p>
 
@@ -3381,11 +3440,11 @@ module.exports = Editable;</pre></div></div>
         </li>
         
         
-        <li id="section-129">
+        <li id="section-130">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-129">&#182;</a>
+                <a class="pilcrow" href="#section-130">&#182;</a>
               </div>
               <p>Set the selection where it should be</p>
 
@@ -3399,11 +3458,11 @@ module.exports = Editable;</pre></div></div>
         </li>
         
         
-        <li id="section-130">
+        <li id="section-131">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-130">&#182;</a>
+                <a class="pilcrow" href="#section-131">&#182;</a>
               </div>
               <p>send remove message</p>
 
@@ -3437,11 +3496,11 @@ module.exports = Editable;</pre></div></div>
         </li>
         
         
-        <li id="section-131">
+        <li id="section-132">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-131">&#182;</a>
+                <a class="pilcrow" href="#section-132">&#182;</a>
               </div>
               <p><a name="components-facets-events"></a></p>
 <h3 id="events-facet">events facet</h3>
@@ -3461,11 +3520,11 @@ module.exports = Editable;</pre></div></div>
         </li>
         
         
-        <li id="section-132">
+        <li id="section-133">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-132">&#182;</a>
+                <a class="pilcrow" href="#section-133">&#182;</a>
               </div>
               <p>events facet</p>
 
@@ -3479,11 +3538,11 @@ _.extendProto(Events, {
         </li>
         
         
-        <li id="section-133">
+        <li id="section-134">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-133">&#182;</a>
+                <a class="pilcrow" href="#section-134">&#182;</a>
               </div>
               <p>_reattach: _reattachEventsOnElementChange</p>
 
@@ -3498,11 +3557,11 @@ module.exports = Events;</pre></div></div>
         </li>
         
         
-        <li id="section-134">
+        <li id="section-135">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-134">&#182;</a>
+                <a class="pilcrow" href="#section-135">&#182;</a>
               </div>
               <p>init Events facet</p>
 
@@ -3523,11 +3582,11 @@ module.exports = Events;</pre></div></div>
         </li>
         
         
-        <li id="section-135">
+        <li id="section-136">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-135">&#182;</a>
+                <a class="pilcrow" href="#section-136">&#182;</a>
               </div>
               <p><a name="components-facets-frame"></a></p>
 <h3 id="frame-facet">frame facet</h3>
@@ -3547,11 +3606,11 @@ module.exports = Events;</pre></div></div>
         </li>
         
         
-        <li id="section-136">
+        <li id="section-137">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-136">&#182;</a>
+                <a class="pilcrow" href="#section-137">&#182;</a>
               </div>
               <p>data model connection facet</p>
 
@@ -3565,11 +3624,11 @@ _.extendProto(Frame, {
         </li>
         
         
-        <li id="section-137">
+        <li id="section-138">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-137">&#182;</a>
+                <a class="pilcrow" href="#section-138">&#182;</a>
               </div>
               <p>_reattach: _reattachEventsOnElementChange</p>
 
@@ -3601,11 +3660,11 @@ module.exports = Frame;
         </li>
         
         
-        <li id="section-138">
+        <li id="section-139">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-138">&#182;</a>
+                <a class="pilcrow" href="#section-139">&#182;</a>
               </div>
               <p><a name="components-facets-item"></a></p>
 <h3 id="item-facet">item facet</h3>
@@ -3623,11 +3682,11 @@ module.exports = Frame;
         </li>
         
         
-        <li id="section-139">
+        <li id="section-140">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-139">&#182;</a>
+                <a class="pilcrow" href="#section-140">&#182;</a>
               </div>
               <p>data model connection facet</p>
 
@@ -3646,11 +3705,11 @@ module.exports = ItemFacet;</pre></div></div>
         </li>
         
         
-        <li id="section-140">
+        <li id="section-141">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-140">&#182;</a>
+                <a class="pilcrow" href="#section-141">&#182;</a>
               </div>
               <p><a name="components-facets-list"></a></p>
 <h3 id="list-facet">list facet</h3>
@@ -3672,35 +3731,22 @@ module.exports = ItemFacet;</pre></div></div>
         </li>
         
         
-        <li id="section-141">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-141">&#182;</a>
-              </div>
-              <p>data model connection facet</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> List = _.createSubclass(ComponentFacet, <span class="string">'List'</span>);
-
-_.extendProto(List, {
-    init: init,</pre></div></div>
-            
-        </li>
-        
-        
         <li id="section-142">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-142">&#182;</a>
               </div>
-              <p>update: update,</p>
+              <p>Data model connection facet</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    require: [<span class="string">'Container'</span>, <span class="string">'Dom'</span>, <span class="string">'Data'</span>],
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> List = _.createSubclass(ComponentFacet, <span class="string">'List'</span>);
+
+_.extendProto(List, {
+    init: init,
+    <span class="comment">/* update: update, */</span>
+    require: [<span class="string">'Container'</span>, <span class="string">'Dom'</span>, <span class="string">'Data'</span>],
     _itemPreviousComponent: _itemPreviousComponent,
 
     item: item,
@@ -3709,7 +3755,13 @@ _.extendProto(List, {
     contains: contains,
     addItem: addItem,
     removeItem: removeItem,
-    each: each</pre></div></div>
+    each: each
+    <span class="comment">/* _reattach: _reattachEventsOnElementChange */</span>
+});
+
+facetsRegistry.add(List);
+
+module.exports = List;</pre></div></div>
             
         </li>
         
@@ -3720,26 +3772,7 @@ _.extendProto(List, {
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-143">&#182;</a>
               </div>
-              <p>_reattach: _reattachEventsOnElementChange</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>});
-
-facetsRegistry.add(List);
-
-module.exports = List;</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-144">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-144">&#182;</a>
-              </div>
-              <p>initialize List facet</p>
+              <p>Initialize List facet</p>
 
             </div>
             
@@ -3752,10 +3785,27 @@ module.exports = List;</pre></div></div>
         _listItems: [],
         _listItemsHash: {}
     });
-    _.defineProperty(<span class="keyword">this</span>, <span class="string">'itemSample'</span>, <span class="literal">null</span>, <span class="literal">false</span>, <span class="literal">false</span>, <span class="literal">true</span>);
+    _.defineProperty(<span class="keyword">this</span>, <span class="string">'itemSample'</span>, <span class="literal">null</span>, <span class="literal">false</span>, <span class="literal">false</span>, <span class="literal">true</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-144">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-144">&#182;</a>
+              </div>
+              <p>Fired by <strong>binder</strong> when all children of component are bound</p>
 
-    <span class="keyword">this</span>.owner.on(<span class="string">'childrenbound'</span>, onChildrenBound);
-}</pre></div></div>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.owner.on(<span class="string">'childrenbound'</span>, onChildrenBound);
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">onChildrenBound</span><span class="params">()</span> {</span>
+    <span class="keyword">var</span> foundItem;</pre></div></div>
             
         </li>
         
@@ -3766,16 +3816,16 @@ module.exports = List;</pre></div></div>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-145">&#182;</a>
               </div>
-              <p>update list
-function update(eventType, data) {
-    var itemModels = data.newValue;</p>
-<pre><code>for (var i = 0; i &lt; itemModels.length; i++) {
-    var itemModel = itemModels[i];
-
-    // Copy component
-    var component = Component.copy(this.listItemType, true);</code></pre>
+              <p><code>this</code> is a component here, as the message was dispatched on a component</p>
 
             </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.container.scope._each(<span class="function"><span class="keyword">function</span><span class="params">(childComp, name)</span> {</span>
+        <span class="keyword">if</span> (childComp.item) {
+            <span class="keyword">if</span> (foundItem) <span class="keyword">throw</span> <span class="keyword">new</span> ListError(<span class="string">'More than one child component has ListItem Facet'</span>)
+            foundItem = childComp;
+        }
+    });</pre></div></div>
             
         </li>
         
@@ -3786,13 +3836,13 @@ function update(eventType, data) {
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-146">&#182;</a>
               </div>
-              <pre><code>    // Bind contents of component
-    var temp = binder(component.el)[component.name];
-
-    // Set new component scope to bind result
-    component.container.scope = temp.container.scope;</code></pre>
+              <p>Component must have one and only one child with a List facet </p>
 
             </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">if</span> (! foundItem) <span class="keyword">throw</span> <span class="keyword">new</span> ListError(<span class="string">'No child component has ListItem Facet'</span>);
+
+    <span class="keyword">this</span>.list.itemSample = foundItem;</pre></div></div>
             
         </li>
         
@@ -3803,24 +3853,13 @@ function update(eventType, data) {
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-147">&#182;</a>
               </div>
-              <pre><code>    // Set list item data of component
-    component.listItem.setData(itemModel);
-
-    // Add it to the dom
-    this.owner.dom.append(component.el);
-
-    // Add to list items hash
-    this.listItems[component.name] = component;
-
-    // Show the list item component
-    component.dom.show();
-};</code></pre>
-<p>}</p>
+              <p>After keeping a reference to the item sample, it must be hidden and removed from scope</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">onChildrenBound</span><span class="params">()</span> {</span>
-    <span class="keyword">var</span> foundItem;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.list.itemSample.dom.hide();
+    <span class="keyword">this</span>.list.itemSample.remove();
+}</pre></div></div>
             
         </li>
         
@@ -3831,51 +3870,13 @@ function update(eventType, data) {
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-148">&#182;</a>
               </div>
-              <p>&quot;this&quot; is a component here, as a message dispatched on component</p>
+              <p>Return a list item by it&#39;s index</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.container.scope._each(<span class="function"><span class="keyword">function</span><span class="params">(childComp, name)</span> {</span>
-        <span class="keyword">if</span> (childComp.item) {
-            <span class="keyword">if</span> (foundItem) <span class="keyword">throw</span> <span class="keyword">new</span> ListError(<span class="string">'More than one child component has ListItem Facet'</span>)
-            foundItem = childComp;
-        }
-    });
-
-    <span class="keyword">if</span> (! foundItem) <span class="keyword">throw</span> <span class="keyword">new</span> ListError(<span class="string">'No child component has ListItem Facet'</span>);
-
-    <span class="keyword">this</span>.list.itemSample = foundItem;
-
-    <span class="keyword">this</span>.list.itemSample.dom.hide();
-    <span class="keyword">this</span>.list.itemSample.remove();
-}
-
-
-<span class="function"><span class="keyword">function</span> <span class="title">item</span><span class="params">(index)</span> {</span>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">item</span><span class="params">(index)</span> {</span>
     <span class="keyword">return</span> <span class="keyword">this</span>._listItems[index];
-}
-
-
-<span class="function"><span class="keyword">function</span> <span class="title">count</span><span class="params">()</span> {</span>
-    <span class="keyword">return</span> <span class="keyword">this</span>._listItems.length
-}
-
-
-<span class="function"><span class="keyword">function</span> <span class="title">_setItem</span><span class="params">(index, component)</span> {</span>
-    <span class="keyword">this</span>._listItems[index] = component;
-    <span class="keyword">this</span>._listItemsHash[component.name] = component
-}
-
-
-<span class="function"><span class="keyword">function</span> <span class="title">contains</span><span class="params">(component)</span>{</span>
-    <span class="keyword">return</span> <span class="keyword">this</span>._listItemsHash[component.name] == component;
-}
-
-
-<span class="function"><span class="keyword">function</span> <span class="title">addItem</span><span class="params">(index)</span> {</span>
-    index = index || <span class="keyword">this</span>.count();
-    <span class="keyword">if</span> (<span class="keyword">this</span>.item(index))
-        <span class="keyword">throw</span> ListError(<span class="string">'attempt to create item with ID of existing item'</span>);</pre></div></div>
+}</pre></div></div>
             
         </li>
         
@@ -3886,15 +3887,19 @@ function update(eventType, data) {
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-149">&#182;</a>
               </div>
-              <p>Copy component</p>
+              <p>Get total number of list items</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> component = Component.copy(<span class="keyword">this</span>.itemSample, <span class="literal">true</span>);
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">count</span><span class="params">()</span> {</span>
+    <span class="keyword">return</span> <span class="keyword">this</span>._listItems.length
+}
 
-    <span class="keyword">var</span> tempComp = binder(component.el)[component.name]
-        , innerScope = tempComp.container.scope;
-    component.container.scope = innerScope;</pre></div></div>
+
+<span class="function"><span class="keyword">function</span> <span class="title">_setItem</span><span class="params">(index, component)</span> {</span>
+    <span class="keyword">this</span>._listItems[index] = component;
+    <span class="keyword">this</span>._listItemsHash[component.name] = component
+}</pre></div></div>
             
         </li>
         
@@ -3905,11 +3910,13 @@ function update(eventType, data) {
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-150">&#182;</a>
               </div>
-              <p>Add it to the DOM</p>
+              <p>Does the list contain a particular list item component</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>._itemPreviousComponent(index).dom.insertAfter(component.el)</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">contains</span><span class="params">(component)</span>{</span>
+    <span class="keyword">return</span> <span class="keyword">this</span>._listItemsHash[component.name] == component;
+}</pre></div></div>
             
         </li>
         
@@ -3920,11 +3927,14 @@ function update(eventType, data) {
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-151">&#182;</a>
               </div>
-              <p>Add to list items</p>
+              <p>Add a new list item at a particular index</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>._setItem(index, component);</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">addItem</span><span class="params">(index)</span> {</span>
+    index = index || <span class="keyword">this</span>.count();
+    <span class="keyword">if</span> (<span class="keyword">this</span>.item(index))
+        <span class="keyword">throw</span> ListError(<span class="string">'attempt to create item with ID of existing item'</span>);</pre></div></div>
             
         </li>
         
@@ -3935,6 +3945,84 @@ function update(eventType, data) {
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-152">&#182;</a>
               </div>
+              <p>Copy component</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> component = Component.copy(<span class="keyword">this</span>.itemSample, <span class="literal">true</span>);
+
+    <span class="keyword">var</span> tempComp = binder(component.el)[component.name]
+        , innerScope = tempComp.container.scope;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-153">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-153">&#182;</a>
+              </div>
+              <p>Set reference to component container facet on scope</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    innerScope._hostObject = component.container;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-154">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-154">&#182;</a>
+              </div>
+              <p>Copy bound scope to component</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    component.container.scope = innerScope;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-155">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-155">&#182;</a>
+              </div>
+              <p>Add it to the DOM</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>._itemPreviousComponent(index).dom.insertAfter(component.el)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-156">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-156">&#182;</a>
+              </div>
+              <p>Add to list items</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>._setItem(index, component);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-157">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-157">&#182;</a>
+              </div>
               <p>Show the list item component</p>
 
             </div>
@@ -3942,10 +4030,23 @@ function update(eventType, data) {
             <div class="content"><div class='highlight'><pre>    component.dom.show();
 
     <span class="keyword">return</span> component;
-}
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-158">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-158">&#182;</a>
+              </div>
+              <p>Remove item from a particular index,
+<code>doSplice</code> determines if the empty space should be removed</p>
 
-
-<span class="function"><span class="keyword">function</span> <span class="title">removeItem</span><span class="params">(index, doSplice)</span> {</span>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">removeItem</span><span class="params">(index, doSplice)</span> {</span>
     <span class="keyword">var</span> comp = <span class="keyword">this</span>.item(index);
 
     <span class="keyword">if</span> (! comp)
@@ -3958,20 +4059,44 @@ function update(eventType, data) {
 
     <span class="keyword">if</span> (doSplice)
         <span class="keyword">this</span>._listItems.splice(index, <span class="number">1</span>);
-}
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-159">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-159">&#182;</a>
+              </div>
+              <p>Returns the previous item component given an index</p>
 
-
-<span class="function"><span class="keyword">function</span> <span class="title">_itemPreviousComponent</span><span class="params">(index)</span> {</span>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">_itemPreviousComponent</span><span class="params">(index)</span> {</span>
     <span class="keyword">while</span> (index &gt;= <span class="number">0</span> &amp;&amp; ! <span class="keyword">this</span>._listItems[index])
         index--;
 
     <span class="keyword">return</span> index &gt;= <span class="number">0</span>
                 ? <span class="keyword">this</span>._listItems[index]
                 : <span class="keyword">this</span>.itemSample;
-}
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-160">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-160">&#182;</a>
+              </div>
+              <p>Performs a callback on each list item</p>
 
-
-<span class="function"><span class="keyword">function</span> <span class="title">each</span><span class="params">(callback, thisArg)</span> {</span>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">each</span><span class="params">(callback, thisArg)</span> {</span>
     <span class="keyword">this</span>._listItems.forEach(<span class="function"><span class="keyword">function</span><span class="params">(item)</span> {</span>
         <span class="keyword">if</span> (item) callback.apply(<span class="keyword">this</span>, arguments);
     }, thisArg || <span class="keyword">this</span>);
@@ -3980,11 +4105,11 @@ function update(eventType, data) {
         </li>
         
         
-        <li id="section-153">
+        <li id="section-161">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-153">&#182;</a>
+                <a class="pilcrow" href="#section-161">&#182;</a>
               </div>
               <p><a name="components-facets-model"></a></p>
 <h3 id="model-facet">model facet</h3>
@@ -4002,11 +4127,11 @@ function update(eventType, data) {
         </li>
         
         
-        <li id="section-154">
+        <li id="section-162">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-154">&#182;</a>
+                <a class="pilcrow" href="#section-162">&#182;</a>
               </div>
               <p>generic drag handler, should be overridden</p>
 
@@ -4021,11 +4146,11 @@ _.extendProto(ModelFacet, {
         </li>
         
         
-        <li id="section-155">
+        <li id="section-163">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-155">&#182;</a>
+                <a class="pilcrow" href="#section-163">&#182;</a>
               </div>
               <p>_reattach: _reattachEventsOnElementChange</p>
 
@@ -4051,11 +4176,11 @@ module.exports = ModelFacet;
         </li>
         
         
-        <li id="section-156">
+        <li id="section-164">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-156">&#182;</a>
+                <a class="pilcrow" href="#section-164">&#182;</a>
               </div>
               <p><a name="components-facets-split"></a></p>
 <h3 id="split-facet">split facet</h3>
@@ -4083,11 +4208,11 @@ _.extendProto(Split, {
         </li>
         
         
-        <li id="section-157">
+        <li id="section-165">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-157">&#182;</a>
+                <a class="pilcrow" href="#section-165">&#182;</a>
               </div>
               <p>_reattach: _reattachEventsOnElementChange</p>
 
@@ -4102,11 +4227,11 @@ module.exports = Split;</pre></div></div>
         </li>
         
         
-        <li id="section-158">
+        <li id="section-166">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-158">&#182;</a>
+                <a class="pilcrow" href="#section-166">&#182;</a>
               </div>
               <p>init Split facet</p>
 
@@ -4121,11 +4246,11 @@ module.exports = Split;</pre></div></div>
         </li>
         
         
-        <li id="section-159">
+        <li id="section-167">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-159">&#182;</a>
+                <a class="pilcrow" href="#section-167">&#182;</a>
               </div>
               <p>start Split facet</p>
 
@@ -4138,11 +4263,11 @@ module.exports = Split;</pre></div></div>
         </li>
         
         
-        <li id="section-160">
+        <li id="section-168">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-160">&#182;</a>
+                <a class="pilcrow" href="#section-168">&#182;</a>
               </div>
               <p>performs the split on selection</p>
 
@@ -4165,11 +4290,11 @@ module.exports = Split;</pre></div></div>
         </li>
         
         
-        <li id="section-161">
+        <li id="section-169">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-161">&#182;</a>
+                <a class="pilcrow" href="#section-169">&#182;</a>
               </div>
               <p>clone itself</p>
 
@@ -4235,11 +4360,11 @@ module.exports = Split;</pre></div></div>
         </li>
         
         
-        <li id="section-162">
+        <li id="section-170">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-162">&#182;</a>
+                <a class="pilcrow" href="#section-170">&#182;</a>
               </div>
               <p><a name="components-facets-template"></a></p>
 <h3 id="template-facet">template facet</h3>
@@ -4258,11 +4383,11 @@ module.exports = Split;</pre></div></div>
         </li>
         
         
-        <li id="section-163">
+        <li id="section-171">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-163">&#182;</a>
+                <a class="pilcrow" href="#section-171">&#182;</a>
               </div>
               <p>data model connection facet</p>
 
@@ -4280,11 +4405,11 @@ _.extendProto(Template, {
         </li>
         
         
-        <li id="section-164">
+        <li id="section-172">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-164">&#182;</a>
+                <a class="pilcrow" href="#section-172">&#182;</a>
               </div>
               <p>_reattach: _reattachEventsOnElementChange</p>
 
@@ -4336,11 +4461,11 @@ module.exports = Template;
         </li>
         
         
-        <li id="section-165">
+        <li id="section-173">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-165">&#182;</a>
+                <a class="pilcrow" href="#section-173">&#182;</a>
               </div>
               <p>TODO should be changed to reconcillation of existing children with new</p>
 
@@ -4352,11 +4477,11 @@ module.exports = Template;
         </li>
         
         
-        <li id="section-166">
+        <li id="section-174">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-166">&#182;</a>
+                <a class="pilcrow" href="#section-174">&#182;</a>
               </div>
               <p><a name="components"></a></p>
 <h2 id="component-class">component class</h2>
@@ -4366,11 +4491,11 @@ module.exports = Template;
         </li>
         
         
-        <li id="section-167">
+        <li id="section-175">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-167">&#182;</a>
+                <a class="pilcrow" href="#section-175">&#182;</a>
               </div>
               <p>Basic component class.</p>
 <p>It&#39;s constructor accepts DOM element and component name as paramenters.</p>
@@ -4405,11 +4530,11 @@ Component.createComponentClass = createComponentClass;
         </li>
         
         
-        <li id="section-168">
+        <li id="section-176">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-168">&#182;</a>
+                <a class="pilcrow" href="#section-176">&#182;</a>
               </div>
               <p>class methods</p>
 
@@ -4426,11 +4551,11 @@ Component.createComponentClass = createComponentClass;
         </li>
         
         
-        <li id="section-169">
+        <li id="section-177">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-169">&#182;</a>
+                <a class="pilcrow" href="#section-177">&#182;</a>
               </div>
               <p>instance methods</p>
 
@@ -4446,11 +4571,11 @@ Component.createComponentClass = createComponentClass;
         </li>
         
         
-        <li id="section-170">
+        <li id="section-178">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-170">&#182;</a>
+                <a class="pilcrow" href="#section-178">&#182;</a>
               </div>
               <p>class methods</p>
 <p>create component from ComponentInfo</p>
@@ -4472,11 +4597,11 @@ Component.createComponentClass = createComponentClass;
         </li>
         
         
-        <li id="section-171">
+        <li id="section-179">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-171">&#182;</a>
+                <a class="pilcrow" href="#section-179">&#182;</a>
               </div>
               <p>creates a new instance with the same state but different element</p>
 
@@ -4513,11 +4638,11 @@ Component.createComponentClass = createComponentClass;
         </li>
         
         
-        <li id="section-172">
+        <li id="section-180">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-172">&#182;</a>
+                <a class="pilcrow" href="#section-180">&#182;</a>
               </div>
               <p>checks if element is bound to a component</p>
 
@@ -4530,11 +4655,11 @@ Component.createComponentClass = createComponentClass;
         </li>
         
         
-        <li id="section-173">
+        <li id="section-181">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-173">&#182;</a>
+                <a class="pilcrow" href="#section-181">&#182;</a>
               </div>
               <p>gets the element bound the component</p>
 
@@ -4557,11 +4682,11 @@ Component.createComponentClass = createComponentClass;
         </li>
         
         
-        <li id="section-174">
+        <li id="section-182">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-174">&#182;</a>
+                <a class="pilcrow" href="#section-182">&#182;</a>
               </div>
               <p>Where the current node is a component it&#39;s component should be returned</p>
 
@@ -4574,28 +4699,28 @@ Component.createComponentClass = createComponentClass;
         </li>
         
         
-        <li id="section-175">
+        <li id="section-183">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-175">&#182;</a>
+                <a class="pilcrow" href="#section-183">&#182;</a>
               </div>
               <p>Where there is no parent node, this function will return null</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>	<span class="keyword">if</span> (!node.parentNode) {
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">if</span> (! node.parentNode) {
 		<span class="keyword">return</span> <span class="literal">null</span>;
 	}</pre></div></div>
             
         </li>
         
         
-        <li id="section-176">
+        <li id="section-184">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-176">&#182;</a>
+                <a class="pilcrow" href="#section-184">&#182;</a>
               </div>
               <p>The parent node is checked recursively</p>
 
@@ -4630,11 +4755,11 @@ Component.createComponentClass = createComponentClass;
         </li>
         
         
-        <li id="section-177">
+        <li id="section-185">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-177">&#182;</a>
+                <a class="pilcrow" href="#section-185">&#182;</a>
               </div>
               <p>instance methods</p>
 <p>initializes component
@@ -4662,11 +4787,11 @@ Component.prototype.init.apply(this, arguments)</p>
         </li>
         
         
-        <li id="section-178">
+        <li id="section-186">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-178">&#182;</a>
+                <a class="pilcrow" href="#section-186">&#182;</a>
               </div>
               <p>start all facets</p>
 
@@ -4695,11 +4820,11 @@ Component.prototype.init.apply(this, arguments)</p>
         </li>
         
         
-        <li id="section-179">
+        <li id="section-187">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-179">&#182;</a>
+                <a class="pilcrow" href="#section-187">&#182;</a>
               </div>
               <p>start facet</p>
 
@@ -4712,11 +4837,11 @@ Component.prototype.init.apply(this, arguments)</p>
         </li>
         
         
-        <li id="section-180">
+        <li id="section-188">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-180">&#182;</a>
+                <a class="pilcrow" href="#section-188">&#182;</a>
               </div>
               <p>envoke given method with optional parameters on all facets</p>
 
@@ -4734,11 +4859,11 @@ Component.prototype.init.apply(this, arguments)</p>
         </li>
         
         
-        <li id="section-181">
+        <li id="section-189">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-181">&#182;</a>
+                <a class="pilcrow" href="#section-189">&#182;</a>
               </div>
               <p>remove component from it&#39;s scope</p>
 
@@ -4752,11 +4877,11 @@ Component.prototype.init.apply(this, arguments)</p>
         </li>
         
         
-        <li id="section-182">
+        <li id="section-190">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-182">&#182;</a>
+                <a class="pilcrow" href="#section-190">&#182;</a>
               </div>
               <p><a name="components-facet"></a></p>
 <h3 id="component-facet-class">component facet class</h3>
@@ -4839,11 +4964,11 @@ _.extendProto(ComponentFacet, {
         </li>
         
         
-        <li id="section-183">
+        <li id="section-191">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-183">&#182;</a>
+                <a class="pilcrow" href="#section-191">&#182;</a>
               </div>
               <p><a name="components-info"></a></p>
 <h3 id="component-info-class">component info class</h3>
@@ -4862,11 +4987,11 @@ module.exports = ComponentInfo;</pre></div></div>
         </li>
         
         
-        <li id="section-184">
+        <li id="section-192">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-184">&#182;</a>
+                <a class="pilcrow" href="#section-192">&#182;</a>
               </div>
               <p>Component information class</p>
 
@@ -4921,11 +5046,11 @@ module.exports = ComponentInfo;</pre></div></div>
         </li>
         
         
-        <li id="section-185">
+        <li id="section-193">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-185">&#182;</a>
+                <a class="pilcrow" href="#section-193">&#182;</a>
               </div>
               <p><a name="components-registry"></a></p>
 <h3 id="component-registry-class">component registry class</h3>
@@ -4947,11 +5072,11 @@ module.exports = componentsRegistry;</pre></div></div>
         </li>
         
         
-        <li id="section-186">
+        <li id="section-194">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-186">&#182;</a>
+                <a class="pilcrow" href="#section-194">&#182;</a>
               </div>
               <p><a name="scope"></a></p>
 <h2 id="scope-class">scope class</h2>
@@ -4961,11 +5086,11 @@ module.exports = componentsRegistry;</pre></div></div>
         </li>
         
         
-        <li id="section-187">
+        <li id="section-195">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-187">&#182;</a>
+                <a class="pilcrow" href="#section-195">&#182;</a>
               </div>
               
             </div>
@@ -4980,20 +5105,21 @@ module.exports = componentsRegistry;</pre></div></div>
         </li>
         
         
-        <li id="section-188">
+        <li id="section-196">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-188">&#182;</a>
+                <a class="pilcrow" href="#section-196">&#182;</a>
               </div>
               <p>Scope class</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">Scope</span><span class="params">(rootEl)</span> {</span>
-	Object.defineProperties(<span class="keyword">this</span>, {
-		_rootEl: { value: rootEl }
-	})
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">Scope</span><span class="params">(rootEl, hostObject)</span> {</span>
+	_.defineProperties(<span class="keyword">this</span>, {
+		_rootEl: rootEl,
+		_hostObject: hostObject
+	}, <span class="literal">false</span>, <span class="literal">false</span>, <span class="literal">true</span>); <span class="comment">// writable</span>
 };
 
 _.extendProto(Scope, {
@@ -5013,11 +5139,11 @@ module.exports = Scope;
         </li>
         
         
-        <li id="section-189">
+        <li id="section-197">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-189">&#182;</a>
+                <a class="pilcrow" href="#section-197">&#182;</a>
               </div>
               <p>adds object to scope throwing if name is notyunique</p>
 
@@ -5035,11 +5161,11 @@ module.exports = Scope;
         </li>
         
         
-        <li id="section-190">
+        <li id="section-198">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-190">&#182;</a>
+                <a class="pilcrow" href="#section-198">&#182;</a>
               </div>
               <p>copies all objects from one scope to another,
 throwing if some object is not unique</p>
@@ -5058,11 +5184,11 @@ throwing if some object is not unique</p>
         </li>
         
         
-        <li id="section-191">
+        <li id="section-199">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-191">&#182;</a>
+                <a class="pilcrow" href="#section-199">&#182;</a>
               </div>
               <p>TODO</p>
 
@@ -5076,11 +5202,11 @@ throwing if some object is not unique</p>
         </li>
         
         
-        <li id="section-192">
+        <li id="section-200">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-192">&#182;</a>
+                <a class="pilcrow" href="#section-200">&#182;</a>
               </div>
               <p>TODO</p>
 
@@ -5102,11 +5228,11 @@ throwing if some object is not unique</p>
         </li>
         
         
-        <li id="section-193">
+        <li id="section-201">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-193">&#182;</a>
+                <a class="pilcrow" href="#section-201">&#182;</a>
               </div>
               <p>returns the number of objects in scope</p>
 
@@ -5119,11 +5245,11 @@ throwing if some object is not unique</p>
         </li>
         
         
-        <li id="section-194">
+        <li id="section-202">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-194">&#182;</a>
+                <a class="pilcrow" href="#section-202">&#182;</a>
               </div>
               <p><a name="components-source-data"></a></p>
 <h3 id="component-data-source">component data source</h3>
@@ -5142,11 +5268,11 @@ throwing if some object is not unique</p>
         </li>
         
         
-        <li id="section-195">
+        <li id="section-203">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-195">&#182;</a>
+                <a class="pilcrow" href="#section-203">&#182;</a>
               </div>
               <p>class to handle subscribtions to changes in DOM for UI (maybe also content editable) elements</p>
 
@@ -5160,11 +5286,11 @@ _.extendProto(ComponentDataSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-196">
+        <li id="section-204">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-196">&#182;</a>
+                <a class="pilcrow" href="#section-204">&#182;</a>
               </div>
               <p>implementing MessageSource interface</p>
 
@@ -5179,11 +5305,11 @@ _.extendProto(ComponentDataSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-197">
+        <li id="section-205">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-197">&#182;</a>
+                <a class="pilcrow" href="#section-205">&#182;</a>
               </div>
               <p>class specific methods
 dom: implemented in DOMEventsSource</p>
@@ -5207,11 +5333,11 @@ module.exports = ComponentDataSource;
         </li>
         
         
-        <li id="section-198">
+        <li id="section-206">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-198">&#182;</a>
+                <a class="pilcrow" href="#section-206">&#182;</a>
               </div>
               <p>TODO: should return value dependent on element tag</p>
 
@@ -5231,11 +5357,11 @@ module.exports = ComponentDataSource;
         </li>
         
         
-        <li id="section-199">
+        <li id="section-207">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-199">&#182;</a>
+                <a class="pilcrow" href="#section-207">&#182;</a>
               </div>
               <p>TODO: this function should return relevant DOM event dependent on element tag
 Can also implement beforedatachanged event to allow preventing the change</p>
@@ -5246,17 +5372,19 @@ Can also implement beforedatachanged event to allow preventing the change</p>
 	<span class="keyword">if</span> (message == <span class="string">'datachanged'</span>)
 		<span class="keyword">return</span> <span class="string">'input'</span>;
 	<span class="keyword">else</span>
-		<span class="keyword">throw</span> <span class="keyword">new</span> ComponentDataSourceError(<span class="string">'unknown component data event'</span>);
+		<span class="keyword">return</span> <span class="string">''</span>;
 }
 
 
 <span class="function"><span class="keyword">function</span> <span class="title">addDomEventListener</span><span class="params">(eventType)</span> {</span>
-	<span class="keyword">this</span>.dom().addEventListener(eventType, <span class="keyword">this</span>, <span class="literal">false</span>); <span class="comment">// no capturing</span>
+	<span class="keyword">if</span> (eventType)
+		<span class="keyword">this</span>.dom().addEventListener(eventType, <span class="keyword">this</span>, <span class="literal">false</span>); <span class="comment">// no capturing</span>
 }
 
 
 <span class="function"><span class="keyword">function</span> <span class="title">removeDomEventListener</span><span class="params">(eventType)</span> {</span>
-	<span class="keyword">this</span>.dom().removeEventListener(eventType, <span class="keyword">this</span>, <span class="literal">false</span>); <span class="comment">// no capturing</span>
+	<span class="keyword">if</span> (eventType)
+		<span class="keyword">this</span>.dom().removeEventListener(eventType, <span class="keyword">this</span>, <span class="literal">false</span>); <span class="comment">// no capturing</span>
 }
 
 
@@ -5267,11 +5395,11 @@ Can also implement beforedatachanged event to allow preventing the change</p>
         </li>
         
         
-        <li id="section-200">
+        <li id="section-208">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-200">&#182;</a>
+                <a class="pilcrow" href="#section-208">&#182;</a>
               </div>
               <p>event dispatcher - as defined by Event DOM API</p>
 
@@ -5292,11 +5420,11 @@ Can also implement beforedatachanged event to allow preventing the change</p>
         </li>
         
         
-        <li id="section-201">
+        <li id="section-209">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-201">&#182;</a>
+                <a class="pilcrow" href="#section-209">&#182;</a>
               </div>
               <p>TODO - opposite translation + event trigger </p>
 
@@ -5307,11 +5435,11 @@ Can also implement beforedatachanged event to allow preventing the change</p>
         </li>
         
         
-        <li id="section-202">
+        <li id="section-210">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-202">&#182;</a>
+                <a class="pilcrow" href="#section-210">&#182;</a>
               </div>
               <p><a name="components-source-dom"></a></p>
 <h3 id="component-dom-events-source">component dom events source</h3>
@@ -5335,11 +5463,11 @@ _.extendProto(DOMEventsSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-203">
+        <li id="section-211">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-203">&#182;</a>
+                <a class="pilcrow" href="#section-211">&#182;</a>
               </div>
               <p>implementing MessageSource interface</p>
 
@@ -5354,11 +5482,11 @@ _.extendProto(DOMEventsSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-204">
+        <li id="section-212">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-204">&#182;</a>
+                <a class="pilcrow" href="#section-212">&#182;</a>
               </div>
               <p>class specific methods</p>
 
@@ -5377,11 +5505,11 @@ module.exports = DOMEventsSource;
         </li>
         
         
-        <li id="section-205">
+        <li id="section-213">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-205">&#182;</a>
+                <a class="pilcrow" href="#section-213">&#182;</a>
               </div>
               <p>init DOM event source</p>
 
@@ -5396,11 +5524,11 @@ module.exports = DOMEventsSource;
         </li>
         
         
-        <li id="section-206">
+        <li id="section-214">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-206">&#182;</a>
+                <a class="pilcrow" href="#section-214">&#182;</a>
               </div>
               <p>this.messenger is set by Messenger class</p>
 
@@ -5411,11 +5539,11 @@ module.exports = DOMEventsSource;
         </li>
         
         
-        <li id="section-207">
+        <li id="section-215">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-207">&#182;</a>
+                <a class="pilcrow" href="#section-215">&#182;</a>
               </div>
               <p>get DOM element of component</p>
 
@@ -5428,11 +5556,11 @@ module.exports = DOMEventsSource;
         </li>
         
         
-        <li id="section-208">
+        <li id="section-216">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-208">&#182;</a>
+                <a class="pilcrow" href="#section-216">&#182;</a>
               </div>
               <p>translate to DOM event</p>
 
@@ -5447,11 +5575,11 @@ module.exports = DOMEventsSource;
         </li>
         
         
-        <li id="section-209">
+        <li id="section-217">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-209">&#182;</a>
+                <a class="pilcrow" href="#section-217">&#182;</a>
               </div>
               <p>add listener to DOM event</p>
 
@@ -5464,11 +5592,11 @@ module.exports = DOMEventsSource;
         </li>
         
         
-        <li id="section-210">
+        <li id="section-218">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-210">&#182;</a>
+                <a class="pilcrow" href="#section-218">&#182;</a>
               </div>
               <p>remove listener from DOM event</p>
 
@@ -5490,11 +5618,11 @@ module.exports = DOMEventsSource;
         </li>
         
         
-        <li id="section-211">
+        <li id="section-219">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-211">&#182;</a>
+                <a class="pilcrow" href="#section-219">&#182;</a>
               </div>
               <p>event dispatcher - as defined by Event DOM API</p>
 
@@ -5507,11 +5635,11 @@ module.exports = DOMEventsSource;
         </li>
         
         
-        <li id="section-212">
+        <li id="section-220">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-212">&#182;</a>
+                <a class="pilcrow" href="#section-220">&#182;</a>
               </div>
               <p>TODO make work with messages (with _capture)</p>
 
@@ -5529,11 +5657,11 @@ module.exports = DOMEventsSource;
         </li>
         
         
-        <li id="section-213">
+        <li id="section-221">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-213">&#182;</a>
+                <a class="pilcrow" href="#section-221">&#182;</a>
               </div>
               <p>check if it is correct</p>
 
@@ -5552,11 +5680,11 @@ module.exports = DOMEventsSource;
         </li>
         
         
-        <li id="section-214">
+        <li id="section-222">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-214">&#182;</a>
+                <a class="pilcrow" href="#section-222">&#182;</a>
               </div>
               <p><a name="components-dom-constructors"></a></p>
 <h3 id="dom-events-constructors">dom events constructors</h3>
@@ -5570,11 +5698,11 @@ module.exports = DOMEventsSource;
         </li>
         
         
-        <li id="section-215">
+        <li id="section-223">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-215">&#182;</a>
+                <a class="pilcrow" href="#section-223">&#182;</a>
               </div>
               <p><a href="https://developer.mozilla.org/en-US/docs/Web/Reference/Events">https://developer.mozilla.org/en-US/docs/Web/Reference/Events</a></p>
 
@@ -5594,11 +5722,11 @@ module.exports = DOMEventsSource;
         </li>
         
         
-        <li id="section-216">
+        <li id="section-224">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-216">&#182;</a>
+                <a class="pilcrow" href="#section-224">&#182;</a>
               </div>
               <p>mock window and event constructors for testing</p>
 
@@ -5638,11 +5766,11 @@ module.exports = domEventsConstructors;</pre></div></div>
         </li>
         
         
-        <li id="section-217">
+        <li id="section-225">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-217">&#182;</a>
+                <a class="pilcrow" href="#section-225">&#182;</a>
               </div>
               <p><a name="components-source-editable"></a></p>
 <h3 id="component-editable-events-source">component editable events source</h3>
@@ -5661,11 +5789,11 @@ module.exports = domEventsConstructors;</pre></div></div>
         </li>
         
         
-        <li id="section-218">
+        <li id="section-226">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-218">&#182;</a>
+                <a class="pilcrow" href="#section-226">&#182;</a>
               </div>
               <p>class to handle subscribtions to changes in DOM for UI (maybe also content editable) elements</p>
 
@@ -5679,11 +5807,11 @@ _.extendProto(EditableEventsSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-219">
+        <li id="section-227">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-219">&#182;</a>
+                <a class="pilcrow" href="#section-227">&#182;</a>
               </div>
               <p>implementing MessageSource interface</p>
 
@@ -5698,11 +5826,11 @@ _.extendProto(EditableEventsSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-220">
+        <li id="section-228">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-220">&#182;</a>
+                <a class="pilcrow" href="#section-228">&#182;</a>
               </div>
               <p>class specific methods
 dom: implemented in DOMEventsSource</p>
@@ -5730,11 +5858,11 @@ module.exports = EditableEventsSource;
         </li>
         
         
-        <li id="section-221">
+        <li id="section-229">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-221">&#182;</a>
+                <a class="pilcrow" href="#section-229">&#182;</a>
               </div>
               <p>move events</p>
 
@@ -5747,11 +5875,11 @@ module.exports = EditableEventsSource;
         </li>
         
         
-        <li id="section-222">
+        <li id="section-230">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-222">&#182;</a>
+                <a class="pilcrow" href="#section-230">&#182;</a>
               </div>
               <p>merge events</p>
 
@@ -5765,11 +5893,11 @@ module.exports = EditableEventsSource;
         </li>
         
         
-        <li id="section-223">
+        <li id="section-231">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-223">&#182;</a>
+                <a class="pilcrow" href="#section-231">&#182;</a>
               </div>
               <p>TODO: this function should return relevant DOM event dependent on element tag
 Can also implement beforedatachanged event to allow preventing the change</p>
@@ -5804,11 +5932,11 @@ Can also implement beforedatachanged event to allow preventing the change</p>
         </li>
         
         
-        <li id="section-224">
+        <li id="section-232">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-224">&#182;</a>
+                <a class="pilcrow" href="#section-232">&#182;</a>
               </div>
               <p>move to adjacent editable events</p>
 
@@ -5827,11 +5955,11 @@ Can also implement beforedatachanged event to allow preventing the change</p>
         </li>
         
         
-        <li id="section-225">
+        <li id="section-233">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-225">&#182;</a>
+                <a class="pilcrow" href="#section-233">&#182;</a>
               </div>
               <p>merge adjacent editable events</p>
 
@@ -5891,11 +6019,11 @@ Can also implement beforedatachanged event to allow preventing the change</p>
         </li>
         
         
-        <li id="section-226">
+        <li id="section-234">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-226">&#182;</a>
+                <a class="pilcrow" href="#section-234">&#182;</a>
               </div>
               <p>event dispatcher - as defined by Event DOM API</p>
 
@@ -5911,11 +6039,11 @@ Can also implement beforedatachanged event to allow preventing the change</p>
         </li>
         
         
-        <li id="section-227">
+        <li id="section-235">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-227">&#182;</a>
+                <a class="pilcrow" href="#section-235">&#182;</a>
               </div>
               <p>TODO - opposite translation + event trigger </p>
 
@@ -5926,11 +6054,11 @@ Can also implement beforedatachanged event to allow preventing the change</p>
         </li>
         
         
-        <li id="section-228">
+        <li id="section-236">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-228">&#182;</a>
+                <a class="pilcrow" href="#section-236">&#182;</a>
               </div>
               <p><a name="components-source-iframe"></a></p>
 <h3 id="component-iframe-source">component iframe source</h3>
@@ -5952,11 +6080,11 @@ _.extendProto(iFrameMessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-229">
+        <li id="section-237">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-229">&#182;</a>
+                <a class="pilcrow" href="#section-237">&#182;</a>
               </div>
               <p>implementing MessageSource interface</p>
 
@@ -5971,11 +6099,11 @@ _.extendProto(iFrameMessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-230">
+        <li id="section-238">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-230">&#182;</a>
+                <a class="pilcrow" href="#section-238">&#182;</a>
               </div>
               <p>class specific methods</p>
 
@@ -6032,11 +6160,11 @@ module.exports = iFrameMessageSource;
         </li>
         
         
-        <li id="section-231">
+        <li id="section-239">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-231">&#182;</a>
+                <a class="pilcrow" href="#section-239">&#182;</a>
               </div>
               <p><a name="model"></a></p>
 <h2 id="milo-model">milo model</h2>
@@ -6046,11 +6174,11 @@ module.exports = iFrameMessageSource;
         </li>
         
         
-        <li id="section-232">
+        <li id="section-240">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-232">&#182;</a>
+                <a class="pilcrow" href="#section-240">&#182;</a>
               </div>
               
             </div>
@@ -6075,11 +6203,11 @@ module.exports = Model;
         </li>
         
         
-        <li id="section-233">
+        <li id="section-241">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-233">&#182;</a>
+                <a class="pilcrow" href="#section-241">&#182;</a>
               </div>
               <p>modelPath should return a ModelPath object with &quot;compiled&quot; methods
 to get/set model properties, to subscribe to property changes, etc.
@@ -6103,7 +6231,7 @@ These references will be evaluated at run rather than at compile time</p>
 		__pathsCache: {}
 	});
 
-	model._wrapMessengerMethods();
+	model._wrapMessengerMethods(modelMethodsToWrap);
 
 	model._data = data;
 
@@ -6115,11 +6243,26 @@ Model.prototype.__proto__ = Model.__proto__;</pre></div></div>
         </li>
         
         
-        <li id="section-234">
+        <li id="section-242">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-234">&#182;</a>
+                <a class="pilcrow" href="#section-242">&#182;</a>
+              </div>
+              <p>these methods will be wrapped to support &quot;*&quot; pattern subscriptions</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> modelMethodsToWrap = [<span class="string">'on'</span>, <span class="string">'off'</span>, <span class="string">'onMessages'</span>, <span class="string">'offMessages'</span>];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-243">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-243">&#182;</a>
               </div>
               <p>cache of compiled ModelPath methods</p>
 
@@ -6154,7 +6297,7 @@ _.extendProto(Model, {
 	set: synthesizeMethod(modelSetterSynthesizer, <span class="string">''</span>, []),
 	path: path,
 	proxyMessenger: proxyMessenger,
-	_wrapMessengerMethods: _wrapMessengerMethods
+	_wrapMessengerMethods: pathUtils.wrapMessengerMethods
 });
 
 <span class="function"><span class="keyword">function</span> <span class="title">get</span><span class="params">()</span> {</span>
@@ -6164,11 +6307,11 @@ _.extendProto(Model, {
         </li>
         
         
-        <li id="section-235">
+        <li id="section-244">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-235">&#182;</a>
+                <a class="pilcrow" href="#section-244">&#182;</a>
               </div>
               <p>returns ModelPath object</p>
 
@@ -6181,44 +6324,6 @@ _.extendProto(Model, {
 
 <span class="function"><span class="keyword">function</span> <span class="title">proxyMessenger</span><span class="params">(modelHostObject)</span> {</span>
 	Mixin.prototype._createProxyMethods.call(<span class="keyword">this</span>._messenger, Messenger.defaultMethods, modelHostObject);
-}</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-236">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-236">&#182;</a>
-              </div>
-              <p>TODO allow for multiple messages in a string</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> modelMethodsToWrap = [<span class="string">'on'</span>, <span class="string">'off'</span>, <span class="string">'onMessages'</span>, <span class="string">'offMessages'</span>];
-<span class="function"><span class="keyword">function</span> <span class="title">_wrapMessengerMethods</span><span class="params">()</span> {</span>
-	modelMethodsToWrap.forEach(<span class="function"><span class="keyword">function</span><span class="params">(methodName)</span> {</span>
-		<span class="keyword">var</span> origMethod = <span class="keyword">this</span>[methodName];</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-237">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-237">&#182;</a>
-              </div>
-              <p>replacing message subsribe/unsubscribe/etc. to convert &quot;*&quot; message patterns to regexps</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>		<span class="keyword">this</span>[methodName] = <span class="function"><span class="keyword">function</span><span class="params">(path, subscriber)</span> {</span>
-			<span class="keyword">var</span> regexPath = pathUtils.createRegexPath(path);
-			origMethod.call(<span class="keyword">this</span>, regexPath, subscriber);
-		};
-	}, <span class="keyword">this</span>);
 }
 
 
@@ -6240,11 +6345,11 @@ _.extend(Model, {
         </li>
         
         
-        <li id="section-238">
+        <li id="section-245">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-238">&#182;</a>
+                <a class="pilcrow" href="#section-245">&#182;</a>
               </div>
               <p>compiling getter and setter</p>
 
@@ -6255,11 +6360,11 @@ _.extend(Model, {
         </li>
         
         
-        <li id="section-239">
+        <li id="section-246">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-239">&#182;</a>
+                <a class="pilcrow" href="#section-246">&#182;</a>
               </div>
               <p>adding methods to model path</p>
 
@@ -6273,11 +6378,11 @@ _.extend(Model, {
         </li>
         
         
-        <li id="section-240">
+        <li id="section-247">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-240">&#182;</a>
+                <a class="pilcrow" href="#section-247">&#182;</a>
               </div>
               <p>adding messaging methods to ModelPath prototype</p>
 
@@ -6290,11 +6395,11 @@ modelMethodsToWrap.forEach(<span class="function"><span class="keyword">function
         </li>
         
         
-        <li id="section-241">
+        <li id="section-248">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-241">&#182;</a>
+                <a class="pilcrow" href="#section-248">&#182;</a>
               </div>
               <p>creating subscribe/unsubscribe/etc. methods for ModelPath class</p>
 
@@ -6340,11 +6445,11 @@ _.extendProto(ModelPath, modelPathMethodsMap);
         </li>
         
         
-        <li id="section-242">
+        <li id="section-249">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-242">&#182;</a>
+                <a class="pilcrow" href="#section-249">&#182;</a>
               </div>
               <p>functions used by ModelPath setter (synthesized by template)</p>
 
@@ -6411,11 +6516,11 @@ _.extendProto(ModelPath, modelPathMethodsMap);
         </li>
         
         
-        <li id="section-243">
+        <li id="section-250">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-243">&#182;</a>
+                <a class="pilcrow" href="#section-250">&#182;</a>
               </div>
               <p><a name="model-connector"></a></p>
 <h3 id="model-connector">model connector</h3>
@@ -6431,11 +6536,11 @@ _.extendProto(ModelPath, modelPathMethodsMap);
         </li>
         
         
-        <li id="section-244">
+        <li id="section-251">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-244">&#182;</a>
+                <a class="pilcrow" href="#section-251">&#182;</a>
               </div>
               <p>Class that creates connector object for data connection between
 two data-sources
@@ -6490,11 +6595,11 @@ _.extendProto(Connector, {
         </li>
         
         
-        <li id="section-245">
+        <li id="section-252">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-245">&#182;</a>
+                <a class="pilcrow" href="#section-252">&#182;</a>
               </div>
               <p>create connection</p>
 
@@ -6543,11 +6648,11 @@ _.extendProto(Connector, {
         </li>
         
         
-        <li id="section-246">
+        <li id="section-253">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-246">&#182;</a>
+                <a class="pilcrow" href="#section-253">&#182;</a>
               </div>
               <p><a name="model-demo"></a></p>
 <h3 id="model-demo">model demo</h3>
@@ -6565,11 +6670,11 @@ _.extendProto(Connector, {
         </li>
         
         
-        <li id="section-247">
+        <li id="section-254">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-247">&#182;</a>
+                <a class="pilcrow" href="#section-254">&#182;</a>
               </div>
               <p>undefined, but doesn&#39;t fail, like in Angular</p>
 
@@ -6582,11 +6687,11 @@ _.extendProto(Connector, {
         </li>
         
         
-        <li id="section-248">
+        <li id="section-255">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-248">&#182;</a>
+                <a class="pilcrow" href="#section-255">&#182;</a>
               </div>
               <p>1982</p>
 
@@ -6597,11 +6702,11 @@ _.extendProto(Connector, {
         </li>
         
         
-        <li id="section-249">
+        <li id="section-256">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-249">&#182;</a>
+                <a class="pilcrow" href="#section-256">&#182;</a>
               </div>
               <p>{ DOB: { year: 1982 } }</p>
 
@@ -6612,11 +6717,11 @@ _.extendProto(Connector, {
         </li>
         
         
-        <li id="section-250">
+        <li id="section-257">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-250">&#182;</a>
+                <a class="pilcrow" href="#section-257">&#182;</a>
               </div>
               <p>{ info: { DOB: { year: 1982 } } }</p>
 
@@ -6631,11 +6736,11 @@ m.on(<span class="regexp">/.*/</span>, onChange);
         </li>
         
         
-        <li id="section-251">
+        <li id="section-258">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-251">&#182;</a>
+                <a class="pilcrow" href="#section-258">&#182;</a>
               </div>
               <p>should be replaced with console if this demo is used</p>
 
@@ -6649,11 +6754,11 @@ m(<span class="string">'.list[0].info.name'</span>).set(<span class="string">'Cl
         </li>
         
         
-        <li id="section-252">
+        <li id="section-259">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-252">&#182;</a>
+                <a class="pilcrow" href="#section-259">&#182;</a>
               </div>
               <p>logged:
 .list  :  { type: &#39;added&#39;, newValue: [] }
@@ -6668,11 +6773,11 @@ m(<span class="string">'.list[0].info.name'</span>).set(<span class="string">'Cl
         </li>
         
         
-        <li id="section-253">
+        <li id="section-260">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-253">&#182;</a>
+                <a class="pilcrow" href="#section-260">&#182;</a>
               </div>
               <p>logged:
 .list[0].info.name  :  { type: &#39;changed&#39;,
@@ -6686,11 +6791,11 @@ m(<span class="string">'.list[0].info.name'</span>).set(<span class="string">'Cl
         </li>
         
         
-        <li id="section-254">
+        <li id="section-261">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-254">&#182;</a>
+                <a class="pilcrow" href="#section-261">&#182;</a>
               </div>
               <p>&#39;Clifton Cunnigham&#39;</p>
 <p>m(&#39;.list[0].info.name&#39;).get.toString() :</p>
@@ -6705,11 +6810,11 @@ m(<span class="string">'.list[0].info.name'</span>).set(<span class="string">'Cl
         </li>
         
         
-        <li id="section-255">
+        <li id="section-262">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-255">&#182;</a>
+                <a class="pilcrow" href="#section-262">&#182;</a>
               </div>
               <p>m(&#39;.list[0].info.name&#39;).set.toString() :</p>
 
@@ -6743,11 +6848,11 @@ m(<span class="string">'.list[0].info.name'</span>).set(<span class="string">'Cl
         </li>
         
         
-        <li id="section-256">
+        <li id="section-263">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-256">&#182;</a>
+                <a class="pilcrow" href="#section-263">&#182;</a>
               </div>
               <p><a name="model-path"></a></p>
 <h3 id="model-path-utils">model path utils</h3>
@@ -6764,7 +6869,8 @@ m(<span class="string">'.list[0].info.name'</span>).set(<span class="string">'Cl
 <span class="keyword">var</span> pathUtils = module.exports = {
 	parseAccessPath: parseAccessPath,
 	createRegexPath: createRegexPath,
-	getPathNodeKey: getPathNodeKey
+	getPathNodeKey: getPathNodeKey,
+	wrapMessengerMethods: wrapMessengerMethods
 };
 
 
@@ -6822,11 +6928,11 @@ nodeRegex[<span class="string">'*'</span>] = nodeRegex[<span class="string">'.*'
         </li>
         
         
-        <li id="section-257">
+        <li id="section-264">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-257">&#182;</a>
+                <a class="pilcrow" href="#section-264">&#182;</a>
               </div>
               <p>regexStr += &#39;(&#39; + regex;
 regexStrEnd += &#39;|)&#39;;</p>
@@ -6838,11 +6944,11 @@ regexStrEnd += &#39;|)&#39;;</p>
         </li>
         
         
-        <li id="section-258">
+        <li id="section-265">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-258">&#182;</a>
+                <a class="pilcrow" href="#section-265">&#182;</a>
               </div>
               <p>regexStrEnd += &#39;|)&#39;;</p>
 
@@ -6876,11 +6982,48 @@ regexStrEnd += &#39;|)&#39;;</p>
         </li>
         
         
-        <li id="section-259">
+        <li id="section-266">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-259">&#182;</a>
+                <a class="pilcrow" href="#section-266">&#182;</a>
+              </div>
+              <p>TODO allow for multiple messages in a string</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">wrapMessengerMethods</span><span class="params">(methodsNames)</span> {</span>
+	methodsNames.forEach(<span class="function"><span class="keyword">function</span><span class="params">(methodName)</span> {</span>
+		<span class="keyword">var</span> origMethod = <span class="keyword">this</span>[methodName];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-267">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-267">&#182;</a>
+              </div>
+              <p>replacing message subsribe/unsubscribe/etc. to convert &quot;*&quot; message patterns to regexps</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		<span class="keyword">this</span>[methodName] = <span class="function"><span class="keyword">function</span><span class="params">(path, subscriber)</span> {</span>
+			<span class="keyword">var</span> regexPath = createRegexPath(path);
+			origMethod.call(<span class="keyword">this</span>, regexPath, subscriber);
+		};
+	}, <span class="keyword">this</span>);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-268">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-268">&#182;</a>
               </div>
               <p><a name="messenger"></a></p>
 <h2 id="milo-messenger">milo messenger</h2>
@@ -6890,11 +7033,11 @@ regexStrEnd += &#39;|)&#39;;</p>
         </li>
         
         
-        <li id="section-260">
+        <li id="section-269">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-260">&#182;</a>
+                <a class="pilcrow" href="#section-269">&#182;</a>
               </div>
               
             </div>
@@ -6951,11 +7094,11 @@ module.exports = Messenger;
         </li>
         
         
-        <li id="section-261">
+        <li id="section-270">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-261">&#182;</a>
+                <a class="pilcrow" href="#section-270">&#182;</a>
               </div>
               <p>hostObject and proxyMethods are used in Mixin
 messenger data</p>
@@ -7031,11 +7174,11 @@ messenger data</p>
         </li>
         
         
-        <li id="section-262">
+        <li id="section-271">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-262">&#182;</a>
+                <a class="pilcrow" href="#section-271">&#182;</a>
               </div>
               <p>removes all subscribers for the message if subscriber isn&#39;t supplied</p>
 
@@ -7106,11 +7249,11 @@ messenger data</p>
         </li>
         
         
-        <li id="section-263">
+        <li id="section-272">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-263">&#182;</a>
+                <a class="pilcrow" href="#section-272">&#182;</a>
               </div>
               <p>TODO - send event to messageSource</p>
 
@@ -7160,11 +7303,11 @@ messenger data</p>
         </li>
         
         
-        <li id="section-264">
+        <li id="section-273">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-264">&#182;</a>
+                <a class="pilcrow" href="#section-273">&#182;</a>
               </div>
               <p>pattern subscribers are incuded by default</p>
 
@@ -7205,11 +7348,11 @@ messenger data</p>
         </li>
         
         
-        <li id="section-265">
+        <li id="section-274">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-265">&#182;</a>
+                <a class="pilcrow" href="#section-274">&#182;</a>
               </div>
               <p><a name="messenger-source"></a></p>
 <h3 id="messenger-source">messenger source</h3>
@@ -7226,11 +7369,11 @@ messenger data</p>
         </li>
         
         
-        <li id="section-266">
+        <li id="section-275">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-266">&#182;</a>
+                <a class="pilcrow" href="#section-275">&#182;</a>
               </div>
               <p>an abstract class for dispatching external to internal events</p>
 
@@ -7246,11 +7389,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-267">
+        <li id="section-276">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-267">&#182;</a>
+                <a class="pilcrow" href="#section-276">&#182;</a>
               </div>
               <p>initializes messageSource - called by Mixin superclass</p>
 
@@ -7261,11 +7404,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-268">
+        <li id="section-277">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-268">&#182;</a>
+                <a class="pilcrow" href="#section-277">&#182;</a>
               </div>
               <p>called by Messenger to notify when the first subscriber for an internal message was added</p>
 
@@ -7276,11 +7419,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-269">
+        <li id="section-278">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-269">&#182;</a>
+                <a class="pilcrow" href="#section-278">&#182;</a>
               </div>
               <p>called by Messenger to notify when the last subscriber for an internal message was removed</p>
 
@@ -7291,11 +7434,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-270">
+        <li id="section-279">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-270">&#182;</a>
+                <a class="pilcrow" href="#section-279">&#182;</a>
               </div>
               <p>dispatches source message</p>
 
@@ -7306,11 +7449,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-271">
+        <li id="section-280">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-271">&#182;</a>
+                <a class="pilcrow" href="#section-280">&#182;</a>
               </div>
               <p>filters source message based on the data of the message - should be implemented in subclass</p>
 
@@ -7321,11 +7464,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-272">
+        <li id="section-281">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-272">&#182;</a>
+                <a class="pilcrow" href="#section-281">&#182;</a>
               </div>
               <hr>
 <p>Methods below must be implemented in subclass</p>
@@ -7335,11 +7478,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-273">
+        <li id="section-282">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-273">&#182;</a>
+                <a class="pilcrow" href="#section-282">&#182;</a>
               </div>
               <p>converts internal message type to external message type - should be implemented in subclass</p>
 
@@ -7350,11 +7493,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-274">
+        <li id="section-283">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-274">&#182;</a>
+                <a class="pilcrow" href="#section-283">&#182;</a>
               </div>
               <p>adds listener to external message - should be implemented by subclass</p>
 
@@ -7365,11 +7508,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-275">
+        <li id="section-284">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-275">&#182;</a>
+                <a class="pilcrow" href="#section-284">&#182;</a>
               </div>
               <p>removes listener from external message - should be implemented by subclass</p>
 
@@ -7446,11 +7589,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-276">
+        <li id="section-285">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-276">&#182;</a>
+                <a class="pilcrow" href="#section-285">&#182;</a>
               </div>
               <p>can be overridden in subclass to implement filtering based on message data</p>
 
@@ -7463,11 +7606,11 @@ _.extendProto(MessageSource, {</pre></div></div>
         </li>
         
         
-        <li id="section-277">
+        <li id="section-286">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-277">&#182;</a>
+                <a class="pilcrow" href="#section-286">&#182;</a>
               </div>
               <p><a name="messenger-message"></a></p>
 <h3 id="messenger-message-class">messenger message class</h3>
@@ -7507,11 +7650,11 @@ module.exports = Message;
         </li>
         
         
-        <li id="section-278">
+        <li id="section-287">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-278">&#182;</a>
+                <a class="pilcrow" href="#section-287">&#182;</a>
               </div>
               <p><a name="attribute"></a></p>
 <h2 id="attribute-class">attribute class</h2>
@@ -7521,11 +7664,11 @@ module.exports = Message;
         </li>
         
         
-        <li id="section-279">
+        <li id="section-288">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-279">&#182;</a>
+                <a class="pilcrow" href="#section-288">&#182;</a>
               </div>
               
             </div>
@@ -7540,11 +7683,11 @@ module.exports = Message;
         </li>
         
         
-        <li id="section-280">
+        <li id="section-289">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-280">&#182;</a>
+                <a class="pilcrow" href="#section-289">&#182;</a>
               </div>
               <p>an abstract attribute class for attribute parsing and validation</p>
 
@@ -7565,11 +7708,11 @@ _.extendProto(Attribute, {
         </li>
         
         
-        <li id="section-281">
+        <li id="section-290">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-281">&#182;</a>
+                <a class="pilcrow" href="#section-290">&#182;</a>
               </div>
               <p>should be defined in subclass</p>
 
@@ -7585,11 +7728,11 @@ _.extendProto(Attribute, {
         </li>
         
         
-        <li id="section-282">
+        <li id="section-291">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-282">&#182;</a>
+                <a class="pilcrow" href="#section-291">&#182;</a>
               </div>
               <p>get attribute value</p>
 
@@ -7602,11 +7745,11 @@ _.extendProto(Attribute, {
         </li>
         
         
-        <li id="section-283">
+        <li id="section-292">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-283">&#182;</a>
+                <a class="pilcrow" href="#section-292">&#182;</a>
               </div>
               <p>set attribute value</p>
 
@@ -7623,11 +7766,11 @@ _.extendProto(Attribute, {
         </li>
         
         
-        <li id="section-284">
+        <li id="section-293">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-284">&#182;</a>
+                <a class="pilcrow" href="#section-293">&#182;</a>
               </div>
               <p><a name="attribute-bind"></a></p>
 <h3 id="bind-attribute-class">bind attribute class</h3>
@@ -7646,11 +7789,11 @@ _.extendProto(Attribute, {
         </li>
         
         
-        <li id="section-285">
+        <li id="section-294">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-285">&#182;</a>
+                <a class="pilcrow" href="#section-294">&#182;</a>
               </div>
               <p>Matches;
 :myView - only component name
@@ -7680,11 +7823,11 @@ module.exports = BindAttribute;</pre></div></div>
         </li>
         
         
-        <li id="section-286">
+        <li id="section-295">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-286">&#182;</a>
+                <a class="pilcrow" href="#section-295">&#182;</a>
               </div>
               <p>get attribute name</p>
 
@@ -7697,11 +7840,11 @@ module.exports = BindAttribute;</pre></div></div>
         </li>
         
         
-        <li id="section-287">
+        <li id="section-296">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-287">&#182;</a>
+                <a class="pilcrow" href="#section-296">&#182;</a>
               </div>
               <p>parse attribute</p>
 
@@ -7728,11 +7871,11 @@ module.exports = BindAttribute;</pre></div></div>
         </li>
         
         
-        <li id="section-288">
+        <li id="section-297">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-288">&#182;</a>
+                <a class="pilcrow" href="#section-297">&#182;</a>
               </div>
               <p>validate attribute</p>
 
@@ -7763,11 +7906,11 @@ module.exports = BindAttribute;</pre></div></div>
         </li>
         
         
-        <li id="section-289">
+        <li id="section-298">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-289">&#182;</a>
+                <a class="pilcrow" href="#section-298">&#182;</a>
               </div>
               <p><a name="attribute-load"></a></p>
 <h3 id="load-attribute-class">load attribute class</h3>
@@ -7814,11 +7957,11 @@ module.exports = LoadAttribute;
         </li>
         
         
-        <li id="section-290">
+        <li id="section-299">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-290">&#182;</a>
+                <a class="pilcrow" href="#section-299">&#182;</a>
               </div>
               <p>TODO url validation</p>
 
@@ -7830,11 +7973,11 @@ module.exports = LoadAttribute;
         </li>
         
         
-        <li id="section-291">
+        <li id="section-300">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-291">&#182;</a>
+                <a class="pilcrow" href="#section-300">&#182;</a>
               </div>
               <p><a name="mixin"></a></p>
 <h2 id="mixin-abstract-class">mixin abstract class</h2>
@@ -7844,13 +7987,17 @@ module.exports = LoadAttribute;
         </li>
         
         
-        <li id="section-292">
+        <li id="section-301">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-292">&#182;</a>
+                <a class="pilcrow" href="#section-301">&#182;</a>
               </div>
-              
+              <p>We also use Mixin pattern, but Mixin in milo is implemented as a separate object
+that is stored on the property of the host object and can create proxy methods on
+the host object if required. Classes Messenger, MessageSource and DataSource are
+subclasses of Mixin abstract class.</p>
+
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
@@ -7866,11 +8013,11 @@ module.exports = Mixin;</pre></div></div>
         </li>
         
         
-        <li id="section-293">
+        <li id="section-302">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-293">&#182;</a>
+                <a class="pilcrow" href="#section-302">&#182;</a>
               </div>
               <p>an abstract class for mixin pattern - adding proxy methods to host objects</p>
 
@@ -7881,11 +8028,11 @@ module.exports = Mixin;</pre></div></div>
         </li>
         
         
-        <li id="section-294">
+        <li id="section-303">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-294">&#182;</a>
+                <a class="pilcrow" href="#section-303">&#182;</a>
               </div>
               <p>TODO - moce checks from Messenger here</p>
 
@@ -7901,11 +8048,11 @@ module.exports = Mixin;</pre></div></div>
         </li>
         
         
-        <li id="section-295">
+        <li id="section-304">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-295">&#182;</a>
+                <a class="pilcrow" href="#section-304">&#182;</a>
               </div>
               <p>calling init if it is defined in the class</p>
 
@@ -7933,11 +8080,11 @@ _.extendProto(Mixin, {
         </li>
         
         
-        <li id="section-296">
+        <li id="section-305">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-296">&#182;</a>
+                <a class="pilcrow" href="#section-305">&#182;</a>
               </div>
               <p>Bind proxied messenger&#39;s method to messenger</p>
 
@@ -7955,11 +8102,11 @@ _.extendProto(Mixin, {
         </li>
         
         
-        <li id="section-297">
+        <li id="section-306">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-297">&#182;</a>
+                <a class="pilcrow" href="#section-306">&#182;</a>
               </div>
               <p>creating and binding proxy methods on the host object</p>
 
@@ -7973,11 +8120,11 @@ _.extendProto(Mixin, {
         </li>
         
         
-        <li id="section-298">
+        <li id="section-307">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-298">&#182;</a>
+                <a class="pilcrow" href="#section-307">&#182;</a>
               </div>
               <p><a name="registry"></a></p>
 <h2 id="registry-abstract-class">registry abstract class</h2>
@@ -7987,13 +8134,16 @@ _.extendProto(Mixin, {
         </li>
         
         
-        <li id="section-299">
+        <li id="section-308">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-299">&#182;</a>
+                <a class="pilcrow" href="#section-308">&#182;</a>
               </div>
-              
+              <p><strong>Dependency inversion</strong></p>
+<p>Components and Facets register themselves in registries that allows to avoid 
+requiring them from one module. It prevents circular dependencies between modules.</p>
+
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;
@@ -8006,27 +8156,9 @@ module.exports = ClassRegistry;
 
 <span class="function"><span class="keyword">function</span> <span class="title">ClassRegistry</span> <span class="params">(FoundationClass)</span> {</span>
 	<span class="keyword">if</span> (FoundationClass)
-		<span class="keyword">this</span>.setClass(FoundationClass);</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-300">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-300">&#182;</a>
-              </div>
-              <p>Object.defineProperty(this, &#39;__registeredClasses&#39;, {
-        enumerable: false,
-        writable: true,
-        configurable: true,
-        value: {}
-});</p>
+		<span class="keyword">this</span>.setClass(FoundationClass);
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>	<span class="keyword">this</span>.__registeredClasses = {};
+	<span class="keyword">this</span>.__registeredClasses = {};
 }
 
 _.extendProto(ClassRegistry, {
