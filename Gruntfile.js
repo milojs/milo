@@ -53,6 +53,13 @@ module.exports = function(grunt) {
 				files: {
 					'test_html/bind_test.bundle.js': 'test_html/bind_test/*.js'
 				}
+			},
+			tests: {
+				files: [{
+                    expand: true,
+                    src: 'test_browser/**/*.js',
+                    dest: '.tmp-test-browser'
+                }]
 			}
 		},
 		watch: {
@@ -67,6 +74,14 @@ module.exports = function(grunt) {
 					'test_html/bind_test/*.js'
 				],
 				tasks: 'browserify:test1'
+			},
+			tests: {
+				files: [
+					'lib/**/*.js',
+					'node_modules/mol-proto/lib/proto.js', 
+					'test_browser/**/*.js'
+				],
+				tasks: 'browserify:tests'
 			}
 		}
 		// uglify: {
