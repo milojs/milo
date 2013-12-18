@@ -23,7 +23,7 @@ describe('milo binder', function() {
             console.log('div', eType, evt);
         });
 
-    	ctrl.articleIdInput.data.on('datachanged', logData);
+    	ctrl.articleIdInput.data.on('', logData);
 
     	function logData(message, data) {
     		console.log(message, data);
@@ -44,6 +44,16 @@ describe('milo binder', function() {
         var myList = ctrl.myList;
         var listButton = myList.container.scope.listButton;
 
+        var m = new milo.Model;
+
+        var myLinkedList = ctrl.myLinkedList;
+
+        var cnct = milo.minder([
+            [myList.data, '->>>', m],
+            [m, '->>>', myLinkedList.data]
+        ]);
+        // var cnct = milo.minder(myList.data, '->>>', myLinkedList.data);
+
         var listArray = [
             {title: 'Title 1', desc: 'Description 1', notUsed: 1},
             {title: 'Title 2', desc: 'Description 2', notUsed: 2},
@@ -54,12 +64,14 @@ describe('milo binder', function() {
 
         myList.data.on(/.*/, function(msgType, data) {
             console.log(msgType, data);
+            console.log(m.get());
         })
 
         var used = myList.data.set(listArray);
 
         console.log(used);
         console.log(myList.data.get());
+        console.log(m.get());
 
         listButton.events.on('mousedown', function (eventType, event) {
             myList.data.path('[2]').set({title: 'New Title', desc: 'New Description'});
