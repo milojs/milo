@@ -16,8 +16,21 @@
         </div>
 
         <div ml-bind="[Container, Template, Events, Drag]:myTemplate"></div>
+
+        <h2>List 1</h2>
         <div ml-bind="[Container, Dom, Data, List]:myList">
             <button ml-bind="[Events]:listButton">Change list data</button>
+            <div ml-bind="[Container, Dom, Data, Item]:myListItem">
+                <span ml-bind="[Data]:title"></span>
+                <input ml-bind="[Data]:desc" type="text" value="" />
+            </div>
+        </div>
+
+        <button ml-bind="[Events]:connectButton">Connect lists</button>
+        <button ml-bind="[Events]:disconnectButton">Disconnect lists</button>
+
+        <h2>List 2 (linked to List 1 with milo.minder)</h2>
+        <div ml-bind="[Container, Dom, Data, List]:myLinkedList">
             <div ml-bind="[Container, Dom, Data, Item]:myListItem">
                 <span ml-bind="[Data]:title"></span>
                 <input ml-bind="[Data]:desc" type="text" value="" />
