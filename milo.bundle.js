@@ -3694,9 +3694,6 @@ function minder(ds1, mode, ds2, options) {
 }
 
 },{"./model/connector":43}],43:[function(require,module,exports){
-// <a name="model-connector"></a>
-// ### model connector
-
 'use strict';
 
 var ConnectorError = require('../util/error').Connector
