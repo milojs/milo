@@ -6,3 +6,4 @@ before_script:
 after_script:
   - npm install -g doxx
   - doxx
+  - git status
