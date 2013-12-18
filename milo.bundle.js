@@ -1644,6 +1644,8 @@ function init() {
 // <a name="components-facets-frame"></a>
 // ###frame facet
 
+// TODO: The message source for this facet needs to be completely refactored
+
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -2600,6 +2602,8 @@ function triggerEditableEvent(message, data) {
 },{"../../util/check":44,"../../util/error":47,"../c_class":8,"./dom_events_source":27,"mol-proto":55}],29:[function(require,module,exports){
 // <a name="components-source-iframe"></a>
 // ###component iframe source
+
+// TODO: This message source needs to be completely refactored
 
 'use strict';
 
