@@ -1,13 +1,4 @@
 ;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-// <a name="mixin"></a>
-// mixin abstract class
-// --------------
-
-// We also use Mixin pattern, but Mixin in milo is implemented as a separate object
-// that is stored on the property of the host object and can create proxy methods on
-// the host object if required. Classes Messenger, MessageSource and DataSource are
-// subclasses of Mixin abstract class.
-
 'use strict';
 
 var _ = require('mol-proto')
@@ -18,8 +9,23 @@ var _ = require('mol-proto')
 
 module.exports = Mixin;
 
-// an abstract class for mixin pattern - adding proxy methods to host objects
-function Mixin(hostObject, proxyMethods /*, other args - passed to init method */) {
+/**
+ * An abstract Mixin class.
+ *
+ * We also use mixin pattern, but Mixin in milo is implemented as a separate object
+ * that is stored on the property of the host object and can create proxy methods on
+ * the host object if required. Classes [`Messenger`](../messenger/index.js.html), MessageSource and DataSource are
+ * subclasses of Mixin abstract class. `this` in proxy methods refers to Mixin instance.
+ *
+ * @param {Object} hostObject an object where a Mixin instance will be stored on. It is used to proxy methods and also to find the reference when it is needed for host object implementation
+ * @param {Object} proxyMethods a map of proxy method names as keys and Mixin methods names as values, so proxied methods can be renamed to avoid name-space conflicts if two different Mixin instances with the same method names are put on the object
+ * @param {List} arguments all constructor arguments will be passed to init method of Mixin subclass together with hostObject and proxyMethods
+ * @return {Mixin} when used with new, the instance of Mixin class
+ */
+
+
+function Mixin(hostObject, proxyMethods) { // , other args - passed to init method
+
 	// TODO - moce checks from Messenger here
 	check(hostObject, Match.Optional(Match.OneOf(Object, Function)));
 	check(proxyMethods, Match.Optional(Match.ObjectHash(String)));
@@ -39,6 +45,13 @@ _.extendProto(Mixin, {
 });
 
 
+/**
+ * _createProxyMethod
+ * Creates a proxied method of Mixin subclass on host object
+ * @param {String} mixinMethodName name of Mixin subclass
+ * @param {String} proxyMethodName name of created proxy method on host object
+ * @param {Object} hostObject an optional reference to the host object; if not specified the host object passed to constructor wil be used. It allows to use the same instance of Mixin on two host objects.
+ */
 function _createProxyMethod(mixinMethodName, proxyMethodName, hostObject) {
 	hostObject = hostObject || this._hostObject;
 
@@ -1391,6 +1404,7 @@ var ComponentFacet = require('../c_facet')
 	, facetsRegistry = require('./cf_registry')
 	, EditableEventsSource = require('../c_message_sources/editable_events_source')
 	, logger = require('../../util/logger')
+	, domUtils = require('../../util/dom')
 	, _ = require('mol-proto')
 	, check = require('../../util').check
 	, Match = check.Match;
@@ -1602,7 +1616,7 @@ function onEnterSplit(message, event) {
 	}
 }
 
-},{"../../util":50,"../../util/logger":51,"../c_class":8,"../c_facet":9,"../c_message_sources/editable_events_source":28,"./cf_registry":23,"mol-proto":57}],16:[function(require,module,exports){
+},{"../../util":50,"../../util/dom":48,"../../util/logger":51,"../c_class":8,"../c_facet":9,"../c_message_sources/editable_events_source":28,"./cf_registry":23,"mol-proto":57}],16:[function(require,module,exports){
 // <a name="components-facets-events"></a>
 // ###events facet
 
@@ -1959,8 +1973,14 @@ function start() {
 }
 
 
-// performs the split on selection
-function make() {
+/**
+ * make
+ * Splits component this facet belongs to on the selection,
+ * but only if the selection is empty and there is some text before selection.
+ * Uses _makeSplit to do actual split.
+ * @return {Component} new component created as a result of a split
+ */
+ function make() {
 	if (! this.isSplittable())
 		return;
 
@@ -1971,6 +1991,12 @@ function make() {
 }
 
 
+/**
+ * _makeSplit
+ * Splits component this facet belongs to on the selection.
+ * This function is called recursively by `splitElement` to split inner components
+ * @return {Component} new component created as a result of a split.
+ */
 function _makeSplit() {
 	var thisComp = this.owner;
 
@@ -1984,6 +2010,14 @@ function _makeSplit() {
 }
 
 
+/**
+ * splitElement
+ * Splits DOM element on the selection point moving everything after it to
+ * a new element. Recursively calls itself when it encounters DOM element or 
+ * `_makeSplit` when it encounters elements with milo components
+ * @param {Element} thisEl element to be split
+ * @param {Element} newEl element where all new elements will be moved to.
+ */
 function splitElement(thisEl, newEl) {
 	var selection = window.getSelection()
 		, selNode = selection.anchorNode
@@ -1994,16 +2028,17 @@ function splitElement(thisEl, newEl) {
 			var comp = Component.getComponent(childNode);
 			if (comp)
 				comp.split._makeSplit();
-			else {
-				if (childNode.nodeType == Node.TEXT_NODE) {
-					var selPos = selection.anchorOffset;
-					var newText = childNode.splitText(selPos);
+			else if (childNode.nodeType == Node.TEXT_NODE) {
+				var selPos = selection.anchorOffset;
+				var newText = childNode.splitText(selPos);
+				if (newText.textContent)
 					newEl.appendChild(newText);
-				} else {
-					var newChildEl = childNode.cloneNode(false);
-					newEl.appendChild(newChildEl);
-					splitElement(childNode, newChildEl);
-				}
+				else
+					newEl.innerHTML += '&nbsp;';
+			} else {
+				var newChildEl = childNode.cloneNode(false);
+				newEl.appendChild(newChildEl);
+				splitElement(childNode, newChildEl);
 			}
 
 			selFound = true;
@@ -4477,25 +4512,38 @@ componentCount.get = function() {
 module.exports = componentCount;
 
 },{}],48:[function(require,module,exports){
-// <a name="utils-dom"></a>
-// milo.utils.dom
-// -----------
-
 'use strict';
 
 
 module.exports = {
-	filterNodeListByType: filterNodeListByType
+	filterNodeListByType: filterNodeListByType,
+	selectElementContents: selectElementContents
 };
 
-// type 1: html element, type 3: text
-function filterNodeListByType(nodeList, type) {
-	var filteredNodes = [];
-	Array.prototype.forEach.call(nodeList, function (node) {
-		if (node.nodeType == type)
-			filteredNodes.push(node);
+/**
+ * filterNodeListByType
+ * Filters the list of nodes by type
+ * @param {NodeList} nodeList the list of nodes, for example childNodes property of DOM element
+ * @param {Integer} nodeType an integer constant [defined by DOM API](https://developer.mozilla.org/en-US/docs/Web/API/Node.nodeType), e.g. `Node.ELEMENT_NODE` or `Node.TEXT_NODE`
+ */
+function filterNodeListByType(nodeList, nodeType) {
+	return Array.prototype.filter.call(nodeList, function (node) {
+		return node.nodeType == nodeType;
 	});
-	return filteredNodes;
+}
+
+
+/**
+ * selectElementContents
+ * Selects inner contents of DOM element
+ * @param {Element} el DOM element
+ */
+function selectElementContents(el) {
+    var range = document.createRange();
+    range.selectNodeContents(el);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
 }
 
 },{}],49:[function(require,module,exports){
@@ -5049,8 +5097,7 @@ var proto = _ = {
 	prependArray: prependArray,
 	toArray: toArray,
 	firstUpperCase: firstUpperCase,
-	firstLowerCase: firstLowerCase,
-	filterNodeListByType: filterNodeListByType
+	firstLowerCase: firstLowerCase
 };
 
 
@@ -5278,17 +5325,6 @@ function firstUpperCase(str) {
 
 function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
-}
-
-
-// type 1: html element, type 3: text
-function filterNodeListByType(nodeList, type) {
-	var filteredNodes = [];
-	Array.prototype.forEach.call(nodeList, function (node) {
-		if (node.nodeType == type)
-			filteredNodes.push(node);
-	});
-	return filteredNodes;
 }
 
 
