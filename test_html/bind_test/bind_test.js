@@ -49,8 +49,8 @@ describe('milo binder', function() {
         var myLinkedList = ctrl.myLinkedList;
 
         var cnct = milo.minder([
-            [myList.data, '->>>', m],
-            [m, '->>>', myLinkedList.data]
+            [myList.data, '<<<->>>', m],
+            [m, '<<<->>>', myLinkedList.data]
         ]);
         // var cnct = milo.minder(myList.data, '->>>', myLinkedList.data);
 
