@@ -3658,15 +3658,6 @@ if (typeof window == 'object')
 	window.milo = milo;
 
 },{"./binder":6,"./classes":7,"./components/c_facets/Container":10,"./components/c_facets/Data":11,"./components/c_facets/Dom":12,"./components/c_facets/Drag":13,"./components/c_facets/Drop":14,"./components/c_facets/Editable":15,"./components/c_facets/Events":16,"./components/c_facets/Frame":17,"./components/c_facets/Item":18,"./components/c_facets/List":19,"./components/c_facets/ModelFacet":20,"./components/c_facets/Split":21,"./components/c_facets/Template":22,"./components/classes/View":31,"./config":33,"./loader":36,"./mail":37,"./minder":42,"./util":50}],42:[function(require,module,exports){
-// <a name="minder"></a>
-// milo.minder
-// -----------
-
-// This module will be used to create and manage reactive connections between 
-// components and models (and, potentially, other models).
-
-// It is not developed yet.
-
 'use strict';
 
 var Connector = require('./model/connector');
@@ -3675,13 +3666,29 @@ var Connector = require('./model/connector');
 module.exports = minder;
 
 
-// can accept array pf arrays to set up many
+/**
+ * minder
+ * This function creates one or many Connector objects that
+ * create live reactive connection between objects implementing
+ * dataSource interface:
+ * Objects should emit messages when any part of their data changes,
+ * methods `on` and `off` should be implemented to subscribe/unsubscribe
+ * to change notification messages, methods `set` and `get` should be implemented to get/set data
+ * on path objects, pointing to particular parts of the object, method `path`
+ * should return path object for a given path string (see path utils for path string syntax).
+ * Both Model and Data facet are such data sources, they can be linked by Connector object.
+ * @param {Object} ds1 the first data source. Instead of the first data source an array can be passed with arrays of Connection objects parameters in each array element.
+ * @param {String} mode the connection mode that defines the direction and the depth of connection. Possible values are '->', '<<-', '<<<->>>', etc.
+ * @param {Object} ds2 the second data source
+ * @param {Object} options not implemented yet
+ */
 function minder(ds1, mode, ds2, options) {
 	if (Array.isArray(ds1)) {
 		var connDescriptions = ds1;
 		var connectors = connDescriptions.map(function(descr) {
 			return new Connector(descr[0], descr[1], descr[2], descr[3]);
 		});
+		return connectors;
 	} else
 		return new Connector(ds1, mode, ds2, options);
 }
