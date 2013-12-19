@@ -1,6 +1,6 @@
 'use strict';
 
-var Attribute = require('../../lib/attribute/a_bind')
+var Attribute = require('../../lib/attributes/a_bind')
 	, assert = require('assert');
 
 
