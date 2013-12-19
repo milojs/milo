@@ -473,7 +473,9 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 		if (isContainer && ! scopeObject.container.scope)
 			scopeObject.container.scope = new Scope(el);
 
-		if (scopeObject)
+
+		// TODO condition after || is a hack! change
+		if (scopeObject && ! scope[attr.compName])
 			scope._add(scopeObject, attr.compName);
 
 		postChildrenBoundMessage(el);
@@ -1411,7 +1413,8 @@ function startDropFacet() {
 	this.on('dragenter dragover', onDragging);
 
 	function onDragging(eventType, event) {
-		var dataTypes = event.dataTransfer.types;
+		var dt = event.dataTransfer
+			, dataTypes = dt.types;
 		if (dataTypes.indexOf('text/html') >= 0
 				|| dataTypes.indexOf('x-application/milo-component') >= 0) {
 			event.dataTransfer.dropEffect = 'move';
@@ -1419,6 +1422,7 @@ function startDropFacet() {
 		}
 	}
 }
+
 },{"../c_facet":10,"../c_message_sources/dom_events_source":28,"./cf_registry":24,"mol-proto":58}],16:[function(require,module,exports){
 // <a name="components-facets-editable"></a>
 // ###editable facet
