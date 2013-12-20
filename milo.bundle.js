@@ -4581,7 +4581,8 @@ module.exports = componentCount;
 
 module.exports = {
 	filterNodeListByType: filterNodeListByType,
-	selectElementContents: selectElementContents
+	selectElementContents: selectElementContents,
+	getElementOffset: getElementOffset
 };
 
 /**
@@ -4608,6 +4609,29 @@ function selectElementContents(el) {
     var sel = window.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
+}
+
+
+/**
+ * getElementOffset
+ * Calculates an element's total top and left offset from the document edge.
+ * @param {Element} el the element for which position needs to be returned
+ * @return {Object} vector object with properties topOffset and leftOffset
+ */
+function getElementOffset(el) {
+	var yPos, xPos;		
+
+    yPos = el.offsetTop;
+    xPos = el.offsetLeft;
+    el = el.offsetParent;
+
+    while (el != null) {
+    	yPos += el.offsetTop;
+    	xPos += el.offsetLeft;
+        el = el.offsetParent;
+    }  
+
+    return { topOffset: yPos, leftOffset: xPos };
 }
 
 },{}],50:[function(require,module,exports){
@@ -5161,7 +5185,8 @@ var proto = _ = {
 	prependArray: prependArray,
 	toArray: toArray,
 	firstUpperCase: firstUpperCase,
-	firstLowerCase: firstLowerCase
+	firstLowerCase: firstLowerCase,
+	partial: partial
 };
 
 
@@ -5373,12 +5398,14 @@ function prependArray(self, arrayToPrepend) {
 
 
 function toArray(arrayLike) {
-	var arr = [];
-	Array.prototype.forEach.call(arrayLike, function(item) {
-		arr.push(item)
-	});
+	return Array.prototype.slice.call(arrayLike);
 
-	return arr;
+	// var arr = [];
+	// Array.prototype.forEach.call(arrayLike, function(item) {
+	// 	arr.push(item)
+	// });
+
+	// return arr;
 }
 
 
@@ -5391,6 +5418,20 @@ function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
 }
 
+/**
+ * partial
+ * Creates a function as a result of partial function application
+ * with the passed parameters.
+ * @param {Function} func function to be applied
+ * @param {List} arguments these arguments will be prepended to the original function call when the partial function is called.
+ * @return {Function} partially applied function
+ */
+function partial(func) { // , ... arguments
+	var args = Array.prototype.slice.call(arguments, 1);
+	return function() {
+		return func.apply(this, args.concat(_.toArray(arguments)));
+	}
+}
 
 },{}]},{},[42])
 ;
