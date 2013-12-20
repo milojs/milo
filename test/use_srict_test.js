@@ -11,7 +11,7 @@ describe('\'use strict\'; statements', function() {
     });
 
     function detectConsoleLog(dir, next) {
-        exec('grep -r --regexp="^\'use strict\';" --files-without-match ' + dir, function(err, stdout, stderr) {
+        exec('grep -r --regexp="^\\\'use strict\\\';" --files-without-match ' + dir, function(err, stdout, stderr) {
             var files = stdout.split('\n').filter(JSfiles);
 
             assert.ok(files.length == 0, '\'use strict\'; statements should be added to the first line of the following files: ' + files);

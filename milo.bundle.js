@@ -76,7 +76,7 @@ function _createProxyMethods(proxyMethods, hostObject) {
 	}, this);
 }
 
-},{"../util/check":47,"../util/error":50,"mol-proto":58}],2:[function(require,module,exports){
+},{"../util/check":48,"../util/error":51,"mol-proto":59}],2:[function(require,module,exports){
 // <a name="registry"></a>
 // registry abstract class
 // --------------
@@ -162,7 +162,7 @@ function unregisterAllClasses() {
 	this.__registeredClasses = {};
 };
 
-},{"../util/check":47,"mol-proto":58}],3:[function(require,module,exports){
+},{"../util/check":48,"mol-proto":59}],3:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -247,7 +247,7 @@ function render() {
 						|| (milo.config.componentPrefix + milo.util.count()));
 }
 
-},{"../config":34,"../util/check":47,"../util/error":50,"./a_class":4,"mol-proto":58}],4:[function(require,module,exports){
+},{"../config":35,"../util/check":48,"../util/error":51,"./a_class":4,"mol-proto":59}],4:[function(require,module,exports){
 // <a name="attribute"></a>
 // attribute class
 // ---------
@@ -295,7 +295,7 @@ function decorate() {
 	this.set(this.render());
 }
 
-},{"../util/check":47,"../util/error":50,"mol-proto":58}],5:[function(require,module,exports){
+},{"../util/check":48,"../util/error":51,"mol-proto":59}],5:[function(require,module,exports){
 // <a name="attribute-load"></a>
 // ###load attribute class
 
@@ -339,7 +339,7 @@ function validateAttribute() {
 
 	return this;
 }
-},{"../config":34,"../util/error":50,"./a_class":4,"mol-proto":58}],6:[function(require,module,exports){
+},{"../config":35,"../util/error":51,"./a_class":4,"mol-proto":59}],6:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -500,7 +500,7 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 	}
 }
 
-},{"./attributes/a_bind":3,"./components/c_facets/cf_registry":24,"./components/c_info":25,"./components/c_registry":31,"./components/scope":33,"./mail":38,"./util/check":47,"./util/dom":49,"./util/error":50,"mol-proto":58}],8:[function(require,module,exports){
+},{"./attributes/a_bind":3,"./components/c_facets/cf_registry":24,"./components/c_info":25,"./components/c_registry":31,"./components/scope":34,"./mail":39,"./util/check":48,"./util/dom":50,"./util/error":51,"mol-proto":59}],8:[function(require,module,exports){
 // <a name="classes"></a>
 // milo.classes
 // -----------
@@ -519,7 +519,9 @@ var classes = {
 
 module.exports = classes;
 
-},{"./abstract/registry":2,"./components/c_facet":10,"./components/c_facets/cf_registry":24,"./components/c_registry":31,"./facets/f_class":35}],9:[function(require,module,exports){
+},{"./abstract/registry":2,"./components/c_facet":10,"./components/c_facets/cf_registry":24,"./components/c_registry":31,"./facets/f_class":36}],9:[function(require,module,exports){
+'use strict';
+
 // <a name="components"></a>
 // component class
 // --------------
@@ -534,11 +536,10 @@ module.exports = classes;
 // You should use Component.createComponentClass method when you want to create
 // a new component class from facets and their configuration.
 
-'use strict';
-
 var FacetedObject = require('../facets/f_object')
 	, facetsRegistry = require('./c_facets/cf_registry')
 	, ComponentFacet = facetsRegistry.get('ComponentFacet')
+	, componentUtils = require('./c_utils')
 	, Messenger = require('../messenger')
 	, _ = require('mol-proto')
 	, check = require('../util/check')
@@ -560,9 +561,9 @@ delete Component.createFacetedClass;
 _.extend(Component, {
 	create: create,
 	copy: copy,
-	isComponent: isComponent,
-	getComponent: getComponent,
-	getContainingComponent: getContainingComponent,
+	isComponent: componentUtils.isComponent,
+	getComponent: componentUtils.getComponent,
+	getContainingComponent: componentUtils.getContainingComponent,
 	_getScopeParent: _getScopeParent
 });
 
@@ -622,52 +623,6 @@ function copy(component, deepCopyDOM) {
 	component.scope._add(aComponent, aComponent.name);
 
 	return aComponent;
-}
-
-
-// checks if element is bound to a component
-function isComponent(element) {
-	return config.componentRef in element;
-}
-
-// gets the element bound the component
-function getComponent(element) {
-	return element && element[config.componentRef];
-}
-
-/**
- * Get Containing Component
- * 
- * Returns the closest component which contains the specified node,
- * optionally with specified facet
- *
- * Unless returnCurrent parameter is false, the function will return
- * the current component of the node.
- * 
- * @param {Node}     node      DOM node
- * @param {Function} condition When provided defines a condition which the components are filtered by. No filtering is applied by default.
- * @param {Boolean}  current   When true indicates that the current node should also be searched. Defaults to true.
- * @return {Component|undefined}
- */
-function getContainingComponent(node, condition, current) {
-	var component;
-
-	// Where the current node is a component than it should be returned provided
-	// that it matches the specified condition (if supplied)
-	if (current !== false && (component = getComponent(node))) {
-		if (typeof condition !== 'function' || condition(component)) {
-			return component;
-		}
-	}
-
-	// Where there are no parent nodes to be found on the node this function
-	// will immediately return undefined
-	if (!node.parentNode) {
-		return undefined;
-	}
-
-	// Otherwise traverse up the node tree recursively
-	return getContainingComponent(node.parentNode, condition);
 }
 
 
@@ -782,10 +737,11 @@ function remove() {
 
 /**
  * getScopeParent
- * Instance method of Component.
- * Returns the scope parent of a component.
- * If withFacet parameter is not specified, an immediate parent
+ *
+ * Instance method of Component. Returns the scope parent of a component.
+ * If `withFacet` parameter is not specified, an immediate parent
  * will be returned, otherwise the closest ancestor with a specified facet.
+ *
  * @param {String} withFacet optional string name of the facet, the case of the first letter is ignored, so both facet name and class name can be used
  * @return {Component|undefined}
  */
@@ -809,7 +765,9 @@ function _getScopeParent(withFacet) {
 	}
 }
 
-},{"../config":34,"../facets/f_object":36,"../messenger":40,"../util/check":47,"../util/count":48,"./c_facets/cf_registry":24,"mol-proto":58}],10:[function(require,module,exports){
+},{"../config":35,"../facets/f_object":37,"../messenger":41,"../util/check":48,"../util/count":49,"./c_facets/cf_registry":24,"./c_utils":32,"mol-proto":59}],10:[function(require,module,exports){
+'use strict';
+
 // <a name="components-facet"></a>
 // ###component facet class
 
@@ -822,18 +780,37 @@ function _getScopeParent(withFacet) {
 // - Component - basic compponent class
 // - ComponentFacet - basic 
 
-'use strict';
 
 var Facet = require('../facets/f_class')
 	, Messenger = require('../messenger')
 	, FacetError = require('../util/error').Facet
-	//, componentsRegistry = require('./c_registry')
-	//, Component = componentsRegistry.get('Component')
+	, componentUtils = require('./c_utils')
 	, _ = require('mol-proto');
 
 var ComponentFacet = _.createSubclass(Facet, 'ComponentFacet');
 
 module.exports = ComponentFacet;
+
+
+/**
+ * postDomParent
+ *
+ * If facet has DOM parent facet (see `domParent` method), posts the message to this facet.
+ *
+ * @param {String} messageType
+ * @param {Object} messageData
+ */
+var postDomParent = _.partial(_postParent, domParent);
+
+/**
+ * postScopeParent
+ *
+ * If facet has scope parent facet (see `scopeParent` method), posts the message to this facet.
+ *
+ * @param {String} messageType
+ * @param {Object} messageData
+ */
+var postScopeParent = _.partial(_postParent, scopeParent);
 
 
 _.extendProto(ComponentFacet, {
@@ -842,6 +819,8 @@ _.extendProto(ComponentFacet, {
 	check: checkDependencies,
 	domParent: domParent,
 	postDomParent: postDomParent,
+	scopeParent: scopeParent,
+	postScopeParent: postScopeParent,
 	_createMessenger: _createMessenger,
 	_setMessageSource: _setMessageSource,
 	_createMessageSource: _createMessageSource
@@ -881,25 +860,30 @@ function checkDependencies() {
 
 /**
  * domParent
- * @return {ComponentFacet} reference to the facet of the same class of the closest parent DOM element, that has a component with the same facet class attached to it. If such element doesn't exist, will return undefined.
+ * 
+ * @return {ComponentFacet} reference to the facet of the same class of the closest parent DOM element, that has a component with the same facet class attached to it. If such element doesn't exist method will return undefined.
  */
 function domParent() {
-	return Component.getContainingComponent(this.owner.el, false, this.name);
-	if (parent)
-		parent.toolbar.postMessage('childtoolbar', { visible: visibility });
+	var parentComponent = componentUtils.getContainingComponent(this.owner.el, false, this.name);
+	return parentComponent && parentComponent[this.name];
 }
 
 
 /**
- * postDomParent
- * If facet has DOM parent, posts the message to it
- * @param {String} messageType
- * @param {Object} messageData
+ * scopeParent
+ * 
+ * @return {ComponentFacet} reference to the facet of the same class as `this` facet of the closest scope parent (i.e., the component that has the scope of the current component in its container facet).
  */
-function postDomParent(messageType, messageData) {
-	var parent = this.domParent();
-	if (parent)
-		parent[this.name].postMessage(messageType, messageData);
+function scopeParent() {
+	var parentComponent = this.owner.getScopeParent(this.name);
+	return parentComponent && parentComponent[this.name];
+}
+
+
+function _postParent(getParentMethod, messageType, messageData) {
+	var parentFacet = getParentMethod.call(this);
+	if (parentFacet)
+		parentFacet.postMessage(messageType, messageData);
 }
 
 
@@ -914,7 +898,8 @@ function _createMessageSource(MessageSourceClass, options) {
 
 	_.defineProperty(this, '_messageSource', messageSource);
 }
-},{"../facets/f_class":35,"../messenger":40,"../util/error":50,"mol-proto":58}],11:[function(require,module,exports){
+
+},{"../facets/f_class":36,"../messenger":41,"../util/error":51,"./c_utils":32,"mol-proto":59}],11:[function(require,module,exports){
 // <a name="components-facets-container"></a>
 // ###container facet
 
@@ -961,7 +946,7 @@ function addChildComponents(childComponents) {
 	_.extend(this.scope, childComponents);
 }
 
-},{"../../binder":7,"../c_facet":10,"./cf_registry":24,"mol-proto":58}],12:[function(require,module,exports){
+},{"../../binder":7,"../c_facet":10,"./cf_registry":24,"mol-proto":59}],12:[function(require,module,exports){
 // <a name="components-facets-data"></a>
 // ###data facet
 
@@ -1173,7 +1158,7 @@ function inputValue(el, value) {
 		return el.value;
 }
 
-},{"../../messenger":40,"../../model/path_utils":46,"../../util/logger":52,"../c_facet":10,"../c_message_sources/component_data_source":26,"./cf_registry":24,"mol-proto":58}],13:[function(require,module,exports){
+},{"../../messenger":41,"../../model/path_utils":47,"../../util/logger":53,"../c_facet":10,"../c_message_sources/component_data_source":26,"./cf_registry":24,"mol-proto":59}],13:[function(require,module,exports){
 // <a name="components-facets-dom"></a>
 // ###dom facet
 
@@ -1377,7 +1362,7 @@ function hasTextBeforeSelection() {
 }
 
 
-},{"../../attributes/a_bind":3,"../../binder":7,"../../util/check":47,"../../util/error":50,"../c_facet":10,"./cf_registry":24,"mol-proto":58}],14:[function(require,module,exports){
+},{"../../attributes/a_bind":3,"../../binder":7,"../../util/check":48,"../../util/error":51,"../c_facet":10,"./cf_registry":24,"mol-proto":59}],14:[function(require,module,exports){
 // <a name="components-facets-drag"></a>
 // ###drag facet
 
@@ -1463,7 +1448,7 @@ function startDragFacet() {
 	}
 }
 
-},{"../c_facet":10,"../c_message_sources/dom_events_source":28,"./cf_registry":24,"mol-proto":58}],15:[function(require,module,exports){
+},{"../c_facet":10,"../c_message_sources/dom_events_source":28,"./cf_registry":24,"mol-proto":59}],15:[function(require,module,exports){
 // <a name="components-facets-drop"></a>
 // ###drop facet
 
@@ -1511,7 +1496,7 @@ function startDropFacet() {
 	}
 }
 
-},{"../c_facet":10,"../c_message_sources/dom_events_source":28,"./cf_registry":24,"mol-proto":58}],16:[function(require,module,exports){
+},{"../c_facet":10,"../c_message_sources/dom_events_source":28,"./cf_registry":24,"mol-proto":59}],16:[function(require,module,exports){
 // <a name="components-facets-editable"></a>
 // ###editable facet
 
@@ -1737,7 +1722,7 @@ function onEnterSplit(message, event) {
 	}
 }
 
-},{"../../util":51,"../../util/dom":49,"../../util/logger":52,"../c_class":9,"../c_facet":10,"../c_message_sources/editable_events_source":29,"./cf_registry":24,"mol-proto":58}],17:[function(require,module,exports){
+},{"../../util":52,"../../util/dom":50,"../../util/logger":53,"../c_class":9,"../c_facet":10,"../c_message_sources/editable_events_source":29,"./cf_registry":24,"mol-proto":59}],17:[function(require,module,exports){
 // <a name="components-facets-events"></a>
 // ###events facet
 
@@ -1779,7 +1764,7 @@ function init() {
 	});
 }
 
-},{"../../messenger":40,"../c_facet":10,"../c_message_sources/dom_events_source":28,"./cf_registry":24,"mol-proto":58}],18:[function(require,module,exports){
+},{"../../messenger":41,"../c_facet":10,"../c_message_sources/dom_events_source":28,"./cf_registry":24,"mol-proto":59}],18:[function(require,module,exports){
 // <a name="components-facets-frame"></a>
 // ###frame facet
 
@@ -1825,7 +1810,7 @@ function initFrameFacet() {
 		_messageSource: { value: messageSource }
 	});
 }
-},{"../../messenger":40,"../c_facet":10,"../c_message_sources/iframe_message_source":30,"./cf_registry":24,"mol-proto":58}],19:[function(require,module,exports){
+},{"../../messenger":41,"../c_facet":10,"../c_message_sources/iframe_message_source":30,"./cf_registry":24,"mol-proto":59}],19:[function(require,module,exports){
 // <a name="components-facets-item"></a>
 // ###item facet
 
@@ -1849,7 +1834,7 @@ facetsRegistry.add(ItemFacet);
 
 module.exports = ItemFacet;
 
-},{"../../mail":38,"../../model":45,"../c_facet":10,"./cf_registry":24,"mol-proto":58}],20:[function(require,module,exports){
+},{"../../mail":39,"../../model":46,"../c_facet":10,"./cf_registry":24,"mol-proto":59}],20:[function(require,module,exports){
 // <a name="components-facets-list"></a>
 // ###list facet
 
@@ -2013,7 +1998,7 @@ function each(callback, thisArg) {
     }, thisArg || this);
 }
 
-},{"../../binder":7,"../../mail":38,"../../model":45,"../../util/error":50,"../../util/logger":52,"../c_class":9,"../c_facet":10,"./cf_registry":24,"mol-proto":58}],21:[function(require,module,exports){
+},{"../../binder":7,"../../mail":39,"../../model":46,"../../util/error":51,"../../util/logger":53,"../c_class":9,"../c_facet":10,"./cf_registry":24,"mol-proto":59}],21:[function(require,module,exports){
 // <a name="components-facets-model"></a>
 // ###model facet
 
@@ -2050,7 +2035,7 @@ function _createMessenger() { // Called by inherited init
 	this.m.proxyMessenger(this); // Creates messenger's methods directly on facet
 }
 
-},{"../../model":45,"../c_facet":10,"./cf_registry":24,"mol-proto":58}],22:[function(require,module,exports){
+},{"../../model":46,"../c_facet":10,"./cf_registry":24,"mol-proto":59}],22:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -2260,7 +2245,7 @@ function bindInnerComponents() {
 	this.owner.container.scope = thisScope[this.owner.name].container.scope;
 }
 
-},{"../../binder":7,"../../util/check":47,"../c_facet":10,"./cf_registry":24,"mol-proto":58}],24:[function(require,module,exports){
+},{"../../binder":7,"../../util/check":48,"../c_facet":10,"./cf_registry":24,"mol-proto":59}],24:[function(require,module,exports){
 // <a name="components-facet-registry"></a>
 // ###component facet registry
 
@@ -2342,7 +2327,7 @@ function ComponentInfo(scope, el, attr) {
 	}
 }
 
-},{"../util/error":50,"./c_facets/cf_registry":24,"./c_registry":31}],26:[function(require,module,exports){
+},{"../util/error":51,"./c_facets/cf_registry":24,"./c_registry":31}],26:[function(require,module,exports){
 // <a name="components-source-data"></a>
 // ###component data source
 
@@ -2447,7 +2432,7 @@ function triggerDataMessage(message, data) {
 	// TODO - opposite translation + event trigger 
 }
 
-},{"../../util/check":47,"../../util/error":50,"../c_class":9,"./dom_events_source":28,"mol-proto":58}],27:[function(require,module,exports){
+},{"../../util/check":48,"../../util/error":51,"../c_class":9,"./dom_events_source":28,"mol-proto":59}],27:[function(require,module,exports){
 // <a name="components-dom-constructors"></a>
 // ###dom events constructors
 
@@ -2502,7 +2487,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"mol-proto":58}],28:[function(require,module,exports){
+},{"mol-proto":59}],28:[function(require,module,exports){
 // <a name="components-source-dom"></a>
 // ###component dom events source
 
@@ -2610,7 +2595,7 @@ function triggerDomEvent(eventType, properties) {
 
 	return notCancelled;
 }
-},{"../../messenger/message_source":41,"../../util/check":47,"../c_class":9,"./dom_events_constructors":27,"mol-proto":58}],29:[function(require,module,exports){
+},{"../../messenger/message_source":42,"../../util/check":48,"../c_class":9,"./dom_events_constructors":27,"mol-proto":59}],29:[function(require,module,exports){
 // <a name="components-source-editable"></a>
 // ###component editable events source
 
@@ -2766,7 +2751,7 @@ function triggerEditableEvent(message, data) {
 	// TODO - opposite translation + event trigger 
 }
 
-},{"../../util/check":47,"../../util/error":50,"../c_class":9,"./dom_events_source":28,"mol-proto":58}],30:[function(require,module,exports){
+},{"../../util/check":48,"../../util/error":51,"../c_class":9,"./dom_events_source":28,"mol-proto":59}],30:[function(require,module,exports){
 // <a name="components-source-iframe"></a>
 // ###component iframe source
 
@@ -2839,7 +2824,7 @@ function handleEvent(event) {
 	this.dispatchMessage(event.type, event);
 }
 
-},{"../../messenger/message_source":41,"../../util/check":47,"mol-proto":58}],31:[function(require,module,exports){
+},{"../../messenger/message_source":42,"../../util/check":48,"mol-proto":59}],31:[function(require,module,exports){
 // <a name="components-registry"></a>
 // ###component registry class
 
@@ -2859,6 +2844,89 @@ module.exports = componentsRegistry;
 },{"../abstract/registry":2,"./c_class":9}],32:[function(require,module,exports){
 'use strict';
 
+var config = require('../config')
+	, check = require('../util/check')
+	, Match = check.Match;
+
+
+var componentUtils = module.exports = {
+	isComponent: isComponent,
+	getComponent: getComponent,
+	getContainingComponent: getContainingComponent
+};
+
+
+/**
+ * isComponent
+ *
+ * Checks if element has a component attached to it by
+ * checking the presence of property difined in milo.config
+ *
+ * @param {Element} el DOM element
+ * @return {Boolean} true, if it has milo component attached to it
+ */
+function isComponent(el) {
+	return el.hasOwnProperty(config.componentRef);
+}
+
+
+/**
+ * getComponent
+ *
+ * @param {Element} el DOM element
+ * @return {Component} component attached to element
+ */
+function getComponent(el) {
+	return el && el[config.componentRef];
+}
+
+
+/**
+ * getContainingComponent
+ *
+ * Returns the closest component which contains the specified element,
+ * optionally, only component that passes `condition` test or contains specified facet
+ *
+ * Unless `returnCurrent` parameter is false, the function will return
+ * the current component of the element (true by default).
+ *
+ * @param {Element} el DOM Element
+ * @param {Boolean} returnCurrent optional boolean value indicating whether the component of the element can be returned. True by default, should be false to return only ancestors.
+ * @param {Function|String} conditionOrFacet optional condition that component should pass (or facet name it should contain)
+ * @return {Component} 
+ */
+function getContainingComponent(el, returnCurrent, conditionOrFacet) {
+	check(el, Element);
+	check(returnCurrent, Match.Optional(Boolean));
+	check(conditionOrFacet, Match.Optional(Match.OneOf(Function, String)));
+
+	var _condition = typeof conditionOrFacet == 'string'
+						? ( function (comp) {
+						       return comp.hasOwnProperty(conditionOrFacet)
+						    } )
+						: conditionOrFacet;
+	_getContainingComponent(el, returnCurrent, _condition);
+}
+
+
+function _getContainingComponent(el, returnCurrent, condition) {
+	// Where the current element is a component it should be returned
+	// if returnCurrent is true or undefined
+	if (returnCurrent !== false) {
+		var comp = getComponent(el);
+		if (comp && (! condition || condition(comp)))
+			return comp;
+	}
+
+	// Where there is no parent element, this function will return undefined
+	// The parent element is checked recursively
+	if (el.parentNode)
+		return _getContainingComponent(el.parentNode, true, condition);
+}
+
+},{"../config":35,"../util/check":48}],33:[function(require,module,exports){
+'use strict';
+
 var Component = require('../c_class')
 	, componentsRegistry = require('../c_registry');
 
@@ -2869,7 +2937,7 @@ componentsRegistry.add(View);
 
 module.exports = View;
 
-},{"../c_class":9,"../c_registry":31}],33:[function(require,module,exports){
+},{"../c_class":9,"../c_registry":31}],34:[function(require,module,exports){
 // <a name="scope"></a>
 // scope class
 // -----------
@@ -2953,7 +3021,7 @@ function _length() {
 	return Object.keys(this).length;
 }
 
-},{"../util/check":47,"../util/error":50,"mol-proto":58}],34:[function(require,module,exports){
+},{"../util/check":48,"../util/error":51,"mol-proto":59}],35:[function(require,module,exports){
 // <a name="config"></a>
 // milo.config
 // -----------
@@ -2990,7 +3058,7 @@ config({
 	componentPrefix: 'milo_'
 });
 
-},{"mol-proto":58}],35:[function(require,module,exports){
+},{"mol-proto":59}],36:[function(require,module,exports){
 // <a name="facet-c"></a>
 // facet class
 // --------------
@@ -3012,7 +3080,7 @@ _.extendProto(Facet, {
 	init: function() {}
 });
 
-},{"mol-proto":58}],36:[function(require,module,exports){
+},{"mol-proto":59}],37:[function(require,module,exports){
 // <a name="facet-o"></a>
 // facetted object class
 // --------------
@@ -3132,7 +3200,7 @@ FacetedObject.createFacetedClass = function (name, facetsClasses, facetsConfig) 
 	return FacetedClass;
 };
 
-},{"../util/check":47,"../util/error":50,"./f_class":35,"mol-proto":58}],37:[function(require,module,exports){
+},{"../util/check":48,"../util/error":51,"./f_class":36,"mol-proto":59}],38:[function(require,module,exports){
 // <a name="loader"></a>
 // milo.loader
 // -----------
@@ -3239,7 +3307,7 @@ function loadView(el, callback) {
 	});
 }
 
-},{"./attributes/a_load":5,"./config":34,"./mail":38,"./util/dom":49,"./util/error":50,"./util/logger":52,"./util/request":54}],38:[function(require,module,exports){
+},{"./attributes/a_load":5,"./config":35,"./mail":39,"./util/dom":50,"./util/error":51,"./util/logger":53,"./util/request":55}],39:[function(require,module,exports){
 // <a name="mail"></a>
 // milo.mail
 // -----------
@@ -3265,7 +3333,7 @@ var miloMail = new Messenger(undefined, undefined, mailMsgSource);
 
 module.exports = miloMail;
 
-},{"../messenger":40,"./mail_source":39}],39:[function(require,module,exports){
+},{"../messenger":41,"./mail_source":40}],40:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../messenger/message_source')
@@ -3339,7 +3407,7 @@ function handleEvent(event) {
 	this.dispatchMessage(event.type, event);
 }
 
-},{"../components/c_message_sources/dom_events_constructors":27,"../messenger/message_source":41,"../util/check":47,"../util/error":50,"mol-proto":58}],40:[function(require,module,exports){
+},{"../components/c_message_sources/dom_events_constructors":27,"../messenger/message_source":42,"../util/check":48,"../util/error":51,"mol-proto":59}],41:[function(require,module,exports){
 // <a name="messenger"></a>
 // milo messenger
 // --------------
@@ -3604,7 +3672,7 @@ function _setMessageSource(messageSource) {
 }
 
 
-},{"../abstract/mixin":1,"../util/check":47,"../util/error":50,"./message_source":41,"mol-proto":58}],41:[function(require,module,exports){
+},{"../abstract/mixin":1,"../util/check":48,"../util/error":51,"./message_source":42,"mol-proto":59}],42:[function(require,module,exports){
 // <a name="messenger-source"></a>
 // ###messenger source
 
@@ -3721,7 +3789,7 @@ function dispatchAllSourceMessages(sourceMessage, message, data) {
 	return true;
 }
 
-},{"../abstract/mixin":1,"../util/error":50,"../util/logger":52,"mol-proto":58}],42:[function(require,module,exports){
+},{"../abstract/mixin":1,"../util/error":51,"../util/logger":53,"mol-proto":59}],43:[function(require,module,exports){
 // A minimalist browser framework that binds HTML elements to JS components and components to models.
 'use strict';
 
@@ -3777,7 +3845,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./attributes":6,"./binder":7,"./classes":8,"./components/c_class":9,"./components/c_facets/Container":11,"./components/c_facets/Data":12,"./components/c_facets/Dom":13,"./components/c_facets/Drag":14,"./components/c_facets/Drop":15,"./components/c_facets/Editable":16,"./components/c_facets/Events":17,"./components/c_facets/Frame":18,"./components/c_facets/Item":19,"./components/c_facets/List":20,"./components/c_facets/ModelFacet":21,"./components/c_facets/Split":22,"./components/c_facets/Template":23,"./components/classes/View":32,"./config":34,"./loader":37,"./mail":38,"./messenger":40,"./minder":43,"./model":45,"./util":51}],43:[function(require,module,exports){
+},{"./attributes":6,"./binder":7,"./classes":8,"./components/c_class":9,"./components/c_facets/Container":11,"./components/c_facets/Data":12,"./components/c_facets/Dom":13,"./components/c_facets/Drag":14,"./components/c_facets/Drop":15,"./components/c_facets/Editable":16,"./components/c_facets/Events":17,"./components/c_facets/Frame":18,"./components/c_facets/Item":19,"./components/c_facets/List":20,"./components/c_facets/ModelFacet":21,"./components/c_facets/Split":22,"./components/c_facets/Template":23,"./components/classes/View":33,"./config":35,"./loader":38,"./mail":39,"./messenger":41,"./minder":44,"./model":46,"./util":52}],44:[function(require,module,exports){
 'use strict';
 
 var Connector = require('./model/connector');
@@ -3813,7 +3881,7 @@ function minder(ds1, mode, ds2, options) {
 		return new Connector(ds1, mode, ds2, options);
 }
 
-},{"./model/connector":44}],44:[function(require,module,exports){
+},{"./model/connector":45}],45:[function(require,module,exports){
 'use strict';
 
 var ConnectorError = require('../util/error').Connector
@@ -3946,7 +4014,7 @@ function off() {
 	}
 }
 
-},{"../util/error":50,"../util/logger":52,"mol-proto":58}],45:[function(require,module,exports){
+},{"../util/error":51,"../util/logger":53,"mol-proto":59}],46:[function(require,module,exports){
 // <a name="model"></a>
 // milo model
 // -----------
@@ -4175,7 +4243,7 @@ function synthesizeMethod(synthesizer, path, parsedPath) {
 	}
 }
 
-},{"../abstract/mixin":1,"../messenger":40,"../util/check":47,"../util/error":50,"./path_utils":46,"dot":57,"fs":55,"mol-proto":58}],46:[function(require,module,exports){
+},{"../abstract/mixin":1,"../messenger":41,"../util/check":48,"../util/error":51,"./path_utils":47,"dot":58,"fs":56,"mol-proto":59}],47:[function(require,module,exports){
 // <a name="model-path"></a>
 // ### model path utils
 
@@ -4286,7 +4354,7 @@ function wrapMessengerMethods(methodsNames) {
 	}, this);
 }
 
-},{"../util/check":47,"mol-proto":58}],47:[function(require,module,exports){
+},{"../util/check":48,"mol-proto":59}],48:[function(require,module,exports){
 // <a name="utils-check"></a>
 // milo.utils.check
 // -----------
@@ -4644,7 +4712,7 @@ function _prependPath(key, base) {
 };
 
 
-},{"mol-proto":58}],48:[function(require,module,exports){
+},{"mol-proto":59}],49:[function(require,module,exports){
 // <a name="utils-count"></a>
 // milo.utils.count
 // ----------------
@@ -4664,7 +4732,7 @@ componentCount.get = function() {
 
 module.exports = componentCount;
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 'use strict';
 
 
@@ -4723,7 +4791,7 @@ function getElementOffset(el) {
     return { topOffset: yPos, leftOffset: xPos };
 }
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 // <a name="utils-error"></a>
 // milo.utils.error
 // -----------
@@ -4767,7 +4835,7 @@ function toBeImplemented() {
 	throw new error.AbstractClass('calling the method of an absctract class MessageSource');
 }
 
-},{"mol-proto":58}],51:[function(require,module,exports){
+},{"mol-proto":59}],52:[function(require,module,exports){
 // <a name="utils"></a>
 // milo.utils
 // -----------
@@ -4785,7 +4853,7 @@ var util = {
 
 module.exports = util;
 
-},{"./check":47,"./count":48,"./dom":49,"./error":50,"./logger":52,"./request":54}],52:[function(require,module,exports){
+},{"./check":48,"./count":49,"./dom":50,"./error":51,"./logger":53,"./request":55}],53:[function(require,module,exports){
 // <a name="utils-logger"></a>
 // milo.utils.logger
 // -----------
@@ -4801,7 +4869,7 @@ var logger = new Logger({ level: 3 });
 
 module.exports = logger;
 
-},{"./logger_class":53}],53:[function(require,module,exports){
+},{"./logger_class":54}],54:[function(require,module,exports){
 // ### Logger Class
 
 // Properties:
@@ -4912,7 +4980,7 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"mol-proto":58}],54:[function(require,module,exports){
+},{"mol-proto":59}],55:[function(require,module,exports){
 // <a name="utils-request"></a>
 // milo.utils.request
 // -----------
@@ -4964,13 +5032,13 @@ function get(url, callback) {
 	request(url, { method: 'GET' }, callback);
 }
 
-},{"mol-proto":58}],55:[function(require,module,exports){
+},{"mol-proto":59}],56:[function(require,module,exports){
 
 // not implemented
 // The reason for having an empty file and not throwing is to allow
 // untraditional implementation of this module.
 
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 // doT.js
 // 2011, Laura Doktorova, https://github.com/olado/doT
 // Licensed under the MIT license.
@@ -5107,7 +5175,7 @@ function get(url, callback) {
 	};
 }());
 
-},{}],57:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 /* doT + auto-compilation of doT templates
  *
  * 2012, Laura Doktorova, https://github.com/olado/doT
@@ -5252,7 +5320,7 @@ InstallDots.prototype.compileAll = function() {
 	return this.__rendermodule;
 };
 
-},{"./doT":56,"fs":55}],58:[function(require,module,exports){
+},{"./doT":57,"fs":56}],59:[function(require,module,exports){
 'use strict';
 
 var _;
@@ -5522,5 +5590,5 @@ function partial(func) { // , ... arguments
 	}
 }
 
-},{}]},{},[42])
+},{}]},{},[43])
 ;
