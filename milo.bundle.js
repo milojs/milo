@@ -569,6 +569,7 @@ _.extend(Component, {
 // instance methods
 _.extendProto(Component, {
 	init: init,
+	initElement: initElement,
 	addFacet: addFacet,
 	allFacets: allFacets,
 	remove: remove,
@@ -705,17 +706,10 @@ function createComponentClass(name, facetsConfig) {
 // Subclasses should call inherited init methods:
 // Component.prototype.init.apply(this, arguments)
 function init(scope, element, name, componentInfo) {
-	this.el = element;
+	this.el = element || this.initElement();
 
-	if (! element && typeof document != 'undefined') {
-		if (this.dom)
-			this.dom.newElement();
-		else
-			this.el = document.createElement('DIV');
-	}
-
-	if (element)
-		element[config.componentRef] = this;
+	if (this.el)
+		this.el[config.componentRef] = this;
 
 	_.defineProperties(this, {
 		name: name,
@@ -732,6 +726,24 @@ function init(scope, element, name, componentInfo) {
 	this.allFacets('start');
 }
 
+/**
+ * Initializes the element which this component is bound to
+ *
+ * This method is called when a component is instantiated outside the dom and
+ * will generate a new element for the component.
+ * 
+ * @return {Element}
+ */
+function initElement() {
+	if (typeof document === 'undefined') {
+		throw 'Can\'t initialize an element without a document to initialize it.';
+	}
+
+	if (this.dom)
+		this.dom.newElement();
+	else
+		this.el = document.createElement('DIV');
+}
 
 function addFacet(facetNameOrClass, facetOpts, facetName) {
 	check(facetNameOrClass, Match.OneOf(String, Match.Subclass(ComponentFacet)));
@@ -5264,7 +5276,8 @@ var proto = _ = {
 	prependArray: prependArray,
 	toArray: toArray,
 	firstUpperCase: firstUpperCase,
-	firstLowerCase: firstLowerCase
+	firstLowerCase: firstLowerCase,
+	partial: partial
 };
 
 
@@ -5476,12 +5489,14 @@ function prependArray(self, arrayToPrepend) {
 
 
 function toArray(arrayLike) {
-	var arr = [];
-	Array.prototype.forEach.call(arrayLike, function(item) {
-		arr.push(item)
-	});
+	return Array.prototype.slice.call(arrayLike);
 
-	return arr;
+	// var arr = [];
+	// Array.prototype.forEach.call(arrayLike, function(item) {
+	// 	arr.push(item)
+	// });
+
+	// return arr;
 }
 
 
@@ -5494,6 +5509,20 @@ function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
 }
 
+/**
+ * partial
+ * Creates a function as a result of partial function application
+ * with the passed parameters.
+ * @param {Function} func function to be applied
+ * @param {List} arguments these arguments will be prepended to the original function call when the partial function is called.
+ * @return {Function} partially applied function
+ */
+function partial(func) { // , ... arguments
+	var args = Array.prototype.slice.call(arguments, 1);
+	return function() {
+		return func.apply(this, args.concat(_.toArray(arguments)));
+	}
+}
 
 },{}]},{},[42])
 ;
