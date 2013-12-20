@@ -736,7 +736,7 @@ function init(scope, element, name, componentInfo) {
  */
 function initElement() {
 	if (typeof document === 'undefined') {
-		throw 'Can\'t initialize an element without a document to initialize it.';
+		return;
 	}
 
 	if (this.dom)
