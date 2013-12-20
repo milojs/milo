@@ -474,7 +474,7 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 			scopeObject.container.scope = new Scope(el);
 
 
-		// TODO condition after || is a hack! change
+		// TODO condition after && is a hack! change
 		if (scopeObject && ! scope[attr.compName])
 			scope._add(scopeObject, attr.compName);
 
@@ -562,7 +562,8 @@ _.extend(Component, {
 	copy: copy,
 	isComponent: isComponent,
 	getComponent: getComponent,
-	getContainingComponent: getContainingComponent
+	getContainingComponent: getContainingComponent,
+	_getScopeParent: _getScopeParent
 });
 
 // instance methods
@@ -570,7 +571,8 @@ _.extendProto(Component, {
 	init: init,
 	addFacet: addFacet,
 	allFacets: allFacets,
-	remove: remove
+	remove: remove,
+	getScopeParent: getScopeParent
 });
 
 
@@ -633,27 +635,36 @@ function getComponent(element) {
 }
 
 /**
- * Returns the closest component which contains the specified node
+ * getContainingComponent
+ * Returns the closest component which contains the specified node,
+ * optionally with specified facet
  *
  * This will return the current component of the node if it is a component.
  * 
  * @param {Node} node DOM Node
- * @return {Component|null}
+ * @param {String} withFacet optional string name of the facet, the case of the first letter is ignored, so both facet name and class name can be used
+ * @return {Component|undefined}
  */
-function getContainingComponent(node) {
-	// Where the current node is a component it's component should be returned
-	if (isComponent(node)) {
-		return getComponent(node);
-	}
-
-	// Where there is no parent node, this function will return null
-	if (! node.parentNode) {
-		return null;
-	}
-
-	// The parent node is checked recursively
-	return getContainingComponent(node.parentNode);
+function getContainingComponent(node, withFacet) {
+	check(node, Element);
+	check(withFacet, Match.Optional(String));
+	withFacet = _.firstLowerCase(withFacet);
+	_getContainingComponent(node, withFacet);
 }
+
+
+function _getContainingComponent(node, withFacet) {
+	// Where the current node is a component it's component should be returned
+	var comp = getComponent(node);
+	if (comp && (! withFacet || comp.hasOwnProperty(withFacet)))
+		return comp;
+
+	// Where there is no parent node, this function will return undefined
+	// The parent node is checked recursively
+	if (node.parentNode)
+		return _getContainingComponent(node.parentNode, withFacet);
+}
+
 
 function createComponentClass(name, facetsConfig) {
 	var facetsClasses = {};
@@ -750,6 +761,36 @@ function allFacets(method /* , ... */) {
 function remove() {
 	if (this.scope)
 		delete this.scope[this.name];
+}
+
+
+/**
+ * getScopeParent
+ * Instance method of Component.
+ * Returns the scope parent of a component.
+ * If withFacet parameter is not specified, an immediate parent
+ * will be returned, otherwise the closest ancestor with a specified facet.
+ * @param {String} withFacet optional string name of the facet, the case of the first letter is ignored, so both facet name and class name can be used
+ * @return {Component|undefined}
+ */
+function getScopeParent(withFacet) {
+	check(withFacet, Match.Optional(String));
+	withFacet = _.firstLowerCase(withFacet);
+	this._getScopeParent(withFacet);	
+}
+
+function _getScopeParent(withFacet) {
+	var parentContainer = this.scope && this.scope._hostObject
+		, parent = parentContainer && parentContainer.owner;
+
+	// Where there is no parent, this function will return undefined
+	// The parent component is checked recursively
+	if (parent) {
+		if (! withFacet || parent.hasOwnProperty(withFacet))
+			return parent;
+		else
+			return parent._getScopeParent(withFacet);
+	}
 }
 
 },{"../config":34,"../facets/f_object":36,"../messenger":40,"../util/check":47,"../util/count":48,"./c_facet":10,"./c_facets/cf_registry":24,"mol-proto":58}],10:[function(require,module,exports){
@@ -1352,13 +1393,16 @@ function startDragFacet() {
 
 	function onMouseDown(eventType, event) {
 		self._target = event.target;
-		if (targetInDragHandle(event))
+		if (targetInDragHandle(event)) {
 			window.getSelection().empty();
+			event.stopPropagation();
+		}
 	}
 
 	function onMouseMovement(eventType, event) {
 		var shouldBeDraggable = targetInDragHandle(event);
 		self.owner.el.setAttribute('draggable', shouldBeDraggable);
+		event.stopPropagation();
 	}
 
 	function onDragging(eventType, event) {
@@ -1963,9 +2007,6 @@ function _createMessenger() { // Called by inherited init
 }
 
 },{"../../model":45,"../c_facet":10,"./cf_registry":24,"mol-proto":58}],22:[function(require,module,exports){
-// <a name="components-facets-split"></a>
-// ###split facet
-
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -1976,7 +2017,6 @@ var Split = _.createSubclass(ComponentFacet, 'Split');
 
 _.extendProto(Split, {
 	init: init,
-	start: start,
 	make: make,
 
 	isSplittable: isSplittable,
@@ -1992,17 +2032,14 @@ facetsRegistry.add(Split);
 module.exports = Split;
 
 
-// init Split facet
+/**
+ * init
+ * Initializes Split facet
+ * Called by inherited ComponentFacet class constructor
+ */
 function init() {
 	ComponentFacet.prototype.init.apply(this, arguments);
-
 	this._splitSender = undefined;
-}
-
-
-// start Split facet
-function start() {
-	ComponentFacet.prototype.start.apply(this, arguments);
 }
 
 
@@ -2081,6 +2118,13 @@ function splitElement(thisEl, newEl) {
 }
 
 
+/**
+ * isSplittable
+ * Checks if a component can be split on selection point
+ * Component can only be split if all inner components containing
+ * selection point can be split too.
+ * @return {Boolean} true, if the component can be split
+ */
 function isSplittable() {
 	var selection = window.getSelection()
 		, el = selection.anchorNode;
