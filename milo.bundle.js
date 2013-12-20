@@ -639,30 +639,36 @@ function getComponent(element) {
  * Returns the closest component which contains the specified node,
  * optionally with specified facet
  *
- * This will return the current component of the node if it is a component.
+ * Unless returnCurrent parameter is false, the function will return
+ * the current component of the node.
  * 
- * @param {Node} node DOM Node
+ * @param {Node} el DOM Element
+ * @param {Boolean} returnCurrent optional boolean value indicating whether the component of the element should be returned. True by default, should be false to return only ancestors.
  * @param {String} withFacet optional string name of the facet, the case of the first letter is ignored, so both facet name and class name can be used
  * @return {Component|undefined}
  */
-function getContainingComponent(node, withFacet) {
-	check(node, Element);
+function getContainingComponent(el, returnCurrent, withFacet) {
+	check(el, Element);
+	check(returnCurrent, Match.Optional(Boolean));
 	check(withFacet, Match.Optional(String));
 	withFacet = _.firstLowerCase(withFacet);
-	_getContainingComponent(node, withFacet);
+	_getContainingComponent(el, returnCurrent, withFacet);
 }
 
 
-function _getContainingComponent(node, withFacet) {
-	// Where the current node is a component it's component should be returned
-	var comp = getComponent(node);
-	if (comp && (! withFacet || comp.hasOwnProperty(withFacet)))
-		return comp;
+function _getContainingComponent(el, returnCurrent, withFacet) {
+	// Where the current element is a component it should be returned
+	// if returnCurrent is true or undefined
+	if (returnCurrent !== false) {
+		var comp = getComponent(el);
+		if (comp && (! withFacet || comp.hasOwnProperty(withFacet)))
+			return comp;
+	}
 
-	// Where there is no parent node, this function will return undefined
-	// The parent node is checked recursively
-	if (node.parentNode)
-		return _getContainingComponent(node.parentNode, withFacet);
+	// Where there is no parent element, this function will return undefined
+	// The parent element is checked recursively
+	if (el.parentNode)
+		return _getContainingComponent(el.parentNode, true, withFacet);
 }
 
 
@@ -5229,8 +5235,7 @@ var proto = _ = {
 	prependArray: prependArray,
 	toArray: toArray,
 	firstUpperCase: firstUpperCase,
-	firstLowerCase: firstLowerCase,
-	partial: partial
+	firstLowerCase: firstLowerCase
 };
 
 
@@ -5442,14 +5447,12 @@ function prependArray(self, arrayToPrepend) {
 
 
 function toArray(arrayLike) {
-	return Array.prototype.slice.call(arrayLike);
+	var arr = [];
+	Array.prototype.forEach.call(arrayLike, function(item) {
+		arr.push(item)
+	});
 
-	// var arr = [];
-	// Array.prototype.forEach.call(arrayLike, function(item) {
-	// 	arr.push(item)
-	// });
-
-	// return arr;
+	return arr;
 }
 
 
@@ -5462,20 +5465,6 @@ function firstLowerCase(str) {
 	return str[0].toLowerCase() + str.slice(1);
 }
 
-/**
- * partial
- * Creates a function as a result of partial function application
- * with the passed parameters.
- * @param {Function} func function to be applied
- * @param {List} arguments these arguments will be prepended to the original function call when the partial function is called.
- * @return {Function} partially applied function
- */
-function partial(func) { // , ... arguments
-	var args = Array.prototype.slice.call(arguments, 1);
-	return function() {
-		return func.apply(this, args.concat(_.toArray(arguments)));
-	}
-}
 
 },{}]},{},[42])
 ;
