@@ -636,40 +636,38 @@ function getComponent(element) {
 }
 
 /**
- * getContainingComponent
+ * Get Containing Component
+ * 
  * Returns the closest component which contains the specified node,
  * optionally with specified facet
  *
  * Unless returnCurrent parameter is false, the function will return
  * the current component of the node.
  * 
- * @param {Node} el DOM Element
- * @param {Boolean} returnCurrent optional boolean value indicating whether the component of the element should be returned. True by default, should be false to return only ancestors.
- * @param {String} withFacet optional string name of the facet, the case of the first letter is ignored, so both facet name and class name can be used
+ * @param {Node}     node      DOM node
+ * @param {Function} condition When provided defines a condition which the components are filtered by. No filtering is applied by default.
+ * @param {Boolean}  current   When true indicates that the current node should also be searched. Defaults to true.
  * @return {Component|undefined}
  */
-function getContainingComponent(el, returnCurrent, withFacet) {
-	check(el, Element);
-	check(returnCurrent, Match.Optional(Boolean));
-	check(withFacet, Match.Optional(String));
-	withFacet = _.firstLowerCase(withFacet);
-	_getContainingComponent(el, returnCurrent, withFacet);
-}
+function getContainingComponent(node, condition, current) {
+	var component;
 
-
-function _getContainingComponent(el, returnCurrent, withFacet) {
-	// Where the current element is a component it should be returned
-	// if returnCurrent is true or undefined
-	if (returnCurrent !== false) {
-		var comp = getComponent(el);
-		if (comp && (! withFacet || comp.hasOwnProperty(withFacet)))
-			return comp;
+	// Where the current node is a component than it should be returned provided
+	// that it matches the specified condition (if supplied)
+	if (current !== false && (component = getComponent(node))) {
+		if (typeof condition !== 'function' || condition(component)) {
+			return component;
+		}
 	}
 
-	// Where there is no parent element, this function will return undefined
-	// The parent element is checked recursively
-	if (el.parentNode)
-		return _getContainingComponent(el.parentNode, true, withFacet);
+	// Where there are no parent nodes to be found on the node this function
+	// will immediately return undefined
+	if (!node.parentNode) {
+		return undefined;
+	}
+
+	// Otherwise traverse up the node tree recursively
+	return getContainingComponent(node.parentNode, condition);
 }
 
 
