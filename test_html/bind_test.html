@@ -29,7 +29,7 @@
         <button ml-bind="[Events]:connectButton">Connect lists</button>
         <button ml-bind="[Events]:disconnectButton">Disconnect lists</button>
 
-        <h2>List 2 (linked to List 1 with milo.minder)</h2>
+        <h2>List 2 (<span ml-bind="[Data]:linkState">linked</span> to List 1 with milo.minder)</h2>
         <div ml-bind="[Container, Dom, Data, List]:myLinkedList">
             <div ml-bind="[Container, Dom, Data, Item]:myListItem">
                 <input ml-bind="[Data]:title" type="text" value="" />

@@ -5,11 +5,11 @@ describe('milo binder', function() {
     it('should bind components based on ml-bind attribute', function() {
 		expect({p: 1}).property('p', 1);
 
-        console.log(milo.binder.scan());
+        // console.log(milo.binder.scan());
 
-        console.log('one pass binding');
+        // console.log('one pass binding');
     	var ctrl = milo.binder();
-        console.log(ctrl);
+        // console.log(ctrl);
 
         // console.log('two pass binding');
         // var ctrl2 = milo.binder.twoPass();
@@ -19,9 +19,9 @@ describe('milo binder', function() {
     		console.log('button', eType, evt);
     	});
 
-        ctrl.main.events.on('click mouseenter input keypress', function(eType, evt) {
-            console.log('div', eType, evt);
-        });
+        // ctrl.main.events.on('click mouseenter input keypress', function(eType, evt) {
+        //     console.log('div', eType, evt);
+        // });
 
     	ctrl.articleIdInput.data.on('', logData);
 
@@ -49,33 +49,47 @@ describe('milo binder', function() {
         var myLinkedList = ctrl.myLinkedList;
 
         var cnct = milo.minder([
-            [myList.data, '<<<->>>', m],
-            [m, '<<<->>>', myLinkedList.data]
+            [myList.data, '<<<->>>', m, {
+                '[*].titleLabel': '[$1].title',
+                '[*].descField': '[$1].desc' 
+            }],
+            [m, '<<<->>>', myLinkedList.data, {
+                '[*].title': '[$1].titleField',
+                '[*].desc': '[$1].descLabel' 
+            }]
         ]);
         // var cnct = milo.minder(myList.data, '->>>', myLinkedList.data);
 
-        var listArray = [
-            {title: 'Title 1', desc: 'Description 1', notUsed: 1},
-            {title: 'Title 2', desc: 'Description 2', notUsed: 2},
-            {title: 'Title 3', desc: 'Description 3', notUsed: 3},
-            {title: 'Title 4', desc: 'Description 4', notUsed: 4},
-            {title: 'Title 5', desc: 'Description 5', notUsed: 5}
-        ];
+        var listArray = [];
+        for (var i = 0; i < 10; i++)
+            listArray.push({title: 'Title ' + i, desc: 'Description ' + i, unused: i});
 
-        myList.data.on(/.*/, function(msgType, data) {
-            console.log(msgType, data);
-            console.log(m.get());
-        })
+        // myList.data.on(/.*/, function(msgType, data) {
+        //     console.log(msgType, data);
+        //     console.log(m.get());
+        // })
 
-        var used = myList.data.set(listArray);
+        // milo.logger.level = 0; // errors
 
-        console.log(used);
-        console.log(myList.data.get());
-        console.log(m.get());
+        m.set(listArray);
 
         listButton.events.on('mousedown', function (eventType, event) {
             myList.data.path('[2]').set({title: 'New Title', desc: 'New Description'});
-            console.log(myList.data.get());
+            // console.log(myList.data.get());
+        });
+
+        ctrl.connectButton.events.on('click', function() {
+            console.log('connecting');
+            ctrl.linkState.data.set('linked');
+            cnct[0].on();
+            cnct[1].on();
+        });
+
+        ctrl.disconnectButton.events.on('click', function() {
+            console.log('disconnecting');
+            ctrl.linkState.data.set('not linked');
+            cnct[0].off();
+            cnct[1].off();
         });
     });
 });

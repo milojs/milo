@@ -4015,11 +4015,10 @@ function off() {
 }
 
 },{"../util/error":51,"../util/logger":53,"mol-proto":59}],46:[function(require,module,exports){
+'use strict';
 // <a name="model"></a>
 // milo model
 // -----------
-
-'use strict';
 
 var pathUtils = require('./path_utils')
 	, Messenger = require('../messenger')
@@ -4066,10 +4065,6 @@ Model.prototype.__proto__ = Model.__proto__;
 
 // these methods will be wrapped to support "*" pattern subscriptions
 var modelMethodsToWrap = ['on', 'off', 'onMessages', 'offMessages'];
-
-
-// cache of compiled ModelPath methods
-var __synthesizedPathsMethods = {};
 
 var dotDef = {
 	modelAccessPrefix: 'this._model._data',
@@ -4154,18 +4149,15 @@ modelMethodsToWrap.forEach(function(methodName) {
 _.extendProto(ModelPath, modelPathMethodsMap);
 
 
-function synthesizePathMethods(path) {
-	if (__synthesizedPathsMethods.hasOwnProperty(path))
-		return __synthesizedPathsMethods[path];
+var synthesizePathMethods = _.memoize(_synthesizePathMethods);
 
+function _synthesizePathMethods(path) {
 	var parsedPath = pathUtils.parseAccessPath(path);
 
 	var methods = {
 		get: synthesizeMethod(getterSynthesizer, path, parsedPath),
 		set: synthesizeMethod(setterSynthesizer, path, parsedPath)
 	};
-
-	__synthesizedPathsMethods[path] = methods;
 
 	return methods;
 }
@@ -4264,10 +4256,12 @@ var pathUtils = module.exports = {
 
 var pathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]/g
 	, patternPathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]|\.\*|\[\*\]|\*/g
+	, targetPathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]|\.\$[1-9][0-9]*|\[\$[1-9][0-9]*\]|\$[1-9][0-9]/g
 	, pathNodeTypes = {
 		'.': { syntax: 'object', empty: '{}' },
 		'[': { syntax: 'array', empty: '[]'},
-		'*': { syntax: 'star', empty: '{}'}
+		'*': { syntax: 'match', empty: '{}'},
+		'$': { syntax: 'matchref', empty: '{}' }
 	};
 
 function parseAccessPath(path, nodeParsePattern) {
@@ -4296,6 +4290,7 @@ var nodeRegex = {
 	'[*]': '\\[[0-9]+\\]'
 };
 nodeRegex['*'] = nodeRegex['.*'] + '|' + nodeRegex['[*]'];
+
 function createRegexPath(path) {
 	check(path, Match.OneOf(String, RegExp));
 
@@ -4318,8 +4313,8 @@ function createRegexPath(path) {
 			// regexStrEnd += '|)';
 			patternsStarted = true;
 		} else {
-			if (patternsStarted)
-				throw new ModelError('"*" path segment cannot be in the middle of the path: ' + path);
+			// if (patternsStarted)
+			// 	throw new ModelError('"*" path segment cannot be in the middle of the path: ' + path);
 			regexStr += prop.replace(/(\.|\[|\])/g, '\\$1');
 		}
 	});
@@ -5343,7 +5338,8 @@ var proto = _ = {
 	toArray: toArray,
 	firstUpperCase: firstUpperCase,
 	firstLowerCase: firstLowerCase,
-	partial: partial
+	partial: partial,
+	memoize: memoize
 };
 
 
@@ -5577,8 +5573,10 @@ function firstLowerCase(str) {
 
 /**
  * partial
+ *
  * Creates a function as a result of partial function application
  * with the passed parameters.
+ *
  * @param {Function} func function to be applied
  * @param {List} arguments these arguments will be prepended to the original function call when the partial function is called.
  * @return {Function} partially applied function
@@ -5589,6 +5587,36 @@ function partial(func) { // , ... arguments
 		return func.apply(this, args.concat(_.toArray(arguments)));
 	}
 }
+
+
+/**
+ * memoize
+ *
+ * Creates a memoized version of the function using supplied hash function
+ * as key. If the hash is not supplied, uses its first parameter as the hash.
+ * 
+ * @param {Function} func function to be memoized
+ * @param {Function} hashFunc optional hash function that is passed all function arguments and should return cache key.
+ * @param {Integer} limit optional maximum number of results to be stored in the cache. 1000 by default.
+ * @return {Function} memoized function
+ */
+ function memoize(func, hashFunc, limit) {
+    var cache = {}, keysList = [];
+    limit = limit || 1000;
+    return function() {
+		var key = hashFunc && hashFunc.apply(this, arguments) || arguments[0];
+		if (cache.hasOwnProperty(key))
+			return cache[key];
+
+		var result = cache[key] = func.apply(this, arguments);
+		keysList.push(key);
+
+		if (keysList.length > limit)
+			delete cache[keysList.shift()];
+
+		return result;
+    };
+ }
 
 },{}]},{},[43])
 ;
