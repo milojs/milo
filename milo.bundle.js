@@ -248,10 +248,6 @@ function render() {
 }
 
 },{"../config":35,"../util/check":48,"../util/error":51,"./a_class":4,"mol-proto":59}],4:[function(require,module,exports){
-// <a name="attribute"></a>
-// attribute class
-// ---------
-
 'use strict';
 
 var _ = require('mol-proto')
@@ -260,9 +256,15 @@ var _ = require('mol-proto')
 	, toBeImplemented = require('../util/error').toBeImplemented;
 
 
-// an abstract attribute class for attribute parsing and validation
 module.exports = Attribute;
 
+
+/**
+ * An absctract class for parsing and validation of element attribute.
+ * Subclasses should define methods `attrName`, `parse`, `validate` and `render`.
+ * @param {Element} el DOM element where attribute is attached
+ * @param {String} name name of the attribute, usually supplied by subclass
+ */
 function Attribute(el, name) {
 	this.name = name || this.attrName();
 	this.el = el;
@@ -272,25 +274,38 @@ function Attribute(el, name) {
 _.extendProto(Attribute, {
 	get: get,
 	set: set,
+	decorate: decorate,
 
 	// should be defined in subclass
 	attrName: toBeImplemented,
 	parse: toBeImplemented,
 	validate: toBeImplemented,
-	render: toBeImplemented,
-	decorate: decorate
+	render: toBeImplemented
 });
 
-// get attribute value
+
+/**
+ * Attribute instance method that returns attribute value as string.
+ * @return {String}
+ */
 function get() {
 	return this.el.getAttribute(this.name);
 }
 
-// set attribute value
+
+/**
+ * Attribute instance method that sets attribute value.
+ * @param {String} value
+ */
 function set(value) {
 	this.el.setAttribute(this.name, value);
 }
 
+
+/**
+ * Attribute instance method that decorates element with its rendered value.
+ * Uses `render` method that should be defiend in subclass.
+ */
 function decorate() {
 	this.set(this.render());
 }
@@ -339,6 +354,7 @@ function validateAttribute() {
 
 	return this;
 }
+
 },{"../config":35,"../util/error":51,"./a_class":4,"mol-proto":59}],6:[function(require,module,exports){
 'use strict';
 
@@ -348,33 +364,6 @@ module.exports = {
 };
 
 },{"./a_bind":3,"./a_load":5}],7:[function(require,module,exports){
-// <a name="binder"></a>
-// milo.binder
-// -----------
-
-// milo.binder recursively scans the document tree inside scopeElement
-// (document.body by default) looking for __ml-bind__ attribute that should
-// contain the class, additional facets and the name of the component
-// that should be created and bound to the element.
-
-// Possible values of __ml-bind__ attribute:
-
-// - :myView - only component name. An instance of Component class will be
-//   created without any facets.
-// - View:myView - class and component name. An instance of View class will be
-//   created.
-// - [Events, Data]:myView - facets and component name. An instance of Component
-//   class will be created with the addition of facets Events and Data.
-// - View[Events, Data]:myView - class, facet(s) and component name. An instance of
-//   View class will be created with the addition of facets Events and Data.
-
-// Created components will be returned as map with their names used as keys.
-// Names within the scope should be therefore unique.
-
-// If the component has _Scope_ facet, children of this element will be stored on the _Scope_ facet of this element as properties. Names of components within
-// the scope whould be unique, but they can be the same as the names of components
-// in outer scope (or some other).
-
 'use strict';
 
 var miloMail = require('./mail')
@@ -399,6 +388,38 @@ binder.twoPass = twoPass;
 module.exports = binder;
 
 
+/**
+ * Recursively scans the document tree inside `scopeEl` (document.body
+ * by default) looking for __ml-bind__ attribute that should contain
+ * the class, additional facets and the name of the component that should
+ * be created and bound to the element.
+ *
+ * Possible values of __ml-bind__ attribute:
+ *
+ * - `:myView` - only component name. An instance of Component class will be
+ *   created without any facets.
+ * - `View:myView` - class and component name. An instance of View class
+ *   will be created.
+ * - `[Events, Data]:myView` - facets and component name. An instance of
+ *   Component class will be created with the addition of facets Events
+ *   and Data.
+ * - `View[Events, Data]:myView` - class, facet(s) and component name.
+ *   An instance of View class will be created with the addition of facets
+ *   Events and Data.
+ *
+ * Function an instance of [`Scope`](./components/scope.js.html) class containing all components created
+ * as a result of scanning DOM.
+ *
+ * If the component has [`Container`](./components/c_facets/Container.js) facet, children of this element will be
+ * stored on the Container facet of this element as properties of scope
+ * property of Container facet. Names of components within the scope should be
+ * unique, but they can be the same as the names of components in outer scope
+ * (or some other scope).
+ *
+ * @param {Element} scopeEl root element inside which DOM will be scanned
+ *  and bound
+ * @return {Scope}
+ */
 function binder(scopeEl) {
 	return createBinderScope(scopeEl, function(scope, el, attr) {
 		var info = new ComponentInfo(scope, el, attr);
@@ -409,7 +430,6 @@ function binder(scopeEl) {
 
 // bind in two passes
 function twoPass(scopeEl) {
-	var scopeEl = scopeEl || document.body;
 	var scanScope = binder.scan(scopeEl);
 	return binder.create(scanScope);
 }
