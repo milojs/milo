@@ -3,16 +3,3 @@ node_js:
   - "0.10"
 before_script:
   - npm install -g grunt-cli
-after_script:
-  - npm install -g doxx
-  - git config user.email "jasoniangreen@gmail.com"
-  - git remote set-url origin https://github.com/MailOnline/milo.git
-  - git config user.name "Travis Docs Task"
-  - git branch gh-pages | echo 'Create branch gh-pages if it does not exist'
-  - git checkout gh-pages
-  - doxx --source lib --target . --title 'milo'
-  - git add .
-  - git add -u .
-  - git commit -m 'doxx generated'
-  - git push --force origin gh-pages
-  - git checkout master
