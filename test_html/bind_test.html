@@ -17,6 +17,11 @@
 
         <div ml-bind="[Container, Template, Events, Drag]:myTemplate"></div>
 
+        <select ml-bind="MLSelect:mySelect">
+            <option>Option 1</option>
+            <option>Option 2</option>
+        </select>
+
         <h2>List 1</h2>
         <div ml-bind="[Container, Dom, Data, List]:myList">
             <button ml-bind="[Events]:listButton">Change list data</button>

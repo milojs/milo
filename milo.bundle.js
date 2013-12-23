@@ -76,7 +76,7 @@ function _createProxyMethods(proxyMethods, hostObject) {
 	}, this);
 }
 
-},{"../util/check":48,"../util/error":51,"mol-proto":59}],2:[function(require,module,exports){
+},{"../util/check":54,"../util/error":58,"mol-proto":66}],2:[function(require,module,exports){
 // <a name="registry"></a>
 // registry abstract class
 // --------------
@@ -162,7 +162,7 @@ function unregisterAllClasses() {
 	this.__registeredClasses = {};
 };
 
-},{"../util/check":48,"mol-proto":59}],3:[function(require,module,exports){
+},{"../util/check":54,"mol-proto":66}],3:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -238,16 +238,16 @@ function validate() {
 
 
 function render() {
+	this.compName = this.compName || (milo.config.componentPrefix + milo.util.count());
 	return attrTemplate
 				.replace('%compClass', this.compClass || '')
 				.replace('%compFacets', this.compFacets
 											? '[' + this.compFacets.join(', ') + ']'
 											: '')
-				.replace('%compName', this.compName 
-						|| (milo.config.componentPrefix + milo.util.count()));
+				.replace('%compName', this.compName);
 }
 
-},{"../config":35,"../util/check":48,"../util/error":51,"./a_class":4,"mol-proto":59}],4:[function(require,module,exports){
+},{"../config":39,"../util/check":54,"../util/error":58,"./a_class":4,"mol-proto":66}],4:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -310,7 +310,7 @@ function decorate() {
 	this.set(this.render());
 }
 
-},{"../util/check":48,"../util/error":51,"mol-proto":59}],5:[function(require,module,exports){
+},{"../util/check":54,"../util/error":58,"mol-proto":66}],5:[function(require,module,exports){
 // <a name="attribute-load"></a>
 // ###load attribute class
 
@@ -355,7 +355,7 @@ function validateAttribute() {
 	return this;
 }
 
-},{"../config":35,"../util/error":51,"./a_class":4,"mol-proto":59}],6:[function(require,module,exports){
+},{"../config":39,"../util/error":58,"./a_class":4,"mol-proto":66}],6:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -520,7 +520,7 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 	}
 }
 
-},{"./attributes/a_bind":3,"./components/c_facets/cf_registry":24,"./components/c_info":25,"./components/c_registry":31,"./components/scope":34,"./mail":39,"./util/check":48,"./util/dom":50,"./util/error":51,"mol-proto":59}],8:[function(require,module,exports){
+},{"./attributes/a_bind":3,"./components/c_facets/cf_registry":24,"./components/c_info":25,"./components/c_registry":31,"./components/scope":34,"./mail":43,"./util/check":54,"./util/dom":57,"./util/error":58,"mol-proto":66}],8:[function(require,module,exports){
 // <a name="classes"></a>
 // milo.classes
 // -----------
@@ -539,7 +539,7 @@ var classes = {
 
 module.exports = classes;
 
-},{"./abstract/registry":2,"./components/c_facet":10,"./components/c_facets/cf_registry":24,"./components/c_registry":31,"./facets/f_class":36}],9:[function(require,module,exports){
+},{"./abstract/registry":2,"./components/c_facet":10,"./components/c_facets/cf_registry":24,"./components/c_registry":31,"./facets/f_class":40}],9:[function(require,module,exports){
 'use strict';
 
 // <a name="components"></a>
@@ -785,7 +785,7 @@ function _getScopeParent(withFacet) {
 	}
 }
 
-},{"../config":35,"../facets/f_object":37,"../messenger":41,"../util/check":48,"../util/count":49,"./c_facets/cf_registry":24,"./c_utils":32,"mol-proto":59}],10:[function(require,module,exports){
+},{"../config":39,"../facets/f_object":41,"../messenger":45,"../util/check":54,"../util/count":56,"./c_facets/cf_registry":24,"./c_utils":32,"mol-proto":66}],10:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facet"></a>
@@ -919,7 +919,7 @@ function _createMessageSource(MessageSourceClass, options) {
 	_.defineProperty(this, '_messageSource', messageSource);
 }
 
-},{"../facets/f_class":36,"../messenger":41,"../util/error":51,"./c_utils":32,"mol-proto":59}],11:[function(require,module,exports){
+},{"../facets/f_class":40,"../messenger":45,"../util/error":58,"./c_utils":32,"mol-proto":66}],11:[function(require,module,exports){
 // <a name="components-facets-container"></a>
 // ###container facet
 
@@ -966,7 +966,7 @@ function addChildComponents(childComponents) {
 	_.extend(this.scope, childComponents);
 }
 
-},{"../../binder":7,"../c_facet":10,"./cf_registry":24,"mol-proto":59}],12:[function(require,module,exports){
+},{"../../binder":7,"../c_facet":10,"./cf_registry":24,"mol-proto":66}],12:[function(require,module,exports){
 // <a name="components-facets-data"></a>
 // ###data facet
 
@@ -987,13 +987,13 @@ var ComponentFacet = require('../c_facet')
 var Data = _.createSubclass(ComponentFacet, 'Data');
 
 _.extendProto(Data, {
-	init: init,
-	get: get,
-	set: set,
-	path: path,
-	_setScalarValue: _setScalarValue,
-	_getScalarValue: _getScalarValue,
-	_postDataChanged: _postDataChanged,
+	start: Data$start,
+	get: Data$get,
+	set: Data$set,
+	path: Data$path,
+	_setScalarValue: Data$_setScalarValue,
+	_getScalarValue: Data$_getScalarValue,
+	_postDataChanged: Data$_postDataChanged,
 	_wrapMessengerMethods: pathUtils.wrapMessengerMethods
 });
 
@@ -1006,10 +1006,8 @@ module.exports = Data;
 var dataFacetMethodsToWrap = ['on', 'off', 'onMessages', 'offMessages'];
 
 
-// Initialize Data Facet
-function init() {
-	ComponentFacet.prototype.init.apply(this, arguments);
-
+// start Data facet
+function Data$start() {
 	var proxyCompDataSourceMethods = {
 		value: 'value',
 		trigger: 'trigger'
@@ -1033,7 +1031,7 @@ function init() {
 
 
 // Set component DOM value
-function set(value) {
+function Data$set(value) {
 	if (value == this._value)
 		return value;
 
@@ -1070,7 +1068,7 @@ function set(value) {
 }
 
 
-function _setScalarValue(value) {
+function Data$_setScalarValue(value) {
 	var el = this.owner.el
 		, setter = tags[el.tagName.toLowerCase()];
 	return setter
@@ -1079,7 +1077,7 @@ function _setScalarValue(value) {
 }
 
 
-function _postDataChanged(message) {
+function Data$_postDataChanged(message) {
 	// TODO compare with old value
 	this.postMessage(message.path, message);
 
@@ -1101,7 +1099,7 @@ function onChildData(msgType, message) {
 
 
 // get structured data from scope hierarchy
-function get() {
+function Data$get() {
 	var comp = this.owner
 		, scopeData;
 
@@ -1128,7 +1126,7 @@ function get() {
 }
 
 
-function _getScalarValue() {
+function Data$_getScalarValue() {
 	var el = this.owner.el
 		, getter = tags[el.tagName.toLowerCase()];
 	return getter
@@ -1138,7 +1136,7 @@ function _getScalarValue() {
 
 
 // returns data facet of a child component (by scopes) corresponding to the path
-function path(accessPath, createItem) {
+function Data$path(accessPath, createItem) {
 	var parsedPath = pathUtils.parseAccessPath(accessPath)
 		, currentComponent = this.owner;
 
@@ -1166,7 +1164,8 @@ function path(accessPath, createItem) {
 
 // Set value rules
 var tags = {
-	'input': inputValue
+	'input': inputValue,
+	'select': inputValue
 }
 
 
@@ -1178,7 +1177,7 @@ function inputValue(el, value) {
 		return el.value;
 }
 
-},{"../../messenger":41,"../../model/path_utils":47,"../../util/logger":53,"../c_facet":10,"../c_message_sources/component_data_source":26,"./cf_registry":24,"mol-proto":59}],13:[function(require,module,exports){
+},{"../../messenger":45,"../../model/path_utils":51,"../../util/logger":60,"../c_facet":10,"../c_message_sources/component_data_source":26,"./cf_registry":24,"mol-proto":66}],13:[function(require,module,exports){
 // <a name="components-facets-dom"></a>
 // ###dom facet
 
@@ -1382,7 +1381,7 @@ function hasTextBeforeSelection() {
 }
 
 
-},{"../../attributes/a_bind":3,"../../binder":7,"../../util/check":48,"../../util/error":51,"../c_facet":10,"./cf_registry":24,"mol-proto":59}],14:[function(require,module,exports){
+},{"../../attributes/a_bind":3,"../../binder":7,"../../util/check":54,"../../util/error":58,"../c_facet":10,"./cf_registry":24,"mol-proto":66}],14:[function(require,module,exports){
 // <a name="components-facets-drag"></a>
 // ###drag facet
 
@@ -1468,7 +1467,7 @@ function startDragFacet() {
 	}
 }
 
-},{"../c_facet":10,"../c_message_sources/dom_events_source":28,"./cf_registry":24,"mol-proto":59}],15:[function(require,module,exports){
+},{"../c_facet":10,"../c_message_sources/dom_events_source":28,"./cf_registry":24,"mol-proto":66}],15:[function(require,module,exports){
 // <a name="components-facets-drop"></a>
 // ###drop facet
 
@@ -1516,7 +1515,7 @@ function startDropFacet() {
 	}
 }
 
-},{"../c_facet":10,"../c_message_sources/dom_events_source":28,"./cf_registry":24,"mol-proto":59}],16:[function(require,module,exports){
+},{"../c_facet":10,"../c_message_sources/dom_events_source":28,"./cf_registry":24,"mol-proto":66}],16:[function(require,module,exports){
 // <a name="components-facets-editable"></a>
 // ###editable facet
 
@@ -1742,7 +1741,7 @@ function onEnterSplit(message, event) {
 	}
 }
 
-},{"../../util":52,"../../util/dom":50,"../../util/logger":53,"../c_class":9,"../c_facet":10,"../c_message_sources/editable_events_source":29,"./cf_registry":24,"mol-proto":59}],17:[function(require,module,exports){
+},{"../../util":59,"../../util/dom":57,"../../util/logger":60,"../c_class":9,"../c_facet":10,"../c_message_sources/editable_events_source":29,"./cf_registry":24,"mol-proto":66}],17:[function(require,module,exports){
 // <a name="components-facets-events"></a>
 // ###events facet
 
@@ -1784,7 +1783,7 @@ function init() {
 	});
 }
 
-},{"../../messenger":41,"../c_facet":10,"../c_message_sources/dom_events_source":28,"./cf_registry":24,"mol-proto":59}],18:[function(require,module,exports){
+},{"../../messenger":45,"../c_facet":10,"../c_message_sources/dom_events_source":28,"./cf_registry":24,"mol-proto":66}],18:[function(require,module,exports){
 // <a name="components-facets-frame"></a>
 // ###frame facet
 
@@ -1830,7 +1829,7 @@ function initFrameFacet() {
 		_messageSource: { value: messageSource }
 	});
 }
-},{"../../messenger":41,"../c_facet":10,"../c_message_sources/iframe_message_source":30,"./cf_registry":24,"mol-proto":59}],19:[function(require,module,exports){
+},{"../../messenger":45,"../c_facet":10,"../c_message_sources/iframe_message_source":30,"./cf_registry":24,"mol-proto":66}],19:[function(require,module,exports){
 // <a name="components-facets-item"></a>
 // ###item facet
 
@@ -1854,7 +1853,7 @@ facetsRegistry.add(ItemFacet);
 
 module.exports = ItemFacet;
 
-},{"../../mail":39,"../../model":46,"../c_facet":10,"./cf_registry":24,"mol-proto":59}],20:[function(require,module,exports){
+},{"../../mail":43,"../../model":50,"../c_facet":10,"./cf_registry":24,"mol-proto":66}],20:[function(require,module,exports){
 // <a name="components-facets-list"></a>
 // ###list facet
 
@@ -2018,7 +2017,7 @@ function each(callback, thisArg) {
     }, thisArg || this);
 }
 
-},{"../../binder":7,"../../mail":39,"../../model":46,"../../util/error":51,"../../util/logger":53,"../c_class":9,"../c_facet":10,"./cf_registry":24,"mol-proto":59}],21:[function(require,module,exports){
+},{"../../binder":7,"../../mail":43,"../../model":50,"../../util/error":58,"../../util/logger":60,"../c_class":9,"../c_facet":10,"./cf_registry":24,"mol-proto":66}],21:[function(require,module,exports){
 // <a name="components-facets-model"></a>
 // ###model facet
 
@@ -2055,7 +2054,7 @@ function _createMessenger() { // Called by inherited init
 	this.m.proxyMessenger(this); // Creates messenger's methods directly on facet
 }
 
-},{"../../model":46,"../c_facet":10,"./cf_registry":24,"mol-proto":59}],22:[function(require,module,exports){
+},{"../../model":50,"../c_facet":10,"./cf_registry":24,"mol-proto":66}],22:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -2265,7 +2264,7 @@ function bindInnerComponents() {
 	this.owner.container.scope = thisScope[this.owner.name].container.scope;
 }
 
-},{"../../binder":7,"../../util/check":48,"../c_facet":10,"./cf_registry":24,"mol-proto":59}],24:[function(require,module,exports){
+},{"../../binder":7,"../../util/check":54,"../c_facet":10,"./cf_registry":24,"mol-proto":66}],24:[function(require,module,exports){
 // <a name="components-facet-registry"></a>
 // ###component facet registry
 
@@ -2347,7 +2346,7 @@ function ComponentInfo(scope, el, attr) {
 	}
 }
 
-},{"../util/error":51,"./c_facets/cf_registry":24,"./c_registry":31}],26:[function(require,module,exports){
+},{"../util/error":58,"./c_facets/cf_registry":24,"./c_registry":31}],26:[function(require,module,exports){
 // <a name="components-source-data"></a>
 // ###component data source
 
@@ -2452,7 +2451,7 @@ function triggerDataMessage(message, data) {
 	// TODO - opposite translation + event trigger 
 }
 
-},{"../../util/check":48,"../../util/error":51,"../c_class":9,"./dom_events_source":28,"mol-proto":59}],27:[function(require,module,exports){
+},{"../../util/check":54,"../../util/error":58,"../c_class":9,"./dom_events_source":28,"mol-proto":66}],27:[function(require,module,exports){
 // <a name="components-dom-constructors"></a>
 // ###dom events constructors
 
@@ -2507,7 +2506,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"mol-proto":59}],28:[function(require,module,exports){
+},{"mol-proto":66}],28:[function(require,module,exports){
 // <a name="components-source-dom"></a>
 // ###component dom events source
 
@@ -2615,7 +2614,7 @@ function triggerDomEvent(eventType, properties) {
 
 	return notCancelled;
 }
-},{"../../messenger/message_source":42,"../../util/check":48,"../c_class":9,"./dom_events_constructors":27,"mol-proto":59}],29:[function(require,module,exports){
+},{"../../messenger/message_source":46,"../../util/check":54,"../c_class":9,"./dom_events_constructors":27,"mol-proto":66}],29:[function(require,module,exports){
 // <a name="components-source-editable"></a>
 // ###component editable events source
 
@@ -2771,7 +2770,7 @@ function triggerEditableEvent(message, data) {
 	// TODO - opposite translation + event trigger 
 }
 
-},{"../../util/check":48,"../../util/error":51,"../c_class":9,"./dom_events_source":28,"mol-proto":59}],30:[function(require,module,exports){
+},{"../../util/check":54,"../../util/error":58,"../c_class":9,"./dom_events_source":28,"mol-proto":66}],30:[function(require,module,exports){
 // <a name="components-source-iframe"></a>
 // ###component iframe source
 
@@ -2844,7 +2843,7 @@ function handleEvent(event) {
 	this.dispatchMessage(event.type, event);
 }
 
-},{"../../messenger/message_source":42,"../../util/check":48,"mol-proto":59}],31:[function(require,module,exports){
+},{"../../messenger/message_source":46,"../../util/check":54,"mol-proto":66}],31:[function(require,module,exports){
 // <a name="components-registry"></a>
 // ###component registry class
 
@@ -2902,21 +2901,19 @@ function getComponent(el) {
 
 
 /**
- * getContainingComponent
- *
  * Returns the closest component which contains the specified element,
  * optionally, only component that passes `condition` test or contains specified facet
  *
  * Unless `returnCurrent` parameter is false, the function will return
  * the current component of the element (true by default).
  *
- * @param {Element} el DOM Element
+ * @param {Node} node DOM Element or text Node
  * @param {Boolean} returnCurrent optional boolean value indicating whether the component of the element can be returned. True by default, should be false to return only ancestors.
  * @param {Function|String} conditionOrFacet optional condition that component should pass (or facet name it should contain)
  * @return {Component} 
  */
-function getContainingComponent(el, returnCurrent, conditionOrFacet) {
-	check(el, Element);
+function getContainingComponent(node, returnCurrent, conditionOrFacet) {
+	// check(node, Node); - can't check tiype here as it is most likely coming from another frame
 	check(returnCurrent, Match.Optional(Boolean));
 	check(conditionOrFacet, Match.Optional(Match.OneOf(Function, String)));
 
@@ -2925,7 +2922,7 @@ function getContainingComponent(el, returnCurrent, conditionOrFacet) {
 						       return comp.hasOwnProperty(conditionOrFacet)
 						    } )
 						: conditionOrFacet;
-	_getContainingComponent(el, returnCurrent, _condition);
+	return _getContainingComponent(node, returnCurrent, _condition);
 }
 
 
@@ -2944,7 +2941,7 @@ function _getContainingComponent(el, returnCurrent, condition) {
 		return _getContainingComponent(el.parentNode, true, condition);
 }
 
-},{"../config":35,"../util/check":48}],33:[function(require,module,exports){
+},{"../config":39,"../util/check":54}],33:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3041,7 +3038,59 @@ function _length() {
 	return Object.keys(this).length;
 }
 
-},{"../util/check":48,"../util/error":51,"mol-proto":59}],35:[function(require,module,exports){
+},{"../util/check":54,"../util/error":58,"mol-proto":66}],35:[function(require,module,exports){
+'use strict';
+
+var Component = require('../c_class')
+	, componentsRegistry = require('../c_registry');
+
+
+var MLButton = Component.createComponentClass('MLButton', ['events']);
+
+componentsRegistry.add(MLButton);
+
+module.exports = MLButton;
+
+},{"../c_class":9,"../c_registry":31}],36:[function(require,module,exports){
+'use strict';
+
+var Component = require('../c_class')
+	, componentsRegistry = require('../c_registry');
+
+
+var MLGroup = Component.createComponentClass('MLGroup', ['container']);
+
+componentsRegistry.add(MLGroup);
+
+module.exports = MLGroup;
+
+},{"../c_class":9,"../c_registry":31}],37:[function(require,module,exports){
+'use strict';
+
+var Component = require('../c_class')
+	, componentsRegistry = require('../c_registry');
+
+
+var MLInput = Component.createComponentClass('MLInput', ['data', 'events']);
+
+componentsRegistry.add(MLInput);
+
+module.exports = MLInput;
+
+},{"../c_class":9,"../c_registry":31}],38:[function(require,module,exports){
+'use strict';
+
+var Component = require('../c_class')
+	, componentsRegistry = require('../c_registry');
+
+
+var MLSelect = Component.createComponentClass('MLSelect', ['data', 'events']);
+
+componentsRegistry.add(MLSelect);
+
+module.exports = MLSelect;
+
+},{"../c_class":9,"../c_registry":31}],39:[function(require,module,exports){
 // <a name="config"></a>
 // milo.config
 // -----------
@@ -3078,7 +3127,7 @@ config({
 	componentPrefix: 'milo_'
 });
 
-},{"mol-proto":59}],36:[function(require,module,exports){
+},{"mol-proto":66}],40:[function(require,module,exports){
 // <a name="facet-c"></a>
 // facet class
 // --------------
@@ -3100,7 +3149,7 @@ _.extendProto(Facet, {
 	init: function() {}
 });
 
-},{"mol-proto":59}],37:[function(require,module,exports){
+},{"mol-proto":66}],41:[function(require,module,exports){
 // <a name="facet-o"></a>
 // facetted object class
 // --------------
@@ -3220,7 +3269,7 @@ FacetedObject.createFacetedClass = function (name, facetsClasses, facetsConfig) 
 	return FacetedClass;
 };
 
-},{"../util/check":48,"../util/error":51,"./f_class":36,"mol-proto":59}],38:[function(require,module,exports){
+},{"../util/check":54,"../util/error":58,"./f_class":40,"mol-proto":66}],42:[function(require,module,exports){
 // <a name="loader"></a>
 // milo.loader
 // -----------
@@ -3327,7 +3376,7 @@ function loadView(el, callback) {
 	});
 }
 
-},{"./attributes/a_load":5,"./config":35,"./mail":39,"./util/dom":50,"./util/error":51,"./util/logger":53,"./util/request":55}],39:[function(require,module,exports){
+},{"./attributes/a_load":5,"./config":39,"./mail":43,"./util/dom":57,"./util/error":58,"./util/logger":60,"./util/request":62}],43:[function(require,module,exports){
 // <a name="mail"></a>
 // milo.mail
 // -----------
@@ -3353,7 +3402,7 @@ var miloMail = new Messenger(undefined, undefined, mailMsgSource);
 
 module.exports = miloMail;
 
-},{"../messenger":41,"./mail_source":40}],40:[function(require,module,exports){
+},{"../messenger":45,"./mail_source":44}],44:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../messenger/message_source')
@@ -3427,7 +3476,7 @@ function handleEvent(event) {
 	this.dispatchMessage(event.type, event);
 }
 
-},{"../components/c_message_sources/dom_events_constructors":27,"../messenger/message_source":42,"../util/check":48,"../util/error":51,"mol-proto":59}],41:[function(require,module,exports){
+},{"../components/c_message_sources/dom_events_constructors":27,"../messenger/message_source":46,"../util/check":54,"../util/error":58,"mol-proto":66}],45:[function(require,module,exports){
 // <a name="messenger"></a>
 // milo messenger
 // --------------
@@ -3692,7 +3741,7 @@ function _setMessageSource(messageSource) {
 }
 
 
-},{"../abstract/mixin":1,"../util/check":48,"../util/error":51,"./message_source":42,"mol-proto":59}],42:[function(require,module,exports){
+},{"../abstract/mixin":1,"../util/check":54,"../util/error":58,"./message_source":46,"mol-proto":66}],46:[function(require,module,exports){
 // <a name="messenger-source"></a>
 // ###messenger source
 
@@ -3809,9 +3858,9 @@ function dispatchAllSourceMessages(sourceMessage, message, data) {
 	return true;
 }
 
-},{"../abstract/mixin":1,"../util/error":51,"../util/logger":53,"mol-proto":59}],43:[function(require,module,exports){
-// A minimalist browser framework that binds HTML elements to JS components and components to models.
+},{"../abstract/mixin":1,"../util/error":58,"../util/logger":60,"mol-proto":66}],47:[function(require,module,exports){
 'use strict';
+// A minimalist browser framework that binds HTML elements to JS components and components to models.
 
 // Main Modules
 // ------------
@@ -3839,22 +3888,10 @@ var milo = {
 
 
 // included facets
-require('./components/c_facets/Dom');
-require('./components/c_facets/Data');
-require('./components/c_facets/Frame');
-require('./components/c_facets/Events');
-require('./components/c_facets/Template');
-require('./components/c_facets/Container');
-require('./components/c_facets/ModelFacet');
-require('./components/c_facets/Drag');
-require('./components/c_facets/Drop');
-require('./components/c_facets/Editable');
-require('./components/c_facets/Split');
-require('./components/c_facets/List');
-require('./components/c_facets/Item');
+require('./use_facets');
 
 // included components
-require('./components/classes/View');
+require('./use_components');
 
 
 // export for node/browserify
@@ -3865,7 +3902,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./attributes":6,"./binder":7,"./classes":8,"./components/c_class":9,"./components/c_facets/Container":11,"./components/c_facets/Data":12,"./components/c_facets/Dom":13,"./components/c_facets/Drag":14,"./components/c_facets/Drop":15,"./components/c_facets/Editable":16,"./components/c_facets/Events":17,"./components/c_facets/Frame":18,"./components/c_facets/Item":19,"./components/c_facets/List":20,"./components/c_facets/ModelFacet":21,"./components/c_facets/Split":22,"./components/c_facets/Template":23,"./components/classes/View":33,"./config":35,"./loader":38,"./mail":39,"./messenger":41,"./minder":44,"./model":46,"./util":52}],44:[function(require,module,exports){
+},{"./attributes":6,"./binder":7,"./classes":8,"./components/c_class":9,"./config":39,"./loader":42,"./mail":43,"./messenger":45,"./minder":48,"./model":50,"./use_components":52,"./use_facets":53,"./util":59}],48:[function(require,module,exports){
 'use strict';
 
 var Connector = require('./model/connector');
@@ -3901,7 +3938,7 @@ function minder(ds1, mode, ds2, options) {
 		return new Connector(ds1, mode, ds2, options);
 }
 
-},{"./model/connector":45}],45:[function(require,module,exports){
+},{"./model/connector":49}],49:[function(require,module,exports){
 'use strict';
 
 var ConnectorError = require('../util/error').Connector
@@ -4034,7 +4071,7 @@ function off() {
 	}
 }
 
-},{"../util/error":51,"../util/logger":53,"mol-proto":59}],46:[function(require,module,exports){
+},{"../util/error":58,"../util/logger":60,"mol-proto":66}],50:[function(require,module,exports){
 'use strict';
 // <a name="model"></a>
 // milo model
@@ -4255,7 +4292,7 @@ function synthesizeMethod(synthesizer, path, parsedPath) {
 	}
 }
 
-},{"../abstract/mixin":1,"../messenger":41,"../util/check":48,"../util/error":51,"./path_utils":47,"dot":58,"fs":56,"mol-proto":59}],47:[function(require,module,exports){
+},{"../abstract/mixin":1,"../messenger":45,"../util/check":54,"../util/error":58,"./path_utils":51,"dot":65,"fs":63,"mol-proto":66}],51:[function(require,module,exports){
 // <a name="model-path"></a>
 // ### model path utils
 
@@ -4369,7 +4406,47 @@ function wrapMessengerMethods(methodsNames) {
 	}, this);
 }
 
-},{"../util/check":48,"mol-proto":59}],48:[function(require,module,exports){
+},{"../util/check":54,"mol-proto":66}],52:[function(require,module,exports){
+'use strict';
+
+require('./components/classes/View');
+require('./components/ui/Group');
+require('./components/ui/Select');
+require('./components/ui/Input');
+require('./components/ui/Button');
+
+},{"./components/classes/View":33,"./components/ui/Button":35,"./components/ui/Group":36,"./components/ui/Input":37,"./components/ui/Select":38}],53:[function(require,module,exports){
+'use strict';
+
+// ['Dom'
+//  'Data'
+//  'Frame'
+//  'Events'
+//  'Template'
+//  'Container'
+//  'ModelFacet'
+//  'Drag'
+//  'Drop'
+//  'Editable'
+//  'Split'
+//  'List'
+//  'Item'].
+
+require('./components/c_facets/Dom');
+require('./components/c_facets/Data');
+require('./components/c_facets/Frame');
+require('./components/c_facets/Events');
+require('./components/c_facets/Template');
+require('./components/c_facets/Container');
+require('./components/c_facets/ModelFacet');
+require('./components/c_facets/Drag');
+require('./components/c_facets/Drop');
+require('./components/c_facets/Editable');
+require('./components/c_facets/Split');
+require('./components/c_facets/List');
+require('./components/c_facets/Item');
+
+},{"./components/c_facets/Container":11,"./components/c_facets/Data":12,"./components/c_facets/Dom":13,"./components/c_facets/Drag":14,"./components/c_facets/Drop":15,"./components/c_facets/Editable":16,"./components/c_facets/Events":17,"./components/c_facets/Frame":18,"./components/c_facets/Item":19,"./components/c_facets/List":20,"./components/c_facets/ModelFacet":21,"./components/c_facets/Split":22,"./components/c_facets/Template":23}],54:[function(require,module,exports){
 // <a name="utils-check"></a>
 // milo.utils.check
 // -----------
@@ -4727,7 +4804,21 @@ function _prependPath(key, base) {
 };
 
 
-},{"mol-proto":59}],49:[function(require,module,exports){
+},{"mol-proto":66}],55:[function(require,module,exports){
+'use strict';
+
+var count = require('./count')
+	, config = require('../config')
+	, prefix = config.componentPrefix;
+
+
+module.exports = componentName;
+
+function componentName() {
+	return prefix + count();
+}
+
+},{"../config":39,"./count":56}],56:[function(require,module,exports){
 // <a name="utils-count"></a>
 // milo.utils.count
 // ----------------
@@ -4747,7 +4838,7 @@ componentCount.get = function() {
 
 module.exports = componentCount;
 
-},{}],50:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 'use strict';
 
 
@@ -4806,7 +4897,7 @@ function getElementOffset(el) {
     return { topOffset: yPos, leftOffset: xPos };
 }
 
-},{}],51:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 // <a name="utils-error"></a>
 // milo.utils.error
 // -----------
@@ -4850,7 +4941,7 @@ function toBeImplemented() {
 	throw new error.AbstractClass('calling the method of an absctract class MessageSource');
 }
 
-},{"mol-proto":59}],52:[function(require,module,exports){
+},{"mol-proto":66}],59:[function(require,module,exports){
 // <a name="utils"></a>
 // milo.utils
 // -----------
@@ -4863,12 +4954,13 @@ var util = {
 	check: require('./check'),
 	error: require('./error'),
 	count: require('./count'),
+	componentName: require('./component_name'),
 	dom: require('./dom')
 };
 
 module.exports = util;
 
-},{"./check":48,"./count":49,"./dom":50,"./error":51,"./logger":53,"./request":55}],53:[function(require,module,exports){
+},{"./check":54,"./component_name":55,"./count":56,"./dom":57,"./error":58,"./logger":60,"./request":62}],60:[function(require,module,exports){
 // <a name="utils-logger"></a>
 // milo.utils.logger
 // -----------
@@ -4884,7 +4976,7 @@ var logger = new Logger({ level: 3 });
 
 module.exports = logger;
 
-},{"./logger_class":54}],54:[function(require,module,exports){
+},{"./logger_class":61}],61:[function(require,module,exports){
 // ### Logger Class
 
 // Properties:
@@ -4995,7 +5087,7 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"mol-proto":59}],55:[function(require,module,exports){
+},{"mol-proto":66}],62:[function(require,module,exports){
 // <a name="utils-request"></a>
 // milo.utils.request
 // -----------
@@ -5047,13 +5139,13 @@ function get(url, callback) {
 	request(url, { method: 'GET' }, callback);
 }
 
-},{"mol-proto":59}],56:[function(require,module,exports){
+},{"mol-proto":66}],63:[function(require,module,exports){
 
 // not implemented
 // The reason for having an empty file and not throwing is to allow
 // untraditional implementation of this module.
 
-},{}],57:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 // doT.js
 // 2011, Laura Doktorova, https://github.com/olado/doT
 // Licensed under the MIT license.
@@ -5190,7 +5282,7 @@ function get(url, callback) {
 	};
 }());
 
-},{}],58:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 /* doT + auto-compilation of doT templates
  *
  * 2012, Laura Doktorova, https://github.com/olado/doT
@@ -5335,98 +5427,474 @@ InstallDots.prototype.compileAll = function() {
 	return this.__rendermodule;
 };
 
-},{"./doT":57,"fs":56}],59:[function(require,module,exports){
+},{"./doT":64,"fs":63}],66:[function(require,module,exports){
 'use strict';
 
-var _;
-var proto = _ = {
-	extendProto: extendProto,
-	createSubclass: createSubclass,
-	makeSubclass: makeSubclass,
+var utils = require('./utils');
+
+
+/**
+ * [__Prototype functions__](proto_prototype.js.html)
+ *
+ * - [extendProto](proto_prototype.js.html#extendProto)
+ * - [createSubclass](proto_prototype.js.html#createSubclass)
+ * - [makeSubclass](proto_prototype.js.html#makeSubclass)
+ */
+var	prototypeMethods = require('./proto_prototype');
+
+
+/**
+ * [__Object functions__](proto_object.js.html)
+ *
+ * - [extend](proto_object.js.html#extend)
+ * - [clone](proto_object.js.html#clone)
+ * - [defineProperty](proto_object.js.html#defineProperty)
+ * - [defineProperties](proto_object.js.html#defineProperties)
+ * - [deepExtend](proto_object.js.html#deepExtend)
+ * - [allKeys](proto_object.js.html#allKeys)
+ * - [keyOf](proto_object.js.html#keyOf)
+ * - [allKeysOf](proto_object.js.html#allKeysOf)
+ * - [eachKey](proto_object.js.html#eachKey)
+ * - [mapKeys](proto_object.js.html#mapKeys)
+ */
+var	objectMethods = require('./proto_object');
+
+
+/**
+ * [__Array functions__](proto_array.js.html)
+ *
+ * - [appendArray](proto_array.js.html#appendArray)
+ * - [prependArray](proto_array.js.html#prependArray)
+ * - [toArray](proto_array.js.html#toArray)
+ * - [object](proto_array.js.html#object)
+ * - [mapToObject](proto_array.js.html#mapToObject)
+ *
+ * Functions that Array [implements natively](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/prototype#Methods) are also added - they can be used with array-like objects and for chaining (native functions are always called).
+ */
+var	arrayMethods = require('./proto_array');
+
+
+/**
+ * [__Function functions__](proto_function.js.html)
+ *
+ * - [partial](proto_function.js.html#partial)
+ * - [partialRight](proto_function.js.html#partialRight)
+ * - [memoize](proto_function.js.html#memoize)
+ */
+var	functionMethods = require('./proto_function');
+
+
+/**
+ * [__String functions__](proto_string.js.html)
+ *
+ * - [firstUpperCase](proto_string.js.html#firstUpperCase)
+ * - [firstLowerCase](proto_string.js.html#firstLowerCase)
+ */
+var	stringMethods = require('./proto_string');
+
+
+/**
+ * Chaining
+ * ========
+ *
+ * `_` can be used to create a wrapped value (object, function, array, etc.) to allow chaining of Proto functions.
+ * To unwrap, `_` method of a wrapped value should be used.
+ * Usage:
+ * ```
+ * var arr = _({ 0: 3, 1: 4, 2: 5, length: 3})
+ *				.toArray()
+ *				.prependArray([1, 2])
+ *				.appendArray([6, 7, 8])
+ *				._();
+ * ```
+ * A wrapped object is an instance of `_` (`Proto` class).
+ *
+ * Chaining is implemented for development convenience, but it has performance overhead, not only to wrap and unwrap values but in each function call.
+ * Although all Proto functions are implemented as methods operating on this and the overhead to redefine them as functions is very small, the overhead to redefine them as methods of wrapped value is slightly higher - chaining is 15-25% slower than using functions (properties of _ that take the first parameter).
+ * In cases when performance is critical, you may want to avoid using chaining.
+ *
+ * @param {Any} self A value to be wrapped
+ * @return {Proto}
+ */
+function Proto(self) {
+	// wrap passed parameter in _ object
+	var wrapped = Object.create(Proto.prototype);
+	wrapped.self = self;
+	return wrapped;
+};
+
+var _ = Proto;
+
+
+// store raw methods from different modules in __ object (double "_")
+var __ = objectMethods.clone.call(objectMethods);
+__.extend.call(__, prototypeMethods);
+__.extend.call(__, arrayMethods);
+__.extend.call(__, stringMethods);
+__.extend.call(__, functionMethods);
+
+// add __ as property of Proto, so they can be used as mixins in other classes
+__.defineProperty(Proto, '__', __);
+
+
+// add _ method to unwrap wrapped value (Proto instance)
+function unwrapProto() { return this.self; }
+__.extendProto.call(Proto, { _: unwrapProto });
+
+
+// add functions that take first parameter instead of "this" and wrapped value instance methods to Proto
+[ prototypeMethods, objectMethods, arrayMethods, functionMethods, stringMethods ]
+	.forEach(addFuncsAndMethodsToProto);
+
+function addFuncsAndMethodsToProto(methodsMap) {
+	// make Proto functions
+	var protoFuncs = __.mapKeys.call(methodsMap, utils.makeProtoFunction);
+	__.extend.call(Proto, protoFuncs);
+
+	// make Proto wrapped value methods
+	var protoInstanceMethods = __.mapKeys.call(methodsMap,
+								utils.makeProtoInstanceMethod);
+	__.extendProto.call(Proto, protoInstanceMethods);
+}
+
+
+/**
+ * In windows environment, a global `_` value is preserved in `_.underscore`
+ */
+if (typeof window == 'object') {
+	// preserve existing _ object
+	if (window._)
+		Proto.underscore = window._
+
+	// expose global _
+	window._ = Proto;
+}
+
+if (typeof module == 'object' && module.exports)
+	// export for node/browserify
+	module.exports = Proto;
+
+},{"./proto_array":67,"./proto_function":68,"./proto_object":69,"./proto_prototype":70,"./proto_string":71,"./utils":72}],67:[function(require,module,exports){
+'use strict';
+
+var __ = require('./proto_object')
+	, utils = require('./utils');
+
+
+/**
+ * - [appendArray](#appendArray)
+ * - [prependArray](#prependArray)
+ * - [toArray](#toArray)
+ * - [object](#object)
+ * - [mapToObject](#mapToObject)
+ *
+ * Functions that Array [implements natively](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/prototype#Methods) are also included for convenience - they can be used with array-like objects and for chaining (native functions are always called)
+ * All these methods can be [chained](proto.js.html#Proto).
+ */
+var arrayMethods = module.exports = {
+	appendArray: appendArray,
+	prependArray: prependArray,
+	toArray: toArray,
+	object: object,
+	mapToObject: mapToObject
+};
+
+
+var nativeArrayMethodsNames = [ 'join', 'pop', 'push', 'concat',
+	'reverse', 'shift', 'unshift', 'slice', 'splice',
+	'sort', 'filter', 'forEach', 'some', 'every',
+	'map', 'indexOf', 'lastIndexOf', 'reduce', 'reduceRight'];
+
+var nativeArrayMethods = mapToObject.call(nativeArrayMethodsNames,
+		function(methodName) {
+			return Array.prototype[methodName];
+		});
+
+__.extend.call(arrayMethods, nativeArrayMethods);
+
+
+/**
+ * Appends `arrayToAppend` to the end of array `self` in place (can be an instance of Array or array-like object).
+ * Changes the value of `self` (it uses `Array.prototype.splice`) and returns `self`.
+ *
+ * @param {Array} self An array that will be modified
+ * @param {Array|Array-like} arrayToAppend An array that will be appended
+ * @return {Array}
+ */
+function appendArray(arrayToAppend) {
+	if (! arrayToAppend.length) return this;
+
+    var args = [this.length, 0].concat(arrayToAppend);
+    Array.prototype.splice.apply(this, args);
+
+    return this;
+}
+
+
+/**
+ * Prepends `arrayToPrepend` to the beginnig of array `self` in place (can be an instance of Array or array-like object).
+ * Changes the value of `self` (it uses `Array.prototype.splice`) and returns `self`.
+ *
+ * @param {Array} self An array that will be modified
+ * @param {Array|Array-like} arrayToAppend An array that will be prepended
+ * @return {Array}
+ */
+function prependArray(arrayToPrepend) {
+	if (! arrayToPrepend.length) return this;
+
+    var args = [0, 0].concat(arrayToPrepend);
+    Array.prototype.splice.apply(this, args);
+
+    return this;
+}
+
+
+/**
+ * Returns new array created from array-like object (e.g., `arguments` pseudo-array).
+ *
+ * @param {Array-like} self Object with numeric property length
+ * @return {Array}
+ */
+function toArray() {
+	return Array.prototype.slice.call(this);
+}
+
+
+/**
+ * Returns an object created from the array of `keys` and optional array of `values`.
+ *
+ * @param {Array} self Array of keys
+ * @param {Array|any} values Optional array of values or the value to be assigned to each property.
+ * @return {Object}
+ */
+function object(values) {
+	var obj = {}
+		, valuesIsArray = Array.isArray(values);
+	this.forEach(function(key, index) {
+		obj[key] = valuesIsArray ? values[index] : values;
+	});
+
+	return obj;
+}
+
+
+/**
+ * Maps array to object.
+ * Array elements become keys, value are taken from `callback`.
+ * 
+ * @param {Array} self An object which values will become keys of the result
+ * @param {Function} callback Callback is passed `value`, `index` and `self` and should return value that will be included in the result.
+ * @param {Object} thisArg An optional context of iteration (the valueof `this`), will be undefined if this parameter is not passed.
+ * @return {Object}
+ */
+function mapToObject(callback, thisArg) {
+	var result = {};
+	this.forEach(function(value, index) {
+		result[value] = callback.call(thisArg, value, index, this);
+	}, this);
+	return result;
+}
+
+},{"./proto_object":69,"./utils":72}],68:[function(require,module,exports){
+'use strict';
+
+/**
+ * - [partial](#partial)
+ * - [partialRight](#partialRight)
+ * - [memoize](#memoize)
+ *
+ * These methods can be [chained](proto.js.html#Proto)
+ */
+var functionMethods = module.exports = {
+	partial: partial,
+	partialRight: partialRight,
+	memoize: memoize
+};
+
+
+var slice = Array.prototype.slice;
+
+
+/**
+ * Creates a function as a result of partial function application with the passed parameters.
+ *
+ * @param {Function} func Function to be applied
+ * @param {List} arguments Arguments after self will be prepended to the original function call when the partial function is called.
+ * @return {Function}
+ */
+function partial() { // , ... arguments
+	var func = this;
+	var args = slice.call(arguments);
+	return function() {
+		return func.apply(this, args.concat(slice.call(arguments)));
+	}
+}
+
+
+/**
+ * Creates a function as a result of partial function application with the passed parameters, but parameters are appended on the right.
+ *
+ * @param {Function} func Function to be applied
+ * @param {List} arguments Arguments after self will be appended on the right to the original function call when the partial function is called.
+ * @return {Function}
+ */
+function partialRight() { // , ... arguments
+	var func = this;
+	var args = slice.call(arguments);
+	return function() {
+		return func.apply(this, slice.call(arguments).concat(args));
+	}
+}
+
+
+/**
+ * Creates a memoized version of the function using supplied hash function as key. If the hash is not supplied, uses its first parameter as the hash.
+ * 
+ * @param {Function} func function to be memoized
+ * @param {Function} hashFunc optional hash function that is passed all function arguments and should return cache key.
+ * @param {Integer} limit optional maximum number of results to be stored in the cache. 1000 by default.
+ * @return {Function} memoized function
+ */
+function memoize(hashFunc, limit) {
+	var func = this;
+	var cache = {}, keysList = [];
+	limit = limit || 1000;
+
+	return function() {
+		var key = hashFunc ? hashFunc.apply(this, arguments) : arguments[0];
+		if (cache.hasOwnProperty(key))
+			return cache[key];
+
+		var result = cache[key] = func.apply(this, arguments);
+		keysList.push(key);
+
+		if (keysList.length > limit)
+			delete cache[keysList.shift()];
+
+		return result;
+	};
+}
+
+},{}],69:[function(require,module,exports){
+'use strict';
+
+/**
+ * - [extend](#extend)
+ * - [clone](#clone)
+ * - [defineProperty](#defineProperty)
+ * - [defineProperties](#defineProperties)
+ * - [deepExtend](#deepExtend)
+ * - [allKeys](#allKeys)
+ * - [keyOf](#keyOf)
+ * - [allKeysOf](#allKeysOf)
+ * - [eachKey](#eachKey)
+ * - [mapKeys](#mapKeys)
+ *
+ * All these methods can be [chained](proto.js.html#Proto)
+ */
+var objectMethods = module.exports = {
 	extend: extend,
 	clone: clone,
 	defineProperty: defineProperty,
 	defineProperties: defineProperties,
 	deepExtend: deepExtend,
-	allKeys: Object.getOwnPropertyNames.bind(Object),
+	allKeys: allKeys,
 	keyOf: keyOf,
 	allKeysOf: allKeysOf,
 	eachKey: eachKey,
-	mapKeys: mapKeys,
-	appendArray: appendArray,
-	prependArray: prependArray,
-	toArray: toArray,
-	firstUpperCase: firstUpperCase,
-	firstLowerCase: firstLowerCase,
-	partial: partial,
-	memoize: memoize
+	mapKeys: mapKeys
 };
 
-
-if (typeof window == 'object') {
-	// preserve existing _ object
-	if (window._)
-		proto.underscore = window._
-
-	// expose global _
-	window._ = proto;
-}
-
-if (typeof module == 'object' && module.exports)
-	// export for node/browserify
-	module.exports = proto;
-	
-
-function extendProto(self, methods) {
+/**
+ * Extends object `self` with the properties of the object `obj` copying all own properties (not those inherited via prototype chain), including non-enumerable properties (unless `onlyEnumerable` is truthy).
+ * Created properties will have the same descriptors as the propertis of `obj`.
+ * Returns `self` to allow chaining with other functions.
+ * Can be used with functions, to copy class methods, e.g.
+ *
+ * @param {Object} self An object to be extended
+ * @param {Object} obj An object which properties will be copied to self
+ * @param {Boolean} onlyEnumerable Optional flag to prevent copying non-enumerable properties, `false` by default
+ * @return {Object}
+ */
+function extend(obj, onlyEnumerable) {
 	var propDescriptors = {};
 
-	_.eachKey(methods, function(method, name) {
-		propDescriptors[name] = {
-			enumerable: false,
-			configurable: false,
-			writable: false,
-			value: method
-		};
-	});
-
-	Object.defineProperties(self.prototype, propDescriptors);
-	return self;
-}
-
-
-function extend(self, obj, onlyEnumerable) {
-	var propDescriptors = {};
-
-	_.eachKey(obj, function(value, prop) {
+	eachKey.call(obj, function(value, prop) {
 		var descriptor = Object.getOwnPropertyDescriptor(obj, prop);
 		propDescriptors[prop] = descriptor;
 	}, this, onlyEnumerable);
 
-	Object.defineProperties(self, propDescriptors);
+	Object.defineProperties(this, propDescriptors);
 
-	return self;
+	return this;
 }
 
 
-function clone(obj) {
-	var clonedObject = Object.create(obj.constructor.prototype);
-	_.extend(clonedObject, obj);
+/**
+ * Makes a shallow clone of object `obj` creating an instance of the same class; the properties will have the same descriptors.
+ * To clone an array use
+ * ```
+ * var clonedArray = [].concat(arr);
+ * ```
+ * This function should not be used to clone an array, both because it is inefficient and because the result will look very much like an array, it will not be a real array.
+ *
+ * @param {Object} self An object to be cloned
+ * @return {Object}
+ */
+function clone() {
+	var clonedObject = Object.create(this.constructor.prototype);
+	extend.call(clonedObject, this);
 	return clonedObject;
 }
 
 
-function defineProperty(self, propertyName, value, enumerable, configurable, writable) {
-	Object.defineProperty(self, propertyName, {
+/**
+ * Syntax sugar to shorten usage of `Object.defineProperty`.
+ * The simplest usage (to add non-enumerable, non-configurable, non-writable property):
+ * ```
+ * _.defineProperty(obj, 'key', value);
+ * ```
+ * Returns `self`.
+ *
+ * @param {Object} self An object to add a property to
+ * @param {String} propertyName the name of the property that will be added
+ * @param {Any} value the value of added property
+ * @param {Boolean} enumerable Optional `true` value to make property enumerable, `false` by default
+ * @param {Boolean} configurable Optional `true` value to make property configurable, `false` by default
+ * @param {Boolean} writable Optional `true` value to make property writable, `false` by default
+ * @return {Object}
+ */
+function defineProperty(propertyName, value, enumerable, configurable, writable) {
+	Object.defineProperty(this, propertyName, {
 		enumerable: enumerable,
 		configurable: configurable,
 		writable: writable,
 		value: value
 	});
+	return this;
 }
 
 
-function defineProperties(self, propertyValues, enumerable, configurable, writable) {
-	var descriptors = _.mapKeys(propertyValues, function(value) {
+/**
+ * Syntax sugar to shorten usage of `Object.defineProperties`.
+ * The simplest usage (to add non-enumerable, non-configurable, non-writable properties):
+ * ```
+ * _.defineProperties(obj, {
+ *     key1: value1,
+ *     key2: value2	
+ * });
+ * ```
+ * Returns `self`.
+ *
+ * @param {Object} self An object to add a property to
+ * @param {Object} propertyValues A map of keys and values of properties thatwill be added. The descriptors of properties will be defined by the following parameters.
+ * @param {Boolean} enumerable Optional `true` value to make property enumerable, `false` by default
+ * @param {Boolean} configurable Optional `true` value to make property configurable, `false` by default
+ * @param {Boolean} writable Optional `true` value to make property writable, `false` by default
+ * @return {Object}
+ */
+function defineProperties(propertyValues, enumerable, configurable, writable) {
+	var descriptors = mapKeys.call(propertyValues, function(value) {
 		return {
 			enumerable: enumerable,
 			configurable: configurable,
@@ -5434,26 +5902,60 @@ function defineProperties(self, propertyValues, enumerable, configurable, writab
 			value: value
 		};		
 	});
-	Object.defineProperties(self, descriptors);
+	Object.defineProperties(this, descriptors);
+	return this;
 }
 
 
-function deepExtend(self, obj, onlyEnumerable) {
-	return _extendTree(self, obj, onlyEnumerable, []);
+/**
+ * Extends object `self` with properties of `obj` to any depth, without overwrtiting existing object properties of `self` with object properties of `obj`.
+ * Scalar properties of `obj` will overwrite properties of `self`. Scalar porperties of `self` will also be overwritten.
+ * Correctly works with recursive objects.
+ * Usage:
+ * ```
+ * var obj = {
+ *     inner: {
+ *         a: 1
+ *     }
+ * };
+ *
+ * _.deepExtend(obj, {
+ *     inner: {
+ *         b: 2
+ *     }
+ * });
+ *
+ * assert.deepEqual(obj, {
+ *     inner: {
+ *         a: 1,
+ *         b: 2
+ *     }
+ * }); // assert passes
+ * ```
+ * Returns `self`.
+ *
+ * @param {Object} self An object to be extended
+ * @param {Object} obj An object with properties to copy to 
+ * @param {Boolean} onlyEnumerable Optional `true` to use only enumerable properties
+ * @return {Object}
+ */
+function deepExtend(obj, onlyEnumerable) {
+	return _extendTree(this, obj, onlyEnumerable, []);
 }
 
 
 function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
-	if (objTraversed.indexOf(objNode) >= 0) return; // node already traversed
+	if (objTraversed.indexOf(objNode) >= 0) return; // node already traversed, obj has recursion
+
+	// store node to recognise recursion
 	objTraversed.push(objNode);
 
-	_.eachKey(objNode, function(value, prop) {
+	eachKey.call(objNode, function(value, prop) {
 		var descriptor = Object.getOwnPropertyDescriptor(objNode, prop);
 		if (typeof value == 'object') {
-			if (selfNode.hasOwnProperty(prop) && typeof selfNode[prop] == 'object')
-				_extendTree(selfNode[prop], value, onlyEnumerable, objTraversed)
-			else
-				Object.defineProperty(selfNode, prop, descriptor);
+			if (! (selfNode.hasOwnProperty(prop) && typeof selfNode[prop] == 'object'))
+				selfNode[prop] = {};
+			_extendTree(selfNode[prop], value, onlyEnumerable, objTraversed);
 		} else
 			Object.defineProperty(selfNode, prop, descriptor);
 	}, this, onlyEnumerable);
@@ -5462,7 +5964,191 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
 }
 
 
-function createSubclass(thisClass, name, applyConstructor) {
+/**
+ * Returns array of all property names of an object `self` (including non-enumerbale).
+ * To get only enumerable properties, use `Object.keys()`.
+ *
+ * @param {Object} self An object to get all properties of.
+ * @return {Array}
+ */
+ function allKeys() {
+ 	return Object.getOwnPropertyNames(this);
+ }
+
+
+/**
+ * An analogue of `indexOf` method of Array prototype.
+ * Returns the `key` of `searchElement` in the object `self`. 
+ * As object keys are unsorted, if there are several keys that hold `searchElement` any of them can be returned. Use `allKeysOf` to return all keys.
+ * All own properties are searched (not those inherited via prototype chain), including non-enumerable properties (unless `onlyEnumerable` is truthy).
+ *
+ * @param {Object} self An object to search a value in
+ * @param {Any} searchElement An element that will be searched. An exact equality is tested, so `0` is not the same as `'0'`.
+ * @param {Boolean} onlyEnumerable An optional true to search among enumerable properties only.
+ * @return {String} 
+ */
+function keyOf(searchElement, onlyEnumerable) {
+	var properties = onlyEnumerable 
+						? Object.keys(this)
+						: allKeys.call(this);
+
+	for (var i = 0; i < properties.length; i++)
+		if (searchElement === this[properties[i]])
+			return properties[i];
+	
+	return undefined;
+}
+
+
+/**
+ * Works similarly to the previous function, but returns the array of keys holding `searchElement` as their value.
+ *
+ * @param {Object} self An object to search a value in
+ * @param {Any} searchElement An element that will be searched. An exact equality is tested, so `0` is not the same as `'0'`.
+ * @param {Boolean} onlyEnumerable An optional true to search among enumerable properties only.
+ * @return {Array[String]} 
+ */
+function allKeysOf(searchElement, onlyEnumerable) {
+	var properties = onlyEnumerable 
+						? Object.keys(this)
+						: allKeys.call(this);
+
+	var keys = properties.filter(function(prop) {
+		return searchElement === this[prop];
+	}, this);
+
+	return keys;
+}
+
+
+/**
+ * An analogue of [forEach](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach) method of Array prototype.
+ * Iterates all own properties of `self` (or only enumerable own properties if `onlyEnumerable` is truthy) calling callback for each key.
+ * This method should not be used with arrays, it will include `length` property in iteration.
+ * To iterate array-like objects (e.g., `arguments` pseudo-array) use:
+ * ```
+ * Array.prototype.forEach.call(arguments, callback, thisArg);
+ * ```
+ * Function returns `self` to allow [chaining](proto.js.html)
+ *
+ * @param {Object} self An object which properties will be iterated
+ * @param {Function} callback Callback is passed `value`, `key` and `self`, its return value is not used.
+ * @param {Object} thisArg An optional context of iteration (the valueof `this`), will be undefined if this parameter is not passed.
+ * @param {Boolean} onlyEnumerable An optional `true` to iterate enumerable properties only.
+ */
+function eachKey(callback, thisArg, onlyEnumerable) {
+	var properties = onlyEnumerable 
+						? Object.keys(this)
+						: allKeys.call(this);
+
+	properties.forEach(function(prop) {
+		callback.call(thisArg, this[prop], prop, this);
+	}, this);
+
+	return this;
+}
+
+
+/**
+ * An analogue of [map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map) method of Array prototype.
+ * Returns the map that is the result of the application of callback to values in all own properties of `self` (or only enumerable own properties if `onlyEnumerable` is truthy).
+ * Property descriptors of the returned map will have the same `enumerable`, `configurable` and `writable` settings as the properties of the original map.
+ * This method should not be used with arrays, it will include `length` property in iteration.
+ * To map array-like objects use:
+ * ```javascript
+ * var result = Array.prototype.map.call(arguments, callback, thisArg);
+ * ```
+ * 
+ * @param {Object} self An object which properties will be iterated
+ * @param {Function} callback Callback is passed `value`, `key` and `self` and should return value that will be included in the map.
+ * @param {Object} thisArg An optional context of iteration (the valueof `this`), will be undefined if this parameter is not passed.
+ * @param {Boolean} onlyEnumerable An optional `true` to iterate enumerable properties only.
+ * @return {Object}
+ */
+function mapKeys(callback, thisArg, onlyEnumerable) {
+	var mapResult = {};
+	eachKey.call(this, mapProperty, this, onlyEnumerable);
+	return mapResult;
+
+	function mapProperty(value, key) {
+		var descriptor = Object.getOwnPropertyDescriptor(this, key);
+		if (descriptor.enumerable || ! onlyEnumerable) {
+			descriptor.value = callback.call(thisArg, value, key, this);
+			Object.defineProperty(mapResult, key, descriptor);
+		}
+	}
+}
+
+},{}],70:[function(require,module,exports){
+'use strict';
+
+/**
+ * - [extendProto](#extendProto)
+ * - [createSubclass](#createSubclass)
+ * - [makeSubclass](#makeSubclass)
+ *
+ * These methods can be [chained](proto.js.html#Proto)
+ */
+var prototypeMethods = module.exports = {
+	extendProto: extendProto,
+	createSubclass: createSubclass,
+	makeSubclass: makeSubclass
+};
+
+
+var __ = require('./proto_object');
+
+
+/**
+ * Adds non-enumerable, non-configurable and non-writable properties to the prototype of constructor function.
+ * Usage:
+ * ```
+ * function MyClass() {}
+ * _.extendProto(MyClass, {
+ *     method1: function() {},
+ *     method2: function() {}
+ * });
+ * ```
+ * To extend class via object:
+ * ```
+ * _.extendProto(obj.constructor, methods);
+ * ```
+ * Returns passed constructor, so functions _.extendProto, [_.extend](object.js.html#extend) and _.makeSubclass can be [chained](proto.js.html). 
+ *
+ * @param {Function} self constructor function
+ * @param {Object} methods a map of functions, keys will be instance methods (properties of the constructor prototype)
+ * @return {Function}
+ */
+function extendProto(methods) {
+	var propDescriptors = {};
+
+	__.eachKey.call(methods, function(method, name) {
+		propDescriptors[name] = {
+			enumerable: false,
+			configurable: false,
+			writable: false,
+			value: method
+		};
+	});
+
+	Object.defineProperties(this.prototype, propDescriptors);
+	return this;
+}
+
+
+/**
+ * Makes a subclass of class `thisClass`.
+ * The returned function will have specified `name` if supplied.
+ * The constructor of superclass will be called in subclass constructor by default unless `applyConstructor === false` (not just falsy).
+ * Copies `thisClass` class methods to created subclass. For them to work correctly they should use `this` to refer to the class rather than explicit superclass name.
+ *
+ * @param {Function} thisClass A class to make subclass of
+ * @param {String} name Optional name of subclass constructor function
+ * @param {Boolean} applyConstructor Optional false value (not falsy) to prevent call of inherited constructor in the constructor of subclass
+ * @return {Function}
+ */
+function createSubclass(name, applyConstructor) {
+	var thisClass = this;
 	var subclass;
 
 	// name is optional
@@ -5475,168 +6161,92 @@ function createSubclass(thisClass, name, applyConstructor) {
 
 	eval('subclass = function ' + name + '(){ ' + constructorCode + ' }');
 
-	_.makeSubclass(subclass, thisClass);
+	makeSubclass.call(subclass, thisClass);
 
 	// copy class methods
 	// - for them to work correctly they should not explictly use superclass name
 	// and use "this" instead
-	_.extend(subclass, thisClass, true);
+	__.extend.call(subclass, thisClass, true);
 
 	return subclass;
 }
 
 
-function makeSubclass(thisClass, Superclass) {
+/**
+ * Sets up prototype chain to change `thisClass` (a constructor function) so that it becomes a subclass of `Superclass`.
+ * Returns `thisClass` so it can be [chained](proto.js.html) with _.extendProto and [_.extend](object.js.html#extend).
+ *
+ * @param {Function} thisClass A class that will become a subclass of Superclass
+ * @param {Function} Superclass A class that will become a superclass of thisClass
+ * @return {Function}
+ */
+function makeSubclass(Superclass) {
 	// prototype chain
-	thisClass.prototype = Object.create(Superclass.prototype);
+	this.prototype = Object.create(Superclass.prototype);
 	
 	// subclass identity
-	_.extendProto(thisClass, {
-		constructor: thisClass
+	extendProto.call(this, {
+		constructor: this
 	});
-	return thisClass;
+	return this;
 }
 
-
-function keyOf(self, searchElement, onlyEnumerable) {
-	var properties = onlyEnumerable 
-						? Object.keys(self)
-						: _.allKeys(self);
-
-	for (var i = 0; i < properties.length; i++)
-		if (searchElement === self[properties[i]])
-			return properties[i];
-	
-	return undefined;
-}
-
-
-function allKeysOf(self, searchElement, onlyEnumerable) {
-	var properties = onlyEnumerable 
-						? Object.keys(self)
-						: _.allKeys(self);
-
-	var keys = properties.filter(function(prop) {
-		return searchElement === self[prop];
-	});
-
-	return keys;
-}
-
-
-function eachKey(self, callback, thisArg, onlyEnumerable) {
-	var properties = onlyEnumerable 
-						? Object.keys(self)
-						: _.allKeys(self);
-
-	properties.forEach(function(prop) {
-		callback.call(thisArg, self[prop], prop, self);
-	});
-}
-
-
-function mapKeys(self, callback, thisArg, onlyEnumerable) {
-	var mapResult = {};
-	_.eachKey(self, mapProperty, thisArg, onlyEnumerable);
-	return mapResult;
-
-	function mapProperty(value, key) {
-		var descriptor = Object.getOwnPropertyDescriptor(self, key);
-		if (descriptor.enumerable || ! onlyEnumerable) {
-			descriptor.value = callback.call(this, value, key, self);
-			Object.defineProperty(mapResult, key, descriptor);
-		}
-	}
-}
-
-
-function appendArray(self, arrayToAppend) {
-	if (! arrayToAppend.length) return self;
-
-    var args = [self.length, 0].concat(arrayToAppend);
-    Array.prototype.splice.apply(self, args);
-
-    return self;
-}
-
-
-function prependArray(self, arrayToPrepend) {
-	if (! arrayToPrepend.length) return self;
-
-    var args = [0, 0].concat(arrayToPrepend);
-    Array.prototype.splice.apply(self, args);
-
-    return self;
-}
-
-
-function toArray(arrayLike) {
-	return Array.prototype.slice.call(arrayLike);
-
-	// var arr = [];
-	// Array.prototype.forEach.call(arrayLike, function(item) {
-	// 	arr.push(item)
-	// });
-
-	// return arr;
-}
-
-
-function firstUpperCase(str) {
-	return str[0].toUpperCase() + str.slice(1);
-}
-
-
-function firstLowerCase(str) {
-	return str[0].toLowerCase() + str.slice(1);
-}
+},{"./proto_object":69}],71:[function(require,module,exports){
+'use strict';
 
 /**
- * partial
- *
- * Creates a function as a result of partial function application
- * with the passed parameters.
- *
- * @param {Function} func function to be applied
- * @param {List} arguments these arguments will be prepended to the original function call when the partial function is called.
- * @return {Function} partially applied function
+ * - [firstUpperCase](#firstUpperCase)
+ * - [firstLowerCase](#firstLowerCase)
  */
-function partial(func) { // , ... arguments
-	var args = Array.prototype.slice.call(arguments, 1);
+ var stringMethods = module.exports = {
+	firstUpperCase: firstUpperCase,
+	firstLowerCase: firstLowerCase
+};
+
+
+/**
+ * Returns string with the first character changed to upper case.
+ *
+ * @param {String} self A string that will have its first character replaced
+ */
+function firstUpperCase() {
+	return this[0].toUpperCase() + this.slice(1);
+}
+
+
+/**
+ * Returns string with the first character changed to lower case.
+ *
+ * @param {String} self A string that will have its first character replaced
+ */
+function firstLowerCase() {
+	return this[0].toLowerCase() + this.slice(1);
+}
+
+},{}],72:[function(require,module,exports){
+'use strict';
+
+var utils = module.exports = {
+	makeProtoInstanceMethod: makeProtoInstanceMethod,
+	makeProtoFunction: makeProtoFunction
+}
+
+
+function makeProtoInstanceMethod(method) {
 	return function() {
-		return func.apply(this, args.concat(_.toArray(arguments)));
-	}
+		this.self = method.apply(this.self, arguments);
+		return this;
+	};
 }
 
 
-/**
- * memoize
- *
- * Creates a memoized version of the function using supplied hash function
- * as key. If the hash is not supplied, uses its first parameter as the hash.
- * 
- * @param {Function} func function to be memoized
- * @param {Function} hashFunc optional hash function that is passed all function arguments and should return cache key.
- * @param {Integer} limit optional maximum number of results to be stored in the cache. 1000 by default.
- * @return {Function} memoized function
- */
- function memoize(func, hashFunc, limit) {
-    var cache = {}, keysList = [];
-    limit = limit || 1000;
-    return function() {
-		var key = hashFunc && hashFunc.apply(this, arguments) || arguments[0];
-		if (cache.hasOwnProperty(key))
-			return cache[key];
+function makeProtoFunction(method) {
+	return function() {
+		// when the method is executed, the value of "this" will be arguments[0],
+		// other arguments starting from #1 will passed to method as parameters.
+		return method.call.apply(method, arguments);
+	};
+}
 
-		var result = cache[key] = func.apply(this, arguments);
-		keysList.push(key);
-
-		if (keysList.length > limit)
-			delete cache[keysList.shift()];
-
-		return result;
-    };
- }
-
-},{}]},{},[43])
+},{}]},{},[47])
 ;
