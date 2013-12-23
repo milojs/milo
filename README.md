@@ -37,8 +37,7 @@ index.html
 ```html
 <html>
 <head>
-	<script src="milo.bundle.js"></script>
-	<script src="index.js"></script>
+    <title>Binding example</title>
 </head>
 <body>
     <input type="text" ml-bind="[Data]:myField">
@@ -49,6 +48,8 @@ index.html
     <div>
     	<span ml-bind=":myTestValue"></span>
     </div>
+    <script src="milo.bundle.js"></script>
+    <script src="index.js"></script>
 </body>
 </html>
 ```
@@ -57,7 +58,7 @@ index.js
 ```javascript
 var ctrl = milo.binder();
 
-ctrl.myField.data.on('datachange', function(msg, data) {
+ctrl.myField.data.on('datachanged', function(msg, data) {
 	ctrl.myCurrentValue.el.innerHTML = data.newValue;
 });
 
