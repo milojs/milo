@@ -38,6 +38,8 @@ index.html
 <html>
 <head>
     <title>Binding example</title>
+    <script src="milo.bundle.js"></script>
+    <script src="index.js"></script>
 </head>
 <body>
     <input type="text" ml-bind="[Data]:myField">
@@ -48,23 +50,23 @@ index.html
     <div>
     	<span ml-bind=":myTestValue"></span>
     </div>
-    <script src="milo.bundle.js"></script>
-    <script src="index.js"></script>
 </body>
 </html>
 ```
 
 index.js
 ```javascript
-var ctrl = milo.binder();
+milo.mail.on('domready', function () {
+    var ctrl = milo.binder();
 
-ctrl.myField.data.on('datachanged', function(msg, data) {
-	ctrl.myCurrentValue.el.innerHTML = data.newValue;
-});
+    ctrl.myField.data.on('datachanged', function(msg, data) {
+    	ctrl.myCurrentValue.el.innerHTML = data.newValue;
+    });
 
-ctrl.myTestButton.events.on('click', function(msg, event) {
-	ctrl.myTestValue.el.innerHTML = ctrl.myField.data.value();
-});
+    ctrl.myTestButton.events.on('click', function(msg, event) {
+    	ctrl.myTestValue.el.innerHTML = ctrl.myField.data.value();
+    });
+}
 ```
 
 ### Contribute

@@ -50,7 +50,8 @@ describe('milo binder', function() {
 
         var cnct = milo.minder([
             [myList.data, '<<<->>>', m, {
-                '[*].titleLabel': '[$1].title',
+                '[*].titleLabel': '[$1].caption',
+                // '[*].titleLabel': '[$1].title', // code
                 '[*].descField': '[$1].desc' 
             }],
             [m, '<<<->>>', myLinkedList.data, {

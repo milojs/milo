@@ -513,7 +513,7 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 
 	function createScopeForChildren(containerEl) {
 		var scope = new Scope(containerEl);
-		Array.prototype.forEach.call(utilDom.filterNodeListByType(containerEl.childNodes, 1), function(node) {
+		_.forEach(utilDom.filterNodeListByType(containerEl.childNodes, 1), function(node) {
 			createScopeForElement(scope, node);
 		});
 		return scope;
@@ -740,7 +740,7 @@ function addFacet(facetNameOrClass, facetOpts, facetName) {
 
 // envoke given method with optional parameters on all facets
 function allFacets(method /* , ... */) {
-	var args = Array.prototype.slice.call(arguments, 1);
+	var args = _.slice(arguments, 1);
 
 	_.eachKey(this.facets, function(facet, fctName) {
 		if (facet && typeof facet[method] == 'function')
@@ -2141,7 +2141,7 @@ function splitElement(thisEl, newEl) {
 		, selNode = selection.anchorNode
 		, selFound = false;
 
-	Array.prototype.forEach.call(thisEl.childNodes, function(childNode) {
+	_.forEach(thisEl.childNodes, function(childNode) {
 		if (childNode.contains(selNode) || childNode == selNode) {
 			var comp = Component.getComponent(childNode);
 			if (comp)
@@ -2487,14 +2487,14 @@ if (typeof window != 'undefined')
 else {
 	global = {};
 	_.eachKey(eventTypes, function(eTypes, eventConstructorName) {
-		var eventsConstructor;
+		var eventConstructor;
 		eval(
-			'eventsConstructor = function ' + eventConstructorName + '(type, properties) { \
+			'eventConstructor = function ' + eventConstructorName + '(type, properties) { \
 				this.type = type; \
 				_.extend(this, properties); \
 			};'
 		);
-		global[eventConstructorName] = eventsConstructor;
+		global[eventConstructorName] = eventConstructor;
 	});
 }
 
@@ -3065,7 +3065,7 @@ var Component = require('../c_class')
 	, componentsRegistry = require('../c_registry');
 
 
-var MLGroup = Component.createComponentClass('MLGroup', ['container', 'data']);
+var MLGroup = Component.createComponentClass('MLGroup', ['container', 'data', 'events']);
 
 componentsRegistry.add(MLGroup);
 
@@ -3377,7 +3377,7 @@ function _loader(rootEl, callback) {
 		, totalCount = loadElements.length
 		, loadedCount = 0;
 
-	Array.prototype.forEach.call(loadElements, function (el) {
+	_.forEach(loadElements, function (el) {
 		loadView(el, function(err) {
 			views[el.id] = err || el;
 			loadedCount++;
@@ -4888,7 +4888,7 @@ module.exports = {
  * @param {Integer} nodeType an integer constant [defined by DOM API](https://developer.mozilla.org/en-US/docs/Web/API/Node.nodeType), e.g. `Node.ELEMENT_NODE` or `Node.TEXT_NODE`
  */
 function filterNodeListByType(nodeList, nodeType) {
-	return Array.prototype.filter.call(nodeList, function (node) {
+	return _.filter(nodeList, function (node) {
 		return node.nodeType == nodeType;
 	});
 }
@@ -5855,14 +5855,13 @@ var objectMethods = module.exports = {
  * @return {Object}
  */
 function extend(obj, onlyEnumerable) {
-	var propDescriptors = {};
+	var descriptors = {};
 
 	eachKey.call(obj, function(value, prop) {
-		var descriptor = Object.getOwnPropertyDescriptor(obj, prop);
-		propDescriptors[prop] = descriptor;
+		descriptors[prop] = Object.getOwnPropertyDescriptor(obj, prop);
 	}, this, onlyEnumerable);
 
-	Object.defineProperties(this, propDescriptors);
+	Object.defineProperties(this, descriptors);
 
 	return this;
 }
@@ -6090,6 +6089,7 @@ function eachKey(callback, thisArg, onlyEnumerable) {
 /**
  * An analogue of [map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map) method of Array prototype.
  * Returns the object that is the result of the application of callback to values in all own properties of `self` (or only enumerable own properties if `onlyEnumerable` is truthy).
+ * The returned object will be the instance of the same class as `self`.
  * Property descriptors of the returned object will have the same `enumerable`, `configurable` and `writable` settings as the properties of `self`.
  * This method should not be used with arrays, it will include `length` property in iteration.
  * To map array-like objects use:
@@ -6104,14 +6104,13 @@ function eachKey(callback, thisArg, onlyEnumerable) {
  * @return {Object}
  */
 function mapKeys(callback, thisArg, onlyEnumerable) {
-	var mapResult = {};
+	var descriptors = {};
 	eachKey.call(this, mapProperty, thisArg, onlyEnumerable);
-	return mapResult;
+	return Object.create(this.constructor.prototype, descriptors);
 
 	function mapProperty(value, key, self) {
-		var descriptor = Object.getOwnPropertyDescriptor(self, key);
-		descriptor.value = callback.call(this, value, key, self);
-		Object.defineProperty(mapResult, key, descriptor);
+		descriptors[key] = Object.getOwnPropertyDescriptor(self, key);
+		descriptors[key].value = callback.call(this, value, key, self);
 	}
 }
 
@@ -6163,14 +6162,13 @@ function reduceKeys(callback, initialValue, thisArg, onlyEnumerable) {
  * @return {Object}
  */
 function filterKeys(callback, thisArg, onlyEnumerable) {
-	var filterResult = {};
+	var descriptors = {};
 	eachKey.call(this, filterProperty, thisArg, onlyEnumerable);
-	return filterResult;
+	return Object.create(this.constructor.prototype, descriptors);;
 
 	function filterProperty(value, key, self) {
-		var descriptor = Object.getOwnPropertyDescriptor(self, key);
 		if (callback.call(this, value, key, self))
-			Object.defineProperty(filterResult, key, descriptor);
+			descriptors[key] = Object.getOwnPropertyDescriptor(self, key);
 	}
 }
 
