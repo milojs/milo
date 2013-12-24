@@ -2382,10 +2382,17 @@ _.extendProto(ComponentDataSource, {
 module.exports = ComponentDataSource;
 
 
+var _tagEvents = {
+	'input': 'input',
+	'select': 'change'
+};
+
 function initComponentDataSource() {
 	DOMEventsSource.prototype.init.apply(this, arguments);
 
 	this.value(); // stores current component data value in this._value
+	this.tagName = this.component.el.tagName.toLowerCase();
+	this.tagEvent = _tagEvents[this.tagName];
 }
 
 
@@ -2405,8 +2412,8 @@ function getDomElementDataValue() { // value method
 // TODO: this function should return relevant DOM event dependent on element tag
 // Can also implement beforedatachanged event to allow preventing the change
 function translateToDomEvent(message) {
-	if (message == '')
-		return 'input';
+	if (message == '' && this.tagEvent)
+		return this.tagEvent;
 	else
 		return '';
 }
@@ -3058,7 +3065,7 @@ var Component = require('../c_class')
 	, componentsRegistry = require('../c_registry');
 
 
-var MLGroup = Component.createComponentClass('MLGroup', ['container']);
+var MLGroup = Component.createComponentClass('MLGroup', ['container', 'data']);
 
 componentsRegistry.add(MLGroup);
 
@@ -3081,16 +3088,42 @@ module.exports = MLInput;
 'use strict';
 
 var Component = require('../c_class')
-	, componentsRegistry = require('../c_registry');
+	, componentsRegistry = require('../c_registry')
+	, doT = require('dot');
 
 
-var MLSelect = Component.createComponentClass('MLSelect', ['data', 'events']);
+var MLSelect = Component.createComponentClass('MLSelect', {
+	dom: undefined,
+	data: undefined,
+	events: undefined,
+	model: {
+		messages: {
+			'***': onOptionsChange
+		}
+	}
+});
+
 
 componentsRegistry.add(MLSelect);
 
 module.exports = MLSelect;
 
-},{"../c_class":9,"../c_registry":31}],39:[function(require,module,exports){
+
+var optionsTemplateText = '\
+	{{~ it.options :option }} \
+		<option value="{{= option.value }}">{{= option.label }}</option> \
+	{{~}} \
+';
+
+var optionsTemplate = doT.compile(optionsTemplateText);
+
+
+function onOptionsChange(path, data) {
+	var selectEl = this.scope.owner.el;
+	selectEl.innerHTML = optionsTemplate(this.get());
+}
+
+},{"../c_class":9,"../c_registry":31,"dot":65}],39:[function(require,module,exports){
 // <a name="config"></a>
 // milo.config
 // -----------
@@ -4914,18 +4947,18 @@ var errorClassNames = ['AbstractClass', 'Mixin', 'Messenger', 'ComponentDataSour
 					   'List', 'Connector'];
 
 var error = {
-	toBeImplemented: toBeImplemented,
-	createClass: createErrorClass
+	toBeImplemented: error$toBeImplemented,
+	createClass: error$createClass
 };
 
 errorClassNames.forEach(function(name) {
-	error[name] = createErrorClass(name + 'Error');
+	error[name] = error$createClass(name + 'Error');
 });
 
 module.exports = error;
 
 
-function createErrorClass(errorClassName) {
+function error$createClass(errorClassName) {
 	var ErrorClass;
 	eval('ErrorClass = function ' + errorClassName + '(message) { \
 			this.name = "' + errorClassName + '"; \
@@ -4937,8 +4970,8 @@ function createErrorClass(errorClassName) {
 }
 
 
-function toBeImplemented() {
-	throw new error.AbstractClass('calling the method of an absctract class MessageSource');
+function error$toBeImplemented() {
+	throw new error.AbstractClass('calling the method of an absctract class');
 }
 
 },{"mol-proto":66}],59:[function(require,module,exports){
@@ -5456,6 +5489,10 @@ var	prototypeMethods = require('./proto_prototype');
  * - [allKeysOf](proto_object.js.html#allKeysOf)
  * - [eachKey](proto_object.js.html#eachKey)
  * - [mapKeys](proto_object.js.html#mapKeys)
+ * - [reduceKeys](proto_object.js.html#reduceKeys)
+ * - [filterKeys](proto_object.js.html#filterKeys)
+ * - [someKey](proto_object.js.html#someKey)
+ * - [everyKey](proto_object.js.html#everyKey)
  */
 var	objectMethods = require('./proto_object');
 
@@ -5542,20 +5579,13 @@ function unwrapProto() { return this.self; }
 __.extendProto.call(Proto, { _: unwrapProto });
 
 
-// add functions that take first parameter instead of "this" and wrapped value instance methods to Proto
-[ prototypeMethods, objectMethods, arrayMethods, functionMethods, stringMethods ]
-	.forEach(addFuncsAndMethodsToProto);
+// add functions that take first parameter instead of "this" to Proto
+var protoFuncs = __.mapKeys.call(__, utils.makeProtoFunction);
+__.extend.call(Proto, protoFuncs);
 
-function addFuncsAndMethodsToProto(methodsMap) {
-	// make Proto functions
-	var protoFuncs = __.mapKeys.call(methodsMap, utils.makeProtoFunction);
-	__.extend.call(Proto, protoFuncs);
-
-	// make Proto wrapped value methods
-	var protoInstanceMethods = __.mapKeys.call(methodsMap,
-								utils.makeProtoInstanceMethod);
-	__.extendProto.call(Proto, protoInstanceMethods);
-}
+// add Proto wrapped value instance methods to Proto prototype
+var protoInstanceMethods = __.mapKeys.call(__, utils.makeProtoInstanceMethod);
+__.extendProto.call(Proto, protoInstanceMethods);
 
 
 /**
@@ -5789,6 +5819,10 @@ function memoize(hashFunc, limit) {
  * - [allKeysOf](#allKeysOf)
  * - [eachKey](#eachKey)
  * - [mapKeys](#mapKeys)
+ * - [reduceKeys](#reduceKeys)
+ * - [filterKeys](#filterKeys)
+ * - [someKey](#someKey)
+ * - [everyKey](#everyKey)
  *
  * All these methods can be [chained](proto.js.html#Proto)
  */
@@ -5802,7 +5836,11 @@ var objectMethods = module.exports = {
 	keyOf: keyOf,
 	allKeysOf: allKeysOf,
 	eachKey: eachKey,
-	mapKeys: mapKeys
+	mapKeys: mapKeys,
+	reduceKeys: reduceKeys,
+	filterKeys: filterKeys,
+	someKey: someKey,
+	everyKey: everyKey
 };
 
 /**
@@ -6027,7 +6065,7 @@ function allKeysOf(searchElement, onlyEnumerable) {
  * This method should not be used with arrays, it will include `length` property in iteration.
  * To iterate array-like objects (e.g., `arguments` pseudo-array) use:
  * ```
- * Array.prototype.forEach.call(arguments, callback, thisArg);
+ * _.forEach(arguments, callback, thisArg);
  * ```
  * Function returns `self` to allow [chaining](proto.js.html)
  *
@@ -6051,12 +6089,12 @@ function eachKey(callback, thisArg, onlyEnumerable) {
 
 /**
  * An analogue of [map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map) method of Array prototype.
- * Returns the map that is the result of the application of callback to values in all own properties of `self` (or only enumerable own properties if `onlyEnumerable` is truthy).
- * Property descriptors of the returned map will have the same `enumerable`, `configurable` and `writable` settings as the properties of the original map.
+ * Returns the object that is the result of the application of callback to values in all own properties of `self` (or only enumerable own properties if `onlyEnumerable` is truthy).
+ * Property descriptors of the returned object will have the same `enumerable`, `configurable` and `writable` settings as the properties of `self`.
  * This method should not be used with arrays, it will include `length` property in iteration.
  * To map array-like objects use:
- * ```javascript
- * var result = Array.prototype.map.call(arguments, callback, thisArg);
+ * ```
+ * var result = _.map(arguments, callback, thisArg);
  * ```
  * 
  * @param {Object} self An object which properties will be iterated
@@ -6067,15 +6105,125 @@ function eachKey(callback, thisArg, onlyEnumerable) {
  */
 function mapKeys(callback, thisArg, onlyEnumerable) {
 	var mapResult = {};
-	eachKey.call(this, mapProperty, this, onlyEnumerable);
+	eachKey.call(this, mapProperty, thisArg, onlyEnumerable);
 	return mapResult;
 
-	function mapProperty(value, key) {
-		var descriptor = Object.getOwnPropertyDescriptor(this, key);
-		if (descriptor.enumerable || ! onlyEnumerable) {
-			descriptor.value = callback.call(thisArg, value, key, this);
-			Object.defineProperty(mapResult, key, descriptor);
-		}
+	function mapProperty(value, key, self) {
+		var descriptor = Object.getOwnPropertyDescriptor(self, key);
+		descriptor.value = callback.call(this, value, key, self);
+		Object.defineProperty(mapResult, key, descriptor);
+	}
+}
+
+
+/**
+ * An analogue of [reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce) method of Array prototype.
+ * This method reduces the object to a single value. Iteration order is impossible to control with object.
+ * This method should not be used with arrays, it will include `length` property in iteration.
+ * To reduce array-like objects use:
+ * ```
+ * var result = _.reduce(arguments, callback, initialValue, thisArg);
+ * ```
+ * 
+ * @param {Object} self An object which properties will be iterated
+ * @param {Function} callback Callback is passed `previousValue`, `value`, `key` and `self` and should return value that will be used as the `previousValue` for the next `callback` call.
+ * @param {Any} initialValue The initial value passed to callback as the first parameter on the first call.
+ * @param {Object} thisArg An optional context of iteration (the valueof `this`), will be undefined if this parameter is not passed.
+ * @param {Boolean} onlyEnumerable An optional `true` to iterate enumerable properties only.
+ * @return {Any}
+ */
+function reduceKeys(callback, initialValue, thisArg, onlyEnumerable) {
+	var properties = onlyEnumerable 
+						? Object.keys(this)
+						: allKeys.call(this);
+
+	var memo = initialValue;
+
+	properties.forEach(function(prop) {
+		memo = callback.call(thisArg, memo, this[prop], prop, this);
+	}, this);
+
+	return memo;
+}
+
+
+/**
+ * An analogue of [filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter) method of Array prototype.
+ * Returns the new object with keys for which callback returns true.
+ * Property descriptors of the returned object will have the same `enumerable`, `configurable` and `writable` settings as the properties of `self`. 
+ * To filter array-like objects use:
+ * ```
+ * var result = _.filter(arguments, callback, thisArg);
+ * ```
+ *
+ * @param {Object} self An object which properties will be iterated
+ * @param {Function} callback Callback is passed `value`, `key` and `self`. If it returns truthy value, the key/value will be included in the resulting object.
+ * @param {Object} thisArg An optional context of iteration (the valueof `this`), will be undefined if this parameter is not passed.
+ * @param {Boolean} onlyEnumerable An optional `true` to iterate enumerable properties only.
+ * @return {Object}
+ */
+function filterKeys(callback, thisArg, onlyEnumerable) {
+	var filterResult = {};
+	eachKey.call(this, filterProperty, thisArg, onlyEnumerable);
+	return filterResult;
+
+	function filterProperty(value, key, self) {
+		var descriptor = Object.getOwnPropertyDescriptor(self, key);
+		if (callback.call(this, value, key, self))
+			Object.defineProperty(filterResult, key, descriptor);
+	}
+}
+
+
+var _passed = {}
+	, _didNotPass = {};
+
+/**
+ * An analogue of [some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some) method of Array prototype.
+ *
+ * @param {Object} self An object which properties will be iterated
+ * @param {Function} callback Callback is passed `value`, `key` and `self`. If it returns truthy value, the function immeaditely returns `true`.
+ * @param {Object} thisArg An optional context of iteration (the valueof `this`), will be undefined if this parameter is not passed.
+ * @param {Boolean} onlyEnumerable An optional `true` to iterate enumerable properties only.
+ * @return {Boolean}
+ */
+function someKey(callback, thisArg, onlyEnumerable) {
+	try {
+		eachKey.call(this, testProperty, thisArg, onlyEnumerable);
+	} catch (test) {
+		if (test == _passed) return true;
+		else throw test;
+	}
+	return false;
+
+	function testProperty(value, key, self) {
+		if (callback.call(this, value, key, self))
+			throw _passed;
+	}
+}
+
+
+/**
+ * An analogue of [every](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every) method of Array prototype.
+ *
+ * @param {Object} self An object which properties will be iterated
+ * @param {Function} callback Callback is passed `value`, `key` and `self`. If it returns falsy value, the function immeaditely returns `false`.
+ * @param {Object} thisArg An optional context of iteration (the valueof `this`), will be undefined if this parameter is not passed.
+ * @param {Boolean} onlyEnumerable An optional `true` to iterate enumerable properties only.
+ * @return {Boolean}
+ */
+function everyKey(callback, thisArg, onlyEnumerable) {
+	try {
+		eachKey.call(this, testProperty, thisArg, onlyEnumerable);
+	} catch (test) {
+		if (test == _didNotPass) return false;
+		else throw test;
+	}
+	return true;
+
+	function testProperty(value, key, self) {
+		if (! callback.call(this, value, key, self))
+			throw _didNotPass;
 	}
 }
 
