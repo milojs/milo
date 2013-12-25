@@ -5,3 +5,4 @@ node_modules/
 test_html/bind_test.bundle.js
 
 .tmp-test-browser
+docs/

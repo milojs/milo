@@ -15,8 +15,8 @@ module.exports = Mixin;
  * Mixin pattern is also used, but Mixin in milo is implemented as a separate object that is stored on the property of the host object and can create proxy methods on the host object if required.
  * Classes [Messenger](../messenger/index.js.html) and [MessageSource](../messenger/message_source.js.html) are subclasses of Mixin abstract class. `this` in proxy methods refers to Mixin instance, the reference to the host object is `this._hostObject`.
  *
- * @param {Object} hostObject an object where a Mixin instance will be stored on. It is used to proxy methods and also to find the reference when it is needed for host object implementation.
- * @param {Object} proxyMethods a map of proxy method names as keys and Mixin methods names as values, so proxied methods can be renamed to avoid name-space conflicts if two different Mixin instances with the same method names are put on the object
+ * @param {Object} hostObject Optional object where a Mixin instance will be stored on. It is used to proxy methods and also to find the reference when it is needed for host object implementation.
+ * @param {Object} proxyMethods Optional map of proxy method names as keys and Mixin methods names as values, so proxied methods can be renamed to avoid name-space conflicts if two different Mixin instances with the same method names are put on the object
  * @param {List} arguments all constructor arguments will be passed to init method of Mixin subclass together with hostObject and proxyMethods
  * @return {Mixin}
  */
@@ -36,6 +36,14 @@ function Mixin(hostObject, proxyMethods) { // , other args - passed to init meth
 		this.init.apply(this, arguments);
 }
 
+
+/**
+ * Mixin instance methods.
+ * These methods are called by constructor, they are not to be called from subclasses.
+ *
+ * - [_createProxyMethod](#_createProxyMethod)
+ * - [_createProxyMethods](#_createProxyMethods)
+ */
 _.extendProto(Mixin, {
 	_createProxyMethod: _createProxyMethod,
 	_createProxyMethods: _createProxyMethods
@@ -47,7 +55,7 @@ _.extendProto(Mixin, {
  *
  * @param {String} mixinMethodName name of method in Mixin subclass
  * @param {String} proxyMethodName name of created proxy method on host object
- * @param {Object} hostObject an optional reference to the host object; if not specified the host object passed to constructor wil be used. It allows to use the same instance of Mixin on two host objects.
+ * @param {Object} hostObject Optional reference to the host object; if not specified the host object passed to constructor wil be used. It allows to use the same instance of Mixin on two host objects.
  */
 function _createProxyMethod(mixinMethodName, proxyMethodName, hostObject) {
 	hostObject = hostObject || this._hostObject;
@@ -128,7 +136,7 @@ _.extendProto(ClassRegistry, {
  * ClassRegistry instance method that registers a class in the registry.
  *
  * @param {Function} aClass class to register in the registry. Should be subclass of `this.FoundationClass`.
- * @param {String} name optional class name. If class name is not specified, it will be taken from constructor function name. Class name should be a valid identifier and cannot be an empty string.
+ * @param {String} name Optional class name. If class name is not specified, it will be taken from constructor function name. Class name should be a valid identifier and cannot be an empty string.
  */
 function add(aClass, name) {
 	name = name || aClass.name;
@@ -212,19 +220,33 @@ var Attribute = require('./a_class')
 	, Match = check.Match;
 
 
-// Matches;
-// :myView - only component name
-// View:myView - class and component name
-// [Events, Data]:myView - facets and component name
-// View[Events]:myView - class, facet(s) and component name
-
 var attrRegExp= /^([^\:\[\]]*)(?:\[([^\:\[\]]*)\])?\:?([^:]*)$/
 	, facetsSplitRegExp = /\s*(?:\,|\s)\s*/
 	, attrTemplate = '%compClass%compFacets:%compName';
 
 
+/**
+ * BindAttribute class parses/validates/etc. an attribute that binds DOM elements to milo components.
+ * Possible attribute values are:
+ *
+ * - `:myView` - only component name
+ * - `View:myView` - class and component name
+ * - `[Events, Data]:myView` - facets and component name
+ * - `View[Events]:myView` - class, facet(s) and component name
+ *
+ * See [binder](../binder.js.html) for more information.
+ */
 var BindAttribute = _.createSubclass(Attribute, 'BindAttribute', true);
 
+
+/**
+ * BindAttribute instance methods
+ *
+ * - [attrName](#attrName)
+ * - [parse](#parse)
+ * - [validate](#validate)
+ * - [render](#render)
+ */
 _.extendProto(BindAttribute, {
 	attrName: attrName,
 	parse: parse,
@@ -236,14 +258,28 @@ _.extendProto(BindAttribute, {
 module.exports = BindAttribute;
 
 
-// get attribute name
+/**
+ * BindAttribute instance method that returns attribute name, by default - `'ml-bind'`.
+ * To configure bind attribute name use:
+ * ```
+ * config({ attrs: { bind: 'cc-bind' } }); // will set bind attribute to 'cc-bind'
+ * ```
+ *
+ * @return {String}
+ */
 function attrName() {
-	return config.attrs['bind'];
+	return config.attrs.bind;
 }
 
 
-// parse attribute
-function parse() {
+/**
+ * BindAttribute instance method that parses bind attribute if it is present on the element.
+ * It defines properties `compClass`, `compFacets` and `compName` on BindAttribute instance.
+ * Returns the instance for method chaining.
+ *
+ * @return {BindAttribute}
+ */
+ function parse() {
 	if (! this.node) return;
 
 	var value = this.get();
@@ -262,12 +298,14 @@ function parse() {
 }
 
 
-// validate attribute
+/**
+ * BindAttribute instance method that validates bind attribute, throws if it has an invalid value.
+ * Returns the instance for method chaining.
+ *
+ * @return {BindAttribute}
+ */
 function validate() {
-	var compName = this.compName;
-	check(compName, Match.Where(function() {
-  		return typeof compName == 'string' && compName != '';
-	}), 'empty component name');
+	check(this.compName, Match.IdentifierString);
 
 	if (! this.compClass)
 		throw new AttributeError('empty component class name ' + this.compClass);
@@ -276,8 +314,14 @@ function validate() {
 }
 
 
+/**
+ * BindAttribute instance method that returns the attribute value for given values of properties `compClass`, `compName` and `compFacets`.
+ * If `this.compName` is not set it will be generated automatically.
+ *
+ * @return {String}
+ */
 function render() {
-	this.compName = this.compName || (milo.config.componentPrefix + milo.util.count());
+	this.compName = this.compName || milo.util.componentName();
 	return attrTemplate
 				.replace('%compClass', this.compClass || '')
 				.replace('%compFacets', this.compFacets
@@ -299,17 +343,35 @@ module.exports = Attribute;
 
 
 /**
- * An absctract class for parsing and validation of element attribute.
+ * An absctract class for parsing and validation of element attributes.
  * Subclasses should define methods `attrName`, `parse`, `validate` and `render`.
+ *
  * @param {Element} el DOM element where attribute is attached
- * @param {String} name name of the attribute, usually supplied by subclass
+ * @param {String} name Optional name of the attribute, usually supplied by subclass via `attrName` method
  */
 function Attribute(el, name) {
 	this.name = name || this.attrName();
 	this.el = el;
+
+	// attribute node
 	this.node = el.attributes[this.name];
 }
 
+
+/**
+ * Attribute instance methods
+ *
+ * - [get](#get)
+ * - [set](#set)
+ * - [decorate](#decorate)
+ *
+ * The following instance methods should be defined by subclass
+ *
+ * - attrName - should return attribute name
+ * - parse - should parse attribute value
+ * - validate - should validate attribute value, throwing exception if it is incorrect 
+ * - render - should return attribute value for a given attribute state (other properties, as defined in subclass)
+ */
 _.extendProto(Attribute, {
 	get: get,
 	set: set,
@@ -325,6 +387,7 @@ _.extendProto(Attribute, {
 
 /**
  * Attribute instance method that returns attribute value as string.
+ *
  * @return {String}
  */
 function get() {
@@ -334,6 +397,7 @@ function get() {
 
 /**
  * Attribute instance method that sets attribute value.
+ *
  * @param {String} value
  */
 function set(value) {
@@ -350,9 +414,6 @@ function decorate() {
 }
 
 },{"../util/check":54,"../util/error":58,"mol-proto":66}],5:[function(require,module,exports){
-// <a name="attribute-load"></a>
-// ###load attribute class
-
 'use strict';
 
 var Attribute = require('./a_class')
@@ -361,43 +422,94 @@ var Attribute = require('./a_class')
 	, _ = require('mol-proto');
 
 
+/**
+ * LoadAttribute class parses/validates/etc. an attribute that loads sub-views into the page.
+ * Attribute value should be URL of the file to load subview from.
+ * See [loader](../loader.js.html) for more information.
+ */
 var LoadAttribute = _.createSubclass(Attribute, 'LoadAttribute', true);
 
+
+/**
+ * LoadAttribute instance methods
+ *
+ * - [attrName](#attrName)
+ * - [parse](#parse)
+ * - [validate](#validate)
+ * - [render](#render)
+ */
 _.extendProto(LoadAttribute, {
-	attrName: getAttributeName,
-	parse: parseAttribute,
-	validate: validateAttribute
+	attrName: attrName,
+	parse: parse,
+	validate: validate,
+	render: render
 });
 
 module.exports = LoadAttribute;
 
 
-function getAttributeName() {
+/**
+ * BindAttribute instance method that returns attribute name, by default - `'ml-load'`.
+ * To configure load attribute name use:
+ * ```
+ * config({ attrs: { load: 'cc-load' } }); // will set bind attribute to 'cc-load'
+ * ```
+ *
+ * @return {String}
+ */
+function attrName() {
 	return config.attrs.load;
 }
 
 
-function parseAttribute() {
+/**
+ * LoadAttribute instance method that parses load attribute if it is present on the element.
+ * It defines property `loadUrl` on LoadAttribute instance.
+ * Returns the instance for method chaining.
+ *
+ * @return {LoadAttribute}
+ */
+function parse() {
 	if (! this.node) return;
 
-	var value = this.get();
-
-	this.loadUrl = value;
-
+	this.loadUrl = this.get();
 	return this;
 }
 
 
-function validateAttribute() {
+/**
+ * LoadAttribute instance method that should validate load attribute and throw if it has an invalid value.
+ * TODO - implement url validation.
+ * Returns the instance for method chaining.
+ *
+ * @return {LoadAttribute}
+ */
+function validate() {
 	// TODO url validation
-
 	return this;
+}
+
+
+/**
+ * LoadAttribute instance method - returns URL
+ *
+ * @return {String}
+ */
+function render() {
+	return this.loadUrl;
 }
 
 },{"../config":39,"../util/error":58,"./a_class":4,"mol-proto":66}],6:[function(require,module,exports){
 'use strict';
 
-module.exports = {
+
+/**
+ * Subclasses of [Attribute](./a_class.js.html) class
+ *
+ * - [BindAttribute](./a_bind.js.html)
+ * - [LoadAttribute](./a_load.js.html)
+ */
+var attributes = module.exports = {
 	bind: require('./a_bind'),
 	load: require('./a_load')
 };
