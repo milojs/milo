@@ -1,6 +1,6 @@
 'use strict';
 
-var Mixin = require('../lib/abstract/mixin')
+var Mixin = require('../../lib/abstract/mixin')
 	,  assert = require('assert')
 	, _ = require('mol-proto');
 
@@ -106,4 +106,3 @@ describe('Mixin', function() {
     	}, 'should throw');
     });
 });
-

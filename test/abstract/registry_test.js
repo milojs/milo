@@ -1,6 +1,6 @@
 'use strict';
 
-var ClassRegistry = require('../lib/abstract/registry.js')
+var ClassRegistry = require('../../lib/abstract/registry.js')
 	, _ = require('mol-proto')
 	, assert = require('assert');
 

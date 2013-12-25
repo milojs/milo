@@ -12,25 +12,22 @@ module.exports = Mixin;
 /**
  * An abstract Mixin class.
  *
- * We also use mixin pattern, but Mixin in milo is implemented as a separate object
- * that is stored on the property of the host object and can create proxy methods on
- * the host object if required. Classes [`Messenger`](../messenger/index.js.html), MessageSource and DataSource are
- * subclasses of Mixin abstract class. `this` in proxy methods refers to Mixin instance.
+ * Mixin pattern is also used, but Mixin in milo is implemented as a separate object that is stored on the property of the host object and can create proxy methods on the host object if required.
+ * Classes [Messenger](../messenger/index.js.html) and [MessageSource](../messenger/message_source.js.html) are subclasses of Mixin abstract class. `this` in proxy methods refers to Mixin instance, the reference to the host object is `this._hostObject`.
  *
- * @param {Object} hostObject an object where a Mixin instance will be stored on. It is used to proxy methods and also to find the reference when it is needed for host object implementation
+ * @param {Object} hostObject an object where a Mixin instance will be stored on. It is used to proxy methods and also to find the reference when it is needed for host object implementation.
  * @param {Object} proxyMethods a map of proxy method names as keys and Mixin methods names as values, so proxied methods can be renamed to avoid name-space conflicts if two different Mixin instances with the same method names are put on the object
  * @param {List} arguments all constructor arguments will be passed to init method of Mixin subclass together with hostObject and proxyMethods
- * @return {Mixin} when used with new, the instance of Mixin class
+ * @return {Mixin}
  */
-
-
 function Mixin(hostObject, proxyMethods) { // , other args - passed to init method
-
-	// TODO - moce checks from Messenger here
 	check(hostObject, Match.Optional(Match.OneOf(Object, Function)));
 	check(proxyMethods, Match.Optional(Match.ObjectHash(String)));
 
-	Object.defineProperty(this, '_hostObject', { value: hostObject });
+	// store hostObject
+	_.defineProperty(this, '_hostObject', hostObject);
+
+	// proxy methods to hostObject
 	if (proxyMethods)
 		this._createProxyMethods(proxyMethods);
 
@@ -46,22 +43,23 @@ _.extendProto(Mixin, {
 
 
 /**
- * _createProxyMethod
- * Creates a proxied method of Mixin subclass on host object
- * @param {String} mixinMethodName name of Mixin subclass
+ * Creates a proxied method of Mixin subclass on host object.
+ *
+ * @param {String} mixinMethodName name of method in Mixin subclass
  * @param {String} proxyMethodName name of created proxy method on host object
  * @param {Object} hostObject an optional reference to the host object; if not specified the host object passed to constructor wil be used. It allows to use the same instance of Mixin on two host objects.
  */
 function _createProxyMethod(mixinMethodName, proxyMethodName, hostObject) {
 	hostObject = hostObject || this._hostObject;
 
+	// Mixin class does not allow shadowing methods that exist on the host object
 	if (hostObject[proxyMethodName])
 		throw new MixinError('method ' + proxyMethodName +
 								 ' already defined in host object');
 
 	check(this[mixinMethodName], Function);
 
-	// Bind proxied messenger's method to messenger
+	// Bind proxied Mixin's method to Mixin instance
 	var boundMethod = this[mixinMethodName].bind(this);
 
 	Object.defineProperty(hostObject, proxyMethodName,
@@ -69,6 +67,12 @@ function _createProxyMethod(mixinMethodName, proxyMethodName, hostObject) {
 }
 
 
+/**
+ * Creates proxied methods of Mixin subclass on host object.
+ *
+ * @param {Hash[String]} proxyMethods map of names of methods, key - proxy method, value - mixin method.
+ * @param {Object} hostObject an optional reference to the host object; if not specified the host object passed to constructor wil be used. It allows to use the same instance of Mixin on two host objects.
+ */
 function _createProxyMethods(proxyMethods, hostObject) {
 	// creating and binding proxy methods on the host object
 	_.eachKey(proxyMethods, function(mixinMethodName, proxyMethodName) {
@@ -77,23 +81,23 @@ function _createProxyMethods(proxyMethods, hostObject) {
 }
 
 },{"../util/check":54,"../util/error":58,"mol-proto":66}],2:[function(require,module,exports){
-// <a name="registry"></a>
-// registry abstract class
-// --------------
-
-// __Dependency inversion__
-
-// Components and Facets register themselves in registries that allows to avoid 
-// requiring them from one module. It prevents circular dependencies between modules.
-
 'use strict';
 
 var _ = require('mol-proto')
+	, RegistryError = require('../util/error').Registry
 	, check = require('../util/check')
 	, Match = check.Match;
 
 module.exports = ClassRegistry;
 
+
+/**
+ * The registry of classes constructor.
+ * Components and Facets register themselves in registries. It allows to avoid requiring them from one module and prevents circular dependencies between modules.
+ * 
+ * @param {Function} FoundationClass All classes that are registered in the registry should be subclasses of the FoundationClass
+ * @return {Object}
+ */
 function ClassRegistry (FoundationClass) {
 	if (FoundationClass)
 		this.setClass(FoundationClass);
@@ -101,50 +105,68 @@ function ClassRegistry (FoundationClass) {
 	this.__registeredClasses = {};
 }
 
+
+/**
+ * ClassRegistry instance methods
+ *
+ * - [add](#add)
+ * - [get](#get)
+ * - [remove](#remove)
+ * - [clean](#clean)
+ * - [setClass](#setClass)
+ */
 _.extendProto(ClassRegistry, {
-	add: registerClass,
-	get: getClass,
-	remove: unregisterClass,
-	clean: unregisterAllClasses,
-	setClass: setFoundationClass
+	add: add,
+	get: get,
+	remove: remove,
+	clean: clean,
+	setClass: setClass
 });
 
 
-function setFoundationClass(FoundationClass) {
-	check(FoundationClass, Function);
-	Object.defineProperty(this, 'FoundationClass', {
-		enumerable: true,
-		value: FoundationClass
-	});
-}
-
-function registerClass(aClass, name) {
+/**
+ * ClassRegistry instance method that registers a class in the registry.
+ *
+ * @param {Function} aClass class to register in the registry. Should be subclass of `this.FoundationClass`.
+ * @param {String} name optional class name. If class name is not specified, it will be taken from constructor function name. Class name should be a valid identifier and cannot be an empty string.
+ */
+function add(aClass, name) {
 	name = name || aClass.name;
 
-	check(name, String, 'class name must be string');
-	check(name, Match.Where(function() {
-		return typeof name == 'string' && name != '';
-	}), 'class name must be string');
+	check(name, Match.IdentifierString, 'class name must be identifier string');
+
 	if (this.FoundationClass) {
 		if (aClass != this.FoundationClass)
 			check(aClass, Match.Subclass(this.FoundationClass), 'class must be a sub(class) of a foundation class');
 	} else
-		throw new TypeError('foundation class must be set before adding classes to registry');
+		throw new RegistryError('foundation class must be set before adding classes to registry');
 
 	if (this.__registeredClasses[name])
-		throw new TypeError('is already registered');
+		throw new RegistryError('class "' + name + '" is already registered');
 
 	this.__registeredClasses[name] = aClass;
 };
 
 
-function getClass(name) {
+/**
+ * Gets class from registry by name
+ *
+ * @param {String} name Class name
+ * @return {Function}
+ */
+function get(name) {
 	check(name, String, 'class name must be string');
 	return this.__registeredClasses[name];
 };
 
 
-function unregisterClass(nameOrClass) {
+/**
+ * Remove class from registry by its name.
+ * If class is not registered, this method will throw an exception.
+ * 
+ * @param {String|Function} nameOrClass Class name. If class constructor is supplied, its name will be used.
+ */
+function remove(nameOrClass) {
 	check(nameOrClass, Match.OneOf(String, Function), 'class or name must be supplied');
 
 	var name = typeof nameOrClass == 'string'
@@ -152,17 +174,34 @@ function unregisterClass(nameOrClass) {
 						: nameOrClass.name;
 						
 	if (! this.__registeredClasses[name])
-		throw new TypeError('class is not registered');
+		throw new RegistryError('class is not registered');
 
 	delete this.__registeredClasses[name];
 };
 
 
-function unregisterAllClasses() {
+/**
+ * Removes all classes from registry.
+ */
+function clean() {
 	this.__registeredClasses = {};
 };
 
-},{"../util/check":54,"mol-proto":66}],3:[function(require,module,exports){
+
+/**
+ * Sets `FoundationClass` of the registry. It should be set before any class can be added.
+ *
+ * @param {Function} FoundationClass Any class that will be added to the registry should be a subclass of this class. FoundationClass itself can be added to the registry too.
+ */
+function setClass(FoundationClass) {
+	check(FoundationClass, Function);
+	Object.defineProperty(this, 'FoundationClass', {
+		enumerable: true,
+		value: FoundationClass
+	});
+}
+
+},{"../util/check":54,"../util/error":58,"mol-proto":66}],3:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -2487,13 +2526,8 @@ if (typeof window != 'undefined')
 else {
 	global = {};
 	_.eachKey(eventTypes, function(eTypes, eventConstructorName) {
-		var eventConstructor;
-		eval(
-			'eventConstructor = function ' + eventConstructorName + '(type, properties) { \
-				this.type = type; \
-				_.extend(this, properties); \
-			};'
-		);
+		var eventConstructor = _.makeFunction(eventConstructorName, 'type', 'properties',
+			'this.type = type; _.extend(this, properties);');
 		global[eventConstructorName] = eventConstructor;
 	});
 }
@@ -4567,6 +4601,9 @@ var Match = check.Match = {
   // Matches only signed 32-bit integers
   Integer: ['__integer__'],
 
+  // Matches string that is a valid identifier, will not allow javascript reserved words
+  IdentifierString: /^[a-z_$][0-9a-z_$]*$/i, 
+
   // Matches hash (object) with values matching pattern
   ObjectHash: function(pattern) {
     return new ObjectHash(pattern);
@@ -4671,9 +4708,17 @@ function checkSubtree(value, pattern) {
     // E.g.: 1.348192308491824e+23 % 1 === 0 in V8
     // Bitwise operators work consistantly but always cast variable to 32-bit
     // signed integer according to JavaScript specs.
-    if (typeof value === "number" && (value | 0) === value)
+    if (typeof value === 'number' && (value | 0) === value)
       return
-    throw new Match.Error("Expected Integer, got "
+    throw new Match.Error('Expected Integer, got '
+                + (value instanceof Object ? JSON.stringify(value) : value));
+  }
+
+  if (pattern === Match.IdentifierString) {
+    if (typeof value === 'string' && Match.IdentifierString.test(value)
+        && _jsKeywords.indexOf(key) == -1)
+      return;
+    throw new Match.Error('Expected identifier string, got '
                 + (value instanceof Object ? JSON.stringify(value) : value));
   }
 
@@ -4828,7 +4873,7 @@ var _jsKeywords = ["do", "if", "in", "for", "let", "new", "try", "var", "case",
 function _prependPath(key, base) {
   if ((typeof key) === "number" || key.match(/^[0-9]+$/))
     key = "[" + key + "]";
-  else if (!key.match(/^[a-z_$][0-9a-z_$]*$/i) || _jsKeywords.indexOf(key) != -1)
+  else if (!key.match(Match.IdentifierString) || _jsKeywords.indexOf(key) != -1)
     key = JSON.stringify([key]);
 
   if (base && base[0] !== "[")
@@ -4944,7 +4989,7 @@ var _ = require('mol-proto');
 var errorClassNames = ['AbstractClass', 'Mixin', 'Messenger', 'ComponentDataSource',
 					   'Attribute', 'Binder', 'Loader', 'MailMessageSource', 'Facet',
 					   'Scope', 'EditableEventsSource', 'Model', 'DomFacet', 'EditableFacet',
-					   'List', 'Connector'];
+					   'List', 'Connector', 'Registry'];
 
 var error = {
 	toBeImplemented: error$toBeImplemented,
@@ -4959,11 +5004,9 @@ module.exports = error;
 
 
 function error$createClass(errorClassName) {
-	var ErrorClass;
-	eval('ErrorClass = function ' + errorClassName + '(message) { \
-			this.name = "' + errorClassName + '"; \
-			this.message = message || "There was an error"; \
-		}');
+	var ErrorClass = _.makeFunction(errorClassName, 'message',
+			'this.name = "' + errorClassName + '"; \
+			this.message = message || "There was an  error";');
 	_.makeSubclass(ErrorClass, Error);
 
 	return ErrorClass;
@@ -5736,6 +5779,7 @@ function mapToObject(callback, thisArg) {
  * These methods can be [chained](proto.js.html#Proto)
  */
 var functionMethods = module.exports = {
+	makeFunction: makeFunction,
 	partial: partial,
 	partialRight: partialRight,
 	memoize: memoize
@@ -5743,6 +5787,30 @@ var functionMethods = module.exports = {
 
 
 var slice = Array.prototype.slice;
+
+
+/**
+ * Similarly to Function constructor creates a function from code.
+ * Unlike Function constructor, the first argument is a function name
+ *
+ * @param {String} name new function name
+ * @param {String} arg1, arg2, ... the names of function parameters
+ * @param {String} funcBody function body
+ * @return {Function}
+ */
+function makeFunction(arg1, arg2, funcBody) {
+	var name = this
+		, count = arguments.length - 1
+		, funcBody = arguments[count]
+		, func
+		, code = '';
+	for (var i = 0; i < count; i++)
+		code += ', ' + arguments[i];
+	code = ['func = function ', name, '(', code.slice(2), ') {\n'
+				, funcBody, '\n}'].join('');
+	eval(code);
+	return func;
+}
 
 
 /**
@@ -6244,6 +6312,8 @@ var prototypeMethods = module.exports = {
 
 var __ = require('./proto_object');
 
+__.extend.call(__, require('./proto_function'));
+
 
 /**
  * Adds non-enumerable, non-configurable and non-writable properties to the prototype of constructor function.
@@ -6337,7 +6407,7 @@ function makeSubclass(Superclass) {
 	return this;
 }
 
-},{"./proto_object":69}],71:[function(require,module,exports){
+},{"./proto_function":68,"./proto_object":69}],71:[function(require,module,exports){
 'use strict';
 
 /**
