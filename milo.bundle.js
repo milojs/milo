@@ -10,7 +10,11 @@ var _ = require('mol-proto')
 module.exports = Mixin;
 
 /**
- * An abstract Mixin class.
+ * `milo.classes.Mixin` - an abstract Mixin class.
+ * Can be subclassed using:
+ * ```
+ * var MyMixin = _.createSubclass(milo.classes.Mixin, 'MyMixin');
+ * ```
  *
  * Mixin pattern is also used, but Mixin in milo is implemented as a separate object that is stored on the property of the host object and can create proxy methods on the host object if required.
  * Classes [Messenger](../messenger/index.js.html) and [MessageSource](../messenger/message_source.js.html) are subclasses of Mixin abstract class. `this` in proxy methods refers to Mixin instance, the reference to the host object is `this._hostObject`.
@@ -88,7 +92,9 @@ function _createProxyMethods(proxyMethods, hostObject) {
 	}, this);
 }
 
-},{"../util/check":54,"../util/error":58,"mol-proto":66}],2:[function(require,module,exports){
+},{"../util/check":55,"../util/error":59,"mol-proto":67}],2:[function(require,module,exports){
+module.exports=require(1)
+},{"../util/check":55,"../util/error":59,"mol-proto":67}],3:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -100,7 +106,7 @@ module.exports = ClassRegistry;
 
 
 /**
- * The registry of classes constructor.
+ * `milo.classes.ClassRegistry` - the registry of classes class.
  * Components and Facets register themselves in registries. It allows to avoid requiring them from one module and prevents circular dependencies between modules.
  * 
  * @param {Function} FoundationClass All classes that are registered in the registry should be subclasses of the FoundationClass
@@ -209,7 +215,7 @@ function setClass(FoundationClass) {
 	});
 }
 
-},{"../util/check":54,"../util/error":58,"mol-proto":66}],3:[function(require,module,exports){
+},{"../util/check":55,"../util/error":59,"mol-proto":67}],4:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -226,6 +232,7 @@ var attrRegExp= /^([^\:\[\]]*)(?:\[([^\:\[\]]*)\])?\:?([^:]*)$/
 
 
 /**
+ * `milo.attributes.bind`
  * BindAttribute class parses/validates/etc. an attribute that binds DOM elements to milo components.
  * Possible attribute values are:
  *
@@ -262,7 +269,7 @@ module.exports = BindAttribute;
  * BindAttribute instance method that returns attribute name, by default - `'ml-bind'`.
  * To configure bind attribute name use:
  * ```
- * config({ attrs: { bind: 'cc-bind' } }); // will set bind attribute to 'cc-bind'
+ * milo.config({ attrs: { bind: 'cc-bind' } }); // will set bind attribute to 'cc-bind'
  * ```
  *
  * @return {String}
@@ -330,7 +337,7 @@ function render() {
 				.replace('%compName', this.compName);
 }
 
-},{"../config":39,"../util/check":54,"../util/error":58,"./a_class":4,"mol-proto":66}],4:[function(require,module,exports){
+},{"../config":40,"../util/check":55,"../util/error":59,"./a_class":5,"mol-proto":67}],5:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -413,7 +420,7 @@ function decorate() {
 	this.set(this.render());
 }
 
-},{"../util/check":54,"../util/error":58,"mol-proto":66}],5:[function(require,module,exports){
+},{"../util/check":55,"../util/error":59,"mol-proto":67}],6:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -431,6 +438,7 @@ var LoadAttribute = _.createSubclass(Attribute, 'LoadAttribute', true);
 
 
 /**
+ * `milo.attributes.load`
  * LoadAttribute instance methods
  *
  * - [attrName](#attrName)
@@ -452,7 +460,7 @@ module.exports = LoadAttribute;
  * BindAttribute instance method that returns attribute name, by default - `'ml-load'`.
  * To configure load attribute name use:
  * ```
- * config({ attrs: { load: 'cc-load' } }); // will set bind attribute to 'cc-load'
+ * milo.config({ attrs: { load: 'cc-load' } }); // will set bind attribute to 'cc-load'
  * ```
  *
  * @return {String}
@@ -499,7 +507,7 @@ function render() {
 	return this.loadUrl;
 }
 
-},{"../config":39,"../util/error":58,"./a_class":4,"mol-proto":66}],6:[function(require,module,exports){
+},{"../config":40,"../util/error":59,"./a_class":5,"mol-proto":67}],7:[function(require,module,exports){
 'use strict';
 
 
@@ -514,7 +522,7 @@ var attributes = module.exports = {
 	load: require('./a_load')
 };
 
-},{"./a_bind":3,"./a_load":5}],7:[function(require,module,exports){
+},{"./a_bind":4,"./a_load":6}],8:[function(require,module,exports){
 'use strict';
 
 var miloMail = require('./mail')
@@ -671,7 +679,7 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 	}
 }
 
-},{"./attributes/a_bind":3,"./components/c_facets/cf_registry":24,"./components/c_info":25,"./components/c_registry":31,"./components/scope":34,"./mail":43,"./util/check":54,"./util/dom":57,"./util/error":58,"mol-proto":66}],8:[function(require,module,exports){
+},{"./attributes/a_bind":4,"./components/c_facets/cf_registry":25,"./components/c_info":26,"./components/c_registry":32,"./components/scope":35,"./mail":44,"./util/check":55,"./util/dom":58,"./util/error":59,"mol-proto":67}],9:[function(require,module,exports){
 // <a name="classes"></a>
 // milo.classes
 // -----------
@@ -684,13 +692,14 @@ var classes = {
 	Facet: require('./facets/f_class'),
 	ComponentFacet: require('./components/c_facet'),
 	ClassRegistry: require('./abstract/registry'),
-	facetsRegistry: require('./components/c_facets/cf_registry'),
-	componentsRegistry: require('./components/c_registry'),
+	Mixin: require('./abstract/Mixin'),
+	// facetsRegistry: require('./components/c_facets/cf_registry'),
+	// componentsRegistry: require('./components/c_registry'),
 };
 
 module.exports = classes;
 
-},{"./abstract/registry":2,"./components/c_facet":10,"./components/c_facets/cf_registry":24,"./components/c_registry":31,"./facets/f_class":40}],9:[function(require,module,exports){
+},{"./abstract/Mixin":1,"./abstract/registry":3,"./components/c_facet":11,"./facets/f_class":41}],10:[function(require,module,exports){
 'use strict';
 
 // <a name="components"></a>
@@ -936,7 +945,7 @@ function _getScopeParent(withFacet) {
 	}
 }
 
-},{"../config":39,"../facets/f_object":41,"../messenger":45,"../util/check":54,"../util/count":56,"./c_facets/cf_registry":24,"./c_utils":32,"mol-proto":66}],10:[function(require,module,exports){
+},{"../config":40,"../facets/f_object":42,"../messenger":46,"../util/check":55,"../util/count":57,"./c_facets/cf_registry":25,"./c_utils":33,"mol-proto":67}],11:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facet"></a>
@@ -1070,7 +1079,7 @@ function _createMessageSource(MessageSourceClass, options) {
 	_.defineProperty(this, '_messageSource', messageSource);
 }
 
-},{"../facets/f_class":40,"../messenger":45,"../util/error":58,"./c_utils":32,"mol-proto":66}],11:[function(require,module,exports){
+},{"../facets/f_class":41,"../messenger":46,"../util/error":59,"./c_utils":33,"mol-proto":67}],12:[function(require,module,exports){
 // <a name="components-facets-container"></a>
 // ###container facet
 
@@ -1117,7 +1126,7 @@ function addChildComponents(childComponents) {
 	_.extend(this.scope, childComponents);
 }
 
-},{"../../binder":7,"../c_facet":10,"./cf_registry":24,"mol-proto":66}],12:[function(require,module,exports){
+},{"../../binder":8,"../c_facet":11,"./cf_registry":25,"mol-proto":67}],13:[function(require,module,exports){
 // <a name="components-facets-data"></a>
 // ###data facet
 
@@ -1328,7 +1337,7 @@ function inputValue(el, value) {
 		return el.value;
 }
 
-},{"../../messenger":45,"../../model/path_utils":51,"../../util/logger":60,"../c_facet":10,"../c_message_sources/component_data_source":26,"./cf_registry":24,"mol-proto":66}],13:[function(require,module,exports){
+},{"../../messenger":46,"../../model/path_utils":52,"../../util/logger":61,"../c_facet":11,"../c_message_sources/component_data_source":27,"./cf_registry":25,"mol-proto":67}],14:[function(require,module,exports){
 // <a name="components-facets-dom"></a>
 // ###dom facet
 
@@ -1532,7 +1541,7 @@ function hasTextBeforeSelection() {
 }
 
 
-},{"../../attributes/a_bind":3,"../../binder":7,"../../util/check":54,"../../util/error":58,"../c_facet":10,"./cf_registry":24,"mol-proto":66}],14:[function(require,module,exports){
+},{"../../attributes/a_bind":4,"../../binder":8,"../../util/check":55,"../../util/error":59,"../c_facet":11,"./cf_registry":25,"mol-proto":67}],15:[function(require,module,exports){
 // <a name="components-facets-drag"></a>
 // ###drag facet
 
@@ -1618,7 +1627,7 @@ function startDragFacet() {
 	}
 }
 
-},{"../c_facet":10,"../c_message_sources/dom_events_source":28,"./cf_registry":24,"mol-proto":66}],15:[function(require,module,exports){
+},{"../c_facet":11,"../c_message_sources/dom_events_source":29,"./cf_registry":25,"mol-proto":67}],16:[function(require,module,exports){
 // <a name="components-facets-drop"></a>
 // ###drop facet
 
@@ -1666,7 +1675,7 @@ function startDropFacet() {
 	}
 }
 
-},{"../c_facet":10,"../c_message_sources/dom_events_source":28,"./cf_registry":24,"mol-proto":66}],16:[function(require,module,exports){
+},{"../c_facet":11,"../c_message_sources/dom_events_source":29,"./cf_registry":25,"mol-proto":67}],17:[function(require,module,exports){
 // <a name="components-facets-editable"></a>
 // ###editable facet
 
@@ -1892,7 +1901,7 @@ function onEnterSplit(message, event) {
 	}
 }
 
-},{"../../util":59,"../../util/dom":57,"../../util/logger":60,"../c_class":9,"../c_facet":10,"../c_message_sources/editable_events_source":29,"./cf_registry":24,"mol-proto":66}],17:[function(require,module,exports){
+},{"../../util":60,"../../util/dom":58,"../../util/logger":61,"../c_class":10,"../c_facet":11,"../c_message_sources/editable_events_source":30,"./cf_registry":25,"mol-proto":67}],18:[function(require,module,exports){
 // <a name="components-facets-events"></a>
 // ###events facet
 
@@ -1934,7 +1943,7 @@ function init() {
 	});
 }
 
-},{"../../messenger":45,"../c_facet":10,"../c_message_sources/dom_events_source":28,"./cf_registry":24,"mol-proto":66}],18:[function(require,module,exports){
+},{"../../messenger":46,"../c_facet":11,"../c_message_sources/dom_events_source":29,"./cf_registry":25,"mol-proto":67}],19:[function(require,module,exports){
 // <a name="components-facets-frame"></a>
 // ###frame facet
 
@@ -1980,7 +1989,7 @@ function initFrameFacet() {
 		_messageSource: { value: messageSource }
 	});
 }
-},{"../../messenger":45,"../c_facet":10,"../c_message_sources/iframe_message_source":30,"./cf_registry":24,"mol-proto":66}],19:[function(require,module,exports){
+},{"../../messenger":46,"../c_facet":11,"../c_message_sources/iframe_message_source":31,"./cf_registry":25,"mol-proto":67}],20:[function(require,module,exports){
 // <a name="components-facets-item"></a>
 // ###item facet
 
@@ -2004,7 +2013,7 @@ facetsRegistry.add(ItemFacet);
 
 module.exports = ItemFacet;
 
-},{"../../mail":43,"../../model":50,"../c_facet":10,"./cf_registry":24,"mol-proto":66}],20:[function(require,module,exports){
+},{"../../mail":44,"../../model":51,"../c_facet":11,"./cf_registry":25,"mol-proto":67}],21:[function(require,module,exports){
 // <a name="components-facets-list"></a>
 // ###list facet
 
@@ -2168,7 +2177,7 @@ function each(callback, thisArg) {
     }, thisArg || this);
 }
 
-},{"../../binder":7,"../../mail":43,"../../model":50,"../../util/error":58,"../../util/logger":60,"../c_class":9,"../c_facet":10,"./cf_registry":24,"mol-proto":66}],21:[function(require,module,exports){
+},{"../../binder":8,"../../mail":44,"../../model":51,"../../util/error":59,"../../util/logger":61,"../c_class":10,"../c_facet":11,"./cf_registry":25,"mol-proto":67}],22:[function(require,module,exports){
 // <a name="components-facets-model"></a>
 // ###model facet
 
@@ -2205,7 +2214,7 @@ function _createMessenger() { // Called by inherited init
 	this.m.proxyMessenger(this); // Creates messenger's methods directly on facet
 }
 
-},{"../../model":50,"../c_facet":10,"./cf_registry":24,"mol-proto":66}],22:[function(require,module,exports){
+},{"../../model":51,"../c_facet":11,"./cf_registry":25,"mol-proto":67}],23:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -2343,7 +2352,7 @@ function isSplittable() {
 	return true;
 }
 
-},{"../c_class":9,"../c_facet":10,"./cf_registry":24}],23:[function(require,module,exports){
+},{"../c_class":10,"../c_facet":11,"./cf_registry":25}],24:[function(require,module,exports){
 // <a name="components-facets-template"></a>
 // ###template facet
 
@@ -2415,27 +2424,26 @@ function bindInnerComponents() {
 	this.owner.container.scope = thisScope[this.owner.name].container.scope;
 }
 
-},{"../../binder":7,"../../util/check":54,"../c_facet":10,"./cf_registry":24,"mol-proto":66}],24:[function(require,module,exports){
-// <a name="components-facet-registry"></a>
-// ###component facet registry
-
-// An instance of ClassRegistry class that is used by milo to register and find facets.
-
+},{"../../binder":8,"../../util/check":55,"../c_facet":11,"./cf_registry":25,"mol-proto":67}],25:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../abstract/registry')
 	, ComponentFacet = require('../c_facet');
 
-var facetsRegistry = new ClassRegistry(ComponentFacet);
 
+/**
+ * `milo.registry.facets`
+ * Component facets registry. An instance of [ClassRegistry](../../abstract/registry.js.html) class that is used by milo to register and find facets.
+ */
+ var facetsRegistry = new ClassRegistry(ComponentFacet);
+
+
+// Adds common ancestor to all facets of components to the registry.
 facetsRegistry.add(ComponentFacet);
 
 module.exports = facetsRegistry;
 
-// TODO - refactor components registry test into a function
-// that tests a registry with a given foundation class
-// Make test for this registry based on this function
-},{"../../abstract/registry":2,"../c_facet":10}],25:[function(require,module,exports){
+},{"../../abstract/registry":3,"../c_facet":11}],26:[function(require,module,exports){
 // <a name="components-info"></a>
 // ###component info class
 
@@ -2497,7 +2505,7 @@ function ComponentInfo(scope, el, attr) {
 	}
 }
 
-},{"../util/error":58,"./c_facets/cf_registry":24,"./c_registry":31}],26:[function(require,module,exports){
+},{"../util/error":59,"./c_facets/cf_registry":25,"./c_registry":32}],27:[function(require,module,exports){
 // <a name="components-source-data"></a>
 // ###component data source
 
@@ -2609,7 +2617,7 @@ function triggerDataMessage(message, data) {
 	// TODO - opposite translation + event trigger 
 }
 
-},{"../../util/check":54,"../../util/error":58,"../c_class":9,"./dom_events_source":28,"mol-proto":66}],27:[function(require,module,exports){
+},{"../../util/check":55,"../../util/error":59,"../c_class":10,"./dom_events_source":29,"mol-proto":67}],28:[function(require,module,exports){
 // <a name="components-dom-constructors"></a>
 // ###dom events constructors
 
@@ -2659,7 +2667,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"mol-proto":66}],28:[function(require,module,exports){
+},{"mol-proto":67}],29:[function(require,module,exports){
 // <a name="components-source-dom"></a>
 // ###component dom events source
 
@@ -2767,7 +2775,7 @@ function triggerDomEvent(eventType, properties) {
 
 	return notCancelled;
 }
-},{"../../messenger/message_source":46,"../../util/check":54,"../c_class":9,"./dom_events_constructors":27,"mol-proto":66}],29:[function(require,module,exports){
+},{"../../messenger/message_source":47,"../../util/check":55,"../c_class":10,"./dom_events_constructors":28,"mol-proto":67}],30:[function(require,module,exports){
 // <a name="components-source-editable"></a>
 // ###component editable events source
 
@@ -2923,7 +2931,7 @@ function triggerEditableEvent(message, data) {
 	// TODO - opposite translation + event trigger 
 }
 
-},{"../../util/check":54,"../../util/error":58,"../c_class":9,"./dom_events_source":28,"mol-proto":66}],30:[function(require,module,exports){
+},{"../../util/check":55,"../../util/error":59,"../c_class":10,"./dom_events_source":29,"mol-proto":67}],31:[function(require,module,exports){
 // <a name="components-source-iframe"></a>
 // ###component iframe source
 
@@ -2996,24 +3004,24 @@ function handleEvent(event) {
 	this.dispatchMessage(event.type, event);
 }
 
-},{"../../messenger/message_source":46,"../../util/check":54,"mol-proto":66}],31:[function(require,module,exports){
-// <a name="components-registry"></a>
-// ###component registry class
-
-// An instance of ClassRegistry class that is used by milo to register and find components.
-
+},{"../../messenger/message_source":47,"../../util/check":55,"mol-proto":67}],32:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
 	, Component = require('./c_class');
 
+/**
+ * `milo.registry.components`
+ * An instance of [ClassRegistry](../abstract/registry.js.html) class that is used by milo to register and find components.
+ */
 var componentsRegistry = new ClassRegistry(Component);
 
+// add common ancestor to all components to the registry.
 componentsRegistry.add(Component);
 
 module.exports = componentsRegistry;
 
-},{"../abstract/registry":2,"./c_class":9}],32:[function(require,module,exports){
+},{"../abstract/registry":3,"./c_class":10}],33:[function(require,module,exports){
 'use strict';
 
 var config = require('../config')
@@ -3094,7 +3102,7 @@ function _getContainingComponent(el, returnCurrent, condition) {
 		return _getContainingComponent(el.parentNode, true, condition);
 }
 
-},{"../config":39,"../util/check":54}],33:[function(require,module,exports){
+},{"../config":40,"../util/check":55}],34:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3107,7 +3115,7 @@ componentsRegistry.add(View);
 
 module.exports = View;
 
-},{"../c_class":9,"../c_registry":31}],34:[function(require,module,exports){
+},{"../c_class":10,"../c_registry":32}],35:[function(require,module,exports){
 // <a name="scope"></a>
 // scope class
 // -----------
@@ -3191,7 +3199,7 @@ function _length() {
 	return Object.keys(this).length;
 }
 
-},{"../util/check":54,"../util/error":58,"mol-proto":66}],35:[function(require,module,exports){
+},{"../util/check":55,"../util/error":59,"mol-proto":67}],36:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3204,7 +3212,7 @@ componentsRegistry.add(MLButton);
 
 module.exports = MLButton;
 
-},{"../c_class":9,"../c_registry":31}],36:[function(require,module,exports){
+},{"../c_class":10,"../c_registry":32}],37:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3217,7 +3225,7 @@ componentsRegistry.add(MLGroup);
 
 module.exports = MLGroup;
 
-},{"../c_class":9,"../c_registry":31}],37:[function(require,module,exports){
+},{"../c_class":10,"../c_registry":32}],38:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3230,7 +3238,7 @@ componentsRegistry.add(MLInput);
 
 module.exports = MLInput;
 
-},{"../c_class":9,"../c_registry":31}],38:[function(require,module,exports){
+},{"../c_class":10,"../c_registry":32}],39:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3269,7 +3277,7 @@ function onOptionsChange(path, data) {
 	selectEl.innerHTML = optionsTemplate(this.get());
 }
 
-},{"../c_class":9,"../c_registry":31,"dot":65}],39:[function(require,module,exports){
+},{"../c_class":10,"../c_registry":32,"dot":66}],40:[function(require,module,exports){
 // <a name="config"></a>
 // milo.config
 // -----------
@@ -3306,7 +3314,7 @@ config({
 	componentPrefix: 'milo_'
 });
 
-},{"mol-proto":66}],40:[function(require,module,exports){
+},{"mol-proto":67}],41:[function(require,module,exports){
 // <a name="facet-c"></a>
 // facet class
 // --------------
@@ -3328,7 +3336,7 @@ _.extendProto(Facet, {
 	init: function() {}
 });
 
-},{"mol-proto":66}],41:[function(require,module,exports){
+},{"mol-proto":67}],42:[function(require,module,exports){
 // <a name="facet-o"></a>
 // facetted object class
 // --------------
@@ -3448,7 +3456,7 @@ FacetedObject.createFacetedClass = function (name, facetsClasses, facetsConfig) 
 	return FacetedClass;
 };
 
-},{"../util/check":54,"../util/error":58,"./f_class":40,"mol-proto":66}],42:[function(require,module,exports){
+},{"../util/check":55,"../util/error":59,"./f_class":41,"mol-proto":67}],43:[function(require,module,exports){
 // <a name="loader"></a>
 // milo.loader
 // -----------
@@ -3555,7 +3563,7 @@ function loadView(el, callback) {
 	});
 }
 
-},{"./attributes/a_load":5,"./config":39,"./mail":43,"./util/dom":57,"./util/error":58,"./util/logger":60,"./util/request":62}],43:[function(require,module,exports){
+},{"./attributes/a_load":6,"./config":40,"./mail":44,"./util/dom":58,"./util/error":59,"./util/logger":61,"./util/request":63}],44:[function(require,module,exports){
 // <a name="mail"></a>
 // milo.mail
 // -----------
@@ -3581,7 +3589,7 @@ var miloMail = new Messenger(undefined, undefined, mailMsgSource);
 
 module.exports = miloMail;
 
-},{"../messenger":45,"./mail_source":44}],44:[function(require,module,exports){
+},{"../messenger":46,"./mail_source":45}],45:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../messenger/message_source')
@@ -3655,11 +3663,7 @@ function handleEvent(event) {
 	this.dispatchMessage(event.type, event);
 }
 
-},{"../components/c_message_sources/dom_events_constructors":27,"../messenger/message_source":46,"../util/check":54,"../util/error":58,"mol-proto":66}],45:[function(require,module,exports){
-// <a name="messenger"></a>
-// milo messenger
-// --------------
-
+},{"../components/c_message_sources/dom_events_constructors":28,"../messenger/message_source":47,"../util/check":55,"../util/error":59,"mol-proto":67}],46:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -3670,16 +3674,41 @@ var Mixin = require('../abstract/mixin')
 	, MessengerError = require('../util/error').Messenger;
 
 
+/**
+ * `milo.Messenger`
+ * A generic Messenger class that is used for all kinds of messaging in milo. It is subclassed from [Mixin](../abstract/mixin.js.html) and it proxies its methods to the host object for convenience.
+ * All facets and components have messenger attached to them. Messenger class interoperates with [MessageSource](./message_source.js.html) class that both connects the messenger to some external source of messages (e.g., DOM events) and allows to define higher level messages that exist on the source.
+ * TODO consider refactoring MessageSource to two classes - MessageSource and MessageAPI.
+ * Messenger class is used internally in milo and can be used together with any objects/classes in the application.
+ * milo also defines a global messenger [milo.mail](../mail/index.js.html) that dispatches `domready` event and can be used for any application wide messaging.
+ * To initialize your app after DOM is ready use:
+ * ```
+ * milo.mail.on('domready', function() {
+ *     // application starts	
+ * });
+ * ```
+ * or the following shorter form of the same:
+ * ```
+ * milo(function() {
+ *     // application starts	
+ * });
+ * ```
+ */
 var Messenger = _.createSubclass(Mixin, 'Messenger');
 
 var messagesSplitRegExp = Messenger.messagesSplitRegExp = /\s*(?:\,|\s)\s*/;
 
 
+/**
+ * Messenger instance methods
+ * 
+ *
+ */
 _.extendProto(Messenger, {
-	init: initMessenger, // called by Mixin (superclass)
-	onMessage: registerSubscriber,
+	init: init, // called by Mixin (superclass)
+	onMessage: onMessage,
 	offMessage: removeSubscriber,
-	onMessages: registerSubscribers,
+	onMessages: onMessages,
 	offMessages: removeSubscribers,
 	postMessage: postMessage,
 	getSubscribers: getMessageSubscribers,
@@ -3693,6 +3722,10 @@ _.extendProto(Messenger, {
 });
 
 
+/**
+ * A default map of proxy methods used by ComponentFacet and Component classes to pass to Messenger when it is instantiated.
+ * This map is for convenience only, it is NOT used internally by Messenger, a host class should pass it for methods to be proxied this way.
+ */
 Messenger.defaultMethods = {
 	on: 'onMessage',
 	off: 'offMessage',
@@ -3706,10 +3739,18 @@ Messenger.defaultMethods = {
 module.exports = Messenger;
 
 
-function initMessenger(hostObject, proxyMethods, messageSource) {
+/**
+ * Messenger instance method that initializes Messenger. Method is called by Mixin class constructor.
+ * See [onMessage](#onMessage) method, [Messenger](#Messenger) class above and [MessageSource](./message_source.js.html) class.
+ *
+ * @param {Object} hostObject Optional object that stores the messenger on one of its properties. It is used to proxy methods of messenger and also as a context for subscribers when they are called by the Messenger. See onMessage method.
+ * @param {Object} proxyMethods Optional map of method names; key - proxy method name, value - messenger's method name.
+ * @param {MessageSource} messageSource Optional messageSource linked to the messenger. If messageSource is supplied, the reference to the messenger will stored on its 'messenger' property
+ */
+function init(hostObject, proxyMethods, messageSource) {
 	check(messageSource, Match.Optional(MessageSource));
+	// hostObject and proxyMethods are used in Mixin and checked there
 
-	// hostObject and proxyMethods are used in Mixin
  	// messenger data
  	Object.defineProperties(this, {
  		_messageSubscribers: { value: {} },
@@ -3722,7 +3763,21 @@ function initMessenger(hostObject, proxyMethods, messageSource) {
 }
 
 
-function registerSubscriber(messages, subscriber) {
+/**
+ * Messenger instance method that registers a subscriber function for a certain message(s).
+ * This method returns `true` if the subscription was successful. It can be unsuccessful if the passed subscriber has already been subscribed to this message type - double subscription never happens and it is safe to subscribe again - no error or warning is thrown or logged.
+ * See [postMessage](#postMessage)
+ * 
+ * @param {String|Array[String]|RegExp} messages Message types that should envoke the subscriber.
+ *  If string is passed, it can be a sigle message or multiple message types separated by whitespace with optional comma.
+ *  If an array of strings is passed, each string is a message type to subscribe for.
+ *  If a RegExp is passed, the subscriber will be envoked when the message dispatched on the messenger matches the pattern (or IS the RegExp with identical pattern).
+ *  RegExp subscriber does NOT cause any subscription to MessageSource, it only captures messages that are already subscribed to with precise message types.
+ * @param {Function} subscriber Message subscriber - a function that will be called when the message is dispatched on the messenger (usually via proxied postMessage method of host object).
+ *  If hostObject was supplied to Messenger constructor, hostObject will be the context (the value of this) for the subscriber envocation.
+ * @return {Boolean}
+ */
+function onMessage(messages, subscriber) {
 	check(messages, Match.OneOf(String, [String], RegExp));
 	check(subscriber, Function); 
 
@@ -3747,6 +3802,13 @@ function registerSubscriber(messages, subscriber) {
 }
 
 
+/**
+ * "Private" Messenger instance method that is called by [onMessage](#onMessage) to register subscriber for a message type.
+ *
+ * @param {Object} subscribersHash The map of subscribers determined by [onMessage](#onMessage) based on Message type, can be `this._patternMessageSubscribers` or `this._messageSubscribers`
+ * @param {String} message A given message.
+ * @param {Function} subscriber
+ */
 function _registerSubscriber(subscribersHash, message, subscriber) {
 	if (! (subscribersHash[message] && subscribersHash[message].length)) {
 		subscribersHash[message] = [];
@@ -3767,7 +3829,10 @@ function _registerSubscriber(subscribersHash, message, subscriber) {
 }
 
 
-function registerSubscribers(messageSubscribers) {
+/**
+ * Messenger instance method that subscribes to multiple messages passed as map togetehr with subscribers.
+ */
+function onMessages(messageSubscribers) {
 	check(messageSubscribers, Match.ObjectHash(Function));
 
 	var notYetRegisteredMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
@@ -3920,7 +3985,7 @@ function _setMessageSource(messageSource) {
 }
 
 
-},{"../abstract/mixin":1,"../util/check":54,"../util/error":58,"./message_source":46,"mol-proto":66}],46:[function(require,module,exports){
+},{"../abstract/mixin":2,"../util/check":55,"../util/error":59,"./message_source":47,"mol-proto":67}],47:[function(require,module,exports){
 // <a name="messenger-source"></a>
 // ###messenger source
 
@@ -4037,8 +4102,11 @@ function dispatchAllSourceMessages(sourceMessage, message, data) {
 	return true;
 }
 
-},{"../abstract/mixin":1,"../util/error":58,"../util/logger":60,"mol-proto":66}],47:[function(require,module,exports){
+},{"../abstract/mixin":2,"../util/error":59,"../util/logger":61,"mol-proto":67}],48:[function(require,module,exports){
 'use strict';
+
+var _ = require('mol-proto');
+
 // A minimalist browser framework that binds HTML elements to JS components and components to models.
 
 // Main Modules
@@ -4050,8 +4118,11 @@ function dispatchAllSourceMessages(sourceMessage, message, data) {
 // - .[config](#config) - milo configuration
 // - .[utils](#utils) - logger, request, check, etc.
 // - .[classes](#classes) - foundation classes and class registries
+function milo(func) {
+	milo.mail.on('domready', func);
+}
 
-var milo = {
+_.extend(milo, {
 	loader: require('./loader'),
 	binder: require('./binder'),
 	minder: require('./minder'),
@@ -4062,8 +4133,12 @@ var milo = {
 	attributes: require('./attributes'),
 	Component: require('./components/c_class'),
 	Messenger: require('./messenger'),
-	Model: require('./model')
-};
+	Model: require('./model'),
+	registry: {
+		facets: require('./components/c_facets/cf_registry'),
+		components: require('./components/c_registry')
+	}
+});
 
 
 // included facets
@@ -4081,7 +4156,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./attributes":6,"./binder":7,"./classes":8,"./components/c_class":9,"./config":39,"./loader":42,"./mail":43,"./messenger":45,"./minder":48,"./model":50,"./use_components":52,"./use_facets":53,"./util":59}],48:[function(require,module,exports){
+},{"./attributes":7,"./binder":8,"./classes":9,"./components/c_class":10,"./components/c_facets/cf_registry":25,"./components/c_registry":32,"./config":40,"./loader":43,"./mail":44,"./messenger":46,"./minder":49,"./model":51,"./use_components":53,"./use_facets":54,"./util":60,"mol-proto":67}],49:[function(require,module,exports){
 'use strict';
 
 var Connector = require('./model/connector');
@@ -4117,7 +4192,7 @@ function minder(ds1, mode, ds2, options) {
 		return new Connector(ds1, mode, ds2, options);
 }
 
-},{"./model/connector":49}],49:[function(require,module,exports){
+},{"./model/connector":50}],50:[function(require,module,exports){
 'use strict';
 
 var ConnectorError = require('../util/error').Connector
@@ -4250,7 +4325,7 @@ function off() {
 	}
 }
 
-},{"../util/error":58,"../util/logger":60,"mol-proto":66}],50:[function(require,module,exports){
+},{"../util/error":59,"../util/logger":61,"mol-proto":67}],51:[function(require,module,exports){
 'use strict';
 // <a name="model"></a>
 // milo model
@@ -4471,7 +4546,7 @@ function synthesizeMethod(synthesizer, path, parsedPath) {
 	}
 }
 
-},{"../abstract/mixin":1,"../messenger":45,"../util/check":54,"../util/error":58,"./path_utils":51,"dot":65,"fs":63,"mol-proto":66}],51:[function(require,module,exports){
+},{"../abstract/mixin":2,"../messenger":46,"../util/check":55,"../util/error":59,"./path_utils":52,"dot":66,"fs":64,"mol-proto":67}],52:[function(require,module,exports){
 // <a name="model-path"></a>
 // ### model path utils
 
@@ -4585,7 +4660,7 @@ function wrapMessengerMethods(methodsNames) {
 	}, this);
 }
 
-},{"../util/check":54,"mol-proto":66}],52:[function(require,module,exports){
+},{"../util/check":55,"mol-proto":67}],53:[function(require,module,exports){
 'use strict';
 
 require('./components/classes/View');
@@ -4594,7 +4669,7 @@ require('./components/ui/Select');
 require('./components/ui/Input');
 require('./components/ui/Button');
 
-},{"./components/classes/View":33,"./components/ui/Button":35,"./components/ui/Group":36,"./components/ui/Input":37,"./components/ui/Select":38}],53:[function(require,module,exports){
+},{"./components/classes/View":34,"./components/ui/Button":36,"./components/ui/Group":37,"./components/ui/Input":38,"./components/ui/Select":39}],54:[function(require,module,exports){
 'use strict';
 
 // ['Dom'
@@ -4625,7 +4700,7 @@ require('./components/c_facets/Split');
 require('./components/c_facets/List');
 require('./components/c_facets/Item');
 
-},{"./components/c_facets/Container":11,"./components/c_facets/Data":12,"./components/c_facets/Dom":13,"./components/c_facets/Drag":14,"./components/c_facets/Drop":15,"./components/c_facets/Editable":16,"./components/c_facets/Events":17,"./components/c_facets/Frame":18,"./components/c_facets/Item":19,"./components/c_facets/List":20,"./components/c_facets/ModelFacet":21,"./components/c_facets/Split":22,"./components/c_facets/Template":23}],54:[function(require,module,exports){
+},{"./components/c_facets/Container":12,"./components/c_facets/Data":13,"./components/c_facets/Dom":14,"./components/c_facets/Drag":15,"./components/c_facets/Drop":16,"./components/c_facets/Editable":17,"./components/c_facets/Events":18,"./components/c_facets/Frame":19,"./components/c_facets/Item":20,"./components/c_facets/List":21,"./components/c_facets/ModelFacet":22,"./components/c_facets/Split":23,"./components/c_facets/Template":24}],55:[function(require,module,exports){
 // <a name="utils-check"></a>
 // milo.utils.check
 // -----------
@@ -4994,7 +5069,7 @@ function _prependPath(key, base) {
 };
 
 
-},{"mol-proto":66}],55:[function(require,module,exports){
+},{"mol-proto":67}],56:[function(require,module,exports){
 'use strict';
 
 var count = require('./count')
@@ -5008,7 +5083,7 @@ function componentName() {
 	return prefix + count();
 }
 
-},{"../config":39,"./count":56}],56:[function(require,module,exports){
+},{"../config":40,"./count":57}],57:[function(require,module,exports){
 // <a name="utils-count"></a>
 // milo.utils.count
 // ----------------
@@ -5028,7 +5103,7 @@ componentCount.get = function() {
 
 module.exports = componentCount;
 
-},{}],57:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 'use strict';
 
 
@@ -5087,7 +5162,7 @@ function getElementOffset(el) {
     return { topOffset: yPos, leftOffset: xPos };
 }
 
-},{}],58:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 // <a name="utils-error"></a>
 // milo.utils.error
 // -----------
@@ -5129,7 +5204,7 @@ function error$toBeImplemented() {
 	throw new error.AbstractClass('calling the method of an absctract class');
 }
 
-},{"mol-proto":66}],59:[function(require,module,exports){
+},{"mol-proto":67}],60:[function(require,module,exports){
 // <a name="utils"></a>
 // milo.utils
 // -----------
@@ -5148,7 +5223,7 @@ var util = {
 
 module.exports = util;
 
-},{"./check":54,"./component_name":55,"./count":56,"./dom":57,"./error":58,"./logger":60,"./request":62}],60:[function(require,module,exports){
+},{"./check":55,"./component_name":56,"./count":57,"./dom":58,"./error":59,"./logger":61,"./request":63}],61:[function(require,module,exports){
 // <a name="utils-logger"></a>
 // milo.utils.logger
 // -----------
@@ -5164,7 +5239,7 @@ var logger = new Logger({ level: 3 });
 
 module.exports = logger;
 
-},{"./logger_class":61}],61:[function(require,module,exports){
+},{"./logger_class":62}],62:[function(require,module,exports){
 // ### Logger Class
 
 // Properties:
@@ -5275,7 +5350,7 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"mol-proto":66}],62:[function(require,module,exports){
+},{"mol-proto":67}],63:[function(require,module,exports){
 // <a name="utils-request"></a>
 // milo.utils.request
 // -----------
@@ -5327,13 +5402,13 @@ function get(url, callback) {
 	request(url, { method: 'GET' }, callback);
 }
 
-},{"mol-proto":66}],63:[function(require,module,exports){
+},{"mol-proto":67}],64:[function(require,module,exports){
 
 // not implemented
 // The reason for having an empty file and not throwing is to allow
 // untraditional implementation of this module.
 
-},{}],64:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 // doT.js
 // 2011, Laura Doktorova, https://github.com/olado/doT
 // Licensed under the MIT license.
@@ -5470,7 +5545,7 @@ function get(url, callback) {
 	};
 }());
 
-},{}],65:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 /* doT + auto-compilation of doT templates
  *
  * 2012, Laura Doktorova, https://github.com/olado/doT
@@ -5615,7 +5690,7 @@ InstallDots.prototype.compileAll = function() {
 	return this.__rendermodule;
 };
 
-},{"./doT":64,"fs":63}],66:[function(require,module,exports){
+},{"./doT":65,"fs":64}],67:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -5759,7 +5834,7 @@ if (typeof module == 'object' && module.exports)
 	// export for node/browserify
 	module.exports = Proto;
 
-},{"./proto_array":67,"./proto_function":68,"./proto_object":69,"./proto_prototype":70,"./proto_string":71,"./utils":72}],67:[function(require,module,exports){
+},{"./proto_array":68,"./proto_function":69,"./proto_object":70,"./proto_prototype":71,"./proto_string":72,"./utils":73}],68:[function(require,module,exports){
 'use strict';
 
 var __ = require('./proto_object')
@@ -5880,7 +5955,7 @@ function mapToObject(callback, thisArg) {
 	return result;
 }
 
-},{"./proto_object":69,"./utils":72}],68:[function(require,module,exports){
+},{"./proto_object":70,"./utils":73}],69:[function(require,module,exports){
 'use strict';
 
 /**
@@ -5985,7 +6060,7 @@ function memoize(hashFunc, limit) {
 	};
 }
 
-},{}],69:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 'use strict';
 
 /**
@@ -6405,7 +6480,7 @@ function everyKey(callback, thisArg, onlyEnumerable) {
 	}
 }
 
-},{}],70:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 'use strict';
 
 /**
@@ -6519,7 +6594,7 @@ function makeSubclass(Superclass) {
 	return this;
 }
 
-},{"./proto_function":68,"./proto_object":69}],71:[function(require,module,exports){
+},{"./proto_function":69,"./proto_object":70}],72:[function(require,module,exports){
 'use strict';
 
 /**
@@ -6551,7 +6626,7 @@ function firstLowerCase() {
 	return this[0].toLowerCase() + this.slice(1);
 }
 
-},{}],72:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 'use strict';
 
 var utils = module.exports = {
@@ -6576,5 +6651,5 @@ function makeProtoFunction(method) {
 	};
 }
 
-},{}]},{},[47])
+},{}]},{},[48])
 ;

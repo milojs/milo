@@ -445,19 +445,3 @@ how to create new facets classes.
 - Component - basic compponent class
 - ComponentFacet - basic 
     ClassRegistry: require('./abstract/registry'),
-
-
-##### milo.utils.classes.__facetsRegistry__
-
-An instance of ClassRegistry class that is used by milo to register and find
-facets.
-
-See ClassRegistry.
-
-
-##### milo.utils.classes.__componentsRegistry__
-
-An instance of ClassRegistry class that is used by milo to register and find
-components.
-
-See ClassRegistry.
