@@ -5744,6 +5744,7 @@ var	arrayMethods = require('./proto_array');
 /**
  * [__Function functions__](proto_function.js.html)
  *
+ * - [makeFunction](proto_function.js.html#makeFunction)
  * - [partial](proto_function.js.html#partial)
  * - [partialRight](proto_function.js.html#partialRight)
  * - [memoize](proto_function.js.html#memoize)
@@ -5959,6 +5960,7 @@ function mapToObject(callback, thisArg) {
 'use strict';
 
 /**
+ * - [makeFunction](#makeFunction)
  * - [partial](#partial)
  * - [partialRight](#partialRight)
  * - [memoize](#memoize)
