@@ -3794,6 +3794,8 @@ function init(hostObject, proxyMethods, messageSource) {
  * myComp.data.on(/.+/, function(msg, data) {
  *     logger.debug(msg, data);
  * }); // subscribes anonymous function to all non-empty messages on data facet
+ * // it will not be possible to unsubscribe anonymous subscriber separately,
+ * // but myComp.data.off(/.+/) will unsubscribe it
  * ```
  * If messenger has [MessageSource](./message_source.js.html) attached to it, MessageSource will be notified when the first subscriber for a given message is added, so it can subscribe to the source.
  * [Components](../components/c_class.js.html) and [facets](../components/c_facet.js.html) change this method name to `on` when they proxy it.
@@ -3871,15 +3873,13 @@ function _registerSubscriber(subscribersHash, message, subscriber) {
  * ```
  * myComp.events.onMessages({
  *     'mousedown': onMouseDown,
- *     'mouseup': onMouseUp,
- *     /.+/: function(eventType, event) { logger.debug(eventType, event); }
- *     // it will not be possible to unsubscribe anonymous subscriber seperately,
- *     // but myComp.events.off(/.+/) will unsubscribe it
+ *     'mouseup': onMouseUp
  * });
  * function onMouseDown(eventType, event) {}
  * function onMouseUp(eventType, event) {}
  * ```
  * Returns map with the same keys (message types) and boolean values indicating whether particular subscriber was added.
+ * It is NOT possible to add pattern subscriber using this method, as although you can use RegExp as the key, JavaScript will automatically convert it to string.
  *
  * @param {Object[Function]} messageSubscribers Map of message subscribers to be added
  * @return {Object[Boolean]}
@@ -3996,9 +3996,10 @@ function _removeAllSubscribers(subscribersHash, message) {
  * myComp.events.offMessages({
  *     'mousedown': onMouseDown,
  *     'mouseup': onMouseUp,
- *     /.+/: undefined // will unsubscribe all subscribers for this pattern
+ *     'click': undefined // all subscribers to this message will be removed
  * });
  * ```
+ * It is NOT possible to remove pattern subscriber(s) using this method, as although you can use RegExp as the key, JavaScript will automatically convert it to string.
  *
  * @param {Object[Function]} messageSubscribers Map of message subscribers to be removed
  * @return {Object[Boolean]}
@@ -4007,7 +4008,7 @@ function offMessages(messageSubscribers) {
 	check(messageSubscribers, Match.ObjectHash(Function));
 
 	var subscriberRemovedMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
-		return this.offMessages(messages, subscriber);
+		return this.offMessage(messages, subscriber);
 	}, this);
 
 	return subscriberRemovedMap;	
