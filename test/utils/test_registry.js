@@ -13,8 +13,7 @@ function testRegistry(registry, FoundationClass) {
 
 	it('should have foundation class (' + registry.name + ') set and registered', function() {
 		assert.equal(registry.FoundationClass, FoundationClass);
-
-		// TODO check if it is in the registry
+		assert.equal(registry.get(FoundationClass.name), FoundationClass);
 	});
 
 	if(FoundationClass != Object)
@@ -28,16 +27,14 @@ function testRegistry(registry, FoundationClass) {
 			assert.equal(registry.get('MyClassQR2MRSMIEulp'), undefined);
 		});
 
-	it.skip('should NOT allow registering classes twice', function() {
+	it('should NOT allow registering another class under the same name', function() {
+		var MyClass = _.createSubclass(FoundationClass, 'MyClass')
+			, MyClass2 = _.createSubclass(FoundationClass, 'MyClass2');
 
-
-		// TODO
-	});
-
-	it.skip('should NOT allow registering another class under the same name', function() {
-		var MyClassQR2MRSMIEulp = _.createSubclass(FoundationClass);
-
-		// registry.add(MyClassQR2MRSMIEulp);
-		// TODO
+		registry.add(MyClass, 'MyClass');
+		
+		assert.throws(function() {
+			registry.add(MyClass2, 'MyClass');
+		});
 	});
 }
