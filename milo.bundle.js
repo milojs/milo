@@ -92,9 +92,9 @@ function _createProxyMethods(proxyMethods, hostObject) {
 	}, this);
 }
 
-},{"../util/check":55,"../util/error":59,"mol-proto":67}],2:[function(require,module,exports){
+},{"../util/check":58,"../util/error":62,"mol-proto":70}],2:[function(require,module,exports){
 module.exports=require(1)
-},{"../util/check":55,"../util/error":59,"mol-proto":67}],3:[function(require,module,exports){
+},{"../util/check":58,"../util/error":62,"mol-proto":70}],3:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -217,7 +217,7 @@ function setClass(FoundationClass) {
 	});
 }
 
-},{"../util/check":55,"../util/error":59,"mol-proto":67}],4:[function(require,module,exports){
+},{"../util/check":58,"../util/error":62,"mol-proto":70}],4:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -339,7 +339,7 @@ function render() {
 				.replace('%compName', this.compName);
 }
 
-},{"../config":40,"../util/check":55,"../util/error":59,"./a_class":5,"mol-proto":67}],5:[function(require,module,exports){
+},{"../config":41,"../util/check":58,"../util/error":62,"./a_class":5,"mol-proto":70}],5:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -422,7 +422,7 @@ function decorate() {
 	this.set(this.render());
 }
 
-},{"../util/check":55,"../util/error":59,"mol-proto":67}],6:[function(require,module,exports){
+},{"../util/check":58,"../util/error":62,"mol-proto":70}],6:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -509,7 +509,7 @@ function render() {
 	return this.loadUrl;
 }
 
-},{"../config":40,"../util/error":59,"./a_class":5,"mol-proto":67}],7:[function(require,module,exports){
+},{"../config":41,"../util/error":62,"./a_class":5,"mol-proto":70}],7:[function(require,module,exports){
 'use strict';
 
 
@@ -681,27 +681,29 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 	}
 }
 
-},{"./attributes/a_bind":4,"./components/c_facets/cf_registry":25,"./components/c_info":26,"./components/c_registry":32,"./components/scope":35,"./mail":44,"./util/check":55,"./util/dom":58,"./util/error":59,"mol-proto":67}],9:[function(require,module,exports){
+},{"./attributes/a_bind":4,"./components/c_facets/cf_registry":25,"./components/c_info":26,"./components/c_registry":31,"./components/scope":36,"./mail":45,"./util/check":58,"./util/dom":61,"./util/error":62,"mol-proto":70}],9:[function(require,module,exports){
+'use strict';
+
 // <a name="classes"></a>
 // milo.classes
 // -----------
 
 // This module contains foundation classes and class registries.
 
-'use strict';
-
 var classes = {
 	Facet: require('./facets/f_class'),
 	ComponentFacet: require('./components/c_facet'),
 	ClassRegistry: require('./abstract/registry'),
 	Mixin: require('./abstract/Mixin'),
+	MessageSource: require('./messenger/message_source'),
+	MessengerAPI: require('./messenger/api')
 	// facetsRegistry: require('./components/c_facets/cf_registry'),
 	// componentsRegistry: require('./components/c_registry'),
 };
 
 module.exports = classes;
 
-},{"./abstract/Mixin":1,"./abstract/registry":3,"./components/c_facet":11,"./facets/f_class":41}],10:[function(require,module,exports){
+},{"./abstract/Mixin":1,"./abstract/registry":3,"./components/c_facet":11,"./facets/f_class":42,"./messenger/api":47,"./messenger/message_source":50}],10:[function(require,module,exports){
 'use strict';
 
 // <a name="components"></a>
@@ -947,7 +949,7 @@ function _getScopeParent(withFacet) {
 	}
 }
 
-},{"../config":40,"../facets/f_object":42,"../messenger":46,"../util/check":55,"../util/count":57,"./c_facets/cf_registry":25,"./c_utils":33,"mol-proto":67}],11:[function(require,module,exports){
+},{"../config":41,"../facets/f_object":43,"../messenger":48,"../util/check":58,"../util/count":60,"./c_facets/cf_registry":25,"./c_utils":32,"mol-proto":70}],11:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facet"></a>
@@ -1005,7 +1007,8 @@ _.extendProto(ComponentFacet, {
 	postScopeParent: postScopeParent,
 	_createMessenger: _createMessenger,
 	_setMessageSource: _setMessageSource,
-	_createMessageSource: _createMessageSource
+	_createMessageSource: _createMessageSource,
+	_createMessageSourceWithAPI: _createMessageSourceWithAPI
 });
 
 
@@ -1081,7 +1084,15 @@ function _createMessageSource(MessageSourceClass, options) {
 	_.defineProperty(this, '_messageSource', messageSource);
 }
 
-},{"../facets/f_class":41,"../messenger":46,"../util/error":59,"./c_utils":33,"mol-proto":67}],12:[function(require,module,exports){
+
+function _createMessageSourceWithAPI(MessageSourceClass, messengerAPIOrClass, options) {
+	var messageSource = new MessageSourceClass(this, undefined, messengerAPIOrClass, this.owner, options);
+	this._setMessageSource(messageSource)
+
+	_.defineProperty(this, '_messageSource', messageSource);
+}
+
+},{"../facets/f_class":42,"../messenger":48,"../util/error":62,"./c_utils":32,"mol-proto":70}],12:[function(require,module,exports){
 // <a name="components-facets-container"></a>
 // ###container facet
 
@@ -1128,7 +1139,7 @@ function addChildComponents(childComponents) {
 	_.extend(this.scope, childComponents);
 }
 
-},{"../../binder":8,"../c_facet":11,"./cf_registry":25,"mol-proto":67}],13:[function(require,module,exports){
+},{"../../binder":8,"../c_facet":11,"./cf_registry":25,"mol-proto":70}],13:[function(require,module,exports){
 // <a name="components-facets-data"></a>
 // ###data facet
 
@@ -1139,6 +1150,8 @@ var ComponentFacet = require('../c_facet')
 
 	, Messenger = require('../../messenger')
 	, ComponentDataSource = require('../c_message_sources/component_data_source')
+	// , DOMEventsSource = require('../msg_src/dom_events')
+	// , DataMsgAPI = require('../msg_api/data')
 	, pathUtils = require('../../model/path_utils')
 
 	, _ = require('mol-proto')
@@ -1339,7 +1352,7 @@ function inputValue(el, value) {
 		return el.value;
 }
 
-},{"../../messenger":46,"../../model/path_utils":52,"../../util/logger":61,"../c_facet":11,"../c_message_sources/component_data_source":27,"./cf_registry":25,"mol-proto":67}],14:[function(require,module,exports){
+},{"../../messenger":48,"../../model/path_utils":55,"../../util/logger":64,"../c_facet":11,"../c_message_sources/component_data_source":27,"./cf_registry":25,"mol-proto":70}],14:[function(require,module,exports){
 // <a name="components-facets-dom"></a>
 // ###dom facet
 
@@ -1543,7 +1556,7 @@ function hasTextBeforeSelection() {
 }
 
 
-},{"../../attributes/a_bind":4,"../../binder":8,"../../util/check":55,"../../util/error":59,"../c_facet":11,"./cf_registry":25,"mol-proto":67}],15:[function(require,module,exports){
+},{"../../attributes/a_bind":4,"../../binder":8,"../../util/check":58,"../../util/error":62,"../c_facet":11,"./cf_registry":25,"mol-proto":70}],15:[function(require,module,exports){
 // <a name="components-facets-drag"></a>
 // ###drag facet
 
@@ -1551,7 +1564,7 @@ function hasTextBeforeSelection() {
 
 var ComponentFacet = require('../c_facet')
 	, facetsRegistry = require('./cf_registry')
-	, DOMEventsSource = require('../c_message_sources/dom_events_source')
+	, DOMEventsSource = require('../msg_src/dom_events')
 
 	, _ = require('mol-proto');
 
@@ -1575,7 +1588,7 @@ module.exports = Drag;
 
 function initDragFacet() {
 	ComponentFacet.prototype.init.apply(this, arguments);	
-	this._createMessageSource(DOMEventsSource);
+	this._createMessageSourceWithAPI(DOMEventsSource);
 	this._dragData = {};
 }
 
@@ -1629,7 +1642,7 @@ function startDragFacet() {
 	}
 }
 
-},{"../c_facet":11,"../c_message_sources/dom_events_source":29,"./cf_registry":25,"mol-proto":67}],16:[function(require,module,exports){
+},{"../c_facet":11,"../msg_src/dom_events":35,"./cf_registry":25,"mol-proto":70}],16:[function(require,module,exports){
 // <a name="components-facets-drop"></a>
 // ###drop facet
 
@@ -1637,7 +1650,7 @@ function startDragFacet() {
 
 var ComponentFacet = require('../c_facet')
 	, facetsRegistry = require('./cf_registry')
-	, DOMEventsSource = require('../c_message_sources/dom_events_source')
+	, DOMEventsSource = require('../msg_src/dom_events')
 
 	, _ = require('mol-proto');
 
@@ -1658,7 +1671,7 @@ module.exports = Drop;
 
 function initDropFacet() {
 	ComponentFacet.prototype.init.apply(this, arguments);
-	this._createMessageSource(DOMEventsSource);
+	this._createMessageSourceWithAPI(DOMEventsSource);
 }
 
 
@@ -1677,7 +1690,7 @@ function startDropFacet() {
 	}
 }
 
-},{"../c_facet":11,"../c_message_sources/dom_events_source":29,"./cf_registry":25,"mol-proto":67}],17:[function(require,module,exports){
+},{"../c_facet":11,"../msg_src/dom_events":35,"./cf_registry":25,"mol-proto":70}],17:[function(require,module,exports){
 // <a name="components-facets-editable"></a>
 // ###editable facet
 
@@ -1686,7 +1699,8 @@ function startDropFacet() {
 var ComponentFacet = require('../c_facet')
 	, Component = require('../c_class')
 	, facetsRegistry = require('./cf_registry')
-	, EditableEventsSource = require('../c_message_sources/editable_events_source')
+	, DOMEventsSource = require('../msg_src/dom_events')
+	, EditableMsgAPI = require('../msg_api/editable')
 	, logger = require('../../util/logger')
 	, domUtils = require('../../util/dom')
 	, _ = require('mol-proto')
@@ -1713,12 +1727,15 @@ module.exports = Editable;
 function init() {
 	ComponentFacet.prototype.init.apply(this, arguments);
 
-	this._createMessageSource(EditableEventsSource, {
+	var editableAPIoptions = {
 		editableOnClick: this.config.editableOnClick,
 		moveToAdjacentEditable: this.config.moveToAdjacentEditable,
 		allowMerge: this.config.allowMerge,
 		acceptMerge: this.config.acceptMerge
-	});
+	};
+	var editableAPI = new EditableMsgAPI(this.owner, editableAPIoptions);
+
+	this._createMessageSourceWithAPI(DOMEventsSource, editableAPI);
 
 	this._editable = typeof this.config.editable != 'undefined'
 						? this.config.editable
@@ -1903,7 +1920,7 @@ function onEnterSplit(message, event) {
 	}
 }
 
-},{"../../util":60,"../../util/dom":58,"../../util/logger":61,"../c_class":10,"../c_facet":11,"../c_message_sources/editable_events_source":30,"./cf_registry":25,"mol-proto":67}],18:[function(require,module,exports){
+},{"../../util":63,"../../util/dom":61,"../../util/logger":64,"../c_class":10,"../c_facet":11,"../msg_api/editable":34,"../msg_src/dom_events":35,"./cf_registry":25,"mol-proto":70}],18:[function(require,module,exports){
 // <a name="components-facets-events"></a>
 // ###events facet
 
@@ -1913,7 +1930,7 @@ var ComponentFacet = require('../c_facet')
 	, facetsRegistry = require('./cf_registry')
 
 	, Messenger = require('../../messenger')
-	, DOMEventsSource = require('../c_message_sources/dom_events_source')
+	, DOMEventsSource = require('../msg_src/dom_events')
 
 	, _ = require('mol-proto');
 
@@ -1936,16 +1953,12 @@ module.exports = Events;
 function init() {
 	ComponentFacet.prototype.init.apply(this, arguments);
 
-	var domEventsSource = new DOMEventsSource(this, { trigger: 'trigger' }, this.owner);
-
-	this._setMessageSource(domEventsSource)
-
-	Object.defineProperties(this, {
-		_domEventsSource: { value: domEventsSource }
-	});
+	var domEventsSource = new DOMEventsSource(this, { trigger: 'trigger' }, undefined, this.owner);
+	this._setMessageSource(domEventsSource);
+	_.defineProperty(this, '_domEventsSource', domEventsSource);
 }
 
-},{"../../messenger":46,"../c_facet":11,"../c_message_sources/dom_events_source":29,"./cf_registry":25,"mol-proto":67}],19:[function(require,module,exports){
+},{"../../messenger":48,"../c_facet":11,"../msg_src/dom_events":35,"./cf_registry":25,"mol-proto":70}],19:[function(require,module,exports){
 // <a name="components-facets-frame"></a>
 // ###frame facet
 
@@ -1991,7 +2004,7 @@ function initFrameFacet() {
 		_messageSource: { value: messageSource }
 	});
 }
-},{"../../messenger":46,"../c_facet":11,"../c_message_sources/iframe_message_source":31,"./cf_registry":25,"mol-proto":67}],20:[function(require,module,exports){
+},{"../../messenger":48,"../c_facet":11,"../c_message_sources/iframe_message_source":30,"./cf_registry":25,"mol-proto":70}],20:[function(require,module,exports){
 // <a name="components-facets-item"></a>
 // ###item facet
 
@@ -2015,7 +2028,7 @@ facetsRegistry.add(ItemFacet);
 
 module.exports = ItemFacet;
 
-},{"../../mail":44,"../../model":51,"../c_facet":11,"./cf_registry":25,"mol-proto":67}],21:[function(require,module,exports){
+},{"../../mail":45,"../../model":54,"../c_facet":11,"./cf_registry":25,"mol-proto":70}],21:[function(require,module,exports){
 // <a name="components-facets-list"></a>
 // ###list facet
 
@@ -2179,7 +2192,7 @@ function each(callback, thisArg) {
     }, thisArg || this);
 }
 
-},{"../../binder":8,"../../mail":44,"../../model":51,"../../util/error":59,"../../util/logger":61,"../c_class":10,"../c_facet":11,"./cf_registry":25,"mol-proto":67}],22:[function(require,module,exports){
+},{"../../binder":8,"../../mail":45,"../../model":54,"../../util/error":62,"../../util/logger":64,"../c_class":10,"../c_facet":11,"./cf_registry":25,"mol-proto":70}],22:[function(require,module,exports){
 // <a name="components-facets-model"></a>
 // ###model facet
 
@@ -2216,7 +2229,7 @@ function _createMessenger() { // Called by inherited init
 	this.m.proxyMessenger(this); // Creates messenger's methods directly on facet
 }
 
-},{"../../model":51,"../c_facet":11,"./cf_registry":25,"mol-proto":67}],23:[function(require,module,exports){
+},{"../../model":54,"../c_facet":11,"./cf_registry":25,"mol-proto":70}],23:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -2426,7 +2439,7 @@ function bindInnerComponents() {
 	this.owner.container.scope = thisScope[this.owner.name].container.scope;
 }
 
-},{"../../binder":8,"../../util/check":55,"../c_facet":11,"./cf_registry":25,"mol-proto":67}],25:[function(require,module,exports){
+},{"../../binder":8,"../../util/check":58,"../c_facet":11,"./cf_registry":25,"mol-proto":70}],25:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../abstract/registry')
@@ -2507,11 +2520,12 @@ function ComponentInfo(scope, el, attr) {
 	}
 }
 
-},{"../util/error":59,"./c_facets/cf_registry":25,"./c_registry":32}],27:[function(require,module,exports){
+},{"../util/error":62,"./c_facets/cf_registry":25,"./c_registry":31}],27:[function(require,module,exports){
+'use strict';
+
 // <a name="components-source-data"></a>
 // ###component data source
 
-'use strict';
 
 var DOMEventsSource = require('./dom_events_source')
 	, Component = require('../c_class')
@@ -2619,7 +2633,7 @@ function triggerDataMessage(message, data) {
 	// TODO - opposite translation + event trigger 
 }
 
-},{"../../util/check":55,"../../util/error":59,"../c_class":10,"./dom_events_source":29,"mol-proto":67}],28:[function(require,module,exports){
+},{"../../util/check":58,"../../util/error":62,"../c_class":10,"./dom_events_source":29,"mol-proto":70}],28:[function(require,module,exports){
 // <a name="components-dom-constructors"></a>
 // ###dom events constructors
 
@@ -2669,7 +2683,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"mol-proto":67}],29:[function(require,module,exports){
+},{"mol-proto":70}],29:[function(require,module,exports){
 // <a name="components-source-dom"></a>
 // ###component dom events source
 
@@ -2777,163 +2791,7 @@ function triggerDomEvent(eventType, properties) {
 
 	return notCancelled;
 }
-},{"../../messenger/message_source":47,"../../util/check":55,"../c_class":10,"./dom_events_constructors":28,"mol-proto":67}],30:[function(require,module,exports){
-// <a name="components-source-editable"></a>
-// ###component editable events source
-
-'use strict';
-
-var DOMEventsSource = require('./dom_events_source')
-	, Component = require('../c_class')
-	, EditableEventsSourceError = require('../../util/error').EditableEventsSource
-	, _ = require('mol-proto')
-	, check = require('../../util/check')
-	, Match = check.Match;
-
-
-// class to handle subscribtions to changes in DOM for UI (maybe also content editable) elements
-var EditableEventsSource = _.createSubclass(DOMEventsSource, 'EditableEventsSource', true);
-
-
-_.extendProto(EditableEventsSource, {
-	// implementing MessageSource interface
-	init: initEditableEventsSource,
-	translateToSourceMessage: translateToDomEvent,
- 	addSourceListener: addDomEventListener,
- 	removeSourceListener: removeDomEventListener,
- 	filterSourceMessage: filterEditableMessage,
-
- 	// class specific methods
- 	// dom: implemented in DOMEventsSource
- 	handleEvent: handleEvent,  // event dispatcher - as defined by Event DOM API
- 	trigger: triggerEditableEvent // redefines method of superclass DOMEventsSource
-});
-
-module.exports = EditableEventsSource;
-
-
-function initEditableEventsSource(hostObject, proxyMethods, component, options) {
-	DOMEventsSource.prototype.init.apply(this, arguments);
-	this.options = options;
-}
-
-
-var editableEventsMap = {
-	'enterkey': 'keypress',
-	'editstart': 'mousedown',
-	'editend': 'blur',
-	// move events
-	'nexteditable': 'keydown',
-	'previouseditable': 'keydown',	
-	'adjacenteditable': 'keydown',
-	// merge events
-	'nextmerge': 'keydown',
-	'previousmerge': 'keydown',
-	'adjacentmerge': 'keydown',
-};
-
-// TODO: this function should return relevant DOM event dependent on element tag
-// Can also implement beforedatachanged event to allow preventing the change
-function translateToDomEvent(message) {
-	if (editableEventsMap.hasOwnProperty(message))
-		return editableEventsMap[message];
-	else
-		return DOMEventsSource.prototype.translateToSourceMessage.call(this, message);
-}
-
-
-function addDomEventListener(eventType) {
-	this.dom().addEventListener(eventType, this, false); // no capturing
-}
-
-
-function removeDomEventListener(eventType) {
-	this.dom().removeEventListener(eventType, this, false); // no capturing
-}
-
-
-function filterEditableMessage(eventType, message, data) {
-	var self = this;
-
-	switch (message) {
-		case 'enterkey':
-		 	return data.keyCode == 13;
-
-		// move to adjacent editable events
-		case 'previouseditable':
-			return this.options.moveToAdjacentEditable
-				&& movedToPrevious(data);
-		case 'nexteditable':
-			return this.options.moveToAdjacentEditable
-				&& movedToNext(data);
-		case 'adjacenteditable':
-			return this.options.moveToAdjacentEditable
-				&& (movedToPrevious(data) || movedToNext(data));
-
-		// merge adjacent editable events
-		case 'previousmerge': // merge current one into previous on backspace key
-			return this.options.allowMerge && mergeToPrevious(data)
-		case 'nextmerge': // merge current one into previous on backspace key
-			return this.options.allowMerge && mergeToNext(data)
-		case 'adjacentmerge':
-			return this.options.allowMerge
-				&& (mergeToPrevious(data) || mergeToNext(data));
-
-		case 'editstart':
-		case 'editend':
-			return this.options.editableOnClick;
-		default:
-			return true;
-	}
-
-	function movedToPrevious(data) {
-		return (data.keyCode == 37 || data.keyCode == 38) // up and left
-			&& noTextBeforeSelection(self.component);
-	}
-
-	function movedToNext(data) {
-		return (data.keyCode == 39 || data.keyCode == 40) // down and right
-			&& noTextAfterSelection(self.component);
-	} 
-
-	function mergeToPrevious(data) {
-		return data.keyCode == 8 // backspace
-			&& noTextBeforeSelection(self.component);
-	}
-
-	function mergeToNext(data) {
-		return data.keyCode == 46 // delete
-			&& noTextAfterSelection(self.component);
-	}
-
-	function noTextBeforeSelection(component) {
-		return ! component.dom.hasTextBeforeSelection();
-	};
-
-	function noTextAfterSelection(component) {
-		var sel = window.getSelection();
-		if (sel.anchorOffset == sel.anchorNode.length) {
-			if (sel.anchorNode.nextSibling) {
-				return false;
-			} else {
-				return true;
-			}
-		}
-	}
-}
-
-
- // event dispatcher - as defined by Event DOM API
-function handleEvent(event) {
-	this.dispatchMessage(event.type, event);
-}
-
-
-function triggerEditableEvent(message, data) {
-	// TODO - opposite translation + event trigger 
-}
-
-},{"../../util/check":55,"../../util/error":59,"../c_class":10,"./dom_events_source":29,"mol-proto":67}],31:[function(require,module,exports){
+},{"../../messenger/message_source":50,"../../util/check":58,"../c_class":10,"./dom_events_constructors":28,"mol-proto":70}],30:[function(require,module,exports){
 // <a name="components-source-iframe"></a>
 // ###component iframe source
 
@@ -3006,7 +2864,7 @@ function handleEvent(event) {
 	this.dispatchMessage(event.type, event);
 }
 
-},{"../../messenger/message_source":47,"../../util/check":55,"mol-proto":67}],32:[function(require,module,exports){
+},{"../../messenger/message_source":50,"../../util/check":58,"mol-proto":70}],31:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -3023,7 +2881,7 @@ componentsRegistry.add(Component);
 
 module.exports = componentsRegistry;
 
-},{"../abstract/registry":3,"./c_class":10}],33:[function(require,module,exports){
+},{"../abstract/registry":3,"./c_class":10}],32:[function(require,module,exports){
 'use strict';
 
 var config = require('../config')
@@ -3104,7 +2962,7 @@ function _getContainingComponent(el, returnCurrent, condition) {
 		return _getContainingComponent(el.parentNode, true, condition);
 }
 
-},{"../config":40,"../util/check":55}],34:[function(require,module,exports){
+},{"../config":41,"../util/check":58}],33:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3117,7 +2975,222 @@ componentsRegistry.add(View);
 
 module.exports = View;
 
-},{"../c_class":10,"../c_registry":32}],35:[function(require,module,exports){
+},{"../c_class":10,"../c_registry":31}],34:[function(require,module,exports){
+'use strict';
+
+
+var MessengerAPI = require('../../messenger/api')
+	, _ = require('mol-proto')
+	, check = require('../../util/check')
+	, Match = check.Match;
+
+
+// class to handle subscribtions to changes in DOM for UI (maybe also content editable) elements
+var EditableMsgAPI = _.createSubclass(MessengerAPI, 'EditableMsgAPI', true);
+
+
+_.extendProto(EditableMsgAPI, {
+	// implementing MessageAPI interface
+	init: init,
+	translateToSourceMessage: translateToSourceMessage,
+ 	filterSourceMessage: filterSourceMessage,
+});
+
+module.exports = EditableMsgAPI;
+
+
+function init(component, options) {
+	this.component = component;
+	this.options = options;
+}
+
+
+var editableEventsMap = {
+	'enterkey': 'keypress',
+	'editstart': 'mousedown',
+	'editend': 'blur',
+	// move events
+	'nexteditable': 'keydown',
+	'previouseditable': 'keydown',	
+	'adjacenteditable': 'keydown',
+	// merge events
+	'nextmerge': 'keydown',
+	'previousmerge': 'keydown',
+	'adjacentmerge': 'keydown',
+};
+
+// TODO: this function should return relevant DOM event dependent on element tag
+// Can also implement beforedatachanged event to allow preventing the change
+// translate to DOM event
+function translateToSourceMessage(message) {
+	if (editableEventsMap.hasOwnProperty(message))
+		return editableEventsMap[message];
+	else
+		return message;
+}
+
+
+// filter editable message
+function filterSourceMessage(eventType, message, data) {
+	var self = this;
+
+	switch (message) {
+		case 'enterkey':
+		 	return data.keyCode == 13;
+
+		// move to adjacent editable events
+		case 'previouseditable':
+			return this.options.moveToAdjacentEditable
+				&& movedToPrevious(data);
+		case 'nexteditable':
+			return this.options.moveToAdjacentEditable
+				&& movedToNext(data);
+		case 'adjacenteditable':
+			return this.options.moveToAdjacentEditable
+				&& (movedToPrevious(data) || movedToNext(data));
+
+		// merge adjacent editable events
+		case 'previousmerge': // merge current one into previous on backspace key
+			return this.options.allowMerge && mergeToPrevious(data)
+		case 'nextmerge': // merge current one into previous on backspace key
+			return this.options.allowMerge && mergeToNext(data)
+		case 'adjacentmerge':
+			return this.options.allowMerge
+				&& (mergeToPrevious(data) || mergeToNext(data));
+
+		case 'editstart':
+		case 'editend':
+			return this.options.editableOnClick;
+		default:
+			return true;
+	}
+
+	function movedToPrevious(data) {
+		return (data.keyCode == 37 || data.keyCode == 38) // up and left
+			&& noTextBeforeSelection(self.component);
+	}
+
+	function movedToNext(data) {
+		return (data.keyCode == 39 || data.keyCode == 40) // down and right
+			&& noTextAfterSelection(self.component);
+	} 
+
+	function mergeToPrevious(data) {
+		return data.keyCode == 8 // backspace
+			&& noTextBeforeSelection(self.component);
+	}
+
+	function mergeToNext(data) {
+		return data.keyCode == 46 // delete
+			&& noTextAfterSelection(self.component);
+	}
+
+	function noTextBeforeSelection(component) {
+		return ! component.dom.hasTextBeforeSelection();
+	};
+
+	function noTextAfterSelection(component) {
+		var sel = window.getSelection();
+		if (sel.anchorOffset == sel.anchorNode.length) {
+			if (sel.anchorNode.nextSibling) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+	}
+}
+
+},{"../../messenger/api":47,"../../util/check":58,"mol-proto":70}],35:[function(require,module,exports){
+'use strict';
+
+// <a name="components-source-dom"></a>
+// ###component dom events source
+
+var MessageSource = require('../../messenger/m_source_with_api')
+	, Component = require('../c_class')
+	, domEventsConstructors = require('../c_message_sources/dom_events_constructors') // TODO merge with DOMEventSource ??
+	, _ = require('mol-proto')
+	, check = require('../../util/check')
+	, Match = check.Match;
+
+var DOMEventsSource = _.createSubclass(MessageSource, 'DOMMessageSource', true);
+
+
+_.extendProto(DOMEventsSource, {
+	// implementing MessageSource interface
+	init: init,
+ 	addSourceListener: _.partial(sourceListenerMethod, 'addEventListener'),
+ 	removeSourceListener: _.partial(sourceListenerMethod, 'removeEventListener'),
+ 	trigger: trigger,
+
+ 	// class specific methods
+ 	dom: dom,
+ 	handleEvent: handleEvent,  // event dispatcher - as defined by Event DOM API
+});
+
+module.exports = DOMEventsSource;
+
+
+var useCapturePattern = /__capture$/
+	, useCapturePostfix = '__capture';
+
+
+// init DOM event source
+function init(hostObject, proxyMethods, messengerAPIOrClass, component) {
+	check(component, Component);
+	this.component = component;
+	MessageSource.prototype.init.apply(this, arguments);
+}
+
+
+// get DOM element of component
+function dom() {
+	return this.component.el;
+}
+
+
+function sourceListenerMethod(method, eventType) {
+	if (! eventType) return;
+	var capture = useCapturePattern.test(eventType);
+	eventType = eventType.replace(useCapturePattern, '');
+	this.dom()[method](eventType, this, capture);
+}
+
+
+// event dispatcher - as defined by Event DOM API
+function handleEvent(event) {
+	var isCapturePhase;
+	if (typeof window != 'undefined')
+		isCapturePhase = event.eventPhase == window.Event.CAPTURING_PHASE;
+
+	if (isCapturePhase)
+		event += useCapturePostfix;
+
+	this.dispatchMessage(event.type, event);
+}
+
+
+function trigger(eventType, properties) {
+	check(eventType, String);
+	check(properties, Match.Optional(Object));
+
+	eventType = eventType.replace(useCapturePattern, '');
+	var EventConstructor = domEventsConstructors[eventType];
+
+	if (typeof eventConstructor != 'function')
+		throw new Error('unsupported event type');
+
+	// check if it is correct
+	if (typeof properties != 'undefined')
+		properties.type = eventType;
+
+	var domEvent = EventConstructor(eventType, properties);
+	var notCancelled = this.dom().dispatchEvent(domEvent);
+	return notCancelled;
+}
+
+},{"../../messenger/m_source_with_api":49,"../../util/check":58,"../c_class":10,"../c_message_sources/dom_events_constructors":28,"mol-proto":70}],36:[function(require,module,exports){
 // <a name="scope"></a>
 // scope class
 // -----------
@@ -3201,7 +3274,7 @@ function _length() {
 	return Object.keys(this).length;
 }
 
-},{"../util/check":55,"../util/error":59,"mol-proto":67}],36:[function(require,module,exports){
+},{"../util/check":58,"../util/error":62,"mol-proto":70}],37:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3214,7 +3287,7 @@ componentsRegistry.add(MLButton);
 
 module.exports = MLButton;
 
-},{"../c_class":10,"../c_registry":32}],37:[function(require,module,exports){
+},{"../c_class":10,"../c_registry":31}],38:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3227,7 +3300,7 @@ componentsRegistry.add(MLGroup);
 
 module.exports = MLGroup;
 
-},{"../c_class":10,"../c_registry":32}],38:[function(require,module,exports){
+},{"../c_class":10,"../c_registry":31}],39:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3240,7 +3313,7 @@ componentsRegistry.add(MLInput);
 
 module.exports = MLInput;
 
-},{"../c_class":10,"../c_registry":32}],39:[function(require,module,exports){
+},{"../c_class":10,"../c_registry":31}],40:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3279,7 +3352,7 @@ function onOptionsChange(path, data) {
 	selectEl.innerHTML = optionsTemplate(this.get());
 }
 
-},{"../c_class":10,"../c_registry":32,"dot":66}],40:[function(require,module,exports){
+},{"../c_class":10,"../c_registry":31,"dot":69}],41:[function(require,module,exports){
 // <a name="config"></a>
 // milo.config
 // -----------
@@ -3316,7 +3389,7 @@ config({
 	componentPrefix: 'milo_'
 });
 
-},{"mol-proto":67}],41:[function(require,module,exports){
+},{"mol-proto":70}],42:[function(require,module,exports){
 // <a name="facet-c"></a>
 // facet class
 // --------------
@@ -3338,7 +3411,7 @@ _.extendProto(Facet, {
 	init: function() {}
 });
 
-},{"mol-proto":67}],42:[function(require,module,exports){
+},{"mol-proto":70}],43:[function(require,module,exports){
 // <a name="facet-o"></a>
 // facetted object class
 // --------------
@@ -3458,7 +3531,7 @@ FacetedObject.createFacetedClass = function (name, facetsClasses, facetsConfig) 
 	return FacetedClass;
 };
 
-},{"../util/check":55,"../util/error":59,"./f_class":41,"mol-proto":67}],43:[function(require,module,exports){
+},{"../util/check":58,"../util/error":62,"./f_class":42,"mol-proto":70}],44:[function(require,module,exports){
 // <a name="loader"></a>
 // milo.loader
 // -----------
@@ -3565,7 +3638,7 @@ function loadView(el, callback) {
 	});
 }
 
-},{"./attributes/a_load":6,"./config":40,"./mail":44,"./util/dom":58,"./util/error":59,"./util/logger":61,"./util/request":63}],44:[function(require,module,exports){
+},{"./attributes/a_load":6,"./config":41,"./mail":45,"./util/dom":61,"./util/error":62,"./util/logger":64,"./util/request":66}],45:[function(require,module,exports){
 // <a name="mail"></a>
 // milo.mail
 // -----------
@@ -3591,7 +3664,7 @@ var miloMail = new Messenger(undefined, undefined, mailMsgSource);
 
 module.exports = miloMail;
 
-},{"../messenger":46,"./mail_source":45}],45:[function(require,module,exports){
+},{"../messenger":48,"./mail_source":46}],46:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../messenger/message_source')
@@ -3665,11 +3738,115 @@ function handleEvent(event) {
 	this.dispatchMessage(event.type, event);
 }
 
-},{"../components/c_message_sources/dom_events_constructors":28,"../messenger/message_source":47,"../util/check":55,"../util/error":59,"mol-proto":67}],46:[function(require,module,exports){
+},{"../components/c_message_sources/dom_events_constructors":28,"../messenger/message_source":50,"../util/check":58,"../util/error":62,"mol-proto":70}],47:[function(require,module,exports){
+'use strict';
+
+var toBeImplemented = require('../util/error').toBeImplemented
+	, _ = require('mol-proto');
+
+
+module.exports = MessengerAPI;
+
+
+/**
+ * 
+ */
+function MessengerAPI() {
+	_.defineProperty(this, '_internalMessages', {});
+	if (this.init)
+		this.init.apply(this, arguments);
+}
+
+
+/**
+ * MessengerAPI instance methods
+ */
+_.extendProto(MessengerAPI, {
+	// init method can be implemented by subclass, it will be called by constructor
+	addInternalMessage: addInternalMessage,
+	removeInternalMessage: removeInternalMessage,
+	filterInternalMessages: filterInternalMessages,
+	translateToSourceMessage: toBeImplemented,
+	filterSourceMessage: toBeImplemented
+});
+
+
+/**
+ * MessengerAPI instance method
+ */
+function addInternalMessage(message) {
+	var internalMsgs
+		, sourceMessage = this.translateToSourceMessage(message);
+
+	if (! sourceMessage) return;
+
+	if (this._internalMessages.hasOwnProperty(sourceMessage)) {
+		internalMsgs = this._internalMessages[sourceMessage];
+		if (internalMsgs.indexOf(message) == -1)
+			internalMsgs.push(message);
+		else
+			logger.warn('Duplicate addInternalMessage call for internal message ' + message);
+	} else {
+		internalMsgs = this._internalMessages[sourceMessage] = [];
+		internalMsgs.push(message);
+		return sourceMessage;
+	}
+}
+
+
+/**
+ * MessengerAPI instance method
+ */
+function removeInternalMessage(message) {
+	var sourceMessage = this.translateToSourceMessage(message);
+
+	if (! sourceMessage) return;
+
+	var internalMsgs = this._internalMessages[sourceMessage];
+
+	if (internalMsgs && internalMsgs.length) {
+		messageIndex = internalMsgs.indexOf(message);
+		if (messageIndex >= 0) {
+			internalMsgs.splice(messageIndex, 1);
+			if (internalMsgs.length == 0) {
+				delete this._internalMessages[sourceMessage];
+				return sourceMessage;
+			}
+		} else
+			unexpectedNotificationWarning();
+	} else
+		unexpectedNotificationWarning();
+
+
+	function unexpectedNotificationWarning() {
+		logger.warn('notification received: un-subscribe from internal message ' + message
+					 + ' without previous subscription notification');
+	}
+}
+
+
+/**
+ * MessengerAPI instance method
+ */
+function filterInternalMessages(sourceMessage, data) {
+	var internalMsgs = this._internalMessages[sourceMessage];
+
+	if (internalMsgs && internalMsgs.length) {
+		var filteredMessages = internalMsgs.filter(function(message) {
+			return ! this.filterSourceMessage
+					|| this.filterSourceMessage(sourceMessage, message, data);
+		}, this);
+		return filteredMessages;
+	} else
+		logger.warn('source message received for which there is no mapped internal message');	
+}
+
+},{"../util/error":62,"mol-proto":70}],48:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
 	, MessageSource = require('./message_source')
+	, MessageSourceWithAPI = require('./m_source_with_api')
 	, _ = require('mol-proto')
 	, check = require('../util/check')
 	, Match = check.Match
@@ -3765,18 +3942,15 @@ module.exports = Messenger;
  * @param {MessageSource} messageSource Optional messageSource linked to the messenger. If messageSource is supplied, the reference to the messenger will stored on its 'messenger' property
  */
 function init(hostObject, proxyMethods, messageSource) {
-	check(messageSource, Match.Optional(MessageSource));
 	// hostObject and proxyMethods are used in Mixin and checked there
+	if (messageSource)
+		this._setMessageSource(messageSource);
 
  	// messenger data
- 	Object.defineProperties(this, {
- 		_messageSubscribers: { value: {} },
- 		_patternMessageSubscribers: { value: {} },
- 		_messageSource: { value: messageSource, writable: true }
+ 	_.defineProperties(this, {
+ 		_messageSubscribers: {},
+ 		_patternMessageSubscribers: {},
  	});
-
- 	if (messageSource)
- 		messageSource.messenger = this;
 }
 
 
@@ -4142,16 +4316,195 @@ function _chooseSubscribersHash(message) {
  * @param {MessageSource} messageSource an instance of MessageSource class to attach to this messenger (and to have this messenger attached to it too)
  */
 function _setMessageSource(messageSource) {
-	check(messageSource, MessageSource);
+	check(messageSource, Match.OneOf(MessageSource, MessageSourceWithAPI));
 
  	_.defineProperty(this, '_messageSource', messageSource);
  	messageSource.messenger = this;
 }
 
-},{"../abstract/mixin":2,"../util/check":55,"../util/error":59,"./message_source":47,"mol-proto":67}],47:[function(require,module,exports){
-// <a name="messenger-source"></a>
-// ###messenger source
+},{"../abstract/mixin":2,"../util/check":58,"../util/error":62,"./m_source_with_api":49,"./message_source":50,"mol-proto":70}],49:[function(require,module,exports){
+'use strict';
 
+var Mixin = require('../abstract/mixin')
+	, MessengerAPI = require('./api')
+	, logger = require('../util/logger')
+	, toBeImplemented = require('../util/error').toBeImplemented
+	, _ = require('mol-proto')
+	, check = require('../util/check')
+	, Match = check.Match;
+
+
+/**
+ * `milo.classes.MessageSource`
+ * An abstract class (subclass of [Mixin](../abstract/mixin.js.html)) for connecting [Messenger](./index.js.html) to external sources of messages (like DOM events) and defining higher level messages.
+ * An instance of MessageSource can either be passed to Messenger constructor or later using `_setMessageSource` method of Messenger. Once set, MessageSource of Messenger cannot be changed.
+ */
+var MessageSource = _.createSubclass(Mixin, 'MessageSource', true);
+
+module.exports = MessageSource;
+
+
+/**
+ * MessageSource instance methods
+ *
+ * - [init](#init) - initializes messageSource - called by Mixin superclass
+ * - [setMessenger](#setMessenger) - connects Messenger to MessageSource, is called from `init` or `_setMessageSource` methods of [Messenger](./index.js.html).
+ * - [onSubscriberAdded](#onSubscriberAdded) - called by Messenger to notify when the first subscriber for an internal message was added, so MessageSource can subscribe to source
+ * - [onSubscriberRemoved](#onSubscriberRemoved) - called by Messenger to notify when the last subscriber for an internal message was removed, so MessageSource can unsubscribe from source
+ * - [dispatchMessage](#dispatchMessage) - dispatches source message. MessageSource subclass should implement mechanism when on actual source message this method is called.
+ *
+ * Methods below must be implemented in subclass:
+ *
+ * - [trigger](#trigger) - triggers messages on the source
+ * - [filterSourceMessage](#filterSourceMessage) - filters source message based on the data of the message and the corresponding internal message that is about to besent on Messenger
+ * - [translateToSourceMessage](#translateToSourceMessage) - converts internal message type to external message type
+ * - [addSourceListener](#addSourceListener) - adds listener/subscriber to external message
+ * - [removeSourceListener](#removeSourceListener) - removes listener/subscriber from external message
+ */
+_.extendProto(MessageSource, {
+	init: init,
+	setMessenger: setMessenger,
+	onSubscriberAdded: onSubscriberAdded,
+ 	onSubscriberRemoved: onSubscriberRemoved, 
+ 	dispatchMessage: dispatchMessage,
+
+ 	// Methods below must be implemented in subclass
+ 	trigger: toBeImplemented,
+ 	addSourceListener: toBeImplemented,
+ 	removeSourceListener: toBeImplemented
+});
+
+
+/**
+ * MessageSource instance method.
+ * Called by Mixin constructor.
+ * Initializes map of internal messages, where keys are external source messages, values - internal Messenger messages.
+ */
+function init(hostObject, proxyMethods, messengerAPIOrClass) {
+	check(messengerAPIOrClass, Match.Optional(Match.OneOf(MessengerAPI, Match.Subclass(MessengerAPI, true))));
+
+	if (messengerAPIOrClass) {
+		var messengerAPI = messengerAPIOrClass instanceof MessengerAPI
+							? messengerAPIOrClass
+							: new messengerAPIOrClass;
+		_.defineProperty(this, 'messengerAPI', messengerAPI);
+	}
+
+	_.defineProperty(this, '_internalMessages', {});
+}
+
+
+/**
+ * MessageSource instance method.
+ * Sets reference to Messenger instance.
+ *
+ * @param {Messenger} messenger reference to Messenger instance linked to this MessageSource
+ */
+function setMessenger(messenger) {
+	_.defineProperty(this, 'messenger', messenger);
+}
+
+
+/**
+ * MessageSource instance method.
+ */
+function onSubscriberAdded(message) {
+	var newSourceMessage = this.messengerAPI
+							? this.messengerAPI.addInternalMessage(message)
+							: message;
+
+	if (newSourceMessage)
+		this.addSourceListener(newSourceMessage);
+
+
+	// var sourceMessage = this.translateToSourceMessage(message);
+
+	// if (! sourceMessage) return;
+
+	// if (! this._internalMessages.hasOwnProperty(sourceMessage)) {
+	// 	this.addSourceListener(sourceMessage);
+	// 	this._internalMessages[sourceMessage] = [];
+	// }
+	// var internalMsgs = this._internalMessages[sourceMessage];
+
+	// if (internalMsgs.indexOf(message) == -1)
+	// 	internalMsgs.push(message);
+	// else
+	// 	logger.warn('Duplicate notification received: for subscribe to internal message ' + message);
+}
+
+
+/**
+ * MessageSource instance method.
+ */
+function onSubscriberRemoved(message) {
+	var removedSourceMessage = this.messengerAPI
+								? this.messengerAPI.removeInternalMessage(message)
+								: message;
+
+	if (removedSourceMessage)
+		this.removeSourceListener(sourceMessage);
+
+
+	// var sourceMessage = this.translateToSourceMessage(message);
+
+	// if (! sourceMessage) return;
+
+	// var internalMsgs = this._internalMessages[sourceMessage];
+
+	// if (internalMsgs && internalMsgs.length) {
+	// 	messageIndex = internalMsgs.indexOf(message);
+	// 	if (messageIndex >= 0) {
+	// 		internalMsgs.splice(messageIndex, 1);
+	// 		if (internalMsgs.length == 0) {
+	// 			delete this._internalMessages[sourceMessage];
+	// 			this.removeSourceListener(sourceMessage);
+	// 		}
+	// 	} else
+	// 		unexpectedNotificationWarning();
+	// } else
+	// 	unexpectedNotificationWarning();
+
+
+	// function unexpectedNotificationWarning() {
+	// 	logger.warn('notification received: un-subscribe from internal message ' + message
+	// 				 + ' without previous subscription notification');
+	// }
+}
+
+
+/**
+ * MessageSource instance method.
+ */
+function dispatchMessage(sourceMessage, data) {
+	var internalMessages = this.messengerAPI
+		? this.messengerAPI.filterInternalMessages(sourceMessage, data)
+		: [sourceMessage];
+
+	var createInternalData = this.messengerAPI && this.messengerAPI.createInternalData
+								? this.messengerAPI.createInternalData.bind(this.messengerAPI)
+								: function(sourceMessage, message, data) { return data; };
+
+	if (internalMessages)
+		internalMessages.forEach(function(message) {
+			var internalData = createInternalData(sourceMessage, message, data);
+			this.messenger.postMessage(message, internalData);
+		}, this);
+
+
+	// var internalMsgs = this._internalMessages[sourceMessage];
+
+	// if (internalMsgs && internalMsgs.length)
+	// 	internalMsgs.forEach(function(message) {
+	// 		if (! this.filterSourceMessage
+	// 				|| this.filterSourceMessage(sourceMessage, message, data))
+	// 			this.messenger.postMessage(message, data);
+	// 	}, this);
+	// else
+	// 	logger.warn('source message received for which there is no mapped internal message');
+}
+
+},{"../abstract/mixin":2,"../util/check":58,"../util/error":62,"../util/logger":64,"./api":47,"mol-proto":70}],50:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -4159,47 +4512,74 @@ var Mixin = require('../abstract/mixin')
 	, toBeImplemented = require('../util/error').toBeImplemented
 	, _ = require('mol-proto');
 
-// an abstract class for dispatching external to internal events
+
+/**
+ * `milo.classes.MessageSource`
+ * An abstract class (subclass of [Mixin](../abstract/mixin.js.html)) for connecting [Messenger](./index.js.html) to external sources of messages (like DOM events) and defining higher level messages.
+ * An instance of MessageSource can either be passed to Messenger constructor or later using `_setMessageSource` method of Messenger. Once set, MessageSource of Messenger cannot be changed.
+ */
 var MessageSource = _.createSubclass(Mixin, 'MessageSource', true);
 
 module.exports = MessageSource;
 
 
+/**
+ * MessageSource instance methods
+ *
+ * - [init](#init) - initializes messageSource - called by Mixin superclass
+ * - [setMessenger](#setMessenger) - connects Messenger to MessageSource, is called from `init` or `_setMessageSource` methods of [Messenger](./index.js.html).
+ * - [onSubscriberAdded](#onSubscriberAdded) - called by Messenger to notify when the first subscriber for an internal message was added, so MessageSource can subscribe to source
+ * - [onSubscriberRemoved](#onSubscriberRemoved) - called by Messenger to notify when the last subscriber for an internal message was removed, so MessageSource can unsubscribe from source
+ * - [dispatchMessage](#dispatchMessage) - dispatches source message. MessageSource subclass should implement mechanism when on actual source message this method is called.
+ *
+ * Methods below must be implemented in subclass:
+ *
+ * - [trigger](#trigger) - triggers messages on the source
+ * - [filterSourceMessage](#filterSourceMessage) - filters source message based on the data of the message and the corresponding internal message that is about to besent on Messenger
+ * - [translateToSourceMessage](#translateToSourceMessage) - converts internal message type to external message type
+ * - [addSourceListener](#addSourceListener) - adds listener/subscriber to external message
+ * - [removeSourceListener](#removeSourceListener) - removes listener/subscriber from external message
+ */
 _.extendProto(MessageSource, {
-	// initializes messageSource - called by Mixin superclass
-	init: initMessageSource,
-
-	// called by Messenger to notify when the first subscriber for an internal message was added
+	init: init,
+	setMessenger: setMessenger,
 	onSubscriberAdded: onSubscriberAdded,
-
-	// called by Messenger to notify when the last subscriber for an internal message was removed
  	onSubscriberRemoved: onSubscriberRemoved, 
+ 	dispatchMessage: dispatchMessage,
 
- 	// dispatches source message
- 	dispatchMessage: dispatchSourceMessage,
-
-	// filters source message based on the data of the message - should be implemented in subclass
-	filterSourceMessage: dispatchAllSourceMessages,
-
- 	// ***
  	// Methods below must be implemented in subclass
- 	
-	// converts internal message type to external message type - should be implemented in subclass
+ 	trigger: toBeImplemented,
+	filterSourceMessage: toBeImplemented,
 	translateToSourceMessage: toBeImplemented,
-
- 	// adds listener to external message - should be implemented by subclass
  	addSourceListener: toBeImplemented,
-
- 	// removes listener from external message - should be implemented by subclass
- 	removeSourceListener: toBeImplemented,
+ 	removeSourceListener: toBeImplemented
 });
 
 
-function initMessageSource() {
-	Object.defineProperty(this, '_internalMessages', { value: {} });
+/**
+ * MessageSource instance method.
+ * Called by Mixin constructor.
+ * Initializes map of internal messages, where keys are external source messages, values - internal Messenger messages.
+ */
+function init(hostObject, proxyMethods) {
+	_.defineProperty(this, '_internalMessages', {});
 }
 
 
+/**
+ * MessageSource instance method.
+ * Sets reference to Messenger instance.
+ *
+ * @param {Messenger} messenger reference to Messenger instance linked to this MessageSource
+ */
+function setMessenger(messenger) {
+	_.defineProperty(this, 'messenger', messenger);
+}
+
+
+/**
+ * MessageSource instance method.
+ */
 function onSubscriberAdded(message) {
 	var sourceMessage = this.translateToSourceMessage(message);
 
@@ -4218,6 +4598,9 @@ function onSubscriberAdded(message) {
 }
 
 
+/**
+ * MessageSource instance method.
+ */
 function onSubscriberRemoved(message) {
 	var sourceMessage = this.translateToSourceMessage(message);
 
@@ -4246,26 +4629,23 @@ function onSubscriberRemoved(message) {
 }
 
 
-function dispatchSourceMessage(sourceMessage, data) {
+/**
+ * MessageSource instance method.
+ */
+function dispatchMessage(sourceMessage, data) {
 	var internalMsgs = this._internalMessages[sourceMessage];
 
 	if (internalMsgs && internalMsgs.length)
 		internalMsgs.forEach(function(message) {
-			if (this.filterSourceMessage
-					&& this.filterSourceMessage(sourceMessage, message, data))
+			if (! this.filterSourceMessage
+					|| this.filterSourceMessage(sourceMessage, message, data))
 				this.messenger.postMessage(message, data);
 		}, this);
 	else
 		logger.warn('source message received for which there is no mapped internal message');
 }
 
-
-// can be overridden in subclass to implement filtering based on message data
-function dispatchAllSourceMessages(sourceMessage, message, data) {
-	return true;
-}
-
-},{"../abstract/mixin":2,"../util/error":59,"../util/logger":61,"mol-proto":67}],48:[function(require,module,exports){
+},{"../abstract/mixin":2,"../util/error":62,"../util/logger":64,"mol-proto":70}],51:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -4319,7 +4699,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./attributes":7,"./binder":8,"./classes":9,"./components/c_class":10,"./components/c_facets/cf_registry":25,"./components/c_registry":32,"./config":40,"./loader":43,"./mail":44,"./messenger":46,"./minder":49,"./model":51,"./use_components":53,"./use_facets":54,"./util":60,"mol-proto":67}],49:[function(require,module,exports){
+},{"./attributes":7,"./binder":8,"./classes":9,"./components/c_class":10,"./components/c_facets/cf_registry":25,"./components/c_registry":31,"./config":41,"./loader":44,"./mail":45,"./messenger":48,"./minder":52,"./model":54,"./use_components":56,"./use_facets":57,"./util":63,"mol-proto":70}],52:[function(require,module,exports){
 'use strict';
 
 var Connector = require('./model/connector');
@@ -4355,7 +4735,7 @@ function minder(ds1, mode, ds2, options) {
 		return new Connector(ds1, mode, ds2, options);
 }
 
-},{"./model/connector":50}],50:[function(require,module,exports){
+},{"./model/connector":53}],53:[function(require,module,exports){
 'use strict';
 
 var ConnectorError = require('../util/error').Connector
@@ -4488,7 +4868,7 @@ function off() {
 	}
 }
 
-},{"../util/error":59,"../util/logger":61,"mol-proto":67}],51:[function(require,module,exports){
+},{"../util/error":62,"../util/logger":64,"mol-proto":70}],54:[function(require,module,exports){
 'use strict';
 // <a name="model"></a>
 // milo model
@@ -4709,7 +5089,7 @@ function synthesizeMethod(synthesizer, path, parsedPath) {
 	}
 }
 
-},{"../abstract/mixin":2,"../messenger":46,"../util/check":55,"../util/error":59,"./path_utils":52,"dot":66,"fs":64,"mol-proto":67}],52:[function(require,module,exports){
+},{"../abstract/mixin":2,"../messenger":48,"../util/check":58,"../util/error":62,"./path_utils":55,"dot":69,"fs":67,"mol-proto":70}],55:[function(require,module,exports){
 // <a name="model-path"></a>
 // ### model path utils
 
@@ -4823,7 +5203,7 @@ function wrapMessengerMethods(methodsNames) {
 	}, this);
 }
 
-},{"../util/check":55,"mol-proto":67}],53:[function(require,module,exports){
+},{"../util/check":58,"mol-proto":70}],56:[function(require,module,exports){
 'use strict';
 
 require('./components/classes/View');
@@ -4832,7 +5212,7 @@ require('./components/ui/Select');
 require('./components/ui/Input');
 require('./components/ui/Button');
 
-},{"./components/classes/View":34,"./components/ui/Button":36,"./components/ui/Group":37,"./components/ui/Input":38,"./components/ui/Select":39}],54:[function(require,module,exports){
+},{"./components/classes/View":33,"./components/ui/Button":37,"./components/ui/Group":38,"./components/ui/Input":39,"./components/ui/Select":40}],57:[function(require,module,exports){
 'use strict';
 
 // ['Dom'
@@ -4863,7 +5243,7 @@ require('./components/c_facets/Split');
 require('./components/c_facets/List');
 require('./components/c_facets/Item');
 
-},{"./components/c_facets/Container":12,"./components/c_facets/Data":13,"./components/c_facets/Dom":14,"./components/c_facets/Drag":15,"./components/c_facets/Drop":16,"./components/c_facets/Editable":17,"./components/c_facets/Events":18,"./components/c_facets/Frame":19,"./components/c_facets/Item":20,"./components/c_facets/List":21,"./components/c_facets/ModelFacet":22,"./components/c_facets/Split":23,"./components/c_facets/Template":24}],55:[function(require,module,exports){
+},{"./components/c_facets/Container":12,"./components/c_facets/Data":13,"./components/c_facets/Dom":14,"./components/c_facets/Drag":15,"./components/c_facets/Drop":16,"./components/c_facets/Editable":17,"./components/c_facets/Events":18,"./components/c_facets/Frame":19,"./components/c_facets/Item":20,"./components/c_facets/List":21,"./components/c_facets/ModelFacet":22,"./components/c_facets/Split":23,"./components/c_facets/Template":24}],58:[function(require,module,exports){
 // <a name="utils-check"></a>
 // milo.utils.check
 // -----------
@@ -5232,7 +5612,7 @@ function _prependPath(key, base) {
 };
 
 
-},{"mol-proto":67}],56:[function(require,module,exports){
+},{"mol-proto":70}],59:[function(require,module,exports){
 'use strict';
 
 var count = require('./count')
@@ -5246,7 +5626,7 @@ function componentName() {
 	return prefix + count();
 }
 
-},{"../config":40,"./count":57}],57:[function(require,module,exports){
+},{"../config":41,"./count":60}],60:[function(require,module,exports){
 // <a name="utils-count"></a>
 // milo.utils.count
 // ----------------
@@ -5266,7 +5646,7 @@ componentCount.get = function() {
 
 module.exports = componentCount;
 
-},{}],58:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 'use strict';
 
 
@@ -5325,7 +5705,7 @@ function getElementOffset(el) {
     return { topOffset: yPos, leftOffset: xPos };
 }
 
-},{}],59:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 // <a name="utils-error"></a>
 // milo.utils.error
 // -----------
@@ -5367,7 +5747,7 @@ function error$toBeImplemented() {
 	throw new error.AbstractClass('calling the method of an absctract class');
 }
 
-},{"mol-proto":67}],60:[function(require,module,exports){
+},{"mol-proto":70}],63:[function(require,module,exports){
 // <a name="utils"></a>
 // milo.utils
 // -----------
@@ -5386,7 +5766,7 @@ var util = {
 
 module.exports = util;
 
-},{"./check":55,"./component_name":56,"./count":57,"./dom":58,"./error":59,"./logger":61,"./request":63}],61:[function(require,module,exports){
+},{"./check":58,"./component_name":59,"./count":60,"./dom":61,"./error":62,"./logger":64,"./request":66}],64:[function(require,module,exports){
 // <a name="utils-logger"></a>
 // milo.utils.logger
 // -----------
@@ -5402,7 +5782,7 @@ var logger = new Logger({ level: 3 });
 
 module.exports = logger;
 
-},{"./logger_class":62}],62:[function(require,module,exports){
+},{"./logger_class":65}],65:[function(require,module,exports){
 // ### Logger Class
 
 // Properties:
@@ -5513,7 +5893,7 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"mol-proto":67}],63:[function(require,module,exports){
+},{"mol-proto":70}],66:[function(require,module,exports){
 // <a name="utils-request"></a>
 // milo.utils.request
 // -----------
@@ -5565,13 +5945,13 @@ function get(url, callback) {
 	request(url, { method: 'GET' }, callback);
 }
 
-},{"mol-proto":67}],64:[function(require,module,exports){
+},{"mol-proto":70}],67:[function(require,module,exports){
 
 // not implemented
 // The reason for having an empty file and not throwing is to allow
 // untraditional implementation of this module.
 
-},{}],65:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 // doT.js
 // 2011, Laura Doktorova, https://github.com/olado/doT
 // Licensed under the MIT license.
@@ -5708,7 +6088,7 @@ function get(url, callback) {
 	};
 }());
 
-},{}],66:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 /* doT + auto-compilation of doT templates
  *
  * 2012, Laura Doktorova, https://github.com/olado/doT
@@ -5853,7 +6233,7 @@ InstallDots.prototype.compileAll = function() {
 	return this.__rendermodule;
 };
 
-},{"./doT":65,"fs":64}],67:[function(require,module,exports){
+},{"./doT":68,"fs":67}],70:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -5998,7 +6378,7 @@ if (typeof module == 'object' && module.exports)
 	// export for node/browserify
 	module.exports = Proto;
 
-},{"./proto_array":68,"./proto_function":69,"./proto_object":70,"./proto_prototype":71,"./proto_string":72,"./utils":73}],68:[function(require,module,exports){
+},{"./proto_array":71,"./proto_function":72,"./proto_object":73,"./proto_prototype":74,"./proto_string":75,"./utils":76}],71:[function(require,module,exports){
 'use strict';
 
 var __ = require('./proto_object')
@@ -6119,7 +6499,7 @@ function mapToObject(callback, thisArg) {
 	return result;
 }
 
-},{"./proto_object":70,"./utils":73}],69:[function(require,module,exports){
+},{"./proto_object":73,"./utils":76}],72:[function(require,module,exports){
 'use strict';
 
 /**
@@ -6225,7 +6605,7 @@ function memoize(hashFunc, limit) {
 	};
 }
 
-},{}],70:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 'use strict';
 
 /**
@@ -6645,7 +7025,7 @@ function everyKey(callback, thisArg, onlyEnumerable) {
 	}
 }
 
-},{}],71:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 'use strict';
 
 /**
@@ -6759,7 +7139,7 @@ function makeSubclass(Superclass) {
 	return this;
 }
 
-},{"./proto_function":69,"./proto_object":70}],72:[function(require,module,exports){
+},{"./proto_function":72,"./proto_object":73}],75:[function(require,module,exports){
 'use strict';
 
 /**
@@ -6791,7 +7171,7 @@ function firstLowerCase() {
 	return this[0].toLowerCase() + this.slice(1);
 }
 
-},{}],73:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 'use strict';
 
 var utils = module.exports = {
@@ -6816,5 +7196,5 @@ function makeProtoFunction(method) {
 	};
 }
 
-},{}]},{},[48])
+},{}]},{},[51])
 ;
