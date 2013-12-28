@@ -3058,13 +3058,16 @@ function removeSourceSubscriber(sourceMessage) {
 
 
 function trigger(msgType, data) {
+	data = data || {};
 	data.type = msgType;
+
 	this.frameWindow().postMessage(data, '*');
 }
 
 
+// TODO maybe refactor to FrameMsgAPI?
 function handleEvent(event) {
-	this.dispatchMessage(event.type, event);
+	this.dispatchMessage(event.data.type, event);
 }
 
 },{"../../messenger/m_source":49,"../../util/check":58,"../../util/error":62,"../c_class":10,"mol-proto":70}],35:[function(require,module,exports){
@@ -3538,10 +3541,12 @@ var Messenger = require('../messenger')
 	, _ = require('mol-proto');
 
 
-var mailMsgAPI = new MailMsgAPI
-	, mailMsgSource = new MailMessageSource(undefined, undefined, MailMsgAPI);
+var miloMail = new Messenger;
 
-var miloMail = new Messenger(undefined, undefined, mailMsgSource);
+var mailMsgSource = new MailMessageSource(miloMail, { trigger: 'trigger' }, new MailMsgAPI);
+
+miloMail._setMessageSource(mailMsgSource);
+
 
 _.extend(miloMail, {
 	on: miloMail.onMessage,
@@ -3618,6 +3623,7 @@ _.extendProto(MailMessageSource, {
 	// implementing MessageSource interface
  	addSourceSubscriber: addSourceSubscriber,
  	removeSourceSubscriber: removeSourceSubscriber,
+ 	trigger: trigger,
 
  	// class specific methods
  	_windowSubscriberMethod: _windowSubscriberMethod,
@@ -3653,8 +3659,12 @@ function isReadyStateChange(sourceMessage) {
 	return sourceMessage == 'readystatechange' && typeof document == 'object';
 }
 
+function isWindowMessage(sourceMessage) {
+	return sourceMessage == 'message' && typeof window == 'object';
+}
+
 function _windowSubscriberMethod(method, sourceMessage) {
-	if (sourceMessage == 'message' && typeof window == 'object')
+	if (isWindowMessage(sourceMessage))
 		window[method]('message', this, false);
 }
 
@@ -3662,6 +3672,15 @@ function _windowSubscriberMethod(method, sourceMessage) {
 // event dispatcher - as defined by Event DOM API
 function handleEvent(event) {
 	this.dispatchMessage(event.type, event);
+}
+
+
+function trigger(msgType, data) {
+	data = data || {};
+	data.type = 'message:' + msgType;
+	
+	if (typeof window == 'object')
+		window.postMessage(data, '*')
 }
 
 },{"../components/c_message_sources/dom_events_constructors":27,"../messenger/m_source":49,"../util/check":58,"../util/error":62,"mol-proto":70}],47:[function(require,module,exports){
@@ -3850,9 +3869,9 @@ function _registerSubscriber(subscribersHash, message, subscriber) {
 		subscribersHash[message] = [];
 		if (message instanceof RegExp)
 			subscribersHash[message].pattern = message;
-		var noSubscribers = true;
-		if (this._messageSource)
+		else if (this._messageSource)
 			this._messageSource.onSubscriberAdded(message);
+		var noSubscribers = true;
 	}
 
 	var msgSubscribers = subscribersHash[message];
@@ -3980,7 +3999,7 @@ function _removeSubscriber(subscribersHash, message, subscriber) {
  */
 function _removeAllSubscribers(subscribersHash, message) {
 	delete subscribersHash[message];
-	if (this._messageSource)
+	if (this._messageSource && message instanceof String)
 		this._messageSource.onSubscriberRemoved(message);
 }
 
@@ -4148,9 +4167,7 @@ function _setMessageSource(messageSource) {
 },{"../abstract/mixin":2,"../util/check":58,"../util/error":62,"./m_source":49,"./message_source":50,"mol-proto":70}],48:[function(require,module,exports){
 'use strict';
 
-var Mixin = require('../abstract/mixin')
-	, toBeImplemented = require('../util/error').toBeImplemented
-	, _ = require('mol-proto');
+var _ = require('mol-proto');
 
 
 module.exports = MessengerAPI;
@@ -4158,6 +4175,7 @@ module.exports = MessengerAPI;
 
 /**
  * 
+ *
  */
 function MessengerAPI() {
 	if (this.init)
@@ -4167,6 +4185,9 @@ function MessengerAPI() {
 
 /**
  * MessengerAPI instance methods
+ *
+ * - [filterSourceMessage](#filterSourceMessage) - filters source message based on the data of the message and the corresponding internal message that is about to be sent on Messenger
+ * - [translateToSourceMessage](#translateToSourceMessage) - converts internal message type to external message type
  */
 _.extendProto(MessengerAPI, {
 	init: init,
@@ -4174,12 +4195,11 @@ _.extendProto(MessengerAPI, {
 	removeInternalMessage: removeInternalMessage,
 	filterInternalMessages: filterInternalMessages,
 	getInternalMessages: getInternalMessages,
-	_proxyMethods: _proxyMethods,
 
-	// implemented by subclass
-	translateToSourceMessage: toBeImplemented,
-	// createInternalData: toBeImplemented,
-	// filterSourceMessage: toBeImplemented
+	// should be redefined by subclass
+	translateToSourceMessage: translateToSourceMessage,
+	createInternalData: createInternalData,
+	filterSourceMessage: filterSourceMessage
 });
 
 
@@ -4270,14 +4290,23 @@ function filterInternalMessages(sourceMessage, data) {
 /**
  * MessengerAPI instance method
  */
-function _proxyMethods(hostObject, prefix) {
-	['filterSourceMessage', 'createInternalData'].forEach(function(methodName) {
-		if (this[methodName])
-			Mixin.prototype._createProxyMethod.call(this, prefix + methodName, methodName, hostObject);
-	}, this);
+
+
+function translateToSourceMessage(message) {
+	return message
 }
 
-},{"../abstract/mixin":2,"../util/error":62,"mol-proto":70}],49:[function(require,module,exports){
+
+function createInternalData(sourceMessage, message, data) {
+	return data;
+}
+
+
+function filterSourceMessage() {
+	return true;
+}
+
+},{"mol-proto":70}],49:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -4311,8 +4340,6 @@ module.exports = MessageSource;
  * Methods below must be implemented in subclass:
  *
  * - [trigger](#trigger) - triggers messages on the source
- * - [filterSourceMessage](#filterSourceMessage) - filters source message based on the data of the message and the corresponding internal message that is about to besent on Messenger
- * - [translateToSourceMessage](#translateToSourceMessage) - converts internal message type to external message type
  * - [addSourceListener](#addSourceListener) - adds listener/subscriber to external message
  * - [removeSourceListener](#removeSourceListener) - removes listener/subscriber from external message
  */
@@ -4334,10 +4361,15 @@ _.extendProto(MessageSource, {
 /**
  * MessageSource instance method.
  * Called by Mixin constructor.
- * Initializes map of internal messages, where keys are external source messages, values - internal Messenger messages.
+ * MessageSource constructor should be passed the same parameters as this method signature.
+ * If an instance of [MessengerAPI](./m_api.js.html) is passed as the third parameter, it extends MessageSource functionality to allow it to define new messages, to filter messages based on their data and to change message data. See [MessengerAPI](./m_api.js/html).
+ *
+ * @param {Object} hostObject Optional object that stores the MessageSource on one of its properties. It is used to proxy methods of MessageSource.
+ * @param {Object[String]} proxyMethods Optional map of method names; key - proxy method name, value - MessageSource's method name.
+ * @param {MessengerAPI} messengerAPI Optional instance of MessengerAPI.
  */
-function init(hostObject, proxyMethods, messengerAPIOrClass) {
-	this._prepareMessengerAPI(messengerAPIOrClass);
+function init(hostObject, proxyMethods, messengerAPI) {
+	this._prepareMessengerAPI(messengerAPI);
 	_.defineProperty(this, '_internalMessages', {});
 }
 
@@ -4353,38 +4385,32 @@ function setMessenger(messenger) {
 }
 
 
-function _prepareMessengerAPI(messengerAPIOrClass) {
-	check(messengerAPIOrClass, Match.Optional(Match.OneOf(MessengerAPI, Match.Subclass(MessengerAPI, true))));
+/**
+ * MessageSource instance method.
+ * Prepares [MessengerAPI](./m_api.js.html) passed to constructor by proxying its methods to itself or if MessengerAPI wasn't passed defines two methods to avoid checking their availability every time the message is dispatched.
+ *
+ * @param {MessengerAPI} messengerAPI Optional instance of MessengerAPI
+ */
+function _prepareMessengerAPI(messengerAPI) {
+	check(messengerAPI, Match.Optional(MessengerAPI));
 
-	if (messengerAPIOrClass) {
-		var messengerAPI = messengerAPIOrClass instanceof MessengerAPI
-							? messengerAPIOrClass
-							: new messengerAPIOrClass;
-		_.defineProperty(this, 'messengerAPI', messengerAPI);
-	}
+	if (! messengerAPI)
+		messengerAPI = new MessengerAPI;
 
-	// proxy methods from messengerAPI
-	if (this.messengerAPI)
-		this.messengerAPI._proxyMethods(this, '');
-
-	// define methods in case there is no MesengerAPI or it does not define a method
-	this.createInternalData =
-		this.createInternalData || useSourceData;
-	this.filterSourceMessage =
-		this.filterSourceMessage || doNotFilter;
+	_.defineProperty(this, 'messengerAPI', messengerAPI);
 }
-function doNotFilter() { return true; }
-function useSourceData(sourceMessage, message, data) { return data; }
 
 
 /**
  * MessageSource instance method.
+ * Subscribes to external source using `addSourceSubscriber` method that should be implemented in subclass.
+ * This method is called by [Messenger](./index.js.html) when the first subscriber to the `message` is added.
+ * Delegates to supplied or default [MessengerAPI](./m_api.js) for translation of `message` to `sourceMessage`. `MessageAPI.prototype.addInternalMessage` will return undefined if this `sourceMessage` was already subscribed to to prevent duplicate subscription.
+ *
+ * @param {String} message internal Messenger message that has to be subscribed to at the external source of messages.
  */
 function onSubscriberAdded(message) {
-	var newSourceMessage = this.messengerAPI
-							? this.messengerAPI.addInternalMessage(message)
-							: message;
-
+	var newSourceMessage = this.messengerAPI.addInternalMessage(message);
 	if (newSourceMessage)
 		this.addSourceSubscriber(newSourceMessage);
 }
@@ -4392,12 +4418,14 @@ function onSubscriberAdded(message) {
 
 /**
  * MessageSource instance method.
+ * Unsubscribes from external source using `removeSourceSubscriber` method that should be implemented in subclass.
+ * This method is called by [Messenger](./index.js.html) when the last subscriber to the `message` is removed.
+ * Delegates to supplied or default [MessengerAPI](./m_api.js) for translation of `message` to `sourceMessage`. `MessageAPI.prototype.removeInternalMessage` will return undefined if this `sourceMessage` was not yet subscribed to to prevent unsubscription without previous subscription.
+ *
+ * @param {String} message internal Messenger message that has to be unsubscribed from at the external source of messages.
  */
 function onSubscriberRemoved(message) {
-	var removedSourceMessage = this.messengerAPI
-								? this.messengerAPI.removeInternalMessage(message)
-								: message;
-
+	var removedSourceMessage = this.messengerAPI.removeInternalMessage(message);
 	if (removedSourceMessage)
 		this.removeSourceSubscriber(sourceMessage);
 }
@@ -4405,16 +4433,22 @@ function onSubscriberRemoved(message) {
 
 /**
  * MessageSource instance method.
+ * Dispatches sourceMessage to Messenger.
+ * Mechanism that calls this method when the source message is received should be implemented by subclass (see [DOMEventsSource](../components/msg_src/dom_events) for example).
+ * Delegates to supplied or default [MessengerAPI](./m_api.js) to create internal message data (`createInternalData`) and to filter the message based on its data and/or message (`filterSourceMessage`).
+ * Base MessengerAPI class implements these two methods in a trivial way (`createInternalData` simply returns external data, `filterSourceMessage` returns `true`), they are meant to be implemented by subclass.
+ *
+ * @param {String} sourceMessage source message received from external source
+ * @param {Object} sourceData data received from external source
  */
-function dispatchMessage(sourceMessage, data) {
-	var internalMessages = this.messengerAPI
-							? this.messengerAPI.getInternalMessages(sourceMessage)
-							: [sourceMessage];
-
+function dispatchMessage(sourceMessage, sourceData) {
+	var api = this.messengerAPI
+		, internalMessages = api.getInternalMessages(sourceMessage);
+							
 	if (internalMessages) {
 		internalMessages.forEach(function(message) {
-			var internalData = this.createInternalData(sourceMessage, message, data);
-			if (this.filterSourceMessage(sourceMessage, message, internalData))
+			var internalData = api.createInternalData(sourceMessage, message, sourceData);
+			if (api.filterSourceMessage(sourceMessage, message, internalData))
 				this.messenger.postMessage(message, internalData);
 		}, this);
 	}

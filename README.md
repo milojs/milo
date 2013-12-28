@@ -5,6 +5,7 @@ A minimalist browser framework that binds HTML elements to JS components and com
 
 [![Build Status](https://travis-ci.org/MailOnline/milo.png?branch=master)](https://travis-ci.org/MailOnline/milo)
 
+Documentation: http://mailonline.github.io/milo/
 
 Quick start
 -----------
