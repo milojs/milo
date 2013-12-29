@@ -93,8 +93,156 @@ function _createProxyMethods(proxyMethods, hostObject) {
 }
 
 },{"../util/check":59,"../util/error":63,"mol-proto":71}],2:[function(require,module,exports){
+'use strict';
+
+// <a name="facet-c"></a>
+// facet class
+// --------------
+
+var _ = require('mol-proto');
+
+module.exports = Facet;
+
+
+/**
+ * 
+ */
+function Facet(owner, config) {
+	this.name = _.firstLowerCase(this.constructor.name);
+	this.owner = owner;
+	this.config = config || {};
+	this.init.apply(this, arguments);
+}
+
+_.extendProto(Facet, {
+	init: function() {}
+});
+
+},{"mol-proto":71}],3:[function(require,module,exports){
+'use strict';
+
+// <a name="facet-o"></a>
+// facetted object class
+// --------------
+
+// Component class is based on an abstract ```FacetedObject``` class that can be
+// applied to any domain where objects can be represented via collection of facets
+// (a facet is an object of a certain class, it holds its own configuration,
+// data and methods).
+
+// In a way, facets pattern is an inversion of adapter pattern - while the latter
+// allows finding a class/methods that has specific functionality, faceted object
+// is simply constructed to have these functionalities. In this way it is possible
+// to create a virtually unlimited number of component classes with a very limited
+// number of building blocks without having any hierarchy of classes - all components
+// inherit directly from Component class.
+
+var Facet = require('./facet')
+	, _ = require('mol-proto')
+	, check = require('../util/check')
+	, Match = check.Match
+	, FacetError = require('../util/error').Facet;
+
+module.exports = FacetedObject;
+
+
+/**
+ * `milo.classes.FacetedObject`
+ */
+function FacetedObject() {
+	// TODO write a test to check that facets are created if configuration isn't passed
+	var facetsConfig = this.facetsConfig || {};
+
+	var facetsDescriptors = {}
+		, facets = {};
+
+	if (this.constructor == FacetedObject)		
+		throw new FacetError('FacetedObject is an abstract class, can\'t be instantiated');
+
+	if (this.facetsClasses)
+		_.eachKey(this.facetsClasses, instantiateFacet, this, true);
+
+	Object.defineProperties(this, facetsDescriptors);
+	Object.defineProperty(this, 'facets', { value: facets });	
+
+	// calling init if it is defined in the class
+	if (this.init)
+		this.init.apply(this, arguments);
+
+	function instantiateFacet(FacetClass, fct) {
+		var facetOpts = facetsConfig[fct];
+
+		facets[fct] = new FacetClass(this, facetOpts);
+
+		facetsDescriptors[fct] = {
+			enumerable: true,
+			value: facets[fct]
+		};
+	}
+}
+
+_.extendProto(FacetedObject, {
+	addFacet: addFacet
+});
+
+
+function addFacet(FacetClass, facetOpts, facetName) {
+	check(FacetClass, Function);
+	check(facetName, Match.Optional(String));
+
+	facetName = _.firstLowerCase(facetName || FacetClass.name);
+
+	var protoFacets = this.constructor.prototype.facetsClasses;
+
+	if (protoFacets && protoFacets[facetName])
+		throw new FacetError('facet ' + facetName + ' is already part of the class ' + this.constructor.name);
+
+	if (this[facetName])
+		throw new FacetError('facet ' + facetName + ' is already present in object');
+
+	var newFacet = this.facets[facetName] = new FacetClass(this, facetOpts);
+
+	Object.defineProperty(this, facetName, {
+		enumerable: true,
+		value: newFacet
+	});
+
+	return newFacet;
+}
+
+
+FacetedObject.hasFacet = function hasFacet(facetName) {
+	var protoFacets = this.prototype.facetsClasses;
+	return protoFacets && protoFacets[facetName];
+}
+
+
+
+// factory that creates classes (constructors) from the map of facets
+// these classes inherit from FacetedObject
+FacetedObject.createFacetedClass = function (name, facetsClasses, facetsConfig) {
+	check(name, String);
+	check(facetsClasses, Match.ObjectHash(Match.Subclass(Facet, true)));
+	check(facetsConfig, Match.Optional(Object));
+
+	if (facetsConfig)
+		_.eachKey(facetsConfig, function(fctConfig, fctName) {
+			if (! facetsClasses.hasOwnProperty(fctName))
+				throw new FacetError('configuration for facet (' + fctName + ') passed that is not in class');
+		});
+
+	var FacetedClass = _.createSubclass(this, name, true);
+
+	_.extendProto(FacetedClass, {
+		facetsClasses: facetsClasses,
+		facetsConfig: facetsConfig
+	});
+	return FacetedClass;
+};
+
+},{"../util/check":59,"../util/error":63,"./facet":2,"mol-proto":71}],4:[function(require,module,exports){
 module.exports=require(1)
-},{"../util/check":59,"../util/error":63,"mol-proto":71}],3:[function(require,module,exports){
+},{"../util/check":59,"../util/error":63,"mol-proto":71}],5:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -217,7 +365,7 @@ function setClass(FoundationClass) {
 	});
 }
 
-},{"../util/check":59,"../util/error":63,"mol-proto":71}],4:[function(require,module,exports){
+},{"../util/check":59,"../util/error":63,"mol-proto":71}],6:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -339,7 +487,7 @@ function render() {
 				.replace('%compName', this.compName);
 }
 
-},{"../config":40,"../util/check":59,"../util/error":63,"./a_class":5,"mol-proto":71}],5:[function(require,module,exports){
+},{"../config":42,"../util/check":59,"../util/error":63,"./a_class":7,"mol-proto":71}],7:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -422,7 +570,7 @@ function decorate() {
 	this.set(this.render());
 }
 
-},{"../util/check":59,"../util/error":63,"mol-proto":71}],6:[function(require,module,exports){
+},{"../util/check":59,"../util/error":63,"mol-proto":71}],8:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -509,7 +657,7 @@ function render() {
 	return this.loadUrl;
 }
 
-},{"../config":40,"../util/error":63,"./a_class":5,"mol-proto":71}],7:[function(require,module,exports){
+},{"../config":42,"../util/error":63,"./a_class":7,"mol-proto":71}],9:[function(require,module,exports){
 'use strict';
 
 /**
@@ -523,7 +671,7 @@ var attributes = module.exports = {
 	load: require('./a_load')
 };
 
-},{"./a_bind":4,"./a_load":6}],8:[function(require,module,exports){
+},{"./a_bind":6,"./a_load":8}],10:[function(require,module,exports){
 'use strict';
 
 var miloMail = require('./mail')
@@ -680,7 +828,7 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 	}
 }
 
-},{"./attributes/a_bind":4,"./components/c_facets/cf_registry":25,"./components/c_info":26,"./components/c_registry":28,"./components/scope":35,"./mail":44,"./util/check":59,"./util/dom":62,"./util/error":63,"mol-proto":71}],9:[function(require,module,exports){
+},{"./attributes/a_bind":6,"./components/c_facets/cf_registry":27,"./components/c_info":28,"./components/c_registry":30,"./components/scope":37,"./mail":44,"./util/check":59,"./util/dom":62,"./util/error":63,"mol-proto":71}],11:[function(require,module,exports){
 'use strict';
 
 // <a name="classes"></a>
@@ -690,8 +838,8 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 // This module contains foundation classes and class registries.
 
 var classes = {
-	Facet: require('./facets/f_class'),
-	ComponentFacet: require('./components/c_facet'),
+	Facet: require('./abstract/facet'),
+	FacetedObject: require('./abstract/faceted_object'),
 	ClassRegistry: require('./abstract/registry'),
 	Mixin: require('./abstract/Mixin'),
 	MessageSource: require('./messenger/m_source'),
@@ -700,7 +848,7 @@ var classes = {
 
 module.exports = classes;
 
-},{"./abstract/Mixin":1,"./abstract/registry":3,"./components/c_facet":11,"./facets/f_class":41,"./messenger/m_api":48,"./messenger/m_source":49}],10:[function(require,module,exports){
+},{"./abstract/Mixin":1,"./abstract/facet":2,"./abstract/faceted_object":3,"./abstract/registry":5,"./messenger/m_api":48,"./messenger/m_source":49}],12:[function(require,module,exports){
 'use strict';
 
 // <a name="components"></a>
@@ -717,7 +865,7 @@ module.exports = classes;
 // You should use Component.createComponentClass method when you want to create
 // a new component class from facets and their configuration.
 
-var FacetedObject = require('../facets/f_object')
+var FacetedObject = require('../abstract/faceted_object')
 	, facetsRegistry = require('./c_facets/cf_registry')
 	, ComponentFacet = facetsRegistry.get('ComponentFacet')
 	, componentUtils = require('./c_utils')
@@ -946,7 +1094,7 @@ function _getScopeParent(withFacet) {
 	}
 }
 
-},{"../config":40,"../facets/f_object":42,"../messenger":47,"../util/check":59,"../util/count":61,"./c_facets/cf_registry":25,"./c_utils":29,"mol-proto":71}],11:[function(require,module,exports){
+},{"../abstract/faceted_object":3,"../config":42,"../messenger":47,"../util/check":59,"../util/count":61,"./c_facets/cf_registry":27,"./c_utils":31,"mol-proto":71}],13:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facet"></a>
@@ -962,7 +1110,7 @@ function _getScopeParent(withFacet) {
 // - ComponentFacet - basic 
 
 
-var Facet = require('../facets/f_class')
+var Facet = require('../abstract/facet')
 	, Messenger = require('../messenger')
 	, FacetError = require('../util/error').Facet
 	, componentUtils = require('./c_utils')
@@ -1089,7 +1237,7 @@ function _createMessageSourceWithAPI(MessageSourceClass, messengerAPIOrClass, op
 	_.defineProperty(this, '_messageSource', messageSource);
 }
 
-},{"../facets/f_class":41,"../messenger":47,"../util/error":63,"./c_utils":29,"mol-proto":71}],12:[function(require,module,exports){
+},{"../abstract/facet":2,"../messenger":47,"../util/error":63,"./c_utils":31,"mol-proto":71}],14:[function(require,module,exports){
 // <a name="components-facets-container"></a>
 // ###container facet
 
@@ -1136,7 +1284,7 @@ function addChildComponents(childComponents) {
 	_.extend(this.scope, childComponents);
 }
 
-},{"../../binder":8,"../c_facet":11,"./cf_registry":25,"mol-proto":71}],13:[function(require,module,exports){
+},{"../../binder":10,"../c_facet":13,"./cf_registry":27,"mol-proto":71}],15:[function(require,module,exports){
 // <a name="components-facets-data"></a>
 // ###data facet
 
@@ -1369,7 +1517,7 @@ function inputValue(el, value) {
 		return el.value;
 }
 
-},{"../../abstract/mixin":2,"../../messenger":47,"../../model/path_utils":55,"../../util/logger":65,"../c_facet":11,"../msg_api/data":31,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":71}],14:[function(require,module,exports){
+},{"../../abstract/mixin":4,"../../messenger":47,"../../model/path_utils":55,"../../util/logger":65,"../c_facet":13,"../msg_api/data":33,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":71}],16:[function(require,module,exports){
 // <a name="components-facets-dom"></a>
 // ###dom facet
 
@@ -1573,7 +1721,7 @@ function hasTextBeforeSelection() {
 }
 
 
-},{"../../attributes/a_bind":4,"../../binder":8,"../../util/check":59,"../../util/error":63,"../c_facet":11,"./cf_registry":25,"mol-proto":71}],15:[function(require,module,exports){
+},{"../../attributes/a_bind":6,"../../binder":10,"../../util/check":59,"../../util/error":63,"../c_facet":13,"./cf_registry":27,"mol-proto":71}],17:[function(require,module,exports){
 // <a name="components-facets-drag"></a>
 // ###drag facet
 
@@ -1659,7 +1807,7 @@ function startDragFacet() {
 	}
 }
 
-},{"../c_facet":11,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":71}],16:[function(require,module,exports){
+},{"../c_facet":13,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":71}],18:[function(require,module,exports){
 // <a name="components-facets-drop"></a>
 // ###drop facet
 
@@ -1707,7 +1855,7 @@ function startDropFacet() {
 	}
 }
 
-},{"../c_facet":11,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":71}],17:[function(require,module,exports){
+},{"../c_facet":13,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":71}],19:[function(require,module,exports){
 // <a name="components-facets-editable"></a>
 // ###editable facet
 
@@ -1931,7 +2079,7 @@ function onEnterSplit(message, event) {
 	}
 }
 
-},{"../../util":64,"../../util/dom":62,"../../util/logger":65,"../c_class":10,"../c_facet":11,"../msg_api/editable":32,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":71}],18:[function(require,module,exports){
+},{"../../util":64,"../../util/dom":62,"../../util/logger":65,"../c_class":12,"../c_facet":13,"../msg_api/editable":34,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":71}],20:[function(require,module,exports){
 // <a name="components-facets-events"></a>
 // ###events facet
 
@@ -1969,7 +2117,7 @@ function init() {
 	_.defineProperty(this, '_domEventsSource', domEventsSource);
 }
 
-},{"../../messenger":47,"../c_facet":11,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":71}],19:[function(require,module,exports){
+},{"../../messenger":47,"../c_facet":13,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":71}],21:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-frame"></a>
@@ -2009,7 +2157,7 @@ function init() {
 	_.defineProperty(this, '_messageSource', messageSource);
 }
 
-},{"../../messenger":47,"../c_facet":11,"../msg_src/frame":34,"./cf_registry":25,"mol-proto":71}],20:[function(require,module,exports){
+},{"../../messenger":47,"../c_facet":13,"../msg_src/frame":36,"./cf_registry":27,"mol-proto":71}],22:[function(require,module,exports){
 // <a name="components-facets-item"></a>
 // ###item facet
 
@@ -2033,7 +2181,7 @@ facetsRegistry.add(ItemFacet);
 
 module.exports = ItemFacet;
 
-},{"../../mail":44,"../../model":54,"../c_facet":11,"./cf_registry":25,"mol-proto":71}],21:[function(require,module,exports){
+},{"../../mail":44,"../../model":54,"../c_facet":13,"./cf_registry":27,"mol-proto":71}],23:[function(require,module,exports){
 // <a name="components-facets-list"></a>
 // ###list facet
 
@@ -2197,7 +2345,7 @@ function each(callback, thisArg) {
     }, thisArg || this);
 }
 
-},{"../../binder":8,"../../mail":44,"../../model":54,"../../util/error":63,"../../util/logger":65,"../c_class":10,"../c_facet":11,"./cf_registry":25,"mol-proto":71}],22:[function(require,module,exports){
+},{"../../binder":10,"../../mail":44,"../../model":54,"../../util/error":63,"../../util/logger":65,"../c_class":12,"../c_facet":13,"./cf_registry":27,"mol-proto":71}],24:[function(require,module,exports){
 // <a name="components-facets-model"></a>
 // ###model facet
 
@@ -2234,7 +2382,7 @@ function _createMessenger() { // Called by inherited init
 	this.m.proxyMessenger(this); // Creates messenger's methods directly on facet
 }
 
-},{"../../model":54,"../c_facet":11,"./cf_registry":25,"mol-proto":71}],23:[function(require,module,exports){
+},{"../../model":54,"../c_facet":13,"./cf_registry":27,"mol-proto":71}],25:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -2372,7 +2520,7 @@ function isSplittable() {
 	return true;
 }
 
-},{"../c_class":10,"../c_facet":11,"./cf_registry":25}],24:[function(require,module,exports){
+},{"../c_class":12,"../c_facet":13,"./cf_registry":27}],26:[function(require,module,exports){
 // <a name="components-facets-template"></a>
 // ###template facet
 
@@ -2444,7 +2592,7 @@ function bindInnerComponents() {
 	this.owner.container.scope = thisScope[this.owner.name].container.scope;
 }
 
-},{"../../binder":8,"../../util/check":59,"../c_facet":11,"./cf_registry":25,"mol-proto":71}],25:[function(require,module,exports){
+},{"../../binder":10,"../../util/check":59,"../c_facet":13,"./cf_registry":27,"mol-proto":71}],27:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../abstract/registry')
@@ -2463,7 +2611,7 @@ facetsRegistry.add(ComponentFacet);
 
 module.exports = facetsRegistry;
 
-},{"../../abstract/registry":3,"../c_facet":11}],26:[function(require,module,exports){
+},{"../../abstract/registry":5,"../c_facet":13}],28:[function(require,module,exports){
 // <a name="components-info"></a>
 // ###component info class
 
@@ -2525,7 +2673,7 @@ function ComponentInfo(scope, el, attr) {
 	}
 }
 
-},{"../util/error":63,"./c_facets/cf_registry":25,"./c_registry":28}],27:[function(require,module,exports){
+},{"../util/error":63,"./c_facets/cf_registry":27,"./c_registry":30}],29:[function(require,module,exports){
 // <a name="components-dom-constructors"></a>
 // ###dom events constructors
 
@@ -2575,7 +2723,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"mol-proto":71}],28:[function(require,module,exports){
+},{"mol-proto":71}],30:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -2592,7 +2740,7 @@ componentsRegistry.add(Component);
 
 module.exports = componentsRegistry;
 
-},{"../abstract/registry":3,"./c_class":10}],29:[function(require,module,exports){
+},{"../abstract/registry":5,"./c_class":12}],31:[function(require,module,exports){
 'use strict';
 
 var config = require('../config')
@@ -2673,7 +2821,7 @@ function _getContainingComponent(el, returnCurrent, condition) {
 		return _getContainingComponent(el.parentNode, true, condition);
 }
 
-},{"../config":40,"../util/check":59}],30:[function(require,module,exports){
+},{"../config":42,"../util/check":59}],32:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -2686,7 +2834,7 @@ componentsRegistry.add(View);
 
 module.exports = View;
 
-},{"../c_class":10,"../c_registry":28}],31:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":30}],33:[function(require,module,exports){
 'use strict';
 
 // <a name="components-source-data"></a>
@@ -2776,7 +2924,7 @@ function createInternalData(sourceMessage, message, data) {
 	return internalData;
 };
 
-},{"../../messenger/m_api":48,"../../util/check":59,"mol-proto":71}],32:[function(require,module,exports){
+},{"../../messenger/m_api":48,"../../util/check":59,"mol-proto":71}],34:[function(require,module,exports){
 'use strict';
 
 
@@ -2904,7 +3052,7 @@ function filterSourceMessage(eventType, message, data) {
 	}
 }
 
-},{"../../messenger/m_api":48,"../../util/check":59,"mol-proto":71}],33:[function(require,module,exports){
+},{"../../messenger/m_api":48,"../../util/check":59,"mol-proto":71}],35:[function(require,module,exports){
 'use strict';
 
 // <a name="components-source-dom"></a>
@@ -2993,7 +3141,7 @@ function trigger(eventType, properties) {
 	return notCancelled;
 }
 
-},{"../../messenger/m_source":49,"../../util/check":59,"../c_class":10,"../c_message_sources/dom_events_constructors":27,"mol-proto":71}],34:[function(require,module,exports){
+},{"../../messenger/m_source":49,"../../util/check":59,"../c_class":12,"../c_message_sources/dom_events_constructors":29,"mol-proto":71}],36:[function(require,module,exports){
 'use strict';
 
 // <a name="components-source-iframe"></a>
@@ -3067,7 +3215,7 @@ function handleEvent(event) {
 	this.dispatchMessage(event.data.type, event);
 }
 
-},{"../../messenger/m_source":49,"../../util/check":59,"../../util/error":63,"../c_class":10,"mol-proto":71}],35:[function(require,module,exports){
+},{"../../messenger/m_source":49,"../../util/check":59,"../../util/error":63,"../c_class":12,"mol-proto":71}],37:[function(require,module,exports){
 // <a name="scope"></a>
 // scope class
 // -----------
@@ -3151,7 +3299,7 @@ function _length() {
 	return Object.keys(this).length;
 }
 
-},{"../util/check":59,"../util/error":63,"mol-proto":71}],36:[function(require,module,exports){
+},{"../util/check":59,"../util/error":63,"mol-proto":71}],38:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3164,7 +3312,7 @@ componentsRegistry.add(MLButton);
 
 module.exports = MLButton;
 
-},{"../c_class":10,"../c_registry":28}],37:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":30}],39:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3177,7 +3325,7 @@ componentsRegistry.add(MLGroup);
 
 module.exports = MLGroup;
 
-},{"../c_class":10,"../c_registry":28}],38:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":30}],40:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3190,7 +3338,7 @@ componentsRegistry.add(MLInput);
 
 module.exports = MLInput;
 
-},{"../c_class":10,"../c_registry":28}],39:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":30}],41:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3229,7 +3377,7 @@ function onOptionsChange(path, data) {
 	selectEl.innerHTML = optionsTemplate(this.get());
 }
 
-},{"../c_class":10,"../c_registry":28,"dot":70}],40:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":30,"dot":70}],42:[function(require,module,exports){
 'use strict';
 // <a name="config"></a>
 // milo.config
@@ -3266,149 +3414,7 @@ config({
 	componentPrefix: 'milo_'
 });
 
-},{"mol-proto":71}],41:[function(require,module,exports){
-// <a name="facet-c"></a>
-// facet class
-// --------------
-
-'use strict';
-
-var _ = require('mol-proto');
-
-module.exports = Facet;
-
-function Facet(owner, config) {
-	this.name = _.firstLowerCase(this.constructor.name);
-	this.owner = owner;
-	this.config = config || {};
-	this.init.apply(this, arguments);
-}
-
-_.extendProto(Facet, {
-	init: function() {}
-});
-
-},{"mol-proto":71}],42:[function(require,module,exports){
-// <a name="facet-o"></a>
-// facetted object class
-// --------------
-
-// Component class is based on an abstract ```FacetedObject``` class that can be
-// applied to any domain where objects can be represented via collection of facets
-// (a facet is an object of a certain class, it holds its own configuration,
-// data and methods).
-
-// In a way, facets pattern is an inversion of adapter pattern - while the latter
-// allows finding a class/methods that has specific functionality, faceted object
-// is simply constructed to have these functionalities. In this way it is possible
-// to create a virtually unlimited number of component classes with a very limited
-// number of building blocks without having any hierarchy of classes - all components
-// inherit directly from Component class.
-
-'use strict';
-
-var Facet = require('./f_class')
-	, _ = require('mol-proto')
-	, check = require('../util/check')
-	, Match = check.Match
-	, FacetError = require('../util/error').Facet;
-
-module.exports = FacetedObject;
-
-
-// abstract class for faceted object
-function FacetedObject() {
-	// TODO write a test to check that facets are created if configuration isn't passed
-	var facetsConfig = this.facetsConfig || {};
-
-	var facetsDescriptors = {}
-		, facets = {};
-
-	if (this.constructor == FacetedObject)		
-		throw new FacetError('FacetedObject is an abstract class, can\'t be instantiated');
-
-	if (this.facetsClasses)
-		_.eachKey(this.facetsClasses, instantiateFacet, this, true);
-
-	Object.defineProperties(this, facetsDescriptors);
-	Object.defineProperty(this, 'facets', { value: facets });	
-
-	// calling init if it is defined in the class
-	if (this.init)
-		this.init.apply(this, arguments);
-
-	function instantiateFacet(FacetClass, fct) {
-		var facetOpts = facetsConfig[fct];
-
-		facets[fct] = new FacetClass(this, facetOpts);
-
-		facetsDescriptors[fct] = {
-			enumerable: true,
-			value: facets[fct]
-		};
-	}
-}
-
-_.extendProto(FacetedObject, {
-	addFacet: addFacet
-});
-
-
-function addFacet(FacetClass, facetOpts, facetName) {
-	check(FacetClass, Function);
-	check(facetName, Match.Optional(String));
-
-	facetName = _.firstLowerCase(facetName || FacetClass.name);
-
-	var protoFacets = this.constructor.prototype.facetsClasses;
-
-	if (protoFacets && protoFacets[facetName])
-		throw new FacetError('facet ' + facetName + ' is already part of the class ' + this.constructor.name);
-
-	if (this[facetName])
-		throw new FacetError('facet ' + facetName + ' is already present in object');
-
-	var newFacet = this.facets[facetName] = new FacetClass(this, facetOpts);
-
-	Object.defineProperty(this, facetName, {
-		enumerable: true,
-		value: newFacet
-	});
-
-	return newFacet;
-}
-
-
-FacetedObject.hasFacet = function hasFacet(facetName) {
-	var protoFacets = this.prototype.facetsClasses;
-	return protoFacets && protoFacets[facetName];
-}
-
-
-
-// factory that creates classes (constructors) from the map of facets
-// these classes inherit from FacetedObject
-FacetedObject.createFacetedClass = function (name, facetsClasses, facetsConfig) {
-	check(name, String);
-	check(facetsClasses, Match.ObjectHash(Match.Subclass(Facet, true)));
-	check(facetsConfig, Match.Optional(Object));
-
-	if (facetsConfig)
-		_.eachKey(facetsConfig, function(fctConfig, fctName) {
-			if (! facetsClasses.hasOwnProperty(fctName))
-				throw new FacetError('configuration for facet (' + fctName + ') passed that is not in class');
-		});
-
-	var FacetedClass = _.createSubclass(this, name, true);
-
-	_.extendProto(FacetedClass, {
-		facetsClasses: facetsClasses,
-		facetsConfig: facetsConfig
-	});
-	return FacetedClass;
-};
-
-},{"../util/check":59,"../util/error":63,"./f_class":41,"mol-proto":71}],43:[function(require,module,exports){
+},{"mol-proto":71}],43:[function(require,module,exports){
 // <a name="loader"></a>
 // milo.loader
 // -----------
@@ -3515,7 +3521,7 @@ function loadView(el, callback) {
 	});
 }
 
-},{"./attributes/a_load":6,"./config":40,"./mail":44,"./util/dom":62,"./util/error":63,"./util/logger":65,"./util/request":67}],44:[function(require,module,exports){
+},{"./attributes/a_load":8,"./config":42,"./mail":44,"./util/dom":62,"./util/error":63,"./util/logger":65,"./util/request":67}],44:[function(require,module,exports){
 'use strict';
 
 // <a name="mail"></a>
@@ -3680,7 +3686,7 @@ function trigger(msgType, data) {
 		window.postMessage(data, '*')
 }
 
-},{"../components/c_message_sources/dom_events_constructors":27,"../messenger/m_source":49,"../util/check":59,"../util/error":63,"mol-proto":71}],47:[function(require,module,exports){
+},{"../components/c_message_sources/dom_events_constructors":29,"../messenger/m_source":49,"../util/check":59,"../util/error":63,"mol-proto":71}],47:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -4164,7 +4170,7 @@ function _setMessageSource(messageSource) {
  	messageSource.messenger = this;
 }
 
-},{"../abstract/mixin":2,"../util/check":59,"../util/error":63,"./m_source":49,"./message_source":50,"mol-proto":71}],48:[function(require,module,exports){
+},{"../abstract/mixin":4,"../util/check":59,"../util/error":63,"./m_source":49,"./message_source":50,"mol-proto":71}],48:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -4493,7 +4499,7 @@ function dispatchMessage(sourceMessage, sourceData) {
 	}
 }
 
-},{"../abstract/mixin":2,"../util/check":59,"../util/error":63,"../util/logger":65,"./m_api":48,"mol-proto":71}],50:[function(require,module,exports){
+},{"../abstract/mixin":4,"../util/check":59,"../util/error":63,"../util/logger":65,"./m_api":48,"mol-proto":71}],50:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -4635,34 +4641,24 @@ function dispatchMessage(sourceMessage, data) {
 		logger.warn('source message received for which there is no mapped internal message');
 }
 
-},{"../abstract/mixin":2,"../util/error":63,"../util/logger":65,"mol-proto":71}],51:[function(require,module,exports){
+},{"../abstract/mixin":4,"../util/error":63,"../util/logger":65,"mol-proto":71}],51:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
 
-// A minimalist framework that binds DOM elements to JS components and components to models.
-
-// Main Modules
-// ------------
-// - .[loader](#loader) - loading subviews into page
-// - .[binder](#binder) - components instantiation and binding of DOM elements to them
-// - .[minder](#minder) - data reactivity, one or two way, shallow or deep, as you like it
-// - .[mail](#mail) - applicaiton level messenger
-// - .[config](#config) - milo configuration
-// - .[utils](#utils) - logger, request, check, etc.
-// - .[classes](#classes) - foundation classes and class registries
-
 /**
  * `milo`
  *
- * milo is available as global object in the browser.
+ * A minimalist browser framework that binds DOM elements to JS components and components to models.
+ *
+ * `milo` is available as global object in the browser.
  * At the moment it is not possiible to require it with browserify to have it bundled with the app because of the way [brfs](https://github.com/substack/brfs) browserify plugin is implemented.
  * It is possible though to require `milo` with node to use universal parts of the framework (abstract classes, Messenger, Model, etc.):
  * ```
  * var milo = require('mol-milo');
  * ```
  * 
- * `milo` itself is a function that can be used to delay execution until DOM is ready.
+ * `milo` itself is a function that in the browser can be used to delay execution until DOM is ready.
  */
 function milo(func) {
 	milo.mail.on('domready', func);
@@ -4680,6 +4676,7 @@ function milo(func) {
  * - [util](./util/index.js.html) - logger, request, dom, check, error, etc.
  * - [classes](./classes.js.html) - abstract and base classes
  * - [attributes](./attributes/index.js.html) - classes that wrap DOM elements attributes recognized by milo
+ * - [ComponentFacet](./components/c_facet.js.html) - base class of Component facet
  * - [Component](./components/c_class.js.html) - base Component class
  * - [Messenger](./messenger/index.js.html) - generic Messenger used in most other milo classes, can be mixed into app classes too.
  * - [Model](./model/index.js.html) - Model class that emits messages on changes to any depth without timer based watching
@@ -4694,6 +4691,7 @@ _.extend(milo, {
 	util: require('./util'),
 	classes: require('./classes'),
 	attributes: require('./attributes'),
+	ComponentFacet: require('./components/c_facet'),
 	Component: require('./components/c_class'),
 	Messenger: require('./messenger'),
 	Model: require('./model'),
@@ -4701,10 +4699,10 @@ _.extend(milo, {
 });
 
 
-// included facets
+// register included facets
 require('./use_facets');
 
-// included components
+// register included components
 require('./use_components');
 
 
@@ -4716,7 +4714,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./attributes":7,"./binder":8,"./classes":9,"./components/c_class":10,"./config":40,"./loader":43,"./mail":44,"./messenger":47,"./minder":52,"./model":54,"./registry":56,"./use_components":57,"./use_facets":58,"./util":64,"mol-proto":71}],52:[function(require,module,exports){
+},{"./attributes":9,"./binder":10,"./classes":11,"./components/c_class":12,"./components/c_facet":13,"./config":42,"./loader":43,"./mail":44,"./messenger":47,"./minder":52,"./model":54,"./registry":56,"./use_components":57,"./use_facets":58,"./util":64,"mol-proto":71}],52:[function(require,module,exports){
 'use strict';
 
 var Connector = require('./model/connector');
@@ -5106,7 +5104,7 @@ function synthesizeMethod(synthesizer, path, parsedPath) {
 	}
 }
 
-},{"../abstract/mixin":2,"../messenger":47,"../util/check":59,"../util/error":63,"./path_utils":55,"dot":70,"fs":68,"mol-proto":71}],55:[function(require,module,exports){
+},{"../abstract/mixin":4,"../messenger":47,"../util/check":59,"../util/error":63,"./path_utils":55,"dot":70,"fs":68,"mol-proto":71}],55:[function(require,module,exports){
 // <a name="model-path"></a>
 // ### model path utils
 
@@ -5234,7 +5232,7 @@ var registry = module.exports = {
 	components: require('./components/c_registry')
 };
 
-},{"./components/c_facets/cf_registry":25,"./components/c_registry":28}],57:[function(require,module,exports){
+},{"./components/c_facets/cf_registry":27,"./components/c_registry":30}],57:[function(require,module,exports){
 'use strict';
 
 require('./components/classes/View');
@@ -5243,7 +5241,7 @@ require('./components/ui/Select');
 require('./components/ui/Input');
 require('./components/ui/Button');
 
-},{"./components/classes/View":30,"./components/ui/Button":36,"./components/ui/Group":37,"./components/ui/Input":38,"./components/ui/Select":39}],58:[function(require,module,exports){
+},{"./components/classes/View":32,"./components/ui/Button":38,"./components/ui/Group":39,"./components/ui/Input":40,"./components/ui/Select":41}],58:[function(require,module,exports){
 'use strict';
 
 // ['Dom'
@@ -5274,7 +5272,7 @@ require('./components/c_facets/Split');
 require('./components/c_facets/List');
 require('./components/c_facets/Item');
 
-},{"./components/c_facets/Container":12,"./components/c_facets/Data":13,"./components/c_facets/Dom":14,"./components/c_facets/Drag":15,"./components/c_facets/Drop":16,"./components/c_facets/Editable":17,"./components/c_facets/Events":18,"./components/c_facets/Frame":19,"./components/c_facets/Item":20,"./components/c_facets/List":21,"./components/c_facets/ModelFacet":22,"./components/c_facets/Split":23,"./components/c_facets/Template":24}],59:[function(require,module,exports){
+},{"./components/c_facets/Container":14,"./components/c_facets/Data":15,"./components/c_facets/Dom":16,"./components/c_facets/Drag":17,"./components/c_facets/Drop":18,"./components/c_facets/Editable":19,"./components/c_facets/Events":20,"./components/c_facets/Frame":21,"./components/c_facets/Item":22,"./components/c_facets/List":23,"./components/c_facets/ModelFacet":24,"./components/c_facets/Split":25,"./components/c_facets/Template":26}],59:[function(require,module,exports){
 // <a name="utils-check"></a>
 // milo.utils.check
 // -----------
@@ -5657,7 +5655,7 @@ function componentName() {
 	return prefix + count();
 }
 
-},{"../config":40,"./count":61}],61:[function(require,module,exports){
+},{"../config":42,"./count":61}],61:[function(require,module,exports){
 // <a name="utils-count"></a>
 // milo.utils.count
 // ----------------
@@ -6297,6 +6295,8 @@ var	prototypeMethods = require('./proto_prototype');
  * - [filterKeys](proto_object.js.html#filterKeys)
  * - [someKey](proto_object.js.html#someKey)
  * - [everyKey](proto_object.js.html#everyKey)
+ * - [findValue](proto_object.js.html#findValue)
+ * - [findKey](proto_object.js.html#findKey)
  */
 var	objectMethods = require('./proto_object');
 
@@ -6304,6 +6304,8 @@ var	objectMethods = require('./proto_object');
 /**
  * [__Array functions__](proto_array.js.html)
  *
+ * - [find](proto_array.js.html#find)
+ * - [findIndex](proto_array.js.html#findIndex)
  * - [appendArray](proto_array.js.html#appendArray)
  * - [prependArray](proto_array.js.html#prependArray)
  * - [toArray](proto_array.js.html#toArray)
@@ -6417,24 +6419,29 @@ var __ = require('./proto_object')
 
 
 /**
+ * - [find](#find)
+ * - [findIndex](#findIndex)
  * - [appendArray](#appendArray)
  * - [prependArray](#prependArray)
  * - [toArray](#toArray)
  * - [object](#object)
  * - [mapToObject](#mapToObject)
  *
- * Functions that Array [implements natively](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/prototype#Methods) are also included for convenience - they can be used with array-like objects and for chaining (native functions are always called)
- * All these methods can be [chained](proto.js.html#Proto).
+ * These methods can be [chained](proto.js.html#Proto).
  */
 var arrayMethods = module.exports = {
 	appendArray: appendArray,
 	prependArray: prependArray,
 	toArray: toArray,
 	object: object,
-	mapToObject: mapToObject
+	mapToObject: mapToObject,
 };
 
 
+/**
+ * Functions that Array [implements natively](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/prototype#Methods) are also included for convenience - they can be used with array-like objects and for chaining (native functions are always called)
+ * These methods can be [chained](proto.js.html#Proto) too.
+ */
 var nativeArrayMethodsNames = [ 'join', 'pop', 'push', 'concat',
 	'reverse', 'shift', 'unshift', 'slice', 'splice',
 	'sort', 'filter', 'forEach', 'some', 'every',
@@ -6449,6 +6456,32 @@ __.extend.call(arrayMethods, nativeArrayMethods);
 
 
 /**
+ * Implementation of ES6 [Array __find__ method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find) (native method is used if available).
+ * Returns array element that passes callback test.
+ *
+ * @param {Array} self array to search in
+ * @param {Function} callback should return `true` for item to pass the test, passed `value`, `index` and `self` as parameters
+ * @param {Object} thisArg optional context (`this`) of callback call
+ * @return {Any}
+ */
+arrayMethods.find = Array.prototype.find
+	|| utils.makeFindMethod(arrayMethods.forEach, 'value');
+
+
+/**
+ * Implementation of ES6 [Array __findIndex__ method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex) (native method is used if available).
+ * Returns the index of array element that passes callback test.
+ *
+ * @param {Array} self array to search in
+ * @param {Function} callback should return `true` for item to pass the test, passed `value`, `index` and `self` as parameters
+ * @param {Object} thisArg optional context (`this`) of callback call
+ * @return {Integer}
+ */
+arrayMethods.findIndex = Array.prototype.findIndex
+	|| utils.makeFindMethod(arrayMethods.forEach, 'index');
+
+
+/**
  * Appends `arrayToAppend` to the end of array `self` in place (can be an instance of Array or array-like object).
  * Changes the value of `self` (it uses `Array.prototype.splice`) and returns `self`.
  *
@@ -6460,7 +6493,7 @@ function appendArray(arrayToAppend) {
 	if (! arrayToAppend.length) return this;
 
     var args = [this.length, 0].concat(arrayToAppend);
-    Array.prototype.splice.apply(this, args);
+    arrayMethods.splice.apply(this, args);
 
     return this;
 }
@@ -6478,7 +6511,7 @@ function prependArray(arrayToPrepend) {
 	if (! arrayToPrepend.length) return this;
 
     var args = [0, 0].concat(arrayToPrepend);
-    Array.prototype.splice.apply(this, args);
+    arrayMethods.splice.apply(this, args);
 
     return this;
 }
@@ -6491,7 +6524,7 @@ function prependArray(arrayToPrepend) {
  * @return {Array}
  */
 function toArray() {
-	return Array.prototype.slice.call(this);
+	return arrayMethods.slice.call(this);
 }
 
 
@@ -6505,7 +6538,7 @@ function toArray() {
 function object(values) {
 	var obj = {}
 		, valuesIsArray = Array.isArray(values);
-	this.forEach(function(key, index) {
+	arrayMethods.forEach.call(this, function(key, index) {
 		obj[key] = valuesIsArray ? values[index] : values;
 	});
 
@@ -6524,7 +6557,7 @@ function object(values) {
  */
 function mapToObject(callback, thisArg) {
 	var result = {};
-	this.forEach(function(value, index) {
+	Array.prototype.forEach.call(this, function(value, index) {
 		result[value] = callback.call(thisArg, value, index, this);
 	}, this);
 	return result;
@@ -6639,6 +6672,10 @@ function memoize(hashFunc, limit) {
 },{}],74:[function(require,module,exports){
 'use strict';
 
+
+var utils = require('./utils');
+
+
 /**
  * - [extend](#extend)
  * - [clone](#clone)
@@ -6654,6 +6691,8 @@ function memoize(hashFunc, limit) {
  * - [filterKeys](#filterKeys)
  * - [someKey](#someKey)
  * - [everyKey](#everyKey)
+ * - [findValue](#findValue)
+ * - [findKey](#findKey)
  *
  * All these methods can be [chained](proto.js.html#Proto)
  */
@@ -6673,6 +6712,31 @@ var objectMethods = module.exports = {
 	someKey: someKey,
 	everyKey: everyKey
 };
+
+
+/**
+ * Analogue of ES6 [Array __find__ method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find).
+ * Returns the value of object property that passes callback test.
+ *
+ * @param {Object} self object to search in
+ * @param {Function} callback should return `true` for item to pass the test, passed `value`, `key` and `self` as parameters
+ * @param {Object} thisArg optional context (`this`) of callback call
+ * @return {Any}
+ */
+objectMethods.findValue = utils.makeFindMethod(eachKey, 'value');
+
+
+/**
+ * Analogue of ES6 [Array __findIndex__ method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex).
+ * Returns the key of object property that passes callback test.
+ *
+ * @param {Object} self object to search in
+ * @param {Function} callback should return `true` for item to pass the test, passed `value`, `key` and `self` as parameters
+ * @param {Object} thisArg optional context (`this`) of callback call
+ * @return {Integer}
+ */
+objectMethods.findKey = utils.makeFindMethod(eachKey, 'key');
+
 
 /**
  * Extends object `self` with the properties of the object `obj` copying all own properties (not those inherited via prototype chain), including non-enumerable properties (unless `onlyEnumerable` is truthy).
@@ -7020,7 +7084,7 @@ function someKey(callback, thisArg, onlyEnumerable) {
 	try {
 		eachKey.call(this, testProperty, thisArg, onlyEnumerable);
 	} catch (test) {
-		if (test == _passed) return true;
+		if (test === _passed) return true;
 		else throw test;
 	}
 	return false;
@@ -7045,7 +7109,7 @@ function everyKey(callback, thisArg, onlyEnumerable) {
 	try {
 		eachKey.call(this, testProperty, thisArg, onlyEnumerable);
 	} catch (test) {
-		if (test == _didNotPass) return false;
+		if (test === _didNotPass) return false;
 		else throw test;
 	}
 	return true;
@@ -7056,7 +7120,7 @@ function everyKey(callback, thisArg, onlyEnumerable) {
 	}
 }
 
-},{}],75:[function(require,module,exports){
+},{"./utils":77}],75:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7207,7 +7271,8 @@ function firstLowerCase() {
 
 var utils = module.exports = {
 	makeProtoInstanceMethod: makeProtoInstanceMethod,
-	makeProtoFunction: makeProtoFunction
+	makeProtoFunction: makeProtoFunction,
+	makeFindMethod: makeFindMethod
 }
 
 
@@ -7225,6 +7290,42 @@ function makeProtoFunction(method) {
 		// other arguments starting from #1 will passed to method as parameters.
 		return method.call.apply(method, arguments);
 	};
+}
+
+
+var _error = new Error;
+
+/**
+ * Returns `find` or `findIndex` method, depending on parameter
+ *
+ * @param {Function} eachMethod - method to use for iteration (forEach for array or eachKey for object)
+ * @param {String} findWhat 'value' - returns find method of Array (implemented in ES6) or findValue method of Object, anything else = returns findIndex/findKey methods.
+ * @return {Function}
+ */
+function makeFindMethod(eachMethod, findWhat) {
+	var argIndex = findWhat == 'value' ? 0 : 1;
+
+	return function findValueOrIndex(callback, thisArg) {
+		var caughtError;
+		try {
+			eachMethod.call(this, testItem, thisArg);
+		} catch (found) {
+			if (found === _error) throw caughtError;
+			else return found;
+		}
+
+		function testItem(value, index, self) {
+			var test;
+			try {
+				test = callback.call(this, value, index, self);
+			} catch(err) {
+				caughtError = err;
+				throw _error;
+			}
+			if (test)
+				throw arguments[argIndex];
+		}
+	}
 }
 
 },{}]},{},[51])

@@ -1,7 +1,7 @@
 'use strict';
 
-var FacetedObject = require('../../lib/facets/f_object')
-	, Facet = require('../../lib/facets/f_class')
+var FacetedObject = require('../../lib/abstract/faceted_object')
+	, Facet = require('../../lib/abstract/facet')
 	, assert = require('assert')
 	, _ = require('mol-proto');
 

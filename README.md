@@ -1,7 +1,7 @@
 Milo
 ====
 
-A minimalist browser framework that binds HTML elements to JS components and components to models.
+A minimalist browser framework that binds DOM elements to JS components and components to models.
 
 [![Build Status](https://travis-ci.org/MailOnline/milo.png?branch=master)](https://travis-ci.org/MailOnline/milo)
 

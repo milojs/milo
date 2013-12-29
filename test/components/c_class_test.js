@@ -2,7 +2,7 @@
 
 var Component = require('../../lib/components/c_class')
 	, ComponentFacet = require('../../lib/components/c_facet')
-	, FacetedObject = require('../../lib/facets/f_object')
+	, FacetedObject = require('../../lib/abstract/faceted_object')
 	, assert = require('assert');
 
 describe('Component class', function() {

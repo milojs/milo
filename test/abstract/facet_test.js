@@ -1,6 +1,6 @@
 'use strict';
 
-var Facet = require('../../lib/facets/f_class')
+var Facet = require('../../lib/abstract/facet')
 	, assert = require('assert')
 	, _ = require('mol-proto');
 
