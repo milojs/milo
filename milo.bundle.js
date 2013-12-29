@@ -3999,7 +3999,7 @@ function _removeSubscriber(subscribersHash, message, subscriber) {
  */
 function _removeAllSubscribers(subscribersHash, message) {
 	delete subscribersHash[message];
-	if (this._messageSource && message instanceof String)
+	if (this._messageSource && typeof message == 'string')
 		this._messageSource.onSubscriberRemoved(message);
 }
 
@@ -4271,7 +4271,7 @@ function removeInternalMessage(message) {
 	var internalMsgs = this._internalMessages[sourceMessage];
 
 	if (internalMsgs && internalMsgs.length) {
-		messageIndex = internalMsgs.indexOf(message);
+		var messageIndex = internalMsgs.indexOf(message);
 		if (messageIndex >= 0) {
 			internalMsgs.splice(messageIndex, 1);
 			if (internalMsgs.length == 0) {
@@ -4466,7 +4466,7 @@ function onSubscriberAdded(message) {
 function onSubscriberRemoved(message) {
 	var removedSourceMessage = this.messengerAPI.removeInternalMessage(message);
 	if (removedSourceMessage)
-		this.removeSourceSubscriber(sourceMessage);
+		this.removeSourceSubscriber(removedSourceMessage);
 }
 
 
