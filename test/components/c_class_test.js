@@ -3,7 +3,11 @@
 var Component = require('../../lib/components/c_class')
 	, ComponentFacet = require('../../lib/components/c_facet')
 	, FacetedObject = require('../../lib/abstract/faceted_object')
+	, Messenger = require('../../lib/messenger')
 	, assert = require('assert');
+
+
+var MyComponent = Component.createComponentClass('MyComponent', ['ComponentFacet']);
 
 describe('Component class', function() {
 	it('should be a subclass of FacetedObject class', function(){
@@ -13,8 +17,6 @@ describe('Component class', function() {
 
 
 	it('should have a class method createComponentClass that creates subclasses', function() {
-		var MyComponent = Component.createComponentClass('MyComponent', ['ComponentFacet']);
-
 		assert(MyComponent.prototype instanceof Component, 'should create subclass of Component');
 		var aComp = new MyComponent;
 
@@ -22,7 +24,9 @@ describe('Component class', function() {
 	});
 
 
-	it.skip('should have messengerMixin', function() {
+	it('should have messengerMixin', function() {
+		var aComp = new MyComponent;
 
+		assert(aComp._messenger instanceof Messenger);
 	});
 });

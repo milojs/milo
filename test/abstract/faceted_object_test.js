@@ -10,9 +10,11 @@ describe('FacetedObject class', function() {
 
 	var facetsClasses = {
 			facet: Facet
-		}
+		};
 
-	it('should have a factory that creates classes of faceted objects', function() {
+	var MyFacet = _.createSubclass(Facet, 'MyFacet');
+
+	it('should define a factory createFacetedClass that creates classes of faceted objects', function() {
 		var TestFacetedClass = factory('TestFacetedClass', facetsClasses, {
 			facet: {
 				prop: 1
@@ -49,7 +51,23 @@ describe('FacetedObject class', function() {
 	});
 
 
-	it.skip('should define addFacet method', function() {
+	it('should define addFacet instance method', function() {
+		var TestFacetedClass = factory('TestFacetedClass', facetsClasses);
+		var aTestFacetedObject = new TestFacetedClass;
 
+			assert(aTestFacetedObject.facet instanceof Facet);
+			assert.equal(aTestFacetedObject.myFacet, undefined);
+
+		aTestFacetedObject.addFacet(MyFacet);
+
+			assert(aTestFacetedObject.myFacet instanceof MyFacet);
+	});
+
+
+	it('should define hasFacet class method', function() {
+		var TestFacetedClass = factory('TestFacetedClass', facetsClasses);
+
+			assert(TestFacetedClass.hasFacet('facet'));
+			assert.equal(TestFacetedClass.hasFacet('noSuchFacet'), undefined);
 	});
 });
