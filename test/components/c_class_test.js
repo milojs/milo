@@ -16,7 +16,7 @@ describe('Component class', function() {
 	});
 
 
-	it('should have a class method createComponentClass that creates subclasses', function() {
+	it('should define a class method createComponentClass that creates subclasses', function() {
 		assert(MyComponent.prototype instanceof Component, 'should create subclass of Component');
 		var aComp = new MyComponent;
 
@@ -28,5 +28,10 @@ describe('Component class', function() {
 		var aComp = new MyComponent;
 
 		assert(aComp._messenger instanceof Messenger);
+	});
+
+
+	it.skip('should define "create" class method that creates Component from ComponentInfo', function() {
+
 	});
 });

@@ -1,10 +1,10 @@
 'use strict';
 
-var Attribute = require('../../lib/attributes/a_bind')
+var BindAttribute = require('../../lib/attributes/a_bind')
 	, assert = require('assert');
 
 
-describe('Attribute class', function() {
+describe('BindAttribute class', function() {
 	it('should have parse and validate methods', function() {
 		var elMock = {
 			attributes: {
@@ -12,7 +12,7 @@ describe('Attribute class', function() {
 			}
 		};
 
-		var attr = new Attribute(elMock, 'ml-bind');
+		var attr = new BindAttribute(elMock, 'ml-bind');
 		elMock.getAttribute = function(name) { return ''; }
 
 			assert.throws(attr.parse.bind(attr), 
@@ -23,7 +23,7 @@ describe('Attribute class', function() {
 			assert.throws(attr.validate.bind(attr),
 				'attribute ' + attr.name + ' can\'t be empty');
 
-		attr = new Attribute(elMock, 'ml-bind');
+		attr = new BindAttribute(elMock, 'ml-bind');
 		elMock.getAttribute = function(name) { return ':myButton'; }
 
 			attr.parse();
@@ -32,7 +32,7 @@ describe('Attribute class', function() {
 			assert.doesNotThrow(attr.validate.bind(attr),
 				'attribute ' + attr.name + ' may contain only component name');
 
-		attr = new Attribute(elMock, 'ml-bind');
+		attr = new BindAttribute(elMock, 'ml-bind');
 		elMock.getAttribute = function(name) { return 'Button:myButton'; }
 
 			attr.parse();
@@ -41,7 +41,7 @@ describe('Attribute class', function() {
 			assert.doesNotThrow(attr.validate.bind(attr),
 				'attribute ' + attr.name + ' may contain component class and name separated with :');
 
-		attr = new Attribute(elMock, 'ml-bind');
+		attr = new BindAttribute(elMock, 'ml-bind');
 		elMock.getAttribute = function(name) { return 'Button:myButton:shmuck'; }
 
 			assert.throws(attr.parse.bind(attr), 
@@ -52,7 +52,7 @@ describe('Attribute class', function() {
 			assert.throws(attr.validate.bind(attr),
 				'attribute ' + attr.name + ' can\'t contain more than 2 elements');
 
-		attr = new Attribute(elMock, 'ml-bind');
+		attr = new BindAttribute(elMock, 'ml-bind');
 		elMock.getAttribute = function(name) { return 'Button:'; }
 
 			attr.parse();
@@ -61,7 +61,7 @@ describe('Attribute class', function() {
 			assert.throws(attr.validate.bind(attr),
 				'attribute ' + attr.name + ' can\'t contain empty name');
 
-		attr = new Attribute(elMock, 'ml-bind');
+		attr = new BindAttribute(elMock, 'ml-bind');
 		elMock.getAttribute = function(name) { return 'myButton'; }
 
 			attr.parse();
@@ -70,7 +70,7 @@ describe('Attribute class', function() {
 			assert.throws(attr.validate.bind(attr),
 				'attribute ' + attr.name + ' can\'t contain empty name');
 
-		attr = new Attribute(elMock, 'ml-bind');
+		attr = new BindAttribute(elMock, 'ml-bind');
 		elMock.getAttribute = function(name) { return 'View[Events, Data]:myView'; }
 
 			attr.parse();
@@ -80,7 +80,7 @@ describe('Attribute class', function() {
 			assert.doesNotThrow(attr.validate.bind(attr),
 				'attribute ' + attr.name + ' should contain optional class, optional facets, and name');
 
-		attr = new Attribute(elMock, 'ml-bind');
+		attr = new BindAttribute(elMock, 'ml-bind');
 		elMock.getAttribute = function(name) { return '[Events]:myView'; }
 
 			attr.parse();
