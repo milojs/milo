@@ -186,7 +186,7 @@ describe('Model class', function() {
 	});
 
 
-	it('should allow message subsciption on model path with a depth indicated by stars', function() {
+	it('should allow message subsciption on model path', function() {
 		var m = new Model()
 			, posted = {};
 
@@ -200,7 +200,7 @@ describe('Model class', function() {
 		m('.list[0].info.name').set('Jason');
 
 			assert.deepEqual(posted, {
-				'.list': { path: '.list', type: 'added', newValue: [ { info: { name: 'Jason' } } ] },
+				'': { path: '', fullPath: '.list', type: 'added', newValue: [ { info: { name: 'Jason' } } ] },
 			}, 'should post messages on model when property added');
 
 
@@ -224,7 +224,7 @@ describe('Model class', function() {
 
 		m('.list[0].info.name').set('Jason');
 
-		assert.deepEqual(posted, { '.list[0].info.name': { path: '.list[0].info.name', type: 'added', newValue: 'Jason' } },
+		assert.deepEqual(posted, { '': { path: '', fullPath: '.list[0].info.name', type: 'added', newValue: 'Jason' } },
 			'should correctly post message');
 	});
 

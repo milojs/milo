@@ -1464,7 +1464,6 @@ _.extendProto(Data, {
 	_setScalarValue: Data$_setScalarValue,
 	_getScalarValue: Data$_getScalarValue,
 	_postDataChanged: Data$_postDataChanged,
-	_wrapMessengerMethods: pathUtils.wrapMessengerMethods,
 	_prepareMessageSource: _prepareMessageSource
 });
 
@@ -1474,8 +1473,7 @@ module.exports = Data;
 
 
 // these methods will be wrapped to support "*" pattern subscriptions
-var dataFacetMethodsToWrap = ['on', 'off']
-	, proxyDataSourceMethods = {
+var proxyDataSourceMethods = {
 		// value: 'value',
 		trigger: 'trigger'
 	};
@@ -1491,7 +1489,7 @@ function Data$start() {
 	this._path = '.' + this.owner.name;
 
 	// change messenger methods to work with "*" subscriptions (like Model class)
-	this._wrapMessengerMethods(dataFacetMethodsToWrap);
+	pathUtils.wrapMessengerMethods.call(this);
 
 	// subscribe to DOM event
 	this.on('', onDataChange);
@@ -2308,10 +2306,11 @@ function init() {
 }
 
 },{"../../messenger":47,"../c_facet":13,"../msg_src/frame":36,"./cf_registry":27,"mol-proto":70}],22:[function(require,module,exports){
+'use strict';
+
+
 // <a name="components-facets-item"></a>
 // ###item facet
-
-'use strict';
 
 var ComponentFacet = require('../c_facet')
     , facetsRegistry = require('./cf_registry')
@@ -2375,7 +2374,7 @@ module.exports = List;
 // Initialize List facet
 function init() {
     ComponentFacet.prototype.init.apply(this, arguments);
-    var model = new Model()
+    var model = new Model
         , self = this;
 
     _.defineProperties(this, {
@@ -2496,10 +2495,10 @@ function each(callback, thisArg) {
 }
 
 },{"../../binder":10,"../../mail":44,"../../model":53,"../../util/error":62,"../../util/logger":64,"../c_class":12,"../c_facet":13,"./cf_registry":27,"mol-proto":70}],24:[function(require,module,exports){
+'use strict';
+
 // <a name="components-facets-model"></a>
 // ###model facet
-
-'use strict';
 
 var ComponentFacet = require('../c_facet')
 	, facetsRegistry = require('./cf_registry')
@@ -2523,7 +2522,7 @@ module.exports = ModelFacet;
 
 
 function initModelFacet() {
-	this.m = new Model(this);
+	this.m = new Model(undefined, this);
 
 	ComponentFacet.prototype.init.apply(this, arguments);
 }
@@ -4752,6 +4751,7 @@ module.exports = minder;
  * on path objects, pointing to particular parts of the object, method `path`
  * should return path object for a given path string (see path utils for path string syntax).
  * Both Model and Data facet are such data sources, they can be linked by Connector object.
+ *
  * @param {Object} ds1 the first data source. Instead of the first data source an array can be passed with arrays of Connection objects parameters in each array element.
  * @param {String} mode the connection mode that defines the direction and the depth of connection. Possible values are '->', '<<-', '<<<->>>', etc.
  * @param {Object} ds2 the second data source
@@ -4903,9 +4903,6 @@ function off() {
 
 },{"../util/error":62,"../util/logger":64,"mol-proto":70}],53:[function(require,module,exports){
 'use strict';
-// <a name="model"></a>
-// milo model
-// -----------
 
 var pathUtils = require('./path_utils')
 	, Messenger = require('../messenger')
@@ -4915,43 +4912,46 @@ var pathUtils = require('./path_utils')
 	, _ = require('mol-proto')
 	, check = require('../util/check')
 	, Match = check.Match
-	, fs = require('fs');
+	, fs = require('fs')
+	, logger = require('../util/logger');
 
 module.exports = Model;
 
 
-function Model(scope, schema, name, data) {
-	// modelPath should return a ModelPath object with "compiled" methods
+/**
+ * `milo.Model`
+ * Model class instantiates objects that allow deep data access with __safe getters__ that return undefined (rather than throwing exception) when properties/items on unexisting objects/arrays are requested and __safe setters__ that create object trees when properties/items on unexisting objects/arrays are set and also post messages to allow subscription on changes and enable data reactivity.
+ * Reactivity is implememnted via [Connector](./connector.js.html) that can be instantiated either directly or with more convenient interface of [milo.minder](../minder.js.html). At the moment model can be connected to [Data facet](../components/c_facets/Data.js.html) or to another model.
+ * Model constructor returns objects that are functions at the same time; when called they return ModelPath objects that allow get/set access to any point in model data. See [ModelData](#ModelData) below.
+ * 
+ */
+function Model(data, hostObject) {
+	// `model` will be returned by constructor instead of `this`. `model`
+	// (`modelPath` function) should return a ModelPath object with "synthesized" methods
 	// to get/set model properties, to subscribe to property changes, etc.
-	// "it" parameter is the object which properties can be referenced in path.
-	// These references will be evaluated at run rather than at compile time
-	var model = function modelPath(path, it) {
-		return new ModelPath(model, path, it);
-	}
+	// Additional arguments of modelPath can be used in the path using interpolation - see ModelPath below.
+	var model = function modelPath(accessPath) { // , ... arguments that will be interpolated
+		return model.path.apply(model, arguments);
+	};
 	model.__proto__ = Model.prototype;
 
 	var messenger = new Messenger(model, Messenger.defaultMethods);
 
 	_.defineProperties(model, {
-		scope: scope,
-		name: name,
-		_schema: schema,
+		hostObject: hostObject,
 		_messenger: messenger,
 		__pathsCache: {}
 	});
 
-	model._wrapMessengerMethods(modelMethodsToWrap);
+	pathUtils.wrapMessengerMethods.call(model);
 
-	model._data = data;
+	if (data) model._data = data;
 
 	return model;
 }
 
 Model.prototype.__proto__ = Model.__proto__;
 
-
-// these methods will be wrapped to support "*" pattern subscriptions
-var modelMethodsToWrap = ['on', 'off'];
 
 var dotDef = {
 	modelAccessPrefix: 'this._model._data',
@@ -4976,20 +4976,24 @@ var getterSynthesizer = doT.compile(getterTemplate, dotDef)
 
 
 _.extendProto(Model, {
-	get: get,
+	get: Model$get,
 	set: synthesizeMethod(modelSetterSynthesizer, '', []),
-	path: path,
-	proxyMessenger: proxyMessenger,
-	_wrapMessengerMethods: pathUtils.wrapMessengerMethods
+	path: Model$path,
+	proxyMessenger: proxyMessenger
 });
 
-function get() {
+function Model$get() {
 	return this._data;
 }
 
 // returns ModelPath object
-function path(accessPath) {
-	return this(accessPath);
+function Model$path(accessPath) {  // , ... arguments that will be interpolated
+	// "null" is context to pass to ModelPath, first parameter of bind
+	// "this" (model) is added in front of all arguments
+	_.splice(arguments, 0, 0, null, this);
+
+	// calling ModelPath constructor with new and the list of arguments: this (model), accessPath, ...
+	return new (Function.prototype.bind.apply(ModelPath, arguments));
 }
 
 
@@ -5002,10 +5006,10 @@ _.extend(Model, {
 	Path: ModelPath
 });
 
-function ModelPath(model, path, it) {
+function ModelPath(model, path) { // ,... - additional arguments for interpolation
 	check(model, Model);
 	check(path, String);
-	check(it, Match.Optional(Object));
+	// check(it, Match.Optional(Object));
 
 	_.defineProperties(this, {
 		_model: model,
@@ -5024,16 +5028,26 @@ function ModelPath(model, path, it) {
 
 
 // adding messaging methods to ModelPath prototype
-var modelPathMethodsMap = {};
-
-modelMethodsToWrap.forEach(function(methodName) {
+var modelPathMessengerMethods = _.mapToObject(['on', 'off'], function(methodName) {
 	// creating subscribe/unsubscribe/etc. methods for ModelPath class
-	modelPathMethodsMap[methodName] = function(path, subscriber) {
-		this._model[methodName](this._path + path, subscriber);
+	// to dispatch messages with paths relative to access path of ModelPath
+	return function(accessPath, subscriber) {
+		check(accessPath, String);
+		var self = this;
+		this._model[methodName](this._path + accessPath, function(msgPath, data) {
+			data.fullPath = msgPath;
+			if (msgPath.indexOf(self._path) == 0) {
+				msgPath = msgPath.replace(self._path, '');
+				data.path = msgPath;
+			} else
+				logger.warn('ModelPath message dispatched with wrong root path');
+
+			subscriber.call(this, msgPath, data);
+		});
 	};
 })
 
-_.extendProto(ModelPath, modelPathMethodsMap);
+_.extendProto(ModelPath, modelPathMessengerMethods);
 
 
 var synthesizePathMethods = _.memoize(_synthesizePathMethods);
@@ -5122,12 +5136,11 @@ function synthesizeMethod(synthesizer, path, parsedPath) {
 	}
 }
 
-},{"../abstract/mixin":4,"../messenger":47,"../util/check":58,"../util/error":62,"./path_utils":54,"dot":69,"fs":67,"mol-proto":70}],54:[function(require,module,exports){
-// <a name="model-path"></a>
-// ### model path utils
-
+},{"../abstract/mixin":4,"../messenger":47,"../util/check":58,"../util/error":62,"../util/logger":64,"./path_utils":54,"dot":69,"fs":67,"mol-proto":70}],54:[function(require,module,exports){
 'use strict';
 
+// <a name="model-path"></a>
+// ### model path utils
 
 var check = require('../util/check')
 	, Match = check.Match
@@ -5141,14 +5154,36 @@ var pathUtils = module.exports = {
 };
 
 
-var pathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]/g
-	, patternPathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]|\.\*|\[\*\]|\*/g
-	, targetPathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]|\.\$[1-9][0-9]*|\[\$[1-9][0-9]*\]|\$[1-9][0-9]/g
+var propertyPathSyntax = '\\.[A-Za-z][A-Za-z0-9_]*'
+	, arrayPathSyntax = '\\[[0-9]+\\]'
+	, propertyInterpolateSyntax = '\\.\\$[1-9][0-9]*'
+	, arrayInterpolateSyntax = '\\.\\$[1-9][0-9]*'
+
+	, propertyStarSyntax = '\\.\\*'
+	, arrayStarSyntax = '\\[\\*\\]'
+	, starSyntax = '\\*'
+
+	, pathParseSyntax = [
+							propertyPathSyntax,
+							arrayPathSyntax,
+							propertyInterpolateSyntax,
+							arrayInterpolateSyntax
+						].join('|')
+	, pathParsePattern = new RegExp(pathParseSyntax, 'g')
+
+	, patternPathParseSyntax =  [
+									pathParseSyntax,
+									propertyStarSyntax,
+									arrayStarSyntax,
+									starSyntax
+								].join('|')
+	, patternPathParsePattern = new RegExp(patternPathParseSyntax, 'g')
+
+	//, targetPathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]|\.\$[1-9][0-9]*|\[\$[1-9][0-9]*\]|\$[1-9][0-9]/g
 	, pathNodeTypes = {
 		'.': { syntax: 'object', empty: '{}' },
 		'[': { syntax: 'array', empty: '[]'},
 		'*': { syntax: 'match', empty: '{}'},
-		'$': { syntax: 'matchref', empty: '{}' }
 	};
 
 function parseAccessPath(path, nodeParsePattern) {
@@ -5173,8 +5208,8 @@ function parseAccessPath(path, nodeParsePattern) {
 
 
 var nodeRegex = {
-	'.*': '\\.[A-Za-z][A-Za-z0-9_]*',
-	'[*]': '\\[[0-9]+\\]'
+	'.*': propertyPathSyntax,
+	'[*]': arrayPathSyntax
 };
 nodeRegex['*'] = nodeRegex['.*'] + '|' + nodeRegex['[*]'];
 
@@ -5226,14 +5261,15 @@ function getPathNodeKey(pathNode) {
 
 // TODO allow for multiple messages in a string
 function wrapMessengerMethods(methodsNames) {
-	methodsNames.forEach(function(methodName) {
+	methodsNames = methodsNames || ['on', 'off'];
+	_.defineProperties(this, _.mapToObject(methodsNames, function(methodName) {
 		var origMethod = this[methodName];
 		// replacing message subsribe/unsubscribe/etc. to convert "*" message patterns to regexps
-		this[methodName] = function(path, subscriber) {
+		return function(path, subscriber) {
 			var regexPath = createRegexPath(path);
 			origMethod.call(this, regexPath, subscriber);
 		};
-	}, this);
+	}, this));
 }
 
 },{"../util/check":58,"mol-proto":70}],55:[function(require,module,exports){
