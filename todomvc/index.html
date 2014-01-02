@@ -7,8 +7,8 @@
 	<input id="test" ml-bind="[Data]:newTodo" />
 	<button ml-bind="[Events]:addBtn">Add</button>
 	<h3>To do's</h3>
-	<div ml-bind="[Container, Dom, Data, List]:todos">
-	  <div ml-bind="[Container, Dom, Data, Item]:todo">
+	<div ml-bind="[List]:todos">
+	  <div ml-bind="[Item]:todo">
 	    <span ml-bind="[Data, Editable, Events]:text"></span>
 	    <button ml-bind="[Events]:deleteBtn">X</button>
 	  </div>

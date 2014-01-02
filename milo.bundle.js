@@ -1293,9 +1293,9 @@ var postScopeParent = _.partial(_postParent, scopeParent);
 
 
 _.extendProto(ComponentFacet, {
-	init: initComponentFacet,
-	start: startComponentFacet,
-	check: checkDependencies,
+	init: ComponentFacet$init,
+	start: ComponentFacet$start,
+	check: ComponentFacet$check,
 	domParent: domParent,
 	postDomParent: postDomParent,
 	scopeParent: scopeParent,
@@ -1307,7 +1307,8 @@ _.extendProto(ComponentFacet, {
 });
 
 
-function initComponentFacet() {
+// initComponentFacet
+function ComponentFacet$init() {
 	this._createMessenger();
 }
 
@@ -1321,18 +1322,23 @@ function _createMessenger(){
 }
 
 
-function startComponentFacet() {
+// startComponentFacet
+function ComponentFacet$start() {
 	if (this.config.messages)
 		this.onMessages(this.config.messages);
 }
 
 
-function checkDependencies() {
+// checkDependencies
+function ComponentFacet$check() {
 	if (this.require) {
 		this.require.forEach(function(reqFacet) {
-			var facetName = _.firstLowerCase(reqFacet);
-			if (! (this.owner[facetName] instanceof ComponentFacet))
-				throw new FacetError('facet ' + this.constructor.name + ' requires facet ' + reqFacet);
+			var facetName = _.firstLowerCase(reqFacet)
+				, facet = this.owner[facetName];
+			if (! facet)
+				this.owner.addFacet(facetName);
+			else if (! facet instanceof ComponentFacet)
+				throw new FacetError('facet ' + this.constructor.name + ' requires facet ' + reqFacet + ' but this property name is already used');
 		}, this);
 	}
 }
