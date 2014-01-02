@@ -520,7 +520,129 @@ describe('Model class', function() {
 				'[0][1].info.name': { path: '[0][1].info.name', type: 'added', newValue: 'Jason' },
 				'[0][1].info.surname': { path: '[0][1].info.surname', type: 'added', newValue: 'Green' }
 			});
- 	})
+ 	});
+
+
+	it('should allow interpolated properties in getters', function() {
+		var m = new Model;
+
+		var modelPath = m('.$1.$2', 'info', 'name');
+
+		// setting data directly, should not be done this way in application
+		m._data = { info: { name: 'Milo' } };
+
+			assert.equal(modelPath.get(), 'Milo');
+			assert.equal(m('.$1.$2', 'info', 'name').get(), 'Milo');
+
+		m._data = { info: {
+			name: 'Jason',
+			DOB: {
+				date: 1,
+				month: 2,
+				year: 1982
+			}
+		} };
+			assert.equal(modelPath.get(), 'Jason');
+			assert.equal(m('.$1.DOB.$2', 'info', 'year').get(), 1982);
+
+		m._data = [ { name: 'Milo' }, { name: 'Jason' } ];
+
+			assert.equal(m('[$1].name', 0).get(), 'Milo');
+			assert.equal(m('[$1].name', 1).get(), 'Jason');
+	});
+
+
+	it('should allow interpolated properties in setters', function() {
+		var m = new Model;
+
+		m('.$1.$2', 'info', 'name').set('Jason');
+		m('.info.$1.year', 'DOB').set(1982);
+
+			// accessing model directly, should not be done this way in application
+			assert.deepEqual(m._data, {
+				info: {
+					name: 'Jason',
+					DOB: {
+						year: 1982
+					}
+				}
+			});
+
+		var m = new Model;
+
+		m('[$1].name', 0).set('Milo');
+		m('[$1].name', 1).set('Jason');
+		m('[$1].$3.$2', 1, 'year', 'DOB').set(1982);
+
+			assert.deepEqual(m._data, [ { name: 'Milo' }, { name: 'Jason', DOB: { year: 1982 } } ]);
+	});
+
+
+	it('should define path instance method of ModelPath', function() {
+		var m = new Model;
+
+		m('.info').path('.name').set('Jason');
+		m('.info').path('.$1', 'DOB').path('.year').set(1982);
+
+			// accessing model directly, should not be done this way in application
+			assert.deepEqual(m._data, {
+				info: {
+					name: 'Jason',
+					DOB: {
+						year: 1982
+					}
+				}
+			});
+
+		var m = new Model;
+
+		var ModelPath = m('[$1]', 0).path('.$1', 'name');
+
+		m('[$1]', 0).path('.$1', 'name').set('Milo');
+		m('[$1]', 1).path('.$1', 'name').set('Jason');
+		m('[$1]', 1).path('.$2.$1', 'year', 'DOB').set(1982);
+
+			assert.deepEqual(m._data, [ { name: 'Milo' }, { name: 'Jason', DOB: { year: 1982 } } ]);
+
+		m('[$1].$2', 1, 'DOB').path('.$1', 'year').set(1972);
+
+			assert.equal(m('[1].DOB.year').get(), 1972);
+	});
+
+
+	it('should define push instance method of Model and of ModelPath', function() {
+		var m = new Model
+			, posted = {};
+
+		function logPosted(path, data) {
+			posted[path] = data;
+		}
+
+		m.on('***', logPosted);
+
+		m.push({ name: 'Milo' });
+		m.push({ name: 'Jason', DOB: { year: 1982 } });
+
+			assert.deepEqual(m._data, [ { name: 'Milo' }, { name: 'Jason', DOB: { year: 1982 } } ]);
+
+			assert.deepEqual(posted, {
+				'': { path: '', type: 'added', newValue: [ { name: 'Milo' }, { name: 'Jason', DOB: { year: 1982 } } ] },
+	  			'[0]': { path: '[0]', type: 'added', newValue: { name: 'Milo' } },
+				'[0].name': { path: '[0].name', type: 'added', newValue: 'Milo' },
+				'[1]':  { path: '[1]', type: 'added', newValue: { name: 'Jason', DOB: { year: 1982 } } },
+				'[1].name': { path: '[1].name', type: 'added', newValue: 'Jason' },
+				'[1].DOB': { path: '[1].DOB', type: 'added', newValue: { year: 1982 } },
+				'[1].DOB.year': { path: '[1].DOB.year', type: 'added', newValue: 1982 }
+			});
+
+
+		var m = new Model;
+
+		m('.list').push({ name: 'Milo' });
+		m('.list').push({ name: 'Jason' });
+
+			assert.deepEqual(m._data, { list: [ { name: 'Milo' }, { name: 'Jason'} ] });
+	});
 });
 
 
