@@ -3472,7 +3472,12 @@ var Component = require('../c_class')
 	, componentsRegistry = require('../c_registry');
 
 
-var MLButton = Component.createComponentClass('MLButton', ['events']);
+var MLButton = Component.createComponentClass('MLButton', {
+	events: undefined,
+	dom: {
+		cls: 'ml-ui-button'
+	}
+});
 
 componentsRegistry.add(MLButton);
 
@@ -3485,7 +3490,14 @@ var Component = require('../c_class')
 	, componentsRegistry = require('../c_registry');
 
 
-var MLGroup = Component.createComponentClass('MLGroup', ['container', 'data', 'events']);
+var MLGroup = Component.createComponentClass('MLGroup', {
+	container: undefined,
+	data: undefined,
+	events: undefined,
+	dom: {
+		cls: 'ml-ui-group'
+	}
+});
 
 componentsRegistry.add(MLGroup);
 
@@ -3498,7 +3510,13 @@ var Component = require('../c_class')
 	, componentsRegistry = require('../c_registry');
 
 
-var MLInput = Component.createComponentClass('MLInput', ['data', 'events']);
+var MLInput = Component.createComponentClass('MLInput', {
+	data: undefined,
+	events: undefined,
+	dom: {
+		cls: 'ml-ui-input'
+	}
+});
 
 componentsRegistry.add(MLInput);
 
@@ -3513,7 +3531,9 @@ var Component = require('../c_class')
 
 
 var MLSelect = Component.createComponentClass('MLSelect', {
-	dom: undefined,
+	dom: {
+		cls: 'ml-ui-select'
+	},
 	data: undefined,
 	events: undefined,
 	model: {
