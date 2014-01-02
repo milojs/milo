@@ -1,17 +1,11 @@
 'use strict';
 
-var assert = require('assert');
+var fs = require('fs')
+	, assert = require('assert');
 
 
 describe('Data facet', function() {
-	var testHtml = '<div ml-bind="[Container, Data]:myItem"> \
-		                <span ml-bind="[Data]:title"></span> \
-		                <input ml-bind="[Data]:desc" type="text" value="" /> \
-		                <div ml-bind="[Container, Data]:info"> \
-		                	<span ml-bind="[Data]:name"></span> \
-		                	<span ml-bind="[Data]:surname"></span> \
-		                </div> \
-		            </div>';
+	var testHtml = fs.readFileSync(__dirname + '/Data_test.html');;
 	var element, scope;
 
 

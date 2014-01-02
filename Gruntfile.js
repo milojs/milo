@@ -28,11 +28,11 @@ module.exports = function(grunt) {
 				}
 			},
 			test1: {
-				options: {
-					debug: true
-				}, 
 				files: {
 					'test_html/bind_test.bundle.js': 'test_html/bind_test/*.js'
+				},
+				options: {
+					debug: true
 				}
 			},
 			tests: {
@@ -40,28 +40,32 @@ module.exports = function(grunt) {
                     expand: true,
                     src: 'test_browser/**/*.js',
                     dest: '.tmp-test-browser'
-                }]
+                }],
+                options: {
+                	transform: ['brfs']
+                }
 			}
+		},
+		karma: {
+			unit: {
+				configFile: 'karma.conf.js'
+	    	}
 		},
 		watch: {
 			milo: {
-				files: ['lib/**/*.js', 'node_modules/mol-proto/lib/proto.js'],
-				tasks: 'browserify:milo'
+				files: [
+					'lib/**/*.js',
+					'node_modules/mol-proto/lib/proto.js'
+				],
+				tasks: 'browserify',
+
 			},
 			test1: {
-				files: [
-					'lib/**/*.js', 
-					'node_modules/mol-proto/lib/proto.js', 
-					'test_html/bind_test/*.js'
-				],
+				files: ['test_html/bind_test/*.js'],
 				tasks: 'browserify:test1'
 			},
 			tests: {
-				files: [
-					'lib/**/*.js',
-					'node_modules/mol-proto/lib/proto.js', 
-					'test_browser/**/*.js'
-				],
+				files: ['test_browser/**/*.{js,html}'],
 				tasks: 'browserify:tests'
 			}
 		}
@@ -71,9 +75,12 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-mocha-test');
 	grunt.loadNpmTasks('grunt-mocha');
+	grunt.loadNpmTasks('grunt-karma');
 
 	grunt.registerTask('test', 'mochaTest');
+	grunt.registerTask('karmatest', 'karma');	
 	grunt.registerTask('htmltest', ['browserify:test1', 'watch']);
+	grunt.registerTask('tests', ['mochaTest', 'browserify', 'karmatest']);
 	grunt.registerTask('default', ['test', 'browserify', 'watch']);
 	grunt.registerTask('skiptest', ['browserify', 'watch']);
 };

@@ -28,7 +28,11 @@ or
     npm install -g grunt-cli
     grunt test
 
-To test in browser, open:
+To run all tests, including browser tests:
+
+    grunt tests
+
+There is also html test file (TODO: separate to browser unit tests):
 
 [bind_test.html](https://github.com/MailOnline/milo/blob/master/test_html/bind_test.html)
 
@@ -44,12 +48,16 @@ index.html
 </head>
 <body>
     <input type="text" ml-bind="[Data]:myField">
-    <div ml-bind=":myCurrentValue"></div>
+    <div ml-bind="[Data]:myCurrentValue"></div>
     <button ml-bind="[Events]:myTestButton">
     	Test
     </button>
     <div>
     	<span ml-bind=":myTestValue"></span>
+    </div>
+    <div>
+      <h2>I am connected:</h2>
+      <span ml-bind="[Data]:myTestValue2"></span>
     </div>
 </body>
 </html>
@@ -57,18 +65,36 @@ index.html
 
 index.js
 ```javascript
-milo.mail.on('domready', function () {
-    var ctrl = milo.binder();
+// run when DOM is ready
+milo(function () {
+    // create and bind components with milo.binder
+    var scope = milo.binder();
 
-    ctrl.myField.data.on('datachanged', function(msg, data) {
-    	ctrl.myCurrentValue.el.innerHTML = data.newValue;
+    // attach subscriber to data change event via data facet
+    // of myField component
+    scope.myField.data.on('', function(msg, data) {
+    	scope.myCurrentValue.data.set(data.newValue);
+      // alternatively:
+      // scope.myCurrentValue.el.innerHTML = data.newValue;
     });
 
-    ctrl.myTestButton.events.on('click', function(msg, event) {
-    	ctrl.myTestValue.el.innerHTML = ctrl.myField.data.value();
+    // attach subscriber to click event via events facet
+    // of myTestButton component
+    scope.myTestButton.events.on('click', function(msg, event) {
+    	scope.myTestValue.el.innerHTML = ctrl.myField.data.value();
     });
+
+    // connect two components directly via their data facets
+    // using milo.minder
+    milo.minder(scope.myField.data, '->', scope.myTestValue2.data);
 }
 ```
+
+### TodoMVC
+
+The more advanced sample is __Todos__ app in
+[todomvc](https://github.com/MailOnline/milo/tree/master/todomvc) folder.
+
 
 ### Contribute
 
@@ -85,7 +111,11 @@ grunt # rebuild milo bundle every time you change any .js file
 ```
 
 Additionally you can setup grunt in your project to rebuild it whenever
-milo bundle changes
+milo bundle changes.
+
+Please make sure you run ```grunt tests``` before committing
+(not just ```grunt test``` that is run by TravisCI automatically)
+- it will run all tests, including browser tests.
 
 
 Modules and classes
