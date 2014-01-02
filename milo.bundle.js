@@ -891,7 +891,7 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 	}
 }
 
-},{"./attributes/a_bind":6,"./components/c_facets/cf_registry":27,"./components/c_info":28,"./components/c_registry":30,"./components/scope":37,"./mail":44,"./util/check":58,"./util/dom":61,"./util/error":62,"mol-proto":70}],11:[function(require,module,exports){
+},{"./attributes/a_bind":6,"./components/c_facets/cf_registry":27,"./components/c_info":28,"./components/c_registry":29,"./components/scope":37,"./mail":44,"./util/check":58,"./util/dom":61,"./util/error":62,"mol-proto":70}],11:[function(require,module,exports){
 'use strict';
 
 // <a name="classes"></a>
@@ -1244,7 +1244,7 @@ function _getScopeParent(withFacet) {
 	}
 }
 
-},{"../abstract/faceted_object":3,"../config":42,"../messenger":47,"../util/check":58,"../util/component_name":59,"./c_facets/cf_registry":27,"./c_utils":31,"mol-proto":70}],13:[function(require,module,exports){
+},{"../abstract/faceted_object":3,"../config":42,"../messenger":47,"../util/check":58,"../util/component_name":59,"./c_facets/cf_registry":27,"./c_utils":30,"mol-proto":70}],13:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facet"></a>
@@ -1387,7 +1387,7 @@ function _createMessageSourceWithAPI(MessageSourceClass, messengerAPIOrClass, op
 	_.defineProperty(this, '_messageSource', messageSource);
 }
 
-},{"../abstract/facet":2,"../messenger":47,"../util/error":62,"./c_utils":31,"mol-proto":70}],14:[function(require,module,exports){
+},{"../abstract/facet":2,"../messenger":47,"../util/error":62,"./c_utils":30,"mol-proto":70}],14:[function(require,module,exports){
 // <a name="components-facets-container"></a>
 // ###container facet
 
@@ -1668,7 +1668,7 @@ function inputValue(el, value) {
 		return el.value;
 }
 
-},{"../../abstract/mixin":4,"../../messenger":47,"../../model/path_utils":54,"../../util/logger":64,"../c_facet":13,"../msg_api/data":33,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":70}],16:[function(require,module,exports){
+},{"../../abstract/mixin":4,"../../messenger":47,"../../model/path_utils":54,"../../util/logger":64,"../c_facet":13,"../msg_api/data":32,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":70}],16:[function(require,module,exports){
 // <a name="components-facets-dom"></a>
 // ###dom facet
 
@@ -2230,7 +2230,7 @@ function onEnterSplit(message, event) {
 	}
 }
 
-},{"../../util":63,"../../util/dom":61,"../../util/logger":64,"../c_class":12,"../c_facet":13,"../msg_api/editable":34,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":70}],20:[function(require,module,exports){
+},{"../../util":63,"../../util/dom":61,"../../util/logger":64,"../c_class":12,"../c_facet":13,"../msg_api/editable":33,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":70}],20:[function(require,module,exports){
 // <a name="components-facets-events"></a>
 // ###events facet
 
@@ -2827,57 +2827,7 @@ function hasContainerFacet(ComponentClass, attr) {
 		|| (Array.isArray(attr.compFacets) && attr.compFacets.indexOf('Container') >= 0));
 }
 
-},{"../util/error":62,"./c_facets/cf_registry":27,"./c_registry":30}],29:[function(require,module,exports){
-// <a name="components-dom-constructors"></a>
-// ###dom events constructors
-
-'use strict';
-
-var _ = require('mol-proto');
-
-
-// https://developer.mozilla.org/en-US/docs/Web/Reference/Events
-
-var eventTypes = {
-	ClipboardEvent: ['copy', 'cut', 'paste', 'beforecopy', 'beforecut', 'beforepaste'],
-	Event: ['input', 'readystatechange'],
-	FocusEvent: ['focus', 'blur', 'focusin', 'focusout'],
-	KeyboardEvent: ['keydown', 'keypress',  'keyup'],
-	MouseEvent: ['click', 'contextmenu', 'dblclick', 'mousedown', 'mouseup',
-				 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover',
-				 'show' /* context menu */],
-	TouchEvent: ['touchstart', 'touchend', 'touchmove', 'touchenter', 'touchleave', 'touchcancel'],
-};
-
-
-// mock window and event constructors for testing
-if (typeof window != 'undefined')
-	var global = window;
-else {
-	global = {};
-	_.eachKey(eventTypes, function(eTypes, eventConstructorName) {
-		var eventConstructor = _.makeFunction(eventConstructorName, 'type', 'properties',
-			'this.type = type; _.extend(this, properties);');
-		global[eventConstructorName] = eventConstructor;
-	});
-}
-
-
-var domEventsConstructors = {};
-
-_.eachKey(eventTypes, function(eTypes, eventConstructorName) {
-	eTypes.forEach(function(type) {
-		if (Object.hasOwnProperty(domEventsConstructors, type))
-			throw new Error('duplicate event type ' + type);
-
-		domEventsConstructors[type] = global[eventConstructorName];
-	});
-});
-
-
-module.exports = domEventsConstructors;
-
-},{"mol-proto":70}],30:[function(require,module,exports){
+},{"../util/error":62,"./c_facets/cf_registry":27,"./c_registry":29}],29:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -2894,7 +2844,7 @@ componentsRegistry.add(Component);
 
 module.exports = componentsRegistry;
 
-},{"../abstract/registry":5,"./c_class":12}],31:[function(require,module,exports){
+},{"../abstract/registry":5,"./c_class":12}],30:[function(require,module,exports){
 'use strict';
 
 var config = require('../config')
@@ -2975,7 +2925,7 @@ function _getContainingComponent(el, returnCurrent, condition) {
 		return _getContainingComponent(el.parentNode, true, condition);
 }
 
-},{"../config":42,"../util/check":58}],32:[function(require,module,exports){
+},{"../config":42,"../util/check":58}],31:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -2988,7 +2938,7 @@ componentsRegistry.add(View);
 
 module.exports = View;
 
-},{"../c_class":12,"../c_registry":30}],33:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":29}],32:[function(require,module,exports){
 'use strict';
 
 // <a name="components-source-data"></a>
@@ -3080,7 +3030,7 @@ function createInternalData(sourceMessage, message, data) {
 	return internalData;
 };
 
-},{"../../messenger/m_api":48,"../../util/check":58,"mol-proto":70}],34:[function(require,module,exports){
+},{"../../messenger/m_api":48,"../../util/check":58,"mol-proto":70}],33:[function(require,module,exports){
 'use strict';
 
 
@@ -3208,7 +3158,58 @@ function filterSourceMessage(eventType, message, data) {
 	}
 }
 
-},{"../../messenger/m_api":48,"../../util/check":58,"mol-proto":70}],35:[function(require,module,exports){
+},{"../../messenger/m_api":48,"../../util/check":58,"mol-proto":70}],34:[function(require,module,exports){
+'use strict';
+
+// <a name="components-dom-constructors"></a>
+// ###dom events constructors
+
+
+var _ = require('mol-proto');
+
+
+// https://developer.mozilla.org/en-US/docs/Web/Reference/Events
+
+var eventTypes = {
+	ClipboardEvent: ['copy', 'cut', 'paste', 'beforecopy', 'beforecut', 'beforepaste'],
+	Event: ['input', 'readystatechange'],
+	FocusEvent: ['focus', 'blur', 'focusin', 'focusout'],
+	KeyboardEvent: ['keydown', 'keypress',  'keyup'],
+	MouseEvent: ['click', 'contextmenu', 'dblclick', 'mousedown', 'mouseup',
+				 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover',
+				 'show' /* context menu */],
+	TouchEvent: ['touchstart', 'touchend', 'touchmove', 'touchenter', 'touchleave', 'touchcancel'],
+};
+
+
+// mock window and event constructors for testing
+if (typeof window != 'undefined')
+	var global = window;
+else {
+	global = {};
+	_.eachKey(eventTypes, function(eTypes, eventConstructorName) {
+		var eventConstructor = _.makeFunction(eventConstructorName, 'type', 'properties',
+			'this.type = type; _.extend(this, properties);');
+		global[eventConstructorName] = eventConstructor;
+	});
+}
+
+
+var domEventsConstructors = {};
+
+_.eachKey(eventTypes, function(eTypes, eventConstructorName) {
+	eTypes.forEach(function(type) {
+		if (Object.hasOwnProperty(domEventsConstructors, type))
+			throw new Error('duplicate event type ' + type);
+
+		domEventsConstructors[type] = global[eventConstructorName];
+	});
+});
+
+
+module.exports = domEventsConstructors;
+
+},{"mol-proto":70}],35:[function(require,module,exports){
 'use strict';
 
 // <a name="components-source-dom"></a>
@@ -3216,7 +3217,7 @@ function filterSourceMessage(eventType, message, data) {
 
 var MessageSource = require('../../messenger/m_source')
 	, Component = require('../c_class')
-	, domEventsConstructors = require('../c_message_sources/dom_events_constructors') // TODO merge with DOMEventSource ??
+	, domEventsConstructors = require('./de_constrs') // TODO merge with DOMEventSource ??
 	, _ = require('mol-proto')
 	, check = require('../../util/check')
 	, Match = check.Match;
@@ -3297,7 +3298,7 @@ function trigger(eventType, properties) {
 	return notCancelled;
 }
 
-},{"../../messenger/m_source":49,"../../util/check":58,"../c_class":12,"../c_message_sources/dom_events_constructors":29,"mol-proto":70}],36:[function(require,module,exports){
+},{"../../messenger/m_source":49,"../../util/check":58,"../c_class":12,"./de_constrs":34,"mol-proto":70}],36:[function(require,module,exports){
 'use strict';
 
 // <a name="components-source-iframe"></a>
@@ -3468,7 +3469,7 @@ componentsRegistry.add(MLButton);
 
 module.exports = MLButton;
 
-},{"../c_class":12,"../c_registry":30}],39:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":29}],39:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3481,7 +3482,7 @@ componentsRegistry.add(MLGroup);
 
 module.exports = MLGroup;
 
-},{"../c_class":12,"../c_registry":30}],40:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":29}],40:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3494,7 +3495,7 @@ componentsRegistry.add(MLInput);
 
 module.exports = MLInput;
 
-},{"../c_class":12,"../c_registry":30}],41:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":29}],41:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3533,7 +3534,7 @@ function onOptionsChange(path, data) {
 	selectEl.innerHTML = optionsTemplate(this.get());
 }
 
-},{"../c_class":12,"../c_registry":30,"dot":69}],42:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":29,"dot":69}],42:[function(require,module,exports){
 'use strict';
 // <a name="config"></a>
 // milo.config
@@ -3768,7 +3769,7 @@ function filterSourceMessage(sourceMessage, msgType, msgData) {
 'use strict';
 
 var MessageSource = require('../messenger/m_source')
-	, domEventsConstructors = require('../components/c_message_sources/dom_events_constructors')
+	, domEventsConstructors = require('../components/msg_src/de_constrs')
 	, MailMessageSourceError = require('../util/error').MailMessageSource
 	, _ = require('mol-proto')
 	, check = require('../util/check')
@@ -3843,7 +3844,7 @@ function trigger(msgType, data) {
 		window.postMessage(data, '*')
 }
 
-},{"../components/c_message_sources/dom_events_constructors":29,"../messenger/m_source":49,"../util/check":58,"../util/error":62,"mol-proto":70}],47:[function(require,module,exports){
+},{"../components/msg_src/de_constrs":34,"../messenger/m_source":49,"../util/check":58,"../util/error":62,"mol-proto":70}],47:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -5338,7 +5339,7 @@ var registry = module.exports = {
 	components: require('./components/c_registry')
 };
 
-},{"./components/c_facets/cf_registry":27,"./components/c_registry":30}],56:[function(require,module,exports){
+},{"./components/c_facets/cf_registry":27,"./components/c_registry":29}],56:[function(require,module,exports){
 'use strict';
 
 require('./components/classes/View');
@@ -5347,7 +5348,7 @@ require('./components/ui/Select');
 require('./components/ui/Input');
 require('./components/ui/Button');
 
-},{"./components/classes/View":32,"./components/ui/Button":38,"./components/ui/Group":39,"./components/ui/Input":40,"./components/ui/Select":41}],57:[function(require,module,exports){
+},{"./components/classes/View":31,"./components/ui/Button":38,"./components/ui/Group":39,"./components/ui/Input":40,"./components/ui/Select":41}],57:[function(require,module,exports){
 'use strict';
 
 // ['Dom'
