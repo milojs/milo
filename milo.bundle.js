@@ -3798,7 +3798,8 @@ function addSourceSubscriber(sourceMessage) {
 		if (document.readyState == 'loading')
 			document.addEventListener('readystatechange', this, false);
 		else {
-			var domEvent = EventConstructor('readystatechange', { target: document });
+			var EventConstructor = domEventsConstructors.readystatechange;
+			var domEvent = new EventConstructor('readystatechange', { target: document });
 			this.dispatchMessage('readystatechange', domEvent);
 		}
 	} else
