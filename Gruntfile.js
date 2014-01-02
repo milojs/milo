@@ -42,7 +42,7 @@ module.exports = function(grunt) {
                     dest: '.tmp-test-browser'
                 }],
                 options: {
-                	transform: ['brfs']
+					transform: ['brfs']
                 }
 			}
 		},

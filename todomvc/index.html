@@ -2,15 +2,20 @@
 <head>
 	<script src="../milo.bundle.js"></script>
 	<script src="todo.js"></script>
+	<link rel="stylesheet" type="text/css" href="todo.css">
 </head>
 <body>
 	<input id="test" ml-bind="[Data]:newTodo" />
 	<button ml-bind="[Events]:addBtn">Add</button>
-	<h3>To do's</h3>
-	<div ml-bind="[List]:todos">
-	  <div ml-bind="[Item]:todo">
+	<h3>To-do's</h3>
+	<ul ml-bind="[List]:todos">
+	  <li ml-bind="[Item]:todo">
+	  	<input type="checkbox" ml-bind="[Data]:checked">
 	    <span ml-bind="[Data, Editable, Events]:text"></span>
 	    <button ml-bind="[Events]:deleteBtn">X</button>
-	  </div>
-	</div>
+	  </li>
+	</ul>
+
+	<h3>Model</h3>
+	<div ml-bind="[Data]:modelView"></div>
 </body>

@@ -1,10 +1,13 @@
+'use strict';
+
 milo(function() {
     var scope = milo.binder();
 
     // components
     var todos = scope.todos
         , newTodo = scope.newTodo
-        , addBtn = scope.addBtn;
+        , addBtn = scope.addBtn
+        , modelView = scope.modelView;
 
     // model
     var m = new milo.Model;
@@ -13,21 +16,29 @@ milo(function() {
     milo.minder(m, '<<<->>>', todos.data);
 
     m.on(/.*/, function(path, data) {
-        console.log('changed', m.get());
+        modelView.data.set(JSON.stringify(m.get()));
     });
+
+    // m.on('[*].checked', function(path, data) {
+    //     var matches = path.match(/^\[([0-9]+)\]/);
+    //     if (matches) {
+    //         var itemID = matches[1];
+    //         var item = todos.list.item(itemID);
+    //         item.el.classList.toggle('todo-item-checked');
+    //     }
+    // });
 
     addBtn.events.on('click', addTodo);
 
-    // todos.data.on('**', function(path, data) {
-    //     console.log('todos data event', path, data);
-    // });
-
     function addTodo() {
-        m.push({ text: newTodo.data.get() });
+        var itemData = { text: newTodo.data.get() };
+        var itemID = m.push(itemData) - 1; // push returns new length, as Array push does
         newTodo.data.set(' '); // can't set to empty string for some reason, only sets to space once
-        var itemID = m.get().length - 1;
-        var newItem = todos.list.item(itemID);
-        var itemScope = newItem.container.scope;
+        
+        var newItem = todos.list.item(itemID); // item is already shown, we just need to get hold of it
+        var itemScope = newItem.container.scope; // get scope inside item
+
+        itemScope.checked.data.on('', _.partial(checkTodo, itemID))
         itemScope.deleteBtn.events.on('click', _.partial(removeTodo, itemID));
 
         // newItem.data.on('*', function(path, data) {
@@ -36,20 +47,30 @@ milo(function() {
         // itemScope.text.data.on('', function(path, data) {
         //     console.log('newItem data event', path, data);
         // });
+    }
 
-        // should update model without the following line, but it doesn't
-        itemScope.text.events.on('input', _.partial(editTodo, itemID));
+    function checkTodo(id, path, data) {
+        var item = todos.list.item(id);
+        item.el.classList.toggle('todo-item-checked');
     }
 
     function removeTodo(id, eventType, event) {
-        m('[$1]', id).set(undefined);
+        // m.splice(id, 1); // - probably the best option
+        // or
+        // m.removeItem(id);
+        // NOT:
+        // m.remove(id);
+        // as this should be implemented to simply remove the property
+        m('[$1]', id).set(undefined); // hack, remove/splice is needed for both Model and Data facet
         todos.list.item(id).dom.hide(); // hack, should remove and work without it
         // either setting to undefined should delete
         // or splice method is needed with splice data message
     }
 
-    function editTodo(id, eventType, event) {
-        var todoText = this.owner;
+    // this method is not needed as model is updated automatically
+    //
+    // function editTodo(id, eventType, event) {
+        // var todoText = this.owner;
         
         //this doesn't work
         // var todo = milo.Component.getContainingComponent(todoText.el, false);
@@ -58,6 +79,6 @@ milo(function() {
         //Keep the model up to date.
         //We should be adding the data to the model, but that is not possible
         //at the moment because we cant use minder on the list facet. - why can't we?
-        m('[$1].text', id).set(todoText.data.get());
-    }
+        // m('[$1].text', id).set(todoText.data.get());
+    // }
 });

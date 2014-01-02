@@ -2023,10 +2023,10 @@ function startDropFacet() {
 }
 
 },{"../c_facet":13,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":70}],19:[function(require,module,exports){
+'use strict';
+
 // <a name="components-facets-editable"></a>
 // ###editable facet
-
-'use strict';
 
 var ComponentFacet = require('../c_facet')
 	, Component = require('../c_class')
@@ -2044,7 +2044,8 @@ var Editable = _.createSubclass(ComponentFacet, 'Editable');
 
 _.extendProto(Editable, {
 	start: start,
-	makeEditable: makeEditable
+	makeEditable: makeEditable,
+	require: ['Dom']
 
 	// _reattach: _reattachEventsOnElementChange
 });
@@ -3000,9 +3001,17 @@ module.exports = DataMsgAPI;
 var _tagEvents = {
 	'div': 'input',
 	'span': 'input',
-	'input': 'input',
+	'input': function(el) { return el && el.type == 'checkbox' ? 'change' : 'input'; },
 	'select': 'change'
 };
+
+var _tagValueProperties = {
+	'div': 'value', // 'innerHTML',  - hack
+	'span': 'innerHTML', // hack
+	'input': function(el) { return el && el.type == 'checkbox' ? el.checked : el.value; },
+	'select': 'value'
+};
+
 
 function init(component) {
 	MessengerAPI.prototype.init.apply(this, arguments);
@@ -3011,13 +3020,17 @@ function init(component) {
 	this.value(); // stores current component data value in this._value
 	this.tagName = this.component.el.tagName.toLowerCase();
 	this.tagEvent = _tagEvents[this.tagName];
+	if (typeof this.tagEvent == 'function')
+		this.tagEvent = this.tagEvent(component.el);
+	this.tagValueProperty = _tagValueProperties[this.tagName] || 'value';	
 }
 
 
-// TODO: should return value dependent on element tag
 // getDomElementDataValue
 function value() { // value method
-	var newValue = this.component.el.value;
+	var newValue = typeof this.tagValueProperty == 'function'
+					? this.tagValueProperty(this.component.el)
+					: this.component.el[this.tagValueProperty];
 
 	Object.defineProperty(this, '_value', {
 		configurable: true,
@@ -3571,7 +3584,7 @@ module.exports = MLSelect;
 
 
 function onOptionsChange(path, data) {
-	var component = this.hostObject.owner;
+	var component = this._hostObject.owner;
 	component.template.render({ selectOptions: this.get() });
 }
 
@@ -4704,8 +4717,10 @@ function dispatchMessage(sourceMessage, sourceData) {
 	if (internalMessages) {
 		internalMessages.forEach(function(message) {
 			var internalData = api.createInternalData(sourceMessage, message, sourceData);
+
 			if (api.filterSourceMessage(sourceMessage, message, internalData))
 				this.messenger.postMessage(message, internalData);
+
 		}, this);
 	}
 }
@@ -4989,11 +5004,9 @@ function Model(data, hostObject) {
 	};
 	model.__proto__ = Model.prototype;
 
-	var messenger = new Messenger(model, Messenger.defaultMethods);
-
 	_.defineProperties(model, {
-		hostObject: hostObject,
-		_messenger: messenger
+		_hostObject: hostObject,
+		_messenger: new Messenger(model, Messenger.defaultMethods)
 	});
 
 	pathUtils.wrapMessengerMethods.call(model);
@@ -5053,13 +5066,13 @@ function Model$path(accessPath) {  // , ... arguments that will be interpolated
 
 
 function proxyMessenger(modelHostObject) {
-	modelHostObject = modelHostObject || this.hostObject;
+	modelHostObject = modelHostObject || this._hostObject;
 	Mixin.prototype._createProxyMethods.call(this, ['on', 'off'], modelHostObject);
 }
 
 
 function proxyMethods(modelHostObject) {
-	modelHostObject = modelHostObject || this.hostObject;
+	modelHostObject = modelHostObject || this._hostObject;
 	Mixin.prototype._createProxyMethods.call(this, ['get', 'set', 'path', 'push'], modelHostObject);
 }
 
@@ -5144,7 +5157,8 @@ function ModelPath$push(value) {
 	var lengthPath = this.path('.length')
 		, length = lengthPath.get() || 0;
 	this.path('[$1]', length).set(value);
-	lengthPath.set(length + 1);
+	lengthPath.set(++length);
+	return length;
 }
 
 

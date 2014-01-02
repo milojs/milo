@@ -1,0 +1,4 @@
+.todo-item-checked {
+	color: #888;
+	text-decoration: line-through;
+}
