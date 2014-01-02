@@ -1625,6 +1625,9 @@ function Data$_getScalarValue() {
 
 // returns data facet of a child component (by scopes) corresponding to the path
 function Data$path(accessPath, createItem) {
+	// hack
+	createItem = true;
+
 	var parsedPath = pathUtils.parseAccessPath(accessPath)
 		, currentComponent = this.owner;
 
@@ -3019,6 +3022,8 @@ module.exports = DataMsgAPI;
 
 
 var _tagEvents = {
+	'div': 'input',
+	'span': 'input',
 	'input': 'input',
 	'select': 'change'
 };
@@ -4574,7 +4579,6 @@ _.extendProto(MessageSource, {
  */
 function init(hostObject, proxyMethods, messengerAPI) {
 	this._prepareMessengerAPI(messengerAPI);
-	_.defineProperty(this, '_internalMessages', {});
 }
 
 
@@ -4593,6 +4597,7 @@ function setMessenger(messenger) {
  * MessageSource instance method.
  * Prepares [MessengerAPI](./m_api.js.html) passed to constructor by proxying its methods to itself or if MessengerAPI wasn't passed defines two methods to avoid checking their availability every time the message is dispatched.
  *
+ * @private
  * @param {MessengerAPI} messengerAPI Optional instance of MessengerAPI
  */
 function _prepareMessengerAPI(messengerAPI) {
@@ -4862,11 +4867,13 @@ function on() {
 			var dsPath = linkToDS.path(path);
 			if (dsPath) {
 				// turn off subscriber to prevent endless message loop for bi-directional connections
-				linkToDS.off(subscriptionPath, self[stopLink]);
+				if (self[stopLink])
+					linkToDS.off(subscriptionPath, self[stopLink]);
 				// set the new data
 				dsPath.set(data.newValue);
 				// turn subscriber back off
-				linkToDS.on(subscriptionPath, self[stopLink]);
+				if (self[stopLink])
+					linkToDS.on(subscriptionPath, self[stopLink]);
 			}
 		};
 
@@ -5079,9 +5086,10 @@ function ModelPath$path(accessPath) {  // , ... arguments that will be interpola
 
 
 function ModelPath$push(value) {
-	var data = this.get()
-		, length = data && data.length || 0;
+	var lengthPath = this.path('.length')
+		, length = lengthPath.get() || 0;
 	this.path('[$1]', length).set(value);
+	lengthPath.set(length + 1);
 }
 
 
