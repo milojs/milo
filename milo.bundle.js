@@ -892,8 +892,9 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 
 
 	function createScopeForChildren(containerEl) {
-		var scope = new Scope(containerEl);
-		_.forEach(utilDom.filterNodeListByType(containerEl.childNodes, 1), function(node) {
+		var scope = new Scope(containerEl)
+			, children = utilDom.filterNodeListByType(containerEl.childNodes, Node.ELEMENT_NODE);
+		_.forEach(children, function(node) {
 			createScopeForElement(scope, node);
 		});
 		return scope;
@@ -1236,7 +1237,7 @@ function remove() {
 function getScopeParent(withFacet) {
 	check(withFacet, Match.Optional(String));
 	withFacet = _.firstLowerCase(withFacet);
-	this._getScopeParent(withFacet);	
+	return this._getScopeParent(withFacet);	
 }
 
 function _getScopeParent(withFacet) {
@@ -1589,11 +1590,7 @@ function Data$_setScalarValue(value) {
 
 function Data$_postDataChanged(message) {
 	// TODO compare with old value
-	// this.postMessage(message.path, message);
-
-	var thisComp = this.owner
-		, parentContainer = thisComp.scope._hostObject
-		, parentData = parentContainer && parentContainer.owner.data;
+	var parentData = this.scopeParent();
 	
 	if (parentData) {
 		var parentMsg = _.clone(message);
