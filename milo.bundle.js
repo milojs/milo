@@ -1672,7 +1672,8 @@ function Data$path(accessPath, createItem) {
 // Set value rules
 var tags = {
 	'input': inputValue,
-	'select': inputValue
+	'select': inputValue,
+	'img': imgValue
 }
 
 
@@ -1682,6 +1683,15 @@ function inputValue(el, value) {
 		return (el.value = value);
 	else
 		return el.value;
+}
+
+
+// Set and get value of img tag
+function imgValue(el, value) {
+	if (value)
+		return (el.src = value);
+	else
+		return el.src;
 }
 
 },{"../../abstract/mixin":4,"../../messenger":47,"../../model/path_utils":54,"../../util/logger":64,"../c_facet":13,"../msg_api/data":32,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":70}],16:[function(require,module,exports){
@@ -3009,7 +3019,8 @@ var _tagValueProperties = {
 	'div': 'value', // 'innerHTML',  - hack
 	'span': 'innerHTML', // hack
 	'input': function(el) { return el && el.type == 'checkbox' ? el.checked : el.value; },
-	'select': 'value'
+	'select': 'value',
+	'img': 'src'
 };
 
 
