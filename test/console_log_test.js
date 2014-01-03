@@ -7,7 +7,7 @@ var assert = require('assert')
 describe('console.log statements', function() {
 
     it('should be removed before committing', function(done) {
-        async.each(['lib', 'test'], detectConsoleLog, done);
+        async.each(['lib', 'test', 'test-browser'], detectConsoleLog, done);
     });
 
     function detectConsoleLog(dir, next) {
