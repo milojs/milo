@@ -1331,7 +1331,31 @@ function _createMessenger(){
 function ComponentFacet$start() {
 	if (this.config.messages)
 		_.eachKey(this.config.messages, function(subscriber, message) {
-			this.on(message, subscriber);
+			var subscriberType = typeof subscriber;
+			if (subscriberType == 'function')
+				this.on(message, subscriber);
+			else if (subscriberType == 'object') {
+				var contextType = typeof subscriber.context;
+				if (contextType == 'object')
+					this.on(message, subscriber);
+				else if (contextType == 'string') {
+					if (subscriber.context == this.name)
+						subscriber = {
+							subscriber: subscriber.subscriber,
+							context: this
+						};
+					else if (subscriber.context == 'owner')
+						subscriber = {
+							subscriber: subscriber.subscriber,
+							context: this.owner
+						};
+					else
+						throw new FacetError('unknown subscriber context in configuration: ' + subscriber.context);
+					this.on(message, subscriber);
+				} else
+					throw new FacetError('unknown subscriber context type in configuration: ' + contextType);
+			} else
+				throw new FacetError('unknown subscriber type in configuration: ' + subscriberType);
 		}, this);
 }
 
@@ -4053,13 +4077,14 @@ function init(hostObject, proxyMethods, messageSource) {
  *  If an array of strings is passed, each string is a message type to subscribe for.
  *  If a RegExp is passed, the subscriber will be envoked when the message dispatched on the messenger matches the pattern (or IS the RegExp with identical pattern).
  *  Pattern subscriber does NOT cause any subscription to MessageSource, it only captures messages that are already subscribed to with precise message types.
- * @param {Function} subscriber Message subscriber - a function that will be called when the message is dispatched on the messenger (usually via proxied postMessage method of host object).
+ * @param {Function|Object} subscriber Message subscriber - a function that will be called when the message is dispatched on the messenger (usually via proxied postMessage method of host object).
  *  If hostObject was supplied to Messenger constructor, hostObject will be the context (the value of this) for the subscriber envocation.
+ *  Subscriber can also be an object with properties `subscriber` (function) and `context` ("this" value when subscriber is called)
  * @return {Boolean}
  */
 function onMessage(messages, subscriber) {
 	check(messages, Match.OneOf(String, [String], RegExp));
-	check(subscriber, Function); 
+	check(subscriber, Match.OneOf(Function, { subscriber: Function, context: Match.Any }));
 
 	if (typeof messages == 'string')
 		messages = messages.split(messagesSplitRegExp);
@@ -4091,7 +4116,7 @@ function onMessage(messages, subscriber) {
  * @private
  * @param {Object} subscribersHash The map of subscribers determined by [onMessage](#onMessage) based on Message type, can be `this._patternMessageSubscribers` or `this._messageSubscribers`
  * @param {String} message Message type
- * @param {Function} subscriber Subscriber function to be removed
+ * @param {Function|Object} subscriber Subscriber function to be added or object with properties `subscriber` (function) and `context` (value of "this" when subscriber is called)
  * @return {Boolean}
  */
 function _registerSubscriber(subscribersHash, message, subscriber) {
@@ -4105,12 +4130,29 @@ function _registerSubscriber(subscribersHash, message, subscriber) {
 	}
 
 	var msgSubscribers = subscribersHash[message];
-	var notYetRegistered = noSubscribers || msgSubscribers.indexOf(subscriber) == -1;
+	var notYetRegistered = noSubscribers || _indexOfSubscriber(msgSubscribers, subscriber) == -1;
 
 	if (notYetRegistered)
 		msgSubscribers.push(subscriber);
 
 	return notYetRegistered;
+}
+
+
+/**
+ * Finds subscriber index in the list
+ *
+ * @param {Array[Function|Object]} list list of subscribers
+ * @param {Function|Object} subscriber subscriber function or object with properties `subscriber` (function) and `context` ("this" object)
+ */
+function _indexOfSubscriber(list, subscriber) {
+	var isFunc = typeof subscriber == 'function';
+	return _.findIndex(list, function(subscr){
+		return isFunc
+				? subscriber == subscr
+				: (subscriber.subscriber == subscr.subscriber 
+					&& subscriber.context == subscr.context);
+	});
 }
 
 
@@ -4133,7 +4175,7 @@ function _registerSubscriber(subscribersHash, message, subscriber) {
  * @return {Object[Boolean]}
  */
 function onMessages(messageSubscribers) {
-	check(messageSubscribers, Match.ObjectHash(Function));
+	check(messageSubscribers, Match.ObjectHash(Match.OneOf(Function, { subscriber: Function, context: Match.Any })));
 
 	var notYetRegisteredMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
 		return this.onMessage(messages, subscriber);
@@ -4165,7 +4207,7 @@ function onMessages(messageSubscribers) {
  */
 function offMessage(messages, subscriber) {
 	check(messages, Match.OneOf(String, [String], RegExp));
-	check(subscriber, Match.Optional(Function)); 
+	check(subscriber, Match.Optional(Match.OneOf(Function, { subscriber: Function, context: Match.Any }))); 
 
 	if (typeof messages == 'string')
 		messages = messages.split(messagesSplitRegExp);
@@ -4206,7 +4248,7 @@ function _removeSubscriber(subscribersHash, message, subscriber) {
 		return false; // nothing removed
 
 	if (subscriber) {
-		var subscriberIndex = msgSubscribers.indexOf(subscriber);
+		var subscriberIndex = _indexOfSubscriber(msgSubscribers, subscriber);
 		if (subscriberIndex == -1) 
 			return false; // nothing removed
 		msgSubscribers.splice(subscriberIndex, 1);
@@ -4255,7 +4297,7 @@ function _removeAllSubscribers(subscribersHash, message) {
  * @return {Object[Boolean]}
  */
 function offMessages(messageSubscribers) {
-	check(messageSubscribers, Match.ObjectHash(Function));
+	check(messageSubscribers, Match.ObjectHash(Match.Optional(Match.OneOf(Function, { subscriber: Function, context: Match.Any }))));
 
 	var subscriberRemovedMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
 		return this.offMessage(messages, subscriber);
@@ -4320,12 +4362,15 @@ function _callPatternSubscribers(message, data) {
  * @private
  * @param {String} message message to be dispatched, passed to subscribers as the first parameter.
  * @param {Any} data data that will be passed to the subscriber as the second parameter. Messenger does not modify this data in any way.
- * @param {Array[Function]} msgSubscribers the array of message subscribers to be called. Each subscriber is called with the host object (see Messenger constructor) as the context.
+ * @param {Array[Function|Object]} msgSubscribers the array of message subscribers to be called. Each subscriber is called with the host object (see Messenger constructor) as the context.
  */
 function _callSubscribers(message, data, msgSubscribers) {
 	if (msgSubscribers && msgSubscribers.length)
 		msgSubscribers.forEach(function(subscriber) {
-			subscriber.call(this._hostObject, message, data);
+			if (typeof subscriber == 'function')
+				subscriber.call(this._hostObject, message, data);
+			else
+				subscriber.subscriber.call(subscriber.context, message, data);
 		}, this);
 }
 
@@ -6614,6 +6659,8 @@ var __ = require('./proto_object')
  * These methods can be [chained](proto.js.html#Proto).
  */
 var arrayMethods = module.exports = {
+	// find: see below
+	// findIndex: see below
 	appendArray: appendArray,
 	prependArray: prependArray,
 	toArray: toArray,
@@ -6654,7 +6701,7 @@ arrayMethods.find = Array.prototype.find
 
 /**
  * Implementation of ES6 [Array __findIndex__ method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex) (native method is used if available).
- * Returns the index of array element that passes callback test.
+ * Returns the index of array element that passes callback test. Returns `-1` if not found.
  *
  * @param {Array} self array to search in
  * @param {Function} callback should return `true` for item to pass the test, passed `value`, `index` and `self` as parameters
@@ -6929,7 +6976,7 @@ objectMethods.findValue = utils.makeFindMethod(eachKey, 'value');
 
 /**
  * Analogue of ES6 [Array __findIndex__ method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex).
- * Returns the key of object property that passes callback test.
+ * Returns the key of object property that passes callback test. Returns `undefined` if not found (unlike `findIndex`, that returns -1 in this case).
  *
  * @param {Object} self object to search in
  * @param {Function} callback should return `true` for item to pass the test, passed `value`, `key` and `self` as parameters
@@ -7526,6 +7573,9 @@ function makeFindMethod(eachMethod, findWhat) {
 			if (found === _error) throw caughtError;
 			else return found;
 		}
+		// if looking for index and not found, return -1
+		if (argIndex && eachMethod == Array.prototype.forEach)
+			return -1; 
 
 		function testItem(value, index, self) {
 			var test;

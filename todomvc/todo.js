@@ -38,8 +38,15 @@ milo(function() {
         var newItem = todos.list.item(itemID); // item is already shown, we just need to get hold of it
         var itemScope = newItem.container.scope; // get scope inside item
 
-        itemScope.checked.data.on('', _.partial(checkTodo, itemID))
-        itemScope.deleteBtn.events.on('click', _.partial(removeTodo, itemID));
+        itemScope.checked.data.on('', {
+            subscriber: checkTodo,
+            context: newItem
+        });
+
+        itemScope.deleteBtn.events.on('click', {
+            subscriber: _.partial(removeTodo, itemID),
+            context: newItem
+        });
 
         // newItem.data.on('*', function(path, data) {
         //     console.log('newItem data event', path, data);
@@ -49,9 +56,8 @@ milo(function() {
         // });
     }
 
-    function checkTodo(id, path, data) {
-        var item = todos.list.item(id);
-        item.el.classList.toggle('todo-item-checked');
+    function checkTodo(path, data) {
+        this.el.classList.toggle('todo-item-checked');
     }
 
     function removeTodo(id, eventType, event) {
@@ -61,8 +67,8 @@ milo(function() {
         // NOT:
         // m.remove(id);
         // as this should be implemented to simply remove the property
+        this.dom.hide(); // hack, should remove and work without it
         m('[$1]', id).set(undefined); // hack, remove/splice is needed for both Model and Data facet
-        todos.list.item(id).dom.hide(); // hack, should remove and work without it
         // either setting to undefined should delete
         // or splice method is needed with splice data message
     }

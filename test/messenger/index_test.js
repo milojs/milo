@@ -289,4 +289,33 @@ describe('Messenger class', function() {
 
             assert.deepEqual(event1_Subscribers, [handler1]);
     });
+
+
+    it('should subscribe/unsubscribe/dispatch messages for subscribers with context', function() {
+        var result = getHostWithMessenger()
+            , host = result.host
+            , messenger = result.messenger
+            , myContext = {}
+            , posted = {};
+
+        function localHandler(message, data) {
+            assert.equal(this, myContext, 'should pass correct context');
+            posted[message] = data;
+        }
+
+        host.on('event', { subscriber: localHandler, context: myContext });
+        host.on('event', handler1);
+            var subscribers = host.getListeners('event');
+            assert.deepEqual(subscribers, [
+                { subscriber: localHandler, context: myContext },
+                handler1
+            ], 'should have 2 subscribers');
+
+        host.post('event', { test: 1 });
+            assert.deepEqual(posted, { 'event': { test: 1 } });
+
+        host.off('event', { subscriber: localHandler, context: myContext });
+            var subscribers = host.getListeners('event');
+            assert.deepEqual(subscribers, [handler1], 'should have 1 subscribers');
+    });
 });
