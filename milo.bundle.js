@@ -5039,10 +5039,16 @@ module.exports = Model;
 
 /**
  * `milo.Model`
- * Model class instantiates objects that allow deep data access with __safe getters__ that return undefined (rather than throwing exception) when properties/items on unexisting objects/arrays are requested and __safe setters__ that create object trees when properties/items on unexisting objects/arrays are set and also post messages to allow subscription on changes and enable data reactivity.
- * Reactivity is implememnted via [Connector](./connector.js.html) that can be instantiated either directly or with more convenient interface of [milo.minder](../minder.js.html). At the moment model can be connected to [Data facet](../components/c_facets/Data.js.html) or to another model.
+ * Model class instantiates objects that allow deep data access with __safe getters__ that return undefined (rather than throwing exception) when properties/items of unexisting objects/arrays are requested and __safe setters__ that create object trees when properties/items of unexisting objects/arrays are set and also post messages to allow subscription on changes and enable data reactivity.
+ * Reactivity is implememnted via [Connector](./connector.js.html) that can be instantiated either directly or with more convenient interface of [milo.minder](../minder.js.html). At the moment model can be connected to [Data facet](../components/c_facets/Data.js.html) or to another model or [ModelPath](#ModelPath.js.html).
  * Model constructor returns objects that are functions at the same time; when called they return ModelPath objects that allow get/set access to any point in model data. See [ModelData](#ModelData) below.
+ *
+ * You can subscribe to model changes with `on` method by passing model access path in place of message, pattern or string with any number of stars to subscribe to a certain depth in model (e.g., `'***'` to subscribe to three levels).
  * 
+ * @constructor
+ * @param {Object|Array} data optional initial array data. If it is planned to connect model to view it is usually better to instantiate an empty Model (`var m = new Model`), connect it to [Component](../components/c_class.js.html)'s [Data facet](../components/c_facets/Data.js.html) (e.g., `milo.minder(m, '<<->>', c.data);`) and then set the model with `m.set(data)` - the view will be automatically updated.
+ * @param {Object} hostObject optional object that hosts model on one of its properties. Can be used when model itself is the context of the message subscriber and you need to travers to this object (although it is possible to set any context). Can also be used to proxy model's methods to the host like [Model facet](../components/c_facets/ModelFacet.js.html) is doing.
+ * @return {Model}
  */
 function Model(data, hostObject) {
 	// `model` will be returned by constructor instead of `this`. `model`
@@ -5059,6 +5065,7 @@ function Model(data, hostObject) {
 		_messenger: new Messenger(model, Messenger.defaultMethods)
 	});
 
+	// enables "stars" subscription to Model
 	pathUtils.wrapMessengerMethods.call(model);
 
 	if (data) model._data = data;
@@ -5068,6 +5075,12 @@ function Model(data, hostObject) {
 
 Model.prototype.__proto__ = Model.__proto__;
 
+
+/**
+ * Templates to synthesize model getters and setters
+ */
+var getterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\nmethod = function get() {\n\tvar m = {{# def.modelAccessPrefix }};\n\treturn m {{~ it.parsedPath :pathNode }}\n\t\t{{? pathNode.interpolate}}\n\t\t\t&& (m = m[this._args[ {{= pathNode.interpolate }} ]])\n\t\t{{??}}\n\t\t\t&& (m = m{{= pathNode.property }})\n\t\t{{?}} {{~}};\n};\n"
+	, setterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n{{## def.wasDefined: m.hasOwnProperty(\n\t{{? currNode.interpolate }}\n\t\tthis._args[ {{= currNode.interpolate }} ]\n\t{{??}}\n\t\t'{{= it.getPathNodeKey(currNode) }}'\n\t{{?}}\n) #}}\n\n{{## def.changeAccessPath:\n\taccessPath += {{? currNode.interpolate }}\n\t\t{{? currNode.syntax == 'array' }}\n\t\t\t'[' + this._args[ {{= currNode.interpolate }} ] + ']';\n\t\t{{??}}\n\t\t\t'.' + this._args[ {{= currNode.interpolate }} ];\n\t\t{{?}}\n\t{{??}}\n\t\t'{{= currProp }}';\n\t{{?}}\n#}}\n\nmethod = function set(value) {\n\tvar m = {{# def.modelAccessPrefix }};\n\tvar messages = [], messagesHash = {};\n\tvar wasDef = true;\n\tvar old = m;\n\n\tif (! m) {\n\t\t{{ var emptyProp = it.parsedPath[0] && it.parsedPath[0].empty; }}\n\t\tm = {{# def.modelAccessPrefix }} = {{= emptyProp || 'value' }};\n\t\twasDef = false;\n\n\t\t{{? emptyProp }}\n\t\t\t{{# def.addMsg }} '', type: 'added',\n\t\t\t\t  newValue: m });\n\t\t{{?}}\n\t}\n\n\tvar accessPath = '';\n\t{{  var modelDataProperty = '';\n\t\tvar nextNode = it.parsedPath[0];\n\t\tfor (var i = 0, count = it.parsedPath.length - 1; i < count; i++) {\n\t\t\tvar currNode = nextNode;\n\t\t\tvar currProp = currNode.property;\n\t\t\tnextNode = it.parsedPath[i + 1];\n\t\t\tvar emptyProp = nextNode && nextNode.empty;\n\t}}\n\n\t\t\t{{# def.changeAccessPath }}\n\n\t\t\tif (! {{# def.wasDefined}}) { \n\n\t\t\t\tm = m{{# def.currProp }} = {{= emptyProp }};\n\n\t\t\t\t{{# def.addMsg }} accessPath, type: 'added', \n\t\t\t\t\t  newValue: m });\n\n\t\t\t} else if (typeof m{{# def.currProp }} != 'object') {\n\t\t\t\tvar old = m{{# def.currProp }};\n\t\t\t\tm = m{{# def.currProp }} = {{= emptyProp }};\n\n\t\t\t\t{{# def.addMsg }} accessPath, type: 'changed', \n\t\t\t\t\t  oldValue: old, newValue: m });\n\n\t\t\t} else\n\t\t\t\tm = m{{# def.currProp }};\n\n\t{{  } /* for loop */\n\t\tcurrNode = nextNode;\n\t\tcurrProp = currNode && currNode.property;\n\t}}\n\n\t{{? currProp }}\n\t\twasDef = {{# def.wasDefined}};\n\t\t{{# def.changeAccessPath }}\n\n\t\tvar old = m{{# def.currProp }};\n\t\tm{{# def.currProp }} = value;\n\t{{?}}\n\n\tif (! wasDef)\n\t\t{{# def.addMsg }} accessPath, type: 'added',\n\t\t\t  newValue: value });\n\telse if (old != value)\n\t\t{{# def.addMsg }} accessPath, type: 'changed',\n\t\t\t  oldValue: old, newValue: value });\n\n\tif (! wasDef || old != value)\t\n\t\taddTreeChangesMessages(messages, messagesHash,\n\t\t\taccessPath, old, value); /* defined in the function that synthesizes ModelPath setter */\n\n\tmessages.forEach(function(msg) {\n\t\t{{# def.modelPostMessageCode }}(msg.path, msg);\n\t}, this);\n};\n";
 
 var dotDef = {
 	modelAccessPrefix: 'this._model._data',
@@ -5081,9 +5094,6 @@ var modelSetterDotDef = {
 	getPathNodeKey: pathUtils.getPathNodeKey
 };
 
-var getterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\nmethod = function get() {\n\tvar m = {{# def.modelAccessPrefix }};\n\treturn m {{~ it.parsedPath :pathNode }}\n\t\t{{? pathNode.interpolate}}\n\t\t\t&& (m = m[this._args[ {{= pathNode.interpolate }} ]])\n\t\t{{??}}\n\t\t\t&& (m = m{{= pathNode.property }})\n\t\t{{?}} {{~}};\n};\n"
-	, setterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n{{## def.wasDefined: m.hasOwnProperty(\n\t{{? currNode.interpolate }}\n\t\tthis._args[ {{= currNode.interpolate }} ]\n\t{{??}}\n\t\t'{{= it.getPathNodeKey(currNode) }}'\n\t{{?}}\n) #}}\n\n{{## def.changeAccessPath:\n\taccessPath += {{? currNode.interpolate }}\n\t\t{{? currNode.syntax == 'array' }}\n\t\t\t'[' + this._args[ {{= currNode.interpolate }} ] + ']';\n\t\t{{??}}\n\t\t\t'.' + this._args[ {{= currNode.interpolate }} ];\n\t\t{{?}}\n\t{{??}}\n\t\t'{{= currProp }}';\n\t{{?}}\n#}}\n\nmethod = function set(value) {\n\tvar m = {{# def.modelAccessPrefix }};\n\tvar messages = [], messagesHash = {};\n\tvar wasDef = true;\n\tvar old = m;\n\n\tif (! m) {\n\t\t{{ var emptyProp = it.parsedPath[0] && it.parsedPath[0].empty; }}\n\t\tm = {{# def.modelAccessPrefix }} = {{= emptyProp || 'value' }};\n\t\twasDef = false;\n\n\t\t{{? emptyProp }}\n\t\t\t{{# def.addMsg }} '', type: 'added',\n\t\t\t\t  newValue: m });\n\t\t{{?}}\n\t}\n\n\tvar accessPath = '';\n\t{{  var modelDataProperty = '';\n\t\tvar nextNode = it.parsedPath[0];\n\t\tfor (var i = 0, count = it.parsedPath.length - 1; i < count; i++) {\n\t\t\tvar currNode = nextNode;\n\t\t\tvar currProp = currNode.property;\n\t\t\tnextNode = it.parsedPath[i + 1];\n\t\t\tvar emptyProp = nextNode && nextNode.empty;\n\t}}\n\n\t\t\t{{# def.changeAccessPath }}\n\n\t\t\tif (! {{# def.wasDefined}}) { \n\n\t\t\t\tm = m{{# def.currProp }} = {{= emptyProp }};\n\n\t\t\t\t{{# def.addMsg }} accessPath, type: 'added', \n\t\t\t\t\t  newValue: m });\n\n\t\t\t} else if (typeof m{{# def.currProp }} != 'object') {\n\t\t\t\tvar old = m{{# def.currProp }};\n\t\t\t\tm = m{{# def.currProp }} = {{= emptyProp }};\n\n\t\t\t\t{{# def.addMsg }} accessPath, type: 'changed', \n\t\t\t\t\t  oldValue: old, newValue: m });\n\n\t\t\t} else\n\t\t\t\tm = m{{# def.currProp }};\n\n\t{{  } /* for loop */\n\t\tcurrNode = nextNode;\n\t\tcurrProp = currNode && currNode.property;\n\t}}\n\n\t{{? currProp }}\n\t\twasDef = {{# def.wasDefined}};\n\t\t{{# def.changeAccessPath }}\n\n\t\tvar old = m{{# def.currProp }};\n\t\tm{{# def.currProp }} = value;\n\t{{?}}\n\n\tif (! wasDef)\n\t\t{{# def.addMsg }} accessPath, type: 'added',\n\t\t\t  newValue: value });\n\telse if (old != value)\n\t\t{{# def.addMsg }} accessPath, type: 'changed',\n\t\t\t  oldValue: old, newValue: value });\n\n\tif (! wasDef || old != value)\t\n\t\taddTreeChangesMessages(messages, messagesHash,\n\t\t\taccessPath, old, value); /* defined in the function that synthesizes ModelPath setter */\n\n\tmessages.forEach(function(msg) {\n\t\t{{# def.modelPostMessageCode }}(msg.path, msg);\n\t}, this);\n};\n";
-
 doT.templateSettings.strip = false;
 
 var getterSynthesizer = doT.compile(getterTemplate, dotDef)
@@ -5091,6 +5101,16 @@ var getterSynthesizer = doT.compile(getterTemplate, dotDef)
 	, modelSetterSynthesizer = doT.compile(setterTemplate, modelSetterDotDef);
 
 
+/** 
+ * ####Model instance methods####
+ *
+ * - [get](#Model$get) - get model data
+ * - set - set model data, synthesized
+ * - [path](#path) - returns ModelPath object that allows access to any point in Model
+ * - [push](#ModelPath$push) - add item to the array (or pseudo-array) in model
+ * - [proxyMessenger](#proxyMessenger) - proxy model's Messenger methods to host object
+ * - [proxyMethods](#proxyMethods) - proxy model methods to host object
+ */
 _.extendProto(Model, {
 	get: Model$get,
 	set: synthesizeMethod(modelSetterSynthesizer, '', []),
@@ -5100,11 +5120,30 @@ _.extendProto(Model, {
 	proxyMethods: proxyMethods
 });
 
+
+/**
+ * Model instance method.
+ * Get model data.
+ *
+ * @return {Any}
+ */
 function Model$get() {
 	return this._data;
 }
 
-// returns ModelPath object
+
+/**
+ * Model instance method.
+ * Returns ModelPath object that implements the same API as model but allows access to any point inside model as defined by `accessPath`.
+ * See [ModelPath](#ModelPath) class below for more information.
+ * 
+ * @param {String} accessPath string that defines path to access model.
+ *  Path string consists of parts to define either property access (`".name"` to access property name) or array item access (`"[1]"` to access item with index 1).
+ *  Access path can contain as many parts as necessary (e.g. `".list[0].name"` to access property `name` in the first element of array stored in property `list`.
+ * @param {List} arguments additional arguments of this method can be used to create interpolated paths.
+ *  E.g. `m.path("[$1].$2", id, prop)` returns ModelPath to access property with name `prop` in array item with index `id`. Although this ModelPath object will work exactly as `m("[" + id + "]." + prop)`, the interpolated is much more efficient as ModelPath with interpolation will not synthesize new getters and setters, while ModelPath with computed access path will synthesize new getters and setters for each pair of values of `id` and `prop`.
+ * @return {ModelPath}
+ */
 function Model$path(accessPath) {  // , ... arguments that will be interpolated
 	// "null" is context to pass to ModelPath, first parameter of bind
 	// "this" (model) is added in front of all arguments
@@ -5115,26 +5154,55 @@ function Model$path(accessPath) {  // , ... arguments that will be interpolated
 }
 
 
+/**
+ * Model instance method.
+ * Proxy model's Messenger methods to host object.
+ *
+ * @param {Object} modelHostObject optional host object. If not passed, hostObject passed to Model constructor will be used.
+ */
 function proxyMessenger(modelHostObject) {
 	modelHostObject = modelHostObject || this._hostObject;
-	Mixin.prototype._createProxyMethods.call(this, ['on', 'off'], modelHostObject);
+	Mixin.prototype._createProxyMethods.call(this, messengerMethodsToProxy, modelHostObject);
 }
+var messengerMethodsToProxy = ['on', 'off', 'getSubscribers'];
 
 
+/**
+ * Model instance method.
+ * Proxy model methods to host object.
+ *
+ * @param {Object} modelHostObject optional host object. If not passed, hostObject passed to Model constructor will be used.
+ */
 function proxyMethods(modelHostObject) {
 	modelHostObject = modelHostObject || this._hostObject;
-	Mixin.prototype._createProxyMethods.call(this, ['get', 'set', 'path', 'push'], modelHostObject);
+	Mixin.prototype._createProxyMethods.call(this, modelMethodsToProxy, modelHostObject);
 }
+var modelMethodsToProxy = ['get', 'set', 'path', 'push'];
 
 
+/**
+ * Export ModelPath object as `milo.Model.Path`.
+ */
 _.extend(Model, {
 	Path: ModelPath
 });
 
+
+/**
+ * 'milo.Model.Path'
+ * ModelPath object that allows access to any point inside model as defined by `accessPath`
+ *
+ * @constructor
+ * @param {String} accessPath string that defines path to access model.
+ *  Path string consists of parts to define either property access (`".name"` to access property name) or array item access (`"[1]"` to access item with index 1).
+ *  Access path can contain as many parts as necessary (e.g. `".list[0].name"` to access property `name` in the first element of array stored in property `list`.
+ * @param {List} arguments additional arguments of this method can be used to create interpolated paths.
+ *  E.g. `m.path("[$1].$2", id, prop)` returns ModelPath to access property with name `prop` in array item with index `id`. Although this ModelPath object will work exactly as `m("[" + id + "]." + prop)`, the interpolated is much more efficient as ModelPath with interpolation will not synthesize new getters and setters, while ModelPath with computed access path will synthesize new getters and setters for each pair of values of `id` and `prop`.
+ * @return {ModelPath}
+ */
 function ModelPath(model, path) { // ,... - additional arguments for interpolation
 	check(model, Model);
 	check(path, String);
-	// check(it, Match.Optional(Object));
 
 	_.defineProperties(this, {
 		_model: model,
@@ -5167,19 +5235,42 @@ var modelPathMessengerMethods = _.mapToObject(['on', 'off'], function(methodName
 			} else
 				logger.warn('ModelPath message dispatched with wrong root path');
 
-			subscriber.call(this, msgPath, data);
+			if (typeof subscriber == 'function')
+				subscriber.call(this, msgPath, data);
+			else
+				subscriber.subscriber.call(subscriber.context, msgPath, data);
 		});
 	};
-})
+});
 
 _.extendProto(ModelPath, modelPathMessengerMethods);
 
+
+/**
+ * ####ModelPath instance methods####
+ * 
+ * - get - synthesized
+ * - set - synthesized
+ * - [path](#ModelPath$path) - gives access to path inside ModelPath
+ * - [push](ModelPath$push) - add item to array (or pseudo-array) in ModelPath
+ */
 _.extendProto(ModelPath, {
 	path: ModelPath$path,
 	push: ModelPath$push
 })
 
 
+/**
+ * ModelPath instance method
+ * Gives access to path inside ModelPath. Method works similarly to [path method](#Model$path) of model, using relative paths.
+ * 
+ * @param {String} accessPath string that defines path to access model.
+ *  Path string consists of parts to define either property access (`".name"` to access property name) or array item access (`"[1]"` to access item with index 1).
+ *  Access path can contain as many parts as necessary (e.g. `".list[0].name"` to access property `name` in the first element of array stored in property `list`.
+ * @param {List} arguments additional arguments of this method can be used to create interpolated paths.
+ *  E.g. `m.path("[$1].$2", id, prop)` returns ModelPath to access property with name `prop` in array item with index `id`. Although this ModelPath object will work exactly as `m("[" + id + "]." + prop)`, the interpolated is much more efficient as ModelPath with interpolation will not synthesize new getters and setters, while ModelPath with computed access path will synthesize new getters and setters for each pair of values of `id` and `prop`.
+ * @return {ModelPath}
+ */
 function ModelPath$path(accessPath) {  // , ... arguments that will be interpolated
 	var thisPathArgsCount = this._args.length - 1;
 
@@ -5203,6 +5294,13 @@ function ModelPath$path(accessPath) {  // , ... arguments that will be interpola
 }
 
 
+/**
+ * ModelPath and Model instance method
+ * Adds item to the end array (or pseudo-array). Returns new length.
+ *
+ * @param {Any} value item that will be added to array (pseudo array)
+ * @return {Number}
+ */
 function ModelPath$push(value) {
 	var lengthPath = this.path('.length')
 		, length = lengthPath.get() || 0;
@@ -5212,7 +5310,15 @@ function ModelPath$push(value) {
 }
 
 
-var synthesizePathMethods = _.memoize(_synthesizePathMethods);
+/**
+ * Function that synthesizes accessor methods.
+ * Function is memoized so accessors are cached (up to 1000).
+ *
+ * @parivate
+ * @param {String} path Model/ModelPath access path
+ * @return {Object{get:Function, set:Function}}
+ */
+var synthesizePathMethods = _.memoize(_synthesizePathMethods, undefined, 1000);
 
 function _synthesizePathMethods(path) {
 	var parsedPath = pathUtils.parseAccessPath(path);

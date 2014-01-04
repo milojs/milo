@@ -114,8 +114,8 @@ Additionally you can setup grunt in your project to rebuild it whenever
 milo bundle changes.
 
 Please make sure you run ```grunt tests``` before committing
-(not just ```grunt test``` that is run by TravisCI automatically)
-- it will run all tests, including browser tests.
+(not just ```grunt test``` that is run by TravisCI automatically) -
+it will run all tests, including browser tests.
 
 
 Modules and classes
