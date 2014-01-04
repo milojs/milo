@@ -578,7 +578,7 @@ describe('Model class', function() {
 	});
 
 
-	it('should define path instance method of ModelPath', function() {
+	it('should define "path" instance method of ModelPath', function() {
 		var m = new Model;
 
 		m('.info').path('.name').set('Jason');
@@ -610,7 +610,7 @@ describe('Model class', function() {
 	});
 
 
-	it('should define push instance method of Model and of ModelPath', function() {
+	it('should define "push" instance method of Model and of ModelPath', function() {
 		var m = new Model
 			, posted = {};
 
@@ -642,6 +642,87 @@ describe('Model class', function() {
 		m('.list').push({ name: 'Jason' });
 
 			assert.deepEqual(m._data, { list: [ { name: 'Milo' }, { name: 'Jason'} ] });
+	});
+
+
+	it('should define "del" instance method for ModelPath', function() {
+		var m = new Model({ test: 1 });
+
+			assert(m._data.hasOwnProperty('test'));
+			assert.equal(m._data.test, 1);
+
+		m('.test').del();
+
+			assert.equal(m._data.hasOwnProperty('test'), false);
+			assert.equal(m._data.test, undefined);
+
+		var m = new Model({ list: [ { name: 'Milo' } ] });
+
+			assert(m._data.list[0].hasOwnProperty('name'));
+			assert.equal(m._data.list[0].name, 'Milo');
+
+		m('.list[0].name').del();
+
+			assert.equal(m._data.list[0].hasOwnProperty('name'), false);
+			assert.equal(m._data.list[0].name, undefined);
+	});
+
+
+	it('should allow "del" with interpolation', function() {
+		var m = new Model({ list: [ , { name: 'Milo' } ] });
+
+			assert(m._data.list[1].hasOwnProperty('name'));
+			assert.equal(m._data.list[1].name, 'Milo');
+
+		m('.list[$1].$2', 1, 'name').del();
+
+			assert.equal(m._data.list[1].hasOwnProperty('name'), false);
+			assert.equal(m._data.list[1].name, undefined);
+	});
+
+
+	it('should post "deleted" message when property is deleted', function() {
+		var m = new Model({ list: [ , { name: 'Milo' } ] });
+
+			assert(m._data.list[1].hasOwnProperty('name'));
+			assert.equal(m._data.list[1].name, 'Milo');
+
+		var posted = {};
+		m.on(/.*/, function(accessPath,  data) {
+			posted[accessPath] = data;
+		});
+
+		m('.list[$1].$2', 1, 'name').del();
+
+			assert.deepEqual(posted, {
+				'.list[1].name': { path: '.list[1].name', type: 'deleted', oldValue: 'Milo' }
+			});
+	});
+
+
+	it('should post "removed" message for subproperties when property-object is deleted', function() {
+		var m = new Model({ list: [ { info: { name: 'Milo', test: 1 } } ] });
+
+			assert(m._data.list[0].hasOwnProperty('info'));
+			assert.deepEqual(m._data.list[0], { info: { name: 'Milo', test: 1 } });
+
+		var posted = {};
+		m.on(/.*/, function(accessPath,  data) {
+			posted[accessPath] = data;
+		});
+
+		m('.list[$1]', 0).del();
+
+			assert.deepEqual(posted, {
+				'.list[0]': { path: '.list[0]', type: 'deleted',
+							  oldValue: { info: { name: 'Milo', test: 1} } },
+				'.list[0].info': { path: '.list[0].info', type: 'removed',
+							  oldValue: { name: 'Milo', test: 1} },
+				'.list[0].info.name': { path: '.list[0].info.name', type: 'removed',
+							  oldValue: 'Milo' },
+				'.list[0].info.test': { path: '.list[0].info.test', type: 'removed',
+							  oldValue: 1 },
+			});
 	});
 });
 

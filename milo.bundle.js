@@ -4979,12 +4979,12 @@ function on() {
 			var dsPath = linkToDS.path(path);
 			if (dsPath) {
 				// turn off subscriber to prevent endless message loop for bi-directional connections
-				// if (self[stopLink])
+				if (self[stopLink])
 					linkToDS.off(subscriptionPath, self[stopLink]);
 				// set the new data
 				dsPath.set(data.newValue);
 				// turn subscriber back off
-				// if (self[stopLink])
+				if (self[stopLink])
 					linkToDS.on(subscriptionPath, self[stopLink]);
 			}
 		};
@@ -5079,8 +5079,9 @@ Model.prototype.__proto__ = Model.__proto__;
 /**
  * Templates to synthesize model getters and setters
  */
-var getterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\nmethod = function get() {\n\tvar m = {{# def.modelAccessPrefix }};\n\treturn m {{~ it.parsedPath :pathNode }}\n\t\t{{? pathNode.interpolate}}\n\t\t\t&& (m = m[this._args[ {{= pathNode.interpolate }} ]])\n\t\t{{??}}\n\t\t\t&& (m = m{{= pathNode.property }})\n\t\t{{?}} {{~}};\n};\n"
-	, setterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n{{## def.wasDefined: m.hasOwnProperty(\n\t{{? currNode.interpolate }}\n\t\tthis._args[ {{= currNode.interpolate }} ]\n\t{{??}}\n\t\t'{{= it.getPathNodeKey(currNode) }}'\n\t{{?}}\n) #}}\n\n{{## def.changeAccessPath:\n\taccessPath += {{? currNode.interpolate }}\n\t\t{{? currNode.syntax == 'array' }}\n\t\t\t'[' + this._args[ {{= currNode.interpolate }} ] + ']';\n\t\t{{??}}\n\t\t\t'.' + this._args[ {{= currNode.interpolate }} ];\n\t\t{{?}}\n\t{{??}}\n\t\t'{{= currProp }}';\n\t{{?}}\n#}}\n\nmethod = function set(value) {\n\tvar m = {{# def.modelAccessPrefix }};\n\tvar messages = [], messagesHash = {};\n\tvar wasDef = true;\n\tvar old = m;\n\n\tif (! m) {\n\t\t{{ var emptyProp = it.parsedPath[0] && it.parsedPath[0].empty; }}\n\t\tm = {{# def.modelAccessPrefix }} = {{= emptyProp || 'value' }};\n\t\twasDef = false;\n\n\t\t{{? emptyProp }}\n\t\t\t{{# def.addMsg }} '', type: 'added',\n\t\t\t\t  newValue: m });\n\t\t{{?}}\n\t}\n\n\tvar accessPath = '';\n\t{{  var modelDataProperty = '';\n\t\tvar nextNode = it.parsedPath[0];\n\t\tfor (var i = 0, count = it.parsedPath.length - 1; i < count; i++) {\n\t\t\tvar currNode = nextNode;\n\t\t\tvar currProp = currNode.property;\n\t\t\tnextNode = it.parsedPath[i + 1];\n\t\t\tvar emptyProp = nextNode && nextNode.empty;\n\t}}\n\n\t\t\t{{# def.changeAccessPath }}\n\n\t\t\tif (! {{# def.wasDefined}}) { \n\n\t\t\t\tm = m{{# def.currProp }} = {{= emptyProp }};\n\n\t\t\t\t{{# def.addMsg }} accessPath, type: 'added', \n\t\t\t\t\t  newValue: m });\n\n\t\t\t} else if (typeof m{{# def.currProp }} != 'object') {\n\t\t\t\tvar old = m{{# def.currProp }};\n\t\t\t\tm = m{{# def.currProp }} = {{= emptyProp }};\n\n\t\t\t\t{{# def.addMsg }} accessPath, type: 'changed', \n\t\t\t\t\t  oldValue: old, newValue: m });\n\n\t\t\t} else\n\t\t\t\tm = m{{# def.currProp }};\n\n\t{{  } /* for loop */\n\t\tcurrNode = nextNode;\n\t\tcurrProp = currNode && currNode.property;\n\t}}\n\n\t{{? currProp }}\n\t\twasDef = {{# def.wasDefined}};\n\t\t{{# def.changeAccessPath }}\n\n\t\tvar old = m{{# def.currProp }};\n\t\tm{{# def.currProp }} = value;\n\t{{?}}\n\n\tif (! wasDef)\n\t\t{{# def.addMsg }} accessPath, type: 'added',\n\t\t\t  newValue: value });\n\telse if (old != value)\n\t\t{{# def.addMsg }} accessPath, type: 'changed',\n\t\t\t  oldValue: old, newValue: value });\n\n\tif (! wasDef || old != value)\t\n\t\taddTreeChangesMessages(messages, messagesHash,\n\t\t\taccessPath, old, value); /* defined in the function that synthesizes ModelPath setter */\n\n\tmessages.forEach(function(msg) {\n\t\t{{# def.modelPostMessageCode }}(msg.path, msg);\n\t}, this);\n};\n";
+var getterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\nmethod = function get() {\n\tvar m = {{# def.modelAccessPrefix }};\n\treturn m {{~ it.parsedPath :pathNode }}\n\t\t{{? pathNode.interpolate}}\n\t\t\t&& (m = m[this._args[ {{= pathNode.interpolate }} ]])\n\t\t{{??}}\n\t\t\t&& (m = m{{= pathNode.property }})\n\t\t{{?}} {{~}};\n};\n"
+	, setterTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n{{## def.wasDefined: m.hasOwnProperty(\n\t{{? currNode.interpolate }}\n\t\tthis._args[ {{= currNode.interpolate }} ]\n\t{{??}}\n\t\t'{{= it.getPathNodeKey(currNode) }}'\n\t{{?}}\n) #}}\n\n{{## def.changeAccessPath:\n\taccessPath += {{? currNode.interpolate }}\n\t\t{{? currNode.syntax == 'array' }}\n\t\t\t'[' + this._args[ {{= currNode.interpolate }} ] + ']';\n\t\t{{??}}\n\t\t\t'.' + this._args[ {{= currNode.interpolate }} ];\n\t\t{{?}}\n\t{{??}}\n\t\t'{{= currProp }}';\n\t{{?}}\n#}}\n\n\nmethod = function set(value) {\n\tvar m = {{# def.modelAccessPrefix }};\n\tvar messages = [], messagesHash = {};\n\tvar wasDef = true;\n\tvar old = m;\n\n\tif (! m) {\n\t\t{{ var emptyProp = it.parsedPath[0] && it.parsedPath[0].empty; }}\n\t\tm = {{# def.modelAccessPrefix }} = {{= emptyProp || 'value' }};\n\t\twasDef = false;\n\n\t\t{{? emptyProp }}\n\t\t\t{{# def.addMsg }} '', type: 'added',\n\t\t\t\t  newValue: m });\n\t\t{{?}}\n\t}\n\n\tvar accessPath = '';\n\t{{  var modelDataProperty = '';\n\t\tvar nextNode = it.parsedPath[0];\n\t\tfor (var i = 0, count = it.parsedPath.length - 1; i < count; i++) {\n\t\t\tvar currNode = nextNode;\n\t\t\tvar currProp = currNode.property;\n\t\t\tnextNode = it.parsedPath[i + 1];\n\t\t\tvar emptyProp = nextNode && nextNode.empty;\n\t}}\n\n\t\t\t{{# def.changeAccessPath }}\n\n\t\t\tif (! {{# def.wasDefined }}) { \n\n\t\t\t\tm = m{{# def.currProp }} = {{= emptyProp }};\n\n\t\t\t\t{{# def.addMsg }} accessPath, type: 'added', \n\t\t\t\t\t  newValue: m });\n\n\t\t\t} else if (typeof m{{# def.currProp }} != 'object') {\n\t\t\t\tvar old = m{{# def.currProp }};\n\t\t\t\tm = m{{# def.currProp }} = {{= emptyProp }};\n\n\t\t\t\t{{# def.addMsg }} accessPath, type: 'changed', \n\t\t\t\t\t  oldValue: old, newValue: m });\n\n\t\t\t} else\n\t\t\t\tm = m{{# def.currProp }};\n\n\t{{  } /* for loop */\n\t\tcurrNode = nextNode;\n\t\tcurrProp = currNode && currNode.property;\n\t}}\n\n\t{{? currProp }}\n\t\twasDef = {{# def.wasDefined}};\n\t\t{{# def.changeAccessPath }}\n\n\t\tvar old = m{{# def.currProp }};\n\t\tm{{# def.currProp }} = value;\n\t{{?}}\n\n\tif (! wasDef)\n\t\t{{# def.addMsg }} accessPath, type: 'added',\n\t\t\t  newValue: value });\n\telse if (old != value)\n\t\t{{# def.addMsg }} accessPath, type: 'changed',\n\t\t\t  oldValue: old, newValue: value });\n\n\tif (! wasDef || old != value)\t\n\t\taddTreeChangesMessages(messages, messagesHash,\n\t\t\taccessPath, old, value); /* defined in the function that synthesizes ModelPath setter */\n\n\tmessages.forEach(function(msg) {\n\t\t{{# def.modelPostMessageCode }}(msg.path, msg);\n\t}, this);\n\n};\n"
+	, deleteTemplate = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n{{## def.changeAccessPath:\n\taccessPath += {{? currNode.interpolate }}\n\t\t{{? currNode.syntax == 'array' }}\n\t\t\t'[' + this._args[ {{= currNode.interpolate }} ] + ']';\n\t\t{{??}}\n\t\t\t'.' + this._args[ {{= currNode.interpolate }} ];\n\t\t{{?}}\n\t{{??}}\n\t\t'{{= currProp }}';\n\t{{?}}\n#}}\n\n{{## def.wasDefined: m.hasOwnProperty(\n\t{{? currNode.interpolate }}\n\t\tthis._args[ {{= currNode.interpolate }} ]\n\t{{??}}\n\t\t'{{= it.getPathNodeKey(currNode) }}'\n\t{{?}}\n) #}}\n\n\nmethod = function del() {\n\tvar m = {{# def.modelAccessPrefix }};\n\tvar accessPath = '';\n\tvar treeDoesNotExist;\n\n\t{{ \n\t\tfor (var i = 0, count = it.parsedPath.length-1; i < count; i++) { \n\t\t\tvar currNode = it.parsedPath[i];\n\t\t\tvar currProp = currNode.property;\n\t}}\n\t\tif (! m || ! m.hasOwnProperty || ! {{# def.wasDefined}} )\n\t\t\ttreeDoesNotExist = true;\n\t\telse {\n\n\t\t\tm = m{{# def.currProp }};\n\t\t\t{{# def.changeAccessPath }}\n\n\t{{ } /* for loop */\n\n\t\tvar currNode = it.parsedPath[count];\n\t\tvar currProp = currNode.property;\n\n\t\twhile (count--) { /* closing braces for else's above */\n\t}}\n\t\t}\n\t{{ } /* while loop */ }}\n\n\tif (! treeDoesNotExist && m && m.hasOwnProperty && {{# def.wasDefined}}) {\n\t\tvar old = m{{# def.currProp }};\n\t\tdelete m{{# def.currProp }};\n\t\t{{# def.changeAccessPath }}\n\t\tvar msg = { path: accessPath, type: 'deleted', oldValue: old };\n\t\t{{# def.modelPostMessageCode }}(accessPath, msg);\n\n\t\tvar messages = [], messagesHash = {};\n\n\t\taddTreeChangesMessages(messages, messagesHash,\n\t\t\taccessPath, old, undefined); /* defined in the function that synthesizes ModelPath setter */\n\n\t\tmessages.forEach(function(msg) {\n\t\t\t{{# def.modelPostMessageCode }}(msg.path, msg);\n\t\t}, this);\n\t}\n};\n";
 
 var dotDef = {
 	modelAccessPrefix: 'this._model._data',
@@ -5088,7 +5089,7 @@ var dotDef = {
 	getPathNodeKey: pathUtils.getPathNodeKey
 };
 
-var modelSetterDotDef = {
+var modelDotDef = {
 	modelAccessPrefix: 'this._data',
 	modelPostMessageCode: 'this.postMessage',
 	getPathNodeKey: pathUtils.getPathNodeKey
@@ -5098,7 +5099,9 @@ doT.templateSettings.strip = false;
 
 var getterSynthesizer = doT.compile(getterTemplate, dotDef)
 	, setterSynthesizer = doT.compile(setterTemplate, dotDef)
-	, modelSetterSynthesizer = doT.compile(setterTemplate, modelSetterDotDef);
+	, modelSetterSynthesizer = doT.compile(setterTemplate, modelDotDef)
+	, deleteSynthesizer = doT.compile(deleteTemplate, dotDef)
+	, modelDeleteSynthesizer = doT.compile(deleteTemplate, modelDotDef);
 
 
 /** 
@@ -5189,7 +5192,7 @@ _.extend(Model, {
 
 
 /**
- * 'milo.Model.Path'
+ * `milo.Model.Path`
  * ModelPath object that allows access to any point inside model as defined by `accessPath`
  *
  * @constructor
@@ -5325,7 +5328,8 @@ function _synthesizePathMethods(path) {
 
 	var methods = {
 		get: synthesizeMethod(getterSynthesizer, path, parsedPath),
-		set: synthesizeMethod(setterSynthesizer, path, parsedPath)
+		set: synthesizeMethod(setterSynthesizer, path, parsedPath),
+		del: synthesizeMethod(deleteSynthesizer, path, parsedPath)  
 	};
 
 	return methods;
