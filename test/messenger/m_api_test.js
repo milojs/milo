@@ -20,6 +20,7 @@ var MyMsgAPI = _.createSubclass(MessengerAPI, 'MyMsgAPI');
 //can implement any of these three methods
 _.extendProto(MyMsgAPI, {
 	translateToSourceMessage: translateToSourceMessage,
+	translateToInternalMessages: translateToInternalMessages,
 	createInternalData: createInternalData,
 	filterSourceMessage: filterSourceMessage
 });
@@ -30,6 +31,13 @@ function translateToSourceMessage(message) {
 	// removes all digits in the end of message
 	return message.replace(/[0-9]+$/, '');
 }
+
+
+// trivial implementation (same as in base class), changed in one of tests
+function translateToInternalMessages(sourceMessage, sourceData) {
+	return this.getInternalMessages(sourceMessage);
+}
+
 
 // simple rule: type property in sourceData is updated to match internal message that should be dispatched,
 // which is determined by id property, which is then removed
@@ -140,7 +148,7 @@ describe('MessengerAPI class', function() {
 					{ handler: 1, data: { type: 'message33', test: 5 } },
 					{ handler: 2, data: { type: 'message33', test: 5 } }
 				]
-			});
+			});	
 	});
 
 

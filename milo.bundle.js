@@ -73,8 +73,7 @@ function _createProxyMethod(proxyMethodName, mixinMethodName, hostObject) {
 	// Bind proxied Mixin's method to Mixin instance
 	var boundMethod = this[mixinMethodName].bind(this);
 
-	Object.defineProperty(hostObject, proxyMethodName,
-		{ value: boundMethod, writable: true });
+	_.defineProperty(hostObject, proxyMethodName, boundMethod, _.WRIT);
 }
 
 
@@ -176,7 +175,7 @@ function FacetedObject() {
 	Object.defineProperties(this, facetsDescriptors);
 
 	// store all facets on `facets` property so that they can be enumerated
-	Object.defineProperty(this, 'facets', { value: facets });	
+	_.defineProperty(this, 'facets', facets);	
 
 	// call `init`method if it is defined in subclass
 	if (this.init)
@@ -253,10 +252,7 @@ function addFacet(FacetClass, facetConfig, facetName) {
 	var newFacet = this.facets[facetName] = new FacetClass(this, facetConfig);
 
 	// add facet to faceted object
-	Object.defineProperty(this, facetName, {
-		enumerable: true,
-		value: newFacet
-	});
+	_.defineProperty(this, facetName, newFacet, _.ENUM);
 
 	return newFacet;
 }
@@ -431,10 +427,7 @@ function clean() {
  */
 function setClass(FoundationClass) {
 	check(FoundationClass, Function);
-	Object.defineProperty(this, 'FoundationClass', {
-		enumerable: true,
-		value: FoundationClass
-	});
+	_.defineProperty(this, 'FoundationClass', FoundationClass, _.ENUM);
 }
 
 },{"../util/check":58,"../util/error":62,"mol-proto":70}],6:[function(require,module,exports){
@@ -1136,7 +1129,7 @@ function init(scope, element, name, componentInfo) {
 		name: name,
 		scope: scope,
 		componentInfo: componentInfo
-	}, true);
+	}, _.ENUM);
 
 	// create component messenger
 	var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
@@ -1730,7 +1723,8 @@ _.extendProto(Dom, {
 	copy: copy,
 
 	find: find,
-	hasTextBeforeSelection: hasTextBeforeSelection
+	hasTextBeforeSelection: hasTextBeforeSelection,
+	hasTextAfterSelection: hasTextAfterSelection
 	// _reattach: _reattachEventsOnElementChange
 });
 
@@ -1897,6 +1891,16 @@ function hasTextBeforeSelection() {
 	return treeWalker.previousNode();
 }
 
+
+function hasTextAfterSelection() {
+	var selection = window.getSelection();
+	if (! selection.isCollapsed) return true;
+	if (selection.anchorOffset < selection.anchorNode.length) return true;
+
+	// walk up the DOM tree to check if there are text nodes before cursor
+	var treeWalker = document.createTreeWalker(this.owner.el, NodeFilter.SHOW_TEXT);
+	return treeWalker.nextNode();
+}
 
 },{"../../attributes/a_bind":6,"../../binder":10,"../../util/check":58,"../../util/error":62,"../c_facet":13,"./cf_registry":27,"mol-proto":70}],17:[function(require,module,exports){
 // <a name="components-facets-drag"></a>
@@ -2411,7 +2415,7 @@ function init() {
         _listItems: [],
         _listItemsHash: {}
     });
-    _.defineProperty(this, 'itemSample', null, false, false, true);
+    _.defineProperty(this, 'itemSample', null, _.WRIT);
 
     // Fired by __binder__ when all children of component are bound
     this.owner.on('childrenbound', onChildrenBound);
@@ -3043,10 +3047,7 @@ function value() { // value method
 					? this.tagValueProperty(this.component.el)
 					: this.component.el[this.tagValueProperty];
 
-	Object.defineProperty(this, '_value', {
-		configurable: true,
-		value: newValue
-	});
+	_.defineProperty(this, '_value', newValue, _.CONF);
 
 	return newValue;
 }
@@ -3197,14 +3198,11 @@ function filterSourceMessage(eventType, message, data) {
 	};
 
 	function noTextAfterSelection(component) {
+		// return ! component.dom.hasTextAfterSelection();
 		var sel = window.getSelection();
-		if (sel.anchorOffset == sel.anchorNode.length) {
-			if (sel.anchorNode.nextSibling) {
-				return false;
-			} else {
-				return true;
-			}
-		}
+		return sel.anchorNode
+				&& sel.anchorOffset == sel.anchorNode.length
+				&& ! sel.anchorNode.nextSibling;
 	}
 }
 
@@ -3440,7 +3438,7 @@ function Scope(rootEl, hostObject) {
 	_.defineProperties(this, {
 		_rootEl: rootEl,
 		_hostObject: hostObject
-	}, false, false, true); // writable
+	}, _.WRIT); // writable
 };
 
 _.extendProto(Scope, {
@@ -3824,11 +3822,9 @@ function translateToSourceMessage(message) {
 // filterDataMessage
 function filterSourceMessage(sourceMessage, msgType, msgData) {
 	if (sourceMessage == 'readystatechange') {
-		if (this._domReadyFired) return false;
-		Object.defineProperty(this, '_domReadyFired', {
-			writable: true,
-			value: true
-		});
+		if (this._domReadyFired)
+			return false;
+		_.defineProperty(this, '_domReadyFired', true, _.WRIT);
 		return true;
 	} else if (sourceMessage == 'message')
 		return windowMessagePrefix + msgData.data.type == msgType;
@@ -4723,17 +4719,15 @@ function onSubscriberRemoved(message) {
  */
 function dispatchMessage(sourceMessage, sourceData) {
 	var api = this.messengerAPI
-		, internalMessages = api.getInternalMessages(sourceMessage);
+		, internalMessages = api.getInternalMessages(sourceMessage, sourceData);
 							
-	if (internalMessages) {
-		internalMessages.forEach(function(message) {
-			var internalData = api.createInternalData(sourceMessage, message, sourceData);
+	if (internalMessages) 
+		internalMessages.forEach(function (message) {
+		var internalData = api.createInternalData(sourceMessage, message, sourceData);
 
-			if (api.filterSourceMessage(sourceMessage, message, internalData))
-				this.messenger.postMessage(message, internalData);
-
-		}, this);
-	}
+		if (api.filterSourceMessage(sourceMessage, message, internalData))
+			this.messenger.postMessage(message, internalData);		
+	}, this);
 }
 
 },{"../abstract/mixin":4,"../util/check":58,"../util/error":62,"../util/logger":64,"./m_api":48,"mol-proto":70}],50:[function(require,module,exports){
@@ -5393,14 +5387,15 @@ function getPathNodeKey(pathNode, interpolated) {
 // TODO allow for multiple messages in a string
 function wrapMessengerMethods(methodsNames) {
 	methodsNames = methodsNames || ['on', 'off'];
-	_.defineProperties(this, _.mapToObject(methodsNames, function(methodName) {
+	var wrappedMethods = _.mapToObject(methodsNames, function(methodName) {
 		var origMethod = this[methodName];
 		// replacing message subsribe/unsubscribe/etc. to convert "*" message patterns to regexps
 		return function(path, subscriber) {
 			var regexPath = createRegexPath(path);
 			origMethod.call(this, regexPath, subscriber);
 		};
-	}, this));
+	}, this);
+	_.defineProperties(this, wrappedMethods);
 }
 
 },{"../util/check":58,"mol-proto":70}],55:[function(require,module,exports){
@@ -6556,7 +6551,9 @@ var _ = Proto;
 
 
 // store raw methods from different modules in __ object (double "_")
-var __ = objectMethods.clone.call(objectMethods);
+var __ = {};
+
+objectMethods.extend.call(__, objectMethods);
 __.extend.call(__, prototypeMethods);
 __.extend.call(__, arrayMethods);
 __.extend.call(__, stringMethods);
@@ -6570,13 +6567,15 @@ __.defineProperty(Proto, '__', __);
 function unwrapProto() { return this.self; }
 __.extendProto.call(Proto, { _: unwrapProto });
 
+// add constants (functions will be overwritten)
+__.extend.call(Proto, objectMethods._constants);
 
 // add functions that take first parameter instead of "this" to Proto
-var protoFuncs = __.mapKeys.call(__, utils.makeProtoFunction);
+var protoFuncs = __.mapKeys.call(__, utils.makeProtoFunction, true);
 __.extend.call(Proto, protoFuncs);
 
 // add Proto wrapped value instance methods to Proto prototype
-var protoInstanceMethods = __.mapKeys.call(__, utils.makeProtoInstanceMethod);
+var protoInstanceMethods = __.mapKeys.call(__, utils.makeProtoInstanceMethod, true);
 __.extendProto.call(Proto, protoInstanceMethods);
 
 
@@ -6895,8 +6894,25 @@ var objectMethods = module.exports = {
 	reduceKeys: reduceKeys,
 	filterKeys: filterKeys,
 	someKey: someKey,
-	everyKey: everyKey
+	everyKey: everyKey,
+
 };
+
+
+/**
+ * ####Property descriptor constants####
+ * The sum of these constants can be used as last parameter of defineProperty and defineProperties to determine types of properties.
+ */
+var constants = {
+	ENUMERABLE: 1,
+	ENUM: 1,
+	CONFIGURABLE: 2,
+	CONF: 2,
+	WRITABLE: 4,
+	WRIT: 4
+};
+
+defineProperty.call(objectMethods, '_constants', constants);
 
 
 /**
@@ -6971,24 +6987,36 @@ function clone() {
  * ```
  * _.defineProperty(obj, 'key', value);
  * ```
+ *
+ * To define some other properties use sum of the flags `_.ENUMERABLE` (or `_.ENUM`), `_.CONFIGURABLE` (or `_.CONF`) and `_.WRITABLE` (or `_.WRIT`):
+ * ```
+ * _.defineProperty(obj, 'key', value, _.ENUM + _.WRIT);
+ * ```
  * Returns `self`.
  *
  * @param {Object} self An object to add a property to
  * @param {String} propertyName the name of the property that will be added
  * @param {Any} value the value of added property
- * @param {Boolean} enumerable Optional `true` value to make property enumerable, `false` by default
- * @param {Boolean} configurable Optional `true` value to make property configurable, `false` by default
- * @param {Boolean} writable Optional `true` value to make property writable, `false` by default
+ * @param {Integer} decriptorFlags bit mask of property descriptor properties composed from `_.ENUMERABLE` (or `_.ENUM`), `_.CONFIGURABLE` (or `_.CONF`) and `_.WRITABLE` (or `_.WRIT`)
  * @return {Object}
  */
-function defineProperty(propertyName, value, enumerable, configurable, writable) {
-	Object.defineProperty(this, propertyName, {
-		enumerable: enumerable,
-		configurable: configurable,
-		writable: writable,
-		value: value
-	});
+function defineProperty(propertyName, value, decriptorFlags) {
+	Object.defineProperty(this, propertyName,
+		_getDescriptor(value, decriptorFlags));
 	return this;
+}
+
+
+function _getDescriptor(value, decriptorFlags) {
+	var descriptor = { value: value };
+	if (decriptorFlags)
+		extend.call(descriptor, {
+			enumerable: !! (decriptorFlags & constants.ENUMERABLE),
+			configurable: !! (decriptorFlags & constants.CONFIGURABLE),
+			writable: !! (decriptorFlags & constants.WRITABLE)
+		});
+
+	return descriptor;
 }
 
 
@@ -7001,24 +7029,24 @@ function defineProperty(propertyName, value, enumerable, configurable, writable)
  *     key2: value2	
  * });
  * ```
+ * To define some other properties use sum of the flags `_.ENUMERABLE` (or `_.ENUM`), `_.CONFIGURABLE` (or `_.CONF`) and `_.WRITABLE` (or `_.WRIT`):
+ * ```
+ * _.defineProperties(obj, {
+ *     key1: value1,
+ *     key2: value2	
+ * }, _.ENUM + _.WRIT);
+ * ```
  * Returns `self`.
  *
  * @param {Object} self An object to add a property to
  * @param {Object} propertyValues A map of keys and values of properties thatwill be added. The descriptors of properties will be defined by the following parameters.
- * @param {Boolean} enumerable Optional `true` value to make property enumerable, `false` by default
- * @param {Boolean} configurable Optional `true` value to make property configurable, `false` by default
- * @param {Boolean} writable Optional `true` value to make property writable, `false` by default
+ * @param {Integer} decriptorFlags bit mask of property descriptor properties composed from `_.ENUMERABLE` (or `_.ENUM`), `_.CONFIGURABLE` (or `_.CONF`) and `_.WRITABLE` (or `_.WRIT`)
  * @return {Object}
  */
-function defineProperties(propertyValues, enumerable, configurable, writable) {
+function defineProperties(propertyValues, decriptorFlags) {
 	var descriptors = mapKeys.call(propertyValues, function(value) {
-		return {
-			enumerable: enumerable,
-			configurable: configurable,
-			writable: writable,
-			value: value
-		};		
-	});
+		return _getDescriptor(value, decriptorFlags);		
+	}, true);
 	Object.defineProperties(this, descriptors);
 	return this;
 }
