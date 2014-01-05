@@ -620,13 +620,13 @@ describe('Model class', function() {
 
 		m.on('***', logPosted);
 
-		m.push({ name: 'Milo' });
-		m.push({ name: 'Jason', DOB: { year: 1982 } });
+		m.push({ name: 'Milo' }, { name: 'Jason', DOB: { year: 1982 } });
 
 			assert.deepEqual(m._data, [ { name: 'Milo' }, { name: 'Jason', DOB: { year: 1982 } } ]);
 
 			assert.deepEqual(posted, {
-				'': { path: '', type: 'added', newValue: [ { name: 'Milo' }, { name: 'Jason', DOB: { year: 1982 } } ] },
+				'': { path: '', type: 'splice', index: 0, removed: [], addedCount: 2,
+						newValue: [ { name: 'Milo' }, { name: 'Jason', DOB: { year: 1982 } } ] },
 	  			'[0]': { path: '[0]', type: 'added', newValue: { name: 'Milo' } },
 				'[0].name': { path: '[0].name', type: 'added', newValue: 'Milo' },
 				'[1]':  { path: '[1]', type: 'added', newValue: { name: 'Jason', DOB: { year: 1982 } } },
@@ -739,7 +739,8 @@ describe('Model class', function() {
 			assert.deepEqual(m._data, [ { test: 'item1' }, 'item2']);
 			assert.deepEqual(removed, []);
 			assert.deepEqual(posted, [
-				{ path: '', type: 'splice', index: 0, removed: [], addedCount: 2 },
+				{ path: '', type: 'splice', index: 0, removed: [], addedCount: 2,
+						newValue: [ { test: 'item1' }, 'item2'] },
   				{ path: '[0]', type: 'added', newValue: { test: 'item1' } },
   				{ path: '[0].test', type: 'added', newValue: 'item1' },
  				{ path: '[1]', type: 'added', newValue: 'item2' }
@@ -753,7 +754,8 @@ describe('Model class', function() {
 			assert.deepEqual(m._data, { 0: 'item3', 1: 'item4', 2: 'item2', length: 3 });
 			assert.deepEqual(removed, ['item1']);
 			assert.deepEqual(posted, [
-				{ path: '', type: 'splice', index: 0, removed: [ 'item1' ], addedCount: 1 },
+				{ path: '', type: 'splice', index: 0, removed: [ 'item1' ], addedCount: 2,
+						newValue: { 0: 'item3', 1: 'item4', 2: 'item2', length: 3 } },
 				{ path: '[0]', type: 'removed', oldValue: 'item1' },
 				{ path: '[0]', type: 'added', newValue: 'item3' },
 				{ path: '[1]', type: 'added', newValue: 'item4' }
@@ -777,7 +779,8 @@ describe('Model class', function() {
 				{ path: '.info', type: 'added', newValue: [ { list: ['item1', 'item2'] } ] },
 				{ path: '.info[0]', type: 'added', newValue: { list: ['item1', 'item2'] } },
 				{ path: '.info[0].list', type: 'added', newValue: [ 'item1', 'item2' ] },
-    			{ path: '.info[0].list', type: 'splice', index: 0, removed: [], addedCount: 2 },
+    			{ path: '.info[0].list', type: 'splice', index: 0, removed: [], addedCount: 2,
+    					newValue: ['item1', 'item2'] },
   				{ path: '.info[0].list[0]', type: 'added', newValue: 'item1' },
  				{ path: '.info[0].list[1]', type: 'added', newValue: 'item2' }
 			]);
@@ -817,10 +820,116 @@ describe('Model class', function() {
 			assert.deepEqual(m._data, [ { fish: ['parrot', 'anemone', 'blue'] } ]);
 			assert.deepEqual(removed, ['trumpet', 'surgeon']);
 	});
+
+
+	it('should define "pop" instance method for Model and ModelPath', function() {
+		var m = new Model([ { item: 'item1'}, { item: 'item2' } ]);
+
+		m.on(/.*/, function(path, data) {
+			posted.push(data);
+		})
+
+		var posted = [];
+		var last = m.pop();
+
+			assert.deepEqual(last, { item: 'item2' });
+			assert.deepEqual(m._data, [ { item: 'item1'} ]);
+			assert.deepEqual(posted, [
+				{ path: '', type: 'splice', index: 1, removed: [ { item: 'item2' } ],
+    				addedCount: 0, newValue: [ { item: 'item1'} ] },
+  				{ path: '[1]', type: 'removed', oldValue: { item: 'item2' } },
+  				{ path: '[1].item', type: 'removed', oldValue: 'item2' }
+  			]);
+
+		var m = new Model({ list: [ { item: 'item1'}, { item: 'item2' } ] });
+
+		m('.list').on('***', function(path, data) {
+			posted.push(data);
+		})
+
+		var posted = [];
+		var last = m('.list').pop();
+
+			assert.deepEqual(last, { item: 'item2' });
+			assert.deepEqual(m._data, { list: [ { item: 'item1'} ] });
+			assert.deepEqual(posted, [
+				{ path: '', type: 'splice', index: 1, removed: [ { item: 'item2' } ],
+    				addedCount: 0, newValue: [ { item: 'item1'} ], fullPath: '.list' },
+  				{ path: '[1]', type: 'removed', oldValue: { item: 'item2' }, fullPath: '.list[1]' },
+  				{ path: '[1].item', type: 'removed', oldValue: 'item2', fullPath: '.list[1].item' }
+  			]);
+	});
+
+
+	it('should define "unshift" instance method for Model and ModelPath', function() {
+		var m = new Model(['item1', 'item2'])
+			, posted = [];
+
+		function logPosted(path, data) {
+			posted.push(data);
+		}
+
+		m.on('***', logPosted);
+
+		m.unshift({ name: 'Milo' }, { name: 'Jason', DOB: { year: 1982 } });
+
+			assert.deepEqual(m._data, [ { name: 'Milo' }, { name: 'Jason', DOB: { year: 1982 } }, 'item1', 'item2' ]);
+
+			assert.deepEqual(posted, [
+				{ path: '', type: 'splice', index: 0, removed: [], addedCount: 2,
+    					newValue: [ { name: 'Milo' }, { name: 'Jason', DOB: { year: 1982 } }, 'item1', 'item2' ] },
+  				{ path: '[0]', type: 'added', newValue: { name: 'Milo' } },
+  				{ path: '[0].name', type: 'added', newValue: 'Milo' },
+ 				{ path: '[1]', type: 'added', newValue: { name: 'Jason', DOB: { year: 1982 } } },
+				{ path: '[1].name', type: 'added', newValue: 'Jason' },
+				{ path: '[1].DOB', type: 'added', newValue: { year: 1982 } },
+				{ path: '[1].DOB.year', type: 'added', newValue: 1982 }
+			]);
+
+
+		var m = new Model({ list: ['item1', 'item2'] });
+
+		m('.$1', 'list').unshift({ name: 'Milo' }, { name: 'Jason' });
+
+			assert.deepEqual(m._data, { list: [ { name: 'Milo' }, { name: 'Jason'}, 'item1', 'item2' ] });
+	});
+
+
+	it('should define "shift" instance method for Model and ModelPath', function() {
+		var m = new Model([ { item: 'item1'}, { item: 'item2' } ]);
+
+		m.on(/.*/, function(path, data) {
+			posted.push(data);
+		})
+
+		var posted = [];
+		var first = m.shift();
+
+			assert.deepEqual(first, { item: 'item1' });
+			assert.deepEqual(m._data, [ { item: 'item2'} ]);
+			assert.deepEqual(posted, [
+				{ path: '', type: 'splice', index: 0, removed: [ { item: 'item1' } ],
+    				addedCount: 0, newValue: [ { item: 'item2'} ] },
+  				{ path: '[0]', type: 'removed', oldValue: { item: 'item1' } },
+  				{ path: '[0].item', type: 'removed', oldValue: 'item1' }
+  			]);
+
+		var m = new Model({ list: [ { item: 'item1'}, { item: 'item2' } ] });
+
+		m('.list').on('***', function(path, data) {
+			posted.push(data);
+		})
+
+		var posted = [];
+		var first = m('.list').shift();
+
+			assert.deepEqual(first, { item: 'item1' });
+			assert.deepEqual(m._data, { list: [ { item: 'item2'} ] });
+			assert.deepEqual(posted, [
+				{ path: '', type: 'splice', index: 0, removed: [ { item: 'item1' } ],
+    				addedCount: 0, newValue: [ { item: 'item2'} ], fullPath: '.list' },
+  				{ path: '[0]', type: 'removed', oldValue: { item: 'item1' }, fullPath: '.list[0]' },
+  				{ path: '[0].item', type: 'removed', oldValue: 'item1', fullPath: '.list[0].item' }
+  			]);
+	});
 });
-
-
-
-
-
-
