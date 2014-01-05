@@ -724,6 +724,70 @@ describe('Model class', function() {
 							  oldValue: 1 },
 			});
 	});
+
+
+	it('should define "splice" instance method for Model and ModelPath', function() {
+		var m = new Model;
+
+		var removed = m.splice(0, 0, 'item1', 'item2');
+
+			assert.deepEqual(m._data, ['item1', 'item2']);
+			assert.deepEqual(removed, []);
+
+		var m = new Model({ 0: 'item1', 1: 'item2', length: 2 });
+
+		removed = m.splice(0, 1, 'item3', 'item4');
+
+			assert.deepEqual(m._data, { 0: 'item3', 1: 'item4', 2: 'item2', length: 3 });
+			assert.deepEqual(removed, ['item1']);
+
+		var m = new Model;
+
+		removed = m('.list').splice(2, 1);
+
+			assert.equal(m._data, undefined);
+			assert.deepEqual(removed, []);
+
+		removed = m('.info[0].list').splice(0, 0, 'item1', 'item2');
+
+			assert.deepEqual(m._data, { info: [ { list: ['item1', 'item2'] } ] });
+			assert.deepEqual(removed, []);
+
+		var m = new Model;
+
+		removed = m('.list').splice(2, 0, 'item1', 'item2');
+
+			assert.deepEqual(m._data, { list: ['item1', 'item2'] });
+			assert.deepEqual(removed, []);
+
+		// samples from Mozilla site
+		m = new Model([ { fish: ['angel', 'clown', 'mandarin', 'surgeon'] } ]);
+
+		removed = m('[0].fish').splice(2, 0, "drum");
+
+			assert.deepEqual(m._data, [ { fish: ['angel', 'clown', 'drum', 'mandarin', 'surgeon'] } ]);
+			assert.deepEqual(removed, []);
+
+		removed = m('[0].fish').splice(3, 1);
+
+			assert.deepEqual(m._data, [ { fish: ['angel', 'clown', 'drum', 'surgeon'] } ]);
+			assert.deepEqual(removed, ['mandarin']);
+
+		removed = m('[$1].$2', 0, 'fish').splice(2, 1, 'trumpet');
+
+			assert.deepEqual(m._data, [ { fish: ['angel', 'clown', 'trumpet', 'surgeon'] } ]);
+			assert.deepEqual(removed, ['drum']);
+
+		removed = m('[$1]', 0).path('.$1', 'fish').splice(0, 2, 'parrot', 'anemone', 'blue');
+
+			assert.deepEqual(m._data, [ { fish: ['parrot', 'anemone', 'blue', 'trumpet', 'surgeon'] } ]);
+			assert.deepEqual(removed, ['angel', 'clown']);
+
+		removed = m('[$1].fish', 0).splice(3, Number.MAX_VALUE);
+
+			assert.deepEqual(m._data, [ { fish: ['parrot', 'anemone', 'blue'] } ]);
+			assert.deepEqual(removed, ['trumpet', 'surgeon']);
+	});
 });
 
 
