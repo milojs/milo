@@ -728,30 +728,59 @@ describe('Model class', function() {
 
 	it('should define "splice" instance method for Model and ModelPath', function() {
 		var m = new Model;
+		var posted = [];
 
-		var removed = m.splice(0, 0, 'item1', 'item2');
+		m.on(/.*/, function(path, data) {
+			posted.push(data);
+		});
 
-			assert.deepEqual(m._data, ['item1', 'item2']);
+		var removed = m.splice(0, 0, { test: 'item1' }, 'item2');
+
+			assert.deepEqual(m._data, [ { test: 'item1' }, 'item2']);
 			assert.deepEqual(removed, []);
+			assert.deepEqual(posted, [
+				{ path: '', type: 'splice', index: 0, removed: [], addedCount: 2 },
+  				{ path: '[0]', type: 'added', newValue: { test: 'item1' } },
+  				{ path: '[0].test', type: 'added', newValue: 'item1' },
+ 				{ path: '[1]', type: 'added', newValue: 'item2' }
+ 			]);
 
-		var m = new Model({ 0: 'item1', 1: 'item2', length: 2 });
+		m._data = { 0: 'item1', 1: 'item2', length: 2 };
+		posted = [];
 
 		removed = m.splice(0, 1, 'item3', 'item4');
 
 			assert.deepEqual(m._data, { 0: 'item3', 1: 'item4', 2: 'item2', length: 3 });
 			assert.deepEqual(removed, ['item1']);
+			assert.deepEqual(posted, [
+				{ path: '', type: 'splice', index: 0, removed: [ 'item1' ], addedCount: 1 },
+				{ path: '[0]', type: 'removed', oldValue: 'item1' },
+				{ path: '[0]', type: 'added', newValue: 'item3' },
+				{ path: '[1]', type: 'added', newValue: 'item4' }
+  			]);
 
-		var m = new Model;
+		m._data = undefined;
+		posted = [];
 
 		removed = m('.list').splice(2, 1);
 
 			assert.equal(m._data, undefined);
 			assert.deepEqual(removed, []);
+			assert.deepEqual(posted, []);
 
 		removed = m('.info[0].list').splice(0, 0, 'item1', 'item2');
 
 			assert.deepEqual(m._data, { info: [ { list: ['item1', 'item2'] } ] });
 			assert.deepEqual(removed, []);
+			assert.deepEqual(posted, [
+				{ path: '', type: 'added', newValue: { info: [ { list: ['item1', 'item2'] } ] } },
+				{ path: '.info', type: 'added', newValue: [ { list: ['item1', 'item2'] } ] },
+				{ path: '.info[0]', type: 'added', newValue: { list: ['item1', 'item2'] } },
+				{ path: '.info[0].list', type: 'added', newValue: [ 'item1', 'item2' ] },
+    			{ path: '.info[0].list', type: 'splice', index: 0, removed: [], addedCount: 2 },
+  				{ path: '.info[0].list[0]', type: 'added', newValue: 'item1' },
+ 				{ path: '.info[0].list[1]', type: 'added', newValue: 'item2' }
+			]);
 
 		var m = new Model;
 
