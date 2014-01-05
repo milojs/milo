@@ -43,10 +43,7 @@ milo(function() {
             context: newItem
         });
 
-        itemScope.deleteBtn.events.on('click', {
-            subscriber: _.partial(removeTodo, itemID),
-            context: newItem
-        });
+        itemScope.deleteBtn.events.on('click', _.partial(removeTodo, itemID));
 
         // newItem.data.on('*', function(path, data) {
         //     console.log('newItem data event', path, data);
@@ -61,16 +58,8 @@ milo(function() {
     }
 
     function removeTodo(id, eventType, event) {
-        // m.splice(id, 1); // - probably the best option
-        // or
-        // m.removeItem(id);
-        // NOT:
-        // m.remove(id);
-        // as this should be implemented to simply remove the property
-        this.dom.hide(); // hack, should remove and work without it
-        m('[$1]', id).set(undefined); // hack, remove/splice is needed for both Model and Data facet
-        // either setting to undefined should delete
-        // or splice method is needed with splice data message
+        m.splice(id, 1);
+        todos.list.removeItem(id, true);
     }
 
     // this method is not needed as model is updated automatically
