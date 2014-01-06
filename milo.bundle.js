@@ -1311,6 +1311,10 @@ _.extendProto(ComponentFacet, {
 	_createMessageSourceWithAPI: _createMessageSourceWithAPI
 });
 
+_.extend(ComponentFacet, {
+	requiresFacet: requiresFacet
+});
+
 
 // initComponentFacet
 function ComponentFacet$init() {
@@ -1422,6 +1426,15 @@ function _createMessageSourceWithAPI(MessageSourceClass, messengerAPIOrClass, op
 	this._setMessageSource(messageSource)
 
 	_.defineProperty(this, '_messageSource', messageSource);
+}
+
+
+function requiresFacet(facetName) {
+	// 'this' refers to the Facet Class
+	var facetRequire = this.prototype.require;
+
+	return facetRequire && (facetRequire.indexOf(_.firstUpperCase(facetName)) >= 0 
+						|| facetRequire.indexOf(_.firstLowerCase(facetName)) >= 0);
 }
 
 },{"../abstract/facet":2,"../messenger":47,"../util/error":64,"./c_utils":30,"mol-proto":72}],14:[function(require,module,exports){
@@ -2497,8 +2510,13 @@ function addItem(index) {
     // Copy component
     var component = Component.copy(this.itemSample, true);
 
-    var tempComp = binder(component.el)[component.name]
-        , innerScope = tempComp.container.scope;
+    // var tempComp = binder(component.el)[component.name]
+    //     , innerScope = tempComp.container.scope;
+
+    var compInfoScope = binder.scan(component.el)
+        , compInfo = compInfoScope._any()
+        , compInfos = compInfo.container.scope
+        , innerScope = binder.create(compInfos);
 
     // Set reference to component container facet on scope
     innerScope._hostObject = component.container;
@@ -2854,7 +2872,7 @@ function ComponentInfo(scope, el, attr) {
 	this.ComponentClass = getComponentClass(attr);
 	this.extraFacetsClasses = getComponentExtraFacets(this.ComponentClass, attr);
 
-	if (hasContainerFacet(this.ComponentClass, attr))
+	if (hasContainerFacet(this.ComponentClass, this.extraFacetsClasses))
 		this.container = {};
 }
 
@@ -2884,9 +2902,12 @@ function getComponentExtraFacets(ComponentClass, attr) {
 	return extraFacetsClasses;
 }
 
-function hasContainerFacet(ComponentClass, attr) {
+function hasContainerFacet(ComponentClass, extraFacetsClasses) {
 	return (ComponentClass.hasFacet('container')
-		|| (Array.isArray(attr.compFacets) && attr.compFacets.indexOf('Container') >= 0));
+		|| 'Container' in extraFacetsClasses 
+		|| _.someKey(extraFacetsClasses, function (FacetClass) {
+				return FacetClass.requiresFacet('container');
+			}));
 }
 
 },{"../util/error":64,"./c_facets/cf_registry":27,"./c_registry":29}],29:[function(require,module,exports){
@@ -3471,7 +3492,8 @@ _.extendProto(Scope, {
 	_each: _each,
 	_addNew: _addNew,
 	_merge: _merge,
-	_length: _length
+	_length: _length,
+	_any: _any
 });
 
 module.exports = Scope;
@@ -3526,6 +3548,11 @@ function checkName(name) {
 // returns the number of objects in scope
 function _length() {
 	return Object.keys(this).length;
+}
+
+function _any() {
+	var key = Object.keys(this)[0];
+    return key && this[key];
 }
 
 },{"../util/check":60,"../util/error":64,"mol-proto":72}],38:[function(require,module,exports){
