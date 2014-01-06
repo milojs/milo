@@ -100,7 +100,7 @@ function _createProxyMethods(proxyMethods, hostObject) {
 		}, this);
 }
 
-},{"../util/check":60,"../util/error":64,"mol-proto":72}],2:[function(require,module,exports){
+},{"../util/check":62,"../util/error":66,"mol-proto":74}],2:[function(require,module,exports){
 'use strict';
 
 
@@ -131,7 +131,7 @@ _.extendProto(Facet, {
 	init: function() {}
 });
 
-},{"mol-proto":72}],3:[function(require,module,exports){
+},{"mol-proto":74}],3:[function(require,module,exports){
 'use strict';
 
 
@@ -308,9 +308,9 @@ function createFacetedClass(name, facetsClasses, facetsConfig) {
 	return FacetedClass;
 };
 
-},{"../util/check":60,"../util/error":64,"./facet":2,"mol-proto":72}],4:[function(require,module,exports){
+},{"../util/check":62,"../util/error":66,"./facet":2,"mol-proto":74}],4:[function(require,module,exports){
 module.exports=require(1)
-},{"../util/check":60,"../util/error":64,"mol-proto":72}],5:[function(require,module,exports){
+},{"../util/check":62,"../util/error":66,"mol-proto":74}],5:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -430,7 +430,7 @@ function setClass(FoundationClass) {
 	_.defineProperty(this, 'FoundationClass', FoundationClass, _.ENUM);
 }
 
-},{"../util/check":60,"../util/error":64,"mol-proto":72}],6:[function(require,module,exports){
+},{"../util/check":62,"../util/error":66,"mol-proto":74}],6:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -552,7 +552,7 @@ function render() {
 				.replace('%compName', this.compName);
 }
 
-},{"../config":42,"../util/check":60,"../util/error":64,"./a_class":7,"mol-proto":72}],7:[function(require,module,exports){
+},{"../config":42,"../util/check":62,"../util/error":66,"./a_class":7,"mol-proto":74}],7:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -635,7 +635,7 @@ function decorate() {
 	this.set(this.render());
 }
 
-},{"../util/check":60,"../util/error":64,"mol-proto":72}],8:[function(require,module,exports){
+},{"../util/check":62,"../util/error":66,"mol-proto":74}],8:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -722,7 +722,7 @@ function render() {
 	return this.loadUrl;
 }
 
-},{"../config":42,"../util/error":64,"./a_class":7,"mol-proto":72}],9:[function(require,module,exports){
+},{"../config":42,"../util/error":66,"./a_class":7,"mol-proto":74}],9:[function(require,module,exports){
 'use strict';
 
 /**
@@ -896,7 +896,7 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 	}
 }
 
-},{"./attributes/a_bind":6,"./components/c_facets/cf_registry":27,"./components/c_info":28,"./components/c_registry":29,"./components/scope":37,"./mail":44,"./util/check":60,"./util/dom":63,"./util/error":64,"mol-proto":72}],11:[function(require,module,exports){
+},{"./attributes/a_bind":6,"./components/c_facets/cf_registry":27,"./components/c_info":28,"./components/c_registry":29,"./components/scope":37,"./mail":44,"./util/check":62,"./util/dom":65,"./util/error":66,"mol-proto":74}],11:[function(require,module,exports){
 'use strict';
 
 // <a name="classes"></a>
@@ -1249,7 +1249,7 @@ function _getScopeParent(withFacet) {
 	}
 }
 
-},{"../abstract/faceted_object":3,"../config":42,"../messenger":47,"../util/check":60,"../util/component_name":61,"./c_facets/cf_registry":27,"./c_utils":30,"mol-proto":72}],13:[function(require,module,exports){
+},{"../abstract/faceted_object":3,"../config":42,"../messenger":47,"../util/check":62,"../util/component_name":63,"./c_facets/cf_registry":27,"./c_utils":30,"mol-proto":74}],13:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facet"></a>
@@ -1424,7 +1424,7 @@ function _createMessageSourceWithAPI(MessageSourceClass, messengerAPIOrClass, op
 	_.defineProperty(this, '_messageSource', messageSource);
 }
 
-},{"../abstract/facet":2,"../messenger":47,"../util/error":64,"./c_utils":30,"mol-proto":72}],14:[function(require,module,exports){
+},{"../abstract/facet":2,"../messenger":47,"../util/error":66,"./c_utils":30,"mol-proto":74}],14:[function(require,module,exports){
 // <a name="components-facets-container"></a>
 // ###container facet
 
@@ -1471,7 +1471,7 @@ function addChildComponents(childComponents) {
 	_.extend(this.scope, childComponents);
 }
 
-},{"../../binder":10,"../c_facet":13,"./cf_registry":27,"mol-proto":72}],15:[function(require,module,exports){
+},{"../../binder":10,"../c_facet":13,"./cf_registry":27,"mol-proto":74}],15:[function(require,module,exports){
 // <a name="components-facets-data"></a>
 // ###data facet
 
@@ -1711,7 +1711,7 @@ function imgValue(el, value) {
 		return el.src;
 }
 
-},{"../../abstract/mixin":4,"../../messenger":47,"../../model/path_utils":55,"../../util/logger":66,"../c_facet":13,"../msg_api/data":32,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":72}],16:[function(require,module,exports){
+},{"../../abstract/mixin":4,"../../messenger":47,"../../model/path_utils":57,"../../util/logger":68,"../c_facet":13,"../msg_api/data":32,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":74}],16:[function(require,module,exports){
 // <a name="components-facets-dom"></a>
 // ###dom facet
 
@@ -1926,7 +1926,7 @@ function hasTextAfterSelection() {
 	return treeWalker.nextNode();
 }
 
-},{"../../attributes/a_bind":6,"../../binder":10,"../../util/check":60,"../../util/error":64,"../c_facet":13,"./cf_registry":27,"mol-proto":72}],17:[function(require,module,exports){
+},{"../../attributes/a_bind":6,"../../binder":10,"../../util/check":62,"../../util/error":66,"../c_facet":13,"./cf_registry":27,"mol-proto":74}],17:[function(require,module,exports){
 // <a name="components-facets-drag"></a>
 // ###drag facet
 
@@ -2012,7 +2012,7 @@ function startDragFacet() {
 	}
 }
 
-},{"../c_facet":13,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":72}],18:[function(require,module,exports){
+},{"../c_facet":13,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":74}],18:[function(require,module,exports){
 // <a name="components-facets-drop"></a>
 // ###drop facet
 
@@ -2060,7 +2060,7 @@ function startDropFacet() {
 	}
 }
 
-},{"../c_facet":13,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":72}],19:[function(require,module,exports){
+},{"../c_facet":13,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":74}],19:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-editable"></a>
@@ -2285,7 +2285,7 @@ function onEnterSplit(message, event) {
 	}
 }
 
-},{"../../util":65,"../../util/dom":63,"../../util/logger":66,"../c_class":12,"../c_facet":13,"../msg_api/editable":33,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":72}],20:[function(require,module,exports){
+},{"../../util":67,"../../util/dom":65,"../../util/logger":68,"../c_class":12,"../c_facet":13,"../msg_api/editable":33,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":74}],20:[function(require,module,exports){
 // <a name="components-facets-events"></a>
 // ###events facet
 
@@ -2323,7 +2323,7 @@ function init() {
 	_.defineProperty(this, '_domEventsSource', domEventsSource);
 }
 
-},{"../../messenger":47,"../c_facet":13,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":72}],21:[function(require,module,exports){
+},{"../../messenger":47,"../c_facet":13,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":74}],21:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-frame"></a>
@@ -2363,7 +2363,7 @@ function init() {
 	_.defineProperty(this, '_messageSource', messageSource);
 }
 
-},{"../../messenger":47,"../c_facet":13,"../msg_src/frame":36,"./cf_registry":27,"mol-proto":72}],22:[function(require,module,exports){
+},{"../../messenger":47,"../c_facet":13,"../msg_src/frame":36,"./cf_registry":27,"mol-proto":74}],22:[function(require,module,exports){
 'use strict';
 
 
@@ -2388,7 +2388,7 @@ facetsRegistry.add(ItemFacet);
 
 module.exports = ItemFacet;
 
-},{"../../mail":44,"../../model":53,"../c_facet":13,"./cf_registry":27,"mol-proto":72}],23:[function(require,module,exports){
+},{"../../mail":44,"../../model":54,"../c_facet":13,"./cf_registry":27,"mol-proto":74}],23:[function(require,module,exports){
 // <a name="components-facets-list"></a>
 // ###list facet
 
@@ -2552,7 +2552,7 @@ function each(callback, thisArg) {
     }, thisArg || this);
 }
 
-},{"../../binder":10,"../../mail":44,"../../model":53,"../../util/error":64,"../../util/logger":66,"../c_class":12,"../c_facet":13,"./cf_registry":27,"mol-proto":72}],24:[function(require,module,exports){
+},{"../../binder":10,"../../mail":44,"../../model":54,"../../util/error":66,"../../util/logger":68,"../c_class":12,"../c_facet":13,"./cf_registry":27,"mol-proto":74}],24:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-model"></a>
@@ -2590,7 +2590,7 @@ function ModelFacet$_createMessenger() { // Called by inherited init
 	this.m.proxyMethods(this); // Creates model's methods directly on facet
 }
 
-},{"../../model":53,"../c_facet":13,"./cf_registry":27,"mol-proto":72}],25:[function(require,module,exports){
+},{"../../model":54,"../c_facet":13,"./cf_registry":27,"mol-proto":74}],25:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -2806,7 +2806,7 @@ function Template$binder() {
 	this.owner.container.scope = thisScope[this.owner.name].container.scope;
 }
 
-},{"../../binder":10,"../../util/check":60,"../c_facet":13,"./cf_registry":27,"mol-proto":72}],27:[function(require,module,exports){
+},{"../../binder":10,"../../util/check":62,"../c_facet":13,"./cf_registry":27,"mol-proto":74}],27:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../abstract/registry')
@@ -2889,7 +2889,7 @@ function hasContainerFacet(ComponentClass, attr) {
 		|| (Array.isArray(attr.compFacets) && attr.compFacets.indexOf('Container') >= 0));
 }
 
-},{"../util/error":64,"./c_facets/cf_registry":27,"./c_registry":29}],29:[function(require,module,exports){
+},{"../util/error":66,"./c_facets/cf_registry":27,"./c_registry":29}],29:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -2990,7 +2990,7 @@ function _getContainingComponent(el, returnCurrent, condition) {
 		return _getContainingComponent(el.parentNode, true, condition);
 }
 
-},{"../config":42,"../util/check":60}],31:[function(require,module,exports){
+},{"../config":42,"../util/check":62}],31:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3105,7 +3105,7 @@ function createInternalData(sourceMessage, message, data) {
 	return internalData;
 };
 
-},{"../../messenger/m_api":48,"../../util/check":60,"mol-proto":72}],33:[function(require,module,exports){
+},{"../../messenger/m_api":48,"../../util/check":62,"mol-proto":74}],33:[function(require,module,exports){
 'use strict';
 
 
@@ -3230,7 +3230,7 @@ function filterSourceMessage(eventType, message, data) {
 	}
 }
 
-},{"../../messenger/m_api":48,"../../util/check":60,"mol-proto":72}],34:[function(require,module,exports){
+},{"../../messenger/m_api":48,"../../util/check":62,"mol-proto":74}],34:[function(require,module,exports){
 'use strict';
 
 // <a name="components-dom-constructors"></a>
@@ -3281,7 +3281,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"mol-proto":72}],35:[function(require,module,exports){
+},{"mol-proto":74}],35:[function(require,module,exports){
 'use strict';
 
 // <a name="components-source-dom"></a>
@@ -3370,7 +3370,7 @@ function trigger(eventType, properties) {
 	return notCancelled;
 }
 
-},{"../../messenger/m_source":49,"../../util/check":60,"../c_class":12,"./de_constrs":34,"mol-proto":72}],36:[function(require,module,exports){
+},{"../../messenger/m_source":49,"../../util/check":62,"../c_class":12,"./de_constrs":34,"mol-proto":74}],36:[function(require,module,exports){
 'use strict';
 
 // <a name="components-source-iframe"></a>
@@ -3444,7 +3444,7 @@ function handleEvent(event) {
 	this.dispatchMessage(event.data.type, event);
 }
 
-},{"../../messenger/m_source":49,"../../util/check":60,"../../util/error":64,"../c_class":12,"mol-proto":72}],37:[function(require,module,exports){
+},{"../../messenger/m_source":49,"../../util/check":62,"../../util/error":66,"../c_class":12,"mol-proto":74}],37:[function(require,module,exports){
 // <a name="scope"></a>
 // scope class
 // -----------
@@ -3528,7 +3528,7 @@ function _length() {
 	return Object.keys(this).length;
 }
 
-},{"../util/check":60,"../util/error":64,"mol-proto":72}],38:[function(require,module,exports){
+},{"../util/check":62,"../util/error":66,"mol-proto":74}],38:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3662,7 +3662,7 @@ config({
 	}
 });
 
-},{"dot":71,"mol-proto":72}],43:[function(require,module,exports){
+},{"dot":73,"mol-proto":74}],43:[function(require,module,exports){
 // <a name="loader"></a>
 // milo.loader
 // -----------
@@ -3710,7 +3710,7 @@ module.exports = loader;
 
 
 function loader(rootEl, callback) {	
-	miloMail.onMessage('domready', function() {
+	miloMail.on('domready', function() {
 		if (typeof rootEl == 'function') {
 			callback = rootEl;
 			rootEl = undefined;
@@ -3769,7 +3769,7 @@ function loadView(el, callback) {
 	});
 }
 
-},{"./attributes/a_load":8,"./config":42,"./mail":44,"./util/dom":63,"./util/error":64,"./util/logger":66,"./util/request":68}],44:[function(require,module,exports){
+},{"./attributes/a_load":8,"./config":42,"./mail":44,"./util/dom":65,"./util/error":66,"./util/logger":68,"./util/request":70}],44:[function(require,module,exports){
 'use strict';
 
 // <a name="mail"></a>
@@ -3799,15 +3799,9 @@ var mailMsgSource = new MailMessageSource(miloMail, { trigger: 'trigger' }, new 
 miloMail._setMessageSource(mailMsgSource);
 
 
-_.extend(miloMail, {
-	on: miloMail.onMessage,
-	off: miloMail.offMessage
-});
-
-
 module.exports = miloMail;
 
-},{"../messenger":47,"./mail_api":45,"./mail_source":46,"mol-proto":72}],45:[function(require,module,exports){
+},{"../messenger":47,"./mail_api":45,"./mail_source":46,"mol-proto":74}],45:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('../messenger/m_api')
@@ -3854,7 +3848,7 @@ function filterSourceMessage(sourceMessage, msgType, msgData) {
 		return windowMessagePrefix + msgData.data.type == msgType;
 };
 
-},{"../messenger/m_api":48,"../util/check":60,"mol-proto":72}],46:[function(require,module,exports){
+},{"../messenger/m_api":48,"../util/check":62,"mol-proto":74}],46:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../messenger/m_source')
@@ -3933,7 +3927,7 @@ function trigger(msgType, data) {
 		window.postMessage(data, '*')
 }
 
-},{"../components/msg_src/de_constrs":34,"../messenger/m_source":49,"../util/check":60,"../util/error":64,"mol-proto":72}],47:[function(require,module,exports){
+},{"../components/msg_src/de_constrs":34,"../messenger/m_source":49,"../util/check":62,"../util/error":66,"mol-proto":74}],47:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -3974,8 +3968,8 @@ var messagesSplitRegExp = Messenger.messagesSplitRegExp = /\s*(?:\,|\s)\s*/;
  * ####Messenger instance methods####
  *
  * - [init](#init)
- * - [onMessage](#onMessage)
- * - [offMessage](#offMessage)
+ * - [on](#Messenger$on) (alias - onMessage, deprecated)
+ * - [off](#Messenger$off) (alias - offMessage, deprecated)
  * - [onMessages](#onMessages)
  * - [offMessages](#offMessages)
  * - [postMessage](#postMessage)
@@ -3993,8 +3987,10 @@ var messagesSplitRegExp = Messenger.messagesSplitRegExp = /\s*(?:\,|\s)\s*/;
  */
 _.extendProto(Messenger, {
 	init: init, // called by Mixin (superclass)
-	onMessage: onMessage,
-	offMessage: offMessage,
+	on: Messenger$on,
+	onMessage: Messenger$on, // deprecated
+	off: Messenger$off,
+	offMessage: Messenger$off, // deprecated
 	onMessages: onMessages,
 	offMessages: offMessages,
 	postMessage: postMessage,
@@ -4012,11 +4008,10 @@ _.extendProto(Messenger, {
 /**
  * A default map of proxy methods used by ComponentFacet and Component classes to pass to Messenger when it is instantiated.
  * This map is for convenience only, it is NOT used internally by Messenger, a host class should pass it for methods to be proxied this way.
- * `onMessage` and `offMessage` are proxied as `on` and `off` if this map is used.
  */
 Messenger.defaultMethods = {
-	on: 'onMessage',
-	off: 'offMessage',
+	on: 'on',
+	off: 'off',
 	onMessages: 'onMessages',
 	offMessages: 'offMessages',
 	postMessage: 'postMessage',
@@ -4030,9 +4025,9 @@ module.exports = Messenger;
 /**
  * Messenger instance method
  * Initializes Messenger. Method is called by Mixin class constructor.
- * See [onMessage](#onMessage) method, [Messenger](#Messenger) class above and [MessageSource](./message_source.js.html) class.
+ * See [on](#Messenger$on) method, [Messenger](#Messenger) class above and [MessageSource](./message_source.js.html) class.
  *
- * @param {Object} hostObject Optional object that stores the messenger on one of its properties. It is used to proxy methods of messenger and also as a context for subscribers when they are called by the Messenger. See onMessage method.
+ * @param {Object} hostObject Optional object that stores the messenger on one of its properties. It is used to proxy methods of messenger and also as a context for subscribers when they are called by the Messenger. See `on` method.
  * @param {Object} proxyMethods Optional map of method names; key - proxy method name, value - messenger's method name.
  * @param {MessageSource} messageSource Optional messageSource linked to the messenger. If messageSource is supplied, the reference to the messenger will stored on its 'messenger' property
  */
@@ -4082,7 +4077,7 @@ function init(hostObject, proxyMethods, messageSource) {
  *  Subscriber can also be an object with properties `subscriber` (function) and `context` ("this" value when subscriber is called)
  * @return {Boolean}
  */
-function onMessage(messages, subscriber) {
+function Messenger$on(messages, subscriber) {
 	check(messages, Match.OneOf(String, [String], RegExp));
 	check(subscriber, Match.OneOf(Function, { subscriber: Function, context: Match.Any }));
 
@@ -4109,12 +4104,12 @@ function onMessage(messages, subscriber) {
 
 /**
  * "Private" Messenger instance method
- * It is called by [onMessage](#onMessage) to register subscriber for one message type.
+ * It is called by [on](#Messenger$on) to register subscriber for one message type.
  * Returns `true` if this subscriber is not yet registered for this type of message.
  * If messenger has [MessageSource](./message_source.js.html) attached to it, MessageSource will be notified when the first subscriber for a given message is added.
  *
  * @private
- * @param {Object} subscribersHash The map of subscribers determined by [onMessage](#onMessage) based on Message type, can be `this._patternMessageSubscribers` or `this._messageSubscribers`
+ * @param {Object} subscribersHash The map of subscribers determined by [on](#Messenger$on) based on Message type, can be `this._patternMessageSubscribers` or `this._messageSubscribers`
  * @param {String} message Message type
  * @param {Function|Object} subscriber Subscriber function to be added or object with properties `subscriber` (function) and `context` (value of "this" when subscriber is called)
  * @return {Boolean}
@@ -4178,7 +4173,7 @@ function onMessages(messageSubscribers) {
 	check(messageSubscribers, Match.ObjectHash(Match.OneOf(Function, { subscriber: Function, context: Match.Any })));
 
 	var notYetRegisteredMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
-		return this.onMessage(messages, subscriber);
+		return this.on(messages, subscriber);
 	}, this);
 
 	return notYetRegisteredMap;
@@ -4205,7 +4200,7 @@ function onMessages(messageSubscribers) {
  * @param {Function} subscriber Message subscriber - Optional function that will be removed from the list of subscribers for the message(s). If subscriber is not supplied, all subscribers will be removed from this message(s).
  * @return {Boolean}
  */
-function offMessage(messages, subscriber) {
+function Messenger$off(messages, subscriber) {
 	check(messages, Match.OneOf(String, [String], RegExp));
 	check(subscriber, Match.Optional(Match.OneOf(Function, { subscriber: Function, context: Match.Any }))); 
 
@@ -4232,12 +4227,12 @@ function offMessage(messages, subscriber) {
 
 /**
  * "Private" Messenger instance method
- * It is called by [offMessage](#offMessage) to remove subscriber for one message type.
+ * It is called by [off](#Messenger$off) to remove subscriber for one message type.
  * Returns `true` if this subscriber was registered for this type of message.
  * If messenger has [MessageSource](./message_source.js.html) attached to it, MessageSource will be notified when the last subscriber for a given message is removed and there is no more subscribers for this message.
  *
  * @private
- * @param {Object} subscribersHash The map of subscribers determined by [offMessage](#offMessage) based on message type, can be `this._patternMessageSubscribers` or `this._messageSubscribers`
+ * @param {Object} subscribersHash The map of subscribers determined by [off](#Messenger$off) based on message type, can be `this._patternMessageSubscribers` or `this._messageSubscribers`
  * @param {String} message Message type
  * @param {Function} subscriber Subscriber function to be removed
  * @return {Boolean}
@@ -4268,7 +4263,7 @@ function _removeSubscriber(subscribersHash, message, subscriber) {
  * If messenger has [MessageSource](./message_source.js.html) attached to it, MessageSource will be notified that all message subscribers were removed so it can unsubscribe from the source.
  *
  * @private
- * @param {Object} subscribersHash The map of subscribers determined by [offMessage](#offMessage) based on message type, can be `this._patternMessageSubscribers` or `this._messageSubscribers`
+ * @param {Object} subscribersHash The map of subscribers determined by [off](#Messenger$off) based on message type, can be `this._patternMessageSubscribers` or `this._messageSubscribers`
  * @param {String} message Message type
  */
 function _removeAllSubscribers(subscribersHash, message) {
@@ -4300,7 +4295,7 @@ function offMessages(messageSubscribers) {
 	check(messageSubscribers, Match.ObjectHash(Match.Optional(Match.OneOf(Function, { subscriber: Function, context: Match.Any }))));
 
 	var subscriberRemovedMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
-		return this.offMessage(messages, subscriber);
+		return this.off(messages, subscriber);
 	}, this);
 
 	return subscriberRemovedMap;	
@@ -4444,7 +4439,7 @@ function _setMessageSource(messageSource) {
  	messageSource.messenger = this;
 }
 
-},{"../abstract/mixin":4,"../util/check":60,"../util/error":64,"./m_source":49,"mol-proto":72}],48:[function(require,module,exports){
+},{"../abstract/mixin":4,"../util/check":62,"../util/error":66,"./m_source":49,"mol-proto":74}],48:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -4627,7 +4622,7 @@ function filterSourceMessage(sourceMessage, message, internalData) {
 	return true;
 }
 
-},{"mol-proto":72}],49:[function(require,module,exports){
+},{"mol-proto":74}],49:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -4764,7 +4759,10 @@ function onSubscriberRemoved(message) {
  */
 function dispatchMessage(sourceMessage, sourceData) {
 	var api = this.messengerAPI
-		, internalMessages = api.getInternalMessages(sourceMessage, sourceData);
+		, internalMessages = api.getInternalMessages(sourceMessage);
+
+	// if (/^\.list(\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]|)(\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]|)(\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]|)$/.test(sourceMessage))
+	// 	cnsl.log('dispatchMessage found', this._hostObject, sourceMessage, internalMessages);
 							
 	if (internalMessages) 
 		internalMessages.forEach(function (message) {
@@ -4775,7 +4773,64 @@ function dispatchMessage(sourceMessage, sourceData) {
 	}, this);
 }
 
-},{"../abstract/mixin":4,"../util/check":60,"../util/error":64,"../util/logger":66,"./m_api":48,"mol-proto":72}],50:[function(require,module,exports){
+},{"../abstract/mixin":4,"../util/check":62,"../util/error":66,"../util/logger":68,"./m_api":48,"mol-proto":74}],50:[function(require,module,exports){
+'use strict';
+
+
+var MessageSource = require('./m_source')
+	, _ = require('mol-proto')
+	, check = require('../util/check');
+
+
+/**
+ * Subclass of MessageSource that allows to connect Messenger to another Messenger using it as external source.
+ */
+var MessengerMessageSource = _.createSubclass(MessageSource, 'MessengerMessageSource');
+
+module.exports = MessengerMessageSource;
+
+
+/**
+ * ####MessengerMessageSource instance methods####
+ */
+_.extendProto(MessengerMessageSource, {
+	init: init,
+	addSourceSubscriber: addSourceSubscriber,
+	removeSourceSubscriber: removeSourceSubscriber,
+});
+
+/**
+ * Initializes MessengerMessageSource
+ * Defines one parameter in addition to [MessageSource](./m_source.js.html) parameters
+ *
+ * @param {Messenger} sourceMessenger messenger this message source connects to
+ */
+function init(hostObject, proxyMethods, messengerAPI, sourceMessenger) {
+	MessageSource.prototype.init.apply(this, arguments);
+	this.sourceMessenger = sourceMessenger;
+}
+
+
+/**
+ * Subscribes to source message. See [MessageSource](./m_source.js.html) docs.
+ *
+ * @param {String|Regex} sourceMessage source message to subscribe to
+ */
+function addSourceSubscriber(sourceMessage) {
+	this.sourceMessenger.on(sourceMessage, { context: this, subscriber: this.dispatchMessage });
+}
+
+
+/**
+ * Unsubscribes from source message. See [MessageSource](./m_source.js.html) docs.
+ *
+ * @param {String|Regex} sourceMessage source message to unsubscribe from
+ */
+function removeSourceSubscriber(sourceMessage) {
+	this.sourceMessenger.off(sourceMessage, { context: this, subscriber: this.dispatchMessage });
+}
+
+},{"../util/check":62,"./m_source":49,"mol-proto":74}],51:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -4848,7 +4903,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./attributes":9,"./binder":10,"./classes":11,"./components/c_class":12,"./components/c_facet":13,"./config":42,"./loader":43,"./mail":44,"./messenger":47,"./minder":51,"./model":53,"./registry":57,"./use_components":58,"./use_facets":59,"./util":65,"mol-proto":72}],51:[function(require,module,exports){
+},{"./attributes":9,"./binder":10,"./classes":11,"./components/c_class":12,"./components/c_facet":13,"./config":42,"./loader":43,"./mail":44,"./messenger":47,"./minder":52,"./model":54,"./registry":59,"./use_components":60,"./use_facets":61,"./util":67,"mol-proto":74}],52:[function(require,module,exports){
 'use strict';
 
 var Connector = require('./model/connector');
@@ -4885,7 +4940,7 @@ function minder(ds1, mode, ds2, options) {
 		return new Connector(ds1, mode, ds2, options);
 }
 
-},{"./model/connector":52}],52:[function(require,module,exports){
+},{"./model/connector":53}],53:[function(require,module,exports){
 'use strict';
 
 var ConnectorError = require('../util/error').Connector
@@ -5020,7 +5075,7 @@ function off() {
 	}
 }
 
-},{"../util/error":64,"../util/logger":66,"mol-proto":72}],53:[function(require,module,exports){
+},{"../util/error":66,"../util/logger":68,"mol-proto":74}],54:[function(require,module,exports){
 'use strict';
 
 var ModelPath = require('./m_path')
@@ -5166,7 +5221,7 @@ function proxyMethods(modelHostObject) {
 	modelHostObject = modelHostObject || this._hostObject;
 	Mixin.prototype._createProxyMethods.call(this, modelMethodsToProxy, modelHostObject);
 }
-var modelMethodsToProxy = ['get', 'set', 'path', 'push'];
+var modelMethodsToProxy = ['path', 'get', 'set', 'splice', 'len', 'push', 'pop', 'unshift', 'shift'];
 
 
 /**
@@ -5176,10 +5231,13 @@ _.extend(Model, {
 	Path: ModelPath
 });
 
-},{"../abstract/mixin":4,"../messenger":47,"../util/check":60,"../util/error":64,"../util/logger":66,"./m_path":54,"./path_utils":55,"./synthesize":56,"mol-proto":72}],54:[function(require,module,exports){
+},{"../abstract/mixin":4,"../messenger":47,"../util/check":62,"../util/error":66,"../util/logger":68,"./m_path":55,"./path_utils":57,"./synthesize":58,"mol-proto":74}],55:[function(require,module,exports){
 'use strict';
 
 var synthesize = require('./synthesize')
+	, Messenger = require('../messenger')
+	, ModelPathMsgAPI = require('./path_msg_api')
+	, MessengerMessageSource = require('../messenger/msngr_source')
 	, _ = require('mol-proto')
 	, check = require('../util/check')
 	, Match = check.Match;
@@ -5210,6 +5268,9 @@ function ModelPath(model, path) { // ,... - additional arguments for interpolati
 		_path: path,
 		_args: _.slice(arguments, 1)
 	});
+
+	// messenger fails on "*" subscriptions
+	// this._prepareMessenger(this._path, this._model);
 
 	// compiling getter and setter
 	var methods = synthesize(path);
@@ -5266,7 +5327,8 @@ _.extendProto(ModelPath, {
 	push: ModelPath$push,
 	pop: ModelPath$pop,
 	unshift: ModelPath$unshift,
-	shift: ModelPath$shift
+	shift: ModelPath$shift,
+	_prepareMessenger: _prepareMessenger
 })
 
 
@@ -5372,7 +5434,97 @@ function ModelPath$shift() { // arguments
 	return this.splice(0, 1)[0];
 }
 
-},{"../util/check":60,"./synthesize":56,"mol-proto":72}],55:[function(require,module,exports){
+
+/**
+ * ModelPath instance method
+ * Initializes ModelPath mesenger with Model's messenger as its source ([MessengerMessageSource](../messenger/msngr_source.js.html)) and [ModelPathMsgAPI](./path_msg_api.js.html) as [MessengerAPI](../messenger/m_api.js.html)
+ */
+function _prepareMessenger() {
+	var mPathAPI = new ModelPathMsgAPI(this._path);
+
+	// create MessengerMessageSource connected to Model's messenger
+	var modelMessageSource = new MessengerMessageSource(this, undefined, mPathAPI, this._model);
+
+	// create messenger with model passed as hostObject (default message dispatch context)
+	// and without proxying methods (we don't want to proxy them to Model)
+	var mPathMessenger = new Messenger(this._model, undefined, modelMessageSource);
+
+	// now proxy messenger's methods to ModelPath instance
+	mPathMessenger._createProxyMethods(Messenger.defaultMethods, this);
+
+	// store messenger on ModelPath instance
+	_.defineProperty(this, '_messenger', mPathMessenger);
+}
+
+},{"../messenger":47,"../messenger/msngr_source":50,"../util/check":62,"./path_msg_api":56,"./synthesize":58,"mol-proto":74}],56:[function(require,module,exports){
+'use strict';
+
+var MessengerAPI = require('../messenger/m_api')
+	, _ = require('mol-proto');
+
+
+/**
+ * Subclass of MessengerAPI that is used to translate messages of Messenger on ModelPath to Messenger on Model.
+ */
+var ModelPathMsgAPI = _.createSubclass(MessengerAPI, 'ModelPathMsgAPI');
+
+module.exports = ModelPathMsgAPI;
+
+
+/**
+ * ####ModelPathMsgAPI instance methods####
+ *
+ * - [init](#init) - initializes MessengerAPI
+ * - [translateToSourceMessage](#translateToSourceMessage) - converts internal message type to source (external) message type
+ * - [createInternalData](#createInternalData) - converts source message data received via MessageSource to internal message data
+ * - [filterSourceMessage](#filterSourceMessage) - filters source message based on the data of the message and the corresponding internal message that is about to be sent on Messenger
+ */
+_.extendProto(ModelPathMsgAPI, {
+	init: init,
+	translateToSourceMessage: translateToSourceMessage,
+	createInternalData: createInternalData,
+});
+
+
+/**
+ * ModelPathMsgAPI instance method
+ * Called by MessengerAPI constructor.
+ */
+function init(rootPath) {
+	MessengerAPI.prototype.init.apply(this, arguments);
+	this.rootPath = rootPath;
+}
+
+/**
+ * ModelPathMsgAPI instance method
+ * Translates relative access paths of ModelPath to full path of Model.
+ *
+ * @param {String} accessPath relative access path to be translated
+ * @return {String}
+ */
+function translateToSourceMessage(accessPath) {
+	if (accessPath instanceof RegExp) return accessPath;
+	return this.rootPath + accessPath;
+}
+
+
+/**
+ * ModelPathMsgAPI instance method
+ * Changes path in message on model to relative path and adds `fullPath` property to message data.
+ *
+ * @param {String} fullSourceAccessPath full access path on Model
+ * @param {String} accessPath relative access path on ModelPath
+ * @param {Object} sourceData data received from Model, will be translated as described to be dispatched to ModelPath
+ * @return {Object}
+ */
+function createInternalData(fullSourceAccessPath, accessPath, sourceData) {
+	var internalData = _.clone(sourceData);
+	internalData.fullPath = fullSourceAccessPath;
+	internalData.path = accessPath;
+	return internalData;
+}
+
+},{"../messenger/m_api":48,"mol-proto":74}],57:[function(require,module,exports){
 'use strict';
 
 // <a name="model-path"></a>
@@ -5514,7 +5666,7 @@ function wrapMessengerMethods(methodsNames) {
 	_.defineProperties(this, wrappedMethods);
 }
 
-},{"../util/check":60,"mol-proto":72}],56:[function(require,module,exports){
+},{"../util/check":62,"mol-proto":74}],58:[function(require,module,exports){
 'use strict';
 
 var pathUtils = require('../path_utils')
@@ -5675,7 +5827,7 @@ _.extend(synthesizePathMethods, {
 	modelSplice: _synthesize(modelSpliceSynthesizer, '', [])
 });
 
-},{"../path_utils":55,"dot":71,"fs":69,"mol-proto":72}],57:[function(require,module,exports){
+},{"../path_utils":57,"dot":73,"fs":71,"mol-proto":74}],59:[function(require,module,exports){
 'use strict';
 
 /**
@@ -5689,7 +5841,7 @@ var registry = module.exports = {
 	components: require('./components/c_registry')
 };
 
-},{"./components/c_facets/cf_registry":27,"./components/c_registry":29}],58:[function(require,module,exports){
+},{"./components/c_facets/cf_registry":27,"./components/c_registry":29}],60:[function(require,module,exports){
 'use strict';
 
 require('./components/classes/View');
@@ -5698,7 +5850,7 @@ require('./components/ui/Select');
 require('./components/ui/Input');
 require('./components/ui/Button');
 
-},{"./components/classes/View":31,"./components/ui/Button":38,"./components/ui/Group":39,"./components/ui/Input":40,"./components/ui/Select":41}],59:[function(require,module,exports){
+},{"./components/classes/View":31,"./components/ui/Button":38,"./components/ui/Group":39,"./components/ui/Input":40,"./components/ui/Select":41}],61:[function(require,module,exports){
 'use strict';
 
 // ['Dom'
@@ -5729,7 +5881,7 @@ require('./components/c_facets/Split');
 require('./components/c_facets/List');
 require('./components/c_facets/Item');
 
-},{"./components/c_facets/Container":14,"./components/c_facets/Data":15,"./components/c_facets/Dom":16,"./components/c_facets/Drag":17,"./components/c_facets/Drop":18,"./components/c_facets/Editable":19,"./components/c_facets/Events":20,"./components/c_facets/Frame":21,"./components/c_facets/Item":22,"./components/c_facets/List":23,"./components/c_facets/ModelFacet":24,"./components/c_facets/Split":25,"./components/c_facets/Template":26}],60:[function(require,module,exports){
+},{"./components/c_facets/Container":14,"./components/c_facets/Data":15,"./components/c_facets/Dom":16,"./components/c_facets/Drag":17,"./components/c_facets/Drop":18,"./components/c_facets/Editable":19,"./components/c_facets/Events":20,"./components/c_facets/Frame":21,"./components/c_facets/Item":22,"./components/c_facets/List":23,"./components/c_facets/ModelFacet":24,"./components/c_facets/Split":25,"./components/c_facets/Template":26}],62:[function(require,module,exports){
 // <a name="utils-check"></a>
 // milo.utils.check
 // -----------
@@ -6098,7 +6250,7 @@ function _prependPath(key, base) {
 };
 
 
-},{"mol-proto":72}],61:[function(require,module,exports){
+},{"mol-proto":74}],63:[function(require,module,exports){
 'use strict';
 
 var count = require('./count')
@@ -6112,7 +6264,7 @@ function componentName() {
 	return prefix + count();
 }
 
-},{"../config":42,"./count":62}],62:[function(require,module,exports){
+},{"../config":42,"./count":64}],64:[function(require,module,exports){
 // <a name="utils-count"></a>
 // milo.utils.count
 // ----------------
@@ -6132,7 +6284,7 @@ componentCount.get = function() {
 
 module.exports = componentCount;
 
-},{}],63:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 'use strict';
 
 
@@ -6191,7 +6343,7 @@ function getElementOffset(el) {
     return { topOffset: yPos, leftOffset: xPos };
 }
 
-},{}],64:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 // <a name="utils-error"></a>
 // milo.utils.error
 // -----------
@@ -6233,7 +6385,7 @@ function error$toBeImplemented() {
 	throw new error.AbstractClass('calling the method of an absctract class');
 }
 
-},{"mol-proto":72}],65:[function(require,module,exports){
+},{"mol-proto":74}],67:[function(require,module,exports){
 // <a name="utils"></a>
 // milo.utils
 // -----------
@@ -6252,7 +6404,7 @@ var util = {
 
 module.exports = util;
 
-},{"./check":60,"./component_name":61,"./count":62,"./dom":63,"./error":64,"./logger":66,"./request":68}],66:[function(require,module,exports){
+},{"./check":62,"./component_name":63,"./count":64,"./dom":65,"./error":66,"./logger":68,"./request":70}],68:[function(require,module,exports){
 // <a name="utils-logger"></a>
 // milo.utils.logger
 // -----------
@@ -6268,7 +6420,7 @@ var logger = new Logger({ level: 3 });
 
 module.exports = logger;
 
-},{"./logger_class":67}],67:[function(require,module,exports){
+},{"./logger_class":69}],69:[function(require,module,exports){
 // ### Logger Class
 
 // Properties:
@@ -6379,7 +6531,7 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"mol-proto":72}],68:[function(require,module,exports){
+},{"mol-proto":74}],70:[function(require,module,exports){
 // <a name="utils-request"></a>
 // milo.utils.request
 // -----------
@@ -6431,13 +6583,13 @@ function get(url, callback) {
 	request(url, { method: 'GET' }, callback);
 }
 
-},{"mol-proto":72}],69:[function(require,module,exports){
+},{"mol-proto":74}],71:[function(require,module,exports){
 
 // not implemented
 // The reason for having an empty file and not throwing is to allow
 // untraditional implementation of this module.
 
-},{}],70:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 // doT.js
 // 2011, Laura Doktorova, https://github.com/olado/doT
 // Licensed under the MIT license.
@@ -6574,7 +6726,7 @@ function get(url, callback) {
 	};
 }());
 
-},{}],71:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 /* doT + auto-compilation of doT templates
  *
  * 2012, Laura Doktorova, https://github.com/olado/doT
@@ -6719,7 +6871,7 @@ InstallDots.prototype.compileAll = function() {
 	return this.__rendermodule;
 };
 
-},{"./doT":70,"fs":69}],72:[function(require,module,exports){
+},{"./doT":72,"fs":71}],74:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -6872,7 +7024,7 @@ if (typeof module == 'object' && module.exports)
 	// export for node/browserify
 	module.exports = Proto;
 
-},{"./proto_array":73,"./proto_function":74,"./proto_object":75,"./proto_prototype":76,"./proto_string":77,"./utils":78}],73:[function(require,module,exports){
+},{"./proto_array":75,"./proto_function":76,"./proto_object":77,"./proto_prototype":78,"./proto_string":79,"./utils":80}],75:[function(require,module,exports){
 'use strict';
 
 var __ = require('./proto_object')
@@ -7026,7 +7178,7 @@ function mapToObject(callback, thisArg) {
 	return result;
 }
 
-},{"./proto_object":75,"./utils":78}],74:[function(require,module,exports){
+},{"./proto_object":77,"./utils":80}],76:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7132,7 +7284,7 @@ function memoize(hashFunc, limit) {
 	};
 }
 
-},{}],75:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 'use strict';
 
 
@@ -7612,7 +7764,7 @@ function everyKey(callback, thisArg, onlyEnumerable) {
 	}
 }
 
-},{"./utils":78}],76:[function(require,module,exports){
+},{"./utils":80}],78:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7726,7 +7878,7 @@ function makeSubclass(Superclass) {
 	return this;
 }
 
-},{"./proto_function":74,"./proto_object":75}],77:[function(require,module,exports){
+},{"./proto_function":76,"./proto_object":77}],79:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7758,7 +7910,7 @@ function firstLowerCase() {
 	return this[0].toLowerCase() + this.slice(1);
 }
 
-},{}],78:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 'use strict';
 
 var utils = module.exports = {
@@ -7823,5 +7975,5 @@ function makeFindMethod(eachMethod, findWhat) {
 	}
 }
 
-},{}]},{},[50])
+},{}]},{},[51])
 ;
