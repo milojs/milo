@@ -1634,11 +1634,11 @@ function onChildData(msgType, data) {
 		}
 
 		var listFacet = this.owner.list
-			, listCount = listFacet && listFacet.count();
+			, listCount = listFacet && listFacet.count()
+			, removeCount = listCount - value.length;
 
-		if (listCount > value.length)
-			for (var itemId = value.length; itemId < listCount; itemId++)
-				listFacet.removeItem(itemId, true);
+		while (removeCount-- > 0)
+			listFacet.removeItem(value.length, true);
 	} else
 		valueSet = this._setScalarValue(value);
 
@@ -1694,7 +1694,7 @@ function Data$_postDataChanged(msgData) {
 	var parentData = this.scopeParent();
 	
 	if (parentData) {
-		var parentMsg = _.clone(message);
+		var parentMsg = _.clone(msgData);
 		parentMsg.path = (this._path || ('.' + thisComp.name))  + parentMsg.path;
 		parentData.postMessage('childdata', parentMsg);
 	}
@@ -2628,7 +2628,7 @@ function removeItem(index, doSplice) {
     var comp = this.item(index);
 
     if (! comp)
-        logger.warn('attempt to remove list item with id that does not exist');
+        return logger.warn('attempt to remove list item with id that does not exist');
 
     this._listItems[index] = undefined;
     delete this._listItemsHash[comp.name];
@@ -3113,9 +3113,6 @@ module.exports = View;
 },{"../c_class":12,"../c_registry":29}],32:[function(require,module,exports){
 'use strict';
 
-// <a name="components-source-data"></a>
-// ###component data source
-
 
 var MessengerAPI = require('../../messenger/m_api')
 	, _ = require('mol-proto')
@@ -3124,6 +3121,10 @@ var MessengerAPI = require('../../messenger/m_api')
 
 
 // class to handle subscribtions to changes in DOM for UI (maybe also content editable) elements
+
+/**
+ * A class
+ */
 var DataMsgAPI = _.createSubclass(MessengerAPI, 'DataMsgAPI', true);
 
 
