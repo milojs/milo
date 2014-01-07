@@ -821,7 +821,13 @@ function create(scanScope, hostObject) {
 	var scope = new Scope(scanScope._rootEl, hostObject);
 
 	scanScope._each(function(compInfo) {
-		var aComponent = Component.create(compInfo);
+		var info = _.clone(compInfo)
+
+		// set correct component's scope
+		info.scope = scope;
+
+		// create component
+		var aComponent = Component.create(info);
 
 		scope._add(aComponent, aComponent.name);
 		if (aComponent.container)
@@ -863,7 +869,7 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 			}
 		}
 
-		// if scope wasn't previously created on container facet, create empy scope anyway
+		// if scope wasn't previously created on container facet, create empty scope anyway
 		if (isContainer && ! scopeObject.container.scope)
 			scopeObject.container.scope = new Scope(el);
 
@@ -1672,8 +1678,6 @@ function onChildData(msgType, data) {
  * @param {String|Number} value value to set to DOM element
  */
 function Data$del() {
-	console.log('Data$del');
-
 	var itemFacet = this.owner.item;
 	if (itemFacet)
 		itemFacet.removeItem();
@@ -1704,8 +1708,8 @@ function Data$_setScalarValue(value) {
  * @param {Object} msgData data change message
  */
 function Data$_postDataChanged(msgData) {
-	if (msgData.oldValue == msgData.newValue)
-		return;
+	// if (msgData.oldValue == msgData.newValue)
+	// 	return;
 
 	var parentData = this.scopeParent();
 	
@@ -5152,7 +5156,7 @@ function Connector(ds1, mode, ds2, options) {
 		isOn: false	
 	});
 
-	this.on();
+	this.turnOn();
 
 	function modeParseError() {
 		throw new ConnectorError('invalid Connector mode: ' + mode);
@@ -5161,16 +5165,16 @@ function Connector(ds1, mode, ds2, options) {
 
 
 _.extendProto(Connector, {
-	on: on,
-	off: off
+	turnOn: turnOn,
+	turnOff: turnOff
 });
 
 
 /**
- * on
+ * turnOn
  * Method of Connector that enables connection (if it was previously disabled)
  */
-function on() {
+function turnOn() {
 	if (this.isOn)
 		return logger.warn('data sources are already connected');
 
@@ -5221,10 +5225,10 @@ function on() {
 
 
 /**
- * off
+ * turnOff
  * Method of Connector that disables connection (if it was previously enabled)
  */
-function off() {
+function turnOff() {
 	if (! this.isOn)
 		return logger.warn('data sources are already disconnected');
 

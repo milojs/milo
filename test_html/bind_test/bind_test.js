@@ -65,32 +65,24 @@ describe('milo binder', function() {
         for (var i = 0; i < 10; i++)
             listArray.push({title: 'Title ' + i, desc: 'Description ' + i});
 
-        // myList.data.on(/.*/, function(msgType, data) {
-        //     console.log(msgType, data);
-        //     console.log(m.get());
-        // })
-
-        // milo.logger.level = 0; // errors
-
         m.set(listArray);
 
         listButton.events.on('mousedown', function (eventType, event) {
             myList.data.path('[2]').set({title: 'New Title', desc: 'New Description'});
-            // console.log(myList.data.get());
         });
 
         ctrl.connectButton.events.on('click', function() {
             console.log('connecting');
             ctrl.linkState.data.set('linked');
-            cnct[0].on();
-            cnct[1].on();
+            cnct[0].turnOn();
+            cnct[1].turnOn();
         });
 
         ctrl.disconnectButton.events.on('click', function() {
             console.log('disconnecting');
             ctrl.linkState.data.set('not linked');
-            cnct[0].off();
-            cnct[1].off();
+            cnct[0].turnOff();
+            cnct[1].turnOff();
         });
     });
 });
