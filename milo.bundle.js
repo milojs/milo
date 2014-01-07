@@ -6661,6 +6661,8 @@ levels.forEach(function (name) {
 module.exports = Logger;
 
 },{"mol-proto":74}],70:[function(require,module,exports){
+'use strict';
+
 // <a name="utils-request"></a>
 // milo.utils.request
 // -----------
@@ -6680,7 +6682,7 @@ module.exports = Logger;
 // });
 // ```
 
-'use strict';
+
 
 var _ = require('mol-proto');
 
@@ -6704,12 +6706,28 @@ function request(url, opts, callback) {
 }
 
 _.extend(request, {
-	get: get
+	get: request$get,
+	json: request$json
 });
 
 
-function get(url, callback) {
+function request$get(url, callback) {
 	request(url, { method: 'GET' }, callback);
+}
+
+
+function request$json(url, callback) {
+	request(url, { method: 'GET' }, function(err, text) {
+		if (err) return callback(err);
+		try {
+			var data = JSON.parse(text);
+		} catch (e) {
+			callback(e);
+			return;
+		}
+
+		callback(null, data);
+	});
 }
 
 },{"mol-proto":74}],71:[function(require,module,exports){
