@@ -30,6 +30,18 @@ describe('milo.binder', function() {
 		assert(innerScope.para2 instanceof milo.Component);
 	};
 
+	function testScopeBackLinks(scope) {
+		var innerScope = scope.infoView.container.scope;
+
+		var containerFacet1 = innerScope.para1.scope._hostObject
+			, containerFacet2 = innerScope.para2.scope._hostObject
+		assert(containerFacet1 instanceof milo.ComponentFacet);
+		assert(containerFacet2 instanceof milo.ComponentFacet);
+
+		assert.equal(containerFacet1.owner, scope.infoView);
+		assert.equal(containerFacet2.owner, scope.infoView);
+	}
+
 
 	it('should instantiate components based on bind attribute (ml-bind by default)', function() {
 		var scope = milo.binder(element);
@@ -45,14 +57,12 @@ describe('milo.binder', function() {
 
 	it('should correctly create back links of container/scopes to traverse up the scope tree', function() {
 		var scope = milo.binder(element);
-		var innerScope = scope.infoView.container.scope;
+		testScopeBackLinks(scope);
+	});
 
-		var containerFacet1 = innerScope.para1.scope._hostObject
-			, containerFacet2 = innerScope.para1.scope._hostObject
-		assert(containerFacet1 instanceof milo.ComponentFacet);
-		assert(containerFacet2 instanceof milo.ComponentFacet);
 
-		assert.equal(containerFacet1.owner, scope.infoView);
-		assert.equal(containerFacet2.owner, scope.infoView);
+	it('should correctly create back links in two-pass binding', function() {
+		var scope = milo.binder.twoPass(element);
+		testScopeBackLinks(scope);
 	});
 });
