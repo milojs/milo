@@ -62,7 +62,7 @@ describe('milo binder', function() {
         // var cnct = milo.minder(myList.data, '->>>', myLinkedList.data);
 
         var listArray = [];
-        for (var i = 0; i < 20; i++)
+        for (var i = 0; i < 10; i++)
             listArray.push({title: 'Title ' + i, desc: 'Description ' + i});
 
         // myList.data.on(/.*/, function(msgType, data) {
