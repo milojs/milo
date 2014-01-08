@@ -934,8 +934,7 @@ var FacetedObject = require('../abstract/faceted_object')
 	, check = require('../util/check')
 	, Match = check.Match
 	, config = require('../config')
-	, miloComponentName = require('../util/component_name')
-	, miloBinder = require('../binder');
+	, miloComponentName = require('../util/component_name'); 	
 
 
 /**
@@ -994,7 +993,6 @@ _.extendProto(Component, {
 	addFacet: addFacet,
 	allFacets: allFacets,
 	remove: remove,
-	binder: binder,
 	getScopeParent: getScopeParent,
 	_getScopeParent: _getScopeParent
 });
@@ -1066,10 +1064,10 @@ function create(info) {
  * Component is added to the same scope as the original component.
  *
  * @param {Component} component an instance of Component class or subclass
- * @param {Boolean} deepCopyDOM optional `true` to make deep copy of DOM element, otherwise only element without children is copied
+ * @param {Boolean} deepCopy optional `true` to make deep copy of DOM element, otherwise only element without children is copied
  * @return {Component}
  */
-function copy(component, deepCopyDOM) {
+function copy(component, deepCopy) {
 	var ComponentClass = component.constructor;
 
 	// get unique component name
@@ -1077,8 +1075,8 @@ function copy(component, deepCopyDOM) {
 
 	// copy DOM element, using Dom facet if it is available
 	var newEl = component.dom 
-					? component.dom.copy(deepCopyDOM)
-					: component.el.cloneNode(deepCopyDOM);
+					? component.dom.copy(deepCopy)
+					: component.el.cloneNode(deepCopy);
 
 	// clone componenInfo and bind attribute
 	var newInfo = _.clone(component.componentInfo);
@@ -1105,6 +1103,10 @@ function copy(component, deepCopyDOM) {
 
 	// add new component to the same scope as the original one
 	component.scope._add(aComponent, aComponent.name);
+
+	// bind inner components
+	// if (deepCopy && component.container)
+	// 	component.container.binder();
 
 	return aComponent;
 }
@@ -1230,15 +1232,6 @@ function remove() {
 
 /**
  * Component instance method.
- * Binds dom children of component element.
- */
-function binder() {
-	var innerScope = miloBinder(this.el, this.container ? this.container.scope : this.scope, false);
-}
-
-
-/**
- * Component instance method.
  * Returns the scope parent of a component.
  * If `withFacet` parameter is not specified, an immediate parent will be returned, otherwise the closest ancestor with a specified facet.
  *
@@ -1265,7 +1258,8 @@ function _getScopeParent(withFacet) {
 	}
 }
 
-},{"../abstract/faceted_object":3,"../binder":10,"../config":42,"../messenger":47,"../util/check":62,"../util/component_name":63,"./c_facets/cf_registry":27,"./c_utils":30,"mol-proto":74}],13:[function(require,module,exports){
+
+},{"../abstract/faceted_object":3,"../config":42,"../messenger":47,"../util/check":62,"../util/component_name":63,"./c_facets/cf_registry":27,"./c_utils":30,"mol-proto":74}],13:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facet"></a>
@@ -1460,7 +1454,7 @@ function requiresFacet(facetName) {
 'use strict';
 
 var ComponentFacet = require('../c_facet')
-	, binder = require('../../binder')
+	, miloBinder = require('../../binder')
 	, _ = require('mol-proto')
 	, facetsRegistry = require('./cf_registry');
 
@@ -1468,20 +1462,12 @@ var ComponentFacet = require('../c_facet')
 var Container = _.createSubclass(ComponentFacet, 'Container');
 
 _.extendProto(Container, {
-	_bind: _bindComponents,
-	// add: addChildComponents
+	binder: Container$binder
 });
 
 facetsRegistry.add(Container);
 
 module.exports = Container;
-
-
-function _bindComponents() {
-	// TODO
-	// this function should re-bind rather than bind all internal elements
-	this.scope = binder(this.owner.el);
-}
 
 
 function addChildComponents(childComponents) {
@@ -1491,6 +1477,15 @@ function addChildComponents(childComponents) {
 	// event handlers
 	// or maybe not, if this function is only used by binder to add new elements...
 	_.extend(this.scope, childComponents);
+}
+
+
+/**
+ * Component instance method.
+ * Binds scope children of component element.
+ */
+function Container$binder() {
+	return miloBinder(this.owner.el, this.scope, false);
 }
 
 },{"../../binder":10,"../c_facet":13,"./cf_registry":27,"mol-proto":74}],15:[function(require,module,exports){
@@ -2400,6 +2395,13 @@ function onMergeRemove(message, data) {
 
 
 function onEnterSplit(message, event) {
+	var sel = window.getSelection()
+		, node = sel.anchorNode
+		, comp = Component.getContainingComponent(node, true, 'editable');
+	
+	if (comp != this.owner)
+		comp.editable.postMessage(message, event);
+
 	var splitFacet = this.owner.split;
 	if (splitFacet) {
 		var newComp = splitFacet.make();
@@ -2535,10 +2537,10 @@ function ItemFacet$removeItem() {
 }
 
 },{"../../mail":44,"../../model":54,"../c_facet":13,"./cf_registry":27,"mol-proto":74}],23:[function(require,module,exports){
+'use strict';
+
 // <a name="components-facets-list"></a>
 // ###list facet
-
-'use strict';
 
 var ComponentFacet = require('../c_facet')
     , Component = require('../c_class')
