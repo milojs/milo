@@ -789,30 +789,31 @@ module.exports = binder;
  * unique, but they can be the same as the names of components in outer scope
  * (or some other scope).
  *
- * @param {Element} scopeEl root element inside which DOM will be scanned
- *  and bound
+ * @param {Element} scopeEl root element inside which DOM will be scanned and bound
+ * @param {Scope} rootScope Optional Root scope object where top level components will be saved.
+ * @param {Boolean} bindRootElement If set to false, then the root element will not be bound. True by default.
  * @return {Scope}
  */
-function binder(scopeEl) {
+function binder(scopeEl, rootScope, bindRootElement) {
 	return createBinderScope(scopeEl, function(scope, el, attr) {
 		var info = new ComponentInfo(scope, el, attr);
 		return Component.create(info);
-	});
+	}, rootScope, bindRootElement);
 }
 
 
 // bind in two passes
-function twoPass(scopeEl) {
-	var scanScope = binder.scan(scopeEl);
+function twoPass(scopeEl, rootScope, bindRootElement) {
+	var scanScope = binder.scan(scopeEl, rootScope, bindRootElement);
 	return binder.create(scanScope);
 }
 
 
 // scan DOM for BindAttribute
-function scan(scopeEl) {
+function scan(scopeEl, rootScope, bindRootElement) {
 	return createBinderScope(scopeEl, function(scope, el, attr) {
 		return new ComponentInfo(scope, el, attr);
-	});
+	}, rootScope, bindRootElement);
 }
 
 
@@ -837,23 +838,23 @@ function create(scanScope, hostObject) {
 }
 
 
-function createBinderScope(scopeEl, scopeObjectFactory) {
+function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootElement) {
 	var scopeEl = scopeEl || document.body
-		, scope = new Scope(scopeEl);
+		, scope = rootScope || new Scope(scopeEl);
 
-	createScopeForElement(scope, scopeEl);
+	createScopeForElement(scope, scopeEl, bindRootElement);
 	
 	return scope;
 
 
-	function createScopeForElement(scope, el) {
+	function createScopeForElement(scope, el, bindRootElement) {
 		// get element's binding attribute (ml-bind by default)
 		var attr = new BindAttribute(el);
 
 		// if eleent has bind attribute crate scope object (Component or ComponentInfo)
-		if (attr.node) {
-			var scopeObject = scopeObjectFactory(scope, el, attr)
-				, isContainer = typeof scopeObject != 'undefined' && scopeObject.container;
+		if (attr.node && bindRootElement !== false) {
+			var scopedObject = scopeObjectFactory(scope, el, attr)
+				, isContainer = typeof scopedObject != 'undefined' && scopedObject.container;
 		}
 
 		// if there are childNodes add children to new scope if this element has component with Container facet
@@ -863,24 +864,23 @@ function createBinderScope(scopeEl, scopeObjectFactory) {
 
 			if (isContainer && innerScope._length()) {
 				// store new scope on container facet and set back link on scope
-				scopeObject.container.scope = innerScope;
-				innerScope._hostObject = scopeObject.container;
+				scopedObject.container.scope = innerScope;
+				innerScope._hostObject = scopedObject.container;
 			}
 		}
 
 		// if scope wasn't previously created on container facet, create empty scope anyway
-		if (isContainer && ! scopeObject.container.scope)
-			scopeObject.container.scope = new Scope(el);
+		if (isContainer && ! scopedObject.container.scope)
+			scopedObject.container.scope = new Scope(el);
 
 
 		// TODO condition after && is a hack! change
-		if (scopeObject && ! scope[attr.compName])
-			scope._add(scopeObject, attr.compName);
+		if (scopedObject && ! scope[attr.compName])
+			scope._add(scopedObject, attr.compName);
 
-		postChildrenBoundMessage(el);
+		_.defer(postChildrenBoundMessage, el);
 
-		return scopeObject;
-
+		return scopedObject;
 
 		function postChildrenBoundMessage(el) {
 			var elComp = Component.getComponent(el);
@@ -934,7 +934,8 @@ var FacetedObject = require('../abstract/faceted_object')
 	, check = require('../util/check')
 	, Match = check.Match
 	, config = require('../config')
-	, miloComponentName = require('../util/component_name');
+	, miloComponentName = require('../util/component_name')
+	, miloBinder = require('../binder');
 
 
 /**
@@ -993,6 +994,7 @@ _.extendProto(Component, {
 	addFacet: addFacet,
 	allFacets: allFacets,
 	remove: remove,
+	binder: binder,
 	getScopeParent: getScopeParent,
 	_getScopeParent: _getScopeParent
 });
@@ -1068,19 +1070,19 @@ function create(info) {
  * @return {Component}
  */
 function copy(component, deepCopyDOM) {
-	var ComponentClass = component.constructor
+	var ComponentClass = component.constructor;
 
-		// get unique component name
-		, newName = miloComponentName()
+	// get unique component name
+	var newName = miloComponentName();
 
-		// copy DOM element, using Dom facet if it is available
-		, newEl = component.dom 
+	// copy DOM element, using Dom facet if it is available
+	var newEl = component.dom 
 					? component.dom.copy(deepCopyDOM)
-					: component.el.cloneNode(deepCopyDOM)
+					: component.el.cloneNode(deepCopyDOM);
 
-		// clone componenInfo and bind attribute
-		, newInfo = _.clone(component.componentInfo)
-		, attr = _.clone(newInfo.attr);
+	// clone componenInfo and bind attribute
+	var newInfo = _.clone(component.componentInfo);
+	var attr = _.clone(newInfo.attr);
 
 	// change bind attribute
 	_.extend(attr, {
@@ -1228,6 +1230,15 @@ function remove() {
 
 /**
  * Component instance method.
+ * Binds dom children of component element.
+ */
+function binder() {
+	var innerScope = miloBinder(this.el, this.container ? this.container.scope : this.scope, false);
+}
+
+
+/**
+ * Component instance method.
  * Returns the scope parent of a component.
  * If `withFacet` parameter is not specified, an immediate parent will be returned, otherwise the closest ancestor with a specified facet.
  *
@@ -1254,7 +1265,7 @@ function _getScopeParent(withFacet) {
 	}
 }
 
-},{"../abstract/faceted_object":3,"../config":42,"../messenger":47,"../util/check":62,"../util/component_name":63,"./c_facets/cf_registry":27,"./c_utils":30,"mol-proto":74}],13:[function(require,module,exports){
+},{"../abstract/faceted_object":3,"../binder":10,"../config":42,"../messenger":47,"../util/check":62,"../util/component_name":63,"./c_facets/cf_registry":27,"./c_utils":30,"mol-proto":74}],13:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facet"></a>
@@ -1457,7 +1468,6 @@ var ComponentFacet = require('../c_facet')
 var Container = _.createSubclass(ComponentFacet, 'Container');
 
 _.extendProto(Container, {
-	init: initContainer,
 	_bind: _bindComponents,
 	// add: addChildComponents
 });
@@ -1465,12 +1475,6 @@ _.extendProto(Container, {
 facetsRegistry.add(Container);
 
 module.exports = Container;
-
-
-function initContainer() {
-	ComponentFacet.prototype.init.apply(this, arguments);
-	this.scope = {};
-}
 
 
 function _bindComponents() {
@@ -2201,6 +2205,7 @@ var Editable = _.createSubclass(ComponentFacet, 'Editable');
 _.extendProto(Editable, {
 	start: start,
 	makeEditable: makeEditable,
+	_manageChildrenEditableState: _manageChildrenEditableState,
 	require: ['Dom']
 
 	// _reattach: _reattachEventsOnElementChange
@@ -2235,13 +2240,14 @@ function start() {
 						? this.config.editable
 						: true;
 
-	if (this._editable) {
-		this.makeEditable(true);
+	this.makeEditable(this._editable);
+	if (this._editable)
 		this.postMessage('editstart');
-	}
 
 	if (this.config.showOutline === false)
 		this.owner.el.style.outline = 'none';
+
+	this.owner.on('childrenbound', _manageChildrenEditableState);
 	
 	this.onMessages({
 		'editstart': onEditStart,
@@ -2402,6 +2408,17 @@ function onEnterSplit(message, event) {
 		newComp.el.focus();
 	}
 }
+
+function _manageChildrenEditableState() {
+	if (this.container) 
+		this.container.scope._each(function (component) {
+			if (! component.editable)
+				component.el.setAttribute('contenteditable', false);
+			if (component.container)
+				_manageChildrenEditableState.call(component);
+		});
+}
+
 
 },{"../../util":67,"../../util/dom":65,"../../util/logger":68,"../c_class":12,"../c_facet":13,"../msg_api/editable":33,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":74}],20:[function(require,module,exports){
 // <a name="components-facets-events"></a>
@@ -3621,7 +3638,7 @@ module.exports = Scope;
 var allowedNamePattern = /^[A-Za-z][A-Za-z0-9\_\$]*$/;
 
 
-// adds object to scope throwing if name is notyunique
+// adds object to scope throwing if name is not unique
 function _add(object, name) {
 	if (this[name])
 		throw new ScopeError('duplicate object name: ' + name);
@@ -3649,7 +3666,7 @@ function _addNew(object, name) {
 
 
 function _merge(scope) {
-// TODO
+	scope._each(_add.bind(this));
 }
 
 
