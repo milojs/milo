@@ -821,9 +821,8 @@ function create(scanScope, hostObject) {
 	var scope = new Scope(scanScope._rootEl, hostObject);
 
 	scanScope._each(function(compInfo) {
-		var info = _.clone(compInfo)
-
 		// set correct component's scope
+		var info = _.clone(compInfo)
 		info.scope = scope;
 
 		// create component
