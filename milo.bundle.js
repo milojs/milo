@@ -7383,7 +7383,9 @@ var functionMethods = module.exports = {
 	makeFunction: makeFunction,
 	partial: partial,
 	partialRight: partialRight,
-	memoize: memoize
+	memoize: memoize,
+	delay: delay,
+	defer: defer
 };
 
 
@@ -7472,6 +7474,31 @@ function memoize(hashFunc, limit) {
 
 		return result;
 	};
+}
+
+
+/**
+ *
+ */
+function delay(wait) { // , arguments
+    var args = slice.call(arguments, 1);
+	return _delay(this, wait, args);
+};
+ 
+
+/**
+ *
+ */
+function defer() { // , arguments
+	return _delay(this, 1, arguments);
+};
+
+
+/**
+ *
+ */
+function _delay(func, wait, args) {
+	return setTimeout(func.apply.bind(func, null, args), wait);
 }
 
 },{}],77:[function(require,module,exports){

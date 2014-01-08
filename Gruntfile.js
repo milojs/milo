@@ -55,7 +55,7 @@ module.exports = function(grunt) {
 			milo: {
 				files: [
 					'lib/**/*.js',
-					'node_modules/mol-proto/lib/proto.js'
+					'node_modules/mol-proto/lib/**/*.js'
 				],
 				tasks: 'browserify',
 
