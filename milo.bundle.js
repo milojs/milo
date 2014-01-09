@@ -1226,7 +1226,7 @@ function allFacets(method /* , ... */) {
  */
 function remove() {
 	if (this.scope)
-		delete this.scope[this.name];
+		delete this.scope._remove(name);
 }
 
 
@@ -3613,7 +3613,8 @@ function handleEvent(event) {
 var _ = require('mol-proto')
 	, check = require('../util/check')
 	, Match = check.Match
-	, ScopeError = require('../util/error').Scope;
+	, ScopeError = require('../util/error').Scope
+	, logger = require('../util/logger');
 
 
 // Scope class
@@ -3631,7 +3632,9 @@ _.extendProto(Scope, {
 	_addNew: _addNew,
 	_merge: _merge,
 	_length: _length,
-	_any: _any
+	_any: _any,
+	_remove: _remove,
+	_clean: _clean
 });
 
 module.exports = Scope;
@@ -3642,6 +3645,8 @@ var allowedNamePattern = /^[A-Za-z][A-Za-z0-9\_\$]*$/;
 
 // adds object to scope throwing if name is not unique
 function _add(object, name) {
+	name = name || object.name;
+	
 	if (this[name])
 		throw new ScopeError('duplicate object name: ' + name);
 
@@ -3693,7 +3698,20 @@ function _any() {
     return key && this[key];
 }
 
-},{"../util/check":62,"../util/error":66,"mol-proto":74}],38:[function(require,module,exports){
+function _remove(name) {
+	if (! name in this)
+		logger.warn('removing object that is not in scope');
+
+	delete this[name];
+}
+
+function _clean() {
+	this._each(function(object, name) {
+		delete this[name];
+	}, this);
+}
+
+},{"../util/check":62,"../util/error":66,"../util/logger":68,"mol-proto":74}],38:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
