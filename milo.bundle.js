@@ -2243,22 +2243,25 @@ function start() {
 		this.owner.el.style.outline = 'none';
 
 	this.owner.on('childrenbound', _manageChildrenEditableState);
-	
+
 	this.onMessages({
 		'editstart': onEditStart,
 		'editend': onEditEnd,
 		// arrow keys events
-		'previouseditable': makePreviousComponentEditable,
-		'nexteditable': makeNextComponentEditable,
+		// 'previouseditable': makePreviousComponentEditable,
+		// 'nexteditable': makeNextComponentEditable,
 		// merge events
 		'previousmerge': mergeToPreviousEditable,
 		'nextmerge': mergeToNextEditable,
+
 		'requestmerge': onRequestMerge,
 		'mergeaccepted': onMergeAccepted,
 		'performmerge': onPerformMerge,
 		'mergeremove': onMergeRemove,
-		// split events
-		'enterkey': onEnterSplit
+		// functional key events
+		'backspacekey': _.partial(dispatchOnSelection, onBackspace),
+		'deletekey': _.partial(dispatchOnSelection, onDelete),
+		'enterkey': _.partial(dispatchOnSelection, onEnterSplit)
 	});
 }
 
@@ -2316,6 +2319,7 @@ function mergeToPreviousEditable(eventType, event) {
 }
 
 function mergeToNextEditable(eventType, event) {
+	event.preventDefault();
 	mergeToAdjacentEditable(this.owner, 'down');
 }
 
@@ -2395,13 +2399,6 @@ function onMergeRemove(message, data) {
 
 
 function onEnterSplit(message, event) {
-	var sel = window.getSelection()
-		, node = sel.anchorNode
-		, comp = Component.getContainingComponent(node, true, 'editable');
-	
-	if (comp != this.owner)
-		comp.editable.postMessage(message, event);
-
 	var splitFacet = this.owner.split;
 	if (splitFacet) {
 		var newComp = splitFacet.make();
@@ -2411,6 +2408,23 @@ function onEnterSplit(message, event) {
 	}
 }
 
+
+function onBackspace(message, event) {
+	if (this.config.allowMerge && noTextBeforeSelection(this.owner)) {
+		this.postMessage('previousmerge', event);
+		this.postMessage('adjacentmerge', event);
+	}
+}
+
+
+function onDelete(message, event) {
+	if (this.config.allowMerge && noTextAfterSelection(this.owner)) {
+		this.postMessage('nextmerge', event);
+		this.postMessage('adjacentmerge', event);
+	}
+}
+
+
 function _manageChildrenEditableState() {
 	if (this.container) 
 		this.container.scope._each(function (component) {
@@ -2419,6 +2433,32 @@ function _manageChildrenEditableState() {
 			if (component.container)
 				_manageChildrenEditableState.call(component);
 		});
+}
+
+
+function dispatchOnSelection(method, message, event) {
+	var sel = window.getSelection()
+		, node = sel.anchorNode
+		, comp = Component.getContainingComponent(node, true, 'editable');
+
+	if (comp != this.owner) {
+		comp.editable.postMessage(message, event);
+		event.preventDefault();
+	} else
+		method && method.call(this, message, event);
+}
+
+
+function noTextBeforeSelection(component) {
+	return ! component.dom.hasTextBeforeSelection();
+}
+
+function noTextAfterSelection(component) {
+	// return ! component.dom.hasTextAfterSelection();
+	var sel = window.getSelection();
+	return sel.anchorNode
+			&& sel.anchorOffset == sel.anchorNode.length
+			&& ! sel.anchorNode.nextSibling;
 }
 
 
@@ -3298,16 +3338,10 @@ function init(component, options) {
 
 var editableEventsMap = {
 	'enterkey': 'keypress',
+	'backspacekey': 'keydown',
+	'deletekey': 'keydown',
 	'editstart': 'mousedown',
-	'editend': 'blur',
-	// move events
-	'nexteditable': 'keydown',
-	'previouseditable': 'keydown',	
-	'adjacenteditable': 'keydown',
-	// merge events
-	'nextmerge': 'keydown',
-	'previousmerge': 'keydown',
-	'adjacentmerge': 'keydown',
+	'editend': 'blur'
 };
 
 // TODO: this function should return relevant DOM event dependent on element tag
@@ -3321,72 +3355,20 @@ function translateToSourceMessage(message) {
 }
 
 
+var functionalKeys = {
+	'enterkey': 13,
+	'backspacekey': 8,
+	'deletekey': 46
+}
 // filter editable message
 function filterSourceMessage(eventType, message, data) {
-	var self = this;
+	if (message in functionalKeys)
+		return data.keyCode == functionalKeys[message];
 
-	switch (message) {
-		case 'enterkey':
-		 	return data.keyCode == 13;
-
-		// move to adjacent editable events
-		case 'previouseditable':
-			return this.options.moveToAdjacentEditable
-				&& movedToPrevious(data);
-		case 'nexteditable':
-			return this.options.moveToAdjacentEditable
-				&& movedToNext(data);
-		case 'adjacenteditable':
-			return this.options.moveToAdjacentEditable
-				&& (movedToPrevious(data) || movedToNext(data));
-
-		// merge adjacent editable events
-		case 'previousmerge': // merge current one into previous on backspace key
-			return this.options.allowMerge && mergeToPrevious(data)
-		case 'nextmerge': // merge current one into previous on backspace key
-			return this.options.allowMerge && mergeToNext(data)
-		case 'adjacentmerge':
-			return this.options.allowMerge
-				&& (mergeToPrevious(data) || mergeToNext(data));
-
-		case 'editstart':
-		case 'editend':
-			return this.options.editableOnClick;
-		default:
-			return true;
-	}
-
-	function movedToPrevious(data) {
-		return (data.keyCode == 37 || data.keyCode == 38) // up and left
-			&& noTextBeforeSelection(self.component);
-	}
-
-	function movedToNext(data) {
-		return (data.keyCode == 39 || data.keyCode == 40) // down and right
-			&& noTextAfterSelection(self.component);
-	} 
-
-	function mergeToPrevious(data) {
-		return data.keyCode == 8 // backspace
-			&& noTextBeforeSelection(self.component);
-	}
-
-	function mergeToNext(data) {
-		return data.keyCode == 46 // delete
-			&& noTextAfterSelection(self.component);
-	}
-
-	function noTextBeforeSelection(component) {
-		return ! component.dom.hasTextBeforeSelection();
-	};
-
-	function noTextAfterSelection(component) {
-		// return ! component.dom.hasTextAfterSelection();
-		var sel = window.getSelection();
-		return sel.anchorNode
-				&& sel.anchorOffset == sel.anchorNode.length
-				&& ! sel.anchorNode.nextSibling;
-	}
+	if (message == 'editstart' || message == 'editend')
+		return this.options.editableOnClick;
+	else
+		return true;
 }
 
 },{"../../messenger/m_api":48,"../../util/check":62,"mol-proto":74}],34:[function(require,module,exports){
