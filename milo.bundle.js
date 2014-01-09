@@ -2146,8 +2146,8 @@ var ComponentFacet = require('../c_facet')
 var Drop = _.createSubclass(ComponentFacet, 'Drop');
 
 _.extendProto(Drop, {
-	init: initDropFacet,
-	start: startDropFacet
+	init: Drop$init,
+	start: Drop$start
 	// _reattach: _reattachEventsOnElementChange
 });
 
@@ -2156,14 +2156,15 @@ facetsRegistry.add(Drop);
 module.exports = Drop;
 
 
-function initDropFacet() {
+function Drop$init() {
 	ComponentFacet.prototype.init.apply(this, arguments);
 	this._createMessageSourceWithAPI(DOMEventsSource);
 }
 
 
-function startDropFacet() {
+function Drop$start() {
 	ComponentFacet.prototype.start.apply(this, arguments);
+	this.owner.el.classList.add('cc-module-relative');
 	this.on('dragenter dragover', onDragging);
 
 	function onDragging(eventType, event) {
