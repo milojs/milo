@@ -1353,7 +1353,7 @@ function ComponentFacet$start() {
 				if (contextType == 'object')
 					this.on(message, subscriber);
 				else if (contextType == 'string') {
-					if (subscriber.context == this.name)
+					if (subscriber.context == this.name || subscriber.context == 'facet')
 						subscriber = {
 							subscriber: subscriber.subscriber,
 							context: this
