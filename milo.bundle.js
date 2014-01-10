@@ -1632,6 +1632,12 @@ function onChildData(msgType, data) {
 	var valueSet;
 	if (typeof value == 'object') {
 		if (Array.isArray(value)) {
+			var listFacet = this.owner.list;
+			if (listFacet){
+				var newItemsCount = value.length - listFacet.count();
+			 	if (newItemsCount >= 3)
+					listFacet.addItems(newItemsCount);
+			}
 			valueSet = [];
 			value.forEach(function(childValue, index) {
 				setChildData.call(this, valueSet, childValue, index, '[$$]');
@@ -1847,7 +1853,8 @@ var ComponentFacet = require('../c_facet')
 	, Match = check.Match
 	, binder = require('../../binder')
 	, BindAttribute = require('../../attributes/a_bind')
-	, DomFacetError = require('../../util/error').DomFacet;
+	, DomFacetError = require('../../util/error').DomFacet
+	, domUtils = require('../../util/dom');
 
 
 // data model connection facet
@@ -1866,6 +1873,7 @@ _.extendProto(Dom, {
 	prependChildren: prependChildren,
 	insertAfter: insertAfter,
 	insertBefore: insertBefore,
+	children: Dom$children,
 	setStyle: setStyle,
 	copy: copy,
 
@@ -1986,6 +1994,18 @@ function insertBefore(el) {
 	parent.insertBefore(el, thisEl);
 }
 
+
+/**
+ * Dom facet instacne method
+ * Returns the list of child elements of the component element
+ *
+ * @return {Array[Element]}
+ */
+function Dom$children() {
+	return domUtils.children(this.owner.el);
+}
+
+
 var findDirections = {
 	'up': 'previousNode',
 	'down': 'nextNode'
@@ -2050,7 +2070,7 @@ function hasTextAfterSelection() {
 	return treeWalker.nextNode();
 }
 
-},{"../../attributes/a_bind":6,"../../binder":10,"../../util/check":63,"../../util/error":67,"../c_facet":13,"./cf_registry":27,"mol-proto":75}],17:[function(require,module,exports){
+},{"../../attributes/a_bind":6,"../../binder":10,"../../util/check":63,"../../util/dom":66,"../../util/error":67,"../c_facet":13,"./cf_registry":27,"mol-proto":75}],17:[function(require,module,exports){
 // <a name="components-facets-drag"></a>
 // ###drag facet
 
@@ -2638,9 +2658,14 @@ var ComponentFacet = require('../c_facet')
     , Model = require('../../model')
     , _ = require('mol-proto')
     , miloMail = require('../../mail')
-    , binder = require('../../binder')
-    , ListError = require('../../util/error').List
-    , logger = require('../../util/logger');
+    , miloBinder = require('../../binder')
+    , miloUtil = require('../../util')
+    , ListError = miloUtil.error.List
+    , logger = miloUtil.logger
+    , doT = require('dot')
+    , check = miloUtil.check
+    , Match = check.Match
+    , domUtils = miloUtil.dom;
 
 
 // Data model connection facet
@@ -2657,6 +2682,7 @@ _.extendProto(List, {
     _setItem: _setItem,
     contains: contains,
     addItem: addItem,
+    addItems: List$addItems,
     removeItem: removeItem,
     each: each
     /* _reattach: _reattachEventsOnElementChange */
@@ -2703,6 +2729,21 @@ function onChildrenBound() {
     // After keeping a reference to the item sample, it must be hidden and removed from scope
     this.list.itemSample.dom.hide();
     this.list.itemSample.remove();
+
+    // create item template to insert many items at once
+    var itemElCopy = foundItem.el.cloneNode(true);
+    var attr = foundItem.componentInfo.attr;
+    var attrCopy = _.clone(attr);
+    attr.compName = '{{= it.componentName() }}';
+    attr.el = itemElCopy;
+    attr.decorate();
+
+    var itemsTemplateStr = 
+          '{{ var i = it.count; while(i--) { }}'
+        + itemElCopy.outerHTML
+        + '{{ } }}';
+
+    this.list.itemsTemplate = doT.compile(itemsTemplateStr);
 }
 
 // Return a list item by it's index
@@ -2737,13 +2778,13 @@ function addItem(index) {
     // Copy component
     var component = Component.copy(this.itemSample, true);
 
-    // var tempComp = binder(component.el)[component.name]
+    // var tempComp = miloBinder(component.el)[component.name]
     //     , innerScope = tempComp.container.scope;
 
-    var compInfoScope = binder.scan(component.el)
+    var compInfoScope = miloBinder.scan(component.el)
         , compInfo = compInfoScope._any()
         , compInfos = compInfo.container.scope
-        , innerScope = binder.create(compInfos);
+        , innerScope = miloBinder.create(compInfos);
 
     // Set reference to component container facet on scope
     innerScope._hostObject = component.container;
@@ -2762,6 +2803,50 @@ function addItem(index) {
 
     return component;
 }
+
+
+/**
+ * List facet instance method
+ * Adds a given number of items using template rendering rather than adding elements one by one
+ */
+function List$addItems(count) {
+    check(count, Match.Integer);
+    if (count < 0)
+        throw new ListError('can\'t add negative number of items')
+
+    if (count == 0) return;
+
+    var itemsHTML = this.itemsTemplate({
+        componentName: miloUtil.componentName,
+        count: count
+    });
+
+    var wrapEl = document.createElement('div');
+    wrapEl.innerHTML = itemsHTML;
+
+    miloBinder(wrapEl);
+    var children = domUtils.children(wrapEl);
+
+    if (count != children.length)
+        logger.error('number of item added is different from requested');
+
+    if (children && children.length) {
+        var count = this.count();
+        var prevComponent = count 
+                                ? this._listItems[count - 1]
+                                : this.itemSample;
+        children.forEach(function(el, index) {
+            var component = Component.getComponent(el);
+            this._listItems.push(component);
+            this._listItemsHash[component.name] = component;
+            // Add it to the DOM
+            prevComponent.dom.insertAfter(component.el)
+            component.dom.show();
+            prevComponent = component;
+        }, this);
+    }
+}
+
 
 // Remove item from a particular index,
 // `doSplice` determines if the empty space should be removed
@@ -2797,7 +2882,7 @@ function each(callback, thisArg) {
     }, thisArg || this);
 }
 
-},{"../../binder":10,"../../mail":45,"../../model":55,"../../util/error":67,"../../util/logger":69,"../c_class":12,"../c_facet":13,"./cf_registry":27,"mol-proto":75}],24:[function(require,module,exports){
+},{"../../binder":10,"../../mail":45,"../../model":55,"../../util":68,"../c_class":12,"../c_facet":13,"./cf_registry":27,"dot":74,"mol-proto":75}],24:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-model"></a>
@@ -6556,17 +6641,31 @@ module.exports = componentCount;
 
 
 module.exports = {
+    children: children,
 	filterNodeListByType: filterNodeListByType,
 	selectElementContents: selectElementContents,
 	getElementOffset: getElementOffset,
     setCaretPosition: setCaretPosition
 };
 
+
 /**
- * filterNodeListByType
+ * Returns the list of element children of DOM element
+ *
+ * @param {Element} el element to return the children of (only DOM elements)
+ * @return {Array[Element]}
+ */
+ function children(el) {
+    return filterNodeListByType(el.childNodes, Node.ELEMENT_NODE)
+ }
+
+
+/**
  * Filters the list of nodes by type
+ *
  * @param {NodeList} nodeList the list of nodes, for example childNodes property of DOM element
  * @param {Integer} nodeType an integer constant [defined by DOM API](https://developer.mozilla.org/en-US/docs/Web/API/Node.nodeType), e.g. `Node.ELEMENT_NODE` or `Node.TEXT_NODE`
+ * @return {Array[Node]}
  */
 function filterNodeListByType(nodeList, nodeType) {
 	return _.filter(nodeList, function (node) {
