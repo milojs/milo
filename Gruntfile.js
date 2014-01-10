@@ -70,7 +70,7 @@ module.exports = function(grunt) {
 					'lib/**/*.js',
 					'node_modules/mol-proto/lib/**/*.js'
 				],
-				tasks: ['browserify', 'uglify'],
+				tasks: ['browserify'],
 			},
 			test1: {
 				files: ['test_html/bind_test/*.js'],
@@ -101,7 +101,7 @@ module.exports = function(grunt) {
 	grunt.registerTask('test', 'mochaTest');
 	grunt.registerTask('karmatest', 'karma');
 	grunt.registerTask('htmltest', ['browserify:test1', 'watch']);
-	grunt.registerTask('tests', ['mochaTest', 'browserify', 'karmatest']);
+	grunt.registerTask('tests', ['mochaTest', 'browserify', 'uglify', 'karmatest']);
 	grunt.registerTask('default', ['test', 'browserify', 'uglify', 'watch']);
 	grunt.registerTask('skiptest', ['browserify', 'watch']);
 };
