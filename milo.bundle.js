@@ -892,7 +892,7 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
 
 	function createScopeForChildren(containerEl, scope) {
 		scope = scope || new Scope(containerEl);
-		var children = utilDom.filterNodeListByType(containerEl.childNodes, Node.ELEMENT_NODE);
+		var children = utilDom.children(containerEl);
 
 		_.forEach(children, function(node) {
 			createScopeForElement(scope, node);
@@ -4089,7 +4089,7 @@ function _loadViewsInElement(rootEl, callback) {
 
 
 function loadView(el, callback) {
-	if (utilDom.filterNodeListByType(el.childNodes, 1).length)
+	if (utilDom.children(el).length)
 		throw new LoaderError('can\'t load html into element that is not empty');
 
 	var attr = new LoadAttribute(el);
