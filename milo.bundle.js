@@ -2405,9 +2405,14 @@ function onEnterSplit(message, event) {
 	var splitFacet = this.owner.split;
 	if (splitFacet) {
 		var newComp = splitFacet.make();
+		
+		// TODO: Need to get top containing component with contenteditable, needs work
+		var parent = Component.getContainingComponent(newComp.el, false, 'editable');
+		parent.el.focus();
+	    domUtils.setCaretPosition(newComp.el, 0);
+
 		event.preventDefault();
 		newComp.editable.postMessage('editstart');
-		newComp.el.focus();
 	}
 }
 
@@ -2827,7 +2832,8 @@ function ModelFacet$_createMessenger() { // Called by inherited init
 
 var ComponentFacet = require('../c_facet')
 	, Component = require('../c_class')
-	, facetsRegistry = require('./cf_registry');
+	, facetsRegistry = require('./cf_registry')
+	, domUtils = require('../../util/dom');
 
 var Split = _.createSubclass(ComponentFacet, 'Split');
 
@@ -2960,7 +2966,7 @@ function isSplittable() {
 	return true;
 }
 
-},{"../c_class":12,"../c_facet":13,"./cf_registry":27}],26:[function(require,module,exports){
+},{"../../util/dom":65,"../c_class":12,"../c_facet":13,"./cf_registry":27}],26:[function(require,module,exports){
 // <a name="components-facets-template"></a>
 // ###template facet
 
