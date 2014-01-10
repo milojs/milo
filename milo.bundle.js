@@ -1668,8 +1668,8 @@ function onChildData(msgType, data) {
 		var childDataFacet = this.path(childPath, true);
 		if (childDataFacet)
 			valueSet[key] = childDataFacet.set(childValue);
-		else
-			logger.warn('attempt to set data on path that does not exist: ' + childPath);
+		// else
+		// 	logger.warn('attempt to set data on path that does not exist: ' + childPath);
 	}
 }
 
