@@ -2206,7 +2206,6 @@ var Editable = _.createSubclass(ComponentFacet, 'Editable');
 _.extendProto(Editable, {
 	start: start,
 	makeEditable: makeEditable,
-	_manageChildrenEditableState: _manageChildrenEditableState,
 	require: ['Dom']
 
 	// _reattach: _reattachEventsOnElementChange
@@ -2247,8 +2246,6 @@ function start() {
 
 	if (this.config.showOutline === false)
 		this.owner.el.style.outline = 'none';
-
-	this.owner.on('childrenbound', _manageChildrenEditableState);
 
 	this.onMessages({
 		'editstart': onEditStart,
@@ -2428,17 +2425,6 @@ function onDelete(message, event) {
 		this.postMessage('nextmerge', event);
 		this.postMessage('adjacentmerge', event);
 	}
-}
-
-
-function _manageChildrenEditableState() {
-	if (this.container) 
-		this.container.scope._each(function (component) {
-			if (! component.editable)
-				component.el.setAttribute('contenteditable', false);
-			if (component.container)
-				_manageChildrenEditableState.call(component);
-		});
 }
 
 
@@ -6532,7 +6518,8 @@ module.exports = componentCount;
 module.exports = {
 	filterNodeListByType: filterNodeListByType,
 	selectElementContents: selectElementContents,
-	getElementOffset: getElementOffset
+	getElementOffset: getElementOffset,
+    setCaretPosition: setCaretPosition
 };
 
 /**
@@ -6556,6 +6543,21 @@ function filterNodeListByType(nodeList, nodeType) {
 function selectElementContents(el) {
     var range = document.createRange();
     range.selectNodeContents(el);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+}
+
+
+/**
+ * setCaretPosition
+ * Sets the caret position to the end of the element
+ * @param {Element} el DOM element
+ * @param {Number} pos caret position
+ */
+function setCaretPosition(el, pos) {
+    var range = document.createRange();
+    range.setStart(el, pos);
     var sel = window.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
