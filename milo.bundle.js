@@ -1906,6 +1906,7 @@ function setStyle(property, value) {
 
 
 // create a copy of DOM element using facet config if set
+// TODO: reconsider deep copy as it wont work with a tagName
 function copy(isDeep) {
 	var tagName = this.config.tagName;
 	if (! this.config.tagName)
@@ -2030,7 +2031,7 @@ function find(direction, iterator) {
 function hasTextBeforeSelection() {
 	var selection = window.getSelection();
 	if (! selection.isCollapsed) return true;
-	if (selection.anchorOffset > 1) return true;
+	if (selection.anchorOffset) return true;
 
 	// walk up the DOM tree to check if there are text nodes before cursor
 	var treeWalker = document.createTreeWalker(this.owner.el, NodeFilter.SHOW_TEXT);
@@ -2405,14 +2406,23 @@ function onEnterSplit(message, event) {
 	var splitFacet = this.owner.split;
 	if (splitFacet) {
 		var newComp = splitFacet.make();
-		
-		// TODO: Need to get top containing component with contenteditable, needs work
-		var parent = Component.getContainingComponent(newComp.el, false, 'editable');
-		parent.el.focus();
-	    domUtils.setCaretPosition(newComp.el, 0);
 
-		event.preventDefault();
-		newComp.editable.postMessage('editstart');
+		if (newComp) {
+			// TODO: Need to get top containing component with contenteditable, needs work
+			var parent = Component.getContainingComponent(newComp.el, false, 'editable');
+			parent.el.focus();
+		    domUtils.setCaretPosition(newComp.el, 0);
+
+			event.preventDefault();
+			newComp.editable.postMessage('editstart');
+		} else {
+			var newComp = Component.copy(this.owner);
+			newComp.template.render();
+			console.log(newComp.el);
+			this.owner.dom.insertBefore(newComp.el);
+		}
+
+		
 	}
 }
 
