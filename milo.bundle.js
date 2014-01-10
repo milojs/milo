@@ -2448,10 +2448,9 @@ function dispatchOnSelection(method, message, event) {
 		, node = sel.anchorNode
 		, comp = Component.getContainingComponent(node, true, 'editable');
 
-	if (comp != this.owner) {
+	if (comp != this.owner)
 		comp.editable.postMessage(message, event);
-		event.preventDefault();
-	} else
+	else
 		method && method.call(this, message, event);
 }
 
@@ -2848,11 +2847,11 @@ var ComponentFacet = require('../c_facet')
 var Split = _.createSubclass(ComponentFacet, 'Split');
 
 _.extendProto(Split, {
-	init: init,
-	make: make,
+	init: Split$init,
+	make: Split$make,
 
-	isSplittable: isSplittable,
-	_makeSplit: _makeSplit,
+	isSplittable: Split$isSplittable,
+	_makeSplit: Split$_makeSplit,
 
 	require: ['Dom']
 
@@ -2869,7 +2868,7 @@ module.exports = Split;
  * Initializes Split facet
  * Called by inherited ComponentFacet class constructor
  */
-function init() {
+function Split$init() {
 	ComponentFacet.prototype.init.apply(this, arguments);
 	this._splitSender = undefined;
 }
@@ -2880,9 +2879,10 @@ function init() {
  * Splits component this facet belongs to on the selection,
  * but only if the selection is empty and there is some text before selection.
  * Uses _makeSplit to do actual split.
+ *
  * @return {Component} new component created as a result of a split
  */
- function make() {
+ function Split$make() {
 	if (! this.isSplittable())
 		return;
 
@@ -2897,9 +2897,10 @@ function init() {
  * _makeSplit
  * Splits component this facet belongs to on the selection.
  * This function is called recursively by `splitElement` to split inner components
+ *
  * @return {Component} new component created as a result of a split.
  */
-function _makeSplit() {
+function Split$_makeSplit() {
 	var thisComp = this.owner;
 
 	// clone itself
@@ -2917,6 +2918,7 @@ function _makeSplit() {
  * Splits DOM element on the selection point moving everything after it to
  * a new element. Recursively calls itself when it encounters DOM element or 
  * `_makeSplit` when it encounters elements with milo components
+ *
  * @param {Element} thisEl element to be split
  * @param {Element} newEl element where all new elements will be moved to.
  */
@@ -2951,13 +2953,14 @@ function splitElement(thisEl, newEl) {
 
 
 /**
- * isSplittable
+ * Split facet instance method
  * Checks if a component can be split on selection point
  * Component can only be split if all inner components containing
  * selection point can be split too.
+ *
  * @return {Boolean} true, if the component can be split
  */
-function isSplittable() {
+function Split$isSplittable() {
 	var selection = window.getSelection()
 		, el = selection.anchorNode;
 
@@ -3373,15 +3376,15 @@ var EditableMsgAPI = _.createSubclass(MessengerAPI, 'EditableMsgAPI', true);
 
 _.extendProto(EditableMsgAPI, {
 	// implementing MessageAPI interface
-	init: init,
-	translateToSourceMessage: translateToSourceMessage,
- 	filterSourceMessage: filterSourceMessage,
+	init: EditableMsgAPI$init,
+	translateToSourceMessage: EditableMsgAPI$translateToSourceMessage,
+ 	filterSourceMessage: EditableMsgAPI$filterSourceMessage,
 });
 
 module.exports = EditableMsgAPI;
 
 
-function init(component, options) {
+function EditableMsgAPI$init(component, options) {
 	MessengerAPI.prototype.init.apply(this, arguments);
 	
 	this.component = component;
@@ -3400,7 +3403,7 @@ var editableEventsMap = {
 // TODO: this function should return relevant DOM event dependent on element tag
 // Can also implement beforedatachanged event to allow preventing the change
 // translate to DOM event
-function translateToSourceMessage(message) {
+function EditableMsgAPI$translateToSourceMessage(message) {
 	if (editableEventsMap.hasOwnProperty(message))
 		return editableEventsMap[message];
 	else
@@ -3414,7 +3417,7 @@ var functionalKeys = {
 	'deletekey': 46
 }
 // filter editable message
-function filterSourceMessage(eventType, message, data) {
+function EditableMsgAPI$filterSourceMessage(eventType, message, data) {
 	if (message in functionalKeys)
 		return data.keyCode == functionalKeys[message];
 

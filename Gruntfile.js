@@ -46,6 +46,19 @@ module.exports = function(grunt) {
                 }
 			}
 		},
+		uglify: {
+            options: {
+                sourceMap: sourceMap,
+                sourceMappingURL: sourceMappingURL,
+                sourceMapRoot: '/',
+                mangle: !grunt.option('no-mangle')
+            },
+			milo: {
+				files: {
+					'milo.min.js': 'milo.bundle.js'
+				}
+			}
+		},
 		karma: {
 			unit: {
 				configFile: 'karma.conf.js'
@@ -57,8 +70,7 @@ module.exports = function(grunt) {
 					'lib/**/*.js',
 					'node_modules/mol-proto/lib/**/*.js'
 				],
-				tasks: 'browserify',
-
+				tasks: ['browserify', 'uglify'],
 			},
 			test1: {
 				files: ['test_html/bind_test/*.js'],
@@ -71,16 +83,25 @@ module.exports = function(grunt) {
 		}
 	});
 
+    function sourceMap(dest) {
+        return dest + '.map';
+    }
+
+    function sourceMappingURL(dest) {
+        return sourceMap(dest.split('/').pop());
+    }
+
 	grunt.loadNpmTasks('grunt-browserify');
+	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-mocha-test');
 	grunt.loadNpmTasks('grunt-mocha');
 	grunt.loadNpmTasks('grunt-karma');
 
 	grunt.registerTask('test', 'mochaTest');
-	grunt.registerTask('karmatest', 'karma');	
+	grunt.registerTask('karmatest', 'karma');
 	grunt.registerTask('htmltest', ['browserify:test1', 'watch']);
 	grunt.registerTask('tests', ['mochaTest', 'browserify', 'karmatest']);
-	grunt.registerTask('default', ['test', 'browserify', 'watch']);
+	grunt.registerTask('default', ['test', 'browserify', 'uglify', 'watch']);
 	grunt.registerTask('skiptest', ['browserify', 'watch']);
 };
