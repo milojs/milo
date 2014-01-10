@@ -2418,7 +2418,6 @@ function onEnterSplit(message, event) {
 		} else {
 			var newComp = Component.copy(this.owner);
 			newComp.template.render();
-			console.log(newComp.el);
 			this.owner.dom.insertBefore(newComp.el);
 		}
 
