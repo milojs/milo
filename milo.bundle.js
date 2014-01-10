@@ -1448,19 +1448,34 @@ function requiresFacet(facetName) {
 }
 
 },{"../abstract/facet":2,"../messenger":47,"../util/error":66,"./c_utils":30,"mol-proto":74}],14:[function(require,module,exports){
-// <a name="components-facets-container"></a>
-// ###container facet
-
 'use strict';
+
 
 var ComponentFacet = require('../c_facet')
 	, miloBinder = require('../../binder')
 	, _ = require('mol-proto')
 	, facetsRegistry = require('./cf_registry');
 
-// container facet
+
+/**
+ * `milo.registry.facets.get('Container')`
+ * A special component facet that makes component create its own inner scope.
+ * When [milo.binder](../../binder.js.html) binds DOM tree and creates components, if components are inside component WITH Container facet, they are put on the `scope` of it (component.container.scope - see [Scope](../scope.js.html)), otherwise they are put on the same scope even though they may be deeper in DOM tree.
+ * It allows creating namespaces avoiding components names conflicts, at the same time creating more shallow components tree than the DOM tree.
+ * To create components for elements inside the current component use:
+ * ```
+ * component.container.binder();
+ * ```
+ * See [milo.binder](../../binder.js.html)
+ */
 var Container = _.createSubclass(ComponentFacet, 'Container');
 
+
+/**
+ * ####Container facet instance methods####
+ *
+ * - [binder](#Container$binder) - create components from DOM inside the current one
+ */
 _.extendProto(Container, {
 	binder: Container$binder
 });
@@ -1470,19 +1485,9 @@ facetsRegistry.add(Container);
 module.exports = Container;
 
 
-function addChildComponents(childComponents) {
-	// TODO
-	// this function should intelligently re-bind existing components to
-	// new elements (if they changed) and re-bind previously bound events to the same
-	// event handlers
-	// or maybe not, if this function is only used by binder to add new elements...
-	_.extend(this.scope, childComponents);
-}
-
-
 /**
  * Component instance method.
- * Binds scope children of component element.
+ * Scans DOM, creates components and adds to scope children of component element.
  */
 function Container$binder() {
 	return miloBinder(this.owner.el, this.scope, false);
@@ -2464,26 +2469,37 @@ function noTextAfterSelection(component) {
 
 
 },{"../../util":67,"../../util/dom":65,"../../util/logger":68,"../c_class":12,"../c_facet":13,"../msg_api/editable":33,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":74}],20:[function(require,module,exports){
-// <a name="components-facets-events"></a>
-// ###events facet
-
 'use strict';
 
 var ComponentFacet = require('../c_facet')
 	, facetsRegistry = require('./cf_registry')
-
 	, Messenger = require('../../messenger')
 	, DOMEventsSource = require('../msg_src/dom_events')
-
 	, _ = require('mol-proto');
 
 
-// events facet
+/**
+ * `milo.registry.facets.get('Events')`
+ * Component facet that manages subscriptions to DOM events using [Messenger](../../messenger/index.js.html) with [DOMEventsSource](../msg_src/dom_events.js.html).
+ * All public methods of Messenger and `trigger` method of [DOMEventsSource](../msg_src/dom_events.js.html) are proxied directly to this facet.
+ * For example, to subscribe to `click` event use:
+ * ```
+ * component.frame.on('click', function() {
+ *     // ...
+ * });
+ * ```
+ * See [Messenger](../../messenger/index.js.html)
+ */
 var Events = _.createSubclass(ComponentFacet, 'Events');
 
-_.extendProto(Events, {
-	init: init,
 
+/**
+ * ####Events facet instance methods####
+ *
+ * - [init](#Events$init) - called by constructor automatically
+ */
+_.extendProto(Events, {
+	init: Events$init,
 	// _reattach: _reattachEventsOnElementChange
 });
 
@@ -2492,8 +2508,11 @@ facetsRegistry.add(Events);
 module.exports = Events;
 
 
-// init Events facet
-function init() {
+/**
+ * Events facet instance method
+ * Initialzes facet, connects DOMEventsSource to facet's messenger
+ */
+function Events$init() {
 	ComponentFacet.prototype.init.apply(this, arguments);
 
 	var domEventsSource = new DOMEventsSource(this, { trigger: 'trigger' }, undefined, this.owner);
@@ -2504,10 +2523,6 @@ function init() {
 },{"../../messenger":47,"../c_facet":13,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":74}],21:[function(require,module,exports){
 'use strict';
 
-// <a name="components-facets-frame"></a>
-// ###frame facet
-
-// TODO: The message source for this facet needs to be completely refactored
 
 var ComponentFacet = require('../c_facet')
 	, facetsRegistry = require('./cf_registry')
@@ -2516,12 +2531,44 @@ var ComponentFacet = require('../c_facet')
 	, _ = require('mol-proto');
 
 
-// data model connection facet
-var Frame = _.createSubclass(ComponentFacet, 'Frame');
+/**
+ * `milo.registry.facets.get('Frame')`
+ * Component facet that simplifies sending window messages to iframe and subscribing to messages on inner window of iframe.
+ * All public methods of Messenger and `trigger` method of [FrameMessageSource](../msg_src/frame.js.html) are proxied directly to this facet.
+ * For example, to send custom message to iframe window use:
+ * ```
+ * iframeComponent.frame.trigger('mymessage', myData);
+ * ```
+ * To subscribe to this messages inside frame use (with milo - see [milo.mail](../../mail/index.js.html)):
+ * ```
+ * milo.mail.on('message:mymessage', function(msgType, msgData) {
+ *	   // data is inside of window message data
+ *     // msgType == 'message:mymessage'
+ *     var myData = msgData.data;
+ *     // ... app logic here
+ * });
+ * ```
+ * or without milo:
+ * ```
+ * window.attachEventListener('message', function(message) {
+ *     var msgType = message.type; // e.g., 'mymessage'
+ *     var myData = message.data;
+ *     // ... message routing and code here
+ * });
+ * ```
+ * Milo does routing based on sent message type automatically.
+ * See [Messenger](../../messenger/index.js.html) and [milo.mail](../../mail/index.js.html).
+ */
+ var Frame = _.createSubclass(ComponentFacet, 'Frame');
 
+
+/**
+ * ####Events facet instance methods####
+ *
+ * - [init](#Frame$init) - called by constructor automatically
+ */
 _.extendProto(Frame, {
-	init: init
-
+	init: Frame$init
 	// _reattach: _reattachEventsOnElementChange
 });
 
@@ -2531,8 +2578,11 @@ facetsRegistry.add(Frame);
 module.exports = Frame;
 
 
-// initFrameFacet
-function init() {
+/**
+ * Frame facet instance method
+ * Initialzes facet, connects FrameMessageSource to facet's messenger
+ */
+function Frame$init() {
 	ComponentFacet.prototype.init.apply(this, arguments);
 	
 	var messageSource = new FrameMessageSource(this, { trigger: 'trigger' }, undefined, this.owner);
