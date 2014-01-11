@@ -762,6 +762,8 @@ module.exports = binder;
 
 
 /**
+ * `milo.binder`
+ *
  * Recursively scans the document tree inside `scopeEl` (document.body
  * by default) looking for __ml-bind__ attribute that should contain
  * the class, additional facets and the name of the component that should
@@ -934,7 +936,8 @@ var FacetedObject = require('../abstract/faceted_object')
 	, check = require('../util/check')
 	, Match = check.Match
 	, config = require('../config')
-	, miloComponentName = require('../util/component_name'); 	
+	, miloComponentName = require('../util/component_name')
+	, logger = require('../util/logger');
 
 
 /**
@@ -1131,8 +1134,14 @@ function init(scope, element, name, componentInfo) {
 	this.el = element || this.initElement();
 
 	// store reference to component on DOM element
-	if (this.el)
+	if (this.el) {
+		// check that element does not have a component already atached
+		// var elComp = this.el[config.componentRef];
+		// if (elComp)
+		// 	logger.error('component ' + name + ' attached to element that already has component ' + elComp.name);
+
 		this.el[config.componentRef] = this;
+	}
 
 	_.defineProperties(this, {
 		name: name,
@@ -1259,7 +1268,7 @@ function _getScopeParent(withFacet) {
 }
 
 
-},{"../abstract/faceted_object":3,"../config":43,"../messenger":48,"../util/check":63,"../util/component_name":64,"./c_facets/cf_registry":27,"./c_utils":30,"mol-proto":75}],13:[function(require,module,exports){
+},{"../abstract/faceted_object":3,"../config":43,"../messenger":48,"../util/check":63,"../util/component_name":64,"../util/logger":69,"./c_facets/cf_registry":27,"./c_utils":30,"mol-proto":75}],13:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facet"></a>
@@ -1841,10 +1850,10 @@ function imgValue(el, value) {
 }
 
 },{"../../abstract/mixin":4,"../../messenger":48,"../../model/path_utils":58,"../../util/logger":69,"../c_facet":13,"../msg_api/data":32,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":75}],16:[function(require,module,exports){
+'use strict';
+
 // <a name="components-facets-dom"></a>
 // ###dom facet
-
-'use strict';
 
 var ComponentFacet = require('../c_facet')
 	, facetsRegistry = require('./cf_registry')	
@@ -2071,10 +2080,10 @@ function hasTextAfterSelection() {
 }
 
 },{"../../attributes/a_bind":6,"../../binder":10,"../../util/check":63,"../../util/dom":66,"../../util/error":67,"../c_facet":13,"./cf_registry":27,"mol-proto":75}],17:[function(require,module,exports){
+'use strict';
+
 // <a name="components-facets-drag"></a>
 // ###drag facet
-
-'use strict';
 
 var ComponentFacet = require('../c_facet')
 	, facetsRegistry = require('./cf_registry')
@@ -2157,10 +2166,10 @@ function startDragFacet() {
 }
 
 },{"../c_facet":13,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":75}],18:[function(require,module,exports){
+'use strict';
+
 // <a name="components-facets-drop"></a>
 // ###drop facet
-
-'use strict';
 
 var ComponentFacet = require('../c_facet')
 	, facetsRegistry = require('./cf_registry')
@@ -3064,10 +3073,19 @@ function Split$isSplittable() {
 }
 
 },{"../../util/dom":66,"../c_class":12,"../c_facet":13,"./cf_registry":27}],26:[function(require,module,exports){
+'use strict';
+
 // <a name="components-facets-template"></a>
 // ###template facet
 
-'use strict';
+// simplifies rendering of component element from template.
+//   Any templating enging can be used that supports template compilation
+//   (or you can mock this compilation easily by creating closure storing
+//   template string in case your engine doesn't support compilation).
+//   By default milo uses [doT](), the most versatile, conscise and at the
+//   same time the fastest templating engine.
+//   If you use milo in browser, it is the part of milo bundle and available
+//   as global variable `doT`.
 
 var ComponentFacet = require('../c_facet')
 	, facetsRegistry = require('./cf_registry')	
@@ -3949,6 +3967,8 @@ module.exports = MLTextarea;
 
 },{"../c_class":12,"../c_registry":29}],43:[function(require,module,exports){
 'use strict';
+
+
 // <a name="config"></a>
 // milo.config
 // -----------
@@ -3989,6 +4009,8 @@ config({
 });
 
 },{"dot":74,"mol-proto":75}],44:[function(require,module,exports){
+'use strict';
+
 // <a name="loader"></a>
 // milo.loader
 // -----------
@@ -4021,7 +4043,6 @@ config({
 // // }
 // ```
 
-'use strict';
 
 var miloMail = require('./mail')
 	, request = require('./util/request')
@@ -4121,7 +4142,7 @@ function loadView(el, callback) {
 // At the moment, in addition to application messages that you define, you can subscribe to __domready__ message that is guaranteed to fire once,
 // even if DOM was ready at the time of the subscription.
 
-// Messaging between frames is likely to be exposed via milo.mail.
+// Messaging between frames is available via milo.mail. See Frame facet.
 
 // See Messenger.
 
@@ -4282,7 +4303,7 @@ var Mixin = require('../abstract/mixin')
 /**
  * `milo.Messenger`
  * A generic Messenger class that is used for all kinds of messaging in milo. It is subclassed from [Mixin](../abstract/mixin.js.html) and it proxies its methods to the host object for convenience.
- * All facets and components have messenger attached to them. Messenger class interoperates with [MessageSource](./message_source.js.html) class that both connects the messenger to some external source of messages (e.g., DOM events) and allows to define higher level messages that exist on the source.
+ * All facets and components have messenger attached to them. Messenger class interoperates with [MessageSource](./m_source.js.html) class that connects the messenger to some external source of messages (e.g., DOM events) and [MessengerAPI](./m_api.js.html) class that allows to define higher level messages than messages that exist on the source.
  * Messenger class is used internally in milo and can be used together with any objects/classes in the application.
  * milo also defines a global messenger [milo.mail](../mail/index.js.html) that dispatches `domready` event and can be used for any application wide messaging.
  * To initialize your app after DOM is ready use:
@@ -4297,7 +4318,6 @@ var Mixin = require('../abstract/mixin')
  *     // application starts	
  * });
  * ```
- * TODO consider refactoring MessageSource to two classes - MessageSource and MessageAPI.
  */
 var Messenger = _.createSubclass(Mixin, 'Messenger');
 
@@ -5253,7 +5273,6 @@ module.exports = minder;
 
 
 /**
- * minder
  * This function creates one or many Connector objects that
  * create live reactive connection between objects implementing
  * dataSource interface:
@@ -6205,20 +6224,6 @@ require('./components/ui/Button');
 },{"./components/classes/View":31,"./components/ui/Button":38,"./components/ui/Group":39,"./components/ui/Input":40,"./components/ui/Select":41,"./components/ui/Textarea":42}],62:[function(require,module,exports){
 'use strict';
 
-// ['Dom'
-//  'Data'
-//  'Frame'
-//  'Events'
-//  'Template'
-//  'Container'
-//  'ModelFacet'
-//  'Drag'
-//  'Drop'
-//  'Editable'
-//  'Split'
-//  'List'
-//  'Item'].
-
 require('./components/c_facets/Dom');
 require('./components/c_facets/Data');
 require('./components/c_facets/Frame');
@@ -6234,6 +6239,8 @@ require('./components/c_facets/List');
 require('./components/c_facets/Item');
 
 },{"./components/c_facets/Container":14,"./components/c_facets/Data":15,"./components/c_facets/Dom":16,"./components/c_facets/Drag":17,"./components/c_facets/Drop":18,"./components/c_facets/Editable":19,"./components/c_facets/Events":20,"./components/c_facets/Frame":21,"./components/c_facets/Item":22,"./components/c_facets/List":23,"./components/c_facets/ModelFacet":24,"./components/c_facets/Split":25,"./components/c_facets/Template":26}],63:[function(require,module,exports){
+'use strict';
+
 // <a name="utils-check"></a>
 // milo.utils.check
 // -----------
@@ -6286,7 +6293,6 @@ require('./components/c_facets/Item');
 //           return MySubclass.prototype instanceof MyClass;
 //       });
 
-'use strict';
 
 // Things we explicitly do NOT support:
 //    - heterogenous arrays
@@ -6788,6 +6794,8 @@ var util = {
 module.exports = util;
 
 },{"./check":63,"./component_name":64,"./count":65,"./dom":66,"./error":67,"./logger":69,"./request":71}],69:[function(require,module,exports){
+'use strict';
+
 // <a name="utils-logger"></a>
 // milo.utils.logger
 // -----------
@@ -6795,7 +6803,19 @@ module.exports = util;
 // Application logger that has error, warn, info and debug
 // methods, that can be suppressed by setting log level.
 
-'use strict';
+// Properties:
+
+// - level
+
+//   - 0 - error
+//   - 1 - warn
+//   - 2 - info
+//   - 3 - debug (default)
+
+// - enabled
+
+//   true by default. Set to false to disable all logging in browser console.
+
 
 var Logger = require('./logger_class');
 
@@ -6804,6 +6824,8 @@ var logger = new Logger({ level: 3 });
 module.exports = logger;
 
 },{"./logger_class":70}],70:[function(require,module,exports){
+'use strict';
+
 // ### Logger Class
 
 // Properties:
@@ -6819,7 +6841,6 @@ module.exports = logger;
 
 //   true by default. Set to false to disable all logging in browser console.
 
-'use strict';
 
 var _ = require('mol-proto');
 
@@ -6917,25 +6938,25 @@ module.exports = Logger;
 },{"mol-proto":75}],71:[function(require,module,exports){
 'use strict';
 
-// <a name="utils-request"></a>
 // milo.utils.request
 // -----------
 
-// example
+// Convenience functions wrapping XMLHTTPRequest functionality.
 
-// ```javascript
+// ```
 // var request = milo.utils.request
 //     , opts: { method: 'GET' };
 
 // request(url, opts, function(err, data) {
-//     log(data);
+//     logger.debug(data);
 // });
 
 // request.get(url, function(err, data) {
-//     log(data);
+//     logger.debug(data);
 // });
 // ```
 
+// Only generic request and get convenience method are currently implemented.
 
 
 var _ = require('mol-proto');
