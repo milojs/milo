@@ -5480,6 +5480,8 @@ function Model(data, hostObject) {
 	// enables "stars" subscription to Model
 	pathUtils.wrapMessengerMethods.call(model);
 
+	// model._prepareMessengers();
+
 	if (data) model._data = data;
 
 	return model;
@@ -5509,7 +5511,8 @@ _.extendProto(Model, {
 	set: synthesize.modelSet,
 	splice: synthesize.modelSplice,
 	proxyMessenger: proxyMessenger,
-	proxyMethods: proxyMethods
+	proxyMethods: proxyMethods,
+	_prepareMessengers: _prepareMessengers
 });
 
 var modelPathMethods = _.mapToObject(['len', 'push', 'pop', 'unshift', 'shift'],
@@ -5581,6 +5584,30 @@ var modelMethodsToProxy = ['path', 'get', 'set', 'splice', 'len', 'push', 'pop',
 
 
 /**
+ * Model instance method.
+ * Create and connect internal and external model's messengers.
+ * External messenger's methods are proxied on the model and it allows "*" subscriptions.
+ */
+function _prepareMessengers() {
+	// model will post all its changes on internal messenger
+	var internalMessenger = new Messenger(this);
+
+	// message source to connect internal messenger to external
+	// 
+	var msgSource = new MessengerMessageSource(this, undefiend, new ModelMsgAPI, internalMessenger);
+
+	// external messenger to which all model users will subscribe,
+	// that will allow "*" subscriptions and support "changedata" message api.
+	var externalMessenger = new Messenger(this, Messenger.defaultMethods, msgSource);
+
+	_.defineProperties(this, {
+		_messenger: externalMessenger,
+		_internalMessenger: internalMessenger
+	});
+}
+
+
+/**
  * Export ModelPath object as `milo.Model.Path`.
  */
 _.extend(Model, {
@@ -5591,6 +5618,7 @@ _.extend(Model, {
 'use strict';
 
 var synthesize = require('./synthesize')
+	, pathUtils = require('./path_utils')
 	, Messenger = require('../messenger')
 	, ModelPathMsgAPI = require('./path_msg_api')
 	, MessengerMessageSource = require('../messenger/msngr_source')
@@ -5622,19 +5650,45 @@ function ModelPath(model, path) { // ,... - additional arguments for interpolati
 	_.defineProperties(this, {
 		_model: model,
 		_path: path,
-		_args: _.slice(arguments, 1)
+		_args: _.slice(arguments, 1) // path will be the first element of this array
 	});
 
 	// messenger fails on "*" subscriptions
 	// this._prepareMessenger(this._path, this._model);
 
 	// compiling getter and setter
-	var methods = synthesize(path);
+	var parsedPath = pathUtils.parseAccessPath(path);
+	var methods = synthesize(path, parsedPath);
+
+	// compute access path string
+	_.defineProperties(this, {
+		_accessPath: interpolateAccessPath(parsedPath, this._args)
+	})
 
 	// adding methods to model path
 	_.defineProperties(this, methods);
 
 	Object.freeze(this);
+}
+
+
+/**
+ * Interpolates path elements to compute real path
+ *
+ * @param {Array} parsedPath parsed path - array of path nodes
+ * @param {Array} args path interpolation arguments, args[0] is path itself
+ * @return {String}
+ */
+function interpolateAccessPath(parsedPath, args) {
+	return parsedPath.reduce(function(accessPathStr, currNode, index) {
+		var interpolate = currNode.interpolate;
+		return accessPathStr + 
+				(interpolate
+					? (currNode.syntax == 'array'
+						? '[' + args[interpolate] + ']'
+						: '.' + args[interpolate])
+					: currNode.property);
+	}, '');
 }
 
 
@@ -5645,10 +5699,10 @@ var modelPathMessengerMethods = _.mapToObject(['on', 'off'], function(methodName
 	return function(accessPath, subscriber) {
 		check(accessPath, String);
 		var self = this;
-		this._model[methodName](this._path + accessPath, function(msgPath, data) {
+		this._model[methodName](this._accessPath + accessPath, function(msgPath, data) {
 			data.fullPath = msgPath;
-			if (msgPath.indexOf(self._path) == 0) {
-				msgPath = msgPath.replace(self._path, '');
+			if (msgPath.indexOf(self._accessPath) == 0) {
+				msgPath = msgPath.replace(self._accessPath, '');
 				data.path = msgPath;
 			} else
 				logger.warn('ModelPath message dispatched with wrong root path');
@@ -5796,7 +5850,7 @@ function ModelPath$shift() { // arguments
  * Initializes ModelPath mesenger with Model's messenger as its source ([MessengerMessageSource](../messenger/msngr_source.js.html)) and [ModelPathMsgAPI](./path_msg_api.js.html) as [MessengerAPI](../messenger/m_api.js.html)
  */
 function _prepareMessenger() {
-	var mPathAPI = new ModelPathMsgAPI(this._path);
+	var mPathAPI = new ModelPathMsgAPI(this._accessPath);
 
 	// create MessengerMessageSource connected to Model's messenger
 	var modelMessageSource = new MessengerMessageSource(this, undefined, mPathAPI, this._model);
@@ -5812,7 +5866,7 @@ function _prepareMessenger() {
 	_.defineProperty(this, '_messenger', mPathMessenger);
 }
 
-},{"../messenger":48,"../messenger/msngr_source":51,"../util/check":63,"./path_msg_api":57,"./synthesize":59,"mol-proto":75}],57:[function(require,module,exports){
+},{"../messenger":48,"../messenger/msngr_source":51,"../util/check":63,"./path_msg_api":57,"./path_utils":58,"./synthesize":59,"mol-proto":75}],57:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('../messenger/m_api')
@@ -5845,6 +5899,8 @@ _.extendProto(ModelPathMsgAPI, {
 /**
  * ModelPathMsgAPI instance method
  * Called by MessengerAPI constructor.
+ *
+ * @param {String} rootPath root path of model path
  */
 function init(rootPath) {
 	MessengerAPI.prototype.init.apply(this, arguments);
@@ -6076,17 +6132,15 @@ var modelSetSynthesizer = doT.template(templates.set, dotSettings, modelDotDef)
  * Function is memoized so accessors are cached (up to 1000).
  *
  * @param {String} path Model/ModelPath access path
+ * @param {Array} parsedPath array of path nodes
  * @return {Object[Function]}
  */
 var synthesizePathMethods = _.memoize(_synthesizePathMethods, undefined, 1000);
 
-function _synthesizePathMethods(path) {
-	var parsedPath = pathUtils.parseAccessPath(path);
-
+function _synthesizePathMethods(path, parsedPath) {
 	var methods = _.mapKeys(synthesizers, function(synthszr) {
 		return _synthesize(synthszr, path, parsedPath)
 	});
-
 	return methods;
 }
 

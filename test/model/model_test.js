@@ -578,6 +578,22 @@ describe('Model class', function() {
 	});
 
 
+	it('should support subscriptions for path with interpolation', function() {
+		var m = new Model;
+		var posted = [];
+
+		m('.$1.$2', 'info', 'name').on('***', logPosted);
+
+		function logPosted(msg, data) {
+			posted.push(data);
+		}
+
+		m('.info.name').set('milo');
+
+		assert.deepEqual(posted, [ { path: '', type: 'added', newValue: 'milo', fullPath: '.info.name' } ]);
+	});
+
+
 	it('should define "path" instance method of ModelPath', function() {
 		var m = new Model;
 
