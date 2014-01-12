@@ -11,9 +11,6 @@ Documentation: http://mailonline.github.io/milo/
 Quick start
 -----------
 
-While __Milo__ is the work in progress that has only recently started, you can already do quite a few things with it.
-
-
 ### Install
 
     npm install mol-milo
@@ -152,14 +149,14 @@ There are the following facets defined in __milo__:
 - [Container](http://mailonline.github.io/milo/components/c_facets/Container.js.html) - a special facet that creates a scope of components
 - [Dom](http://mailonline.github.io/milo/components/c_facets/Dom.js.html) - a collection of helper methods simplifying DOM manipulation of component element
 - [Events](http://mailonline.github.io/milo/components/c_facets/Events.js.html) - gives a convenient API to subscribe to DOM events
-- [Data](http://mailonline.github.io/milo/components/c_facets/Data.js.html) - an api to manipulate DOM tree inside component element as data, allowing both getting/setting structured datafrom/to many DOM elements at once and creating reactive data connection of Models (see below) to DOM.
+- [Data](http://mailonline.github.io/milo/components/c_facets/Data.js.html) - an api to manipulate DOM tree inside component element as data, allowing both getting/setting structured data from/to many DOM elements at once and creating reactive data connection of Models (see below) to DOM.
 - [List](http://mailonline.github.io/milo/components/c_facets/List.js.html) and [Item](http://mailonline.github.io/milo/components/c_facets/Item.js.html) - allow creating lists in DOM from arays in your data. Component class using any of these facets require Data facet (will be added automatically) that should be used to get/set list data and to create reactive data connection.
 - [Template](http://mailonline.github.io/milo/components/c_facets/Template.js.html) - simplifies rendering of component DOM element from template.
 - [Frame](http://mailonline.github.io/milo/components/c_facets/Frame.js.html) - manages sending/receiveing messages to/from iframe.
 - [Drag](http://mailonline.github.io/milo/components/c_facets/Drag.js.html) - allows easy management of draggable DOM elements.
 - [Drop](http://mailonline.github.io/milo/components/c_facets/Drop.js.html) - helps creating drop targets.
 - [Editable](http://mailonline.github.io/milo/components/c_facets/Editable.js.html) - manages contenteditable DOM elements enabling splitting and merging of components
-- [Split](http://mailonline.github.io/milo/components/c_facets/Split.js.html) - manages the process of splitting of component at the current selection point
+- [Split](http://mailonline.github.io/milo/components/c_facets/Split.js.html) - manages the process of splitting the component at the current selection point
 - [Model](http://mailonline.github.io/milo/components/c_facets/ModelFacet.js.html) - simple wrapper for __milo__ Model (see below), helping to store data on component.
 
 There is a [Component facet template](https://github.com/MailOnline/milo/blob/master/lib/components/c_facets/facet_template.js) to simplify creation of your own facets. All facets of components should be subclasses of [ComponentFacet](http://mailonline.github.io/milo/components/c_facet.js.html).
@@ -191,7 +188,7 @@ See [Messenger documentation](http://mailonline.github.io/milo/messenger/index.j
 
 __milo__ defines Model to allow safe access to the data without the need to worry whether the data was set (it never throws when you access data when you get properties of undefined objects) and to enable possibility to subscribe to data changes similar to what experimental Object.observe and Array.observe APIs allow.
 
-Using Model does not require these apis, it allows subscribing to changes on properties of your Models to any depth.
+Using Model does not require these APIs, and unlike these APIs it allows subscribing to changes on properties of your Models to any depth.
 
 See Model [demo](https://github.com/MailOnline/milo/blob/master/lib/model/demo.js) and [Model documentation](http://mailonline.github.io/milo/model/index.js.html).
 
@@ -200,30 +197,30 @@ See Model [demo](https://github.com/MailOnline/milo/blob/master/lib/model/demo.j
 
 __milo__ defines this class to manage reactive connection between objects that implement data messaging API. Both instances of Data facet and of Model are such objects.
 
-You can create one or two way connections, define the depth of your data structures you want to observe, turn these connections off, e.g. when you want to make many Model changes without causing DOM updates.
+You can create one- or two-way connections, define the depth of your data structures you want to observe, turn these connections off, e.g. when you want to make many Model changes without causing DOM updates.
 
-These connections do not have overhead of comparing data in the loop like angular does and do not cause any performance degradation when many connected objects exist.
+These connections do not have overhead of comparing data in the loop like `angularjs` does and do not cause any performance degradation when many connected objects exist.
 
 Very soon Connector instances will support structure translation allowing creating reactive connections between models with fixed structures and DOM trees with flexible structures.
 
-One or multiple reactive connections can be created with `milo.minder`.
+One or multiple reactive connections can be created with [milo.minder](http://mailonline.github.io/milo/minder.js.html).
 
 See [Connector documentation](http://mailonline.github.io/milo/model/connector.js.html).
 
 
 ### Views and application management
 
-- [milo.loader](http://mailonline.github.io/milo/loader.js.html) - loading subviews into page
-- [milo.mail](http://mailonline.github.io/milo/mail/index.js.html) - applicaiton level messenger that also defines `domready` event and simplifies routing of messages between iframes.
-- [milo.config](http://mailonline.github.io/milo/config.js.html) - configuring __milo__ settings
+- [milo.loader](http://mailonline.github.io/milo/loader.js.html) - loading subviews into page.
+- [milo.mail](http://mailonline.github.io/milo/mail/index.js.html) - applicaiton level messenger that also defines `domready` event and simplifies routing of messages between iframes (see [Frame facet](http://mailonline.github.io/milo/components/c_facets/Frame.js.html)).
+- [milo.config](http://mailonline.github.io/milo/config.js.html) - configuring __milo__ settings.
 
 
 ### Utilities
 
-- [check](http://mailonline.github.io/milo/util/check.js.html) - check parameter types
-- [logger](http://mailonline.github.io/milo/util/logger.js.html)
-- [request](http://mailonline.github.io/milo/util/request.js.html) - HTTP requests library
-- [dom](http://mailonline.github.io/milo/util/dom.js.html) - library to manipulate DOM elements
+- [check](http://mailonline.github.io/milo/util/check.js.html) - check parameter types.
+- [logger](http://mailonline.github.io/milo/util/logger.js.html) - configurable logger with log levels.
+- [request](http://mailonline.github.io/milo/util/request.js.html) - HTTP requests library.
+- [dom](http://mailonline.github.io/milo/util/dom.js.html) - library to manipulate DOM elements.
 
 
 Why Milo?
@@ -231,7 +228,7 @@ Why Milo?
 
 __Milo__ name was chosen because of [Milo Minderbinder](http://en.wikipedia.org/wiki/Milo_Minderbinder), a war profiteer from Catch 22. Having started from managing mess operations, he expanded them into a profitable trading enterprise, that connected everybody with everything, and in that Milo and everybody else "has a share".
 
-__Milo__ the framework has the module __binder__, that binds DOM elements to components (via special ml-bind attribute), and the module __minder__ that allows establishing live reactive connections between different data sources (all models and some components, such as input field, e.g., are data sources).
+__Milo__ the framework has the module __binder__, that binds DOM elements to components (via special ml-bind attribute), and the module __minder__ that allows establishing live reactive connections between different data sources (Model and Data facet of components are such data sources).
 
 Coincidentally, __Milo__ can be read as an acronym of [__MaIL Online__](http://dailymail.co.uk).
 
@@ -247,6 +244,7 @@ What we always wanted was a framework that would allow
 - inserting __validators__ and __translators__ in these bindings, so we can bind views to data models rather than to view models like in AngularJS.
 - __precise control__ over components linked to DOM elements.
 - flexibility of views management allowing both to automatically __manipulate DOM__ on model changes and to re-render some sections using any __ templating engine__ in cases where rendering is more efficient than DOM manipulation
+- ability to __dynamically create UI__
 - being able to __hook into__ mechanisms behind data reactivity and to precisely control view updates and data flow
 - being able to __extend functionality__ of components supplied by framework and to create new components.
 

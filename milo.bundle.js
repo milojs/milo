@@ -7341,6 +7341,8 @@ var	arrayMethods = require('./proto_array');
  * - [partial](proto_function.js.html#partial)
  * - [partialRight](proto_function.js.html#partialRight)
  * - [memoize](proto_function.js.html#memoize)
+ * - [delay](proto_function.js.html#delay)
+ * - [defer](proto_function.js.html#defer)
  */
 var	functionMethods = require('./proto_function');
 
@@ -7594,6 +7596,8 @@ function mapToObject(callback, thisArg) {
  * - [partial](#partial)
  * - [partialRight](#partialRight)
  * - [memoize](#memoize)
+ * - [delay](#delay)
+ * - [defer](#defer)
  *
  * These methods can be [chained](proto.js.html#Proto)
  */
@@ -7637,7 +7641,7 @@ function makeFunction(arg1, arg2, funcBody) {
 /**
  * Creates a function as a result of partial function application with the passed parameters.
  *
- * @param {Function} func Function to be applied
+ * @param {Function} self Function to be applied
  * @param {List} arguments Arguments after self will be prepended to the original function call when the partial function is called.
  * @return {Function}
  */
@@ -7653,7 +7657,7 @@ function partial() { // , ... arguments
 /**
  * Creates a function as a result of partial function application with the passed parameters, but parameters are appended on the right.
  *
- * @param {Function} func Function to be applied
+ * @param {Function} self Function to be applied
  * @param {List} arguments Arguments after self will be appended on the right to the original function call when the partial function is called.
  * @return {Function}
  */
@@ -7669,7 +7673,7 @@ function partialRight() { // , ... arguments
 /**
  * Creates a memoized version of the function using supplied hash function as key. If the hash is not supplied, uses its first parameter as the hash.
  * 
- * @param {Function} func function to be memoized
+ * @param {Function} self function to be memoized
  * @param {Function} hashFunc optional hash function that is passed all function arguments and should return cache key.
  * @param {Integer} limit optional maximum number of results to be stored in the cache. 1000 by default.
  * @return {Function} memoized function
@@ -7696,25 +7700,30 @@ function memoize(hashFunc, limit) {
 
 
 /**
+ * Delays function execution by a given time in milliseconds.
+ * The context in function when it is executed is set to `null`.
  *
+ * @param {Function} self function that execution has to be delayed
+ * @param {Number} wait approximate dalay time in milliseconds
+ * @param {List} arguments optional arguments that will be passed to the function
  */
 function delay(wait) { // , arguments
     var args = slice.call(arguments, 1);
 	return _delay(this, wait, args);
-};
+}
  
 
 /**
+ * Defers function execution (executes as soon as execution loop becomes free)
+ * The context in function when it is executed is set to `null`.
  *
+ * @param {Function} self function that execution has to be delayed
+ * @param {List} arguments optional arguments that will be passed to the function
  */
 function defer() { // , arguments
 	return _delay(this, 1, arguments);
-};
+}
 
-
-/**
- *
- */
 function _delay(func, wait, args) {
 	return setTimeout(func.apply.bind(func, null, args), wait);
 }
