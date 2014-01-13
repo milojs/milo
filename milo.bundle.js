@@ -5554,11 +5554,17 @@ function Model(data, hostObject) {
 	};
 	model.__proto__ = Model.prototype;
 
-	_.defineProperty(model, '_hostObject', hostObject);
+	_.defineProperties(model, {
+		_hostObject: hostObject,
+		_changesQueue: []
+	});
 
 	model._prepareMessengers();
 
 	if (data) model._data = data;
+
+	// subscribe to "changedata" message to enable reactive connections
+	model.on('changedata', model._onChangeData);
 
 	return model;
 }
@@ -5591,8 +5597,14 @@ _.extendProto(Model, {
 	_prepareMessengers: _prepareMessengers
 });
 
-var modelPathMethods = _.mapToObject(['len', 'push', 'pop', 'unshift', 'shift'],
-		function(methodName) {
+
+/**
+ * ModelPath methods added to Model prototype
+ */
+var modelPathMethods = _.mapToObject([
+			'len', 'push', 'pop', 'unshift', 'shift',
+			'_onChangeData', '_processChanges'
+		], function(methodName) {
 			return ModelPath.prototype[methodName];
 		}
 	);
@@ -5764,7 +5776,8 @@ function ModelPath(model, path) { // ,... - additional arguments for interpolati
 	_.defineProperties(this, {
 		_model: model,
 		_path: path,
-		_args: _.slice(arguments, 1) // path will be the first element of this array
+		_args: _.slice(arguments, 1), // path will be the first element of this array
+		_changesQueue: []
 	});
 
 	// parse access path
@@ -5781,6 +5794,9 @@ function ModelPath(model, path) { // ,... - additional arguments for interpolati
 
 	// adding methods to model path
 	_.defineProperties(this, methods);
+
+	// subscribe to "changedata" message to enable reactive connections
+	this.on('changedata', _onChangeData);
 
 	Object.freeze(this);
 }
@@ -5826,7 +5842,9 @@ _.extendProto(ModelPath, {
 	pop: ModelPath$pop,
 	unshift: ModelPath$unshift,
 	shift: ModelPath$shift,
-	_prepareMessenger: _prepareMessenger
+	_prepareMessenger: _prepareMessenger,
+	_onChangeData: _onChangeData,
+	_processChanges: _processChanges
 })
 
 
@@ -5945,14 +5963,64 @@ function _prepareMessenger() {
 
 	// create messenger with model passed as hostObject (default message dispatch context)
 	// and without proxying methods (we don't want to proxy them to Model)
-	var mPathMessenger = new Messenger(this._model, undefined, modelMessageSource);
-
-	// now proxy messenger's methods to ModelPath instance
-	mPathMessenger._createProxyMethods(Messenger.defaultMethods, this);
+	var mPathMessenger = new Messenger(this, Messenger.defaultMethods, modelMessageSource);
 
 	// store messenger on ModelPath instance
 	_.defineProperty(this, '_messenger', mPathMessenger);
 }
+
+
+/**
+ * ModelPath instance method
+ * Handler of "changedata" event that is emitted by [Connector](./connector.js.html) object
+ *
+ * @private
+ * @param {String} message "changedata"
+ * @param {Object} data data change desciption object
+ */
+function _onChangeData(message, data) {
+	if (! this._changesQueue.length)
+		_.defer(_processChanges.call, this)
+
+	this._changesQueue.push(data);
+}
+
+
+/**
+ * ModelPath instance method
+ * Processes queued "changedata" messages
+ *
+ * @private
+ */
+function _processChanges() {
+	this._changesQueue.forEach(function(data) {
+		var modelPath = this.path(data.path); // same as this._model(data.fullPath)
+
+		// set the new data
+		if (data.type == 'splice') {
+			var index = data.index
+				, howMany = data.removed.length
+				, spliceArgs = [index, howMany];
+
+			spliceArgs = spliceArgs.concat(data.newValue.slice(index, index + data.addedCount));
+			modelPath.splice.apply(modelPath, spliceArgs);
+		} else {
+			var methodName = changeTypeToMethodMap[data.type];
+			if (methodName)
+				modelPath[methodName](data.newValue);
+			else
+				logger.error('unknown data change type');
+		}
+	}, this);
+
+	this._changesQueue.length = 0;
+}
+var changeTypeToMethodMap = {
+	'added': 'set',
+	'changed': 'set',
+	'deleted': 'del',
+	'removed': 'del'
+};
 
 },{"../messenger":48,"../messenger/msngr_source":52,"../util/check":65,"./path_msg_api":59,"./path_utils":60,"./synthesize":61,"mol-proto":77}],59:[function(require,module,exports){
 'use strict';
@@ -6200,13 +6268,11 @@ var dotDef = {
 	include_traverse_tree: include_traverse_tree,
 	getPathNodeKey: pathUtils.getPathNodeKey,
 	modelAccessPrefix: 'this._model._data',
-	// modelPostMessageCode: 'this._model.postMessage'
 	modelPostMessageCode: 'this._model._internalMessenger.postMessage'
 };
 
 var modelDotDef = _(dotDef).clone().extend({
 	modelAccessPrefix: 'this._data',
-	// modelPostMessageCode: 'this.postMessage',
 	modelPostMessageCode: 'this._internalMessenger.postMessage',
 })._();
 

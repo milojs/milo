@@ -2,7 +2,8 @@
 
 
 var Model = require('../../lib/model')
-	, assert = require('assert');
+	, assert = require('assert')
+	, _ = require('mol-proto');
 
 
 describe('Model class', function() {
@@ -191,8 +192,7 @@ describe('Model class', function() {
 			, posted = {};
 
 		function postLogger(message, data) {
-			assert.equal(m, this, 'should set message handler context to model');
-			posted[message] = data;
+			posted[data.path] = data;
 		}
 
 		m('.list').on('', postLogger);
@@ -213,11 +213,9 @@ describe('Model class', function() {
 			, posted = {};
 
 		function postLogger(message, data) {
-			assert.equal(m, this, 'should set message handler context to model');
-
 			// main thing in this test!
 			assert.equal(m('.list[0].info.name').get(), 'Jason', 'should set model BEFORE posting message');
-			posted[message] = data;
+			posted[data.path] = data;
 		}
 
 		m('.list[0].info.name').on('', postLogger);
@@ -948,5 +946,17 @@ describe('Model class', function() {
   				{ path: '[0]', type: 'removed', oldValue: { item: 'item1' }, fullPath: '.list[0]' },
   				{ path: '[0].item', type: 'removed', oldValue: 'item1', fullPath: '.list[0].item' }
   			]);
+	});
+
+
+	it.skip('should change its data when "changedata" message is dispatched', function(done) {
+		var m= new Model;
+
+		m.postMessage('changedata', { path: '.info.name', type: 'added', newValue: 'milo' });
+
+			_.delay(function() {
+				assert.deepEqual(m._data, { info: {name: 'milo'} } );
+				done();
+			}, 10);
 	});
 });
