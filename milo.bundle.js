@@ -866,8 +866,8 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
 		if (scopedObject && ! scope[attr.compName])
 			scope._add(scopedObject, attr.compName);
 
-		_.defer(postChildrenBoundMessage, el);
-		// postChildrenBoundMessage(el);
+		// _.defer(postChildrenBoundMessage, el);
+		postChildrenBoundMessage(el);
 
 		return scopedObject;
 
@@ -3429,8 +3429,6 @@ function value() { // value method
 function translateToSourceMessage(message) {
 	if (message == '' && this.tagEvent)
 		return this.tagEvent;
-	else
-		return '';
 }
 
 
@@ -4180,8 +4178,6 @@ function translateToSourceMessage(message) {
 		return 'readystatechange';
 	else if (windowMessageRegExp.test(message))
 		return 'message';
-	else
-		return '';
 }
 
 
@@ -4863,7 +4859,7 @@ function addInternalMessage(message) {
 	var internalMsgs
 		, sourceMessage = this.translateToSourceMessage(message);
 
-	if (! sourceMessage) return;
+	if (typeof sourceMessage == 'undefined') return;
 
 	if (this._internalMessages.hasOwnProperty(sourceMessage)) {
 		internalMsgs = this._internalMessages[sourceMessage];
@@ -4890,7 +4886,7 @@ function addInternalMessage(message) {
 function removeInternalMessage(message) {
 	var sourceMessage = this.translateToSourceMessage(message);
 
-	if (! sourceMessage) return;
+	if (typeof sourceMessage == 'undefined') return;
 
 	var internalMsgs = this._internalMessages[sourceMessage];
 
@@ -5157,7 +5153,7 @@ function _prepareMessengerAPI(messengerAPI) {
  */
 function onSubscriberAdded(message) {
 	var newSourceMessage = this.messengerAPI.addInternalMessage(message);
-	if (newSourceMessage)
+	if (typeof newSourceMessage != 'undefined')
 		this.addSourceSubscriber(newSourceMessage);
 }
 
@@ -5172,7 +5168,7 @@ function onSubscriberAdded(message) {
  */
 function onSubscriberRemoved(message) {
 	var removedSourceMessage = this.messengerAPI.removeInternalMessage(message);
-	if (removedSourceMessage)
+	if (typeof removedSourceMessage != 'undefined')
 		this.removeSourceSubscriber(removedSourceMessage);
 }
 
