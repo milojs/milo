@@ -1695,6 +1695,7 @@ function _processChanges() {
 
 	this.postMessage('changedatafinished');
 }
+
 var changeTypeToMethodMap = {
 	'added': 'set',
 	'changed': 'set',
@@ -5509,6 +5510,13 @@ function Connector(ds1, mode, ds2, options) {
 		isOn: false	
 	});
 
+	var translationRules = options && options.translationRules;
+	if (translationRules)
+		_.extend(this, {
+			translationRules1: reverseTranslationRules(translationRules),
+			translationRules2: translationRules
+		});
+
 	this.turnOn();
 
 	function modeParseError() {
@@ -5524,6 +5532,20 @@ _.extendProto(Connector, {
 
 
 /**
+ * Function that reverses translation rules for paths of connected odata sources
+ *
+ * @param {Object[String]} rules map of paths defining the translation rules
+ */
+function reverseTranslationRules(rules) {
+	var reverseRules = {};
+	_.eachKey(rules, function(path2_value, path1_key) {
+		reverseRules[path2_value] = path1_key;
+	});
+	return reverseRules;
+}
+
+
+/**
  * turnOn
  * Method of Connector that enables connection (if it was previously disabled)
  */
@@ -5536,19 +5558,27 @@ function turnOn() {
 
 	var self = this;
 	if (this.depth1)
-		linkDataSource('_link1', '_link2', this.ds1, this.ds2, subscriptionPath);
+		linkDataSource('_link1', '_link2', this.ds1, this.ds2, subscriptionPath, this.translationRules1);
 	if (this.depth2)
-		linkDataSource('_link2', '_link1',  this.ds2, this.ds1, subscriptionPath);
+		linkDataSource('_link2', '_link1',  this.ds2, this.ds1, subscriptionPath, this.translationRules2);
 
 	this.isOn = true;
 
 
-	function linkDataSource(linkName, stopLink, linkToDS, linkedDS, subscriptionPath) {
+	function linkDataSource(linkName, stopLink, linkToDS, linkedDS, subscriptionPath, translationRules) {
 		var onData = function onData(message, data) {
 			// prevent endless loop of updates for 2-way connection
 			if (self[stopLink]) {
 				linkToDS.on('changedatastarted', stopSubscription);
 				linkToDS.on('changedatafinished', startSubscription);
+			}
+
+			// translated
+			if (translationRules) {
+				data = _.clone(data);
+				var translatedPath = translationRules[data.path];
+				if (translatedPath)
+					data.path = translatedPath;
 			}
 
 			// send data change instruction as message
@@ -6107,6 +6137,7 @@ function _processChanges() {
 
 	this.postMessage('changedatafinished');
 }
+
 var changeTypeToMethodMap = {
 	'added': 'set',
 	'changed': 'set',
