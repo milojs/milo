@@ -145,12 +145,12 @@ describe('Model class', function() {
 
 
 	it('should postMessage on model when properties are added', function() {
-		var m = new Model()
+		var m = new Model
 			, posted = {};
 
 		m.on(/.*/, function(message, data) {
 			assert.equal(m, this, 'should set message handler context to model');
-			posted[message] = data;
+			posted[data.path] = data;
 		});
 
 		m('.list[0].info.name').set('Jason');
@@ -161,7 +161,7 @@ describe('Model class', function() {
 				'.list[0]': { path: '.list[0]', type: 'added', newValue: { info: { name: 'Jason' } } },
 				'.list[0].info': { path: '.list[0].info', type: 'added', newValue: { name: 'Jason' } },
 				'.list[0].info.name': { path: '.list[0].info.name', type: 'added', newValue: 'Jason' }
-			}, 'should post messages on model when property added');
+			});
 
 		var posted = {}
 
@@ -248,8 +248,9 @@ describe('Model class', function() {
 			, posted = {};
 
 		m.on(/.*/, function(path, message) {
-			assert(typeof posted[path] == 'undefined');
-			posted[path] = message;
+			var accessPath = message.path;
+			assert(typeof posted[accessPath] == 'undefined');
+			posted[accessPath] = message;
 		});
 
 		m.set({ info: { name: 'Milo' } });
@@ -274,7 +275,7 @@ describe('Model class', function() {
 			assert.deepEqual(m.get(), [ [ , { info: { name: 'Jason' } } ] ], 'should create array on top level');
 
 		m.on(/.*/, function(message, data) {
-			posted[message] = data;
+			posted[data.path] = data;
 		});
 
 		m('[0][1]').set('subtree removed');
@@ -298,7 +299,7 @@ describe('Model class', function() {
 			assert.deepEqual(m.get(), [ [ , 'scalar value' ] ], 'should create array on top level');
 
 		m.on(/.*/, function(message, data) {
-			posted[message] = data;
+			posted[data.path] = data;
 		});
 
 		var shouldBePosted = {
@@ -330,7 +331,7 @@ describe('Model class', function() {
 			, posted = {};
 
 		m.on(/.*/, function(message, data) {
-			posted[message] = data;
+			posted[data.path] = data;
 		});
 
 		var shouldBePosted = {
@@ -360,7 +361,7 @@ describe('Model class', function() {
 			assert.deepEqual(m.get(), [ [ , { info: { name: 'Jason', surname: 'Green', map: { data: 2 } } } ] ], 'should create array on top level');
 
 		m.on(/.*/, function(message, data) {
-			posted[message] = data;
+			posted[data.path] = data;
 		});
 
 		var shouldBePosted = {
@@ -411,7 +412,7 @@ describe('Model class', function() {
 
 		// should dispatch property change one level deep for both array and property syntax
 		m.on('[0]*', function(message, data) {
-			posted[message] = data;
+			posted[data.path] = data;
 		}); 
 
 		m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
@@ -427,7 +428,7 @@ describe('Model class', function() {
 
 		// should dispatch property change up to one level deep for property syntax only
 		m.on('[0].*', function(message, data) {
-			posted[message] = data;
+			posted[data.path] = data;
 		}); 
 
 		m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
@@ -442,7 +443,7 @@ describe('Model class', function() {
 
 		// should dispatch property change up to one level deep for array syntax only
 		m.on('[0][*]', function(message, data) {
-			posted[message] = data;
+			posted[data.path] = data;
 		}); 
 
 		m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
@@ -459,7 +460,7 @@ describe('Model class', function() {
 
 		// should dispatch property change up to two levels deep for both array and property syntax
 		m.on('[0]**', function(message, data) {
-			posted[message] = data;
+			posted[data.path] = data;
 		}); 
 
 		m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
@@ -476,7 +477,7 @@ describe('Model class', function() {
 
 		// should dispatch property change up to two levels deep for strict array/property syntax
 		m.on('[0][*].*', function(message, data) {
-			posted[message] = data;
+			posted[data.path] = data;
 		}); 
 
 		m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
@@ -493,7 +494,7 @@ describe('Model class', function() {
 
 		// should NOT dispatch property change up to two levels deep for incorrect strict array/property syntax
 		m.on('[0].*.*', function(message, data) {
-			posted[message] = data;
+			posted[data.path] = data;
 		}); 
 
 		m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
@@ -508,7 +509,7 @@ describe('Model class', function() {
 
 		// should dispatch property change up to two levels deep for both array and property syntax
 		m.on('[0]***', function(message, data) {
-			posted[message] = data;
+			posted[data.path] = data;
 		}); 
 
 		m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
@@ -631,7 +632,7 @@ describe('Model class', function() {
 			, posted = {};
 
 		function logPosted(path, data) {
-			posted[path] = data;
+			posted[data.path] = data;
 		}
 
 		m.on('***', logPosted);
@@ -705,7 +706,7 @@ describe('Model class', function() {
 
 		var posted = {};
 		m.on(/.*/, function(accessPath,  data) {
-			posted[accessPath] = data;
+			posted[data.path] = data;
 		});
 
 		m('.list[$1].$2', 1, 'name').del();
@@ -724,7 +725,7 @@ describe('Model class', function() {
 
 		var posted = {};
 		m.on(/.*/, function(accessPath,  data) {
-			posted[accessPath] = data;
+			posted[data.path] = data;
 		});
 
 		m('.list[$1]', 0).del();
