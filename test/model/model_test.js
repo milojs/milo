@@ -968,4 +968,13 @@ describe('Model class', function() {
 			}, 10);
 		}, 10);
 	});
+
+
+	it('should return Model when empty path is passed to get ModelPath from Model', function() {
+		var m = new Model;
+
+		m('').set({ test: 1 });
+
+		assert.deepEqual(m._data, { test: 1 });
+	});
 });

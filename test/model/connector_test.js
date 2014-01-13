@@ -7,10 +7,10 @@ var Model = require('../../lib/model')
 
 
 describe('Connector', function() {
-	it.skip('should connect two models', function(done) {
+	it('should connect two models', function(done) {
 		var m1 = new Model
 			, m2 = new Model
-			, c = new Connector(m1, '->>', m2);
+			, c = new Connector(m1, '<<->>', m2);
 
 		m1('.info.name').set('milo');
 
@@ -19,4 +19,20 @@ describe('Connector', function() {
 			done();
 		}, 10);
 	});
+
+	it.skip('should allow path translation', function(done) {
+		var m1 = new Model
+			, m2 = new Model
+			, c = new Connector(m1, '<<->>', m2, { pathTranslation: {
+				'.info': '.myInfo',
+				'.info.name': '.myInfo.myName'
+			} });
+
+		m1('.info.name').set('milo');
+
+		setTimeout(function() {
+			assert.deepEqual(m2.get(), { myInfo: { myName: 'milo' } } );
+			done();
+		}, 10);
+	})
 });

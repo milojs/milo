@@ -5510,11 +5510,11 @@ function Connector(ds1, mode, ds2, options) {
 		isOn: false	
 	});
 
-	var translationRules = options && options.translationRules;
-	if (translationRules)
+	var pathTranslation = options && options.pathTranslation;
+	if (pathTranslation)
 		_.extend(this, {
-			translationRules1: reverseTranslationRules(translationRules),
-			translationRules2: translationRules
+			pathTranslation1: reverseTranslationRules(pathTranslation),
+			pathTranslation2: pathTranslation
 		});
 
 	this.turnOn();
@@ -5535,6 +5535,7 @@ _.extendProto(Connector, {
  * Function that reverses translation rules for paths of connected odata sources
  *
  * @param {Object[String]} rules map of paths defining the translation rules
+ * @return {Object[String]}
  */
 function reverseTranslationRules(rules) {
 	var reverseRules = {};
@@ -5558,14 +5559,14 @@ function turnOn() {
 
 	var self = this;
 	if (this.depth1)
-		linkDataSource('_link1', '_link2', this.ds1, this.ds2, subscriptionPath, this.translationRules1);
+		linkDataSource('_link1', '_link2', this.ds1, this.ds2, subscriptionPath, this.pathTranslation1);
 	if (this.depth2)
-		linkDataSource('_link2', '_link1',  this.ds2, this.ds1, subscriptionPath, this.translationRules2);
+		linkDataSource('_link2', '_link1',  this.ds2, this.ds1, subscriptionPath, this.pathTranslation2);
 
 	this.isOn = true;
 
 
-	function linkDataSource(linkName, stopLink, linkToDS, linkedDS, subscriptionPath, translationRules) {
+	function linkDataSource(linkName, stopLink, linkToDS, linkedDS, subscriptionPath, pathTranslation) {
 		var onData = function onData(message, data) {
 			// prevent endless loop of updates for 2-way connection
 			if (self[stopLink]) {
@@ -5574,9 +5575,9 @@ function turnOn() {
 			}
 
 			// translated
-			if (translationRules) {
+			if (pathTranslation) {
 				data = _.clone(data);
-				var translatedPath = translationRules[data.path];
+				var translatedPath = pathTranslation[data.path];
 				if (translatedPath)
 					data.path = translatedPath;
 			}
@@ -5752,6 +5753,8 @@ function Model$get() {
  * @return {ModelPath}
  */
 function Model$path(accessPath) {  // , ... arguments that will be interpolated
+	if (! accessPath) return this;
+
 	// "null" is context to pass to ModelPath, first parameter of bind
 	// "this" (model) is added in front of all arguments
 	_.splice(arguments, 0, 0, null, this);
@@ -6096,7 +6099,6 @@ function _prepareMessenger() {
  */
 function _onChangeData(message, data) {
 	if (! this._changesQueue.length)
-		// setTimeout(_.partial(_processChanges.call.bind(_processChanges), this), 1);
 		_.defer(processChangesFunc, this);
 
 	this._changesQueue.push(data);
