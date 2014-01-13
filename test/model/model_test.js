@@ -2,8 +2,7 @@
 
 
 var Model = require('../../lib/model')
-	, assert = require('assert')
-	, _ = require('mol-proto');
+	, assert = require('assert');
 
 
 describe('Model class', function() {
@@ -949,14 +948,24 @@ describe('Model class', function() {
 	});
 
 
-	it.skip('should change its data when "changedata" message is dispatched', function(done) {
+	it('should change its data when "changedata" message is dispatched', function(done) {
 		var m= new Model;
 
 		m.postMessage('changedata', { path: '.info.name', type: 'added', newValue: 'milo' });
 
-			_.delay(function() {
-				assert.deepEqual(m._data, { info: {name: 'milo'} } );
-				done();
+		setTimeout(function() {
+			assert.deepEqual(m._data, { info: {name: 'milo'} } );		
+			m.postMessage('changedata', { path: '.list', type: 'splice', index: 0, removed: [], addedCount: 2, newValue: ['item1', 'item2'] });
+
+			setTimeout(function() {
+				assert.deepEqual(m('.list').get(), ['item1', 'item2'] );
+				m.postMessage('changedata', { path: '.list', type: 'splice', index: 1, removed: ['item2'], addedCount: 1, newValue: ['item1', 'item3'] });
+
+				setTimeout(function() {
+					assert.deepEqual(m('.list').get(), ['item1', 'item3'] );
+					done();
+				}, 10);
 			}, 10);
+		}, 10);
 	});
 });

@@ -1553,6 +1553,9 @@ var proxyDataSourceMethods = {
 function Data$start() {
 	ComponentFacet.prototype.start.apply(this, arguments);
 
+	// queue of "changedata" messages
+	_.defineProperty(this, '_changesQueue', []);
+
 	this._prepareMessageSource();
 
 	// store facet data path
@@ -1561,13 +1564,41 @@ function Data$start() {
 	// change messenger methods to work with "*" subscriptions (like Model class)
 	pathUtils.wrapMessengerMethods.call(this);
 
+	// prepare internal and external messengers
+	// this._prepareMessengers();
+
 	// subscribe to DOM event
 	this.on('', onDataChange);
 
 	// subscribe to changes in scope children with Data facet
 	this.on('childdata', onChildData);
+
+	// subscribe to "changedata" event to enable reactive connections
+	this.on('changedata', onChangeDataMessage)
 }
 
+
+/**
+ * Data facet instance method
+ * Create and connect internal and external messengers of Data facet.
+ * External messenger's methods are proxied on the Data facet and they allows "*" subscriptions.
+ */
+function _prepareMessengers() {
+	// model will post all its changes on internal messenger
+	var internalMessenger = new Messenger(this);
+
+	// message source to connect internal messenger to external
+	var internalMessengerSource = new MessengerMessageSource(this, undefined, new ModelMsgAPI, internalMessenger);
+
+	// external messenger to which all model users will subscribe,
+	// that will allow "*" subscriptions and support "changedata" message api.
+	var externalMessenger = new Messenger(this, Messenger.defaultMethods, internalMessengerSource);
+
+	_.defineProperties(this, {
+		_messenger: externalMessenger,
+		_internalMessenger: internalMessenger
+	});
+}
 
 /**
  * Data facet instance method
@@ -1576,7 +1607,6 @@ function Data$start() {
  * @private
  */
 function _prepareMessageSource() {
-	// TODO instead of this.owner should pass model? Where it is set?
 	var dataAPI = new DataMsgAPI(this.owner)
 		, dataEventsSource = new DOMEventsSource(this, proxyDataSourceMethods, dataAPI, this.owner);
 	this._setMessageSource(dataEventsSource);
@@ -1612,6 +1642,65 @@ function onChildData(msgType, data) {
 	this.postMessage(data.path, data);
 	this._postDataChanged(data);
 }
+
+
+/**
+ * subscriber to "changedata" event to enable reactive connections
+ *
+ * @private
+ * @param {String} msg should be "changedata" here
+ * @param {Object} data data change desciption object}
+ */
+function onChangeDataMessage(msg, data) {
+	if (! this._changesQueue.length)
+		// setTimeout(_.partial(_processChanges.call.bind(_processChanges), this), 1);
+		_.defer(processChangesFunc, this)
+
+	this._changesQueue.push(data);
+}
+
+
+var processChangesFunc = Function.prototype.call.bind(_processChanges);
+/**
+ * Processes queued "changedata" messages
+ *
+ * @private
+ */
+function _processChanges() {
+	this.postMessage('changedatastarted');
+
+	this._changesQueue.forEach(function(data) {
+		var modelPath = this.path(data.path); // same as this._model(data.fullPath)
+
+		if (! modelPath) return;
+
+		// set the new data
+		if (data.type == 'splice') {
+			var index = data.index
+				, howMany = data.removed.length
+				, spliceArgs = [index, howMany];
+
+			spliceArgs = spliceArgs.concat(data.newValue.slice(index, index + data.addedCount));
+			modelPath.splice.apply(modelPath, spliceArgs);
+		} else {
+			var methodName = changeTypeToMethodMap[data.type];
+			if (methodName)
+				modelPath[methodName](data.newValue);
+			else
+				logger.error('unknown data change type');
+		}
+	}, this);
+
+	this._changesQueue.length = 0;
+
+	this.postMessage('changedatafinished');
+}
+var changeTypeToMethodMap = {
+	'added': 'set',
+	'changed': 'set',
+	'deleted': 'del',
+	'removed': 'del'
+};
 
 
 /**
@@ -5455,28 +5544,25 @@ function turnOn() {
 
 
 	function linkDataSource(linkName, stopLink, linkToDS, linkedDS, subscriptionPath) {
-		var onData = function onData(message, data) {			
-			var dsPath = linkToDS.path(data.path);
-			if (dsPath) {
-				// turn off subscriber to prevent endless message loop for bi-directional connections
-				if (self[stopLink])
-					linkToDS.off(subscriptionPath, self[stopLink]);
+		var onData = function onData(message, data) {
+			// prevent endless loop of updates for 2-way connection
+			if (self[stopLink]) {
+				linkToDS.on('changedatastarted', stopSubscription);
+				linkToDS.on('changedatafinished', startSubscription);
+			}
 
-				// set the new data
-				switch (data.type) {
-					case 'added':
-					case 'changed':
-						dsPath.set(data.newValue);
-						break;
-					case 'deleted':
-					case 'removed':
-						dsPath.del();
-						break;
-				}
+			// send data change instruction as message
+			linkToDS.postMessage('changedata', data);
 
-				// turn subscriber back off
-				if (self[stopLink])
-					linkToDS.on(subscriptionPath, self[stopLink]);
+
+			function stopSubscription() {
+				linkToDS.off(subscriptionPath, self[stopLink]);
+			}
+
+			function startSubscription() {
+				linkToDS.off('changedatastarted', stopSubscription);
+				linkToDS.off('changedatafinished', startSubscription);
+				linkToDS.on(subscriptionPath, self[stopLink]);
 			}
 		};
 
@@ -5674,7 +5760,7 @@ var modelMethodsToProxy = ['path', 'get', 'set', 'splice', 'len', 'push', 'pop',
 /**
  * Model instance method.
  * Create and connect internal and external model's messengers.
- * External messenger's methods are proxied on the model and it allows "*" subscriptions.
+ * External messenger's methods are proxied on the model and they allows "*" subscriptions.
  */
 function _prepareMessengers() {
 	// model will post all its changes on internal messenger
@@ -5980,12 +6066,14 @@ function _prepareMessenger() {
  */
 function _onChangeData(message, data) {
 	if (! this._changesQueue.length)
-		_.defer(_processChanges.call, this)
+		// setTimeout(_.partial(_processChanges.call.bind(_processChanges), this), 1);
+		_.defer(processChangesFunc, this);
 
 	this._changesQueue.push(data);
 }
 
 
+var processChangesFunc = Function.prototype.call.bind(_processChanges);
 /**
  * ModelPath instance method
  * Processes queued "changedata" messages
@@ -5993,6 +6081,8 @@ function _onChangeData(message, data) {
  * @private
  */
 function _processChanges() {
+	this.postMessage('changedatastarted');
+
 	this._changesQueue.forEach(function(data) {
 		var modelPath = this.path(data.path); // same as this._model(data.fullPath)
 
@@ -6014,6 +6104,8 @@ function _processChanges() {
 	}, this);
 
 	this._changesQueue.length = 0;
+
+	this.postMessage('changedatafinished');
 }
 var changeTypeToMethodMap = {
 	'added': 'set',
