@@ -5979,6 +5979,8 @@ _.extendProto(ModelPath, {
  * @return {ModelPath}
  */
 function ModelPath$path(accessPath) {  // , ... arguments that will be interpolated
+	if (! accessPath) return this;
+	
 	var thisPathArgsCount = this._args.length - 1;
 
 	if (thisPathArgsCount > 0) {// this path has interpolated arguments too
