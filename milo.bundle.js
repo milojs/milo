@@ -1650,11 +1650,12 @@ function onChildData(msgType, data) {
  * @private
  * @param {String} msg should be "changedata" here
  * @param {Object} data data change desciption object}
+ * @param {Function} callback callback to call when the data is processed
  */
-function onChangeDataMessage(msg, data) {
+function onChangeDataMessage(msg, data, callback) {
 	if (! this._changesQueue.length)
 		// setTimeout(_.partial(_processChanges.call.bind(_processChanges), this), 1);
-		_.defer(processChangesFunc, this)
+		_.defer(processChangesFunc, this, callback)
 
 	this._changesQueue.push(data);
 }
@@ -1666,8 +1667,8 @@ var processChangesFunc = Function.prototype.call.bind(_processChanges);
  *
  * @private
  */
-function _processChanges() {
-	this.postMessage('changedatastarted');
+function _processChanges(callback) {
+	callback && callback(null, false);
 
 	this._changesQueue.forEach(function(data) {
 		var modelPath = this.path(data.path); // same as this._model(data.fullPath)
@@ -1693,7 +1694,7 @@ function _processChanges() {
 
 	this._changesQueue.length = 0;
 
-	this.postMessage('changedatafinished');
+	callback && callback(null, true);
 }
 
 var changeTypeToMethodMap = {
@@ -4748,17 +4749,19 @@ function offMessages(messageSubscribers) {
  *  If the message is a string, the subscribers registered with exactly this message will be called and also pattern subscribers registered with the pattern that matches the dispatched message.
  *  If the message is RegExp, only the subscribers registered with exactly this pattern will be called.
  * @param {Any} data data that will be passed to the subscriber as the second parameter. Messenger does not modify this data in any way.
+ * @param {Function} callback optional callback to pass to subscriber
  */
-function postMessage(message, data) {
+function postMessage(message, data, callback) {
 	check(message, Match.OneOf(String, RegExp));
+	check(callback, Match.Optional(Function));
 
 	var subscribersHash = this._chooseSubscribersHash(message);
 	var msgSubscribers = subscribersHash[message];
 
-	this._callSubscribers(message, data, msgSubscribers);
+	this._callSubscribers(message, data, callback, msgSubscribers);
 
 	if (typeof message == 'string')
-		this._callPatternSubscribers(message, data);
+		this._callPatternSubscribers(message, data, callback);
 }
 
 
@@ -4770,13 +4773,14 @@ function postMessage(message, data) {
  * @private
  * @param {String} message message to be dispatched. Pattern subscribers registered with the pattern that matches the dispatched message will be called.
  * @param {Any} data data that will be passed to the subscriber as the second parameter. Messenger does not modify this data in any way.
+ * @param {Function} callback optional callback to pass to subscriber
  */
-function _callPatternSubscribers(message, data) {
+function _callPatternSubscribers(message, data, callback) {
 	_.eachKey(this._patternMessageSubscribers, 
 		function(patternSubscribers) {
 			var pattern = patternSubscribers.pattern;
 			if (pattern.test(message))
-				this._callSubscribers(message, data, patternSubscribers);
+				this._callSubscribers(message, data, callback, patternSubscribers);
 		}
 	, this);
 }
@@ -4791,14 +4795,15 @@ function _callPatternSubscribers(message, data) {
  * @param {String} message message to be dispatched, passed to subscribers as the first parameter.
  * @param {Any} data data that will be passed to the subscriber as the second parameter. Messenger does not modify this data in any way.
  * @param {Array[Function|Object]} msgSubscribers the array of message subscribers to be called. Each subscriber is called with the host object (see Messenger constructor) as the context.
+ * @param {Function} callback optional callback to pass to subscriber
  */
-function _callSubscribers(message, data, msgSubscribers) {
+function _callSubscribers(message, data, callback, msgSubscribers) {
 	if (msgSubscribers && msgSubscribers.length)
 		msgSubscribers.forEach(function(subscriber) {
 			if (typeof subscriber == 'function')
-				subscriber.call(this._hostObject, message, data);
+				subscriber.call(this._hostObject, message, data, callback);
 			else
-				subscriber.subscriber.call(subscriber.context, message, data);
+				subscriber.subscriber.call(subscriber.context, message, data, callback);
 		}, this);
 }
 
@@ -5510,12 +5515,12 @@ function Connector(ds1, mode, ds2, options) {
 		isOn: false	
 	});
 
-	var pathTranslation = options && options.pathTranslation;
-	if (pathTranslation)
-		_.extend(this, {
-			pathTranslation1: reverseTranslationRules(pathTranslation),
-			pathTranslation2: pathTranslation
-		});
+	// var pathTranslation = options && options.pathTranslation;
+	// if (pathTranslation)
+	// 	_.extend(this, {
+	// 		pathTranslation1: reverseTranslationRules(pathTranslation),
+	// 		pathTranslation2: pathTranslation
+	// 	});
 
 	this.turnOn();
 
@@ -5559,47 +5564,39 @@ function turnOn() {
 
 	var self = this;
 	if (this.depth1)
-		linkDataSource('_link1', '_link2', this.ds1, this.ds2, subscriptionPath, this.pathTranslation1);
+		this._link1 = linkDataSource('_link2', this.ds1, this.ds2, subscriptionPath); //, this.pathTranslation1);
 	if (this.depth2)
-		linkDataSource('_link2', '_link1',  this.ds2, this.ds1, subscriptionPath, this.pathTranslation2);
+		this._link2 = linkDataSource('_link1', this.ds2, this.ds1, subscriptionPath); //, this.pathTranslation2);
 
 	this.isOn = true;
 
 
-	function linkDataSource(linkName, stopLink, linkToDS, linkedDS, subscriptionPath, pathTranslation) {
+	function linkDataSource(reverseLink, linkToDS, linkedDS, subscriptionPath) { // , pathTranslation) {
 		var onData = function onData(message, data) {
-			// prevent endless loop of updates for 2-way connection
-			if (self[stopLink]) {
-				linkToDS.on('changedatastarted', stopSubscription);
-				linkToDS.on('changedatafinished', startSubscription);
-			}
-
 			// translated
-			if (pathTranslation) {
-				data = _.clone(data);
-				var translatedPath = pathTranslation[data.path];
-				if (translatedPath)
-					data.path = translatedPath;
-			}
+			// if (pathTranslation) {
+			// 	data = _.clone(data);
+			// 	var translatedPath = pathTranslation[data.path];
+			// 	if (translatedPath)
+			// 		data.path = translatedPath;
+			// }
+
+			// prevent endless loop of updates for 2-way connection
+			if (self[reverseLink])
+				var callback = subscriptionSwitch;
 
 			// send data change instruction as message
-			linkToDS.postMessage('changedata', data);
+			linkToDS.postMessage('changedata', data, callback);
 
-
-			function stopSubscription() {
-				linkToDS.off(subscriptionPath, self[stopLink]);
-			}
-
-			function startSubscription() {
-				linkToDS.off('changedatastarted', stopSubscription);
-				linkToDS.off('changedatafinished', startSubscription);
-				linkToDS.on(subscriptionPath, self[stopLink]);
+			function subscriptionSwitch(err, changeFinished) {
+				if (err) return;
+				var onOff = changeFinished ? 'on' : 'off';
+				linkToDS[onOff](subscriptionPath, self[reverseLink]);
 			}
 		};
 
 		linkedDS.on(subscriptionPath, onData);
 
-		self[linkName] = onData;
 		return onData;
 	}
 }
@@ -5980,7 +5977,7 @@ _.extendProto(ModelPath, {
  */
 function ModelPath$path(accessPath) {  // , ... arguments that will be interpolated
 	if (! accessPath) return this;
-	
+
 	var thisPathArgsCount = this._args.length - 1;
 
 	if (thisPathArgsCount > 0) {// this path has interpolated arguments too
@@ -6098,10 +6095,11 @@ function _prepareMessenger() {
  * @private
  * @param {String} message "changedata"
  * @param {Object} data data change desciption object
+ * @param {Function} callback callback to call when the data is processed
  */
-function _onChangeData(message, data) {
+function _onChangeData(message, data, callback) {
 	if (! this._changesQueue.length)
-		_.defer(processChangesFunc, this);
+		_.defer(processChangesFunc, this, callback);
 
 	this._changesQueue.push(data);
 }
@@ -6114,8 +6112,8 @@ var processChangesFunc = Function.prototype.call.bind(_processChanges);
  *
  * @private
  */
-function _processChanges() {
-	this.postMessage('changedatastarted');
+function _processChanges(callback) {
+	callback && callback(null, false);
 
 	this._changesQueue.forEach(function(data) {
 		var modelPath = this.path(data.path); // same as this._model(data.fullPath)
@@ -6139,7 +6137,7 @@ function _processChanges() {
 
 	this._changesQueue.length = 0;
 
-	this.postMessage('changedatafinished');
+	callback && callback(null, true);
 }
 
 var changeTypeToMethodMap = {
@@ -6977,6 +6975,7 @@ module.exports = componentCount;
 module.exports = {
     children: children,
 	filterNodeListByType: filterNodeListByType,
+    containingElement: containingElement,
 	selectElementContents: selectElementContents,
 	getElementOffset: getElementOffset,
     setCaretPosition: setCaretPosition
@@ -7005,6 +7004,20 @@ function filterNodeListByType(nodeList, nodeType) {
 	return _.filter(nodeList, function (node) {
 		return node.nodeType == nodeType;
 	});
+}
+
+
+/**
+ * Find nearest parent element for node.
+ * If node is an element, it will be returned.
+ *
+ * @param {Node} node
+ * @return {Element}
+ */
+function containingElement(node) {
+    while (node.nodeType !== Node.ELEMENT_NODE && node.parentNode)
+        node = node.parentNode;
+    return node;
 }
 
 

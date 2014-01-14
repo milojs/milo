@@ -20,7 +20,7 @@ describe('Connector', function() {
 		}, 10);
 	});
 
-	it('should allow path translation', function(done) {
+	it.skip('should allow path translation', function(done) {
 		var m1 = new Model
 			, m2 = new Model
 			, c = new Connector(m1, '<<<->>>', m2, { pathTranslation: {
