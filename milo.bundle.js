@@ -299,6 +299,10 @@ function createFacetedClass(name, facetsClasses, facetsConfig) {
 	// create subclass of the current class (this refers to the class that calls this method)
 	var FacetedClass = _.createSubclass(this, name, true);
 
+	// get facets classes and configurations from parent class
+	facetsClasses = addInheritedFacets(this, facetsClasses, 'facetsClasses');
+	facetsConfig = addInheritedFacets(this, facetsConfig, 'facetsConfig');
+
 	// store facets classes and configurations of class prototype
 	_.extendProto(FacetedClass, {
 		facetsClasses: facetsClasses,
@@ -306,6 +310,17 @@ function createFacetedClass(name, facetsClasses, facetsConfig) {
 	});
 
 	return FacetedClass;
+
+
+	function addInheritedFacets(superClass, facetsInfo, facetsInfoName) {
+		var inheritedFacetsInfo = superClass.prototype[facetsInfoName];
+		if (inheritedFacetsInfo)
+			return _(inheritedFacetsInfo)
+					.clone()
+					.extend(facetsInfo)._();
+		else
+			return facetsInfo;
+	}
 };
 
 },{"../util/check":65,"../util/error":69,"./facet":2,"mol-proto":77}],4:[function(require,module,exports){
@@ -2573,7 +2588,6 @@ function noTextAfterSelection(component) {
 			&& sel.anchorOffset == sel.anchorNode.length
 			&& ! sel.anchorNode.nextSibling;
 }
-
 
 },{"../../util":70,"../../util/dom":68,"../../util/logger":71,"../c_class":12,"../c_facet":13,"../msg_api/editable":33,"../msg_src/dom_events":35,"./cf_registry":27,"mol-proto":77}],20:[function(require,module,exports){
 'use strict';
