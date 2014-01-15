@@ -4034,6 +4034,16 @@ componentsRegistry.add(MLSelect);
 module.exports = MLSelect;
 
 
+_.extendProto(MLSelect, {
+	disable: MLSelect$disable
+});
+
+
+function MLSelect$disable(disable) {
+	this.el.disabled = disable;
+}
+
+
 function onOptionsChange(path, data) {
 	var component = this._hostObject.owner;
 	component.template.render({ selectOptions: this.get() });
