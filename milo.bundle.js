@@ -1808,7 +1808,7 @@ function Data$_setScalarValue(value) {
 		, setter = tags[el.tagName.toLowerCase()];
 	return setter
 			? setter(el, value)
-			: (el.innerHTML = value);
+			: (el.innerHTML = typeof value == 'undefined' ? '' : value);
 }
 
 
@@ -1929,7 +1929,7 @@ var tags = {
 // Set and get value of input
 function inputValue(el, value) {
 	if (value)
-		return (el.value = value);
+		return (el.value = typeof value == 'undefined' ? '' : value);
 	else
 		return el.value;
 }
@@ -1938,7 +1938,7 @@ function inputValue(el, value) {
 // Set and get value of img tag
 function imgValue(el, value) {
 	if (value)
-		return (el.src = value);
+		return (el.src = typeof value == 'undefined' ? '' : value);
 	else
 		return el.src;
 }
@@ -2530,10 +2530,10 @@ function onMergeRemove(message, data) {
 
 function onEnterSplit(message, event) {
 	(new TextSelection).del();
+	event.preventDefault();
 
-	var splitFacet = this.owner.split;
-	if (splitFacet) {
-		var newComp = splitFacet.make();
+	if (this.owner.split) {
+		var newComp = this.owner.split.make();
 
 		if (newComp) {
 			// TODO: Need to get top containing component with contenteditable, needs work
@@ -2904,7 +2904,7 @@ function addItem(index) {
     this._setItem(index, component);
 
     // Show the list item component
-    component.dom.show();
+    component.el.style.display = '';
 
     return component;
 }
@@ -2946,7 +2946,7 @@ function List$addItems(count) {
             this._listItemsHash[component.name] = component;
             // Add it to the DOM
             prevComponent.dom.insertAfter(component.el)
-            component.dom.show();
+            component.el.style.display = '';
             prevComponent = component;
         }, this);
     }
@@ -7563,7 +7563,6 @@ function TextSelection$del() {
 	var selStart = this.range.startContainer
 		, selEnd = this.range.endContainer
 		, rangeContainer = this.range.commonAncestorContainer;
-
 
 	// remove middle components from scope
 	if (selStart != selEnd) {
