@@ -2331,8 +2331,9 @@ var ComponentFacet = require('../c_facet')
 var Editable = _.createSubclass(ComponentFacet, 'Editable');
 
 _.extendProto(Editable, {
-	start: start,
-	makeEditable: makeEditable,
+	start: Editable$start,
+	makeEditable: Editable$makeEditable,
+	isEditable: Editable$isEditable,
 	require: ['Dom']
 
 	// _reattach: _reattachEventsOnElementChange
@@ -2344,13 +2345,23 @@ module.exports = Editable;
 
 
 // init Editable facets
-function makeEditable(editable) {
+function Editable$makeEditable(editable) {
 	this.owner.el.setAttribute('contenteditable', editable);
 }
 
 
+/**
+ * Editable facet instance method
+ * Returns true/false indicating if the element is editable
+ * @return {Boolean}
+ */
+ function Editable$isEditable() {
+ 	return this.owner.el.contentEditable == 'true';
+ }
+
+
 // start Editable facet
-function start() {
+function Editable$start() {
 	ComponentFacet.prototype.start.apply(this, arguments);
 	
 	var editableAPIoptions = {
@@ -2530,9 +2541,9 @@ function onMergeRemove(message, data) {
 
 function onEnterSplit(message, event) {
 	(new TextSelection).del();
-	event.preventDefault();
 
 	if (this.owner.split) {
+		event.preventDefault();
 		var newComp = this.owner.split.make();
 
 		if (newComp) {
@@ -2547,7 +2558,6 @@ function onEnterSplit(message, event) {
 			newComp.template.render();
 			this.owner.dom.insertBefore(newComp.el);
 		}
-		event.preventDefault();
 	}
 }
 
