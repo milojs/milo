@@ -937,14 +937,13 @@ var FacetedObject = require('../abstract/faceted_object')
 	, componentUtils = require('./c_utils')
 	, Messenger = require('../messenger')
 	, _ = require('mol-proto')
-	, miloUtil = require('../util')
-	, check = miloUtil.check
+	, check = require('../util/check')
 	, Match = check.Match
 	, config = require('../config')
 	, miloComponentName = require('../util/component_name')
-	, logger = miloUtil.logger
-	, domUtils = miloUtil.dom
-	, ComponentError = miloUtil.error.Component
+	, logger = require('../util/logger')
+	, domUtils = require('../util/dom')
+	, ComponentError = require('../util/error').Component
 	, BindAttribute = require('../attributes/a_bind');
 
 
@@ -1139,7 +1138,7 @@ function copy(component, deepCopy) {
 function Component$$getState(component) {
 	if (component.transfer)
 		return component.transfer.get();
-	
+
 	var state = component._getState();
 	state.outerHTML = component.el.outerHTML;
 	return state;
@@ -1388,7 +1387,7 @@ function _getScopeParent(withFacet) {
 	}
 }
 
-},{"../abstract/faceted_object":3,"../attributes/a_bind":6,"../config":42,"../messenger":47,"../util":69,"../util/component_name":65,"./c_facets/cf_registry":25,"./c_utils":28,"mol-proto":77}],13:[function(require,module,exports){
+},{"../abstract/faceted_object":3,"../attributes/a_bind":6,"../config":42,"../messenger":47,"../util/check":64,"../util/component_name":65,"../util/dom":67,"../util/error":68,"../util/logger":70,"./c_facets/cf_registry":25,"./c_utils":28,"mol-proto":77}],13:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facet"></a>
