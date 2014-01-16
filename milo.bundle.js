@@ -979,7 +979,7 @@ _.extend(Component, {
 	copy: copy,
 	isComponent: componentUtils.isComponent,
 	getComponent: componentUtils.getComponent,
-	getContainingComponent: componentUtils.getContainingComponent,
+	getContainingComponent: componentUtils.getContainingComponent
 });
 delete Component.createFacetedClass;
 
@@ -1000,6 +1000,8 @@ _.extendProto(Component, {
 	addFacet: addFacet,
 	allFacets: allFacets,
 	remove: remove,
+	getState: getState,
+	setState: setState,
 	getScopeParent: getScopeParent,
 	_getScopeParent: _getScopeParent
 });
@@ -1219,16 +1221,20 @@ function addFacet(facetNameOrClass, facetConfig, facetName) {
 }
 
 
-// envoke given method with optional parameters on all facets
 /**
  * Component instance method.
+ * Envoke given method with optional parameters on all facets.
+ * Returns the map of values returned by all facets. If the facet doesn't have the method it is simply not called and the value in the map will be undefined.
+ *
+ * @param {String} method method name to envoke on the facet
+ * @return {Object}
  */
-function allFacets(method /* , ... */) {
+function allFacets(method /* , ... */) { // ,... arguments
 	var args = _.slice(arguments, 1);
 
-	_.eachKey(this.facets, function(facet, fctName) {
+	return _.mapKeys(this.facets, function(facet, fctName) {
 		if (facet && typeof facet[method] == 'function')
-			facet[method].apply(facet, args);
+			return facet[method].apply(facet, args);
 	});
 }
 
@@ -1240,6 +1246,31 @@ function allFacets(method /* , ... */) {
 function remove() {
 	if (this.scope)
 		this.scope._remove(this.name);
+}
+
+
+/**
+ * Component instance method
+ * Returns the state of component
+ *
+ * @return {Object}
+ */
+function getState(){
+	return allFacets('getState');
+}
+
+
+/**
+ * Component instance method
+ * Sets the state of component
+ *
+ * @param {Object} data data to set the state
+ */
+function setState(data) {
+	return _.eachKey(this.facets, function(facet, fctName) {
+		if (facet && typeof facet.setState == 'function')
+			return facet.setState.apply(facet, data[fctName]);
+	});
 }
 
 
@@ -1270,7 +1301,6 @@ function _getScopeParent(withFacet) {
 			return parent._getScopeParent(withFacet);
 	}
 }
-
 
 },{"../abstract/faceted_object":3,"../config":42,"../messenger":47,"../util/check":64,"../util/component_name":65,"../util/logger":70,"./c_facets/cf_registry":25,"./c_utils":28,"mol-proto":77}],13:[function(require,module,exports){
 'use strict';
@@ -1467,7 +1497,8 @@ function requiresFacet(facetName) {
 var ComponentFacet = require('../c_facet')
 	, miloBinder = require('../../binder')
 	, _ = require('mol-proto')
-	, facetsRegistry = require('./cf_registry');
+	, facetsRegistry = require('./cf_registry')
+	, logger = require('../../util/logger');
 
 
 /**
@@ -1490,7 +1521,9 @@ var Container = _.createSubclass(ComponentFacet, 'Container');
  * - [binder](#Container$binder) - create components from DOM inside the current one
  */
 _.extendProto(Container, {
-	binder: Container$binder
+	binder: Container$binder,
+	getState: Container$getState,
+	setState: Container$setState
 });
 
 facetsRegistry.add(Container);
@@ -1506,7 +1539,42 @@ function Container$binder() {
 	return miloBinder(this.owner.el, this.scope, false);
 }
 
-},{"../../binder":10,"../c_facet":13,"./cf_registry":25,"mol-proto":77}],15:[function(require,module,exports){
+
+/**
+ * Container instance method
+ * Called by `Component.prototype.getState` to get facet's state
+ * Returns the state of components in the scope
+ *
+ * @return {Object}
+ */
+function Container$getState() {
+	var state = {};
+	this.scope._each(function(component, compName) {
+		state[compName] = component.getState();
+	})
+	return state;
+}
+
+
+/**
+ * Container instance method
+ * Called by `Component.prototype.setState` to set facet's state
+ * Sets the state of components in the scope
+ *
+ * @param {Object} data data to set on facet's model
+ */
+function Container$setState(data) {
+	_.eachKey(data, function(compData, compName) {
+		var component = this.scope[compName];
+		if (component)
+			component.setState(compData);
+		else
+			logger.warn('component does not exist on scope');
+	}, this);
+}
+
+
+},{"../../binder":10,"../../util/logger":70,"../c_facet":13,"./cf_registry":25,"mol-proto":77}],15:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../../abstract/mixin')
@@ -2736,6 +2804,8 @@ var ModelFacet = _.createSubclass(ComponentFacet, 'Model');
 
 _.extendProto(ModelFacet, {
 	init: ModelFacet$init,
+	getState: ModelFacet$getState,
+	setState: ModelFacet$setState,
 	_createMessenger: ModelFacet$_createMessenger
 	// _reattach: _reattachEventsOnElementChange
 });
@@ -2749,6 +2819,31 @@ function ModelFacet$init() {
 	this.m = new Model(undefined, this);
 	ComponentFacet.prototype.init.apply(this, arguments);
 }
+
+
+/**
+ * ModelFacet instance method
+ * Called by `Component.prototype.getState` to get facet's state
+ * Simply returns model data
+ *
+ * @return {Object}
+ */
+function ModelFacet$getState() {
+	return this.m.get();
+}
+
+
+/**
+ * ModelFacet instance method
+ * Called by `Component.prototype.setState` to set facet's state
+ * Simply sets model data
+ *
+ * @param {Object} data data to set on facet's model
+ */
+function ModelFacet$setState() {
+	return this.m.set(data);
+}
+
 
 function ModelFacet$_createMessenger() { // Called by inherited init
 	this.m.proxyMessenger(this); // Creates messenger's methods directly on facet
@@ -5005,7 +5100,8 @@ function dispatchMessage(sourceMessage, sourceData) {
 		internalMessages.forEach(function (message) {
 		var internalData = api.createInternalData(sourceMessage, message, sourceData);
 
-		if (api.filterSourceMessage(sourceMessage, message, internalData))
+		var shouldDispatch = api.filterSourceMessage(sourceMessage, message, internalData);
+		if (shouldDispatch)
 			this.messenger.postMessage(message, internalData);		
 	}, this);
 }
@@ -7151,7 +7247,8 @@ _.extendProto(TextSelection, {
  */
 function TextSelection$init() {
 	this.selection = this.window.getSelection();
-	this.range = this.selection.getRangeAt(0);
+	if (this.selection.rangeCount)
+		this.range = this.selection.getRangeAt(0);
 	this.isCollapsed = this.selection.isCollapsed;
 }
 
@@ -7163,6 +7260,8 @@ function TextSelection$init() {
  * @return {String}
  */
 function TextSelection$text() {
+	if (! this.range) return undefined;
+
 	if (! this._text)
 		this._text = this.range.toString();
 
@@ -7177,6 +7276,8 @@ function TextSelection$text() {
  * @return {Array[Node]}
  */
 function TextSelection$textNodes() {
+	if (! this.range) return undefined;
+
 	if (! this._textNodes)
 		_getTextNodes.call(this);
 	return this._textNodes;
@@ -7221,6 +7322,8 @@ function _getTextNodes() {
  * @return {Element|null}
  */
 function _getElement(thisPropName, rangePropName) {
+	if (! this.range) return undefined;
+
 	if (typeof this[thisPropName] == 'undefined')
 		this[thisPropName] = containingElement(this.range[rangePropName]);
 	return this[thisPropName];
@@ -7235,6 +7338,8 @@ function _getElement(thisPropName, rangePropName) {
  * @return {Component}
  */
 function _getComponent(thisPropName, elMethodName) {
+	if (! this.range) return undefined;
+
 	if (typeof this[thisPropName] == 'undefined')
 		this[thisPropName] = Component.getContainingComponent(this[elMethodName]());
 	return this[thisPropName];
@@ -7246,8 +7351,7 @@ function _getComponent(thisPropName, elMethodName) {
  * Deletes the current selection and all components in it
  */
 function TextSelection$del() {
-	if (this.isCollapsed)
-		return;
+	if (this.isCollapsed || ! this.range) return;
 
 	var selStart = this.range.startContainer
 		, selEnd = this.range.endContainer
