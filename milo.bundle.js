@@ -937,11 +937,15 @@ var FacetedObject = require('../abstract/faceted_object')
 	, componentUtils = require('./c_utils')
 	, Messenger = require('../messenger')
 	, _ = require('mol-proto')
-	, check = require('../util/check')
+	, miloUtil = require('../util')
+	, check = miloUtil.check
 	, Match = check.Match
 	, config = require('../config')
 	, miloComponentName = require('../util/component_name')
-	, logger = require('../util/logger');
+	, logger = miloUtil.logger
+	, domUtils = miloUtil.dom
+	, ComponentError = miloUtil.error.Component
+	, BindAttribute = require('../attributes/a_bind');
 
 
 /**
@@ -979,7 +983,9 @@ _.extend(Component, {
 	copy: copy,
 	isComponent: componentUtils.isComponent,
 	getComponent: componentUtils.getComponent,
-	getContainingComponent: componentUtils.getContainingComponent
+	getContainingComponent: componentUtils.getContainingComponent,
+	getState: Component$$getState,
+	createFromState: Component$$createFromState
 });
 delete Component.createFacetedClass;
 
@@ -1000,8 +1006,8 @@ _.extendProto(Component, {
 	addFacet: addFacet,
 	allFacets: allFacets,
 	remove: remove,
-	getState: getState,
-	setState: setState,
+	_getState: Component$_getState,
+	_setState: Component$_setState,
 	getScopeParent: getScopeParent,
 	_getScopeParent: _getScopeParent
 });
@@ -1118,6 +1124,77 @@ function copy(component, deepCopy) {
 	// 	component.container.binder();
 
 	return aComponent;
+}
+
+
+/**
+ * Component class method
+ * Retrieves all component state, including information about its class, extra facets, facets data and all scope children.
+ * This information is used to save/load, copy/paste and drag/drop component 
+ * Returns component state
+ *
+ * @param {Component} component component which state will be saved
+ * @return {Object}
+ */
+function Component$$getState(component) {
+	if (component.transfer)
+		return component.transfer.get();
+	
+	var state = component._getState();
+	state.outerHTML = component.el.outerHTML;
+	return state;
+}
+
+
+/**
+ * Component class method
+ * Creates component from component state, that includes information about its class, extra facets, facets data and all scope children.
+ * This is used to save/load, copy/paste and drag/drop component
+ *
+ * @param {Object} state state from which component will be created
+ * @param {Boolean} newUniqueName optional `true` to create component with the name different from the original one. `False` by default.
+ * @return {Component} component
+ */
+function Component$$createFromState(state, newUniqueName) {
+	check(state, Match.ObjectIncluding({
+		facets: Object,
+		name: String,
+		compClass: String,
+		compFacets: Match.Optional([String]),
+		outerHTML: String
+	}));
+
+	// create wrapper element optionally renaming component
+	var wrapEl = _createComponentWrapElement(state, newUniqueName);
+
+	// instantiate all components from HTML
+	var scope = milo.binder(wrapEl);
+
+	// as there will only be one compnent, call to _any will return it
+	var component = scope._any();
+
+	// restor component state
+	component._setState(state);
+
+	return component;
+
+
+	function _createComponentWrapElement(state, newUniqueName) {
+		var wrapEl = document.createElement('div');
+		wrapEl.innerHTML = state.outerHTML;
+
+		var children = domUtils.children(wrapEl);
+		if (children.length != 1)
+			throw new ComponentError('cannot create component: incorrect HTML, elements number: ' + children.length + ' (should be 1)');
+		var compEl = children[0];
+		var attr = new BindAttribute(compEl);
+		attr.compName = newUniqueName ? miloComponentName() : state.name;
+		attr.compClass = state.compClass;
+		attr.compFacets = state.compFacets;
+		attr.decorate();
+
+		return wrapEl;
+	}
 }
 
 
@@ -1252,24 +1329,33 @@ function remove() {
 /**
  * Component instance method
  * Returns the state of component
+ * Used by class method `Component.getState` and by [Container](./c_facets/Container.js.html) facet.
  *
+ * @private
  * @return {Object}
  */
-function getState(){
-	return allFacets('getState');
+function Component$_getState(){
+	return {
+		facets: allFacets('getState'),
+		name: this.name,
+		compClass: this.attr.compClass,
+		compFacets: this.attr.compFacets
+	};
 }
 
 
 /**
  * Component instance method
- * Sets the state of component
+ * Sets the state of component.
+ * Used by class method `Component.createFromState` and by [Container](./c_facets/Container.js.html) facet.
  *
- * @param {Object} data data to set the state
+ * @private
+ * @param {Object} state state to set the component
  */
-function setState(data) {
-	return _.eachKey(this.facets, function(facet, fctName) {
+function Component$_setState(state) {
+	_.eachKey(this.facets, function(facet, fctName) {
 		if (facet && typeof facet.setState == 'function')
-			return facet.setState.apply(facet, data[fctName]);
+			facet.setState(state.facets[fctName]);
 	});
 }
 
@@ -1302,7 +1388,7 @@ function _getScopeParent(withFacet) {
 	}
 }
 
-},{"../abstract/faceted_object":3,"../config":42,"../messenger":47,"../util/check":64,"../util/component_name":65,"../util/logger":70,"./c_facets/cf_registry":25,"./c_utils":28,"mol-proto":77}],13:[function(require,module,exports){
+},{"../abstract/faceted_object":3,"../attributes/a_bind":6,"../config":42,"../messenger":47,"../util":69,"../util/component_name":65,"./c_facets/cf_registry":25,"./c_utils":28,"mol-proto":77}],13:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facet"></a>
@@ -1548,9 +1634,9 @@ function Container$binder() {
  * @return {Object}
  */
 function Container$getState() {
-	var state = {};
+	var state = { scope: {} };
 	this.scope._each(function(component, compName) {
-		state[compName] = component.getState();
+		state.scope[compName] = component.getState();
 	})
 	return state;
 }
@@ -1563,8 +1649,8 @@ function Container$getState() {
  *
  * @param {Object} data data to set on facet's model
  */
-function Container$setState(data) {
-	_.eachKey(data, function(compData, compName) {
+function Container$setState(state) {
+	_.eachKey(state.scope, function(compData, compName) {
 		var component = this.scope[compName];
 		if (component)
 			component.setState(compData);
@@ -1997,6 +2083,30 @@ function Data$path(accessPath, createItem) {
 	}
 
 	return currentDataFacet;
+}
+
+
+/**
+ * Data facet instance method
+ * Called by `Component.prototype.getState` to get facet's state
+ * Returns DOM data
+ *
+ * @return {Object}
+ */
+function Data$getState() {
+	return { data: this.get() };
+}
+
+
+/**
+ * Data facet instance method
+ * Called by `Component.prototype.setState` to set facet's state
+ * Simply sets model data
+ *
+ * @param {Object} state data to set on facet's model
+ */
+function Data$setState(state) {
+	return this.set(state.data);
 }
 
 
@@ -2829,7 +2939,7 @@ function ModelFacet$init() {
  * @return {Object}
  */
 function ModelFacet$getState() {
-	return this.m.get();
+	return { data: this.m.get() };
 }
 
 
@@ -2838,10 +2948,10 @@ function ModelFacet$getState() {
  * Called by `Component.prototype.setState` to set facet's state
  * Simply sets model data
  *
- * @param {Object} data data to set on facet's model
+ * @param {Object} state data to set on facet's model
  */
-function ModelFacet$setState() {
-	return this.m.set(data);
+function ModelFacet$setState(state) {
+	return this.m.set(state.data);
 }
 
 
@@ -6898,7 +7008,7 @@ var _ = require('mol-proto');
 
 
 // module exports error classes for all names defined in this array
-var errorClassNames = ['AbstractClass', 'Mixin', 'Messenger',
+var errorClassNames = ['AbstractClass', 'Mixin', 'Messenger', 'Component',
 					   'Attribute', 'Binder', 'Loader', 'MailMessageSource', 'Facet',
 					   'Scope', 'Model', 'DomFacet', 'EditableFacet',
 					   'List', 'Connector', 'Registry', 'FrameMessageSource',
@@ -7168,7 +7278,8 @@ function request$json(url, callback) {
 var domUtil = require('./dom')
 	, containingElement = domUtil.containingElement
 	, setCaretPosition = domUtil.setCaretPosition
-	, Component = require('../components/c_class');
+	, Component = require('../components/c_class')
+	, _ = require('mol-proto');
 
 module.exports = TextSelection;
 
@@ -7378,7 +7489,7 @@ function TextSelection$del() {
 	this.range.deleteContents();
 }
 
-},{"../components/c_class":12,"./dom":67}],74:[function(require,module,exports){
+},{"../components/c_class":12,"./dom":67,"mol-proto":77}],74:[function(require,module,exports){
 
 // not implemented
 // The reason for having an empty file and not throwing is to allow
