@@ -36,6 +36,22 @@ describe('milo binder', function() {
 
         var innerPara = ctrl.myTemplate.container.scope.innerPara;
         innerPara.el.innerHTML += ', then bound and changed via component inside template';
+
+        var radio = ctrl.myRadioGroup;
+        radio.model.m.set([
+            { name: 'gender', value: 'female', label: 'Female' },
+            { name: 'gender', value: 'male', label: 'Male' },
+            { name: 'gender', value: 'other', label: 'Other' }
+        ]);
+
+        radio.data.on('', function(msg, data) {
+            console.log('Radio Group Event', msg, data);
+        });
+
+        radio.data.set('male');
+        assert.equal(radio.data.get(), 'male');
+        radio.data.del();
+        assert.equal(radio.data.get(), undefined);
     });
 
     it('should bind a list, and instantiate list items', function() {
