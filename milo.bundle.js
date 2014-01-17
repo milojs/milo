@@ -984,7 +984,8 @@ _.extend(Component, {
 	getComponent: componentUtils.getComponent,
 	getContainingComponent: componentUtils.getContainingComponent,
 	getState: Component$$getState,
-	createFromState: Component$$createFromState
+	getTransferState: Component$$getTransferState,
+	createFromState: Component$$createFromState,
 });
 delete Component.createFacetedClass;
 
@@ -1136,12 +1137,26 @@ function copy(component, deepCopy) {
  * @return {Object}
  */
 function Component$$getState(component) {
-	if (component.transfer)
-		return component.transfer.get();
-
 	var state = component._getState();
 	state.outerHTML = component.el.outerHTML;
 	return state;
+}
+
+
+/**
+ * Component class method
+ * Retrieves all component state, including information about its class, extra facets, facets data and all scope children.
+ * This information is used to save/load, copy/paste and drag/drop component 
+ * If component has [Transfer](./c_facets/Transfer.js.html) facet on it, this method retrieves state from this facet
+ * Returns component state
+ *
+ * @param {Component} component component which state will be saved
+ * @return {Object}
+ */
+function Component$$getTransferState(component) {
+	return component.transfer
+			? component.transfer.get()
+			: Component.getState(component);
 }
 
 
@@ -1169,7 +1184,7 @@ function Component$$createFromState(state, newUniqueName) {
 	// instantiate all components from HTML
 	var scope = milo.binder(wrapEl);
 
-	// as there will only be one compnent, call to _any will return it
+	// as there should only be one component, call to _any will return it
 	var component = scope._any();
 
 	// restor component state
