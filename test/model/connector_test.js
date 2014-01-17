@@ -20,19 +20,25 @@ describe('Connector', function() {
 		}, 10);
 	});
 
-	it.skip('should allow path translation', function(done) {
+	it('should allow path translation', function(done) {
 		var m1 = new Model
 			, m2 = new Model
 			, c = new Connector(m1, '<<<->>>', m2, { pathTranslation: {
-				'.info': '.myInfo',
 				'.info.name': '.myInfo.myName'
 			} });
 
 		m1('.info.name').set('milo');
 
 		setTimeout(function() {
-			assert.deepEqual(m2.get(), { myInfo: { myName: 'milo' } } );
-			done();
+			assert.deepEqual(m2._data, { myInfo: { myName: 'milo' } } );
+
+			m1._data = undefined;
+			m2('.myInfo.myName').set('jason');
+
+			setTimeout(function() {
+				assert.deepEqual(m1._data, { info: { name: 'jason' } } );
+				done();
+			});
 		}, 10);
 	})
 });

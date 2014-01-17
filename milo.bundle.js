@@ -5451,12 +5451,12 @@ function Connector(ds1, mode, ds2, options) {
 		isOn: false	
 	});
 
-	// var pathTranslation = options && options.pathTranslation;
-	// if (pathTranslation)
-	// 	_.extend(this, {
-	// 		pathTranslation1: reverseTranslationRules(pathTranslation),
-	// 		pathTranslation2: pathTranslation
-	// 	});
+	var pathTranslation = options && options.pathTranslation;
+	if (pathTranslation)
+		_.extend(this, {
+			pathTranslation1: reverseTranslationRules(pathTranslation),
+			pathTranslation2: pathTranslation
+		});
 
 	this.turnOn();
 
@@ -5500,22 +5500,26 @@ function turnOn() {
 
 	var self = this;
 	if (this.depth1)
-		this._link1 = linkDataSource('_link2', this.ds1, this.ds2, subscriptionPath); //, this.pathTranslation1);
+		this._link1 = linkDataSource('_link2', this.ds1, this.ds2, subscriptionPath, this.pathTranslation1);
 	if (this.depth2)
-		this._link2 = linkDataSource('_link1', this.ds2, this.ds1, subscriptionPath); //, this.pathTranslation2);
+		this._link2 = linkDataSource('_link1', this.ds2, this.ds1, subscriptionPath, this.pathTranslation2);
 
 	this.isOn = true;
 
 
-	function linkDataSource(reverseLink, linkToDS, linkedDS, subscriptionPath) { // , pathTranslation) {
+	function linkDataSource(reverseLink, linkToDS, linkedDS, subscriptionPath, pathTranslation) {
 		var onData = function onData(message, data) {
 			// translated
-			// if (pathTranslation) {
-			// 	data = _.clone(data);
-			// 	var translatedPath = pathTranslation[data.path];
-			// 	if (translatedPath)
-			// 		data.path = translatedPath;
-			// }
+			if (pathTranslation) {
+				data = _.clone(data);
+				var translatedPath = pathTranslation[data.path];
+				if (translatedPath)
+					data.path = translatedPath;
+				else {
+					logger.warn('Connector: data message received that should not have been subscribed to')
+					return; // no translation -> no dispatch
+				}
+			}
 
 			// prevent endless loop of updates for 2-way connection
 			if (self[reverseLink])
@@ -5527,13 +5531,25 @@ function turnOn() {
 			function subscriptionSwitch(err, changeFinished) {
 				if (err) return;
 				var onOff = changeFinished ? 'on' : 'off';
-				linkToDS[onOff](subscriptionPath, self[reverseLink]);
+				// linkToDS[onOff](subscriptionPath, self[reverseLink]);
+				subscribeToDS(linkToDS, onOff, self[reverseLink], subscriptionPath, pathTranslation);
 			}
 		};
 
-		linkedDS.on(subscriptionPath, onData);
+		// linkedDS.on(subscriptionPath, onData);
+		subscribeToDS(linkedDS, 'on', onData, subscriptionPath, pathTranslation)
 
 		return onData;
+
+
+		function subscribeToDS(dataSource, onOff, subscriber, subscriptionPath, pathTranslation) {
+			if (pathTranslation)
+				_.eachKey(pathTranslation, function(translatedPath, path) {
+					dataSource[onOff](path, subscriber);
+				});
+			else
+				dataSource[onOff](subscriptionPath, subscriber);
+		}
 	}
 }
 
