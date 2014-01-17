@@ -100,7 +100,7 @@ function _createProxyMethods(proxyMethods, hostObject) {
 		}, this);
 }
 
-},{"../util/check":65,"../util/error":69,"mol-proto":79}],2:[function(require,module,exports){
+},{"../util/check":69,"../util/error":73,"mol-proto":83}],2:[function(require,module,exports){
 'use strict';
 
 
@@ -131,7 +131,7 @@ _.extendProto(Facet, {
 	init: function() {}
 });
 
-},{"mol-proto":79}],3:[function(require,module,exports){
+},{"mol-proto":83}],3:[function(require,module,exports){
 'use strict';
 
 
@@ -323,9 +323,9 @@ function createFacetedClass(name, facetsClasses, facetsConfig) {
 	}
 };
 
-},{"../util/check":65,"../util/error":69,"./facet":2,"mol-proto":79}],4:[function(require,module,exports){
+},{"../util/check":69,"../util/error":73,"./facet":2,"mol-proto":83}],4:[function(require,module,exports){
 module.exports=require(1)
-},{"../util/check":65,"../util/error":69,"mol-proto":79}],5:[function(require,module,exports){
+},{"../util/check":69,"../util/error":73,"mol-proto":83}],5:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -445,7 +445,7 @@ function setClass(FoundationClass) {
 	_.defineProperty(this, 'FoundationClass', FoundationClass, _.ENUM);
 }
 
-},{"../util/check":65,"../util/error":69,"mol-proto":79}],6:[function(require,module,exports){
+},{"../util/check":69,"../util/error":73,"mol-proto":83}],6:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -567,7 +567,7 @@ function render() {
 				.replace('%compName', this.compName);
 }
 
-},{"../config":43,"../util/check":65,"../util/error":69,"./a_class":7,"mol-proto":79}],7:[function(require,module,exports){
+},{"../config":47,"../util/check":69,"../util/error":73,"./a_class":7,"mol-proto":83}],7:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -650,7 +650,7 @@ function decorate() {
 	this.set(this.render());
 }
 
-},{"../util/check":65,"../util/error":69,"mol-proto":79}],8:[function(require,module,exports){
+},{"../util/check":69,"../util/error":73,"mol-proto":83}],8:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -737,7 +737,7 @@ function render() {
 	return this.loadUrl;
 }
 
-},{"../config":43,"../util/error":69,"./a_class":7,"mol-proto":79}],9:[function(require,module,exports){
+},{"../config":47,"../util/error":73,"./a_class":7,"mol-proto":83}],9:[function(require,module,exports){
 'use strict';
 
 /**
@@ -906,7 +906,7 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
 	}
 }
 
-},{"./attributes/a_bind":6,"./components/c_facets/cf_registry":26,"./components/c_info":27,"./components/c_registry":28,"./components/scope":35,"./mail":45,"./util/check":65,"./util/dom":68,"./util/error":69,"mol-proto":79}],11:[function(require,module,exports){
+},{"./attributes/a_bind":6,"./components/c_facets/cf_registry":26,"./components/c_info":27,"./components/c_registry":28,"./components/scope":35,"./mail":49,"./util/check":69,"./util/dom":72,"./util/error":73,"mol-proto":83}],11:[function(require,module,exports){
 'use strict';
 
 // <a name="classes"></a>
@@ -927,7 +927,7 @@ var classes = {
 
 module.exports = classes;
 
-},{"./abstract/Mixin":1,"./abstract/facet":2,"./abstract/faceted_object":3,"./abstract/registry":5,"./components/msg_src/dom_events":33,"./messenger/m_api":49,"./messenger/m_source":51}],12:[function(require,module,exports){
+},{"./abstract/Mixin":1,"./abstract/facet":2,"./abstract/faceted_object":3,"./abstract/registry":5,"./components/msg_src/dom_events":33,"./messenger/m_api":53,"./messenger/m_source":55}],12:[function(require,module,exports){
 'use strict';
 
 
@@ -1412,7 +1412,7 @@ function _getScopeParent(withFacet) {
 	}
 }
 
-},{"../abstract/faceted_object":3,"../attributes/a_bind":6,"../config":43,"../messenger":48,"../util/check":65,"../util/component_name":66,"../util/dom":68,"../util/error":69,"../util/logger":72,"./c_facets/cf_registry":26,"./c_utils":29,"mol-proto":79}],13:[function(require,module,exports){
+},{"../abstract/faceted_object":3,"../attributes/a_bind":6,"../config":47,"../messenger":52,"../util/check":69,"../util/component_name":70,"../util/dom":72,"../util/error":73,"../util/logger":76,"./c_facets/cf_registry":26,"./c_utils":29,"mol-proto":83}],13:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facet"></a>
@@ -1426,7 +1426,6 @@ function _getScopeParent(withFacet) {
 
 // - Component - basic compponent class
 // - ComponentFacet - basic 
-
 
 var Facet = require('../abstract/facet')
 	, Messenger = require('../messenger')
@@ -1600,7 +1599,7 @@ function requiresFacet(facetName) {
 						|| facetRequire.indexOf(_.firstLowerCase(facetName)) >= 0);
 }
 
-},{"../abstract/facet":2,"../messenger":48,"../util/error":69,"./c_utils":29,"mol-proto":79}],14:[function(require,module,exports){
+},{"../abstract/facet":2,"../messenger":52,"../util/error":73,"./c_utils":29,"mol-proto":83}],14:[function(require,module,exports){
 'use strict';
 
 
@@ -1685,7 +1684,7 @@ function Container$setState(state) {
 }
 
 
-},{"../../binder":10,"../../util/logger":72,"../c_facet":13,"./cf_registry":26,"mol-proto":79}],15:[function(require,module,exports){
+},{"../../binder":10,"../../util/logger":76,"../c_facet":13,"./cf_registry":26,"mol-proto":83}],15:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../../abstract/mixin')
@@ -2165,7 +2164,7 @@ function imgValue(el, value) {
 		return el.src;
 }
 
-},{"../../abstract/mixin":4,"../../messenger":48,"../../model/path_utils":60,"../../util/logger":72,"../c_facet":13,"../msg_api/data":31,"../msg_src/dom_events":33,"./cf_registry":26,"mol-proto":79}],16:[function(require,module,exports){
+},{"../../abstract/mixin":4,"../../messenger":52,"../../model/path_utils":64,"../../util/logger":76,"../c_facet":13,"../msg_api/data":31,"../msg_src/dom_events":33,"./cf_registry":26,"mol-proto":83}],16:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-dom"></a>
@@ -2394,7 +2393,7 @@ function hasTextAfterSelection() {
 	return treeWalker.nextNode();
 }
 
-},{"../../attributes/a_bind":6,"../../binder":10,"../../util/check":65,"../../util/dom":68,"../../util/error":69,"../c_facet":13,"./cf_registry":26,"mol-proto":79}],17:[function(require,module,exports){
+},{"../../attributes/a_bind":6,"../../binder":10,"../../util/check":69,"../../util/dom":72,"../../util/error":73,"../c_facet":13,"./cf_registry":26,"mol-proto":83}],17:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drag"></a>
@@ -2503,7 +2502,7 @@ function Drag$start() {
 	}
 }
 
-},{"../c_class":12,"../c_facet":13,"../msg_src/dom_events":33,"./cf_registry":26,"mol-proto":79}],18:[function(require,module,exports){
+},{"../c_class":12,"../c_facet":13,"../msg_src/dom_events":33,"./cf_registry":26,"mol-proto":83}],18:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drop"></a>
@@ -2552,7 +2551,7 @@ function Drop$start() {
 	}
 }
 
-},{"../c_facet":13,"../msg_src/dom_events":33,"./cf_registry":26,"mol-proto":79}],19:[function(require,module,exports){
+},{"../c_facet":13,"../msg_src/dom_events":33,"./cf_registry":26,"mol-proto":83}],19:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -2604,7 +2603,7 @@ function Events$init() {
 	_.defineProperty(this, '_domEventsSource', domEventsSource);
 }
 
-},{"../../messenger":48,"../c_facet":13,"../msg_src/dom_events":33,"./cf_registry":26,"mol-proto":79}],20:[function(require,module,exports){
+},{"../../messenger":52,"../c_facet":13,"../msg_src/dom_events":33,"./cf_registry":26,"mol-proto":83}],20:[function(require,module,exports){
 'use strict';
 
 
@@ -2652,7 +2651,9 @@ var ComponentFacet = require('../c_facet')
  * - [init](#Frame$init) - called by constructor automatically
  */
 _.extendProto(Frame, {
-	init: Frame$init
+	init: Frame$init,
+	start: Frame$start,
+	getWindow: Frame$getWindow
 	// _reattach: _reattachEventsOnElementChange
 });
 
@@ -2675,7 +2676,33 @@ function Frame$init() {
 	_.defineProperty(this, '_messageSource', messageSource);
 }
 
-},{"../../messenger":48,"../c_facet":13,"../msg_src/frame":34,"./cf_registry":26,"mol-proto":79}],21:[function(require,module,exports){
+
+/**
+ * Frame facet instance method
+ * Emits frameloaded event when ready.
+ */
+function Frame$start() {
+	ComponentFacet.prototype.start.apply(this, arguments);
+	var self = this;
+	var doc = this.getWindow().document;
+	if (doc.readyState == 'loading') 
+		doc.addEventListener('readystatechange', function(event) {
+			self.postMessage('domready');
+		});
+	else
+		this.postMessage('domready');
+}
+
+
+/**
+ * Frame facet instance method
+ * Retrieves the internal window of the frame 
+ */
+function Frame$getWindow() {
+	return this.owner.el.contentWindow;
+}
+
+},{"../../messenger":52,"../c_facet":13,"../msg_src/frame":34,"./cf_registry":26,"mol-proto":83}],21:[function(require,module,exports){
 'use strict';
 
 
@@ -2711,7 +2738,7 @@ function ItemFacet$removeItem() {
 	this.list.removeItem(this.index, true);
 }
 
-},{"../../mail":45,"../../model":56,"../c_facet":13,"./cf_registry":26,"mol-proto":79}],22:[function(require,module,exports){
+},{"../../mail":49,"../../model":60,"../c_facet":13,"./cf_registry":26,"mol-proto":83}],22:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-list"></a>
@@ -2947,7 +2974,7 @@ function each(callback, thisArg) {
     }, thisArg || this);
 }
 
-},{"../../binder":10,"../../mail":45,"../../model":56,"../../util":70,"../c_class":12,"../c_facet":13,"./cf_registry":26,"dot":78,"mol-proto":79}],23:[function(require,module,exports){
+},{"../../binder":10,"../../mail":49,"../../model":60,"../../util":74,"../c_class":12,"../c_facet":13,"./cf_registry":26,"dot":82,"mol-proto":83}],23:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-model"></a>
@@ -3011,7 +3038,7 @@ function ModelFacet$_createMessenger() { // Called by inherited init
 	this.m.proxyMethods(this); // Creates model's methods directly on facet
 }
 
-},{"../../model":56,"../c_facet":13,"./cf_registry":26,"mol-proto":79}],24:[function(require,module,exports){
+},{"../../model":60,"../c_facet":13,"./cf_registry":26,"mol-proto":83}],24:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-template"></a>
@@ -3098,7 +3125,7 @@ function Template$binder() {
 	this.owner.container.scope = thisScope[this.owner.name].container.scope;
 }
 
-},{"../../binder":10,"../../util/check":65,"../c_facet":13,"./cf_registry":26,"mol-proto":79}],25:[function(require,module,exports){
+},{"../../binder":10,"../../util/check":69,"../c_facet":13,"./cf_registry":26,"mol-proto":83}],25:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -3153,7 +3180,7 @@ function Transfer$init() {
  	this._state = state
  }
 
-},{"../c_facet":13,"./cf_registry":26,"mol-proto":79}],26:[function(require,module,exports){
+},{"../c_facet":13,"./cf_registry":26,"mol-proto":83}],26:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../abstract/registry')
@@ -3239,7 +3266,7 @@ function hasContainerFacet(ComponentClass, extraFacetsClasses) {
 			}));
 }
 
-},{"../util/error":69,"./c_facets/cf_registry":26,"./c_registry":28}],28:[function(require,module,exports){
+},{"../util/error":73,"./c_facets/cf_registry":26,"./c_registry":28}],28:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -3340,7 +3367,7 @@ function _getContainingComponent(el, returnCurrent, condition) {
 		return _getContainingComponent(el.parentNode, true, condition);
 }
 
-},{"../config":43,"../util/check":65}],30:[function(require,module,exports){
+},{"../config":47,"../util/check":69}],30:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3462,7 +3489,7 @@ function createInternalData(sourceMessage, message, data) {
 	return internalData;
 };
 
-},{"../../messenger/m_api":49,"../../util/check":65,"mol-proto":79}],32:[function(require,module,exports){
+},{"../../messenger/m_api":53,"../../util/check":69,"mol-proto":83}],32:[function(require,module,exports){
 'use strict';
 
 // <a name="components-dom-constructors"></a>
@@ -3513,7 +3540,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"mol-proto":79}],33:[function(require,module,exports){
+},{"mol-proto":83}],33:[function(require,module,exports){
 'use strict';
 
 // <a name="components-source-dom"></a>
@@ -3602,7 +3629,7 @@ function trigger(eventType, properties) {
 	return notCancelled;
 }
 
-},{"../../messenger/m_source":51,"../../util/check":65,"../c_class":12,"./de_constrs":32,"mol-proto":79}],34:[function(require,module,exports){
+},{"../../messenger/m_source":55,"../../util/check":69,"../c_class":12,"./de_constrs":32,"mol-proto":83}],34:[function(require,module,exports){
 'use strict';
 
 // <a name="components-source-iframe"></a>
@@ -3676,7 +3703,7 @@ function handleEvent(event) {
 	this.dispatchMessage(event.data.type, event);
 }
 
-},{"../../messenger/m_source":51,"../../util/check":65,"../../util/error":69,"../c_class":12,"mol-proto":79}],35:[function(require,module,exports){
+},{"../../messenger/m_source":55,"../../util/check":69,"../../util/error":73,"../c_class":12,"mol-proto":83}],35:[function(require,module,exports){
 // <a name="scope"></a>
 // scope class
 // -----------
@@ -3784,7 +3811,7 @@ function _clean() {
 	}, this);
 }
 
-},{"../util/check":65,"../util/error":69,"../util/logger":72,"mol-proto":79}],36:[function(require,module,exports){
+},{"../util/check":69,"../util/error":73,"../util/logger":76,"mol-proto":83}],36:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3809,6 +3836,40 @@ var Component = require('../c_class')
 	, componentsRegistry = require('../c_registry');
 
 
+var MLCheckbox = Component.createComponentClass('MLCheckbox', {
+	events: undefined,
+	dom: {
+		cls: 'ml-ui-checkbox'
+	}
+});
+
+componentsRegistry.add(MLCheckbox);
+
+module.exports = MLCheckbox;
+},{"../c_class":12,"../c_registry":28}],38:[function(require,module,exports){
+'use strict';
+
+var Component = require('../c_class')
+	, componentsRegistry = require('../c_registry');
+
+
+var MLDate = Component.createComponentClass('MLDate', {
+	events: undefined,
+	dom: {
+		cls: 'ml-ui-time'
+	}
+});
+
+componentsRegistry.add(MLDate);
+
+module.exports = MLDate;
+},{"../c_class":12,"../c_registry":28}],39:[function(require,module,exports){
+'use strict';
+
+var Component = require('../c_class')
+	, componentsRegistry = require('../c_registry');
+
+
 var MLGroup = Component.createComponentClass('MLGroup', {
 	container: undefined,
 	data: undefined,
@@ -3822,7 +3883,7 @@ componentsRegistry.add(MLGroup);
 
 module.exports = MLGroup;
 
-},{"../c_class":12,"../c_registry":28}],38:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":28}],40:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3840,7 +3901,7 @@ componentsRegistry.add(MLHyperlink);
 
 module.exports = MLHyperlink;
 
-},{"../c_class":12,"../c_registry":28}],39:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":28}],41:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3859,7 +3920,54 @@ componentsRegistry.add(MLInput);
 
 module.exports = MLInput;
 
-},{"../c_class":12,"../c_registry":28}],40:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":28}],42:[function(require,module,exports){
+'use strict';
+
+var Component = require('../c_class')
+	, componentsRegistry = require('../c_registry')
+	, _ = require('mol-proto');
+
+
+var MLList = Component.createComponentClass('MLList', {
+	dom: {
+		cls: 'ml-ui-list'
+	},
+	data: undefined,
+	events: undefined,
+	model: {
+		messages: {
+			'***': onOptionsChange
+		}
+	},
+	template: {
+		template: '{{~ it.selectOptions :option }} \
+						<option value="{{= option.value }}">{{= option.label }}</option> \
+				   {{~}}'
+	}
+});
+
+
+componentsRegistry.add(MLList);
+
+module.exports = MLList;
+
+
+_.extendProto(MLList, {
+	disable: MLList$disable
+});
+
+
+function MLList$disable(disable) {
+	this.el.disabled = disable;
+}
+
+
+function onOptionsChange(path, data) {
+	var component = this._hostObject.owner;
+	component.template.render({ selectOptions: this.get() });
+}
+
+},{"../c_class":12,"../c_registry":28,"mol-proto":83}],43:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -4002,7 +4110,7 @@ function onOptionsChange(path, data) {
 		this._radioList.push(radioEls[i]);
 }
 
-},{"../c_class":12,"../c_registry":28}],41:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":28}],44:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -4049,7 +4157,7 @@ function onOptionsChange(path, data) {
 	component.template.render({ selectOptions: this.get() });
 }
 
-},{"../c_class":12,"../c_registry":28,"mol-proto":79}],42:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":28,"mol-proto":83}],45:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -4068,7 +4176,24 @@ componentsRegistry.add(MLTextarea);
 
 module.exports = MLTextarea;
 
-},{"../c_class":12,"../c_registry":28}],43:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":28}],46:[function(require,module,exports){
+'use strict';
+
+var Component = require('../c_class')
+	, componentsRegistry = require('../c_registry');
+
+
+var MLTime = Component.createComponentClass('MLTime', {
+	events: undefined,
+	dom: {
+		cls: 'ml-ui-time'
+	}
+});
+
+componentsRegistry.add(MLTime);
+
+module.exports = MLTime;
+},{"../c_class":12,"../c_registry":28}],47:[function(require,module,exports){
 'use strict';
 
 
@@ -4111,7 +4236,7 @@ config({
 	}
 });
 
-},{"dot":78,"mol-proto":79}],44:[function(require,module,exports){
+},{"dot":82,"mol-proto":83}],48:[function(require,module,exports){
 'use strict';
 
 // <a name="loader"></a>
@@ -4233,7 +4358,7 @@ function loadView(el, callback) {
 	});
 }
 
-},{"./attributes/a_load":8,"./config":43,"./mail":45,"./util/dom":68,"./util/error":69,"./util/logger":72,"./util/request":74}],45:[function(require,module,exports){
+},{"./attributes/a_load":8,"./config":47,"./mail":49,"./util/dom":72,"./util/error":73,"./util/logger":76,"./util/request":78}],49:[function(require,module,exports){
 'use strict';
 
 // <a name="mail"></a>
@@ -4265,7 +4390,7 @@ miloMail._setMessageSource(mailMsgSource);
 
 module.exports = miloMail;
 
-},{"../messenger":48,"./mail_api":46,"./mail_source":47,"mol-proto":79}],46:[function(require,module,exports){
+},{"../messenger":52,"./mail_api":50,"./mail_source":51,"mol-proto":83}],50:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('../messenger/m_api')
@@ -4310,7 +4435,7 @@ function filterSourceMessage(sourceMessage, msgType, msgData) {
 		return windowMessagePrefix + msgData.data.type == msgType;
 };
 
-},{"../messenger/m_api":49,"../util/check":65,"mol-proto":79}],47:[function(require,module,exports){
+},{"../messenger/m_api":53,"../util/check":69,"mol-proto":83}],51:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../messenger/m_source')
@@ -4389,7 +4514,7 @@ function trigger(msgType, data) {
 		window.postMessage(data, '*')
 }
 
-},{"../components/msg_src/de_constrs":32,"../messenger/m_source":51,"../util/check":65,"../util/error":69,"mol-proto":79}],48:[function(require,module,exports){
+},{"../components/msg_src/de_constrs":32,"../messenger/m_source":55,"../util/check":69,"../util/error":73,"mol-proto":83}],52:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -4904,7 +5029,7 @@ function _setMessageSource(messageSource) {
  	messageSource.messenger = this;
 }
 
-},{"../abstract/mixin":4,"../util/check":65,"../util/error":69,"./m_source":51,"mol-proto":79}],49:[function(require,module,exports){
+},{"../abstract/mixin":4,"../util/check":69,"../util/error":73,"./m_source":55,"mol-proto":83}],53:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -5087,7 +5212,7 @@ function filterSourceMessage(sourceMessage, message, internalData) {
 	return true;
 }
 
-},{"mol-proto":79}],50:[function(require,module,exports){
+},{"mol-proto":83}],54:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('./m_api')
@@ -5170,7 +5295,7 @@ function getInternalMessages(sourceMessage) {
 	return internalMessages;
 }
 
-},{"./m_api":49,"mol-proto":79}],51:[function(require,module,exports){
+},{"./m_api":53,"mol-proto":83}],55:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -5322,7 +5447,7 @@ function dispatchMessage(sourceMessage, sourceData) {
 	}, this);
 }
 
-},{"../abstract/mixin":4,"../util/check":65,"../util/error":69,"../util/logger":72,"./m_api":49,"mol-proto":79}],52:[function(require,module,exports){
+},{"../abstract/mixin":4,"../util/check":69,"../util/error":73,"../util/logger":76,"./m_api":53,"mol-proto":83}],56:[function(require,module,exports){
 'use strict';
 
 
@@ -5379,7 +5504,7 @@ function removeSourceSubscriber(sourceMessage) {
 	this.sourceMessenger.off(sourceMessage, { context: this, subscriber: this.dispatchMessage });
 }
 
-},{"../util/check":65,"./m_source":51,"mol-proto":79}],53:[function(require,module,exports){
+},{"../util/check":69,"./m_source":55,"mol-proto":83}],57:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -5452,7 +5577,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./attributes":9,"./binder":10,"./classes":11,"./components/c_class":12,"./components/c_facet":13,"./config":43,"./loader":44,"./mail":45,"./messenger":48,"./minder":54,"./model":56,"./registry":62,"./use_components":63,"./use_facets":64,"./util":70,"mol-proto":79}],54:[function(require,module,exports){
+},{"./attributes":9,"./binder":10,"./classes":11,"./components/c_class":12,"./components/c_facet":13,"./config":47,"./loader":48,"./mail":49,"./messenger":52,"./minder":58,"./model":60,"./registry":66,"./use_components":67,"./use_facets":68,"./util":74,"mol-proto":83}],58:[function(require,module,exports){
 'use strict';
 
 var Connector = require('./model/connector');
@@ -5488,7 +5613,7 @@ function minder(ds1, mode, ds2, options) {
 		return new Connector(ds1, mode, ds2, options);
 }
 
-},{"./model/connector":55}],55:[function(require,module,exports){
+},{"./model/connector":59}],59:[function(require,module,exports){
 'use strict';
 
 var ConnectorError = require('../util/error').Connector
@@ -5669,7 +5794,7 @@ function turnOff() {
 	}
 }
 
-},{"../util/error":69,"../util/logger":72,"mol-proto":79}],56:[function(require,module,exports){
+},{"../util/error":73,"../util/logger":76,"mol-proto":83}],60:[function(require,module,exports){
 'use strict';
 
 var ModelPath = require('./m_path')
@@ -5815,7 +5940,7 @@ function proxyMessenger(modelHostObject) {
 	modelHostObject = modelHostObject || this._hostObject;
 	Mixin.prototype._createProxyMethods.call(this._messenger, messengerMethodsToProxy, modelHostObject);
 }
-var messengerMethodsToProxy = ['on', 'off', 'getSubscribers'];
+var messengerMethodsToProxy = ['on', 'off', 'postMessage', 'onMessages', 'offMessages', 'getSubscribers'];
 
 
 /**
@@ -5861,7 +5986,7 @@ _.extend(Model, {
 	Path: ModelPath
 });
 
-},{"../abstract/mixin":4,"../messenger":48,"../messenger/msngr_source":52,"../util/check":65,"../util/error":69,"../util/logger":72,"./m_msg_api":57,"./m_path":58,"./path_utils":60,"./synthesize":61,"mol-proto":79}],57:[function(require,module,exports){
+},{"../abstract/mixin":4,"../messenger":52,"../messenger/msngr_source":56,"../util/check":69,"../util/error":73,"../util/logger":76,"./m_msg_api":61,"./m_path":62,"./path_utils":64,"./synthesize":65,"mol-proto":83}],61:[function(require,module,exports){
 'use strict';
 
 var MessengerRegexpAPI = require('../messenger/m_api_rx')
@@ -5900,7 +6025,7 @@ function translateToSourceMessage(accessPath) {
 	return pathUtils.createRegexPath(accessPath);
 }
 
-},{"../messenger/m_api_rx":50,"./path_utils":60,"mol-proto":79}],58:[function(require,module,exports){
+},{"../messenger/m_api_rx":54,"./path_utils":64,"mol-proto":83}],62:[function(require,module,exports){
 'use strict';
 
 var synthesize = require('./synthesize')
@@ -6191,7 +6316,7 @@ var changeTypeToMethodMap = {
 	'removed': 'del'
 };
 
-},{"../messenger":48,"../messenger/msngr_source":52,"../util/check":65,"./path_msg_api":59,"./path_utils":60,"./synthesize":61,"mol-proto":79}],59:[function(require,module,exports){
+},{"../messenger":52,"../messenger/msngr_source":56,"../util/check":69,"./path_msg_api":63,"./path_utils":64,"./synthesize":65,"mol-proto":83}],63:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('../messenger/m_api')
@@ -6266,7 +6391,7 @@ function createInternalData(fullSourceAccessPath, accessPath, sourceData) {
 	return internalData;
 }
 
-},{"../messenger/m_api":49,"../util/logger":72,"mol-proto":79}],60:[function(require,module,exports){
+},{"../messenger/m_api":53,"../util/logger":76,"mol-proto":83}],64:[function(require,module,exports){
 'use strict';
 
 // <a name="model-path"></a>
@@ -6408,7 +6533,7 @@ function wrapMessengerMethods(methodsNames) {
 	_.defineProperties(this, wrappedMethods);
 }
 
-},{"../util/check":65,"mol-proto":79}],61:[function(require,module,exports){
+},{"../util/check":69,"mol-proto":83}],65:[function(require,module,exports){
 'use strict';
 
 var pathUtils = require('../path_utils')
@@ -6567,7 +6692,7 @@ _.extend(synthesizePathMethods, {
 	modelSplice: _synthesize(modelSpliceSynthesizer, '', [])
 });
 
-},{"../path_utils":60,"dot":78,"fs":76,"mol-proto":79}],62:[function(require,module,exports){
+},{"../path_utils":64,"dot":82,"fs":80,"mol-proto":83}],66:[function(require,module,exports){
 'use strict';
 
 /**
@@ -6581,7 +6706,7 @@ var registry = module.exports = {
 	components: require('./components/c_registry')
 };
 
-},{"./components/c_facets/cf_registry":26,"./components/c_registry":28}],63:[function(require,module,exports){
+},{"./components/c_facets/cf_registry":26,"./components/c_registry":28}],67:[function(require,module,exports){
 'use strict';
 
 require('./components/classes/View');
@@ -6592,8 +6717,12 @@ require('./components/ui/RadioGroup');
 require('./components/ui/Textarea');
 require('./components/ui/Button');
 require('./components/ui/Hyperlink');
+require('./components/ui/Checkbox');
+require('./components/ui/List');
+require('./components/ui/Time');
+require('./components/ui/Date');
 
-},{"./components/classes/View":30,"./components/ui/Button":36,"./components/ui/Group":37,"./components/ui/Hyperlink":38,"./components/ui/Input":39,"./components/ui/RadioGroup":40,"./components/ui/Select":41,"./components/ui/Textarea":42}],64:[function(require,module,exports){
+},{"./components/classes/View":30,"./components/ui/Button":36,"./components/ui/Checkbox":37,"./components/ui/Date":38,"./components/ui/Group":39,"./components/ui/Hyperlink":40,"./components/ui/Input":41,"./components/ui/List":42,"./components/ui/RadioGroup":43,"./components/ui/Select":44,"./components/ui/Textarea":45,"./components/ui/Time":46}],68:[function(require,module,exports){
 'use strict';
 
 require('./components/c_facets/Dom');
@@ -6609,7 +6738,7 @@ require('./components/c_facets/List');
 require('./components/c_facets/Item');
 require('./components/c_facets/Transfer');
 
-},{"./components/c_facets/Container":14,"./components/c_facets/Data":15,"./components/c_facets/Dom":16,"./components/c_facets/Drag":17,"./components/c_facets/Drop":18,"./components/c_facets/Events":19,"./components/c_facets/Frame":20,"./components/c_facets/Item":21,"./components/c_facets/List":22,"./components/c_facets/ModelFacet":23,"./components/c_facets/Template":24,"./components/c_facets/Transfer":25}],65:[function(require,module,exports){
+},{"./components/c_facets/Container":14,"./components/c_facets/Data":15,"./components/c_facets/Dom":16,"./components/c_facets/Drag":17,"./components/c_facets/Drop":18,"./components/c_facets/Events":19,"./components/c_facets/Frame":20,"./components/c_facets/Item":21,"./components/c_facets/List":22,"./components/c_facets/ModelFacet":23,"./components/c_facets/Template":24,"./components/c_facets/Transfer":25}],69:[function(require,module,exports){
 'use strict';
 
 // <a name="utils-check"></a>
@@ -6979,7 +7108,7 @@ function _prependPath(key, base) {
 };
 
 
-},{"mol-proto":79}],66:[function(require,module,exports){
+},{"mol-proto":83}],70:[function(require,module,exports){
 'use strict';
 
 var count = require('./count')
@@ -6993,7 +7122,7 @@ function componentName() {
 	return prefix + count();
 }
 
-},{"../config":43,"./count":67}],67:[function(require,module,exports){
+},{"../config":47,"./count":71}],71:[function(require,module,exports){
 // <a name="utils-count"></a>
 // milo.utils.count
 // ----------------
@@ -7013,7 +7142,7 @@ componentCount.get = function() {
 
 module.exports = componentCount;
 
-},{}],68:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 'use strict';
 
 
@@ -7132,7 +7261,7 @@ function getElementOffset(el) {
         parent.removeChild(el);
  }
 
-},{}],69:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 // <a name="utils-error"></a>
 // milo.utils.error
 // -----------
@@ -7175,7 +7304,7 @@ function error$toBeImplemented() {
 	throw new error.AbstractClass('calling the method of an absctract class');
 }
 
-},{"mol-proto":79}],70:[function(require,module,exports){
+},{"mol-proto":83}],74:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7195,7 +7324,7 @@ var util = {
 
 module.exports = util;
 
-},{"./check":65,"./component_name":66,"./count":67,"./dom":68,"./error":69,"./json_parse":71,"./logger":72,"./request":74,"./selection":75}],71:[function(require,module,exports){
+},{"./check":69,"./component_name":70,"./count":71,"./dom":72,"./error":73,"./json_parse":75,"./logger":76,"./request":78,"./selection":79}],75:[function(require,module,exports){
 'use strict';
 
 
@@ -7215,7 +7344,7 @@ function jsonParse(str) {
 	} catch (e) {}
 }
 
-},{}],72:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 'use strict';
 
 // <a name="utils-logger"></a>
@@ -7245,7 +7374,7 @@ var logger = new Logger({ level: 3 });
 
 module.exports = logger;
 
-},{"./logger_class":73}],73:[function(require,module,exports){
+},{"./logger_class":77}],77:[function(require,module,exports){
 'use strict';
 
 // ### Logger Class
@@ -7357,7 +7486,7 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"mol-proto":79}],74:[function(require,module,exports){
+},{"mol-proto":83}],78:[function(require,module,exports){
 'use strict';
 
 // milo.utils.request
@@ -7427,7 +7556,7 @@ function request$json(url, callback) {
 	});
 }
 
-},{"mol-proto":79}],75:[function(require,module,exports){
+},{"mol-proto":83}],79:[function(require,module,exports){
 'use strict';
 
 
@@ -7546,7 +7675,7 @@ function TextSelection$textNodes() {
 	if (! this.range) return undefined;
 
 	if (! this._textNodes)
-		_getTextNodes.call(this);
+		this._textNodes = _getTextNodes.call(this);
 	return this._textNodes;
 }
 
@@ -7559,10 +7688,10 @@ function TextSelection$textNodes() {
  */
 function _getTextNodes() {
 	// list of selected text nodes
-	this._textNodes = [];
+	var textNodes = [];
 
 	if (this.isCollapsed)
-		return;
+		return textNodes;
 
 	// create TreeWalker to traverse the tree to select all text nodes
 	var selStart = this.range.startContainer
@@ -7574,10 +7703,11 @@ function _getTextNodes() {
 
 	// traverse DOM tree to collect all selected text nodes
 	while (node && (! inEnd || selEnd.contains(node))) {
-		this._textNodes.push(node);
+		textNodes.push(node);
 		var inEnd = inEnd || selEnd.contains(node);
 		node = treeWalker.nextNode();
 	}
+	return textNodes;
 }
 
 
@@ -7645,13 +7775,13 @@ function TextSelection$del() {
 	this.range.deleteContents();
 }
 
-},{"../components/c_class":12,"./dom":68,"mol-proto":79}],76:[function(require,module,exports){
+},{"../components/c_class":12,"./dom":72,"mol-proto":83}],80:[function(require,module,exports){
 
 // not implemented
 // The reason for having an empty file and not throwing is to allow
 // untraditional implementation of this module.
 
-},{}],77:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 // doT.js
 // 2011, Laura Doktorova, https://github.com/olado/doT
 // Licensed under the MIT license.
@@ -7788,7 +7918,7 @@ function TextSelection$del() {
 	};
 }());
 
-},{}],78:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 /* doT + auto-compilation of doT templates
  *
  * 2012, Laura Doktorova, https://github.com/olado/doT
@@ -7933,7 +8063,7 @@ InstallDots.prototype.compileAll = function() {
 	return this.__rendermodule;
 };
 
-},{"./doT":77,"fs":76}],79:[function(require,module,exports){
+},{"./doT":81,"fs":80}],83:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -8088,7 +8218,7 @@ if (typeof module == 'object' && module.exports)
 	// export for node/browserify
 	module.exports = Proto;
 
-},{"./proto_array":80,"./proto_function":81,"./proto_object":82,"./proto_prototype":83,"./proto_string":84,"./utils":85}],80:[function(require,module,exports){
+},{"./proto_array":84,"./proto_function":85,"./proto_object":86,"./proto_prototype":87,"./proto_string":88,"./utils":89}],84:[function(require,module,exports){
 'use strict';
 
 var __ = require('./proto_object')
@@ -8242,7 +8372,7 @@ function mapToObject(callback, thisArg) {
 	return result;
 }
 
-},{"./proto_object":82,"./utils":85}],81:[function(require,module,exports){
+},{"./proto_object":86,"./utils":89}],85:[function(require,module,exports){
 'use strict';
 
 /**
@@ -8382,7 +8512,7 @@ function _delay(func, wait, args) {
 	return setTimeout(func.apply.bind(func, null, args), wait);
 }
 
-},{}],82:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 'use strict';
 
 
@@ -8862,7 +8992,7 @@ function everyKey(callback, thisArg, onlyEnumerable) {
 	}
 }
 
-},{"./utils":85}],83:[function(require,module,exports){
+},{"./utils":89}],87:[function(require,module,exports){
 'use strict';
 
 /**
@@ -8976,7 +9106,7 @@ function makeSubclass(Superclass) {
 	return this;
 }
 
-},{"./proto_function":81,"./proto_object":82}],84:[function(require,module,exports){
+},{"./proto_function":85,"./proto_object":86}],88:[function(require,module,exports){
 'use strict';
 
 /**
@@ -9008,7 +9138,7 @@ function firstLowerCase() {
 	return this[0].toLowerCase() + this.slice(1);
 }
 
-},{}],85:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 'use strict';
 
 var utils = module.exports = {
@@ -9073,5 +9203,5 @@ function makeFindMethod(eachMethod, findWhat) {
 	}
 }
 
-},{}]},{},[53])
+},{}]},{},[57])
 ;
