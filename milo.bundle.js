@@ -944,7 +944,8 @@ var FacetedObject = require('../abstract/faceted_object')
 	, logger = require('../util/logger')
 	, domUtils = require('../util/dom')
 	, ComponentError = require('../util/error').Component
-	, BindAttribute = require('../attributes/a_bind');
+	, BindAttribute = require('../attributes/a_bind')
+	, Scope = require('./scope');
 
 
 /**
@@ -977,9 +978,10 @@ module.exports = Component;
  * - [getContainingComponent](c_utils.js.html#getContainingComponent)
  */
 _.extend(Component, {
-	createComponentClass: createComponentClass,
-	create: create,
-	copy: copy,
+	createComponentClass: Component$$createComponentClass,
+	create: Component$$create,
+	copy: Component$$copy,
+	createOnElement: Component$$createOnElement,
 	isComponent: componentUtils.isComponent,
 	getComponent: componentUtils.getComponent,
 	getContainingComponent: componentUtils.getContainingComponent,
@@ -1025,7 +1027,7 @@ _.extendProto(Component, {
  *  If no facet requires configuration, the array of facets names can be passed.
  * @return {Subclass(Component)}
  */
-function createComponentClass(name, facetsConfig) {
+function Component$$createComponentClass(name, facetsConfig) {
 	var facetsClasses = {};
 
 	// convert array of facet names to map of empty facets configurations
@@ -1060,7 +1062,7 @@ function createComponentClass(name, facetsConfig) {
  * @param {ComponentInfo} info
  @ @return {Component}
  */
-function create(info) {
+function Component$$create(info) {
 	var ComponentClass = info.ComponentClass;
 	var aComponent = new ComponentClass(info.scope, info.el, info.name, info);
 
@@ -1082,7 +1084,7 @@ function create(info) {
  * @param {Boolean} deepCopy optional `true` to make deep copy of DOM element, otherwise only element without children is copied
  * @return {Component}
  */
-function copy(component, deepCopy) {
+function Component$$copy(component, deepCopy) {
 	var ComponentClass = component.constructor;
 
 	// get unique component name
@@ -1124,6 +1126,52 @@ function copy(component, deepCopy) {
 	// 	component.container.binder();
 
 	return aComponent;
+}
+
+
+/**
+ * Component class method
+ * Creates an instance of component atached to element. All subclasses of component inherit this method.
+ * Returns the component of the class this method is used with (thecontext of the method call).
+ *
+ * @param {Element} el optional element to attach component to. If element is not passed, it will be created
+ * @param {String} innerHTML optional inner html to insert in element before binding.
+ * @param {Scope} rootScope optional scope to put component in. If not passed, component will be attached to the scope that contains the element. If such scope does not exist, new scope will be created.
+ * @return {Subclass(Component)}
+ */
+function Component$$createOnElement(el, innerHTML, rootScope) {
+	// should required here to resolve circular dependency
+	var miloBinder = require('../binder')
+
+	// create element if it wasn't passed
+	if (! el) {
+		var domFacetConfig = this.prototype.facetsConfig.dom
+			, tagName = domFacetConfig && domFacetConfig.tagName || 'div';
+		el = document.createElement(tagName);
+	}
+
+	// find scope to attach component to
+	if (! rootScope) {
+		var parentComponent = Component.getContainingComponent(el, false, 'Container');
+		if (parentComponent)
+			rootScope = parentComponent.container.scope;
+		else
+			rootScope = new Scope(el);
+	}
+
+	// add bind attribute to element
+	var attr = new BindAttribute(el);
+	// "this" refers to the class of component here, as this is a class method
+	attr.compClass = this.name;
+	attr.decorate();
+
+	// insert HTML
+	if (innerHTML)
+		el.innerHTML = innerHTML;
+
+	miloBinder(el, rootScope);
+
+	return rootScope[attr.compName];
 }
 
 
@@ -1421,7 +1469,7 @@ function _getScopeParent(withFacet) {
 	}
 }
 
-},{"../abstract/faceted_object":3,"../attributes/a_bind":6,"../config":47,"../messenger":52,"../util/check":69,"../util/component_name":70,"../util/dom":72,"../util/error":73,"../util/logger":76,"./c_facets/cf_registry":26,"./c_utils":29,"mol-proto":83}],13:[function(require,module,exports){
+},{"../abstract/faceted_object":3,"../attributes/a_bind":6,"../binder":10,"../config":47,"../messenger":52,"../util/check":69,"../util/component_name":70,"../util/dom":72,"../util/error":73,"../util/logger":76,"./c_facets/cf_registry":26,"./c_utils":29,"./scope":35,"mol-proto":83}],13:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facet"></a>
@@ -3174,7 +3222,7 @@ module.exports = Transfer;
 function Transfer$init() {
 	ComponentFacet.prototype.init.apply(this, arguments);
 	this._state = undefined;
-ß}
+}
 
 
 /**
