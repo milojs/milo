@@ -1155,7 +1155,7 @@ function Component$$getState(component) {
  */
 function Component$$getTransferState(component) {
 	return component.transfer
-			? component.transfer.get()
+			? component.transfer.getState()
 			: Component.getState(component);
 }
 
@@ -1166,15 +1166,16 @@ function Component$$getTransferState(component) {
  * This is used to save/load, copy/paste and drag/drop component
  *
  * @param {Object} state state from which component will be created
+ * @param {Scope} rootScope scope to which component will be added
  * @param {Boolean} newUniqueName optional `true` to create component with the name different from the original one. `False` by default.
  * @return {Component} component
  */
-function Component$$createFromState(state, newUniqueName) {
+function Component$$createFromState(state, rootScope, newUniqueName) {
 	check(state, Match.ObjectIncluding({
 		compName: Match.Optional(String),
-		compClass: String,
-		extraFacets: [String],
-		facetsStates: Object,
+		compClass: Match.Optional(String),
+		extraFacets: Match.Optional([String]),
+		facetsStates: Match.Optional(Object),
 		outerHTML: String
 	}));
 
@@ -1186,6 +1187,12 @@ function Component$$createFromState(state, newUniqueName) {
 
 	// as there should only be one component, call to _any will return it
 	var component = scope._any();
+
+	// set component's scope
+	if (rootScope) {
+		component.scope = rootScope;
+		rootScope._add(component);
+	}
 
 	// restor component state
 	component._setState(state);
@@ -1243,10 +1250,11 @@ function init(scope, element, name, componentInfo) {
 
 	_.defineProperties(this, {
 		name: name,
-		scope: scope,
 		componentInfo: componentInfo,
 		extraFacets: []
 	}, _.ENUM);
+
+	this.scope = scope;
 
 	// create component messenger
 	var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
@@ -1376,11 +1384,12 @@ function Component$_getState(){
  * @param {Object} state state to set the component
  */
 function Component$_setState(state) {
-	_.eachKey(state.facetsStates, function(fctState, fctName) {
-		var facet = this[fctName];
-		if (facet && typeof facet.setState == 'function')
-			facet.setState(fctState);
-	}, this);
+	if (state.facetsStates)
+		_.eachKey(state.facetsStates, function(fctState, fctName) {
+			var facet = this[fctName];
+			if (facet && typeof facet.setState == 'function')
+				facet.setState(fctState);
+		}, this);
 }
 
 
@@ -2417,7 +2426,6 @@ _.extendProto(Drag, {
 	start: Drag$start,
 
 	setHandle: Drag$setHandle,
-	setDragData: Drag$setDragData
 	// _reattach: _reattachEventsOnElementChange
 });
 
@@ -2451,55 +2459,66 @@ function Drag$setHandle(handleEl) {
 }
 
 
-function Drag$setDragData(data) {
-	this._dragData = data;
-}
-
-
 function Drag$start() {
 	ComponentFacet.prototype.start.apply(this, arguments);
 	this.owner.el.setAttribute('draggable', true);
 
-	this.on('mousedown', Drag_onMouseDown);
-	this.on('mouseenter mouseleave mousemove', Drag_onMouseMovement);
-	this.on('dragstart drag', Drag_onDragging);
+	this.onMessages({
+		'mousedown': {
+			context: this, subscriber: onMouseDown },
+		'mouseenter mouseleave mousemove': {
+			context: this, subscriber: onMouseMovement },
+		'dragstart': {
+			context: this, subscriber: onDragStart },
+		'drag': {
+			context: this, subscriber: onDragging }
+	});
+}
 
-	var self = this;
 
-	function Drag_onMouseDown(eventType, event) {
-		self._target = event.target;
-		if (Drag_targetInDragHandle(event)) {
-			window.getSelection().empty();
-			event.stopPropagation();
-		}
-	}
-
-	function Drag_onMouseMovement(eventType, event) {
-		var shouldBeDraggable = Drag_targetInDragHandle(event);
-		self.owner.el.setAttribute('draggable', shouldBeDraggable);
+function onMouseDown(eventType, event) {
+	this.__mouseDownTarget = event.target;
+	if (targetInDragHandle.call(this)) {
+		window.getSelection().empty();
 		event.stopPropagation();
 	}
+}
 
-	function Drag_onDragging(eventType, event) {
-		if (Drag_targetInDragHandle(event)) {
-			var dt = event.dataTransfer;
 
-			var dragData = Component.getTransferState(self.owner);
+function onMouseMovement(eventType, event) {
+	var shouldBeDraggable = targetInDragHandle.call(this);
+	this.owner.el.setAttribute('draggable', shouldBeDraggable);
+	event.stopPropagation();
+}
 
-			var dataType = 'x-application/milo-component/' + dragData.compClass + '/'
-							+ this._dataTypeInfo.call(this);
 
-			dt.setData('text/html', self.owner.el.outerHTML);
-			dt.setData('x-application/milo-component', JSON.stringify(self._dragData));
+function onDragStart(eventType, event) {
+	var transferState = Component.getTransferState(this.owner);
+	this.__dragData = JSON.stringify(transferState);
+	this.__dataType = 'x-application/milo-component/' + transferState.compClass + '/'
+						+ this._dataTypeInfo.call(this);
+	setDragData.call(this, event);
+}
 
-			dt.setData(dataType, JSON.stringify(dragData));
-		} else
-			event.preventDefault();
-	}
 
-	function Drag_targetInDragHandle(event) {
-		return ! self._dragHandle || self._dragHandle.contains(self._target);
-	}
+function onDragging(eventType, event) {
+	setDragData.call(this, event);
+}
+
+
+function setDragData(event) {
+	if (targetInDragHandle.call(this)) {
+		var dt = event.dataTransfer;
+		dt.setData(this.__dataType, this.__dragData);
+		// set html in case it is inserted elsewhere
+		dt.setData('text/html', this.owner.el.outerHTML);
+	} else
+		event.preventDefault();
+}
+
+
+function targetInDragHandle() {
+	return ! this._dragHandle || this._dragHandle.contains(this.__mouseDownTarget);
 }
 
 },{"../c_class":12,"../c_facet":13,"../msg_src/dom_events":33,"./cf_registry":26,"mol-proto":83}],18:[function(require,module,exports){
@@ -3143,8 +3162,8 @@ var Transfer = _.createSubclass(ComponentFacet, 'Transfer');
 
 _.extendProto(Transfer, {
 	init: Transfer$init,
-	get: Transfer$get,
-	set: Transfer$set
+	getState: Transfer$getState,
+	setState: Transfer$setState
 });
 
 facetsRegistry.add(Transfer);
@@ -3155,8 +3174,7 @@ module.exports = Transfer;
 function Transfer$init() {
 	ComponentFacet.prototype.init.apply(this, arguments);
 	this._state = undefined;
-	// .. initialization code
-}
+ß}
 
 
 /**
@@ -3165,8 +3183,8 @@ function Transfer$init() {
  *
  * @return {Object}
  */
- function Transfer$get() {
- 	return this._state
+ function Transfer$getState() {
+ 	return this._state;
  }
 
 
@@ -3176,8 +3194,8 @@ function Transfer$init() {
  *
  * @param {Object} state
  */
- function Transfer$set(state) {
- 	this._state = state
+ function Transfer$setState(state) {
+ 	this._state = state;
  }
 
 },{"../c_facet":13,"./cf_registry":26,"mol-proto":83}],26:[function(require,module,exports){
