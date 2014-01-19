@@ -1751,6 +1751,7 @@ var Mixin = require('../../abstract/mixin')
 	, Messenger = require('../../messenger')
 	, DOMEventsSource = require('../msg_src/dom_events')
 	, DataMsgAPI = require('../msg_api/data')
+	, getElementDataAccess = require('../msg_api/de_data')
 	, pathUtils = require('../../model/path_utils')
 
 	, _ = require('mol-proto')
@@ -1806,6 +1807,9 @@ var proxyDataSourceMethods = {
  */
 function Data$start() {
 	ComponentFacet.prototype.start.apply(this, arguments);
+
+	// get/set methods to set data of element
+	this.elData = getElementDataAccess(this.owner.el);
 
 	// queue of "changedata" messages
 	_.defineProperty(this, '_changesQueue', []);
@@ -2057,11 +2061,7 @@ function Data$del() {
  * @param {String|Number} value value to set to DOM element
  */
 function Data$_setScalarValue(value) {
-	var el = this.owner.el
-		, setter = tags[el.tagName.toLowerCase()];
-	return setter
-			? setter(el, value)
-			: (el.innerHTML = typeof value == 'undefined' ? '' : value);
+	return this.elData.set(this.owner.el, value);
 }
 
 
@@ -2128,11 +2128,7 @@ function Data$get() {
  * @private
  */
 function Data$_getScalarValue() {
-	var el = this.owner.el
-		, getter = tags[el.tagName.toLowerCase()];
-	return getter
-			 ? getter(el)
-			 : el.innerHTML;
+	return this.elData.get(this.owner.el);
 }
 
 
@@ -2194,34 +2190,7 @@ function Data$setState(state) {
 	return this.set(state.state);
 }
 
-
-// Set value rules
-var tags = {
-	'input': inputValue,
-	'select': inputValue,
-	'textarea': inputValue,
-	'img': imgValue
-}
-
-
-// Set and get value of input
-function inputValue(el, value) {
-	if (value)
-		return (el.value = typeof value == 'undefined' ? '' : value);
-	else
-		return el.value;
-}
-
-
-// Set and get value of img tag
-function imgValue(el, value) {
-	if (value)
-		return (el.src = typeof value == 'undefined' ? '' : value);
-	else
-		return el.src;
-}
-
-},{"../../abstract/mixin":4,"../../messenger":53,"../../model/path_utils":65,"../../util/logger":77,"../c_facet":13,"../msg_api/data":31,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":84}],16:[function(require,module,exports){
+},{"../../abstract/mixin":4,"../../messenger":53,"../../model/path_utils":65,"../../util/logger":77,"../c_facet":13,"../msg_api/data":31,"../msg_api/de_data":32,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":84}],16:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-dom"></a>
@@ -3541,7 +3510,7 @@ var _ = require('mol-proto');
 var getElementDataAccess = function(el) {
 	var tagName = el.tagName.toLowerCase()
 		, elData = domElementsDataAccess[tagName];
-	return elData || domElementsDataAccess.unknown;
+	return elData || domElementsDataAccess.byDefault;
 }
 
 module.exports = getElementDataAccess;
@@ -3551,9 +3520,8 @@ module.exports = getElementDataAccess;
  * Data access methods and events for DOM elements.
  */
 var domElementsDataAccess = {
-	unknown: {
- 		property: 'value',
- 		event: 'input'
+	byDefault: {
+ 		property: 'innerHTML',
 	},
 	'div': {
  		property: 'value', // hack, should be innerHTML? to make work with Editable facet
@@ -3582,7 +3550,7 @@ var domElementsDataAccess = {
 
 
 // convert strings to functions and create getset methods
-_.eachKey(domElementsDataAccess, function(tagInfo, tagName) {
+_.eachKey(domElementsDataAccess, function(tagInfo) {
 	var property = tagInfo.property
 		, event = tagInfo.event;
 	if (typeof property != 'function')
@@ -3593,7 +3561,9 @@ _.eachKey(domElementsDataAccess, function(tagInfo, tagName) {
 	if (! tagInfo.get)
 		tagInfo.get = function(el) { return el[propFunc(el)]; }
 	if (! tagInfo.set)
-		tagInfo.set = function(el, value) { el[propFunc(el)] = value; }
+		tagInfo.set = function(el, value) {
+			return (el[propFunc(el)] = typeof value == 'undefined' ? '' : value);
+		}
 });
 
 
@@ -3601,6 +3571,10 @@ _.eachKey(domElementsDataAccess, function(tagInfo, tagName) {
  * Types of input elements
  */
 var inputElementTypes = {
+	byDefault: {
+ 		property: 'value',
+ 		event: 'input'
+	},
 	'checkbox': {
 		property: 'checked',
 		event: 'change'
@@ -3626,7 +3600,7 @@ function inputDataProperty(el) {
 	var inputType = inputElementTypes[el.type];
 	return inputType
 			? inputType.property
-			: 'value';
+			: inputElementTypes.byDefault.property;
 }
 
 
@@ -3640,7 +3614,7 @@ function inputChangeEvent(el) {
 	var inputType = inputElementTypes[el.type];
 	return inputType
 			? inputType.event
-			: 'input';
+			: inputElementTypes.byDefault.event;
 }
 
 },{"mol-proto":84}],33:[function(require,module,exports){
