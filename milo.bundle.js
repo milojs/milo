@@ -988,6 +988,7 @@ _.extend(Component, {
 	getState: Component$$getState,
 	getTransferState: Component$$getTransferState,
 	createFromState: Component$$createFromState,
+	createFromDataTransfer: createFromDataTransfer
 });
 delete Component.createFacetedClass;
 
@@ -1014,6 +1015,8 @@ _.extendProto(Component, {
 	_getScopeParent: _getScopeParent
 });
 
+var COMPONENT_DATA_TYPE_PREFIX = 'x-application/milo-component';
+var COMPONENT_DATA_TYPE_REGEX = /x-application\/milo-component\/([a-z_$][0-9a-z_$]*)(?:\/())/i;
 
 /**
  * Component class method
@@ -1267,6 +1270,26 @@ function _createComponentWrapElement(state, newUniqueName) {
 	return wrapEl;
 }
 
+/**
+ * Creates a component from a DataTransfer object (if possible)
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer
+ * @param {DataTransfer} dataTransfer Data transfer
+ */
+function createFromDataTransfer(dataTransfer) {
+	var dataType = _.find(dataTransfer.types, function (type) {
+		return COMPONENT_DATA_TYPE_REGEX.test(type);
+	});
+
+	if (!dataType) return;
+
+	var state = milo.util.jsonParse(dataTransfer.getData(dataType));
+
+	if (!state) return;
+
+	return Component.createFromState(state, undefined, true);
+}
+
 
 /**
  * Component instance method.
@@ -1297,11 +1320,11 @@ function init(scope, element, name, componentInfo) {
 	}
 
 	_.defineProperties(this, {
-		name: name,
 		componentInfo: componentInfo,
 		extraFacets: []
 	}, _.ENUM);
 
+	this.name = name;
 	this.scope = scope;
 
 	// create component messenger
@@ -3888,17 +3911,17 @@ var allowedNamePattern = /^[A-Za-z][A-Za-z0-9\_\$]*$/;
 
 // adds object to scope throwing if name is not unique
 function _add(object, name) {
-	name = name || object.name;
+	if (typeof name === 'string') {
+		object.name = name;
+	}
 	
-	if (this[name])
+	if (this[object.name])
 		throw new ScopeError('duplicate object name: ' + name);
 
-	checkName(name);
+	checkName(object.name);
 
-	this[name] = object;
+	this[object.name] = object;
 }
-
-
 
 
 // copies all objects from one scope to another,
@@ -3924,6 +3947,9 @@ function _each(callback, thisArg) {
 	_.eachKey(this, callback, thisArg || this, true); // enumerates enumerable properties only
 }
 
+function _filter(callback, thisArg) {
+	return _.filter(this, callback, thisArg || this, true);
+}
 
 function checkName(name) {
 	if (! allowedNamePattern.test(name))
@@ -8250,8 +8276,6 @@ var	prototypeMethods = require('./proto_prototype');
  * - [everyKey](proto_object.js.html#everyKey)
  * - [findValue](proto_object.js.html#findValue)
  * - [findKey](proto_object.js.html#findKey)
- * - [pickKeys](proto_object.js.html#pickKeys)
- * - [omitKeys](proto_object.js.html#omitKeys)
  */
 var	objectMethods = require('./proto_object');
 
@@ -8690,8 +8714,6 @@ var utils = require('./utils');
  * - [everyKey](#everyKey)
  * - [findValue](#findValue)
  * - [findKey](#findKey)
- * - [pickKeys](#pickKeys)
- * - [omitKeys](#omitKeys)
  *
  * All these methods can be [chained](proto.js.html#Proto)
  */
@@ -8710,8 +8732,7 @@ var objectMethods = module.exports = {
 	filterKeys: filterKeys,
 	someKey: someKey,
 	everyKey: everyKey,
-	pickKeys: pickKeys,
-	omitKeys: omitKeys
+
 };
 
 
@@ -9147,43 +9168,6 @@ function everyKey(callback, thisArg, onlyEnumerable) {
 		if (! callback.call(this, value, key, self))
 			throw _didNotPass;
 	}
-}
-
-
-var ArrayProto = Array.prototype
-	, concat = ArrayProto.concat;
-/**
- * Returns object of the same class with only specified keys, that are passed as string parameters or array(s) of keys.
- *
- * @param {Object} self an object to pick keys from
- * @param {List[String|Array]} arguments list of keys (or array(s) of keys)
- * @return {Object} 
- */
-function pickKeys() { // , ... keys
-	var keys = concat.apply(ArrayProto, arguments)
-		, obj = Object.create(this.constructor.prototype);
-	keys.forEach(function(key){
-		if (this.hasOwnProperty(key))
-			obj[key] = this[key];
-	}, this);
-	return obj;
-}
-
-
-/**
- * Returns object of the same class without specified keys, that are passed as string parameters or array(s) of keys.
- *
- * @param {Object} self an object to omit keys in
- * @param {List[String|Array]} arguments list of keys (or array(s) of keys)
- * @return {Object} 
- */
-function omitKeys() { // , ... keys
-	var keys = concat.apply(ArrayProto, arguments)
-		, obj = clone.call(this);
-	keys.forEach(function(key){
-		delete obj[key];
-	}, this);
-	return obj;
 }
 
 },{"./utils":90}],88:[function(require,module,exports){

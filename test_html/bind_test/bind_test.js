@@ -52,6 +52,13 @@ describe('milo binder', function() {
         assert.equal(radio.data.get(), 'male');
         radio.data.del();
         assert.equal(radio.data.get(), undefined);
+
+        // Setting select options
+        ctrl.mySelect.model.m.set([
+            { value: 'female', label: 'Female' },
+            { value: 'male', label: 'Male' },
+            { value: 'other', label: 'Other' }
+        ]);
     });
 
     it('should bind a list, and instantiate list items', function() {
