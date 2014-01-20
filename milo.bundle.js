@@ -831,7 +831,7 @@ function create(scanScope, hostObject) {
 
 		// create component
 		var aComponent = Component.create(info);
-
+		
 		scope._add(aComponent, aComponent.name);
 		if (aComponent.container)
 			aComponent.container.scope = create(compInfo.container.scope, aComponent.container);
@@ -1685,6 +1685,7 @@ function requiresFacet(facetName) {
 
 var ComponentFacet = require('../c_facet')
 	, miloBinder = require('../../binder')
+	, Scope = require('../scope')
 	, _ = require('mol-proto')
 	, facetsRegistry = require('./cf_registry')
 	, logger = require('../../util/logger');
@@ -1710,9 +1711,9 @@ var Container = _.createSubclass(ComponentFacet, 'Container');
  * - [binder](#Container$binder) - create components from DOM inside the current one
  */
 _.extendProto(Container, {
+	start: Container$start,
 	getState: Container$getState,
 	setState: Container$setState,
-
 	binder: Container$binder
 });
 
@@ -1727,6 +1728,17 @@ module.exports = Container;
  */
 function Container$binder() {
 	return miloBinder(this.owner.el, this.scope, false);
+}
+
+
+/**
+ * Component instance method.
+ * Setup empty scope object on start
+ */
+function Container$start() {
+	ComponentFacet.prototype.start.apply(this, arguments);
+	this.scope = new Scope(this.owner.el);
+	//hostObject?
 }
 
 
@@ -1764,7 +1776,7 @@ function Container$setState(state) {
 }
 
 
-},{"../../binder":10,"../../util/logger":77,"../c_facet":13,"./cf_registry":26,"mol-proto":84}],15:[function(require,module,exports){
+},{"../../binder":10,"../../util/logger":77,"../c_facet":13,"../scope":36,"./cf_registry":26,"mol-proto":84}],15:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../../abstract/mixin')
@@ -3895,6 +3907,7 @@ _.extendProto(Scope, {
 	_add: _add,
 	_copy: _copy,
 	_each: _each,
+	_move: _move,
 	_addNew: _addNew,
 	_merge: _merge,
 	_length: _length,
@@ -3930,6 +3943,16 @@ function _copy(aScope) {
 	check(aScope, Scope);
 
 	aScope._each(_add, this);
+}
+
+/**
+ * Instance method.
+ * Moves a component from this scope to another scope.
+ */
+function _move(comp, otherScope) {
+	otherScope._add(comp);
+	this._remove(comp.name);
+	comp.scope = otherScope;
 }
 
 
@@ -8426,7 +8449,7 @@ var arrayMethods = module.exports = {
 
 
 /**
- * Functions that Array [implements natively](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/prototype#Methods) are also included for convenience - they can be used with array-like objects and for chaining (native functions are always called).
+ * Functions that Array [implements natively](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/prototype#Methods) are also included for convenience - they can be used with array-like objects and for chaining (native functions are always called)
  * These methods can be [chained](proto.js.html#Proto) too.
  */
 var nativeArrayMethodsNames = [ 'join', 'pop', 'push', 'concat',
