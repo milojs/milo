@@ -2644,6 +2644,7 @@ var ComponentFacet = require('../c_facet')
 	, facetsRegistry = require('./cf_registry')
 	, Messenger = require('../../messenger')
 	, FrameMessageSource = require('../msg_src/frame')
+	, domEventsConstructors = require('../msg_src/de_constrs')
 	, _ = require('mol-proto');
 
 
@@ -2686,7 +2687,8 @@ var ComponentFacet = require('../c_facet')
 _.extendProto(Frame, {
 	init: Frame$init,
 	start: Frame$start,
-	getWindow: Frame$getWindow
+	getWindow: Frame$getWindow,
+	isReady: Frame$isReady
 	// _reattach: _reattachEventsOnElementChange
 });
 
@@ -2718,24 +2720,40 @@ function Frame$start() {
 	ComponentFacet.prototype.start.apply(this, arguments);
 	var self = this;
 	var doc = this.getWindow().document;
-	if (doc.readyState == 'loading') 
+	if (doc.readyState == 'loading') {
 		doc.addEventListener('readystatechange', function(event) {
-			self.postMessage('domready');
+			self.postMessage('domready', event);
 		});
-	else
-		this.postMessage('domready');
+	} else {
+		var EventConstructor = domEventsConstructors.readystatechange;
+		var domEvent = new EventConstructor('readystatechange', { target: doc });
+		this.postMessage('domready', domEvent);
+	}
 }
 
 
 /**
  * Frame facet instance method
  * Retrieves the internal window of the frame 
+ *
+ * @param {Window}
  */
 function Frame$getWindow() {
 	return this.owner.el.contentWindow;
 }
 
-},{"../../messenger":53,"../c_facet":13,"../msg_src/frame":35,"./cf_registry":26,"mol-proto":84}],21:[function(require,module,exports){
+
+/**
+ * Frame facet instance method
+ * Returns document.readyState if frame doument state is 'interactive' or 'complete', false otherwise
+ *
+ * @return {String|Boolean}
+ */
+function Frame$isReady() {
+	var readyState = this.getWindow().document.readyState;
+	return  readyState != 'loading' ? readyState : false;
+}
+},{"../../messenger":53,"../c_facet":13,"../msg_src/de_constrs":33,"../msg_src/frame":35,"./cf_registry":26,"mol-proto":84}],21:[function(require,module,exports){
 'use strict';
 
 
@@ -6847,8 +6865,8 @@ require('./components/classes/View');
 require('./components/ui/Group');
 require('./components/ui/Select');
 require('./components/ui/Input');
-require('./components/ui/RadioGroup');
 require('./components/ui/Textarea');
+require('./components/ui/RadioGroup');
 require('./components/ui/Button');
 require('./components/ui/Hyperlink');
 require('./components/ui/Checkbox');
@@ -8384,7 +8402,7 @@ var arrayMethods = module.exports = {
 
 
 /**
- * Functions that Array [implements natively](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/prototype#Methods) are also included for convenience - they can be used with array-like objects and for chaining (native functions are always called)
+ * Functions that Array [implements natively](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/prototype#Methods) are also included for convenience - they can be used with array-like objects and for chaining (native functions are always called).
  * These methods can be [chained](proto.js.html#Proto) too.
  */
 var nativeArrayMethodsNames = [ 'join', 'pop', 'push', 'concat',
