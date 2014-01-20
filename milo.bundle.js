@@ -2776,6 +2776,7 @@ function Frame$isReady() {
 	var readyState = this.getWindow().document.readyState;
 	return  readyState != 'loading' ? readyState : false;
 }
+
 },{"../../messenger":53,"../c_facet":13,"../msg_src/de_constrs":33,"../msg_src/frame":35,"./cf_registry":26,"mol-proto":84}],21:[function(require,module,exports){
 'use strict';
 
@@ -5846,6 +5847,13 @@ function Connector(ds1, mode, ds2, options) {
 			pathTranslation2: pathTranslation
 		});
 
+	var dataTranslation = options && options.dataTranslation;
+	if (dataTranslation)
+		_.extend(this, {
+			dataTranslation1: dataTranslation['<-'],
+			dataTranslation2: dataTranslation['->']
+		});
+
 	this.turnOn();
 
 	function modeParseError() {
@@ -5888,17 +5896,22 @@ function turnOn() {
 
 	var self = this;
 	if (this.depth1)
-		this._link1 = linkDataSource('_link2', this.ds1, this.ds2, subscriptionPath, this.pathTranslation1);
+		this._link1 = linkDataSource('_link2', this.ds1, this.ds2, subscriptionPath, this.pathTranslation1, this.dataTranslation1);
 	if (this.depth2)
-		this._link2 = linkDataSource('_link1', this.ds2, this.ds1, subscriptionPath, this.pathTranslation2);
+		this._link2 = linkDataSource('_link1', this.ds2, this.ds1, subscriptionPath, this.pathTranslation2, this.dataTranslation2);
 
 	this.isOn = true;
 
 
-	function linkDataSource(reverseLink, linkToDS, linkedDS, subscriptionPath, pathTranslation) {
+	function linkDataSource(reverseLink, linkToDS, linkedDS, subscriptionPath, pathTranslation, dataTranslation) {
 		var onData = function onData(message, data) {
-			// translated
+			// store untranslated path
+			var sourcePath = data.path
+				, cloned = false;
+
+			// translate path
 			if (pathTranslation) {
+				cloned = true;
 				data = _.clone(data);
 				var translatedPath = pathTranslation[data.path];
 				if (translatedPath)
@@ -5906,6 +5919,17 @@ function turnOn() {
 				else {
 					logger.warn('Connector: data message received that should not have been subscribed to')
 					return; // no translation -> no dispatch
+				}
+			}
+
+			// translate data
+			if (dataTranslation) {
+				var translate = dataTranslation[sourcePath];
+				if (translate && typeof translate == 'function') {
+					if (! cloned)
+						data = _.clone(data);
+					data.oldValue = translate(data.oldValue);
+					data.newValue = translate(data.newValue);
 				}
 			}
 
@@ -8276,6 +8300,8 @@ var	prototypeMethods = require('./proto_prototype');
  * - [everyKey](proto_object.js.html#everyKey)
  * - [findValue](proto_object.js.html#findValue)
  * - [findKey](proto_object.js.html#findKey)
+ * - [pickKeys](proto_object.js.html#pickKeys)
+ * - [omitKeys](proto_object.js.html#omitKeys)
  */
 var	objectMethods = require('./proto_object');
 
@@ -8714,6 +8740,8 @@ var utils = require('./utils');
  * - [everyKey](#everyKey)
  * - [findValue](#findValue)
  * - [findKey](#findKey)
+ * - [pickKeys](#pickKeys)
+ * - [omitKeys](#omitKeys)
  *
  * All these methods can be [chained](proto.js.html#Proto)
  */
@@ -8732,7 +8760,8 @@ var objectMethods = module.exports = {
 	filterKeys: filterKeys,
 	someKey: someKey,
 	everyKey: everyKey,
-
+	pickKeys: pickKeys,
+	omitKeys: omitKeys
 };
 
 
@@ -9168,6 +9197,43 @@ function everyKey(callback, thisArg, onlyEnumerable) {
 		if (! callback.call(this, value, key, self))
 			throw _didNotPass;
 	}
+}
+
+
+var ArrayProto = Array.prototype
+	, concat = ArrayProto.concat;
+/**
+ * Returns object of the same class with only specified keys, that are passed as string parameters or array(s) of keys.
+ *
+ * @param {Object} self an object to pick keys from
+ * @param {List[String|Array]} arguments list of keys (or array(s) of keys)
+ * @return {Object} 
+ */
+function pickKeys() { // , ... keys
+	var keys = concat.apply(ArrayProto, arguments)
+		, obj = Object.create(this.constructor.prototype);
+	keys.forEach(function(key){
+		if (this.hasOwnProperty(key))
+			obj[key] = this[key];
+	}, this);
+	return obj;
+}
+
+
+/**
+ * Returns object of the same class without specified keys, that are passed as string parameters or array(s) of keys.
+ *
+ * @param {Object} self an object to omit keys in
+ * @param {List[String|Array]} arguments list of keys (or array(s) of keys)
+ * @return {Object} 
+ */
+function omitKeys() { // , ... keys
+	var keys = concat.apply(ArrayProto, arguments)
+		, obj = clone.call(this);
+	keys.forEach(function(key){
+		delete obj[key];
+	}, this);
+	return obj;
 }
 
 },{"./utils":90}],88:[function(require,module,exports){
