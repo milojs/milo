@@ -8232,8 +8232,6 @@ var	prototypeMethods = require('./proto_prototype');
  * - [everyKey](proto_object.js.html#everyKey)
  * - [findValue](proto_object.js.html#findValue)
  * - [findKey](proto_object.js.html#findKey)
- * - [pickKeys](proto_object.js.html#pickKeys)
- * - [omitKeys](proto_object.js.html#omitKeys)
  */
 var	objectMethods = require('./proto_object');
 
@@ -8672,8 +8670,6 @@ var utils = require('./utils');
  * - [everyKey](#everyKey)
  * - [findValue](#findValue)
  * - [findKey](#findKey)
- * - [pickKeys](#pickKeys)
- * - [omitKeys](#omitKeys)
  *
  * All these methods can be [chained](proto.js.html#Proto)
  */
@@ -8692,8 +8688,7 @@ var objectMethods = module.exports = {
 	filterKeys: filterKeys,
 	someKey: someKey,
 	everyKey: everyKey,
-	pickKeys: pickKeys,
-	omitKeys: omitKeys
+
 };
 
 
@@ -9129,43 +9124,6 @@ function everyKey(callback, thisArg, onlyEnumerable) {
 		if (! callback.call(this, value, key, self))
 			throw _didNotPass;
 	}
-}
-
-
-var ArrayProto = Array.prototype
-	, concat = ArrayProto.concat;
-/**
- * Returns object of the same class with only specified keys, that are passed as string parameters or array(s) of keys.
- *
- * @param {Object} self an object to pick keys from
- * @param {List[String|Array]} arguments list of keys (or array(s) of keys)
- * @return {Object} 
- */
-function pickKeys() { // , ... keys
-	var keys = concat.apply(ArrayProto, arguments)
-		, obj = Object.create(this.constructor.prototype);
-	keys.forEach(function(key){
-		if (this.hasOwnProperty(key))
-			obj[key] = this[key];
-	}, this);
-	return obj;
-}
-
-
-/**
- * Returns object of the same class without specified keys, that are passed as string parameters or array(s) of keys.
- *
- * @param {Object} self an object to omit keys in
- * @param {List[String|Array]} arguments list of keys (or array(s) of keys)
- * @return {Object} 
- */
-function omitKeys() { // , ... keys
-	var keys = concat.apply(ArrayProto, arguments)
-		, obj = clone.call(this);
-	keys.forEach(function(key){
-		delete obj[key];
-	}, this);
-	return obj;
 }
 
 },{"./utils":90}],88:[function(require,module,exports){
