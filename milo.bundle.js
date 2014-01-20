@@ -988,6 +988,7 @@ _.extend(Component, {
 	getState: Component$$getState,
 	getTransferState: Component$$getTransferState,
 	createFromState: Component$$createFromState,
+	createFromDataTransfer: createFromDataTransfer
 });
 delete Component.createFacetedClass;
 
@@ -1014,6 +1015,8 @@ _.extendProto(Component, {
 	_getScopeParent: _getScopeParent
 });
 
+var COMPONENT_DATA_TYPE_PREFIX = 'x-application/milo-component';
+var COMPONENT_DATA_TYPE_REGEX = /x-application\/milo-component\/([a-z_$][0-9a-z_$]*)(?:\/())/i;
 
 /**
  * Component class method
@@ -1267,6 +1270,26 @@ function _createComponentWrapElement(state, newUniqueName) {
 	return wrapEl;
 }
 
+/**
+ * Creates a component from a DataTransfer object (if possible)
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer
+ * @param {DataTransfer} dataTransfer Data transfer
+ */
+function createFromDataTransfer(dataTransfer) {
+	var dataType = _.find(dataTransfer.types, function (type) {
+		return COMPONENT_DATA_TYPE_REGEX.test(type);
+	});
+
+	if (!dataType) return;
+
+	var state = milo.util.jsonParse(dataTransfer.getData(dataType));
+
+	if (!state) return;
+
+	return Component.createFromState(state, undefined, true);
+}
+
 
 /**
  * Component instance method.
@@ -1297,11 +1320,11 @@ function init(scope, element, name, componentInfo) {
 	}
 
 	_.defineProperties(this, {
-		name: name,
 		componentInfo: componentInfo,
 		extraFacets: []
 	}, _.ENUM);
 
+	this.name = name;
 	this.scope = scope;
 
 	// create component messenger
@@ -3870,17 +3893,17 @@ var allowedNamePattern = /^[A-Za-z][A-Za-z0-9\_\$]*$/;
 
 // adds object to scope throwing if name is not unique
 function _add(object, name) {
-	name = name || object.name;
+	if (typeof name === 'string') {
+		object.name = name;
+	}
 	
-	if (this[name])
+	if (this[object.name])
 		throw new ScopeError('duplicate object name: ' + name);
 
-	checkName(name);
+	checkName(object.name);
 
-	this[name] = object;
+	this[object.name] = object;
 }
-
-
 
 
 // copies all objects from one scope to another,
@@ -3906,6 +3929,9 @@ function _each(callback, thisArg) {
 	_.eachKey(this, callback, thisArg || this, true); // enumerates enumerable properties only
 }
 
+function _filter(callback, thisArg) {
+	return _.filter(this, callback, thisArg || this, true);
+}
 
 function checkName(name) {
 	if (! allowedNamePattern.test(name))
@@ -8382,7 +8408,7 @@ var arrayMethods = module.exports = {
 
 
 /**
- * Functions that Array [implements natively](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/prototype#Methods) are also included for convenience - they can be used with array-like objects and for chaining (native functions are always called)
+ * Functions that Array [implements natively](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/prototype#Methods) are also included for convenience - they can be used with array-like objects and for chaining (native functions are always called).
  * These methods can be [chained](proto.js.html#Proto) too.
  */
 var nativeArrayMethodsNames = [ 'join', 'pop', 'push', 'concat',
