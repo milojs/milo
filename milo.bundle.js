@@ -2305,11 +2305,19 @@ function copy(isDeep) {
 
 	var newEl = document.createElement(tagName);
 
-	var attributes = this.config.attributes;
-	if (attributes)
-		_.eachKey(attributes, function(attrValue, attrName) {
+	var configAttributes = this.config.attributes;
+	if (configAttributes)
+		_.eachKey(configAttributes, function(attrValue, attrName) {
 			newEl.setAttribute(attrName, attrValue);
 		});
+
+	var attributes = this.owner.el.attributes;
+	if (attributes)
+		for (var i = 0; i<attributes.length; i++) {
+			var attr = attributes[i];
+			if (attr.name == 'id') continue;
+			newEl.setAttribute(attr.name, attr.value);
+		}
 
 	return newEl;
 }
@@ -2609,6 +2617,8 @@ function Drop$start() {
 	this.on('dragenter dragover', Drop_onDragging);
 
 	function Drop_onDragging(eventType, event) {
+		// TODO: manage not-allowed drops, maybe with config.
+		// Just need to set dropEffect to 'none'
 		var dt = event.dataTransfer
 			, dataTypes = dt.types;
 		if (dataTypes && (dataTypes.indexOf('text/html') >= 0
