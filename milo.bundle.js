@@ -2777,7 +2777,6 @@ function Frame$start() {
 	}
 }
 
-
 /**
  * Frame facet instance method
  * Retrieves the internal window of the frame 
@@ -7138,6 +7137,7 @@ var typeofChecks = [
   [String, "string"],
   [Number, "number"],
   [Boolean, "boolean"],
+  [Function, "function"],
   // While we don't allow undefined in JSON, this is good for optional
   // arguments with OneOf.
   [undefined, "undefined"]
@@ -9290,7 +9290,11 @@ function omitKeys() { // , ... keys
 	return obj;
 }
 
+<<<<<<< HEAD
 },{"./utils":90}],88:[function(require,module,exports){
+=======
+},{"./utils":91}],89:[function(require,module,exports){
+>>>>>>> tom, josiah: support type checking by alias for Function (across windows/frames)
 'use strict';
 
 /**
