@@ -1474,7 +1474,8 @@ function Component$_setState(state) {
  */
 function getScopeParent(withFacet) {
 	check(withFacet, Match.Optional(String));
-	withFacet = _.firstLowerCase(withFacet);
+	if (withFacet)
+		withFacet = _.firstLowerCase(withFacet);
 	return this._getScopeParent(withFacet);	
 }
 
@@ -3101,7 +3102,7 @@ module.exports = ModelFacet;
 
 
 function ModelFacet$init() {
-	this.m = new Model(undefined, this);
+	this.m = new Model(this.config.data, this);
 	ComponentFacet.prototype.init.apply(this, arguments);
 }
 
@@ -6630,12 +6631,14 @@ var check = require('../util/check')
 	, Match = check.Match
 	, _ = require('mol-proto');
 
-var pathUtils = module.exports = {
+var pathUtils = {
 	parseAccessPath: parseAccessPath,
 	createRegexPath: createRegexPath,
 	getPathNodeKey: getPathNodeKey,
 	wrapMessengerMethods: wrapMessengerMethods
 };
+
+module.exports = pathUtils;
 
 
 var propertyPathSyntax = '\\.[A-Za-z][A-Za-z0-9_]*'
