@@ -4103,10 +4103,11 @@ var Component = require('../c_class')
 
 
 var MLDatalist = Component.createComponentClass('MLDatalist', {
-events: undefined,
-dom: {
-cls: 'ml-ui-datalist'
-}
+	events: undefined,
+	data: undefined,
+	dom: {
+		cls: 'ml-ui-datalist'
+	}
 });
 
 componentsRegistry.add(MLDatalist);
@@ -4121,6 +4122,7 @@ var Component = require('../c_class')
 
 var MLDate = Component.createComponentClass('MLDate', {
 	events: undefined,
+	data: undefined,
 	dom: {
 		cls: 'ml-ui-date'
 	}
@@ -4159,6 +4161,7 @@ var Component = require('../c_class')
 
 var MLHyperlink = Component.createComponentClass('MLHyperlink', {
 	events: undefined,
+	data: undefined,
 	dom: {
 		cls: 'ml-ui-hyperlink'
 	}
@@ -4452,6 +4455,7 @@ var Component = require('../c_class')
 
 var MLTime = Component.createComponentClass('MLTime', {
 	events: undefined,
+	data: undefined,
 	dom: {
 		cls: 'ml-ui-time'
 	}
