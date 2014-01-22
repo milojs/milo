@@ -7436,15 +7436,26 @@ function componentName() {
 
 'use strict';
 
-var count = 0;
+var timestamp = Date.now()
+	, count = ''
+	, componentID = '' + timestamp;
 
 function componentCount() {
-	count++;
-	return count;
+	var newTimestamp = Date.now();
+	componentID = '' + newTimestamp;
+	if (timestamp == newTimestamp) {
+		count = count === '' ? 0 : count + 1;
+		componentID += '_' + count;
+	} else {
+		timestamp = newTimestamp;
+		count = '';
+	}
+
+	return componentID;
 }
 
 componentCount.get = function() {
-	return count;
+	return componentID;
 }
 
 module.exports = componentCount;
@@ -7847,17 +7858,20 @@ var okStatuses = ['200', '304'];
 function request(url, opts, callback) {
 	var req = new XMLHttpRequest();
 	req.open(opts.method, url, true); // what true means?
+	req.setRequestHeader('Content-Type', opts.contentType || 'application/json;charset=UTF-8');
+
 	req.onreadystatechange = function () {
 		if (req.readyState == 4 && req.statusText.toUpperCase() == 'OK' )
 			callback(null, req.responseText, req);
 		// else
 		// 	callback(req.status, req.responseText, req);
 	};
-	req.send(null);
+	req.send(JSON.stringify(opts.data));
 }
 
 _.extend(request, {
 	get: request$get,
+	post: request$post,
 	json: request$json
 });
 
@@ -7866,6 +7880,9 @@ function request$get(url, callback) {
 	request(url, { method: 'GET' }, callback);
 }
 
+function request$post(url, data, callback) {
+	request(url, { method: 'POST', data: data }, callback);
+}
 
 function request$json(url, callback) {
 	request(url, { method: 'GET' }, function(err, text) {
