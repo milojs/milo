@@ -2573,6 +2573,7 @@ function setDragData(event) {
 		var dt = event.dataTransfer;
 		dt.setData(this.__dataType, this.__dragData);
 		// set html in case it is inserted elsewhere
+		dt.setData('x-application/milo-component', null)
 		dt.setData('text/html', this.owner.el.outerHTML);
 	} else
 		event.preventDefault();
@@ -2623,7 +2624,6 @@ function Drop$start() {
 
 	function Drop_onDragging(eventType, event) {
 		// TODO: manage not-allowed drops, maybe with config.
-		// Just need to set dropEffect to 'none'
 		var dt = event.dataTransfer
 			, dataTypes = dt.types;
 		if (dataTypes && (dataTypes.indexOf('text/html') >= 0
