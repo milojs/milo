@@ -4501,7 +4501,8 @@ config({
 	componentPrefix: 'milo_',
 	template: {
 		compile: doT.compile
-	}
+	},
+	check: true
 });
 
 },{"dot":83,"mol-proto":84}],49:[function(require,module,exports){
@@ -7098,9 +7099,13 @@ require('./components/c_facets/Transfer');
 
 // Things we explicitly do NOT support:
 //    - heterogenous arrays
-var _ = require('mol-proto');
+var _ = require('mol-proto')
+    , config = require('../config');
 
 var check = function (value, pattern) {
+  if (config.check === false)
+    return;
+
   // Record that check got called, if somebody cared.
   try {
     checkSubtree(value, pattern);
@@ -7411,7 +7416,7 @@ function _prependPath(key, base) {
 };
 
 
-},{"mol-proto":84}],71:[function(require,module,exports){
+},{"../config":48,"mol-proto":84}],71:[function(require,module,exports){
 'use strict';
 
 var count = require('./count')
