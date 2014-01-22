@@ -7432,15 +7432,26 @@ function componentName() {
 
 'use strict';
 
-var count = 0;
+var timestamp = Date.now()
+	, count = ''
+	, componentID = '' + timestamp;
 
 function componentCount() {
-	count++;
-	return count;
+	var newTimestamp = Date.now();
+	componentID = '' + newTimestamp;
+	if (timestamp == newTimestamp) {
+		count = count === '' ? 0 : count + 1;
+		componentID += '_' + count;
+	} else {
+		timestamp = newTimestamp;
+		count = '';
+	}
+
+	return componentID;
 }
 
 componentCount.get = function() {
-	return count;
+	return componentID;
 }
 
 module.exports = componentCount;
