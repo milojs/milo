@@ -977,4 +977,13 @@ describe('Model class', function() {
 
 		assert.deepEqual(m._data, { test: 1 });
 	});
+
+
+	it('should reset model when the whole value is set', function() {
+		var m = new Model;
+		m.set({ test: 1 });
+		assert.deepEqual(m._data, { test: 1 });
+		m.set({ test: 2 });
+		assert.deepEqual(m._data, { test: 2 });
+	});
 });

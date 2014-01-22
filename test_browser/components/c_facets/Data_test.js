@@ -79,11 +79,11 @@ describe('Data facet', function() {
 		scope.myItem.data.set({ title: 'Title 1', desc: 'Description 1', info: { name: 'Jason', surname: 'Green' } });
 
 			assert.deepEqual(posted, {
-				'.title': { path: '.title', type: 'changed', newValue: 'Title 1', oldValue: undefined },
-				'.desc': { path: '.desc', type: 'changed', newValue: 'Description 1', oldValue: undefined },
-				'.info': { path: '.info', type: 'changed', newValue: { name: 'Jason', surname: 'Green' }, oldValue: undefined },
-				'': { path: '', type: 'changed', newValue: { title: 'Title 1', desc: 'Description 1', info: { name: 'Jason', surname: 'Green' } }, oldValue: undefined}
-			}, 'should post messages for changes in data of component and in data of scope children');
+				'.title': { path: '.title', type: 'changed', newValue: 'Title 1', oldValue: '' },
+				'.desc': { path: '.desc', type: 'changed', newValue: 'Description 1', oldValue: '' },
+				'.info': { path: '.info', type: 'changed', newValue: { name: 'Jason', surname: 'Green' }, oldValue: {} },
+				'': { path: '', type: 'changed', newValue: { title: 'Title 1', desc: 'Description 1', info: { name: 'Jason', surname: 'Green' } }, oldValue: {} }
+			});
 
 		scope.myItem.data.set({ title: '', desc: '2', info: { name: '', surname: '' } });
 
