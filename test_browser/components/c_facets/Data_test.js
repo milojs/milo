@@ -59,11 +59,13 @@ describe('Data facet', function() {
 
 		delete posted['childdata']; // childdata used to dispatch messages up the scope tree
 
+			console.log(posted);
+
 			assert.deepEqual(posted, {
-				'.title': { path: '.title', type: 'changed', newValue: 'Title 1', oldValue: undefined },
-				'.desc': { path: '.desc', type: 'changed', newValue: 'Description 1', oldValue: undefined },
-				'': { path: '', type: 'changed', newValue: { title: 'Title 1', desc: 'Description 1'}, oldValue: undefined}
-			}, 'should post messages for changes in data of component and in data of scope children');
+				'.title': { path: '.title', type: 'changed', newValue: 'Title 1', oldValue: '' },
+				'.desc': { path: '.desc', type: 'changed', newValue: 'Description 1', oldValue: '' },
+				'': { path: '', type: 'changed', newValue: { title: 'Title 1', desc: 'Description 1'}, oldValue: {} }
+			});
 	});
 
 
