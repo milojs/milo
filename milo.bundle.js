@@ -4190,6 +4190,14 @@ componentsRegistry.add(MLInput);
 
 module.exports = MLInput;
 
+_.extendProto(MLInput, {
+	disable: MLInput$disable
+});
+
+
+function MLInput$disable(disable) {
+	this.el.disabled = disable;
+}
 },{"../c_class":12,"../c_registry":28}],43:[function(require,module,exports){
 'use strict';
 
