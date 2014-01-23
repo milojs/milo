@@ -17,7 +17,7 @@ module.exports = Mixin;
  * ```
  *
  * Mixin pattern is also used, but Mixin in milo is implemented as a separate object that is stored on the property of the host object and can create proxy methods on the host object if required.
- * Classes [Messenger](../messenger/index.js.html) and [MessageSource](../messenger/message_source.js.html) are subclasses of Mixin abstract class. `this` in proxy methods refers to Mixin instance, the reference to the host object is `this._hostObject`.
+ * Classes [Messenger](../messenger/index.js.html) and [MessageSource](../messenger/m_source.js.html) are subclasses of Mixin abstract class. `this` in proxy methods refers to Mixin instance, the reference to the host object is `this._hostObject`.
  *
  * @param {Object} hostObject Optional object where a Mixin instance will be stored on. It is used to proxy methods and also to find the reference when it is needed for host object implementation.
  * @param {Object} proxyMethods Optional map of proxy method names as keys and Mixin methods names as values, so proxied methods can be renamed to avoid name-space conflicts if two different Mixin instances with the same method names are put on the object
@@ -1022,7 +1022,7 @@ var COMPONENT_DATA_TYPE_REGEX = /x-application\/milo-component\/([a-z_$][0-9a-z_
 /**
  * Component class method
  * Creates a subclass of component from the map of configured facets.
- * This method wraps and replaces [`createFacetedClass`](./abstract/faceted_object.js.html#createFacetedClass) class method of FacetedObject.
+ * This method wraps and replaces [`createFacetedClass`](../abstract/faceted_object.js.html#createFacetedClass) class method of FacetedObject.
  * Unlike createFacetedClass, this method take facet classes from registry by their name, so only map of facets configuration needs to be passed. All facets classes should be subclasses of [ComponentFacet](./c_facet.js.html)
  *
  * @param {String} name class name
@@ -1804,10 +1804,10 @@ var Data = _.createSubclass(ComponentFacet, 'Data');
 /**
  * Data facet instance methods
  *
- * - [start](Data$start) - start Data facet
- * - [get](Data$get) - get DOM data from DOM tree
- * - [set](Data$set) - set DOM data to DOM tree
- * - [path](Data$path) - get reference to Data facet by path
+ * - [start](#Data$start) - start Data facet
+ * - [get](#Data$get) - get DOM data from DOM tree
+ * - [set](#Data$set) - set DOM data to DOM tree
+ * - [path](#Data$path) - get reference to Data facet by path
  */
 _.extendProto(Data, {
 	start: Data$start,
@@ -4884,7 +4884,7 @@ module.exports = Messenger;
 /**
  * Messenger instance method
  * Initializes Messenger. Method is called by Mixin class constructor.
- * See [on](#Messenger$on) method, [Messenger](#Messenger) class above and [MessageSource](./message_source.js.html) class.
+ * See [on](#Messenger$on) method, [Messenger](#Messenger) class above and [MessageSource](./m_source.js.html) class.
  *
  * @param {Object} hostObject Optional object that stores the messenger on one of its properties. It is used to proxy methods of messenger and also as a context for subscribers when they are called by the Messenger. See `on` method.
  * @param {Object} proxyMethods Optional map of method names; key - proxy method name, value - messenger's method name.
@@ -4922,7 +4922,7 @@ function init(hostObject, proxyMethods, messageSource) {
  * // it will not be possible to unsubscribe anonymous subscriber separately,
  * // but myComp.data.off(/.+/) will unsubscribe it
  * ```
- * If messenger has [MessageSource](./message_source.js.html) attached to it, MessageSource will be notified when the first subscriber for a given message is added, so it can subscribe to the source.
+ * If messenger has [MessageSource](./m_source.js.html) attached to it, MessageSource will be notified when the first subscriber for a given message is added, so it can subscribe to the source.
  * [Components](../components/c_class.js.html) and [facets](../components/c_facet.js.html) change this method name to `on` when they proxy it.
  * See [postMessage](#postMessage).
  * 
@@ -4965,7 +4965,7 @@ function Messenger$on(messages, subscriber) {
  * "Private" Messenger instance method
  * It is called by [on](#Messenger$on) to register subscriber for one message type.
  * Returns `true` if this subscriber is not yet registered for this type of message.
- * If messenger has [MessageSource](./message_source.js.html) attached to it, MessageSource will be notified when the first subscriber for a given message is added.
+ * If messenger has [MessageSource](./m_source.js.html) attached to it, MessageSource will be notified when the first subscriber for a given message is added.
  *
  * @private
  * @param {Object} subscribersHash The map of subscribers determined by [on](#Messenger$on) based on Message type, can be `this._patternMessageSubscribers` or `this._messageSubscribers`
@@ -5049,7 +5049,7 @@ function onMessages(messageSubscribers) {
  * // unsubscribes onMouseUpDown from two DOM events.
  * myComp.events.off('mousedown mouseup', onMouseUpDown);
  * ```
- * If messenger has [MessageSource](./message_source.js.html) attached to it, MessageSource will be notified when the last subscriber for a given message is removed and there is no more subscribers for this message.
+ * If messenger has [MessageSource](./m_source.js.html) attached to it, MessageSource will be notified when the last subscriber for a given message is removed and there is no more subscribers for this message.
  *
  * @param {String|Array[String]|RegExp} messages Message types that a subscriber should be removed for.
  *  If string is passed, it can be a sigle message or multiple message types separated by whitespace with optional commas.
@@ -5088,7 +5088,7 @@ function Messenger$off(messages, subscriber) {
  * "Private" Messenger instance method
  * It is called by [off](#Messenger$off) to remove subscriber for one message type.
  * Returns `true` if this subscriber was registered for this type of message.
- * If messenger has [MessageSource](./message_source.js.html) attached to it, MessageSource will be notified when the last subscriber for a given message is removed and there is no more subscribers for this message.
+ * If messenger has [MessageSource](./m_source.js.html) attached to it, MessageSource will be notified when the last subscriber for a given message is removed and there is no more subscribers for this message.
  *
  * @private
  * @param {Object} subscribersHash The map of subscribers determined by [off](#Messenger$off) based on message type, can be `this._patternMessageSubscribers` or `this._messageSubscribers`
@@ -5119,7 +5119,7 @@ function _removeSubscriber(subscribersHash, message, subscriber) {
 /**
  * "Private" Messenger instance method
  * It is called by [_removeSubscriber](#_removeSubscriber) to remove all subscribers for one message type.
- * If messenger has [MessageSource](./message_source.js.html) attached to it, MessageSource will be notified that all message subscribers were removed so it can unsubscribe from the source.
+ * If messenger has [MessageSource](./m_source.js.html) attached to it, MessageSource will be notified that all message subscribers were removed so it can unsubscribe from the source.
  *
  * @private
  * @param {Object} subscribersHash The map of subscribers determined by [off](#Messenger$off) based on message type, can be `this._patternMessageSubscribers` or `this._messageSubscribers`
@@ -5289,7 +5289,7 @@ function _chooseSubscribersHash(message) {
 
 /**
  * Messenger instance method
- * Sets [MessageSource](./message_source.js.html) for the messenger also setting the reference to the messenger in the MessageSource.
+ * Sets [MessageSource](./m_source.js.html) for the messenger also setting the reference to the messenger in the MessageSource.
  * MessageSource can be passed to message constructor; this method allows to set it at a later time. For example, the subclasses of [ComponentFacet](../components/c_facet.js.html) use this method to set different MessageSource'es in the messenger that is created by ComponentFacet.
  * Currently the method is implemented in such way that it can be called only once - MessageSource cannot be changed after this method is called.
  *
@@ -5315,7 +5315,7 @@ module.exports = MessengerAPI;
  * `milo.classes.MessengerAPI`
  * Base class, subclasses of which can supplement the functionality of [MessageSource](./m_source.js.html) by implementing three methods:
  *
- * - `translateToSourceMessage` to translate source messages (recieved from external source via `MessageSOurce`) to internal messages (that are dispatched on Messenger), allowing to make internal messages more detailed than source messages. For example, [Editable facet](../components/c_facets/Editable.js.html) uses [EditableMsgAPI](../components/msg_api/editable.js.html) to define several internal messages related to the change of state in contenteditable DOM element.
+ * - `translateToSourceMessage` to translate source messages (recieved from external source via `MessageSOurce`) to internal messages (that are dispatched on Messenger), allowing to make internal messages more detailed than source messages. For example, [Data facet](../components/c_facets/Data.js.html) uses [DataMsgAPI](../components/msg_api/data.js.html) to define several internal messages related to the change of state in contenteditable DOM element.
  * - `createInternalData` to modify message data received from source to some more meaningful or more detailed message data that will be dispatched on Messenger. For example, [Data facet](../components/c_facets/Data.js.html) uses [DataMsgAPI](../components/msg_api/data.js.html) (subclass of MessengerAPI) to translate DOM messages to data change messages.
  * - `filterSourceMessage` to enable/disable message dispatch based on some conditions in data.
  *
@@ -5624,7 +5624,7 @@ _.extendProto(MessageSource, {
  * MessageSource instance method.
  * Called by Mixin constructor.
  * MessageSource constructor should be passed the same parameters as this method signature.
- * If an instance of [MessengerAPI](./m_api.js.html) is passed as the third parameter, it extends MessageSource functionality to allow it to define new messages, to filter messages based on their data and to change message data. See [MessengerAPI](./m_api.js/html).
+ * If an instance of [MessengerAPI](./m_api.js.html) is passed as the third parameter, it extends MessageSource functionality to allow it to define new messages, to filter messages based on their data and to change message data. See [MessengerAPI](./m_api.js.html).
  *
  * @param {Object} hostObject Optional object that stores the MessageSource on one of its properties. It is used to proxy methods of MessageSource.
  * @param {Object[String]} proxyMethods Optional map of method names; key - proxy method name, value - MessageSource's method name.
@@ -5667,7 +5667,7 @@ function _prepareMessengerAPI(messengerAPI) {
  * MessageSource instance method.
  * Subscribes to external source using `addSourceSubscriber` method that should be implemented in subclass.
  * This method is called by [Messenger](./index.js.html) when the first subscriber to the `message` is added.
- * Delegates to supplied or default [MessengerAPI](./m_api.js) for translation of `message` to `sourceMessage`. `MessageAPI.prototype.addInternalMessage` will return undefined if this `sourceMessage` was already subscribed to to prevent duplicate subscription.
+ * Delegates to supplied or default [MessengerAPI](./m_api.js.html) for translation of `message` to `sourceMessage`. `MessageAPI.prototype.addInternalMessage` will return undefined if this `sourceMessage` was already subscribed to to prevent duplicate subscription.
  *
  * @param {String} message internal Messenger message that has to be subscribed to at the external source of messages.
  */
@@ -5682,7 +5682,7 @@ function onSubscriberAdded(message) {
  * MessageSource instance method.
  * Unsubscribes from external source using `removeSourceSubscriber` method that should be implemented in subclass.
  * This method is called by [Messenger](./index.js.html) when the last subscriber to the `message` is removed.
- * Delegates to supplied or default [MessengerAPI](./m_api.js) for translation of `message` to `sourceMessage`. `MessageAPI.prototype.removeInternalMessage` will return undefined if this `sourceMessage` was not yet subscribed to to prevent unsubscription without previous subscription.
+ * Delegates to supplied or default [MessengerAPI](./m_api.js.html) for translation of `message` to `sourceMessage`. `MessageAPI.prototype.removeInternalMessage` will return undefined if this `sourceMessage` was not yet subscribed to to prevent unsubscription without previous subscription.
  *
  * @param {String} message internal Messenger message that has to be unsubscribed from at the external source of messages.
  */
@@ -5696,8 +5696,8 @@ function onSubscriberRemoved(message) {
 /**
  * MessageSource instance method.
  * Dispatches sourceMessage to Messenger.
- * Mechanism that calls this method when the source message is received should be implemented by subclass (see [DOMEventsSource](../components/msg_src/dom_events) for example).
- * Delegates to supplied or default [MessengerAPI](./m_api.js) to create internal message data (`createInternalData`) and to filter the message based on its data and/or message (`filterSourceMessage`).
+ * Mechanism that calls this method when the source message is received should be implemented by subclass (see [DOMEventsSource](../components/msg_src/dom_events.js.html) for example).
+ * Delegates to supplied or default [MessengerAPI](./m_api.js.html) to create internal message data (`createInternalData`) and to filter the message based on its data and/or message (`filterSourceMessage`).
  * Base MessengerAPI class implements these two methods in a trivial way (`createInternalData` simply returns external data, `filterSourceMessage` returns `true`), they are meant to be implemented by subclass.
  *
  * @param {String} sourceMessage source message received from external source

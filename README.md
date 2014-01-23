@@ -156,8 +156,8 @@ There are the following facets defined in __milo__:
 - [Frame](http://mailonline.github.io/milo/components/c_facets/Frame.js.html) - manages sending/receiveing messages to/from iframe.
 - [Drag](http://mailonline.github.io/milo/components/c_facets/Drag.js.html) - allows easy management of draggable DOM elements.
 - [Drop](http://mailonline.github.io/milo/components/c_facets/Drop.js.html) - helps creating drop targets.
-- [Editable](http://mailonline.github.io/milo/components/c_facets/Editable.js.html) - manages contenteditable DOM elements enabling splitting and merging of components
-- [Split](http://mailonline.github.io/milo/components/c_facets/Split.js.html) - manages the process of splitting the component at the current selection point
+- Editable - manages contenteditable DOM elements enabling splitting and merging of components (moved to app)
+- Split - manages the process of splitting the component at the current selection point (moved to app)
 - [Model](http://mailonline.github.io/milo/components/c_facets/ModelFacet.js.html) - simple wrapper for __milo__ Model (see below), helping to store data on component.
 
 There is a [Component facet template](https://github.com/MailOnline/milo/blob/master/lib/components/c_facets/facet_template.js) to simplify creation of your own facets. All facets of components should be subclasses of [ComponentFacet](http://mailonline.github.io/milo/components/c_facet.js.html).
