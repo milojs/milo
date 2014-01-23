@@ -5,17 +5,17 @@
 	<link rel="stylesheet" type="text/css" href="todo.css">
 </head>
 <body>
-	<input ml-bind="[Data]:newTodo" />
-	<button ml-bind="[Events]:addBtn">Add</button>
+	<input ml-bind="[data]:newTodo" />
+	<button ml-bind="[events]:addBtn">Add</button>
 	<h3>To-do's</h3>
-	<ul ml-bind="[List]:todos">
-	  <li ml-bind="[Item]:todo">
-	  	<input type="checkbox" ml-bind="[Data]:checked">
-	    <span ml-bind="[Data, Editable]:text"></span>
-	    <button ml-bind="[Events]:deleteBtn">X</button>
+	<ul ml-bind="[list, Container]:todos">
+	  <li ml-bind="[item]:todo">
+	  	<input type="checkbox" ml-bind="[data]:checked">
+	    <span ml-bind="[data]:text"></span>
+	    <button ml-bind="[events]:deleteBtn">X</button>
 	  </li>
 	</ul>
 
 	<h3>Model</h3>
-	<div ml-bind="[Data]:modelView"></div>
+	<div ml-bind="[data]:modelView"></div>
 </body>

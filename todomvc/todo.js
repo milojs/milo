@@ -35,15 +35,17 @@ milo(function() {
         var itemID = m.push(itemData) - 1; // push returns new length, as Array push does
         newTodo.data.set(' '); // can't set to empty string for some reason, only sets to space once
         
-        var newItem = todos.list.item(itemID); // item is already shown, we just need to get hold of it
-        var itemScope = newItem.container.scope; // get scope inside item
+        _.defer(function() {
+            var newItem = todos.list.item(itemID); // item is already shown, we just need to get hold of it
+            var itemScope = newItem.container.scope; // get scope inside item
 
-        itemScope.checked.data.on('', {
-            subscriber: checkTodo,
-            context: newItem
+            itemScope.checked.data.on('', {
+                subscriber: checkTodo,
+                context: newItem
+            });
+
+            itemScope.deleteBtn.events.on('click', _.partial(removeTodo, itemID));
         });
-
-        itemScope.deleteBtn.events.on('click', _.partial(removeTodo, itemID));
 
         // newItem.data.on('*', function(path, data) {
         //     console.log('newItem data event', path, data);
