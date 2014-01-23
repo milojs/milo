@@ -3005,6 +3005,8 @@ function addItem(index) {
 /**
  * List facet instance method
  * Adds a given number of items using template rendering rather than adding elements one by one
+ *
+ * @param {Integer} count number of items to add
  */
 function List$addItems(count) {
     check(count, Match.Integer);
@@ -3025,22 +3027,27 @@ function List$addItems(count) {
     var children = domUtils.children(wrapEl);
 
     if (count != children.length)
-        logger.error('number of item added is different from requested');
+        logger.error('number of items added is different from requested');
 
     if (children && children.length) {
         var count = this.count();
         var prevComponent = count 
                                 ? this._listItems[count - 1]
                                 : this.itemSample;
+
+        var frag = document.createDocumentFragment()
         children.forEach(function(el, index) {
             var component = Component.getComponent(el);
+            if (! component)
+                return logger.error('List: element in new items is not a component');
             this._listItems.push(component);
             this._listItemsHash[component.name] = component;
-            // Add it to the DOM
-            prevComponent.dom.insertAfter(component.el)
-            component.el.style.display = '';
-            prevComponent = component;
+            frag.appendChild(el);
+            el.style.display = '';
         }, this);
+
+        // Add it to the DOM
+        prevComponent.dom.insertAfter(frag);
     }
 }
 
