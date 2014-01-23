@@ -947,6 +947,8 @@ var FacetedObject = require('../abstract/faceted_object')
 	, BindAttribute = require('../attributes/a_bind')
 	, Scope = require('./scope');
 
+var _makeComponentConditionFunc = componentUtils._makeComponentConditionFunc;
+
 
 /**
  * `milo.Component`
@@ -1014,7 +1016,8 @@ _.extendProto(Component, {
 	_getState: Component$_getState,
 	setState: Component$setState,
 	getScopeParent: getScopeParent,
-	_getScopeParent: _getScopeParent
+	_getScopeParent: _getScopeParent,
+	getScopeParentWithClass: getScopeParentWithClass
 });
 
 var COMPONENT_DATA_TYPE_PREFIX = 'x-application/milo-component';
@@ -1483,28 +1486,44 @@ function Component$setState(state) {
  * Returns the scope parent of a component.
  * If `withFacet` parameter is not specified, an immediate parent will be returned, otherwise the closest ancestor with a specified facet.
  *
- * @param {String} withFacet optional string name of the facet, the case of the first letter is ignored, so both facet name and class name can be used
+ * @param {Function|String} conditionOrFacet optional condition that component should pass (or facet name it should contain)
  * @return {Component|undefined}
  */
-function getScopeParent(withFacet) {
-	check(withFacet, Match.Optional(String));
-	if (withFacet)
-		withFacet = _.firstLowerCase(withFacet);
-	return this._getScopeParent(withFacet);	
+function getScopeParent(conditionOrFacet) {
+	check(conditionOrFacet, Match.Optional(Match.OneOf(Function, String)));
+
+	var conditionFunc = _makeComponentConditionFunc(conditionOrFacet);
+
+	return this._getScopeParent(conditionFunc);	
 }
 
-function _getScopeParent(withFacet) {
+function _getScopeParent(conditionFunc) {
 	var parentContainer = this.scope && this.scope._hostObject
 		, parent = parentContainer && parentContainer.owner;
 
 	// Where there is no parent, this function will return undefined
 	// The parent component is checked recursively
 	if (parent) {
-		if (! withFacet || parent.hasOwnProperty(withFacet))
+		if (! conditionFunc || conditionFunc(parent) )
 			return parent;
 		else
-			return parent._getScopeParent(withFacet);
+			return parent._getScopeParent(conditionFunc);
 	}
+}
+
+
+/**
+ * Component instance method
+ * Returns scope parent with a given class, with same class if not specified
+ *
+ * @param {[Function]} ComponentClass component class that the parent should have, same class by default
+ * @return {Component}
+ */
+function getScopeParentWithClass(ComponentClass) {
+	ComponentClass = ComponentClass || this.constructor;
+	return this._getScopeParent(function(comp) {
+		return comp instanceof ComponentClass;
+	})
 }
 
 },{"../abstract/faceted_object":3,"../attributes/a_bind":6,"../binder":10,"../config":48,"../messenger":53,"../util/check":70,"../util/component_name":71,"../util/dom":73,"../util/error":74,"../util/logger":77,"./c_facets/cf_registry":26,"./c_utils":29,"./scope":36,"mol-proto":84}],13:[function(require,module,exports){
@@ -3415,7 +3434,8 @@ var config = require('../config')
 var componentUtils = module.exports = {
 	isComponent: isComponent,
 	getComponent: getComponent,
-	getContainingComponent: getContainingComponent
+	getContainingComponent: getContainingComponent,
+	_makeComponentConditionFunc: _makeComponentConditionFunc
 };
 
 
@@ -3461,31 +3481,37 @@ function getContainingComponent(node, returnCurrent, conditionOrFacet) {
 	check(returnCurrent, Match.Optional(Boolean));
 	check(conditionOrFacet, Match.Optional(Match.OneOf(Function, String)));
 
-	if (typeof conditionOrFacet == 'string') {
-		var facetName = _.firstLowerCase(conditionOrFacet);
-		var _condition = function (comp) {
-	       return comp.hasOwnProperty(facetName);
-	    };
-	} else
-		_condition = conditionOrFacet;
+	var conditionFunc = _makeComponentConditionFunc(conditionOrFacet);
 
-	return _getContainingComponent(node, returnCurrent, _condition);
+	return _getContainingComponent(node, returnCurrent, conditionFunc);
 }
 
 
-function _getContainingComponent(el, returnCurrent, condition) {
+function _makeComponentConditionFunc(conditionOrFacet) {
+	if (typeof conditionOrFacet == 'function')
+		return conditionOrFacet;
+	else if (typeof conditionOrFacet == 'string') {
+	 	var facetName = _.firstLowerCase(conditionOrFacet);
+		return function (comp) {
+	       return comp.hasFacet(facetName);
+	    };
+	}
+}
+
+
+function _getContainingComponent(el, returnCurrent, conditionFunc) {
 	// Where the current element is a component it should be returned
 	// if returnCurrent is true or undefined
 	if (returnCurrent !== false) {
 		var comp = getComponent(el);
-		if (comp && (! condition || condition(comp)))
+		if (comp && (! conditionFunc || conditionFunc(comp)))
 			return comp;
 	}
 
 	// Where there is no parent element, this function will return undefined
 	// The parent element is checked recursively
 	if (el.parentNode)
-		return _getContainingComponent(el.parentNode, true, condition);
+		return _getContainingComponent(el.parentNode, true, conditionFunc);
 }
 
 },{"../config":48,"../util/check":70}],30:[function(require,module,exports){
