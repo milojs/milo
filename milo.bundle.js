@@ -201,22 +201,22 @@ function FacetedObject() {
 /**
  * ####FacetedObject class methods####
  *
- * - [createFacetedClass](#createFacetedClass)
- * - [hasFacet](#hasFacet)
+ * - [createFacetedClass](#FacetedObject$$createFacetedClass)
+ * - [hasFacet](#FacetedObject$$hasFacet)
  */
 _.extend(FacetedObject, {
-	createFacetedClass: createFacetedClass,
-	hasFacet: hasFacet
+	createFacetedClass: FacetedObject$$createFacetedClass,
+	hasFacet: FacetedObject$$hasFacet
 });
 
 
 /**
  * ####FacetedObject instance methods####
  *
- * - [addFacet](#addFacet)
+ * - [addFacet](#FacetedObject$addFacet)
  */
 _.extendProto(FacetedObject, {
-	addFacet: addFacet
+	addFacet: FacetedObject$addFacet
 });
 
 
@@ -230,7 +230,7 @@ _.extendProto(FacetedObject, {
  * @param {String} facetName optional facet name, FacetClass.name will be used if facetName is not passed.
  * @return {Facet}
  */
-function addFacet(FacetClass, facetConfig, facetName) {
+function FacetedObject$addFacet(FacetClass, facetConfig, facetName) {
 	check(FacetClass, Function);
 	check(facetName, Match.Optional(String));
 
@@ -266,7 +266,7 @@ function addFacet(FacetClass, facetConfig, facetName) {
  * @param {String} facetName
  * @return {Subclass(Facet)|undefined} 
  */
-function hasFacet(facetName) {
+function FacetedObject$$hasFacet(facetName) {
 	// this refers to the FacetedObject class (or subclass), not instance
 	var protoFacets = this.prototype.facetsClasses;
 	return protoFacets && protoFacets[facetName];
@@ -284,7 +284,7 @@ function hasFacet(facetName) {
  * @param {Object[Object]} facetsConfig map of facets configuration, should have the same keys as the map of classes. Some facets may not have configuration, but the configuration for a facet that is not included in facetsClasses will throw an exception
  * @return {Subclass(FacetedObject)}
  */
-function createFacetedClass(name, facetsClasses, facetsConfig) {
+function FacetedObject$$createFacetedClass(name, facetsClasses, facetsConfig) {
 	check(name, String);
 	check(facetsClasses, Match.ObjectHash(Match.Subclass(Facet, true)));
 	check(facetsConfig, Match.Optional(Object));
@@ -986,8 +986,6 @@ _.extend(Component, {
 	isComponent: componentUtils.isComponent,
 	getComponent: componentUtils.getComponent,
 	getContainingComponent: componentUtils.getContainingComponent,
-	getState: Component$$getState,
-	getTransferState: Component$$getTransferState,
 	createFromState: Component$$createFromState,
 	createFromDataTransfer: createFromDataTransfer
 });
@@ -1007,11 +1005,14 @@ delete Component.createFacetedClass;
 _.extendProto(Component, {
 	init: init,
 	initElement: initElement,
+	hasFacet: Component$hasFacet,
 	addFacet: addFacet,
 	allFacets: allFacets,
 	remove: remove,
+	getState: Component$getState,
+	getTransferState: Component$getTransferState,
 	_getState: Component$_getState,
-	_setState: Component$_setState,
+	setState: Component$setState,
 	getScopeParent: getScopeParent,
 	_getScopeParent: _getScopeParent
 });
@@ -1072,7 +1073,8 @@ function Component$$create(info) {
 
 	if (info.extraFacetsClasses)
 		_.eachKey(info.extraFacetsClasses, function(FacetClass) {
-			aComponent.addFacet(FacetClass);
+			if (! aComponent.hasFacet(FacetClass))
+				aComponent.addFacet(FacetClass);
 		});
 
 	return aComponent;
@@ -1089,45 +1091,27 @@ function Component$$create(info) {
  * @return {Component}
  */
 function Component$$copy(component, deepCopy) {
-	var ComponentClass = component.constructor;
+	check(component, Component);
+	check(deepCopy, Match.Optional(Boolean));
 
-	// get unique component name
-	var newName = miloComponentName();
+	if (deepCopy && !component.container) 
+		throw new ComponentError('Cannot deep copy component without container facet');
 
 	// copy DOM element, using Dom facet if it is available
 	var newEl = component.dom 
 					? component.dom.copy(deepCopy)
 					: component.el.cloneNode(deepCopy);
 
-	// clone componenInfo and bind attribute
-	var newInfo = _.clone(component.componentInfo);
-	var attr = _.clone(newInfo.attr);
+	var ComponentClass = component.constructor;
 
-	// change bind attribute
-	_.extend(attr, {
-		el: newEl,
-		compName: newName
-	});
+	// create component of the same class on the element
+	var aComponent = ComponentClass.createOnElement(newEl, undefined, component.scope, component.extraFacets);
 
-	// put bind attribute on the new element
-	attr.decorate();
+	if (deepCopy)
+	  	aComponent.container.binder();
 
-	// change componentInfo
-	_.extend(newInfo, {
-		el: newEl,
-		name: newName,
-		attr: attr
-	});
-
-	// create component copy
-	var aComponent = Component.create(newInfo);
-
-	// add new component to the same scope as the original one
-	component.scope._add(aComponent, aComponent.name);
-
-	// bind inner components
-	// if (deepCopy && component.container)
-	// 	component.container.binder();
+	// transfer state
+	aComponent.setState(component._getState(deepCopy || false));
 
 	return aComponent;
 }
@@ -1141,9 +1125,14 @@ function Component$$copy(component, deepCopy) {
  * @param {Element} el optional element to attach component to. If element is not passed, it will be created
  * @param {String} innerHTML optional inner html to insert in element before binding.
  * @param {Scope} rootScope optional scope to put component in. If not passed, component will be attached to the scope that contains the element. If such scope does not exist, new scope will be created.
+ * @param {Array[String]} extraFacets list of extra facet to add to component
  * @return {Subclass(Component)}
  */
-function Component$$createOnElement(el, innerHTML, rootScope) {
+function Component$$createOnElement(el, innerHTML, rootScope, extraFacets) {
+	check(innerHTML, Match.Optional(String));
+	check(rootScope, Match.Optional(Scope));
+	check(extraFacets, Match.Optional([String]));
+
 	// should required here to resolve circular dependency
 	var miloBinder = require('../binder')
 
@@ -1167,6 +1156,7 @@ function Component$$createOnElement(el, innerHTML, rootScope) {
 	var attr = new BindAttribute(el);
 	// "this" refers to the class of component here, as this is a class method
 	attr.compClass = this.name;
+	attr.compFacets = extraFacets;
 	attr.decorate();
 
 	// insert HTML
@@ -1176,39 +1166,6 @@ function Component$$createOnElement(el, innerHTML, rootScope) {
 	miloBinder(el, rootScope);
 
 	return rootScope[attr.compName];
-}
-
-
-/**
- * Component class method
- * Retrieves all component state, including information about its class, extra facets, facets data and all scope children.
- * This information is used to save/load, copy/paste and drag/drop component 
- * Returns component state
- *
- * @param {Component} component component which state will be saved
- * @return {Object}
- */
-function Component$$getState(component) {
-	var state = component._getState();
-	state.outerHTML = component.el.outerHTML;
-	return state;
-}
-
-
-/**
- * Component class method
- * Retrieves all component state, including information about its class, extra facets, facets data and all scope children.
- * This information is used to save/load, copy/paste and drag/drop component 
- * If component has [Transfer](./c_facets/Transfer.js.html) facet on it, this method retrieves state from this facet
- * Returns component state
- *
- * @param {Component} component component which state will be saved
- * @return {Object}
- */
-function Component$$getTransferState(component) {
-	return component.transfer
-			? component.transfer.getState()
-			: Component.getState(component);
 }
 
 
@@ -1231,11 +1188,13 @@ function Component$$createFromState(state, rootScope, newUniqueName) {
 		outerHTML: String
 	}));
 
+	var miloBinder = require('../binder');
+
 	// create wrapper element optionally renaming component
 	var wrapEl = _createComponentWrapElement(state, newUniqueName);
 
 	// instantiate all components from HTML
-	var scope = milo.binder(wrapEl);
+	var scope = miloBinder(wrapEl);
 
 	// as there should only be one component, call to _any will return it
 	var component = scope._any();
@@ -1246,8 +1205,8 @@ function Component$$createFromState(state, rootScope, newUniqueName) {
 		rootScope._add(component);
 	}
 
-	// restor component state
-	component._setState(state);
+	// restore component state
+	component.setState(state);
 
 	return component;	
 }
@@ -1364,6 +1323,26 @@ function initElement() {
 
 
 /**
+ * Component instance method
+ * Returns true if componet has facet
+ *
+ * @param {Function|String} facetNameOrClass
+ * @return {Boolean}
+ */
+function Component$hasFacet(facetNameOrClass) {
+	var facetName = _.firstLowerCase(typeof facetNameOrClass == 'function'
+										? facetNameOrClass.name
+										: facetNameOrClass);
+
+	var facet = this[facetName];
+	if (! facet instanceof ComponentFacet)
+	 	logger.warn('expected facet', facetName, 'but this property name is used for something else');
+
+	 return !! facet;
+}
+
+
+/**
  * Component instance method.
  * Adds facet with given name or class to the instance of Component (or its subclass).
  * 
@@ -1426,14 +1405,48 @@ function remove() {
 
 /**
  * Component instance method
+ * Retrieves all component state, including information about its class, extra facets, facets data and all scope children.
+ * This information is used to save/load, copy/paste and drag/drop component 
+ * Returns component state
+ *
+ * @this {Component} component which state will be saved
+ * @return {Object}
+ */
+function Component$getState() {
+	var state = this._getState(true);
+	state.outerHTML = this.el.outerHTML;
+	return state;
+}
+
+
+/**
+ * Component instance method
+ * Retrieves all component state, including information about its class, extra facets, facets data and all scope children.
+ * This information is used to save/load, copy/paste and drag/drop component 
+ * If component has [Transfer](./c_facets/Transfer.js.html) facet on it, this method retrieves state from this facet
+ * Returns component state
+ *
+ * @this {Component} component which state will be saved
+ * @return {Object}
+ */
+function Component$getTransferState() {
+	return this.transfer
+			? this.transfer.getState()
+			: this.getState();
+}
+
+
+/**
+ * Component instance method
  * Returns the state of component
  * Used by class method `Component.getState` and by [Container](./c_facets/Container.js.html) facet.
  *
  * @private
+ * @param {Boolean} deepState false to get shallow state from all facets (true by default)
  * @return {Object}
  */
-function Component$_getState(){
-	var facetsStates = this.allFacets('getState');
+function Component$_getState(deepState){
+	var facetsStates = this.allFacets('getState', deepState === false ? false : true);
 	facetsStates = _.filterKeys(facetsStates, function(fctState) {
 		return !! fctState;
 	});
@@ -1455,7 +1468,7 @@ function Component$_getState(){
  * @private
  * @param {Object} state state to set the component
  */
-function Component$_setState(state) {
+function Component$setState(state) {
 	if (state.facetsStates)
 		_.eachKey(state.facetsStates, function(fctState, fctName) {
 			var facet = this[fctName];
@@ -1612,12 +1625,8 @@ function ComponentFacet$start() {
 function ComponentFacet$check() {
 	if (this.require) {
 		this.require.forEach(function(reqFacet) {
-			var facetName = _.firstLowerCase(reqFacet)
-				, facet = this.owner[facetName];
-			if (! facet)
-				this.owner.addFacet(facetName);
-			else if (! facet instanceof ComponentFacet)
-				throw new FacetError('facet ' + this.constructor.name + ' requires facet ' + reqFacet + ' but this property name is already used');
+			if (! this.owner.hasFacet(reqFacet))
+				this.owner.addFacet(reqFacet);
 		}, this);
 	}
 }
@@ -1748,13 +1757,15 @@ function Container$start() {
  * Called by `Component.prototype.getState` to get facet's state
  * Returns the state of components in the scope
  *
+ * @param {Boolean} deepCopy true by default
  * @return {Object}
  */
-function Container$getState() {
+function Container$getState(deepCopy) {
 	var state = { scope: {} };
-	this.scope._each(function(component, compName) {
-		state.scope[compName] = component._getState();
-	})
+	if (deepCopy !== false)
+		this.scope._each(function(component, compName) {
+			state.scope[compName] = component._getState();
+		});
 	return state;
 }
 
@@ -1770,7 +1781,7 @@ function Container$setState(state) {
 	_.eachKey(state.scope, function(compData, compName) {
 		var component = this.scope[compName];
 		if (component)
-			component._setState(compData);
+			component.setState(compData);
 		else
 			logger.warn('component does not exist on scope');
 	}, this);
@@ -2124,11 +2135,15 @@ function Data$_postDataChanged(msgData) {
  * Get structured data from DOM hierarchy recursively
  * Returns DOM data
  *
+ * @param {Boolean} deepGet true by default
  * @return {Object}
  */
-function Data$get() {
+function Data$get(deepGet) {
 	if (typeof this.config.get == 'function')
  		return this.config.get.call(this.owner);
+
+ 	if (deepGet === false)
+ 		return;
 
 	var comp = this.owner
 		, scopeData;
@@ -2210,10 +2225,11 @@ function Data$path(accessPath, createItem) {
  * Called by `Component.prototype.getState` to get facet's state
  * Returns DOM data
  *
+ * @param {Boolean} deepState, true by default
  * @return {Object}
  */
-function Data$getState() {
-	return { state: this.get() };
+function Data$getState(deepState) {
+	return { state: this.get(deepState) };
 }
 
 
@@ -2556,7 +2572,7 @@ function onMouseMovement(eventType, event) {
 
 
 function onDragStart(eventType, event) {
-	var transferState = Component.getTransferState(this.owner);
+	var transferState = this.owner.getTransferState();
 	this.__dragData = JSON.stringify(transferState);
 	this.__dataType = 'x-application/milo-component/' + transferState.compClass + '/'
 						+ this._dataTypeInfo.call(this);
@@ -2973,20 +2989,6 @@ function addItem(index) {
     // Copy component
     var component = Component.copy(this.itemSample, true);
 
-    // var tempComp = miloBinder(component.el)[component.name]
-    //     , innerScope = tempComp.container.scope;
-
-    var compInfoScope = miloBinder.scan(component.el)
-        , compInfo = compInfoScope._any()
-        , compInfos = compInfo.container.scope
-        , innerScope = miloBinder.create(compInfos);
-
-    // Set reference to component container facet on scope
-    innerScope._hostObject = component.container;
-
-    // Copy bound scope to component
-    component.container.scope = innerScope;
-
     // Add it to the DOM
     this._itemPreviousComponent(index).dom.insertAfter(component.el)
 
@@ -3003,6 +3005,8 @@ function addItem(index) {
 /**
  * List facet instance method
  * Adds a given number of items using template rendering rather than adding elements one by one
+ *
+ * @param {Integer} count number of items to add
  */
 function List$addItems(count) {
     check(count, Match.Integer);
@@ -3023,22 +3027,27 @@ function List$addItems(count) {
     var children = domUtils.children(wrapEl);
 
     if (count != children.length)
-        logger.error('number of item added is different from requested');
+        logger.error('number of items added is different from requested');
 
     if (children && children.length) {
         var count = this.count();
         var prevComponent = count 
                                 ? this._listItems[count - 1]
                                 : this.itemSample;
+
+        var frag = document.createDocumentFragment()
         children.forEach(function(el, index) {
             var component = Component.getComponent(el);
+            if (! component)
+                return logger.error('List: element in new items is not a component');
             this._listItems.push(component);
             this._listItemsHash[component.name] = component;
-            // Add it to the DOM
-            prevComponent.dom.insertAfter(component.el)
-            component.el.style.display = '';
-            prevComponent = component;
+            frag.appendChild(el);
+            el.style.display = '';
         }, this);
+
+        // Add it to the DOM
+        prevComponent.dom.insertAfter(frag);
     }
 }
 
@@ -3306,7 +3315,8 @@ module.exports = facetsRegistry;
 
 var componentsRegistry = require('./c_registry')
 	, facetsRegistry = require('./c_facets/cf_registry')
-	, BinderError = require('../util/error').Binder;
+	, BinderError = require('../util/error').Binder
+	, _ = require('mol-proto');
 
 
 module.exports = ComponentInfo;
@@ -3347,6 +3357,7 @@ function getComponentExtraFacets(ComponentClass, attr) {
 
 	if (Array.isArray(facets))
 		facets.forEach(function(fctName) {
+			fctName = _.firstUpperCase(fctName);
 			if (ComponentClass.hasFacet(fctName))
 				throw new BinderError('class ' + ComponentClass.name
 									  + ' already has facet ' + fctName);
@@ -3362,13 +3373,21 @@ function getComponentExtraFacets(ComponentClass, attr) {
 
 function hasContainerFacet(ComponentClass, extraFacetsClasses) {
 	return (ComponentClass.hasFacet('container')
-		|| 'Container' in extraFacetsClasses 
-		|| _.someKey(extraFacetsClasses, function (FacetClass) {
-				return FacetClass.requiresFacet('container');
-			}));
+		|| 'Container' in extraFacetsClasses
+		|| _.someKey(extraFacetsClasses, facetRequiresContainer)
+		|| classHasFacetThatRequiresContainer());
+
+	function classHasFacetThatRequiresContainer() {
+		return (ComponentClass.prototype.facetsClasses
+			&& _.someKey(ComponentClass.prototype.facetsClasses, facetRequiresContainer))
+	}
+
+	function facetRequiresContainer(FacetClass) {
+		return FacetClass.requiresFacet('container');
+	}
 }
 
-},{"../util/error":74,"./c_facets/cf_registry":26,"./c_registry":28}],28:[function(require,module,exports){
+},{"../util/error":74,"./c_facets/cf_registry":26,"./c_registry":28,"mol-proto":84}],28:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
