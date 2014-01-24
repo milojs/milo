@@ -8224,6 +8224,8 @@ function TextSelection$del() {
 		comp.remove();
 	});
 
+	var selStart = this.range.startContainer;
+
 	this.range.deleteContents();
 	selStart.parentNode.normalize();
 	setCaretPosition(selStart, this.selection.anchorOffset);
