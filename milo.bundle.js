@@ -8058,6 +8058,8 @@ _.extendProto(TextSelection, {
 	endElement: TextSelection$endElement,
 	startComponent: TextSelection$startComponent,
 	endComponent: TextSelection$endComponent,
+	containedComponents: TextSelection$containedComponents,
+	eachContainedComponent: TextSelection$eachContainedComponent,
 	del: TextSelection$del
 });
 
@@ -8168,21 +8170,20 @@ function _getComponent(thisPropName, elMethodName) {
 }
 
 
-/**
- * TextSelection instance method
- * Deletes the current selection and all components in it
- */
-function TextSelection$del() {
-	var self = this; 
+function TextSelection$containedComponents() {
+	if (this._containedComponents)
+		return this._containedComponents;
 
-	if (this.isCollapsed || ! this.range) return;
+	var components = this._containedComponents = [];
+
+	if (this.isCollapsed || ! this.range) return components;
 
 	var selStart = this.range.startContainer
 		, selEnd = this.range.endContainer
 		, rangeContainer = this.range.commonAncestorContainer;
 
 	if (selStart != selEnd) {
-		var treeWalker = self.window.document.createTreeWalker(rangeContainer,
+		var treeWalker = this.window.document.createTreeWalker(rangeContainer,
 				NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
 
 		treeWalker.currentNode = selStart; 
@@ -8193,11 +8194,35 @@ function TextSelection$del() {
 				var comp = Component.getComponent(node);
 
 				if (comp && ! comp.el.contains(selEnd))
-					comp.remove();
+					components.push(comp);
 			}
 			node = treeWalker.nextNode();
 		}
 	}
+
+	return components;
+}
+
+
+function TextSelection$eachContainedComponent(callback, thisArg) {
+	if (this.isCollapsed || ! this.range) return;
+
+	var components = this.containedComponents();
+
+	components.forEach(callback, thisArg);
+}
+
+
+/**
+ * TextSelection instance method
+ * Deletes the current selection and all components in it
+ */
+function TextSelection$del() {
+	if (this.isCollapsed || ! this.range) return;
+
+	this.eachContainedComponent(function(comp) {
+		comp.remove();
+	});
 
 	this.range.deleteContents();
 }
