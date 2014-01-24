@@ -1401,8 +1401,10 @@ function allFacets(method) { // ,... arguments
  * Removes component from its scope.
  */
 function remove() {
-	if (this.scope)
+	if (this.scope) {
 		this.scope._remove(this.name);
+		delete this.scope;
+	}
 }
 
 
@@ -3054,7 +3056,7 @@ function List$addItems(count) {
                                 ? this._listItems[count - 1]
                                 : this.itemSample;
 
-        var frag = document.createDocumentFragment()
+        var frag = document.createDocumentFragment();
         children.forEach(function(el, index) {
             var component = Component.getComponent(el);
             if (! component)
@@ -3990,16 +3992,18 @@ var allowedNamePattern = /^[A-Za-z][A-Za-z0-9\_\$]*$/;
  * @param {String} name the name of the component to add
  */
 function Scope$_add(object, name) {
-	if (typeof name === 'string') {
+	if (typeof name == 'string')
 		object.name = name;
-	}
+	else
+		name = object.name;
 	
-	if (this[object.name])
+	if (this[name])
 		throw new ScopeError('duplicate object name: ' + name);
 
-	checkName(object.name);
+	checkName(name);
 
-	this[object.name] = object;
+	this[name] = object;
+	object.scope = this;
 }
 
 
@@ -4040,7 +4044,7 @@ function Scope$_addNew(object, name) {
  * @param {Scope} scope the scope to absorb
  */
 function Scope$_merge(scope) {
-	scope._each(Scope$_add.bind(this));
+	scope._each(Scope$_add, this);
 }
 
 
@@ -4105,9 +4109,10 @@ function Scope$_any() {
  * @param {String} name the name of the component to remove
  */
 function Scope$_remove(name) {
-	if (! name in this)
-		logger.warn('removing object that is not in scope');
+	if (! (name in this))
+		return logger.warn('removing object that is not in scope');
 
+	delete this[name].scope;
 	delete this[name];
 }
 
@@ -4118,6 +4123,7 @@ function Scope$_remove(name) {
  */
 function Scope$_clean() {
 	this._each(function(object, name) {
+		delete this[name].scope;
 		delete this[name];
 	}, this);
 }
@@ -7530,7 +7536,8 @@ module.exports = {
 	getElementOffset: getElementOffset,
     setCaretPosition: setCaretPosition,
     setSelection: setSelection,
-    removeElement: removeElement
+    removeElement: removeElement,
+    unwrapElement: unwrapElement
 };
 
 
@@ -7649,11 +7656,27 @@ function getElementOffset(el) {
  *
  * @param {Element} el the element to be removed
  */
- function removeElement(el) {
+function removeElement(el) {
     var parent = el.parentNode;
     if (parent)
         parent.removeChild(el);
- }
+}
+
+
+/**
+ * Removes element from the document putting its children in its place
+ *
+ * @param {Element} el the element to be "unwrapped"
+ */
+function unwrapElement(el) {
+    var parent = el.parentNode;
+
+    if (parent) {
+        var frag = document.createDocumentFragment();
+        _.forEach(el.childNodes, frag.appendChild, frag);
+        parent.replaceChild(frag, el);
+    }
+}
 
 },{}],74:[function(require,module,exports){
 // <a name="utils-error"></a>
