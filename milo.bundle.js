@@ -2118,6 +2118,8 @@ function Data$del() {
 	var itemFacet = this.owner.item;
 	if (itemFacet)
 		itemFacet.removeItem();
+	else
+		this.set();
 }
 
 
