@@ -1602,6 +1602,7 @@ _.extendProto(ComponentFacet, {
 	postDomParent: postDomParent,
 	scopeParent: scopeParent,
 	postScopeParent: postScopeParent,
+	getMessageSource: getMessageSource,
 	_createMessenger: _createMessenger,
 	_setMessageSource: _setMessageSource,
 	_createMessageSource: _createMessageSource,
@@ -1703,6 +1704,11 @@ function _postParent(getParentMethod, messageType, messageData) {
 
 function _setMessageSource(messageSource) {
 	this._messenger._setMessageSource(messageSource);
+}
+
+
+function getMessageSource() {
+	return this._messenger.getMessageSource();
 }
 
 
@@ -2067,10 +2073,9 @@ var changeTypeToMethodMap = {
  * @return {Object|String|Number}
  */
  function Data$set(value) {
- 	if (typeof this.config.set == 'function') {
- 		this.config.set.call(this.owner, value);
- 		return;
- 	}
+ 	var componentSetter = this.config.set;
+ 	if (typeof componentSetter == 'function')
+ 		return componentSetter.call(this.owner, value);
 
 	var valueSet;
 	if (value != null && typeof value == 'object') {
@@ -2130,10 +2135,10 @@ var changeTypeToMethodMap = {
  * @param {String|Number} value value to set to DOM element
  */
 function Data$del() {
-	if (typeof this.config.del == 'function') {
- 		this.config.del.call(this.owner);
- 		return;
- 	}
+	var componentDelete = this.config.del;
+	if (typeof componentDelete == 'function')
+ 		return componentDelete.call(this.owner);
+
 	var itemFacet = this.owner.item;
 	if (itemFacet)
 		itemFacet.removeItem();
@@ -2181,10 +2186,11 @@ function Data$_postDataChanged(msgData) {
  * @return {Object}
  */
 function Data$get(deepGet) {
-	if (typeof this.config.get == 'function')
- 		return this.config.get.call(this.owner);
+	var componentGetter = this.config.get;
+	if (typeof componentGetter == 'function')
+ 		return componentGetter.call(this.owner);
 
- 	if (deepGet === false)
+ 	if (deepGet === false) // a hack to enable getting shallow state
  		return;
 
 	var comp = this.owner
@@ -3571,19 +3577,19 @@ var DataMsgAPI = _.createSubclass(MessengerAPI, 'DataMsgAPI', true);
 
 _.extendProto(DataMsgAPI, {
 	// implementing MessageSource interface
-	init: init,
+	init: DataMsgAPI$init,
 	translateToSourceMessage: translateToSourceMessage,
  	filterSourceMessage: filterSourceMessage,
  	createInternalData: createInternalData,
 
  	// class specific methods
- 	value: value,
+ 	value: DataMsgAPI$value,
 });
 
 module.exports = DataMsgAPI;
 
 
-function init(component) {
+function DataMsgAPI$init(component) {
 	MessengerAPI.prototype.init.apply(this, arguments);
 
 	this.component = component;
@@ -3592,10 +3598,15 @@ function init(component) {
 
 
 // getDomElementDataValue
-function value() { // value method
-	var newValue = this.elData.get(this.component.el);
+function DataMsgAPI$value() { // value method
+	var componentGetter = this.component.data.config.get;
+	var newValue = typeof componentGetter == 'function'
+					? componentGetter.call(this.component)
+					: this.elData.get(this.component.el);
+
 	this.component.data._value = newValue;
-	return this.elData.get(this.component.el);
+
+	return newValue;
 }
 
 
@@ -3603,7 +3614,9 @@ function value() { // value method
 // Can also implement beforedatachanged event to allow preventing the change
 // translateToDomEvent
 function translateToSourceMessage(message) {
-	var event = this.elData.event(this.component.el);
+	var componentEvent = this.component.data.config.event;
+	var event = componentEvent || this.elData.event(this.component.el);
+
 	if (message == '' && event)
 		return event;  // this.tagEvent;
 }
@@ -3616,12 +3629,14 @@ function filterSourceMessage(sourceMessage, message, data) {
 
 
 function createInternalData(sourceMessage, message, data) {
-	var oldValue = this.component.data._value;
+	var oldValue = this.component.data._value
+		, newValue = this.value();
+
 	var internalData = { 
 		path: '',
 		type: 'changed',
 		oldValue: oldValue,
-		newValue: this.value()
+		newValue: newValue
 	};
 	return internalData;
 };
@@ -4174,17 +4189,37 @@ var Component = require('../c_class')
 , componentsRegistry = require('../c_registry');
 
 
-var MLDatalist = Component.createComponentClass('MLDatalist', {
+var MLCombo = Component.createComponentClass('MLCombo', {
 	events: undefined,
-	data: undefined,
+	data: {
+		get: MLCombo_get,
+		set: MLCombo_set,
+		del: MLCombo_del,
+		splice: undefined
+	},
 	dom: {
 		cls: 'ml-ui-datalist'
-	}
+	},
+	container: undefined
 });
 
-componentsRegistry.add(MLDatalist);
+componentsRegistry.add(MLCombo);
 
-module.exports = MLDatalist;
+module.exports = MLCombo;
+
+
+function MLCombo_get() {
+
+}
+
+function MLCombo_set() {
+	
+}
+
+function MLCombo_del() {
+	
+}
+
 },{"../c_class":12,"../c_registry":28}],39:[function(require,module,exports){
 'use strict';
 
@@ -4321,15 +4356,21 @@ function onOptionsChange(path, data) {
 'use strict';
 
 var Component = require('../c_class')
-	, componentsRegistry = require('../c_registry');
+	, componentsRegistry = require('../c_registry')
+	, miloCount = require('../../util/count');
 
+
+var RADIO_CHANGE_MESSAGE = 'mlradiogroupchange'
+	, ELEMENT_NAME_PROPERTY = '_mlRadioGroupElementID'
+	, ELEMENT_NAME_PREFIX = 'ml-radio-group-'
 
 var MLRadioGroup = Component.createComponentClass('MLRadioGroup', {
 	data: {
-		set: setGroupValue,
-		get: getGroupValue,
-		del: deleteGroupValue,
-		splice: undefined
+		set: MLRadioGroup_set,
+		get: MLRadioGroup_get,
+		del: MLRadioGroup_del,
+		splice: undefined,
+		event: RADIO_CHANGE_MESSAGE
 	},
 	model: {
 		messages: {
@@ -4347,8 +4388,9 @@ var MLRadioGroup = Component.createComponentClass('MLRadioGroup', {
 	},
 	template: {
 		template: '{{~ it.radioOptions :option }} \
-						<input id="{{= option.name }}-{{= option.value }}" type="radio" value="{{= option.value }}" name="{{= option.name }}"> \
-						<label for="{{= option.name }}-{{= option.value }}">{{= option.label }}</label> \
+						{{##def.elID:{{= it.elementName }}-{{= option.value }}#}} \
+						<input id="{{# def.elID }}" type="radio" value="{{= option.value }}" name="{{= it.elementName }}"> \
+						<label for="{{# def.elID }}">{{= option.label }}</label> \
 				   {{~}}'
 	}
 });
@@ -4369,7 +4411,7 @@ _.extendProto(MLRadioGroup, {
  */
 function MLRadioGroup$init() {
 	_.defineProperty(this, '_radioList', [], _.CONF);
-	_.defineProperty(this, '_value', undefined, _.WRIT);
+	_.defineProperty(this, ELEMENT_NAME_PROPERTY, ELEMENT_NAME_PREFIX + miloCount());
 	Component.prototype.init.apply(this, arguments);
 }
 
@@ -4380,18 +4422,17 @@ function MLRadioGroup$init() {
  *
  * @param {Mixed} value The value to be set
  */
-function setGroupValue(value) {
-	var oldValue = this._value;
-	var newValue = undefined;
-	if (this._radioList.length)
-		this._radioList.forEach(function(radio) {
-			if (radio.value == value){
-				radio.checked = true;
-				this._value = value;
-			} else
-				radio.checked = false;
-		}, this);
-	postDataChangeMessage.call(this, oldValue);
+function MLRadioGroup_set(value) {
+	var options = this._radioList;
+	if (options.length) {
+		options.forEach(function(radio) {
+			radio.checked = radio.value == value;
+		});
+
+		dispatchChangeMessage.call(this);
+
+		return this._value;
+	}
 }
 
 
@@ -4401,11 +4442,12 @@ function setGroupValue(value) {
  *
  * @return {String}
  */
-function getGroupValue() {
-	var filtered = this._radioList.filter(function(radio) {
+function MLRadioGroup_get() {
+	var checked = _.find(this._radioList, function(radio) {
 		return radio.checked;
-	});
-	return filtered[0] && filtered[0].value ? filtered[0].value : undefined;
+	}); 
+
+	return checked && checked.value || undefined;
 }
 
 
@@ -4413,16 +4455,14 @@ function getGroupValue() {
  * Deleted group value
  * Deletes the value of the group, setting it to empty
  */
-function deleteGroupValue() {
-	var oldValue = this._value;
-	if (this._radioList.length)
-		this._radioList.forEach(function(radio) {
+function MLRadioGroup_del() {
+	var options = this._radioList;
+	if (options.length)
+		options.forEach(function(radio) {
 			radio.checked = false;
-			this._value = undefined;
-		}, this);
+		});
 
-	if (this._value != oldValue)
-		this.data.postMessage('', { path: '', type: 'deleted', oldValue: oldValue });
+	dispatchChangeMessage.call(this);
 }
 
 
@@ -4430,37 +4470,30 @@ function deleteGroupValue() {
  * Manage radio children clicks
  */
 function onGroupClick(eventType, event) {
-	if (event.target.type == 'radio') {
-		var oldValue = this._value;
-		this._value = event.target.value;
-		postDataChangeMessage.call(this, oldValue);
-	}
+	if (event.target.type == 'radio')
+		dispatchChangeMessage.call(this);
 }
 
 // Post the data change
-function postDataChangeMessage(oldValue) {
-	if (this._value != oldValue){
-		if (typeof oldValue == 'undefined')
-			this.data.postMessage('', { path: '', type: 'added',
-									newValue: this._value });
-		else
-			this.data.postMessage('', { path: '', type: 'changed',
-									newValue: this._value, oldValue: oldValue });
-	}
+function dispatchChangeMessage() {
+	this.data.getMessageSource().dispatchMessage(RADIO_CHANGE_MESSAGE);
 }
 
 
 // Set radio button children on model change
 function onOptionsChange(path, data) {
-	this.template.render({ radioOptions: this.model.get() });
+	this.template.render({
+		radioOptions: this.model.get(),
+		elementName: this[ELEMENT_NAME_PROPERTY]
+	});
 
-	var radioEls = this.el.querySelectorAll('input[type="radio"]');
-	this._radioList.length = 0;
-	for (var i = 0; i < radioEls.length; i++)
-		this._radioList.push(radioEls[i]);
+	var radioEls = this.el.querySelectorAll('input[type="radio"]')
+		, options = this._radioList;
+	options.length = 0;
+	_.forEach(radioEls, options.push, options);
 }
 
-},{"../c_class":12,"../c_registry":28}],45:[function(require,module,exports){
+},{"../../util/count":72,"../c_class":12,"../c_registry":28}],45:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -4923,6 +4956,7 @@ var messagesSplitRegExp = Messenger.messagesSplitRegExp = /\s*(?:\,|\s)\s*/;
  * - [_callPatternSubscribers](#_callPatternSubscribers)
  * - [_callSubscribers](#_callSubscribers)
  * - [_setMessageSource](#_setMessageSource)
+ * - [getMessageSource](#getMessageSource)
  */
 _.extendProto(Messenger, {
 	init: init, // called by Mixin (superclass)
@@ -4934,6 +4968,7 @@ _.extendProto(Messenger, {
 	offMessages: offMessages,
 	postMessage: postMessage,
 	getSubscribers: getSubscribers,
+	getMessageSource: getMessageSource,
 	_chooseSubscribersHash: _chooseSubscribersHash,
 	_registerSubscriber: _registerSubscriber,
 	_removeSubscriber: _removeSubscriber,
@@ -5380,6 +5415,17 @@ function _setMessageSource(messageSource) {
 
  	_.defineProperty(this, '_messageSource', messageSource);
  	messageSource.messenger = this;
+}
+
+
+/**
+ * Messenger instance method
+ * Returns messenger MessageSource
+ *
+ * @return {MessageSource}
+ */
+function getMessageSource() {
+	return this._messageSource
 }
 
 },{"../abstract/mixin":4,"../util/check":70,"../util/error":74,"./m_source":56,"mol-proto":85}],54:[function(require,module,exports){
@@ -7107,9 +7153,9 @@ require('./components/ui/Hyperlink');
 require('./components/ui/List');
 require('./components/ui/Time');
 require('./components/ui/Date');
-require('./components/ui/Datalist');
+require('./components/ui/Combo');
 
-},{"./components/classes/View":30,"./components/ui/Button":37,"./components/ui/Datalist":38,"./components/ui/Date":39,"./components/ui/Group":40,"./components/ui/Hyperlink":41,"./components/ui/Input":42,"./components/ui/List":43,"./components/ui/RadioGroup":44,"./components/ui/Select":45,"./components/ui/Textarea":46,"./components/ui/Time":47}],69:[function(require,module,exports){
+},{"./components/classes/View":30,"./components/ui/Button":37,"./components/ui/Combo":38,"./components/ui/Date":39,"./components/ui/Group":40,"./components/ui/Hyperlink":41,"./components/ui/Input":42,"./components/ui/List":43,"./components/ui/RadioGroup":44,"./components/ui/Select":45,"./components/ui/Textarea":46,"./components/ui/Time":47}],69:[function(require,module,exports){
 'use strict';
 
 require('./components/c_facets/Dom');
@@ -7934,7 +7980,12 @@ module.exports = Promise;
 
 
 /**
- * Promise object to manage delayed data delivery
+ * Simple Promise object to manage asynchronous data delivery
+ * Can't be chained like Q promises (here, [then](#Promise$then) and [error](#Promise$error) always simply return original promise), but can be transformed to another promise using [transform](Promise$transform) method with data transformation function.
+ * Another differences with Q:
+ *
+ * - `then` accepts only success callback
+ * - all callbacks are passed three parameters: error, data and dataSource (argument passed to Promise constructor)
  *
  * @return {Promise}
  */
@@ -7947,6 +7998,14 @@ function Promise(dataSource) {
 }
 
 
+/**
+ * Promise instance method
+ * 
+ * - [then](#Promise$then) - register callback to be called when promise data is set
+ * - [error](#Promise$error) - register callback to be called when promise dataError is set
+ * - [setData](#Promise$setData) - set data and dataError of the promise
+ * - [transform](#Promise$transform) - create a new promise with data transformation
+ */
 _.extendProto(Promise, {
 	then: Promise$then,
 	error: Promise$error,
@@ -7957,31 +8016,35 @@ _.extendProto(Promise, {
 
 /**
  * Promise instance method
- * Calls callback when data arrives if there is no error (or immediately if data had arrived before)
+ * Calls callback when data arrives if there is no error (or on next tick if data had arrived before)
  *
  * @param {Function} callback
  */
 function Promise$then(callback) {
 	if (! this.dataError) {
 		if (this.data)
-			callback(null, this.data, this.request);
+			_.defer(callback, null, this.data, this.dataSource);
 		else
 			this._thenQueue.push(callback);
 	}
+
+	return this;
 }
 
 
 /**
  * Promise instance method
- * Calls callback if there is data error (or immediately if error had happened before)
+ * Calls callback if there is data error (or on next tick if error had happened before)
  *
  * @param {Function} callback
  */
 function Promise$error(callback) {
 	if (this.dataError)
-		callback(this.dataError, this.data, this.request);
+		_.defer(callback, this.dataError, this.data, this.dataSource);
 	else if (! this.data)
 		this._errorQueue.push(callback);
+
+	return this;
 }
 
 
@@ -7992,16 +8055,19 @@ function Promise$error(callback) {
  * @param {Any} data data
  */
 function Promise$setData(error, data) {
-	this.data = data;
 	this.dataError = error;
+	this.data = data;
 
 	var queue = error ? this._errorQueue : this._thenQueue;
 
-	queue.forEach(function(callback) {
-		callback(error, data, this.request);
-	}, this);
-
-	queue.length = 0;
+	var self = this;
+	_.defer(function() {
+		queue.forEach(function(callback) {
+			callback(error, data, self.request);
+		});
+		self._errorQueue.length = 0;
+		self._thenQueue.length = 0;
+	});
 }
 
 
@@ -8013,13 +8079,17 @@ function Promise$setData(error, data) {
  */
 function Promise$transform(transformDataFunc) {
 	var promise = new Promise(this);
-	this.then(function(error, data) {
+	this
+	.then(function(error, data) {
 		try {
 			var transformedData = transformDataFunc(data);
 			promise.setData(error, transformedData);
 		} catch (e) {
-			promise.setData(e, transformedData);
+			promise.setData(e);
 		}
+	})
+	.error(function(error, data) {
+		promise.setData(error, data);
 	});
 	return promise;
 }
@@ -8095,21 +8165,14 @@ function request$post(url, data, callback) {
 }
 
 function request$json(url, callback) {
-	var promise = request(url, { method: 'GET' }, function(err, text) {
-		if (! callback) return;
+	var promise = request(url, { method: 'GET' });
 
-		if (err) return callback(err);
-		try {
-			var data = JSON.parse(text);
-		} catch (e) {
-			callback && callback(e);
-			return;
-		}
+	var jsonPromise = promise.transform(JSON.parse.bind(JSON));
 
-		callback && callback(null, data);
-	});
+	if (callback)
+		jsonPromise.then(callback).error(callback);
 
-	return promise.transform(JSON.parse.bind(JSON));
+	return jsonPromise;
 }
 
 },{"./promise":79,"mol-proto":85}],81:[function(require,module,exports){
