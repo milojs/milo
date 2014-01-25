@@ -996,29 +996,30 @@ delete Component.createFacetedClass;
 
 /**
  * ####Component instance methods####
- * - [init](#init)
- * - [initElement](#initElement)
- * - [addFacet](#addFacet)
- * - [allFacets](#allFacets)
- * - [remove](#remove)
- * - [getScopeParent](#getScopeParent)
- * - [_getScopeParent](#_getScopeParent)
+ *
+ * - [init](#Component$init)
+ * - [initElement](#Component$initElement)
+ * - [addFacet](#Component$addFacet)
+ * - [allFacets](#Component$allFacets)
+ * - [remove](#Component$remove)
+ * - [getScopeParent](#Component$getScopeParent)
  */
 _.extendProto(Component, {
-	init: init,
-	initElement: initElement,
+	init: Component$init,
+	initElement: Component$initElement,
 	hasFacet: Component$hasFacet,
-	addFacet: addFacet,
-	allFacets: allFacets,
-	remove: remove,
+	addFacet: Component$addFacet,
+	allFacets: Component$allFacets,
+	remove: Component$remove,
 	getState: Component$getState,
 	getTransferState: Component$getTransferState,
 	_getState: Component$_getState,
 	setState: Component$setState,
-	getScopeParent: getScopeParent,
-	_getScopeParent: _getScopeParent,
-	getScopeParentWithClass: getScopeParentWithClass,
-    walkScopeTree: walkScopeTree
+	getScopeParent: Component$getScopeParent,
+	getTopScopeParent: Component$getTopScopeParent,
+	getScopeParentWithClass: Component$getScopeParentWithClass,
+	getTopScopeParentWithClass: Component$getTopScopeParentWithClass,
+    walkScopeTree: Component$walkScopeTree
 });
 
 var COMPONENT_DATA_TYPE_PREFIX = 'x-application/milo-component';
@@ -1273,7 +1274,7 @@ function createFromDataTransfer(dataTransfer) {
  * @param {ComponentInfo} componentInfo instance of ComponentInfo class that can be used to create a copy of component
  *  TODO try removing it
  */
-function init(scope, element, name, componentInfo) {
+function Component$init(scope, element, name, componentInfo) {
 	// create DOM element if it wasn't passed to Constructor
 	this.el = element || this.initElement();
 
@@ -1317,7 +1318,7 @@ function init(scope, element, name, componentInfo) {
  * 
  * @return {Element}
  */
-function initElement() {
+function Component$initElement() {
 	if (typeof document == 'undefined')
 		return;
 
@@ -1346,7 +1347,7 @@ function Component$hasFacet(facetNameOrClass) {
 	if (! facet instanceof ComponentFacet)
 	 	logger.warn('expected facet', facetName, 'but this property name is used for something else');
 
-	 return !! facet;
+	return !! facet;
 }
 
 
@@ -1358,7 +1359,7 @@ function Component$hasFacet(facetNameOrClass) {
  * @param {Object} facetConfig optional facet configuration
  * @param {String} facetName optional facet name. Allows to add facet under a name different from the class name supplied.
  */
-function addFacet(facetNameOrClass, facetConfig, facetName) {
+function Component$addFacet(facetNameOrClass, facetConfig, facetName) {
 	check(facetNameOrClass, Match.OneOf(String, Match.Subclass(ComponentFacet)));
 	check(facetConfig, Match.Optional(Object));
 	check(facetName, Match.Optional(String));
@@ -1391,7 +1392,7 @@ function addFacet(facetNameOrClass, facetConfig, facetName) {
  * @param {String} method method name to envoke on the facet
  * @return {Object}
  */
-function allFacets(method) { // ,... arguments
+function Component$allFacets(method) { // ,... arguments
 	var args = _.slice(arguments, 1);
 
 	return _.mapKeys(this.facets, function(facet, fctName) {
@@ -1405,7 +1406,7 @@ function allFacets(method) { // ,... arguments
  * Component instance method.
  * Removes component from its scope.
  */
-function remove() {
+function Component$remove() {
 	if (this.scope) {
 		this.scope._remove(this.name);
 		delete this.scope;
@@ -1491,17 +1492,15 @@ function Component$setState(state) {
 /**
  * Component instance method.
  * Returns the scope parent of a component.
- * If `withFacet` parameter is not specified, an immediate parent will be returned, otherwise the closest ancestor with a specified facet.
+ * If `conditionOrFacet` parameter is not specified, an immediate parent will be returned, otherwise the closest ancestor with a specified facet or passing condition test.
  *
  * @param {Function|String} conditionOrFacet optional condition that component should pass (or facet name it should contain)
  * @return {Component|undefined}
  */
-function getScopeParent(conditionOrFacet) {
+function Component$getScopeParent(conditionOrFacet) {
 	check(conditionOrFacet, Match.Optional(Match.OneOf(Function, String)));
-
 	var conditionFunc = _makeComponentConditionFunc(conditionOrFacet);
-
-	return this._getScopeParent(conditionFunc);	
+	return _getScopeParent.call(this, conditionFunc);	
 }
 
 function _getScopeParent(conditionFunc) {
@@ -1514,9 +1513,10 @@ function _getScopeParent(conditionFunc) {
 		if (! conditionFunc || conditionFunc(parent) )
 			return parent;
 		else
-			return parent._getScopeParent(conditionFunc);
+			return _getScopeParent.call(parent, conditionFunc);
 	}
 }
+
 
 /**
  * Component instance method
@@ -1525,12 +1525,54 @@ function _getScopeParent(conditionFunc) {
  * @param {[Function]} ComponentClass component class that the parent should have, same class by default
  * @return {Component}
  */
-function getScopeParentWithClass(ComponentClass) {
+function Component$getScopeParentWithClass(ComponentClass) {
 	ComponentClass = ComponentClass || this.constructor;
-	return this._getScopeParent(function(comp) {
+	return _getScopeParent.call(this, function(comp) {
 		return comp instanceof ComponentClass;
 	})
 }
+
+
+/**
+ * Component instance method.
+ * Returns the topmost scope parent of a component.
+ * If `conditionOrFacet` parameter is not specified, the topmost scope parent will be returned, otherwise the topmost ancestor with a specified facet or passing condition test.
+ *
+ * @param {Function|String} conditionOrFacet optional condition that component should pass (or facet name it should contain)
+ * @return {Component|undefined}
+ */
+function Component$getTopScopeParent(conditionOrFacet) {
+	check(conditionOrFacet, Match.Optional(Match.OneOf(Function, String)));
+	var conditionFunc = _makeComponentConditionFunc(conditionOrFacet);
+	return _getTopScopeParent.call(this, conditionFunc);	
+}
+
+function _getTopScopeParent(conditionFunc) {
+	var topParent;
+	do {
+		var parent = _getScopeParent.call(this, conditionFunc);
+		if (parent)
+			topParent = parent;
+	} while (parent);
+
+	return topParent;
+}
+
+
+/**
+ * Component instance method
+ * Returns scope parent with a given class, with same class if not specified
+ *
+ * @param {[Function]} ComponentClass component class that the parent should have, same class by default
+ * @return {Component}
+ */
+function Component$getTopScopeParentWithClass(ComponentClass) {
+	ComponentClass = ComponentClass || this.constructor;
+	return _getTopScopeParent.call(this, function(comp) {
+		return comp instanceof ComponentClass;
+	})
+}
+
 
 /**
  * Walks component tree, calling provided callback on each component
@@ -1539,7 +1581,7 @@ function getScopeParentWithClass(ComponentClass) {
  * @param callback
  * @param thisArg
  */
-function walkScopeTree(callback, thisArg) {
+function Component$walkScopeTree(callback, thisArg) {
     callback.call(thisArg, this);
     if (!this.container) return;
     this.container.scope._each(function(component) {
