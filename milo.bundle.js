@@ -4186,8 +4186,15 @@ module.exports = MLButton;
 'use strict';
 
 var Component = require('../c_class')
-, componentsRegistry = require('../c_registry');
+	, componentsRegistry = require('../c_registry')
+	, _ = require('mol-proto');
 
+
+var COMBO_CHANGE_MESSAGE = 'mlcombochange';
+
+var DATALIST_TEMPLATE = '{{~ it.comboOptions :option }} \
+							<option value="{{= option.label }}"></option> \
+					     {{~}}';
 
 var MLCombo = Component.createComponentClass('MLCombo', {
 	events: undefined,
@@ -4195,7 +4202,13 @@ var MLCombo = Component.createComponentClass('MLCombo', {
 		get: MLCombo_get,
 		set: MLCombo_set,
 		del: MLCombo_del,
-		splice: undefined
+		splice: undefined,
+		event: COMBO_CHANGE_MESSAGE
+	},
+	model: {
+		messages: {
+			'***': { subscriber: onOptionsChange, context: 'owner' }
+		}
 	},
 	dom: {
 		cls: 'ml-ui-datalist'
@@ -4208,19 +4221,61 @@ componentsRegistry.add(MLCombo);
 module.exports = MLCombo;
 
 
-function MLCombo_get() {
+_.extendProto(MLCombo, {
+	init: MLCombo$init
+});
 
+
+function MLCombo$init() {
+	Component.prototype.init.apply(this, arguments);
+	this.on('childrenbound', onChildrenBound);
 }
 
-function MLCombo_set() {
-	
+function onChildrenBound() {
+	_.defineProperties(this, {
+		'_comboInput': this.container.scope.input,
+		'_comboList': this.container.scope.datalist
+	});
+
+	this._comboList.template.set(DATALIST_TEMPLATE);
+
+	this._comboInput.data.on('input',
+		{ subscriber: dispatchChangeMessage, context: this });
+}
+
+function MLCombo_get() {
+	if (! this._comboInput) return;
+	return this._comboInput.data.get();
+}
+
+function MLCombo_set(value) {
+	return changeComboData.call(this, 'set', value);
 }
 
 function MLCombo_del() {
-	
+	return changeComboData.call(this, 'del', value);
 }
 
-},{"../c_class":12,"../c_registry":28}],39:[function(require,module,exports){
+function changeComboData(method, value) {
+	if (! this._comboInput) return;
+	var result = this._comboInput.data[method](value);
+	dispatchChangeMessage.call(this);
+	return result;
+}
+
+
+// Post the data change
+function dispatchChangeMessage() {
+	this.data.getMessageSource().dispatchMessage(COMBO_CHANGE_MESSAGE);
+}
+
+function onOptionsChange(msg, data) {
+	this._comboList.template.render({
+		comboOptions: this.model.get()
+	});
+}
+
+},{"../c_class":12,"../c_registry":28,"mol-proto":85}],39:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -4423,15 +4478,18 @@ function MLRadioGroup$init() {
  * @param {Mixed} value The value to be set
  */
 function MLRadioGroup_set(value) {
-	var options = this._radioList;
+	var options = this._radioList
+		, setResult;
 	if (options.length) {
 		options.forEach(function(radio) {
 			radio.checked = radio.value == value;
+			if (radio.checked)
+				setResult = value;
 		});
 
 		dispatchChangeMessage.call(this);
 
-		return this._value;
+		return setResult;
 	}
 }
 
@@ -4463,6 +4521,7 @@ function MLRadioGroup_del() {
 		});
 
 	dispatchChangeMessage.call(this);
+	return undefined;
 }
 
 
@@ -4509,7 +4568,7 @@ var MLSelect = Component.createComponentClass('MLSelect', {
 	events: undefined,
 	model: {
 		messages: {
-			'***': onOptionsChange
+			'***': { subscriber: onOptionsChange, context: 'owner' }
 		}
 	},
 	template: {
@@ -4536,8 +4595,7 @@ function MLSelect$disable(disable) {
 
 
 function onOptionsChange(path, data) {
-	var component = this._hostObject.owner;
-	component.template.render({ selectOptions: this.get() });
+	this.template.render({ selectOptions: this.model.get() });
 }
 
 },{"../c_class":12,"../c_registry":28,"mol-proto":85}],46:[function(require,module,exports){
