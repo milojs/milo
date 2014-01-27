@@ -2567,7 +2567,7 @@ function hasTextAfterSelection() {
 	if (! selection.isCollapsed) return true;
 	if (selection.anchorOffset < selection.anchorNode.length) return true;
 
-	// walk up the DOM tree to check if there are text nodes before cursor
+	// walk up the DOM tree to check if there are text nodes after cursor
 	var treeWalker = document.createTreeWalker(this.owner.el, NodeFilter.SHOW_TEXT);
 	return treeWalker.nextNode();
 }
@@ -8547,10 +8547,13 @@ function TextSelection$del() {
 	});
 
 	var selStart = this.range.startContainer;
-
+	var anchorOffset = this.selection.anchorOffset;
 	this.range.deleteContents();
+	
+	selStart.textContent = selStart.textContent.trim();
+	var position = anchorOffset > selStart.length ? selStart.length : anchorOffset;
+	setCaretPosition(selStart, position);
 	selStart.parentNode.normalize();
-	setCaretPosition(selStart, this.selection.anchorOffset);
 }
 
 
