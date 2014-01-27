@@ -1333,7 +1333,7 @@ function Component$initElement() {
 
 /**
  * Component instance method
- * Returns true if componet has facet
+ * Returns true if component has facet
  *
  * @param {Function|String} facetNameOrClass
  * @return {Boolean}
@@ -2056,7 +2056,6 @@ function onChildData(msgType, data) {
  */
 function onChangeDataMessage(msg, data, callback) {
 	if (! this._changesQueue.length)
-		// setTimeout(_.partial(_processChanges.call.bind(_processChanges), this), 1);
 		_.defer(processChangesFunc, this, callback)
 
 	this._changesQueue.push(data);
@@ -8371,7 +8370,7 @@ _.extendProto(TextSelection, {
 	init: TextSelection$init,
 	text: TextSelection$text,
 	textNodes: TextSelection$textNodes,
-	
+
 	startElement: TextSelection$startElement,
 	endElement: TextSelection$endElement,
 	containingElement: TextSelection$containingElement,
