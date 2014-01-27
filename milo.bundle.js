@@ -1548,9 +1548,10 @@ function Component$getTopScopeParent(conditionOrFacet) {
 }
 
 function _getTopScopeParent(conditionFunc) {
-	var topParent;
+	var topParent
+		parent = this;
 	do {
-		var parent = _getScopeParent.call(this, conditionFunc);
+		var parent = _getScopeParent.call(parent, conditionFunc);
 		if (parent)
 			topParent = parent;
 	} while (parent);
@@ -6922,7 +6923,8 @@ function createInternalData(fullSourceAccessPath, accessPath, sourceData) {
 
 var check = require('../util/check')
 	, Match = check.Match
-	, _ = require('mol-proto');
+	, _ = require('mol-proto')
+	, ModelError = require('../util/error').Model;
 
 var pathUtils = {
 	parseAccessPath: parseAccessPath,
@@ -7058,7 +7060,7 @@ function wrapMessengerMethods(methodsNames) {
 	_.defineProperties(this, wrappedMethods);
 }
 
-},{"../util/check":70,"mol-proto":85}],66:[function(require,module,exports){
+},{"../util/check":70,"../util/error":74,"mol-proto":85}],66:[function(require,module,exports){
 'use strict';
 
 var pathUtils = require('../path_utils')
@@ -7840,7 +7842,9 @@ function unwrapElement(el) {
 
     if (parent) {
         var frag = document.createDocumentFragment();
-        _.forEach(el.childNodes, frag.appendChild, frag);
+        // must be copied to avoid iterating a mutating list of childNodes
+        var children = _.slice(el.childNodes);
+        children.forEach(frag.appendChild, frag);
         parent.replaceChild(frag, el);
     }
 }
@@ -8325,6 +8329,16 @@ var TextSelection$endElement =
 
 /**
  * TextSelection instance method
+ * Returns selection end element
+ *
+ * @return {Element|null}
+ */
+var TextSelection$containingElement = 
+	_.partial(_getElement, '_containingElement', 'commonAncestorContainer');
+
+
+/**
+ * TextSelection instance method
  * Returns selection start Component
  *
  * @return {Component}
@@ -8343,15 +8357,29 @@ var TextSelection$endComponent =
 	_.partial(_getComponent, '_endComponent', 'endElement');
 
 
+/**
+ * TextSelection instance method
+ * Returns selection end Component
+ *
+ * @return {Component}
+ */
+var TextSelection$containingComponent = 
+	_.partial(_getComponent, '_containingComponent', 'containingElement');
+
 
 _.extendProto(TextSelection, {
 	init: TextSelection$init,
 	text: TextSelection$text,
 	textNodes: TextSelection$textNodes,
+	
 	startElement: TextSelection$startElement,
 	endElement: TextSelection$endElement,
+	containingElement: TextSelection$containingElement,
+
 	startComponent: TextSelection$startComponent,
 	endComponent: TextSelection$endComponent,
+	containingComponent: TextSelection$containingComponent,
+
 	containedComponents: TextSelection$containedComponents,
 	eachContainedComponent: TextSelection$eachContainedComponent,
 	del: TextSelection$del
@@ -9150,7 +9178,8 @@ var functionMethods = module.exports = {
 	partialRight: partialRight,
 	memoize: memoize,
 	delay: delay,
-	defer: defer
+	defer: defer,
+	debounce: debounce
 };
 
 
@@ -9270,6 +9299,42 @@ function defer() { // , arguments
 function _delay(func, wait, args) {
 	return setTimeout(func.apply.bind(func, null, args), wait);
 }
+
+
+/**
+ * Creates a function that will call original function once it has not been called for a specified time
+ *
+ * @param {Function} self function that execution has to be delayed
+ * @param {Number} wait approximate dalay time in milliseconds
+ * @param {Boolean} immediate true to invoke funciton immediately and then ignore following calls for wait milliseconds
+ * @return {Function}
+ */
+function debounce(wait, immediate) {
+	var func = this; // first parameter of _.debounce
+    var timeout, args, context, timestamp, result;
+    return function() {
+		context = this; // store original context
+		args = arguments;
+		timestamp = Date.now();
+		var callNow = immediate && ! timeout;
+		if (! timeout)
+			timeout = setTimeout(later, wait);
+		if (callNow)
+			result = func.apply(context, args);
+		return result;
+
+		function later() {
+	        var last = Date.now() - timestamp;
+	        if (last < wait)
+	        	timeout = setTimeout(later, wait - last);
+	        else {
+	        	timeout = null;
+	        	if (! immediate)
+	        		result = func.apply(context, args);
+	        }
+		}
+    };
+};
 
 },{}],88:[function(require,module,exports){
 'use strict';
