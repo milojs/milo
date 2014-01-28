@@ -8587,11 +8587,11 @@ function TextSelection$del() {
 	});
 
 	var selStart = this.range.startContainer;
-	var anchorOffset = this.selection.anchorOffset;
+	var startOffset = this.range.startOffset;
 	this.range.deleteContents();
 	
 	selStart.textContent = selStart.textContent.trim();
-	var position = anchorOffset > selStart.length ? selStart.length : anchorOffset;
+	var position = startOffset > selStart.length ? selStart.length : startOffset;
 	setCaretPosition(selStart, position);
 	selStart.parentNode.normalize();
 }
