@@ -863,13 +863,13 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
 		// if there are childNodes add children to new scope if this element has component with Container facet
 		// otherwise create a new scope
 		if (el.childNodes && el.childNodes.length) {
-			var innerScope = createScopeForChildren(el, isContainer ? undefined : scope);
+            if (isContainer) {
+                var innerScope = new Scope(el);
+                scopedObject.container.scope = innerScope;
+                innerScope._hostObject = scopedObject.container;
+            }
 
-			if (isContainer && innerScope._length()) {
-				// store new scope on container facet and set back link on scope
-				scopedObject.container.scope = innerScope;
-				innerScope._hostObject = scopedObject.container;
-			}
+			createScopeForChildren(el, isContainer ? innerScope : scope);
 		}
 
 		// if scope wasn't previously created on container facet, create empty scope anyway
@@ -897,7 +897,6 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
 
 
 	function createScopeForChildren(containerEl, scope) {
-		scope = scope || new Scope(containerEl);
 		var children = utilDom.children(containerEl);
 
 		_.forEach(children, function(node) {
@@ -1211,7 +1210,9 @@ function Component$$createFromState(state, rootScope, newUniqueName) {
 	component.setState(state);
 
     component.walkScopeTree(function(comp) {
-        comp.postMessage('stateready');
+        _.defer(function() {
+            comp.postMessage('stateready');
+        });
     });
 
 	return component;	
@@ -4079,7 +4080,7 @@ var allowedNamePattern = /^[A-Za-z][A-Za-z0-9\_\$]*$/;
 function Scope$_add(object, name) {
 	if (typeof name == 'string')
 		object.name = name;
-	else
+    else
 		name = object.name;
 	
 	if (this[name])
