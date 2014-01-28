@@ -1405,12 +1405,12 @@ function Component$allFacets(method) { // ,... arguments
 /**
  * Component instance method.
  * Removes component from its scope.
+ *
+ * @param {Boolean} preserveScopeProperty true not to delete scope property of component
  */
-function Component$remove() {
-	if (this.scope) {
-		this.scope._remove(this.name);
-		delete this.scope;
-	}
+function Component$remove(preserveScopeProperty) {
+	if (this.scope)
+		this.scope._remove(this.name, preserveScopeProperty);
 }
 
 
@@ -3029,7 +3029,7 @@ function onChildrenBound() {
 
     // After keeping a reference to the item sample, it must be hidden and removed from scope
     this.list.itemSample.dom.hide();
-    this.list.itemSample.remove();
+    this.list.itemSample.remove(true);
 
     // create item template to insert many items at once
     var itemElCopy = foundItem.el.cloneNode(true);
@@ -3113,7 +3113,7 @@ function List$addItems(count) {
     var wrapEl = document.createElement('div');
     wrapEl.innerHTML = itemsHTML;
 
-    miloBinder(wrapEl);
+    miloBinder(wrapEl, this.owner.container.scope);
     var children = domUtils.children(wrapEl);
 
     if (count != children.length)
@@ -3714,8 +3714,8 @@ var domElementsDataAccess = {
  		property: 'innerHTML',
 	},
 	'div': {
- 		property: 'value', // hack, should be innerHTML? to make work with Editable facet
- 		event: 'input'
+ 		property: 'innerHTML', // hack, should be innerHTML? to make work with Editable facet
+ 		// event: 'input'
 	},
 	'span': {
  		property: 'innerHTML', // hack,  to make work with Editable facet
@@ -4185,12 +4185,14 @@ function Scope$_any() {
  * Instance method.
  * Removes a component from the scope by it's name.
  * @param {String} name the name of the component to remove
+ * @param {Boolean} preserveScopeProperty true not to delete scope property of object
  */
-function Scope$_remove(name) {
+function Scope$_remove(name, preserveScopeProperty) {
 	if (! (name in this))
 		return logger.warn('removing object that is not in scope');
 
-	delete this[name].scope;
+	if (! preserveScopeProperty)
+		delete this[name].scope;
 	delete this[name];
 }
 
