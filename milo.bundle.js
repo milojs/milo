@@ -8548,20 +8548,18 @@ function TextSelection$containedComponents() {
 		var treeWalker = this.window.document.createTreeWalker(rangeContainer,
 				NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
 
-		treeWalker.currentNode = selStart; 
+		treeWalker.currentNode = selStart;
 		var node = treeWalker.nextNode(); // first node after selected text node
 
 		while (node && node != selEnd) {
 			if (node.nodeType != Node.TEXT_NODE) {
 				var comp = Component.getComponent(node);
-
-				if (comp && ! comp.el.contains(selEnd))
+				if (comp && !comp.el.contains(selEnd))
 					components.push(comp);
 			}
 			node = treeWalker.nextNode();
 		}
 	}
-
 	return components;
 }
 
@@ -8590,7 +8588,7 @@ function TextSelection$del() {
 	var startOffset = this.range.startOffset;
 	this.range.deleteContents();
 	
-	selStart.textContent = selStart.textContent.trim();
+	selStart.textContent = selStart.textContent.trimRight();
 	var position = startOffset > selStart.length ? selStart.length : startOffset;
 	setCaretPosition(selStart, position);
 	selStart.parentNode.normalize();
