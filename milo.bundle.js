@@ -4082,6 +4082,10 @@ function Scope$_add(object, name) {
 
 	this[name] = object;
 	object.scope = this;
+
+    if (typeof object.postMessage === 'function') {
+        object.postMessage('insertedinscope');
+    }
 }
 
 
@@ -9150,7 +9154,8 @@ var functionMethods = module.exports = {
 	partialRight: partialRight,
 	memoize: memoize,
 	delay: delay,
-	defer: defer
+	defer: defer,
+	debounce: debounce
 };
 
 
@@ -9270,6 +9275,42 @@ function defer() { // , arguments
 function _delay(func, wait, args) {
 	return setTimeout(func.apply.bind(func, null, args), wait);
 }
+
+
+/**
+ * Creates a function that will call original function once it has not been called for a specified time
+ *
+ * @param {Function} self function that execution has to be delayed
+ * @param {Number} wait approximate dalay time in milliseconds
+ * @param {Boolean} immediate true to invoke funciton immediately and then ignore following calls for wait milliseconds
+ * @return {Function}
+ */
+function debounce(wait, immediate) {
+	var func = this; // first parameter of _.debounce
+    var timeout, args, context, timestamp, result;
+    return function() {
+		context = this; // store original context
+		args = arguments;
+		timestamp = Date.now();
+		var callNow = immediate && ! timeout;
+		if (! timeout)
+			timeout = setTimeout(later, wait);
+		if (callNow)
+			result = func.apply(context, args);
+		return result;
+
+		function later() {
+	        var last = Date.now() - timestamp;
+	        if (last < wait)
+	        	timeout = setTimeout(later, wait - last);
+	        else {
+	        	timeout = null;
+	        	if (! immediate)
+	        		result = func.apply(context, args);
+	        }
+		}
+    };
+};
 
 },{}],88:[function(require,module,exports){
 'use strict';
