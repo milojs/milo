@@ -1546,9 +1546,9 @@ function Component$getTopScopeParent(conditionOrFacet) {
 
 function _getTopScopeParent(conditionFunc) {
 	var topParent
-		parent = this;
+		, parent = this;
 	do {
-		var parent = _getScopeParent.call(parent, conditionFunc);
+		parent = _getScopeParent.call(parent, conditionFunc);
 		if (parent)
 			topParent = parent;
 	} while (parent);
