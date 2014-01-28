@@ -72,17 +72,9 @@ describe('milo binder', function() {
         var myLinkedList = ctrl.myLinkedList;
 
         var cnct = milo.minder([
-            [myList.data, '<<<->>>', m, {
-                '[*].titleLabel': '[$1].caption',
-                // '[*].titleLabel': '[$1].title', // code
-                '[*].descField': '[$1].desc' 
-            }],
-            [m, '<<<->>>', myLinkedList.data, {
-                '[*].title': '[$1].titleField',
-                '[*].desc': '[$1].descLabel' 
-            }]
+            [myList.data, '<<<->>>', m],
+            [m, '<<<->>>', myLinkedList.data]
         ]);
-        // var cnct = milo.minder(myList.data, '->>>', myLinkedList.data);
 
         var listArray = [];
         for (var i = 0; i < 10; i++)

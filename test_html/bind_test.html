@@ -22,9 +22,9 @@
         <div ml-bind="MLRadioGroup:myRadioGroup"></div>
 
         <h2>List 1</h2>
-        <div ml-bind="[Container, Dom, Data, List]:myList">
+        <div ml-bind="[List]:myList">
             <button ml-bind="[Events]:listButton">Change list data</button>
-            <div ml-bind="[Container, Dom, Data, Item]:myListItem">
+            <div ml-bind="[Item]:myListItem">
                 <span ml-bind="[Data]:title"></span>
                 <input ml-bind="[Data]:desc" type="text" value="" />
             </div>
@@ -34,8 +34,8 @@
         <button ml-bind="[Events]:disconnectButton">Disconnect lists</button>
 
         <h2>List 2 (<span ml-bind="[Data]:linkState">linked</span> to List 1 with milo.minder)</h2>
-        <div ml-bind="[Container, Dom, Data, List]:myLinkedList">
-            <div ml-bind="[Container, Dom, Data, Item]:myListItem">
+        <div ml-bind="[List]:myLinkedList">
+            <div ml-bind="[Item]:myListItem">
                 <input ml-bind="[Data]:title" type="text" value="" />
                 <span ml-bind="[Data]:desc"></span>
             </div>

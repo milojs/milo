@@ -1333,7 +1333,7 @@ function Component$initElement() {
 
 /**
  * Component instance method
- * Returns true if componet has facet
+ * Returns true if component has facet
  *
  * @param {Function|String} facetNameOrClass
  * @return {Boolean}
@@ -1405,12 +1405,12 @@ function Component$allFacets(method) { // ,... arguments
 /**
  * Component instance method.
  * Removes component from its scope.
+ *
+ * @param {Boolean} preserveScopeProperty true not to delete scope property of component
  */
-function Component$remove() {
-	if (this.scope) {
-		this.scope._remove(this.name);
-		delete this.scope;
-	}
+function Component$remove(preserveScopeProperty) {
+	if (this.scope)
+		this.scope._remove(this.name, preserveScopeProperty);
 }
 
 
@@ -1548,9 +1548,10 @@ function Component$getTopScopeParent(conditionOrFacet) {
 }
 
 function _getTopScopeParent(conditionFunc) {
-	var topParent;
+	var topParent
+		parent = this;
 	do {
-		var parent = _getScopeParent.call(this, conditionFunc);
+		var parent = _getScopeParent.call(parent, conditionFunc);
 		if (parent)
 			topParent = parent;
 	} while (parent);
@@ -2055,7 +2056,6 @@ function onChildData(msgType, data) {
  */
 function onChangeDataMessage(msg, data, callback) {
 	if (! this._changesQueue.length)
-		// setTimeout(_.partial(_processChanges.call.bind(_processChanges), this), 1);
 		_.defer(processChangesFunc, this, callback)
 
 	this._changesQueue.push(data);
@@ -2566,7 +2566,7 @@ function hasTextAfterSelection() {
 	if (! selection.isCollapsed) return true;
 	if (selection.anchorOffset < selection.anchorNode.length) return true;
 
-	// walk up the DOM tree to check if there are text nodes before cursor
+	// walk up the DOM tree to check if there are text nodes after cursor
 	var treeWalker = document.createTreeWalker(this.owner.el, NodeFilter.SHOW_TEXT);
 	return treeWalker.nextNode();
 }
@@ -3029,7 +3029,7 @@ function onChildrenBound() {
 
     // After keeping a reference to the item sample, it must be hidden and removed from scope
     this.list.itemSample.dom.hide();
-    this.list.itemSample.remove();
+    this.list.itemSample.remove(true);
 
     // create item template to insert many items at once
     var itemElCopy = foundItem.el.cloneNode(true);
@@ -3113,7 +3113,7 @@ function List$addItems(count) {
     var wrapEl = document.createElement('div');
     wrapEl.innerHTML = itemsHTML;
 
-    miloBinder(wrapEl);
+    miloBinder(wrapEl, this.owner.container.scope);
     var children = domUtils.children(wrapEl);
 
     if (count != children.length)
@@ -3714,8 +3714,8 @@ var domElementsDataAccess = {
  		property: 'innerHTML',
 	},
 	'div': {
- 		property: 'value', // hack, should be innerHTML? to make work with Editable facet
- 		event: 'input'
+ 		property: 'innerHTML', // hack, should be innerHTML? to make work with Editable facet
+ 		// event: 'input'
 	},
 	'span': {
  		property: 'innerHTML', // hack,  to make work with Editable facet
@@ -4189,12 +4189,14 @@ function Scope$_any() {
  * Instance method.
  * Removes a component from the scope by it's name.
  * @param {String} name the name of the component to remove
+ * @param {Boolean} preserveScopeProperty true not to delete scope property of object
  */
-function Scope$_remove(name) {
+function Scope$_remove(name, preserveScopeProperty) {
 	if (! (name in this))
 		return logger.warn('removing object that is not in scope');
 
-	delete this[name].scope;
+	if (! preserveScopeProperty)
+		delete this[name].scope;
 	delete this[name];
 }
 
@@ -6926,7 +6928,8 @@ function createInternalData(fullSourceAccessPath, accessPath, sourceData) {
 
 var check = require('../util/check')
 	, Match = check.Match
-	, _ = require('mol-proto');
+	, _ = require('mol-proto')
+	, ModelError = require('../util/error').Model;
 
 var pathUtils = {
 	parseAccessPath: parseAccessPath,
@@ -7062,7 +7065,7 @@ function wrapMessengerMethods(methodsNames) {
 	_.defineProperties(this, wrappedMethods);
 }
 
-},{"../util/check":70,"mol-proto":85}],66:[function(require,module,exports){
+},{"../util/check":70,"../util/error":74,"mol-proto":85}],66:[function(require,module,exports){
 'use strict';
 
 var pathUtils = require('../path_utils')
@@ -7844,7 +7847,9 @@ function unwrapElement(el) {
 
     if (parent) {
         var frag = document.createDocumentFragment();
-        _.forEach(el.childNodes, frag.appendChild, frag);
+        // must be copied to avoid iterating a mutating list of childNodes
+        var children = _.slice(el.childNodes);
+        children.forEach(frag.appendChild, frag);
         parent.replaceChild(frag, el);
     }
 }
@@ -8329,6 +8334,16 @@ var TextSelection$endElement =
 
 /**
  * TextSelection instance method
+ * Returns selection end element
+ *
+ * @return {Element|null}
+ */
+var TextSelection$containingElement = 
+	_.partial(_getElement, '_containingElement', 'commonAncestorContainer');
+
+
+/**
+ * TextSelection instance method
  * Returns selection start Component
  *
  * @return {Component}
@@ -8347,15 +8362,29 @@ var TextSelection$endComponent =
 	_.partial(_getComponent, '_endComponent', 'endElement');
 
 
+/**
+ * TextSelection instance method
+ * Returns selection end Component
+ *
+ * @return {Component}
+ */
+var TextSelection$containingComponent = 
+	_.partial(_getComponent, '_containingComponent', 'containingElement');
+
 
 _.extendProto(TextSelection, {
 	init: TextSelection$init,
 	text: TextSelection$text,
 	textNodes: TextSelection$textNodes,
+
 	startElement: TextSelection$startElement,
 	endElement: TextSelection$endElement,
+	containingElement: TextSelection$containingElement,
+
 	startComponent: TextSelection$startComponent,
 	endComponent: TextSelection$endComponent,
+	containingComponent: TextSelection$containingComponent,
+
 	containedComponents: TextSelection$containedComponents,
 	eachContainedComponent: TextSelection$eachContainedComponent,
 	del: TextSelection$del
@@ -8523,10 +8552,13 @@ function TextSelection$del() {
 	});
 
 	var selStart = this.range.startContainer;
-
+	var anchorOffset = this.selection.anchorOffset;
 	this.range.deleteContents();
+	
+	selStart.textContent = selStart.textContent.trim();
+	var position = anchorOffset > selStart.length ? selStart.length : anchorOffset;
+	setCaretPosition(selStart, position);
 	selStart.parentNode.normalize();
-	setCaretPosition(selStart, this.selection.anchorOffset);
 }
 
 
