@@ -877,8 +877,8 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
 			scopedObject.container.scope = new Scope(el);
 
 
-		// TODO condition after && is a hack! change
-		if (scopedObject && ! scope[attr.compName])
+		// TODO condition after && is a hack, should not be used!
+		if (scopedObject) // && ! scope[attr.compName])
 			scope._add(scopedObject, attr.compName);
 
 		// _.defer(postChildrenBoundMessage, el);
@@ -889,6 +889,7 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
 
 		function postChildrenBoundMessage(el) {
 			var elComp = Component.getComponent(el);
+
 			if (elComp)
 				elComp.postMessage('childrenbound');
 		}
@@ -1112,10 +1113,6 @@ function Component$$copy(component, deepCopy) {
 	// create component of the same class on the element
 	var aComponent = ComponentClass.createOnElement(newEl, undefined, component.scope, component.extraFacets);
 
-	if (deepCopy)
-	  	aComponent.container.binder();
-
-	// transfer state
 	aComponent.setState(component._getState(deepCopy || false));
 
 	return aComponent;
@@ -1281,9 +1278,9 @@ function Component$init(scope, element, name, componentInfo) {
 	// store reference to component on DOM element
 	if (this.el) {
 		// check that element does not have a component already atached
-		// var elComp = this.el[config.componentRef];
-		// if (elComp)
-		// 	logger.error('component ' + name + ' attached to element that already has component ' + elComp.name);
+		var elComp = this.el[config.componentRef];
+		if (elComp)
+		 	logger.warn('component ' + name + ' attached to element that already has component ' + elComp.name);
 
 		this.el[config.componentRef] = this;
 	}
@@ -2389,8 +2386,14 @@ function init() {
 
 // start Dom facet
 function start() {
-	if (this.config.cls)
-		this.owner.el.classList.add(this.config.cls);
+	var cssClasses = this.config.cls
+		, classList = this.owner.el.classList;
+	if (Array.isArray(cssClasses))
+		cssClasses.forEach(classList.add, classList);
+	else if (typeof cssClasses == 'string')
+		classList.add(cssClasses);
+	else if (cssClasses)
+		throw new DomFacetError('unknown type of "cls" configuration parameter');
 }
 
 // show HTML element of component
@@ -2581,7 +2584,8 @@ var ComponentFacet = require('../c_facet')
 	, facetsRegistry = require('./cf_registry')
 	, DOMEventsSource = require('../msg_src/dom_events')
 	, Component = require('../c_class')
-	, _ = require('mol-proto');
+	, _ = require('mol-proto')
+	, logger = require('../../util/logger');
 
 
 /**
@@ -2691,7 +2695,7 @@ function targetInDragHandle() {
 	return ! this._dragHandle || this._dragHandle.contains(this.__mouseDownTarget);
 }
 
-},{"../c_class":12,"../c_facet":13,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":85}],18:[function(require,module,exports){
+},{"../../util/logger":77,"../c_class":12,"../c_facet":13,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":85}],18:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drop"></a>
@@ -2966,7 +2970,8 @@ var ComponentFacet = require('../c_facet')
     , doT = require('dot')
     , check = miloUtil.check
     , Match = check.Match
-    , domUtils = miloUtil.dom;
+    , domUtils = miloUtil.dom
+    , miloConfig = require('../../config');
 
 
 // Data model connection facet
@@ -3028,8 +3033,13 @@ function onChildrenBound() {
     this.list.itemSample = foundItem;
 
     // After keeping a reference to the item sample, it must be hidden and removed from scope
-    this.list.itemSample.dom.hide();
-    this.list.itemSample.remove(true);
+    foundItem.dom.hide();
+    foundItem.remove(true);
+
+    // remove references to components from sample item
+    foundItem.walkScopeTree(function(comp) {
+        delete comp.el[miloConfig.componentRef];
+    });
 
     // create item template to insert many items at once
     var itemElCopy = foundItem.el.cloneNode(true);
@@ -3176,7 +3186,7 @@ function each(callback, thisArg) {
     }, thisArg || this);
 }
 
-},{"../../binder":10,"../../mail":50,"../../model":61,"../../util":75,"../c_class":12,"../c_facet":13,"./cf_registry":26,"dot":84,"mol-proto":85}],23:[function(require,module,exports){
+},{"../../binder":10,"../../config":48,"../../mail":50,"../../model":61,"../../util":75,"../c_class":12,"../c_facet":13,"./cf_registry":26,"dot":84,"mol-proto":85}],23:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-model"></a>
@@ -3321,10 +3331,7 @@ function Template$render(data) { // we need data only if use templating engine
 
 
 function Template$binder() {
-	var thisScope = binder(this.owner.el);
-
-	// TODO should be changed to reconcillation of existing children with new
-	this.owner.container.scope = thisScope[this.owner.name].container.scope;
+	this.owner.container.binder();
 }
 
 },{"../../binder":10,"../../util/check":70,"../c_facet":13,"./cf_registry":26,"mol-proto":85}],25:[function(require,module,exports){
@@ -4082,6 +4089,10 @@ function Scope$_add(object, name) {
 
 	this[name] = object;
 	object.scope = this;
+
+    if (typeof object.postMessage === 'function') {
+        object.postMessage('insertedinscope');
+    }
 }
 
 

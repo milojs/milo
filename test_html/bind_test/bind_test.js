@@ -5,23 +5,11 @@ describe('milo binder', function() {
     it('should bind components based on ml-bind attribute', function() {
 		expect({p: 1}).property('p', 1);
 
-        // console.log(milo.binder.scan());
-
-        // console.log('one pass binding');
     	var ctrl = milo.binder();
-        // console.log(ctrl);
-
-        // console.log('two pass binding');
-        // var ctrl2 = milo.binder.twoPass();
-        // console.log(ctrl);
 
     	ctrl.articleButton.events.on('click mouseenter', function(eType, evt) {
     		console.log('button', eType, evt);
     	});
-
-        // ctrl.main.events.on('click mouseenter input keypress', function(eType, evt) {
-        //     console.log('div', eType, evt);
-        // });
 
     	ctrl.articleIdInput.data.on('', logData);
 
@@ -59,10 +47,10 @@ describe('milo binder', function() {
             { value: 'male', label: 'Male' },
             { value: 'other', label: 'Other' }
         ]);
-    });
+    // });
 
-    it('should bind a list, and instantiate list items', function() {
-        var ctrl = milo.binder();
+    // it('should bind a list, and instantiate list items', function() {
+    //     var ctrl = milo.binder();
 
         var myList = ctrl.myList;
         var listButton = myList.container.scope.listButton;
@@ -77,7 +65,7 @@ describe('milo binder', function() {
         ]);
 
         var listArray = [];
-        for (var i = 0; i < 10; i++)
+        for (var i = 0; i < 2; i++)
             listArray.push({title: 'Title ' + i, desc: 'Description ' + i});
 
         m.set(listArray);
