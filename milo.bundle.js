@@ -100,7 +100,7 @@ function _createProxyMethods(proxyMethods, hostObject) {
 		}, this);
 }
 
-},{"../util/check":71,"../util/error":75,"mol-proto":86}],2:[function(require,module,exports){
+},{"../util/check":72,"../util/error":76,"mol-proto":87}],2:[function(require,module,exports){
 'use strict';
 
 
@@ -131,7 +131,7 @@ _.extendProto(Facet, {
 	init: function() {}
 });
 
-},{"mol-proto":86}],3:[function(require,module,exports){
+},{"mol-proto":87}],3:[function(require,module,exports){
 'use strict';
 
 
@@ -323,9 +323,9 @@ function FacetedObject$$createFacetedClass(name, facetsClasses, facetsConfig) {
 	}
 };
 
-},{"../util/check":71,"../util/error":75,"./facet":2,"mol-proto":86}],4:[function(require,module,exports){
+},{"../util/check":72,"../util/error":76,"./facet":2,"mol-proto":87}],4:[function(require,module,exports){
 module.exports=require(1)
-},{"../util/check":71,"../util/error":75,"mol-proto":86}],5:[function(require,module,exports){
+},{"../util/check":72,"../util/error":76,"mol-proto":87}],5:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -445,7 +445,7 @@ function setClass(FoundationClass) {
 	_.defineProperty(this, 'FoundationClass', FoundationClass, _.ENUM);
 }
 
-},{"../util/check":71,"../util/error":75,"mol-proto":86}],6:[function(require,module,exports){
+},{"../util/check":72,"../util/error":76,"mol-proto":87}],6:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -456,9 +456,9 @@ var Attribute = require('./a_class')
 	, Match = check.Match;
 
 
-var attrRegExp= /^([^\:\[\]]*)(?:\[([^\:\[\]]*)\])?\:?([^:]*)$/
-	, facetsSplitRegExp = /\s*(?:\,|\s)\s*/
-	, attrTemplate = '%compClass%compFacets:%compName';
+var ATTRIBUTE_REGEXP= /^([^\:\[\]]*)(?:\[([^\:\[\]]*)\])?\:?([^:]*)$/
+	, FACETS_SPLIT_REGEXP = /\s*(?:\,|\s)\s*/
+	, ATTRIBUTE_TEMPLATE = '%compClass%compFacets:%compName';
 
 
 /**
@@ -522,13 +522,13 @@ function attrName() {
 	var value = this.get();
 
 	if (value)
-		var bindTo = value.match(attrRegExp);
+		var bindTo = value.match(ATTRIBUTE_REGEXP);
 
 	if (! bindTo)
 		throw new AttributeError('invalid bind attribute ' + value);
 
 	this.compClass = bindTo[1] || 'Component';
-	this.compFacets = (bindTo[2] && bindTo[2].split(facetsSplitRegExp)) || undefined;
+	this.compFacets = (bindTo[2] && bindTo[2].split(FACETS_SPLIT_REGEXP)) || undefined;
 	this.compName = bindTo[3] || undefined;
 
 	return this;
@@ -559,15 +559,15 @@ function validate() {
  */
 function render() {
 	this.compName = this.compName || milo.util.componentName();
-	return attrTemplate
+	return ATTRIBUTE_TEMPLATE
 				.replace('%compClass', this.compClass || '')
-				.replace('%compFacets', this.compFacets
+				.replace('%compFacets', this.compFacets && this.compFacets.length
 											? '[' + this.compFacets.join(', ') + ']'
 											: '')
 				.replace('%compName', this.compName);
 }
 
-},{"../config":48,"../util/check":71,"../util/error":75,"./a_class":7,"mol-proto":86}],7:[function(require,module,exports){
+},{"../config":48,"../util/check":72,"../util/error":76,"./a_class":7,"mol-proto":87}],7:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -650,7 +650,7 @@ function decorate() {
 	this.set(this.render());
 }
 
-},{"../util/check":71,"../util/error":75,"mol-proto":86}],8:[function(require,module,exports){
+},{"../util/check":72,"../util/error":76,"mol-proto":87}],8:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -737,7 +737,7 @@ function render() {
 	return this.loadUrl;
 }
 
-},{"../config":48,"../util/error":75,"./a_class":7,"mol-proto":86}],9:[function(require,module,exports){
+},{"../config":48,"../util/error":76,"./a_class":7,"mol-proto":87}],9:[function(require,module,exports){
 'use strict';
 
 /**
@@ -906,7 +906,7 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
 	}
 }
 
-},{"./attributes/a_bind":6,"./components/c_facets/cf_registry":26,"./components/c_info":27,"./components/c_registry":28,"./components/scope":36,"./mail":50,"./util/check":71,"./util/dom":74,"./util/error":75,"mol-proto":86}],11:[function(require,module,exports){
+},{"./attributes/a_bind":6,"./components/c_facets/cf_registry":26,"./components/c_info":27,"./components/c_registry":28,"./components/scope":36,"./mail":50,"./util/check":72,"./util/dom":75,"./util/error":76,"mol-proto":87}],11:[function(require,module,exports){
 'use strict';
 
 // <a name="classes"></a>
@@ -1588,7 +1588,7 @@ function Component$walkScopeTree(callback, thisArg) {
     });
 }
 
-},{"../abstract/faceted_object":3,"../attributes/a_bind":6,"../binder":10,"../config":48,"../messenger":53,"../util/check":71,"../util/component_name":72,"../util/dom":74,"../util/error":75,"../util/logger":78,"./c_facets/cf_registry":26,"./c_utils":29,"./scope":36,"mol-proto":86}],13:[function(require,module,exports){
+},{"../abstract/faceted_object":3,"../attributes/a_bind":6,"../binder":10,"../config":48,"../messenger":53,"../util/check":72,"../util/component_name":73,"../util/dom":75,"../util/error":76,"../util/logger":79,"./c_facets/cf_registry":26,"./c_utils":29,"./scope":36,"mol-proto":87}],13:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facet"></a>
@@ -1777,7 +1777,7 @@ function requiresFacet(facetName) {
 						|| facetRequire.indexOf(_.firstLowerCase(facetName)) >= 0);
 }
 
-},{"../abstract/facet":2,"../messenger":53,"../util/error":75,"./c_utils":29,"mol-proto":86}],14:[function(require,module,exports){
+},{"../abstract/facet":2,"../messenger":53,"../util/error":76,"./c_utils":29,"mol-proto":87}],14:[function(require,module,exports){
 'use strict';
 
 
@@ -1875,7 +1875,7 @@ function Container$setState(state) {
 }
 
 
-},{"../../binder":10,"../../util/logger":78,"../c_facet":13,"../scope":36,"./cf_registry":26,"mol-proto":86}],15:[function(require,module,exports){
+},{"../../binder":10,"../../util/logger":79,"../c_facet":13,"../scope":36,"./cf_registry":26,"mol-proto":87}],15:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../../abstract/mixin')
@@ -1887,6 +1887,7 @@ var Mixin = require('../../abstract/mixin')
 	, DataMsgAPI = require('../msg_api/data')
 	, getElementDataAccess = require('../msg_api/de_data')
 	, pathUtils = require('../../model/path_utils')
+	, modelUtils = require('../../model/model_utils')
 	, changeDataHandler = require('../../model/change_data')
 
 	, _ = require('mol-proto')
@@ -2216,6 +2217,69 @@ function Data$_getScalarValue() {
 
 /**
  * Data facet instance method
+ * Splices List items. Requires List facet to be present on component. Works in the same way as array splice.
+ * Returns data retrieved from removed items
+ *
+ * @param {Integer} spliceIndex index to delete/insert at
+ * @param {Integer} spliceHowMany number of items to delete
+ * @param {List} arguments optional items to insert
+ * @return {Array}
+ */
+function Data$splice(spliceIndex, spliceHowMany) { //, ... arguments
+ 	var listFacet = this.owner.list;
+ 	if (! listFacet)
+ 		return logger.warn('Data: cannot use splice method without List facet');
+
+ 	var removed = [];
+
+ 	var listLength = listFacet.count();
+ 	arguments[0] = spliceIndex =
+ 		modelUtils.normalizeSpliceIndex(spliceIndex, listLength);
+
+ 	if (spliceHowMany > 0 && listLength > 0) {
+ 		for (var i = spliceIndex; i < spliceIndex + spliceHowMany; i++) {
+ 			var item = listFacet.item(spliceIndex);
+ 			if (item) {
+ 				var itemData = item.data.get();
+ 				listFacet.removeItem(spliceIndex, true);
+ 			} else
+ 				logger.warn('Data: no item for index', i);
+
+ 			removed.push(itemData);
+ 		}
+ 	}
+
+ 	var added = [];
+
+ 	var argsLen = arguments.length
+ 		, addItems = argsLen > 2;
+ 	if (addItems) {
+ 		listFacet.addItems(argsLen - 2, spliceIndex);
+ 		for (var i = 2, j = spliceIndex; i < argsLen; i++, j++) {
+ 			var item = listFacet.item(j);
+ 			if (item)
+ 				var itemData = item.data.set(arguments[i]);
+ 			else
+ 				logger.warn('Data: no item for index', j);
+
+ 			added.push(itemData);
+ 		}
+ 	}
+
+ 	if (Array.isArray(this._value)) {
+ 		_.prependArray(added, [spliceIndex, spliceHowMany]);
+ 		Array.prototype.splice.apply(this._value, added);
+ 	} else
+ 		this._value = this.get();
+
+	this.postMessage('', { path: '', type: 'splice',
+							index: spliceIndex, removed: removed, addedCount: addItems ? argsLen - 2 : 0,
+							newValue: this._value });
+}
+
+
+/**
+ * Data facet instance method
  * Returns data facet of a child component (by scopes) corresponding to the path
  * @param {String} accessPath data access path
  */
@@ -2273,7 +2337,7 @@ function Data$setState(state) {
 	return this.set(state.state);
 }
 
-},{"../../abstract/mixin":4,"../../messenger":53,"../../model/change_data":60,"../../model/path_utils":66,"../../util/logger":78,"../c_facet":13,"../msg_api/data":31,"../msg_api/de_data":32,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":86}],16:[function(require,module,exports){
+},{"../../abstract/mixin":4,"../../messenger":53,"../../model/change_data":60,"../../model/model_utils":65,"../../model/path_utils":67,"../../util/logger":79,"../c_facet":13,"../msg_api/data":31,"../msg_api/de_data":32,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":87}],16:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-dom"></a>
@@ -2516,7 +2580,7 @@ function hasTextAfterSelection() {
 	return treeWalker.nextNode();
 }
 
-},{"../../attributes/a_bind":6,"../../binder":10,"../../util/check":71,"../../util/dom":74,"../../util/error":75,"../c_facet":13,"./cf_registry":26,"mol-proto":86}],17:[function(require,module,exports){
+},{"../../attributes/a_bind":6,"../../binder":10,"../../util/check":72,"../../util/dom":75,"../../util/error":76,"../c_facet":13,"./cf_registry":26,"mol-proto":87}],17:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drag"></a>
@@ -2637,7 +2701,7 @@ function targetInDragHandle() {
 	return ! this._dragHandle || this._dragHandle.contains(this.__mouseDownTarget);
 }
 
-},{"../../util/logger":78,"../c_class":12,"../c_facet":13,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":86}],18:[function(require,module,exports){
+},{"../../util/logger":79,"../c_class":12,"../c_facet":13,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":87}],18:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drop"></a>
@@ -2687,7 +2751,7 @@ function Drop$start() {
 	}
 }
 
-},{"../c_facet":13,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":86}],19:[function(require,module,exports){
+},{"../c_facet":13,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":87}],19:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -2739,7 +2803,7 @@ function Events$init() {
 	_.defineProperty(this, '_domEventsSource', domEventsSource);
 }
 
-},{"../../messenger":53,"../c_facet":13,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":86}],20:[function(require,module,exports){
+},{"../../messenger":53,"../c_facet":13,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":87}],20:[function(require,module,exports){
 'use strict';
 
 
@@ -2857,7 +2921,7 @@ function Frame$isReady() {
 	return  readyState != 'loading' ? readyState : false;
 }
 
-},{"../../messenger":53,"../c_facet":13,"../msg_src/de_constrs":33,"../msg_src/frame":35,"./cf_registry":26,"mol-proto":86}],21:[function(require,module,exports){
+},{"../../messenger":53,"../c_facet":13,"../msg_src/de_constrs":33,"../msg_src/frame":35,"./cf_registry":26,"mol-proto":87}],21:[function(require,module,exports){
 'use strict';
 
 
@@ -2893,7 +2957,7 @@ function ItemFacet$removeItem() {
 	this.list.removeItem(this.index, true);
 }
 
-},{"../../mail":50,"../../model":62,"../c_facet":13,"./cf_registry":26,"mol-proto":86}],22:[function(require,module,exports){
+},{"../../mail":50,"../../model":62,"../c_facet":13,"./cf_registry":26,"mol-proto":87}],22:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-list"></a>
@@ -3049,8 +3113,9 @@ function addItem(index) {
  * Adds a given number of items using template rendering rather than adding elements one by one
  *
  * @param {Integer} count number of items to add
+ * @param {[Integer]} index optional index of item after which to add
  */
-function List$addItems(count) {
+function List$addItems(count, index) {
     check(count, Match.Integer);
     if (count < 0)
         throw new ListError('can\'t add negative number of items')
@@ -3072,17 +3137,23 @@ function List$addItems(count) {
         logger.error('number of items added is different from requested');
 
     if (children && children.length) {
-        var count = this.count();
-        var prevComponent = count 
-                                ? this._listItems[count - 1]
-                                : this.itemSample;
+        var listLength = this.count();
+        var spliceIndex = index < 0
+                            ? 0
+                            : typeof index == 'undefined' || index > listLength
+                                ? listLength
+                                : index;
+
+        var prevComponent = spliceIndex == 0
+                                ? this.itemSample
+                                : this._listItems[spliceIndex - 1];
 
         var frag = document.createDocumentFragment();
-        children.forEach(function(el, index) {
+        children.forEach(function(el, i) {
             var component = Component.getComponent(el);
             if (! component)
                 return logger.error('List: element in new items is not a component');
-            this._listItems.push(component);
+            this._listItems.splice(spliceIndex++, 0, component);
             this._listItemsHash[component.name] = component;
             frag.appendChild(el);
             el.style.display = '';
@@ -3128,7 +3199,7 @@ function each(callback, thisArg) {
     }, thisArg || this);
 }
 
-},{"../../binder":10,"../../config":48,"../../mail":50,"../../model":62,"../../util":76,"../c_class":12,"../c_facet":13,"./cf_registry":26,"dot":85,"mol-proto":86}],23:[function(require,module,exports){
+},{"../../binder":10,"../../config":48,"../../mail":50,"../../model":62,"../../util":77,"../c_class":12,"../c_facet":13,"./cf_registry":26,"dot":86,"mol-proto":87}],23:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-model"></a>
@@ -3192,7 +3263,7 @@ function ModelFacet$_createMessenger() { // Called by inherited init
 	this.m.proxyMethods(this); // Creates model's methods directly on facet
 }
 
-},{"../../model":62,"../c_facet":13,"./cf_registry":26,"mol-proto":86}],24:[function(require,module,exports){
+},{"../../model":62,"../c_facet":13,"./cf_registry":26,"mol-proto":87}],24:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-template"></a>
@@ -3276,7 +3347,7 @@ function Template$binder() {
 	this.owner.container.binder();
 }
 
-},{"../../binder":10,"../../util/check":71,"../c_facet":13,"./cf_registry":26,"mol-proto":86}],25:[function(require,module,exports){
+},{"../../binder":10,"../../util/check":72,"../c_facet":13,"./cf_registry":26,"mol-proto":87}],25:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -3330,7 +3401,7 @@ function Transfer$init() {
  	this._state = state;
  }
 
-},{"../c_facet":13,"./cf_registry":26,"mol-proto":86}],26:[function(require,module,exports){
+},{"../c_facet":13,"./cf_registry":26,"mol-proto":87}],26:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../abstract/registry')
@@ -3426,7 +3497,7 @@ function hasContainerFacet(ComponentClass, extraFacetsClasses) {
 	}
 }
 
-},{"../util/error":75,"./c_facets/cf_registry":26,"./c_registry":28,"mol-proto":86}],28:[function(require,module,exports){
+},{"../util/error":76,"./c_facets/cf_registry":26,"./c_registry":28,"mol-proto":87}],28:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -3534,7 +3605,7 @@ function _getContainingComponent(el, returnCurrent, conditionFunc) {
 		return _getContainingComponent(el.parentNode, true, conditionFunc);
 }
 
-},{"../config":48,"../util/check":71}],30:[function(require,module,exports){
+},{"../config":48,"../util/check":72}],30:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3632,7 +3703,7 @@ function createInternalData(sourceMessage, message, data) {
 	return internalData;
 };
 
-},{"../../messenger/m_api":54,"../../util/check":71,"./de_data":32,"mol-proto":86}],32:[function(require,module,exports){
+},{"../../messenger/m_api":54,"../../util/check":72,"./de_data":32,"mol-proto":87}],32:[function(require,module,exports){
 'use strict';
 
 
@@ -3756,7 +3827,7 @@ function inputChangeEvent(el) {
 			: inputElementTypes.byDefault.event;
 }
 
-},{"mol-proto":86}],33:[function(require,module,exports){
+},{"mol-proto":87}],33:[function(require,module,exports){
 'use strict';
 
 // <a name="components-dom-constructors"></a>
@@ -3807,7 +3878,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"mol-proto":86}],34:[function(require,module,exports){
+},{"mol-proto":87}],34:[function(require,module,exports){
 'use strict';
 
 // <a name="components-source-dom"></a>
@@ -3896,7 +3967,7 @@ function trigger(eventType, properties) {
 	return notCancelled;
 }
 
-},{"../../messenger/m_source":56,"../../util/check":71,"../c_class":12,"./de_constrs":33,"mol-proto":86}],35:[function(require,module,exports){
+},{"../../messenger/m_source":56,"../../util/check":72,"../c_class":12,"./de_constrs":33,"mol-proto":87}],35:[function(require,module,exports){
 'use strict';
 
 // <a name="components-source-iframe"></a>
@@ -3970,7 +4041,7 @@ function handleEvent(event) {
 	this.dispatchMessage(event.data.type, event);
 }
 
-},{"../../messenger/m_source":56,"../../util/check":71,"../../util/error":75,"../c_class":12,"mol-proto":86}],36:[function(require,module,exports){
+},{"../../messenger/m_source":56,"../../util/check":72,"../../util/error":76,"../c_class":12,"mol-proto":87}],36:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -4161,7 +4232,7 @@ function Scope$_clean() {
 	}, this);
 }
 
-},{"../util/check":71,"../util/error":75,"../util/logger":78,"mol-proto":86}],37:[function(require,module,exports){
+},{"../util/check":72,"../util/error":76,"../util/logger":79,"mol-proto":87}],37:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -4272,7 +4343,7 @@ function onOptionsChange(msg, data) {
 	});
 }
 
-},{"../c_class":12,"../c_registry":28,"mol-proto":86}],39:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":28,"mol-proto":87}],39:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -4404,7 +4475,7 @@ function onOptionsChange(path, data) {
 	component.template.render({ selectOptions: this.get() });
 }
 
-},{"../c_class":12,"../c_registry":28,"mol-proto":86}],44:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":28,"mol-proto":87}],44:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -4549,7 +4620,7 @@ function onOptionsChange(path, data) {
 	_.forEach(radioEls, options.push, options);
 }
 
-},{"../../util/count":73,"../c_class":12,"../c_registry":28}],45:[function(require,module,exports){
+},{"../../util/count":74,"../c_class":12,"../c_registry":28}],45:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -4595,7 +4666,7 @@ function onOptionsChange(path, data) {
 	this.template.render({ selectOptions: this.model.get() });
 }
 
-},{"../c_class":12,"../c_registry":28,"mol-proto":86}],46:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":28,"mol-proto":87}],46:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -4677,7 +4748,7 @@ config({
 	check: true
 });
 
-},{"dot":85,"mol-proto":86}],49:[function(require,module,exports){
+},{"dot":86,"mol-proto":87}],49:[function(require,module,exports){
 'use strict';
 
 // <a name="loader"></a>
@@ -4799,7 +4870,7 @@ function loadView(el, callback) {
 	});
 }
 
-},{"./attributes/a_load":8,"./config":48,"./mail":50,"./util/dom":74,"./util/error":75,"./util/logger":78,"./util/request":81}],50:[function(require,module,exports){
+},{"./attributes/a_load":8,"./config":48,"./mail":50,"./util/dom":75,"./util/error":76,"./util/logger":79,"./util/request":82}],50:[function(require,module,exports){
 'use strict';
 
 // <a name="mail"></a>
@@ -4831,7 +4902,7 @@ miloMail._setMessageSource(mailMsgSource);
 
 module.exports = miloMail;
 
-},{"../messenger":53,"./mail_api":51,"./mail_source":52,"mol-proto":86}],51:[function(require,module,exports){
+},{"../messenger":53,"./mail_api":51,"./mail_source":52,"mol-proto":87}],51:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('../messenger/m_api')
@@ -4876,7 +4947,7 @@ function filterSourceMessage(sourceMessage, msgType, msgData) {
 		return windowMessagePrefix + msgData.data.type == msgType;
 };
 
-},{"../messenger/m_api":54,"../util/check":71,"mol-proto":86}],52:[function(require,module,exports){
+},{"../messenger/m_api":54,"../util/check":72,"mol-proto":87}],52:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../messenger/m_source')
@@ -4955,7 +5026,7 @@ function trigger(msgType, data) {
 		window.postMessage(data, '*')
 }
 
-},{"../components/msg_src/de_constrs":33,"../messenger/m_source":56,"../util/check":71,"../util/error":75,"mol-proto":86}],53:[function(require,module,exports){
+},{"../components/msg_src/de_constrs":33,"../messenger/m_source":56,"../util/check":72,"../util/error":76,"mol-proto":87}],53:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -5483,7 +5554,7 @@ function getMessageSource() {
 	return this._messageSource
 }
 
-},{"../abstract/mixin":4,"../util/check":71,"../util/error":75,"./m_source":56,"mol-proto":86}],54:[function(require,module,exports){
+},{"../abstract/mixin":4,"../util/check":72,"../util/error":76,"./m_source":56,"mol-proto":87}],54:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -5666,7 +5737,7 @@ function filterSourceMessage(sourceMessage, message, internalData) {
 	return true;
 }
 
-},{"mol-proto":86}],55:[function(require,module,exports){
+},{"mol-proto":87}],55:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('./m_api')
@@ -5749,7 +5820,7 @@ function getInternalMessages(sourceMessage) {
 	return internalMessages;
 }
 
-},{"./m_api":54,"mol-proto":86}],56:[function(require,module,exports){
+},{"./m_api":54,"mol-proto":87}],56:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -5901,7 +5972,7 @@ function dispatchMessage(sourceMessage, sourceData) {
 	}, this);
 }
 
-},{"../abstract/mixin":4,"../util/check":71,"../util/error":75,"../util/logger":78,"./m_api":54,"mol-proto":86}],57:[function(require,module,exports){
+},{"../abstract/mixin":4,"../util/check":72,"../util/error":76,"../util/logger":79,"./m_api":54,"mol-proto":87}],57:[function(require,module,exports){
 'use strict';
 
 
@@ -5958,7 +6029,7 @@ function removeSourceSubscriber(sourceMessage) {
 	this.sourceMessenger.off(sourceMessage, { context: this, subscriber: this.dispatchMessage });
 }
 
-},{"../util/check":71,"./m_source":56,"mol-proto":86}],58:[function(require,module,exports){
+},{"../util/check":72,"./m_source":56,"mol-proto":87}],58:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -6031,7 +6102,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./attributes":9,"./binder":10,"./classes":11,"./components/c_class":12,"./components/c_facet":13,"./config":48,"./loader":49,"./mail":50,"./messenger":53,"./minder":59,"./model":62,"./registry":68,"./use_components":69,"./use_facets":70,"./util":76,"mol-proto":86}],59:[function(require,module,exports){
+},{"./attributes":9,"./binder":10,"./classes":11,"./components/c_class":12,"./components/c_facet":13,"./config":48,"./loader":49,"./mail":50,"./messenger":53,"./minder":59,"./model":62,"./registry":69,"./use_components":70,"./use_facets":71,"./util":77,"mol-proto":87}],59:[function(require,module,exports){
 'use strict';
 
 var Connector = require('./model/connector');
@@ -6118,9 +6189,13 @@ var CHANGE_TYPE_TO_METHOD_MAP = {
 
 /**
  * Processes queued "changedata" messages.
+ * Posts "changestarted" and "changecompleted" messages and calls callback
+ *
+ * @param {[Function]} callback optional callback that is called with `(null, false)` parameters before change processing starts and `(null, true)` after it's finished.
  */
 function _processChanges(callback) {
 	callback && callback(null, false);
+	this.postMessage('changestarted');
 
 	this._changesQueue.forEach(function(data) {
 		var modelPath = this.path(data.path); // same as this._model(data.fullPath)
@@ -6147,9 +6222,10 @@ function _processChanges(callback) {
 	this._changesQueue.length = 0;
 
 	callback && callback(null, true);
+	this.postMessage('changecompleted');
 }
 
-},{"mol-proto":86}],61:[function(require,module,exports){
+},{"mol-proto":87}],61:[function(require,module,exports){
 'use strict';
 
 var ConnectorError = require('../util/error').Connector
@@ -6353,7 +6429,7 @@ function turnOff() {
 	}
 }
 
-},{"../util/error":75,"../util/logger":78,"mol-proto":86}],62:[function(require,module,exports){
+},{"../util/error":76,"../util/logger":79,"mol-proto":87}],62:[function(require,module,exports){
 'use strict';
 
 var ModelPath = require('./m_path')
@@ -6546,7 +6622,7 @@ _.extend(Model, {
 	Path: ModelPath
 });
 
-},{"../abstract/mixin":4,"../messenger":53,"../messenger/msngr_source":57,"../util/check":71,"../util/error":75,"../util/logger":78,"./change_data":60,"./m_msg_api":63,"./m_path":64,"./path_utils":66,"./synthesize":67,"mol-proto":86}],63:[function(require,module,exports){
+},{"../abstract/mixin":4,"../messenger":53,"../messenger/msngr_source":57,"../util/check":72,"../util/error":76,"../util/logger":79,"./change_data":60,"./m_msg_api":63,"./m_path":64,"./path_utils":67,"./synthesize":68,"mol-proto":87}],63:[function(require,module,exports){
 'use strict';
 
 var MessengerRegexpAPI = require('../messenger/m_api_rx')
@@ -6585,7 +6661,7 @@ function translateToSourceMessage(accessPath) {
 	return pathUtils.createRegexPath(accessPath);
 }
 
-},{"../messenger/m_api_rx":55,"./path_utils":66,"mol-proto":86}],64:[function(require,module,exports){
+},{"../messenger/m_api_rx":55,"./path_utils":67,"mol-proto":87}],64:[function(require,module,exports){
 'use strict';
 
 var synthesize = require('./synthesize')
@@ -6817,7 +6893,28 @@ function _prepareMessenger() {
 }
 
 
-},{"../messenger":53,"../messenger/msngr_source":57,"../util/check":71,"./change_data":60,"./path_msg_api":65,"./path_utils":66,"./synthesize":67,"mol-proto":86}],65:[function(require,module,exports){
+},{"../messenger":53,"../messenger/msngr_source":57,"../util/check":72,"./change_data":60,"./path_msg_api":66,"./path_utils":67,"./synthesize":68,"mol-proto":87}],65:[function(require,module,exports){
+'use strict';
+
+
+var modelUtils = {
+	normalizeSpliceIndex: normalizeSpliceIndex
+};
+
+module.exports = modelUtils;
+
+
+function normalizeSpliceIndex(spliceIndex, length) {
+	return spliceIndex > length
+			? length
+			: spliceIndex >= 0
+				? spliceIndex
+				: spliceIndex + length > 0
+					? spliceIndex + length
+					: 0;
+}
+
+},{}],66:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('../messenger/m_api')
@@ -6892,7 +6989,7 @@ function createInternalData(fullSourceAccessPath, accessPath, sourceData) {
 	return internalData;
 }
 
-},{"../messenger/m_api":54,"../util/logger":78,"mol-proto":86}],66:[function(require,module,exports){
+},{"../messenger/m_api":54,"../util/logger":79,"mol-proto":87}],67:[function(require,module,exports){
 'use strict';
 
 // <a name="model-path"></a>
@@ -7037,10 +7134,11 @@ function wrapMessengerMethods(methodsNames) {
 	_.defineProperties(this, wrappedMethods);
 }
 
-},{"../util/check":71,"../util/error":75,"mol-proto":86}],67:[function(require,module,exports){
+},{"../util/check":72,"../util/error":76,"mol-proto":87}],68:[function(require,module,exports){
 'use strict';
 
 var pathUtils = require('../path_utils')
+	, modelUtils = require('../model_utils')
 	, fs = require('fs')
 	, doT = require('dot')
 	, _ = require('mol-proto');
@@ -7053,7 +7151,7 @@ var templates = {
 	get: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\nmethod = function get() {\n\tvar m = {{# def.modelAccessPrefix }};\n\treturn m {{~ it.parsedPath :pathNode }}\n\t\t{{? pathNode.interpolate}}\n\t\t\t&& (m = m[this._args[ {{= pathNode.interpolate }} ]])\n\t\t{{??}}\n\t\t\t&& (m = m{{= pathNode.property }})\n\t\t{{?}} {{~}};\n};\n",
 	set: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n\n\n/**\n * Template that synthesizes setter for Model and for ModelPath\n */\nmethod = function set(value) {\n\t{{# def.initVars }}\n\n\t{{# def.createTree:'set' }}\n\n\t{{\n\t\tcurrNode = nextNode;\n\t\tcurrProp = currNode && currNode.property;\n\t}}\n\n\t{{ /* assign value to the last property */ }}\n\t{{? currProp }}\n\t\twasDef = {{# def.wasDefined}};\n\t\t{{# def.changeAccessPath }}\n\n\t\tvar old = m{{# def.currProp }};\n\n\t\t{{ /* clone value to prevent same reference in linked models */ }}\n\t\tm{{# def.currProp }} = cloneTree(value);\n\t{{?}}\n\n\t{{ /* add message related to the last property change */ }}\n\tif (! wasDef)\n\t\t{{# def.addMsg }} accessPath, type: 'added',\n\t\t\t\tnewValue: value });\n\telse if (old != value)\n\t\t{{# def.addMsg }} accessPath, type: 'changed',\n\t\t\t\toldValue: old, newValue: value });\n\n\t{{ /* add message related to changes in (sub)properties inside removed and assigned value */ }}\n\tif (! wasDef || old != value)\n\t\taddTreeChangesMessages(messages, messagesHash,\n\t\t\taccessPath, old, value); /* defined in the function that synthesizes ModelPath setter */\n\n\t{{ /* post all stored messages */ }}\n\t{{# def.postMessages }}\n};\n",
 	del: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_traverse_tree }}\n\nmethod = function del() {\n\t{{# def.initVars }}\n\n\t{{# def.traverseTree }}\n\n\t{{\n\t\tvar currNode = it.parsedPath[count];\n\t\tvar currProp = currNode.property;\t\t\n\t}}\n\n\tif (! treeDoesNotExist && m && m.hasOwnProperty && {{# def.wasDefined}}) {\n\t\tvar old = m{{# def.currProp }};\n\t\tdelete m{{# def.currProp }};\n\t\t{{# def.changeAccessPath }}\n\t\tvar msg = { path: accessPath, type: 'deleted', oldValue: old };\n\t\t{{# def.modelPostMessageCode }}(accessPath, msg);\n\n\t\taddTreeChangesMessages(messages, messagesHash,\n\t\t\taccessPath, old, undefined); /* defined in the function that synthesizes ModelPath setter */\n\n\t\t{{ /* post all stored messages */ }}\n\t\t{{# def.postMessages }}\n\t}\n};\n",
-	splice: "'use strict';/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n{{# def.include_traverse_tree }}\n\nmethod = function splice(spliceIndex, spliceHowMany) { /* ,... - extra arguments to splice into array */\n\t{{# def.initVars }}\n\n\tvar argsLen = arguments.length;\n\tvar addItems = argsLen > 2;\n\n\tif (addItems) {\n\t\t{{ /* only create model tree if items are inserted in array */ }}\n\n\t\t{{ /* if model is undefined it will be set to an empty array */ }}\t\n\t\tvar value = [];\n\t\t{{# def.createTree:'splice' }}\n\n\t\t{{? nextNode }}\n\t\t\t{{\n\t\t\t\tvar currNode = nextNode;\n\t\t\t\tvar currProp = currNode.property;\n\t\t\t\tvar emptyProp = '[]';\n\t\t\t}}\n\n\t\t\t{{# def.createTreeStep }}\n\t\t{{?}}\n\n\t} else if (spliceHowMany > 0) {\n\t\t{{ /* if items are not inserted, only traverse model tree if items are deleted from array */ }}\n\t\t{{? it.parsedPath.length }}\n\t\t\t{{# def.traverseTree }}\n\n\t\t\t{{\n\t\t\t\tvar currNode = it.parsedPath[count];\n\t\t\t\tvar currProp = currNode.property;\t\t\n\t\t\t}}\n\n\t\t\t{{ /* extra brace closes 'else' in def.traverseTreeStep */ }}\n\t\t\t{{# def.traverseTreeStep }} }\n\t\t{{?}}\n\t}\n\n\t{{ /* splice items */ }}\n\tif (addItems || (! treeDoesNotExist && m\n\t\t\t&& m.length > spliceIndex ) ) {\n\t\tvar oldLength = m.length = m.length || 0;\n\n\t\t{{ /* normalize spliceIndex */ }}\n\t\targuments[0] = spliceIndex = spliceIndex > m.length\n\t\t\t\t\t\t\t\t\t\t? m.length\n\t\t\t\t\t\t\t\t\t\t: spliceIndex >= 0\n\t\t\t\t\t\t\t\t\t\t\t? spliceIndex\n\t\t\t\t\t\t\t\t\t\t\t: spliceIndex + m.length > 0\n\t\t\t\t\t\t\t\t\t\t\t\t? spliceIndex + m.length\n\t\t\t\t\t\t\t\t\t\t\t\t: 0;\n\n\t\t{{ /* clone added arguments to prevent same references in linked models */ }}\n\t\tif (addItems)\n\t\t\tfor (var i = 2; i < argsLen; i++)\n\t\t\t\targuments[i] = cloneTree(arguments[i]);\n\n\t\t{{ /* actual aplice call */ }}\n\t\tvar removed = Array.prototype.splice.apply(m, arguments);\n\n\t\t{{# def.addMsg }} accessPath, type: 'splice',\n\t\t\t\tindex: spliceIndex, removed: removed, addedCount: addItems ? argsLen - 2 : 0,\n\t\t\t\tnewValue: m });\n\n\t\tif (removed && removed.length)\n\t\t\tremoved.forEach(function(item, index) {\n\t\t\t\tvar itemPath = accessPath + '[' + (spliceIndex + index) + ']';\n\t\t\t\t{{# def.addMsg }} itemPath, type: 'removed', oldValue: item });\n\n\t\t\t\tif (valueIsTree(item))\n\t\t\t\t\taddMessages(messages, messagesHash, itemPath, item, 'removed', 'oldValue');\n\t\t\t});\n\n\t\tif (addItems)\n\t\t\tfor (var i = 2; i < argsLen; i++) {\n\t\t\t\tvar item = arguments[i];\n\t\t\t\tvar itemPath = accessPath + '[' + (spliceIndex + i - 2) + ']';\n\t\t\t\t{{# def.addMsg }} itemPath, type: 'added', newValue: item });\n\n\t\t\t\tif (valueIsTree(item))\n\t\t\t\t\taddMessages(messages, messagesHash, itemPath, item, 'added', 'newValue');\n\t\t\t}\n\n\t\t{{ /* post all stored messages */ }}\n\t\t{{# def.postMessages }}\n\t}\n\n\treturn removed || [];\n}\n"
+	splice: "'use strict';/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n{{# def.include_traverse_tree }}\n\nmethod = function splice(spliceIndex, spliceHowMany) { /* ,... - extra arguments to splice into array */\n\t{{# def.initVars }}\n\n\tvar argsLen = arguments.length;\n\tvar addItems = argsLen > 2;\n\n\tif (addItems) {\n\t\t{{ /* only create model tree if items are inserted in array */ }}\n\n\t\t{{ /* if model is undefined it will be set to an empty array */ }}\t\n\t\tvar value = [];\n\t\t{{# def.createTree:'splice' }}\n\n\t\t{{? nextNode }}\n\t\t\t{{\n\t\t\t\tvar currNode = nextNode;\n\t\t\t\tvar currProp = currNode.property;\n\t\t\t\tvar emptyProp = '[]';\n\t\t\t}}\n\n\t\t\t{{# def.createTreeStep }}\n\t\t{{?}}\n\n\t} else if (spliceHowMany > 0) {\n\t\t{{ /* if items are not inserted, only traverse model tree if items are deleted from array */ }}\n\t\t{{? it.parsedPath.length }}\n\t\t\t{{# def.traverseTree }}\n\n\t\t\t{{\n\t\t\t\tvar currNode = it.parsedPath[count];\n\t\t\t\tvar currProp = currNode.property;\t\t\n\t\t\t}}\n\n\t\t\t{{ /* extra brace closes 'else' in def.traverseTreeStep */ }}\n\t\t\t{{# def.traverseTreeStep }} }\n\t\t{{?}}\n\t}\n\n\t{{ /* splice items */ }}\n\tif (addItems || (! treeDoesNotExist && m\n\t\t\t&& m.length > spliceIndex ) ) {\n\t\tvar oldLength = m.length = m.length || 0;\n\n\t\targuments[0] = spliceIndex = normalizeSpliceIndex(spliceIndex, m.length);\n\n\t\t{{ /* clone added arguments to prevent same references in linked models */ }}\n\t\tif (addItems)\n\t\t\tfor (var i = 2; i < argsLen; i++)\n\t\t\t\targuments[i] = cloneTree(arguments[i]);\n\n\t\t{{ /* actual aplice call */ }}\n\t\tvar removed = Array.prototype.splice.apply(m, arguments);\n\n\t\t{{# def.addMsg }} accessPath, type: 'splice',\n\t\t\t\tindex: spliceIndex, removed: removed, addedCount: addItems ? argsLen - 2 : 0,\n\t\t\t\tnewValue: m });\n\n\t\tif (removed && removed.length)\n\t\t\tremoved.forEach(function(item, index) {\n\t\t\t\tvar itemPath = accessPath + '[' + (spliceIndex + index) + ']';\n\t\t\t\t{{# def.addMsg }} itemPath, type: 'removed', oldValue: item });\n\n\t\t\t\tif (valueIsTree(item))\n\t\t\t\t\taddMessages(messages, messagesHash, itemPath, item, 'removed', 'oldValue');\n\t\t\t});\n\n\t\tif (addItems)\n\t\t\tfor (var i = 2; i < argsLen; i++) {\n\t\t\t\tvar item = arguments[i];\n\t\t\t\tvar itemPath = accessPath + '[' + (spliceIndex + i - 2) + ']';\n\t\t\t\t{{# def.addMsg }} itemPath, type: 'added', newValue: item });\n\n\t\t\t\tif (valueIsTree(item))\n\t\t\t\t\taddMessages(messages, messagesHash, itemPath, item, 'added', 'newValue');\n\t\t\t}\n\n\t\t{{ /* post all stored messages */ }}\n\t\t{{# def.postMessages }}\n\t}\n\n\treturn removed || [];\n}\n"
 };
 
 var include_defines = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts initialization code\n */\n {{## def.initVars:\n \tvar m = {{# def.modelAccessPrefix }};\n\tvar messages = [], messagesHash = {};\n\tvar accessPath = '';\n\tvar treeDoesNotExist;\n #}}\n\n/**\n * Inserts the beginning of function call to add message to list\n */\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n/**\n * Inserts current property/index for both normal and interpolated properties/indexes \n */\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n/**\n * Inserts condition to test whether normal/interpolated property/index exists \n */\n{{## def.wasDefined: m.hasOwnProperty(\n\t{{? currNode.interpolate }}\n\t\tthis._args[ {{= currNode.interpolate }} ]\n\t{{??}}\n\t\t'{{= it.getPathNodeKey(currNode) }}'\n\t{{?}}\n) #}}\n\n\n/**\n * Inserts code to update access path for current property\n * Because of the possibility of interpolated properties, it can't be calculated in template, it can only be calculated during accessor call. \n */\n{{## def.changeAccessPath:\n\taccessPath += {{? currNode.interpolate }}\n\t\t{{? currNode.syntax == 'array' }}\n\t\t\t'[' + this._args[ {{= currNode.interpolate }} ] + ']';\n\t\t{{??}}\n\t\t\t'.' + this._args[ {{= currNode.interpolate }} ];\n\t\t{{?}}\n\t{{??}}\n\t\t'{{= currProp }}';\n\t{{?}}\n#}}\n\n\n/**\n * Inserts code to post stored messages\n */\n{{## def.postMessages:\n\tmessages.forEach(function(msg) {\n\t\t{{# def.modelPostMessageCode }}(msg.path, msg);\n\t}, this);\n#}}\n"
@@ -7103,6 +7201,8 @@ function _synthesizePathMethods(path, parsedPath) {
 	return methods;
 }
 
+
+var normalizeSpliceIndex = modelUtils.normalizeSpliceIndex; // used in splice.dot.js
 
 function _synthesize(synthesizer, path, parsedPath) {
 	var method
@@ -7204,7 +7304,7 @@ _.extend(synthesizePathMethods, {
 	modelSplice: _synthesize(modelSpliceSynthesizer, '', [])
 });
 
-},{"../path_utils":66,"dot":85,"fs":83,"mol-proto":86}],68:[function(require,module,exports){
+},{"../model_utils":65,"../path_utils":67,"dot":86,"fs":84,"mol-proto":87}],69:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7218,7 +7318,7 @@ var registry = module.exports = {
 	components: require('./components/c_registry')
 };
 
-},{"./components/c_facets/cf_registry":26,"./components/c_registry":28}],69:[function(require,module,exports){
+},{"./components/c_facets/cf_registry":26,"./components/c_registry":28}],70:[function(require,module,exports){
 'use strict';
 
 require('./components/classes/View');
@@ -7234,7 +7334,7 @@ require('./components/ui/Time');
 require('./components/ui/Date');
 require('./components/ui/Combo');
 
-},{"./components/classes/View":30,"./components/ui/Button":37,"./components/ui/Combo":38,"./components/ui/Date":39,"./components/ui/Group":40,"./components/ui/Hyperlink":41,"./components/ui/Input":42,"./components/ui/List":43,"./components/ui/RadioGroup":44,"./components/ui/Select":45,"./components/ui/Textarea":46,"./components/ui/Time":47}],70:[function(require,module,exports){
+},{"./components/classes/View":30,"./components/ui/Button":37,"./components/ui/Combo":38,"./components/ui/Date":39,"./components/ui/Group":40,"./components/ui/Hyperlink":41,"./components/ui/Input":42,"./components/ui/List":43,"./components/ui/RadioGroup":44,"./components/ui/Select":45,"./components/ui/Textarea":46,"./components/ui/Time":47}],71:[function(require,module,exports){
 'use strict';
 
 require('./components/c_facets/Dom');
@@ -7250,7 +7350,7 @@ require('./components/c_facets/List');
 require('./components/c_facets/Item');
 require('./components/c_facets/Transfer');
 
-},{"./components/c_facets/Container":14,"./components/c_facets/Data":15,"./components/c_facets/Dom":16,"./components/c_facets/Drag":17,"./components/c_facets/Drop":18,"./components/c_facets/Events":19,"./components/c_facets/Frame":20,"./components/c_facets/Item":21,"./components/c_facets/List":22,"./components/c_facets/ModelFacet":23,"./components/c_facets/Template":24,"./components/c_facets/Transfer":25}],71:[function(require,module,exports){
+},{"./components/c_facets/Container":14,"./components/c_facets/Data":15,"./components/c_facets/Dom":16,"./components/c_facets/Drag":17,"./components/c_facets/Drop":18,"./components/c_facets/Events":19,"./components/c_facets/Frame":20,"./components/c_facets/Item":21,"./components/c_facets/List":22,"./components/c_facets/ModelFacet":23,"./components/c_facets/Template":24,"./components/c_facets/Transfer":25}],72:[function(require,module,exports){
 'use strict';
 
 // <a name="utils-check"></a>
@@ -7625,7 +7725,7 @@ function _prependPath(key, base) {
 };
 
 
-},{"../config":48,"mol-proto":86}],72:[function(require,module,exports){
+},{"../config":48,"mol-proto":87}],73:[function(require,module,exports){
 'use strict';
 
 var count = require('./count')
@@ -7639,7 +7739,7 @@ function componentName() {
 	return prefix + count();
 }
 
-},{"../config":48,"./count":73}],73:[function(require,module,exports){
+},{"../config":48,"./count":74}],74:[function(require,module,exports){
 // <a name="utils-count"></a>
 // milo.utils.count
 // ----------------
@@ -7670,7 +7770,7 @@ componentCount.get = function() {
 
 module.exports = componentCount;
 
-},{}],74:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 'use strict';
 
 
@@ -7854,7 +7954,7 @@ function unwrapElement(el) {
     }
 }
 
-},{}],75:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 // <a name="utils-error"></a>
 // milo.utils.error
 // -----------
@@ -7897,7 +7997,7 @@ function error$toBeImplemented() {
 	throw new error.AbstractClass('calling the method of an absctract class');
 }
 
-},{"mol-proto":86}],76:[function(require,module,exports){
+},{"mol-proto":87}],77:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7918,7 +8018,7 @@ var util = {
 
 module.exports = util;
 
-},{"./check":71,"./component_name":72,"./count":73,"./dom":74,"./error":75,"./json_parse":77,"./logger":78,"./promise":80,"./request":81,"./selection":82}],77:[function(require,module,exports){
+},{"./check":72,"./component_name":73,"./count":74,"./dom":75,"./error":76,"./json_parse":78,"./logger":79,"./promise":81,"./request":82,"./selection":83}],78:[function(require,module,exports){
 'use strict';
 
 
@@ -7938,7 +8038,7 @@ function jsonParse(str) {
 	} catch (e) {}
 }
 
-},{}],78:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 'use strict';
 
 // <a name="utils-logger"></a>
@@ -7968,7 +8068,7 @@ var logger = new Logger({ level: 3 });
 
 module.exports = logger;
 
-},{"./logger_class":79}],79:[function(require,module,exports){
+},{"./logger_class":80}],80:[function(require,module,exports){
 'use strict';
 
 // ### Logger Class
@@ -8080,7 +8180,7 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"mol-proto":86}],80:[function(require,module,exports){
+},{"mol-proto":87}],81:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -8203,7 +8303,7 @@ function Promise$transform(transformDataFunc) {
 	return promise;
 }
 
-},{"mol-proto":86}],81:[function(require,module,exports){
+},{"mol-proto":87}],82:[function(require,module,exports){
 'use strict';
 
 // milo.utils.request
@@ -8284,7 +8384,7 @@ function request$json(url, callback) {
 	return jsonPromise;
 }
 
-},{"./promise":80,"mol-proto":86}],82:[function(require,module,exports){
+},{"./promise":81,"mol-proto":87}],83:[function(require,module,exports){
 'use strict';
 
 
@@ -8566,13 +8666,13 @@ function TextSelection$del() {
 
 
 
-},{"../components/c_class":12,"./dom":74,"mol-proto":86}],83:[function(require,module,exports){
+},{"../components/c_class":12,"./dom":75,"mol-proto":87}],84:[function(require,module,exports){
 
 // not implemented
 // The reason for having an empty file and not throwing is to allow
 // untraditional implementation of this module.
 
-},{}],84:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 // doT.js
 // 2011, Laura Doktorova, https://github.com/olado/doT
 // Licensed under the MIT license.
@@ -8709,7 +8809,7 @@ function TextSelection$del() {
 	};
 }());
 
-},{}],85:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 /* doT + auto-compilation of doT templates
  *
  * 2012, Laura Doktorova, https://github.com/olado/doT
@@ -8854,7 +8954,7 @@ InstallDots.prototype.compileAll = function() {
 	return this.__rendermodule;
 };
 
-},{"./doT":84,"fs":83}],86:[function(require,module,exports){
+},{"./doT":85,"fs":84}],87:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -9011,7 +9111,7 @@ if (typeof module == 'object' && module.exports)
 	// export for node/browserify
 	module.exports = Proto;
 
-},{"./proto_array":87,"./proto_function":88,"./proto_object":89,"./proto_prototype":90,"./proto_string":91,"./utils":92}],87:[function(require,module,exports){
+},{"./proto_array":88,"./proto_function":89,"./proto_object":90,"./proto_prototype":91,"./proto_string":92,"./utils":93}],88:[function(require,module,exports){
 'use strict';
 
 var __ = require('./proto_object')
@@ -9165,7 +9265,7 @@ function mapToObject(callback, thisArg) {
 	return result;
 }
 
-},{"./proto_object":89,"./utils":92}],88:[function(require,module,exports){
+},{"./proto_object":90,"./utils":93}],89:[function(require,module,exports){
 'use strict';
 
 /**
@@ -9342,7 +9442,7 @@ function debounce(wait, immediate) {
     };
 };
 
-},{}],89:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 'use strict';
 
 
@@ -9862,7 +9962,7 @@ function omitKeys() { // , ... keys
 	return obj;
 }
 
-},{"./utils":92}],90:[function(require,module,exports){
+},{"./utils":93}],91:[function(require,module,exports){
 'use strict';
 
 /**
@@ -9976,7 +10076,7 @@ function makeSubclass(Superclass) {
 	return this;
 }
 
-},{"./proto_function":88,"./proto_object":89}],91:[function(require,module,exports){
+},{"./proto_function":89,"./proto_object":90}],92:[function(require,module,exports){
 'use strict';
 
 /**
@@ -10008,7 +10108,7 @@ function firstLowerCase() {
 	return this[0].toLowerCase() + this.slice(1);
 }
 
-},{}],92:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 'use strict';
 
 var utils = module.exports = {

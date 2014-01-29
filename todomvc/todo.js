@@ -61,7 +61,6 @@ milo(function() {
 
     function removeTodo(id, eventType, event) {
         m.splice(id, 1);
-        todos.list.removeItem(id, true);
     }
 
     // this method is not needed as model is updated automatically
