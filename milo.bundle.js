@@ -8671,7 +8671,7 @@ function TextSelection$del(endContainer) {
 
 	var selStart = this.range.startContainer;
 	var startOffset = this.range.startOffset;
-	if (endContainer) {
+	if (endContainer && this.range.startContainer != this.range.endContainer) {
 		selStart = this.range.endContainer;
 		startOffset = 0;
 	}
