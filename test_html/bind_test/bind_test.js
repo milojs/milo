@@ -87,5 +87,9 @@ describe('milo binder', function() {
             cnct[0].turnOff();
             cnct[1].turnOff();
         });
+
+
+        // simple data to data connection
+        milo.minder(ctrl.data1.data, '<<->>', ctrl.data2.data);
     });
 });

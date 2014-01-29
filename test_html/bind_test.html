@@ -40,6 +40,13 @@
                 <span ml-bind="[Data]:desc"></span>
             </div>
         </div>
+
+        <div ml-bind="[data, container]:data1">
+            <label>Data 1</label><input ml-bind="[data]:text"></input>
+        </div>
+        <div ml-bind="[data, container]:data2">
+            <label>Data 2</label><input ml-bind="[data]:text"></input>
+        </div>
     </div>
 
     <!-- Required for browser reporter -->

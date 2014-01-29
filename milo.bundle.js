@@ -5969,12 +5969,12 @@ function dispatchMessage(sourceMessage, sourceData) {
 							
 	if (internalMessages) 
 		internalMessages.forEach(function (message) {
-		var internalData = api.createInternalData(sourceMessage, message, sourceData);
+			var internalData = api.createInternalData(sourceMessage, message, sourceData);
 
-		var shouldDispatch = api.filterSourceMessage(sourceMessage, message, internalData);
-		if (shouldDispatch)
-			this.messenger.postMessage(message, internalData);		
-	}, this);
+			var shouldDispatch = api.filterSourceMessage(sourceMessage, message, internalData);
+			if (shouldDispatch)
+				this.messenger.postMessage(message, internalData);		
+		}, this);
 }
 
 },{"../abstract/mixin":4,"../util/check":72,"../util/error":76,"../util/logger":79,"./m_api":54,"mol-proto":87}],57:[function(require,module,exports){
@@ -6170,6 +6170,7 @@ function changeDataHandler(message, data, callback) {
 		_.defer(processChangesFunc, this, callback);
 
 	this._changesQueue.push(data);
+	// _processChanges.call(this, callback);
 }
 
 
@@ -6214,6 +6215,7 @@ function _processChanges(callback) {
 				, spliceArgs = [index, howMany];
 
 			spliceArgs = spliceArgs.concat(data.newValue.slice(index, index + data.addedCount));
+
 			modelPath.splice.apply(modelPath, spliceArgs);
 		} else {
 			var methodName = CHANGE_TYPE_TO_METHOD_MAP[data.type];
@@ -6341,14 +6343,14 @@ function turnOn() {
 
 	var self = this;
 	if (this.depth1)
-		this._link1 = linkDataSource('_link2', this.ds1, this.ds2, subscriptionPath, this.pathTranslation1, this.dataTranslation1);
+		this._link1 = linkDataSource('_link2', this.ds1, this.ds2, subscriptionPath, this.pathTranslation1, this.pathTranslation2, this.dataTranslation1);
 	if (this.depth2)
-		this._link2 = linkDataSource('_link1', this.ds2, this.ds1, subscriptionPath, this.pathTranslation2, this.dataTranslation2);
+		this._link2 = linkDataSource('_link1', this.ds2, this.ds1, subscriptionPath, this.pathTranslation2, this.pathTranslation1, this.dataTranslation2);
 
 	this.isOn = true;
 
 
-	function linkDataSource(reverseLink, linkToDS, linkedDS, subscriptionPath, pathTranslation, dataTranslation) {
+	function linkDataSource(reverseLink, linkToDS, linkedDS, subscriptionPath, pathTranslation, reversePathTranslation, dataTranslation) {
 		var onData = function onData(message, data) {
 			// store untranslated path
 			var sourcePath = data.path
@@ -6388,18 +6390,17 @@ function turnOn() {
 			function subscriptionSwitch(err, changeFinished) {
 				if (err) return;
 				var onOff = changeFinished ? 'on' : 'off';
-				// linkToDS[onOff](subscriptionPath, self[reverseLink]);
-				subscribeToDS(linkToDS, onOff, linkedDS, self[reverseLink], subscriptionPath, pathTranslation);
+				subscribeToDS(linkToDS, onOff, self[reverseLink], subscriptionPath, reversePathTranslation);
 			}
 		};
 
 		// linkedDS.on(subscriptionPath, onData);
-		subscribeToDS(linkedDS, 'on', linkToDS, onData, subscriptionPath, pathTranslation);
+		subscribeToDS(linkedDS, 'on', onData, subscriptionPath, pathTranslation);
 
 		return onData;
 
 
-		function subscribeToDS(dataSource, onOff, context, subscriber, subscriptionPath, pathTranslation) {
+		function subscribeToDS(dataSource, onOff, subscriber, subscriptionPath, pathTranslation) {
 			if (pathTranslation)
 				_.eachKey(pathTranslation, function(translatedPath, path) {
 					dataSource[onOff](path, subscriber);
@@ -6897,7 +6898,6 @@ function _prepareMessenger() {
 	_.defineProperty(this, '_messenger', mPathMessenger);
 }
 
-
 },{"../messenger":53,"../messenger/msngr_source":57,"../util/check":72,"./change_data":60,"./path_msg_api":66,"./path_utils":67,"./synthesize":68,"mol-proto":87}],65:[function(require,module,exports){
 'use strict';
 
@@ -6923,6 +6923,7 @@ function normalizeSpliceIndex(spliceIndex, length) {
 'use strict';
 
 var MessengerAPI = require('../messenger/m_api')
+	, pathUtils = require('./path_utils')
 	, logger = require('../util/logger')
 	, _ = require('mol-proto');
 
@@ -6967,9 +6968,11 @@ function init(rootPath) {
  * @param {String} accessPath relative access path to be translated
  * @return {String}
  */
-function translateToSourceMessage(accessPath) {
-	if (accessPath instanceof RegExp) return accessPath;
-	return this.rootPath + accessPath;
+function translateToSourceMessage(message) {
+	// TODO should prepend RegExes
+	// TODO should not prepend something that is not a path???
+	if (message instanceof RegExp) return message;
+	return this.rootPath + message;
 }
 
 
@@ -6994,7 +6997,7 @@ function createInternalData(fullSourceAccessPath, accessPath, sourceData) {
 	return internalData;
 }
 
-},{"../messenger/m_api":54,"../util/logger":79,"mol-proto":87}],67:[function(require,module,exports){
+},{"../messenger/m_api":54,"../util/logger":79,"./path_utils":67,"mol-proto":87}],67:[function(require,module,exports){
 'use strict';
 
 // <a name="model-path"></a>
@@ -7006,6 +7009,7 @@ var check = require('../util/check')
 	, ModelError = require('../util/error').Model;
 
 var pathUtils = {
+	isPath: isPath,
 	parseAccessPath: parseAccessPath,
 	createRegexPath: createRegexPath,
 	getPathNodeKey: getPathNodeKey,
@@ -7069,6 +7073,16 @@ function parseAccessPath(path, nodeParsePattern) {
 		throw new ModelError('incorrect model path: ' + path);
 
 	return parsedPath;
+}
+
+
+// checks if string is "path"
+function isPath(path) {
+	var unparsed = path.replace(patternPathParsePattern, function() {
+		return '';
+	});
+
+	return !unparsed;
 }
 
 

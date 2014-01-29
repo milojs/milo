@@ -31,6 +31,8 @@ milo(function() {
     addBtn.events.on('click', addTodo);
 
     function addTodo() {
+        console.log('addTodo');
+
         var itemData = { text: newTodo.data.get() };
         var itemID = m.push(itemData) - 1; // push returns new length, as Array push does
         newTodo.data.set(' '); // can't set to empty string for some reason, only sets to space once

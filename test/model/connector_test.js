@@ -38,7 +38,26 @@ describe('Connector', function() {
 			setTimeout(function() {
 				assert.deepEqual(m1._data, { info: { name: 'jason' } } );
 				done();
-			});
+			}, 10);
 		}, 10);
-	})
+	});
+
+	it.skip('should support splice method', function(done) {
+		var m1 = new Model
+			, m2 = new Model
+			, c = new Connector(m1, '<<->>', m2);
+
+		m1.set([1,2,3]);
+
+		setTimeout(function() {
+			assert.deepEqual(m2.get(), [1,2,3] );
+
+			m1.splice(1,1);
+
+			setTimeout(function() {
+				assert.deepEqual(m2.get(), [1,3] );
+				done();
+			}, 10);
+		}, 10);
+	});
 });
