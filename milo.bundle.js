@@ -2580,6 +2580,7 @@ function hasTextAfterSelection() {
 	treeWalker.currentNode = selection.anchorNode;
 	var nextNode = treeWalker.nextNode();
 	
+	//To capture when treewalker gives us an empty text node (unknown reason)
 	var isText = nextNode ? !nextNode.nodeValue == '' : false;
 
 	return isText;
@@ -8661,7 +8662,7 @@ function TextSelection$eachContainedComponent(callback, thisArg) {
  * TextSelection instance method
  * Deletes the current selection and all components in it
  */
-function TextSelection$del() {
+function TextSelection$del(endContainer) {
 	if (this.isCollapsed || ! this.range) return;
 
 	this.eachContainedComponent(function(comp) {
@@ -8670,6 +8671,11 @@ function TextSelection$del() {
 
 	var selStart = this.range.startContainer;
 	var startOffset = this.range.startOffset;
+	if (endContainer) {
+		selStart = this.range.endContainer;
+		startOffset = 0;
+	}
+
 	this.range.deleteContents();
 	
 	selStart.textContent = selStart.textContent.trimRight();
