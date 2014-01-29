@@ -11,7 +11,7 @@
 	<ul ml-bind="[list, Container]:todos">
 	  <li ml-bind="[item]:todo">
 	  	<input type="checkbox" ml-bind="[data]:checked">
-	    <span ml-bind="[data]:text"></span>
+	    <span ml-bind="[data]:text" contenteditable="true"></span>
 	    <button ml-bind="[events]:deleteBtn">X</button>
 	  </li>
 	</ul>
