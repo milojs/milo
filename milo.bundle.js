@@ -2577,7 +2577,7 @@ function hasTextAfterSelection() {
 
 	// walk up the DOM tree to check if there are text nodes after cursor
 	var treeWalker = document.createTreeWalker(this.owner.el, NodeFilter.SHOW_TEXT);
-	return treeWalker.nextNode();
+	return treeWalker.nextSibling();
 }
 
 },{"../../attributes/a_bind":6,"../../binder":10,"../../util/check":72,"../../util/dom":75,"../../util/error":76,"../c_facet":13,"./cf_registry":26,"mol-proto":87}],17:[function(require,module,exports){
