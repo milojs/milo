@@ -1,6 +1,6 @@
 {
   "name": "mol-milo",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "A minimalist browser framework that binds HTML elements to JS components",
   "main": "lib/milo.js",
   "scripts": {
