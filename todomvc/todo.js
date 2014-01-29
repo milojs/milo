@@ -15,18 +15,10 @@ milo(function() {
     // connect model to list of todos
     milo.minder(m, '<<<->>>', todos.data);
 
-    m.on(/.*/, function(path, data) {
+    m.on(/.*/, function showModel(msg, data) {
         modelView.data.set(JSON.stringify(m.get()));
     });
 
-    // m.on('[*].checked', function(path, data) {
-    //     var matches = path.match(/^\[([0-9]+)\]/);
-    //     if (matches) {
-    //         var itemID = matches[1];
-    //         var item = todos.list.item(itemID);
-    //         item.el.classList.toggle('todo-item-checked');
-    //     }
-    // });
 
     addBtn.events.on('click', addTodo);
 

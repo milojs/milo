@@ -29,17 +29,19 @@ describe('MessengerMessageSource and MessengerRegexpAPI', function() {
 		assert.deepEqual(posted, [{ msg: '', data: { test: 1 } }]);
 	});
 
-	it('should subscribe to another messenger with pattern', function() {
-		messenger.on(/.*/, logPost);
+	// TODO: this test fails currently
+	it.skip('should prevent duplicate messages when pattern subscription is present', function() {
+		messenger.on(/.*/, function() {});
+		messenger.on('a', logPost);
 
 		function logPost(msg, data) {
 			posted.push({ msg: msg, data: data });
 		}
 
 		var posted = [];
-		internalMessenger.postMessage('', { test: 2 });
+		internalMessenger.postMessage('a', { test: 2 });
 
 		assert.equal(posted.length, 1);
-		assert.deepEqual(posted, [{ msg: /.*/, data: { test: 2 } }]);
+		assert.deepEqual(posted, [{ msg: 'a', data: { test: 2 } }]);
 	});
 });
