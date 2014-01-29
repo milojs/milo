@@ -1917,7 +1917,11 @@ _.extendProto(Data, {
 	get: Data$get,
 	set: Data$set,
 	del: Data$del,
+	splice: Data$splice,
 	path: Data$path,
+	getPath: Data$getPath,
+	getKey: Data$getKey,
+
 	_setScalarValue: Data$_setScalarValue,
 	_getScalarValue: Data$_getScalarValue,
 	_postDataChanged: Data$_postDataChanged,
@@ -2064,9 +2068,12 @@ function onChildData(msgType, data) {
 		if (Array.isArray(value)) {
 			var listFacet = this.owner.list;
 			if (listFacet){
-				var newItemsCount = value.length - listFacet.count();
-			 	if (newItemsCount >= 3)
+				var listLength = listFacet.count()
+					, newItemsCount = value.length - listLength;
+			 	if (newItemsCount >= 3) {
 					listFacet.addItems(newItemsCount);
+					_.defer(_updataDataPaths, listFacet, listLength, listFacet.count());
+			 	}
 			}
 			valueSet = [];
 			value.forEach(function(childValue, index) {
@@ -2121,10 +2128,10 @@ function Data$del() {
 	if (typeof componentDelete == 'function')
  		return componentDelete.call(this.owner);
 
-	var itemFacet = this.owner.item;
-	if (itemFacet)
-		itemFacet.removeItem();
-	else
+	// var itemFacet = this.owner.item;
+	// if (itemFacet)
+	// 	itemFacet.removeItem();
+	// else
 		this.set();
 }
 
@@ -2247,14 +2254,17 @@ function Data$splice(spliceIndex, spliceHowMany) { //, ... arguments
 
  			removed.push(itemData);
  		}
+
+ 		_updataDataPaths(listFacet, spliceIndex, listFacet.count());
  	}
 
  	var added = [];
 
  	var argsLen = arguments.length
- 		, addItems = argsLen > 2;
+ 		, addItems = argsLen > 2
+ 		, addedCount = argsLen - 2;
  	if (addItems) {
- 		listFacet.addItems(argsLen - 2, spliceIndex);
+ 		listFacet.addItems(addedCount, spliceIndex);
  		for (var i = 2, j = spliceIndex; i < argsLen; i++, j++) {
  			var item = listFacet.item(j);
  			if (item)
@@ -2264,6 +2274,9 @@ function Data$splice(spliceIndex, spliceHowMany) { //, ... arguments
 
  			added.push(itemData);
  		}
+
+ 		// change paths of items that were added and items after them
+ 		_updataDataPaths(listFacet, spliceIndex, listFacet.count());
  	}
 
  	if (Array.isArray(this._value)) {
@@ -2273,8 +2286,21 @@ function Data$splice(spliceIndex, spliceHowMany) { //, ... arguments
  		this._value = this.get();
 
 	this.postMessage('', { path: '', type: 'splice',
-							index: spliceIndex, removed: removed, addedCount: addItems ? argsLen - 2 : 0,
+							index: spliceIndex, removed: removed, addedCount: addItems ? addedCount : 0,
 							newValue: this._value });
+}
+
+
+// toIndex is not included
+// no range checking is made
+function _updataDataPaths(listFacet, fromIndex, toIndex) {
+	for (var i = fromIndex; i < toIndex; i++) {
+		var item = listFacet.item(i);
+		if (item)
+			item.data._path = '[' + i + ']';
+		else
+			logger.warn('Data: no item for index', j);		
+	}		
 }
 
 
@@ -2286,6 +2312,9 @@ function Data$splice(spliceIndex, spliceHowMany) { //, ... arguments
 function Data$path(accessPath, createItem) {
 	// hack
 	createItem = true;
+
+	if (! accessPath)
+		return this;
 
 	var parsedPath = pathUtils.parseAccessPath(accessPath)
 		, currentComponent = this.owner;
@@ -2310,6 +2339,33 @@ function Data$path(accessPath, createItem) {
 	}
 
 	return currentDataFacet;
+}
+
+
+/**
+ * Data facet instance method
+ * Returns path to access this data facet from parent (using path method)
+ *
+ * @return {String}
+ */
+function Data$getPath() {
+	return this._path;
+}
+
+
+
+/**
+ * Data facet instance method
+ * Returns key to access the value related to this data facet on the value related to parent data facet.
+ * If component has List facet, returns index
+ *
+ * @return {String|Integer}
+ */
+function Data$getKey() {
+	var path = this._path;
+	return path[0] == '['
+			? +path.slice(1, -1) // remove "[" and "]"
+			: path.slice(1) // remove leading "."
 }
 
 
@@ -6218,13 +6274,16 @@ function _processChanges(callback) {
 	callback && callback(null, false);
 	this.postMessage('changestarted');
 
+	var splicedPaths = [];
+
 	this._changesQueue.forEach(function(data) {
-		var modelPath = this.path(data.path); // same as this._model(data.fullPath)
-
-		if (! modelPath) return;
-
 		// set the new data
 		if (data.type == 'splice') {
+			var modelPath = this.path(data.path);
+			if (! modelPath) return;
+
+			splicedPaths.push(data.path)
+
 			var index = data.index
 				, howMany = data.removed.length
 				, spliceArgs = [index, howMany];
@@ -6233,6 +6292,16 @@ function _processChanges(callback) {
 
 			modelPath.splice.apply(modelPath, spliceArgs);
 		} else {
+			var parentPathSpliced = splicedPaths.some(function(parentPath) {
+				var pos = data.path.indexOf(parentPath)
+				return pos == 0 && data.path[parentPath.length] == '[';
+			});
+
+			if (parentPathSpliced) return;
+
+			var modelPath = this.path(data.path);
+			if (! modelPath) return;
+
 			var methodName = CHANGE_TYPE_TO_METHOD_MAP[data.type];
 			if (methodName)
 				modelPath[methodName](data.newValue);
@@ -7027,7 +7096,6 @@ var check = require('../util/check')
 	, ModelError = require('../util/error').Model;
 
 var pathUtils = {
-	isPath: isPath,
 	parseAccessPath: parseAccessPath,
 	createRegexPath: createRegexPath,
 	getPathNodeKey: getPathNodeKey,
@@ -7091,16 +7159,6 @@ function parseAccessPath(path, nodeParsePattern) {
 		throw new ModelError('incorrect model path: ' + path);
 
 	return parsedPath;
-}
-
-
-// checks if string is "path"
-function isPath(path) {
-	var unparsed = path.replace(patternPathParsePattern, function() {
-		return '';
-	});
-
-	return !unparsed;
 }
 
 

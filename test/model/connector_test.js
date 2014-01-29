@@ -42,7 +42,7 @@ describe('Connector', function() {
 		}, 10);
 	});
 
-	it.skip('should support splice method', function(done) {
+	it('should support splice method', function(done) {
 		var m1 = new Model
 			, m2 = new Model
 			, c = new Connector(m1, '<<->>', m2);
