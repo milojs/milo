@@ -5137,10 +5137,12 @@ module.exports = Messenger;
  * @param {Object} proxyMethods Optional map of method names; key - proxy method name, value - messenger's method name.
  * @param {MessageSource} messageSource Optional messageSource linked to the messenger. If messageSource is supplied, the reference to the messenger will stored on its 'messenger' property
  */
-function init(hostObject, proxyMethods, messageSource) {
+function init(hostObject, proxyMethods, messageSource, options) {
 	// hostObject and proxyMethods are used in Mixin and checked there
 	if (messageSource)
 		this._setMessageSource(messageSource);
+
+	this.options = options || {};
 
  	// messenger data
  	_.defineProperties(this, {
@@ -5451,8 +5453,12 @@ function _callPatternSubscribers(message, data, callback) {
 	_.eachKey(this._patternMessageSubscribers, 
 		function(patternSubscribers) {
 			var pattern = patternSubscribers.pattern;
-			if (pattern.test(message))
-				this._callSubscribers(message, data, callback, patternSubscribers);
+			if (pattern.test(message)) {
+				var msgType = this.options.postPatternAsMessage
+								? pattern
+								: message;
+				this._callSubscribers(msgType, data, callback, patternSubscribers);
+			}
 		}
 	, this);
 }
@@ -5812,8 +5818,10 @@ function getInternalMessages(sourceMessage) {
 	if (typeof sourceMessage == 'string') {
 		internalMessages = internalMessages || [];
 		var internalMessagesHash = _.object(internalMessages, true);
+
 		_.eachKey(this._patternInternalMessages, function(patternMessages) {
 			var sourcePattern = patternMessages.pattern;
+
 			if (sourcePattern.test(sourceMessage))
 				patternMessages.forEach(function(message) {
 					if (internalMessagesHash[message]) return;
@@ -5821,7 +5829,7 @@ function getInternalMessages(sourceMessage) {
 					internalMessagesHash[message] = true;
 				});
 		});
-	}
+	} 
 
 	return internalMessages;
 }
@@ -6605,15 +6613,17 @@ var modelMethodsToProxy = ['path', 'get', 'set', 'splice', 'len', 'push', 'pop',
  * External messenger's methods are proxied on the model and they allows "*" subscriptions.
  */
 function _prepareMessengers() {
+	var options = { postPatternAsMessage: true };
+
 	// model will post all its changes on internal messenger
-	var internalMessenger = new Messenger(this);
+	var internalMessenger = new Messenger(this, undefined, undefined, options);
 
 	// message source to connect internal messenger to external
 	var internalMessengerSource = new MessengerMessageSource(this, undefined, new ModelMsgAPI, internalMessenger);
 
 	// external messenger to which all model users will subscribe,
 	// that will allow "*" subscriptions and support "changedata" message api.
-	var externalMessenger = new Messenger(this, Messenger.defaultMethods, internalMessengerSource);
+	var externalMessenger = new Messenger(this, Messenger.defaultMethods, internalMessengerSource, options);
 
 	_.defineProperties(this, {
 		_messenger: externalMessenger,
@@ -6972,7 +6982,8 @@ function init(rootPath) {
 function translateToSourceMessage(message) {
 	// TODO should prepend RegExes
 	// TODO should not prepend something that is not a path???
-	if (message instanceof RegExp) return message;
+	if (message instanceof RegExp)
+		return message;
 	return this.rootPath + message;
 }
 
