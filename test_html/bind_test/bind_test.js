@@ -47,6 +47,14 @@ describe('milo binder', function() {
             { value: 'male', label: 'Male' },
             { value: 'other', label: 'Other' }
         ]);
+
+        // Setting Super Combo options
+        var comboTestArray = [];
+        for (var i = 0; i < 20000; i++) {
+            comboTestArray.push({value: 'value ' + i, label: 'Label ' + i});
+        };
+        ctrl.mySuperCombo.setOptions(comboTestArray);
+
     // });
 
     // it('should bind a list, and instantiate list items', function() {
