@@ -8,7 +8,7 @@
 	<input ml-bind="[data]:newTodo" />
 	<button ml-bind="[events]:addBtn">Add</button>
 	<h3>To-do's</h3>
-	<ul ml-bind="[list, Container]:todos">
+	<ul ml-bind="[list]:todos">
 	  <li ml-bind="[item]:todo">
 	  	<input type="checkbox" ml-bind="[data]:checked">
 	    <span ml-bind="[data]:text" contenteditable="true"></span>

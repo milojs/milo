@@ -2419,6 +2419,7 @@ _.extendProto(Dom, {
 
 	show: show,
 	hide: hide,
+	toggle: toggle,
 	remove: remove,
 	append: append,
 	prepend: prepend,
@@ -2466,6 +2467,11 @@ function show() {
 // hide HTML element of component
 function hide() {
 	this.owner.el.style.display = 'none';
+}
+
+// show/hide
+function toggle(doShow) {
+	Dom.prototype[doShow ? 'show' : 'hide'].call(this);
 }
 
 function setStyle(property, value) {
