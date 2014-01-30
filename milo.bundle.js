@@ -1019,7 +1019,8 @@ _.extendProto(Component, {
 	getTopScopeParent: Component$getTopScopeParent,
 	getScopeParentWithClass: Component$getScopeParentWithClass,
 	getTopScopeParentWithClass: Component$getTopScopeParentWithClass,
-    walkScopeTree: Component$walkScopeTree
+    walkScopeTree: Component$walkScopeTree,
+    broadcast: Component$broadcast
 });
 
 var COMPONENT_DATA_TYPE_PREFIX = 'x-application/milo-component';
@@ -1209,10 +1210,8 @@ function Component$$createFromState(state, rootScope, newUniqueName) {
 	// restore component state
 	component.setState(state);
 
-    component.walkScopeTree(function(comp) {
-        _.defer(function() {
-            comp.postMessage('stateready');
-        });
+    _.defer(function() {
+    	component.broadcast('stateready');
     });
 
 	return component;	
@@ -1586,6 +1585,20 @@ function Component$walkScopeTree(callback, thisArg) {
     this.container.scope._each(function(component) {
         component.walkScopeTree(callback, thisArg);
     });
+}
+
+
+/**
+ * Broadcast message to component and to all its scope children
+ *
+ * @param {String|RegExp} msg message to be sent
+ * @param {[Any]} data optional message data
+ * @param {[Function]} callback optional callback
+ */
+function Component$broadcast(msg, data, callback) {
+	this.walkScopeTree(function(component) {
+		component.postMessage(msg, data, callback)
+	});
 }
 
 },{"../abstract/faceted_object":3,"../attributes/a_bind":6,"../binder":10,"../config":49,"../messenger":54,"../util/check":73,"../util/component_name":74,"../util/dom":76,"../util/error":77,"../util/logger":80,"./c_facets/cf_registry":26,"./c_utils":29,"./scope":36,"mol-proto":88}],13:[function(require,module,exports){
@@ -2407,7 +2420,8 @@ var ComponentFacet = require('../c_facet')
 	, binder = require('../../binder')
 	, BindAttribute = require('../../attributes/a_bind')
 	, DomFacetError = require('../../util/error').DomFacet
-	, domUtils = require('../../util/dom');
+	, domUtils = require('../../util/dom')
+	, config = require('../../config');
 
 
 // data model connection facet
@@ -2420,6 +2434,7 @@ _.extendProto(Dom, {
 	show: show,
 	hide: hide,
 	toggle: toggle,
+	detach: detach,
 	remove: remove,
 	append: append,
 	prepend: prepend,
@@ -2474,6 +2489,12 @@ function hide() {
 function toggle(doShow) {
 	Dom.prototype[doShow ? 'show' : 'hide'].call(this);
 }
+
+
+function detach() {
+	delete this.owner.el[config.componentRef];
+}
+
 
 function setStyle(property, value) {
 	this.owner.el.style[property] = value;
@@ -2654,7 +2675,7 @@ function hasTextAfterSelection() {
 	return isText;
 }
 
-},{"../../attributes/a_bind":6,"../../binder":10,"../../util/check":73,"../../util/dom":76,"../../util/error":77,"../c_facet":13,"./cf_registry":26,"mol-proto":88}],17:[function(require,module,exports){
+},{"../../attributes/a_bind":6,"../../binder":10,"../../config":49,"../../util/check":73,"../../util/dom":76,"../../util/error":77,"../c_facet":13,"./cf_registry":26,"mol-proto":88}],17:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drag"></a>
@@ -4941,14 +4962,12 @@ function onBtnClick (type, event) {
 }
 
 function onListClick (type, event) {
-	console.log('value: ', event.target.getAttribute('data-value'));
+	//cnsole.log('value: ', event.target.getAttribute('data-value'));
 }
 
 function onListScroll (type, event) {
 	var scrollPos = event.target.scrollTop;
-	console.log('throttled scroll', scrollPos);
 	var totalElementsBefore = Math.floor(scrollPos / this._elementHeight) - BUFFER;
-	console.log('totalElementsBefore', totalElementsBefore);
 
 	this._startIndex = totalElementsBefore > 0 ? totalElementsBefore : 0;
 	this._endIndex = totalElementsBefore + MAX_RENDERED;
@@ -6709,17 +6728,27 @@ function turnOn() {
 		subscribeToDS(linkedDS, 'on', onData, subscriptionPath, pathTranslation);
 
 		return onData;
-
-
-		function subscribeToDS(dataSource, onOff, subscriber, subscriptionPath, pathTranslation) {
-			if (pathTranslation)
-				_.eachKey(pathTranslation, function(translatedPath, path) {
-					dataSource[onOff](path, subscriber);
-				});
-			else
-				dataSource[onOff](subscriptionPath, subscriber);
-		}
 	}
+}
+
+
+/**
+ * Subscribes and unsubscribes to/from datasource
+ *
+ * @private
+ * @param {Object} dataSource data source object that has messenger with proxied on/off methods
+ * @param {String} onOff 'on' or 'off'
+ * @param {Function} subscriber
+ * @param {String} subscriptionPath only used if there is no path translation
+ * @param {Object[String]} pathTranslation paths translation map
+ */
+function subscribeToDS(dataSource, onOff, subscriber, subscriptionPath, pathTranslation) {
+	if (pathTranslation)
+		_.eachKey(pathTranslation, function(translatedPath, path) {
+			dataSource[onOff](path, subscriber);
+		});
+	else
+		dataSource[onOff](subscriptionPath, subscriber);
 }
 
 
@@ -6732,15 +6761,16 @@ function turnOff() {
 		return logger.warn('data sources are already disconnected');
 
 	var self = this;
-	unlinkDataSource(this.ds1, '_link2');
-	unlinkDataSource(this.ds2, '_link1');
+	unlinkDataSource(this.ds1, '_link2', this.pathTranslation2);
+	unlinkDataSource(this.ds2, '_link1', this.pathTranslation1);
 
 	this.isOn = false;
 
 
-	function unlinkDataSource(linkedDS, linkName) {
+	function unlinkDataSource(linkedDS, linkName, pathTranslation) {
 		if (self[linkName]) {
-			linkedDS.off(self._subscriptionPath, self[linkName]);
+			subscribeToDS(linkedDS, 'off', self[linkName], self._subscriptionPath, pathTranslation)
+			// linkedDS.off(self._subscriptionPath, self[linkName]);
 			delete self[linkName];
 		}
 	}
