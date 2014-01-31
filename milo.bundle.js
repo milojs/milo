@@ -1652,6 +1652,7 @@ _.extendProto(ComponentFacet, {
 	init: ComponentFacet$init,
 	start: ComponentFacet$start,
 	check: ComponentFacet$check,
+	onConfigMessages: ComponentFacet$onConfigMessages,
 	domParent: domParent,
 	postDomParent: postDomParent,
 	scopeParent: scopeParent,
@@ -1686,33 +1687,45 @@ function _createMessenger(){
 // startComponentFacet
 function ComponentFacet$start() {
 	if (this.config.messages)
-		_.eachKey(this.config.messages, function(subscriber, message) {
-			var subscriberType = typeof subscriber;
-			if (subscriberType == 'function')
-				this.on(message, subscriber);
-			else if (subscriberType == 'object') {
-				var contextType = typeof subscriber.context;
-				if (contextType == 'object')
-					this.on(message, subscriber);
-				else if (contextType == 'string') {
-					if (subscriber.context == this.name || subscriber.context == 'facet')
-						subscriber = {
-							subscriber: subscriber.subscriber,
-							context: this
-						};
-					else if (subscriber.context == 'owner')
-						subscriber = {
-							subscriber: subscriber.subscriber,
-							context: this.owner
-						};
-					else
-						throw new FacetError('unknown subscriber context in configuration: ' + subscriber.context);
-					this.on(message, subscriber);
-				} else
-					throw new FacetError('unknown subscriber context type in configuration: ' + contextType);
-			} else
-				throw new FacetError('unknown subscriber type in configuration: ' + subscriberType);
-		}, this);
+		this.onConfigMessages(this.config.messages);
+}
+
+
+function ComponentFacet$onConfigMessages(messageSubscribers) {
+	var notYetRegisteredMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
+		var subscriberType = typeof subscriber;
+		if (subscriberType == 'function')
+			return this.on(messages, subscriber);
+
+		if (subscriberType == 'object') {
+			var contextType = typeof subscriber.context;
+			if (contextType == 'object')
+				return this.on(messages, subscriber);
+			
+			if (contextType == 'string') {
+				if (subscriber.context == this.name || subscriber.context == 'facet')
+					subscriber = {
+						subscriber: subscriber.subscriber,
+						context: this
+					};
+				else if (subscriber.context == 'owner')
+					subscriber = {
+						subscriber: subscriber.subscriber,
+						context: this.owner
+					};
+				else
+					throw new FacetError('unknown subscriber context in configuration: ' + subscriber.context);
+
+				return this.on(messages, subscriber);
+			}
+
+			throw new FacetError('unknown subscriber context type in configuration: ' + contextType);
+		}
+		
+		throw new FacetError('unknown subscriber type in configuration: ' + subscriberType);
+	}, this);
+
+	return notYetRegisteredMap;
 }
 
 
@@ -2447,6 +2460,10 @@ _.extendProto(Dom, {
 	setStyles: setStyles,
 	copy: copy,
 
+	addCssClasses: _.partial(_manageCssClasses, 'add'),
+	removeCssClasses: _.partial(_manageCssClasses, 'remove'),
+	toggleCssClasses: _.partial(_manageCssClasses, 'toggle'),
+
 	find: find,
 	hasTextBeforeSelection: hasTextBeforeSelection,
 	hasTextAfterSelection: hasTextAfterSelection
@@ -2465,14 +2482,10 @@ function init() {
 
 // start Dom facet
 function start() {
-	var cssClasses = this.config.cls
-		, classList = this.owner.el.classList;
-	if (Array.isArray(cssClasses))
-		cssClasses.forEach(classList.add, classList);
-	else if (typeof cssClasses == 'string')
-		classList.add(cssClasses);
-	else if (cssClasses)
-		throw new DomFacetError('unknown type of "cls" configuration parameter');
+	var cssClasses = this.config.cls;
+
+	if (cssClasses)
+		this.addCssClasses(cssClasses);
 }
 
 // show HTML element of component
@@ -2488,6 +2501,20 @@ function hide() {
 // show/hide
 function toggle(doShow) {
 	Dom.prototype[doShow ? 'show' : 'hide'].call(this);
+}
+
+
+function _manageCssClasses(methodName, cssClasses, enforce) {
+	var classList = this.owner.el.classList;
+
+	if (Array.isArray(cssClasses))
+		cssClasses.forEach(function(cls) {
+			classList[methodName](cls, enforce)
+		});
+	else if (typeof cssClasses == 'string')
+		classList[methodName](cssClasses, enforce);
+	else
+		throw new DomFacetError('unknown type of CSS classes parameter');
 }
 
 
@@ -3424,9 +3451,9 @@ function Template$set(templateStr, compile) {
 
 	this._templateStr = templateStr;
 	if (compile)
-		this._compile = compile
-
-	compile = compile || this._compile;
+		this._compile = compile;
+	else
+		compile = this._compile;
 
 	if (compile)
 		this._template = compile(templateStr);
@@ -9385,6 +9412,8 @@ var	arrayMethods = require('./proto_array');
  * - [memoize](proto_function.js.html#memoize)
  * - [delay](proto_function.js.html#delay)
  * - [defer](proto_function.js.html#defer)
+ * - [debounce](proto_function.js.html#debounce)
+ * - [throttle](proto_function.js.html#throttle) 
  */
 var	functionMethods = require('./proto_function');
 
@@ -9640,6 +9669,8 @@ function mapToObject(callback, thisArg) {
  * - [memoize](#memoize)
  * - [delay](#delay)
  * - [defer](#defer)
+ * - [debounce](#debounce)
+ * - [throttle](#throttle)
  *
  * These methods can be [chained](proto.js.html#Proto)
  */
@@ -9650,7 +9681,8 @@ var functionMethods = module.exports = {
 	memoize: memoize,
 	delay: delay,
 	defer: defer,
-	debounce: debounce
+	debounce: debounce,
+	throttle: throttle
 };
 
 
@@ -9805,7 +9837,47 @@ function debounce(wait, immediate) {
 	        }
 		}
     };
-};
+}
+
+
+/**
+ * Returns a function, that, when invoked, will only be triggered at most once during a given window of time. 
+ *
+ * @param {Function} self function that execution has to be delayed
+ * @param {Number} wait approximate delay time in milliseconds
+ * @param {Object} options `{leading: false}` to disable the execution on the leading edge
+ * @return {Function}
+ */
+function throttle(wait, options) {
+	var func = this; // first parameter of _.throttle
+	var context, args, result;
+	var timeout = null;
+	var previous = 0;
+	options || (options = {});
+
+	return function() {
+	    var now = Date.now();
+	    if (!previous && options.leading === false) previous = now;
+	    var remaining = wait - (now - previous);
+	    context = this;
+	    args = arguments;
+	    if (remaining <= 0) {
+	        clearTimeout(timeout);
+	        timeout = null;
+	        previous = now;
+	        result = func.apply(context, args);
+	    } else if (!timeout && options.trailing !== false)
+	        timeout = setTimeout(later, remaining);
+
+	    return result;
+	};
+
+	function later() {
+	    previous = options.leading === false ? 0 : Date.now();
+	    timeout = null;
+	    result = func.apply(context, args);
+	}
+}
 
 },{}],91:[function(require,module,exports){
 'use strict';
