@@ -48,14 +48,18 @@ describe('milo binder', function() {
             { value: 'other', label: 'Other' }
         ]);
 
+
         // Setting Super Combo options
         var comboTestArray = [];
         for (var i = 0; i < 20000; i++) {
-            comboTestArray.push({value: 'value ' + i, label: 'Label ' + i});
+            comboTestArray.push({value: {val: 'value ' + i, id: i}, label: 'Label ' + i});
         };
         ctrl.mySuperCombo.setOptions(comboTestArray);
         ctrl.mySuperCombo.data.on('', function(msg, data) {
-            console.log(msg, data);
+            ctrl.myMLList.model.push(data.newValue);
+        });
+        ctrl.myMLList.data.on('', function(msg, data) {
+            //cnsole.log('on mylist data', msg, data);
         });
 
     // });

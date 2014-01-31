@@ -3061,9 +3061,6 @@ function ItemFacet$removeItem() {
 },{"../../mail":51,"../../model":63,"../c_facet":13,"./cf_registry":26,"mol-proto":88}],22:[function(require,module,exports){
 'use strict';
 
-// <a name="components-facets-list"></a>
-// ###list facet
-
 var ComponentFacet = require('../c_facet')
     , Component = require('../c_class')
     , facetsRegistry = require('./cf_registry')
@@ -3086,6 +3083,7 @@ var List = _.createSubclass(ComponentFacet, 'List');
 
 _.extendProto(List, {
     init: init,
+    start: start,
     /* update: update, */
     require: ['Container', 'Dom', 'Data'],
     _itemPreviousComponent: _itemPreviousComponent,
@@ -3117,11 +3115,12 @@ function init() {
         _listItemsHash: {}
     });
     _.defineProperty(this, 'itemSample', null, _.WRIT);
+}
 
+function start() {
     // Fired by __binder__ when all children of component are bound
     this.owner.on('childrenbound', onChildrenBound);
 }
-
 
 function onChildrenBound() {
     var foundItem;
@@ -4544,23 +4543,26 @@ var Component = require('../c_class')
 	, componentsRegistry = require('../c_registry')
 	, _ = require('mol-proto');
 
+var LIST_CHANGE_MESSAGE = 'mllistchange';
+
 
 var MLList = Component.createComponentClass('MLList', {
 	dom: {
 		cls: 'ml-ui-list'
 	},
-	data: undefined,
+	data: {
+		get: MLList_get,
+		set: MLList_set,
+		del: MLList_del,
+		event: LIST_CHANGE_MESSAGE
+	},
 	events: undefined,
 	model: {
-		messages: {
-			'***': onOptionsChange
-		}
+		// messages: {
+		// 	'***': onItemsChange
+		// }
 	},
-	template: {
-		template: '{{~ it.selectOptions :option }} \
-						<option value="{{= option.value }}">{{= option.label }}</option> \
-				   {{~}}'
-	}
+	list: undefined
 });
 
 
@@ -4570,18 +4572,54 @@ module.exports = MLList;
 
 
 _.extendProto(MLList, {
-	disable: MLList$disable
+	init: MLList$init,
 });
 
 
-function MLList$disable(disable) {
-	this.el.disabled = disable;
+function MLList$init() {
+	Component.prototype.init.apply(this, arguments);
+	this.on('childrenbound', onChildrenBound);
 }
 
 
-function onOptionsChange(path, data) {
-	var component = this._hostObject.owner;
-	component.template.render({ selectOptions: this.get() });
+function MLList_get() {
+	return this.model.get();
+}
+
+function MLList_set(value) {
+	this.model.set(value);
+}
+
+function MLList_del() {
+	return this.model.set([]);
+}
+
+
+function onChildrenBound() {
+	this.model.set([]);
+	milo.minder(this.model, '<<<->>>', this.data);
+	this.data.on('', {subscriber: onItemsChange, context: this});
+}
+
+
+function onItemsChange(path, data) {
+	if (data.removed.length) return;
+	var index = data.index;
+	var newItem = this.list.item(index);
+	var btn = newItem.container.scope.delete;
+	btn.events.on('click', {subscriber: onItemDelete, context: newItem});
+	//this.data.getMessageSource().dispatchMessage(LIST_CHANGE_MESSAGE);
+}
+
+
+function onItemDelete(msg, event) {
+	var id = this.data.getKey();
+	var parent = this.getScopeParent('list');
+	var btn = this.container.scope.delete;
+	btn.events.off('click', {subscriber: onItemDelete, context: this});
+
+	parent.model.splice(id, 1);
+	//this.data.getMessageSource().dispatchMessage(LIST_CHANGE_MESSAGE);
 }
 
 },{"../c_class":12,"../c_registry":28,"mol-proto":88}],44:[function(require,module,exports){
@@ -4786,8 +4824,8 @@ var Component = require('../c_class')
 
 var COMBO_CHANGE_MESSAGE = 'mlsupercombochange';
 
-var OPTIONS_TEMPLATE = '{{~ it.comboOptions :option }}\
-							<div data-value="{{= option.value }}">{{= option.label }}</div>\
+var OPTIONS_TEMPLATE = '{{~ it.comboOptions :option:index }}\
+							<div data-value="{{= index }}">{{= option.label }}</div>\
 						{{~}}';
 
 var MAX_RENDERED = 100;
@@ -4811,7 +4849,6 @@ var MLSuperCombo = Component.createComponentClass('MLSuperCombo', {
 	},
 	template: {
 		template: '<input ml-bind="[data, events]:input">\
-		           <input type="hidden" ml-bind="[data]:value">\
 		           <button ml-bind="[events]:openBtn">+</button>\
 		           <div ml-bind="[dom, events]:list">\
 		               <div ml-bind="[dom]:before"></div>\
@@ -4859,7 +4896,6 @@ function onChildrenBound() {
 function componentSetup() {
 	_.defineProperties(this, {
 		'_comboInput': this.container.scope.input,
-		'_comboValue': this.container.scope.value,
 		'_comboList': this.container.scope.list,
 		'_comboOptions': this.container.scope.options,
 		'_comboBefore': this.container.scope.before,
@@ -4875,7 +4911,8 @@ function componentSetup() {
 		'_elementHeight': 0,
 		'_total': 0,
 		'_optionsHeight': 200,
-		'_this._lastScrollPos': 0
+		'_lastScrollPos': 0,
+		'_currentValue': null
 	}, _.WRIT);
 
 	// Component Setup
@@ -4969,17 +5006,16 @@ function setupComboBtn(btn, self) {
 
 /* Data Facet */
 function MLSuperCombo_get() {
-	if (! this._comboValue) return;
-	return this._comboValue.data.get();
+	return this._currentValue;
 }
 
 function MLSuperCombo_set(obj) {
-	this._comboValue.data.set(obj.value);
+	this._currentValue = obj;
 	this._comboInput.data.set(obj.label);
 }
 
 function MLSuperCombo_del() {
-	this._comboValue.data.set('');
+	this._currentValue = null;
 	this._comboInput.data.set('');
 }
 
@@ -4988,7 +5024,9 @@ function MLSuperCombo_del() {
 function onDataChange(msg, data) {
 	var text = data.newValue;
 	var filteredArr = _.filter(this._optionsData, function(option) {
-		return option.label.indexOf(text) != -1;
+		var label = option.label.toLowerCase();
+		text = text.toLowerCase();
+		return label.indexOf(text) != -1;
 	});
 	this.showOptions();
 	this.setFilteredOptions(filteredArr);
@@ -5013,8 +5051,12 @@ function onAddBtn (type, event) {
 function onListClick (type, event) {
 	this.hideOptions();
 	this._comboInput.data.off('', { subscriber: onDataChange, context: this });
-	this.data.set({value: event.target.getAttribute('data-value'), label: event.target.innerText});
+
+	var index = Number(event.target.getAttribute('data-value')) + this._startIndex;
+	var data = this._filteredOptionsData[index];
+	this.data.set(data);
 	this.data.getMessageSource().dispatchMessage(COMBO_CHANGE_MESSAGE);
+
 	this._comboInput.data.on('', { subscriber: onDataChange, context: this });
 }
 
@@ -5041,12 +5083,6 @@ function onListScroll (type, event) {
 	}
 	this._lastScrollPos = scrollPos;
 }
-
-
-
-
-
-
 
 },{"../c_class":12,"../c_registry":28,"dot":87,"mol-proto":88}],47:[function(require,module,exports){
 'use strict';

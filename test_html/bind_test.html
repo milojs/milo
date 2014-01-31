@@ -17,6 +17,14 @@
 
         <div ml-bind="[Container, Template, Events, Drag]:myTemplate"></div>
 
+        <!-- ML LIST -->
+        <div ml-bind="MLList:myMLList">
+            <div ml-bind="[item]:item">
+                <span ml-bind="[data]:label"></span>
+                <button ml-bind="[events]:delete">x</button>
+            </div>
+        </div>
+
         <!-- SUPER COMBO -->
         <div ml-bind="MLSuperCombo:mySuperCombo" style="width:250px; background-color: #ccc;"></div>
 
