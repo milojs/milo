@@ -18,15 +18,7 @@
         <div ml-bind="[Container, Template, Events, Drag]:myTemplate"></div>
 
         <!-- SUPER COMBO -->
-        <div ml-bind="MLSuperCombo:mySuperCombo" style="width:250px; background-color: #ccc;">
-            <input ml-bind="[data]:input">
-            <button ml-bind="[events]:openBtn">v</button>
-            <div ml-bind="[dom, events]:list">
-                <div ml-bind="[dom]:before"></div>
-                <div ml-bind="[template, dom, events]:options"></div>
-                <div ml-bind="[dom]:after"></div>
-            </div>
-        </div>
+        <div ml-bind="MLSuperCombo:mySuperCombo" style="width:250px; background-color: #ccc;"></div>
 
         <select ml-bind="MLSelect:mySelect"></select>
 

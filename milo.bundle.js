@@ -4772,7 +4772,8 @@ function onOptionsChange(path, data) {
 
 var Component = require('../c_class')
 	, componentsRegistry = require('../c_registry')
-	, _ = require('mol-proto');
+	, _ = require('mol-proto')
+	, doT = require('dot');
 
 
 var COMBO_CHANGE_MESSAGE = 'mlsupercombochange';
@@ -4782,10 +4783,14 @@ var OPTIONS_TEMPLATE = '{{~ it.comboOptions :option }}\
 						{{~}}';
 
 var MAX_RENDERED = 100;
-var BUFFER = 50;
+var BUFFER = 25;
 
 var MLSuperCombo = Component.createComponentClass('MLSuperCombo', {
-	events: undefined,
+	events: {
+		messages: {
+			'mouseleave': {subscriber: onMouseLeave, context: 'owner'}
+		}
+	},
 	data: {
 		get: MLSuperCombo_get,
 		set: MLSuperCombo_set,
@@ -4795,6 +4800,16 @@ var MLSuperCombo = Component.createComponentClass('MLSuperCombo', {
 	},
 	dom: {
 		cls: 'ml-ui-supercombo'
+	},
+	template: {
+		template: '<input ml-bind="[data, events]:input">\
+		           <input type="hidden" ml-bind="[data]:value">\
+		           <button ml-bind="[events]:openBtn">+</button>\
+		           <div ml-bind="[dom, events]:list">\
+		               <div ml-bind="[dom]:before"></div>\
+		               <div ml-bind="[template, dom, events]:options"></div>\
+		               <div ml-bind="[dom]:after"></div>\
+		           </div>'
 	},
 	container: undefined
 });
@@ -4817,22 +4832,64 @@ _.extendProto(MLSuperCombo, {
 
 function MLSuperCombo$init() {
 	Component.prototype.init.apply(this, arguments);
+	
 	this.on('childrenbound', onChildrenBound);
+	
 	_.defineProperties(this, {
 		_optionsData: [],
 		_filteredOptionsData: []
 	}, _.WRIT);
 }
 
+
+function onChildrenBound() {
+	this.off('childrenbound', onChildrenBound);
+	this.template.render().binder();
+	componentSetup.call(this);
+}
+
+function componentSetup() {
+	_.defineProperties(this, {
+		'_comboInput': this.container.scope.input,
+		'_comboValue': this.container.scope.value,
+		'_comboList': this.container.scope.list,
+		'_comboOptions': this.container.scope.options,
+		'_comboBefore': this.container.scope.before,
+		'_comboAfter': this.container.scope.after,
+		'_comboOpenBtn': this.container.scope.openBtn,
+		'_optionTemplate': doT.compile(OPTIONS_TEMPLATE)
+	});
+
+	_.defineProperties(this, {
+		'_startIndex': 0,
+		'_endIndex': MAX_RENDERED,
+		'_hidden': false,
+		'_elementHeight': 0,
+		'_total': 0,
+		'_optionsHeight': 200,
+		'_this._lastScrollPos': 0
+	}, _.WRIT);
+
+	// Component Setup
+	this.dom.setStyles({ position: 'relative' });
+	setupComboList(this._comboList, this._comboOptions, this);
+	setupComboInput(this._comboInput, this);
+	setupComboBtn(this._comboOpenBtn, this);
+}
+
+
 function MLSuperCombo$toggleOptions(show) {
+	this._hidden = !show;
 	this._comboList.dom.toggle(show);
 }
 
 function MLSuperCombo$showOptions() {
+	this._hidden = false;
 	this._comboList.dom.toggle(true);
 }
 
 function MLSuperCombo$hideOptions() {
+	this._hidden = true;
 	this._comboList.dom.toggle(false);
 }
 
@@ -4848,64 +4905,37 @@ function MLSuperCombo$setFilteredOptions(arr) {
 }
 
 function MLSuperCombo$update() {
-	// var wasHidden = this._isHidden
-	// if (wasHidden)
-	// 	this.showOptions();
+	var wasHidden = this._hidden;
+	if (wasHidden)
+		this.showOptions();
 
 	var arrToShow = this._filteredOptionsData.slice(this._startIndex, this._endIndex);
+	
 	this._comboOptions.template.render({
 		comboOptions: arrToShow
 	});
 
 	var firstEl = this._comboOptions.el.firstChild;
-	this._elementHeight = firstEl ? firstEl.offsetHeight : 0;
+	this._elementHeight = firstEl ? firstEl.offsetHeight : this._elementHeight;
 
-	// if (wasHidden)
-	// 	this.hideOptions();
+	if (wasHidden)
+		this.hideOptions();
 
 	var beforeHeight = this._startIndex * this._elementHeight;
 	var afterHeight = (this._total - this._endIndex) * this._elementHeight;
-	var optionsHeight = this._comboOptions.el.childNodes.length * this._elementHeight;
-
-	this._comboOptions.el.style.height = optionsHeight + 'px';
 	this._comboBefore.el.style.height = beforeHeight + 'px';
 	this._comboAfter.el.style.height = afterHeight > 0 ? afterHeight + 'px' : '0px';
 }
 
-function onChildrenBound() {
-	_.defineProperties(this, {
-		'_comboInput': this.container.scope.input,
-		'_comboList': this.container.scope.list,
-		'_comboOptions': this.container.scope.options,
-		'_comboBefore': this.container.scope.before,
-		'_comboAfter': this.container.scope.after,
-		'_comboOpenBtn': this.container.scope.openBtn
-	});
-
-	_.defineProperties(this, {
-		'_startIndex': 0,
-		'_endIndex': MAX_RENDERED,
-		'_hidden': false,
-		'_elementHeight': 0,
-		'_total': 0
-	}, _.WRIT);
-
-	// Component Setup
-	this.dom.setStyles({ position: 'relative' });
-
-	setupComboList(this._comboList, this._comboOptions, this);
-	setupComboInput(this._comboInput, this);
-	setupComboBtn(this._comboOpenBtn, this);
-}
 
 function setupComboList(list, options, self) {
 	options.template.set(OPTIONS_TEMPLATE);
 	var xPos = self._comboInput.el.clientLeft;
-	var yPos = self._comboInput.el.clientTop + self._comboInput.el.offsetHeight + 4;
+	var yPos = self._comboInput.el.clientTop + self._comboInput.el.offsetHeight;
 	
 	list.dom.setStyles({
 		overflow: 'scroll',
-		height: '200px',
+		height: self._optionsHeight + 'px',
 		width: '100%',
 		position: 'absolute',
 		top: yPos + 'px',
@@ -4913,34 +4943,36 @@ function setupComboList(list, options, self) {
 		backgroundColor: '#FFFFFF'
 	});
 
-	//list.dom.hide();
-	var scrollHandler = _.throttle(onListScroll, 50);
+	self.hideOptions();
 	list.events.onMessages({
 		'click': {subscriber: onListClick, context: self},
-		'scroll': {subscriber: scrollHandler, context: self}
+		'scroll': {subscriber: onListScroll, context: self}
 	});
 }
 
 function setupComboInput(input, self) {
 	input.data.on('', { subscriber: onDataChange, context: self });
+	input.events.on('click', {subscriber: onInputClick, context: self });
 }
 
 function setupComboBtn(btn, self) {
-	btn.events.on('click', { subscriber: onBtnClick, context: self });
+	btn.events.on('click', { subscriber: onAddBtn, context: self });
 }
 
 /* Data Facet */
 function MLSuperCombo_get() {
-	// if (! this._comboInput) return;
-	// return this._comboInput.data.get();
+	if (! this._comboValue) return;
+	return this._comboValue.data.get();
 }
 
-function MLSuperCombo_set(value) {
-	// return changeComboData.call(this, 'set', value);
+function MLSuperCombo_set(obj) {
+	this._comboValue.data.set(obj.value);
+	this._comboInput.data.set(obj.label);
 }
 
 function MLSuperCombo_del() {
-	// return changeComboData.call(this, 'del', value);
+	this._comboValue.data.set('');
+	this._comboInput.data.set('');
 }
 
 
@@ -4950,28 +4982,56 @@ function onDataChange(msg, data) {
 	var filteredArr = _.filter(this._optionsData, function(option) {
 		return option.label.indexOf(text) != -1;
 	});
+	this.showOptions();
 	this.setFilteredOptions(filteredArr);
 	this._comboList.el.scrollTop = 0;
-
-	//this.data.getMessageSource().dispatchMessage(COMBO_CHANGE_MESSAGE);
 }
 
-function onBtnClick (type, event) {
-	this._hidden = !this._hidden;
-	this.toggleOptions(this._hidden);
+function onMouseLeave(type, event) {
+	this.hideOptions();
 }
+
+
+function onInputClick(type, event) {
+	this.showOptions();
+}
+
+
+function onAddBtn (type, event) {
+	
+}
+
 
 function onListClick (type, event) {
-	//cnsole.log('value: ', event.target.getAttribute('data-value'));
+	this.hideOptions();
+	this._comboInput.data.off('', { subscriber: onDataChange, context: this });
+	this.data.set({value: event.target.getAttribute('data-value'), label: event.target.innerText});
+	this.data.getMessageSource().dispatchMessage(COMBO_CHANGE_MESSAGE);
+	this._comboInput.data.on('', { subscriber: onDataChange, context: this });
 }
+
 
 function onListScroll (type, event) {
-	var scrollPos = event.target.scrollTop;
-	var totalElementsBefore = Math.floor(scrollPos / this._elementHeight) - BUFFER;
+	var scrollPos = event.target.scrollTop
+		, direction = scrollPos > this._lastScrollPos ? 'down' : 'up'
+		, firstChild = this._comboOptions.el.lastChild
+		, lastChild = this._comboOptions.el.firstChild
+		, lastElPosition = firstChild ? firstChild.offsetTop : 0
+		, firstElPosition = lastChild ? lastChild.offsetTop : 0
+		, distFromLastEl = lastElPosition - scrollPos - this._optionsHeight + this._elementHeight
+		, distFromFirstEl = scrollPos - firstElPosition
+		, elsFromStart = Math.floor(distFromFirstEl / this._elementHeight)
+		, elsToTheEnd = Math.floor(distFromLastEl / this._elementHeight)
+		, totalElementsBefore = Math.floor(scrollPos / this._elementHeight) - BUFFER;
+		
+		this._startIndex = totalElementsBefore > 0 ? totalElementsBefore : 0;
+		this._endIndex = totalElementsBefore + MAX_RENDERED;
 
-	this._startIndex = totalElementsBefore > 0 ? totalElementsBefore : 0;
-	this._endIndex = totalElementsBefore + MAX_RENDERED;
-	this.update();
+	if ((direction == 'down' && elsToTheEnd < BUFFER) 
+	 	 || (direction == 'up' && elsFromStart < BUFFER)) {
+		this.update();
+	}
+	this._lastScrollPos = scrollPos;
 }
 
 
@@ -4980,7 +5040,7 @@ function onListScroll (type, event) {
 
 
 
-},{"../c_class":12,"../c_registry":28,"mol-proto":88}],47:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":28,"dot":87,"mol-proto":88}],47:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
