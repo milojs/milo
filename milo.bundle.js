@@ -4545,7 +4545,7 @@ function onChildrenBound() {
 }
 
 function componentSetup() {
-	console.log('componentSetup', this.container.scope);
+
 }
 
 function MLComboList_get() {
