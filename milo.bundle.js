@@ -3839,7 +3839,11 @@ var domElementsDataAccess = {
  		// event: 'input'
 	},
 	'span': {
- 		property: 'innerHTML', // hack,  to make work with Editable facet
+ 		property: 'innerHTML',
+ 		event: 'input'
+	},
+	'p': {
+ 		property: 'innerHTML',
  		event: 'input'
 	},
  	'input': {
@@ -4204,9 +4208,8 @@ function Scope$_add(object, name) {
 	this[name] = object;
 	object.scope = this;
 
-    if (typeof object.postMessage === 'function') {
-        object.postMessage('insertedinscope');
-    }
+    if (typeof object.postMessage === 'function')
+        object.postMessage('addedtoscope');
 }
 
 
@@ -4316,9 +4319,14 @@ function Scope$_remove(name, preserveScopeProperty) {
 	if (! (name in this))
 		return logger.warn('removing object that is not in scope');
 
+	var object = this[name];
+
 	if (! preserveScopeProperty)
-		delete this[name].scope;
+		delete object.scope;
 	delete this[name];
+
+	if (typeof object.postMessage === 'function')
+        object.postMessage('removedfromscope');
 }
 
 
@@ -9692,8 +9700,6 @@ function mapToObject(callback, thisArg) {
  * - [memoize](#memoize)
  * - [delay](#delay)
  * - [defer](#defer)
- * - [debounce](#debounce)
- * - [throttle](#throttle)
  *
  * These methods can be [chained](proto.js.html#Proto)
  */
@@ -9704,8 +9710,7 @@ var functionMethods = module.exports = {
 	memoize: memoize,
 	delay: delay,
 	defer: defer,
-	debounce: debounce,
-	throttle: throttle
+	debounce: debounce
 };
 
 
@@ -9860,44 +9865,6 @@ function debounce(wait, immediate) {
 	        }
 		}
     };
-};
-
-
-/**
- * Returns a function, that, when invoked, will only be triggered at most once during a given window of time. 
- *
- * @param {Function} self function that execution has to be delayed
- * @param {Number} wait approximate delay time in milliseconds
- * @param {Object} options `{leading: false}` to disable the execution on the leading edge
- * @return {Function}
- */
-function throttle(wait, options) {
-	var func = this; // first parameter of _.throttle
-	var context, args, result;
-	var timeout = null;
-	var previous = 0;
-	options || (options = {});
-	var later = function() {
-	    previous = options.leading === false ? 0 : new Date;
-	    timeout = null;
-	    result = func.apply(context, args);
-	};
-	return function() {
-	    var now = new Date;
-	    if (!previous && options.leading === false) previous = now;
-	    var remaining = wait - (now - previous);
-	    context = this;
-	    args = arguments;
-	    if (remaining <= 0) {
-	        clearTimeout(timeout);
-	        timeout = null;
-	        previous = now;
-	        result = func.apply(context, args);
-	    } else if (!timeout && options.trailing !== false) {
-	        timeout = setTimeout(later, remaining);
-	    }
-	    return result;
-	};
 };
 
 },{}],91:[function(require,module,exports){
