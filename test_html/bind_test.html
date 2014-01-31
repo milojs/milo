@@ -17,16 +17,16 @@
 
         <div ml-bind="[Container, Template, Events, Drag]:myTemplate"></div>
 
-        <!-- SUPER COMBO -->
-        <div ml-bind="MLSuperCombo:mySuperCombo" style="width:250px; background-color: #ccc;">
-            <input ml-bind="[data]:input">
-            <button ml-bind="[events]:openBtn">v</button>
-            <div ml-bind="[dom, events]:list">
-                <div ml-bind="[dom]:before"></div>
-                <div ml-bind="[template, dom, events]:options"></div>
-                <div ml-bind="[dom]:after"></div>
+        <!-- ML LIST -->
+        <div ml-bind="MLList:myMLList">
+            <div ml-bind="[item]:item">
+                <span ml-bind="[data]:label"></span>
+                <button ml-bind="[events]:delete">x</button>
             </div>
         </div>
+
+        <!-- SUPER COMBO -->
+        <div ml-bind="MLSuperCombo:mySuperCombo" style="width:250px; background-color: #ccc;"></div>
 
         <select ml-bind="MLSelect:mySelect"></select>
 
@@ -56,6 +56,10 @@
         <label>Data 1</label><input ml-bind="[data]:data1"></input>
 
         <label>Data 2</label><input ml-bind="[data]:data2"></input>
+
+        <!-- COMBO LIST -->
+        <h1>Combo List</h1>
+        <div ml-bind="MLComboList:myComboList"></div>
     </div>
 
     <!-- Required for browser reporter -->

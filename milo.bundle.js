@@ -100,7 +100,7 @@ function _createProxyMethods(proxyMethods, hostObject) {
 		}, this);
 }
 
-},{"../util/check":73,"../util/error":77,"mol-proto":88}],2:[function(require,module,exports){
+},{"../util/check":74,"../util/error":78,"mol-proto":89}],2:[function(require,module,exports){
 'use strict';
 
 
@@ -131,7 +131,7 @@ _.extendProto(Facet, {
 	init: function() {}
 });
 
-},{"mol-proto":88}],3:[function(require,module,exports){
+},{"mol-proto":89}],3:[function(require,module,exports){
 'use strict';
 
 
@@ -323,9 +323,9 @@ function FacetedObject$$createFacetedClass(name, facetsClasses, facetsConfig) {
 	}
 };
 
-},{"../util/check":73,"../util/error":77,"./facet":2,"mol-proto":88}],4:[function(require,module,exports){
+},{"../util/check":74,"../util/error":78,"./facet":2,"mol-proto":89}],4:[function(require,module,exports){
 module.exports=require(1)
-},{"../util/check":73,"../util/error":77,"mol-proto":88}],5:[function(require,module,exports){
+},{"../util/check":74,"../util/error":78,"mol-proto":89}],5:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -445,7 +445,7 @@ function setClass(FoundationClass) {
 	_.defineProperty(this, 'FoundationClass', FoundationClass, _.ENUM);
 }
 
-},{"../util/check":73,"../util/error":77,"mol-proto":88}],6:[function(require,module,exports){
+},{"../util/check":74,"../util/error":78,"mol-proto":89}],6:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -567,7 +567,7 @@ function render() {
 				.replace('%compName', this.compName);
 }
 
-},{"../config":49,"../util/check":73,"../util/error":77,"./a_class":7,"mol-proto":88}],7:[function(require,module,exports){
+},{"../config":50,"../util/check":74,"../util/error":78,"./a_class":7,"mol-proto":89}],7:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -650,7 +650,7 @@ function decorate() {
 	this.set(this.render());
 }
 
-},{"../util/check":73,"../util/error":77,"mol-proto":88}],8:[function(require,module,exports){
+},{"../util/check":74,"../util/error":78,"mol-proto":89}],8:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -737,7 +737,7 @@ function render() {
 	return this.loadUrl;
 }
 
-},{"../config":49,"../util/error":77,"./a_class":7,"mol-proto":88}],9:[function(require,module,exports){
+},{"../config":50,"../util/error":78,"./a_class":7,"mol-proto":89}],9:[function(require,module,exports){
 'use strict';
 
 /**
@@ -906,7 +906,7 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
 	}
 }
 
-},{"./attributes/a_bind":6,"./components/c_facets/cf_registry":26,"./components/c_info":27,"./components/c_registry":28,"./components/scope":36,"./mail":51,"./util/check":73,"./util/dom":76,"./util/error":77,"mol-proto":88}],11:[function(require,module,exports){
+},{"./attributes/a_bind":6,"./components/c_facets/cf_registry":26,"./components/c_info":27,"./components/c_registry":28,"./components/scope":36,"./mail":52,"./util/check":74,"./util/dom":77,"./util/error":78,"mol-proto":89}],11:[function(require,module,exports){
 'use strict';
 
 // <a name="classes"></a>
@@ -927,7 +927,7 @@ var classes = {
 
 module.exports = classes;
 
-},{"./abstract/Mixin":1,"./abstract/facet":2,"./abstract/faceted_object":3,"./abstract/registry":5,"./components/msg_src/dom_events":34,"./messenger/m_api":55,"./messenger/m_source":57}],12:[function(require,module,exports){
+},{"./abstract/Mixin":1,"./abstract/facet":2,"./abstract/faceted_object":3,"./abstract/registry":5,"./components/msg_src/dom_events":34,"./messenger/m_api":56,"./messenger/m_source":58}],12:[function(require,module,exports){
 'use strict';
 
 
@@ -1601,7 +1601,7 @@ function Component$broadcast(msg, data, callback) {
 	});
 }
 
-},{"../abstract/faceted_object":3,"../attributes/a_bind":6,"../binder":10,"../config":49,"../messenger":54,"../util/check":73,"../util/component_name":74,"../util/dom":76,"../util/error":77,"../util/logger":80,"./c_facets/cf_registry":26,"./c_utils":29,"./scope":36,"mol-proto":88}],13:[function(require,module,exports){
+},{"../abstract/faceted_object":3,"../attributes/a_bind":6,"../binder":10,"../config":50,"../messenger":55,"../util/check":74,"../util/component_name":75,"../util/dom":77,"../util/error":78,"../util/logger":81,"./c_facets/cf_registry":26,"./c_utils":29,"./scope":36,"mol-proto":89}],13:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facet"></a>
@@ -1803,7 +1803,7 @@ function requiresFacet(facetName) {
 						|| facetRequire.indexOf(_.firstLowerCase(facetName)) >= 0);
 }
 
-},{"../abstract/facet":2,"../messenger":54,"../util/error":77,"./c_utils":29,"mol-proto":88}],14:[function(require,module,exports){
+},{"../abstract/facet":2,"../messenger":55,"../util/error":78,"./c_utils":29,"mol-proto":89}],14:[function(require,module,exports){
 'use strict';
 
 
@@ -1901,7 +1901,7 @@ function Container$setState(state) {
 }
 
 
-},{"../../binder":10,"../../util/logger":80,"../c_facet":13,"../scope":36,"./cf_registry":26,"mol-proto":88}],15:[function(require,module,exports){
+},{"../../binder":10,"../../util/logger":81,"../c_facet":13,"../scope":36,"./cf_registry":26,"mol-proto":89}],15:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../../abstract/mixin')
@@ -2419,7 +2419,7 @@ function Data$setState(state) {
 	return this.set(state.state);
 }
 
-},{"../../abstract/mixin":4,"../../messenger":54,"../../model/change_data":61,"../../model/model_utils":66,"../../model/path_utils":68,"../../util/logger":80,"../c_facet":13,"../msg_api/data":31,"../msg_api/de_data":32,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":88}],16:[function(require,module,exports){
+},{"../../abstract/mixin":4,"../../messenger":55,"../../model/change_data":62,"../../model/model_utils":67,"../../model/path_utils":69,"../../util/logger":81,"../c_facet":13,"../msg_api/data":31,"../msg_api/de_data":32,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":89}],16:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-dom"></a>
@@ -2702,7 +2702,7 @@ function hasTextAfterSelection() {
 	return isText;
 }
 
-},{"../../attributes/a_bind":6,"../../binder":10,"../../config":49,"../../util/check":73,"../../util/dom":76,"../../util/error":77,"../c_facet":13,"./cf_registry":26,"mol-proto":88}],17:[function(require,module,exports){
+},{"../../attributes/a_bind":6,"../../binder":10,"../../config":50,"../../util/check":74,"../../util/dom":77,"../../util/error":78,"../c_facet":13,"./cf_registry":26,"mol-proto":89}],17:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drag"></a>
@@ -2823,7 +2823,7 @@ function targetInDragHandle() {
 	return ! this._dragHandle || this._dragHandle.contains(this.__mouseDownTarget);
 }
 
-},{"../../util/logger":80,"../c_class":12,"../c_facet":13,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":88}],18:[function(require,module,exports){
+},{"../../util/logger":81,"../c_class":12,"../c_facet":13,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":89}],18:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drop"></a>
@@ -2879,7 +2879,7 @@ function Drop$start() {
 	}
 }
 
-},{"../c_facet":13,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":88}],19:[function(require,module,exports){
+},{"../c_facet":13,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":89}],19:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -2931,7 +2931,7 @@ function Events$init() {
 	_.defineProperty(this, '_domEventsSource', domEventsSource);
 }
 
-},{"../../messenger":54,"../c_facet":13,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":88}],20:[function(require,module,exports){
+},{"../../messenger":55,"../c_facet":13,"../msg_src/dom_events":34,"./cf_registry":26,"mol-proto":89}],20:[function(require,module,exports){
 'use strict';
 
 
@@ -3049,7 +3049,7 @@ function Frame$isReady() {
 	return  readyState != 'loading' ? readyState : false;
 }
 
-},{"../../messenger":54,"../c_facet":13,"../msg_src/de_constrs":33,"../msg_src/frame":35,"./cf_registry":26,"mol-proto":88}],21:[function(require,module,exports){
+},{"../../messenger":55,"../c_facet":13,"../msg_src/de_constrs":33,"../msg_src/frame":35,"./cf_registry":26,"mol-proto":89}],21:[function(require,module,exports){
 'use strict';
 
 
@@ -3085,11 +3085,8 @@ function ItemFacet$removeItem() {
 	this.list.removeItem(this.index, true);
 }
 
-},{"../../mail":51,"../../model":63,"../c_facet":13,"./cf_registry":26,"mol-proto":88}],22:[function(require,module,exports){
+},{"../../mail":52,"../../model":64,"../c_facet":13,"./cf_registry":26,"mol-proto":89}],22:[function(require,module,exports){
 'use strict';
-
-// <a name="components-facets-list"></a>
-// ###list facet
 
 var ComponentFacet = require('../c_facet')
     , Component = require('../c_class')
@@ -3113,6 +3110,7 @@ var List = _.createSubclass(ComponentFacet, 'List');
 
 _.extendProto(List, {
     init: init,
+    start: start,
     /* update: update, */
     require: ['Container', 'Dom', 'Data'],
     _itemPreviousComponent: _itemPreviousComponent,
@@ -3144,11 +3142,12 @@ function init() {
         _listItemsHash: {}
     });
     _.defineProperty(this, 'itemSample', null, _.WRIT);
+}
 
+function start() {
     // Fired by __binder__ when all children of component are bound
     this.owner.on('childrenbound', onChildrenBound);
 }
-
 
 function onChildrenBound() {
     var foundItem;
@@ -3327,7 +3326,7 @@ function each(callback, thisArg) {
     }, thisArg || this);
 }
 
-},{"../../binder":10,"../../config":49,"../../mail":51,"../../model":63,"../../util":78,"../c_class":12,"../c_facet":13,"./cf_registry":26,"dot":87,"mol-proto":88}],23:[function(require,module,exports){
+},{"../../binder":10,"../../config":50,"../../mail":52,"../../model":64,"../../util":79,"../c_class":12,"../c_facet":13,"./cf_registry":26,"dot":88,"mol-proto":89}],23:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-model"></a>
@@ -3391,7 +3390,7 @@ function ModelFacet$_createMessenger() { // Called by inherited init
 	this.m.proxyMethods(this); // Creates model's methods directly on facet
 }
 
-},{"../../model":63,"../c_facet":13,"./cf_registry":26,"mol-proto":88}],24:[function(require,module,exports){
+},{"../../model":64,"../c_facet":13,"./cf_registry":26,"mol-proto":89}],24:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-template"></a>
@@ -3475,7 +3474,7 @@ function Template$binder() {
 	this.owner.container.binder();
 }
 
-},{"../../binder":10,"../../util/check":73,"../c_facet":13,"./cf_registry":26,"mol-proto":88}],25:[function(require,module,exports){
+},{"../../binder":10,"../../util/check":74,"../c_facet":13,"./cf_registry":26,"mol-proto":89}],25:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -3529,7 +3528,7 @@ function Transfer$init() {
  	this._state = state;
  }
 
-},{"../c_facet":13,"./cf_registry":26,"mol-proto":88}],26:[function(require,module,exports){
+},{"../c_facet":13,"./cf_registry":26,"mol-proto":89}],26:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../abstract/registry')
@@ -3625,7 +3624,7 @@ function hasContainerFacet(ComponentClass, extraFacetsClasses) {
 	}
 }
 
-},{"../util/error":77,"./c_facets/cf_registry":26,"./c_registry":28,"mol-proto":88}],28:[function(require,module,exports){
+},{"../util/error":78,"./c_facets/cf_registry":26,"./c_registry":28,"mol-proto":89}],28:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -3733,7 +3732,7 @@ function _getContainingComponent(el, returnCurrent, conditionFunc) {
 		return _getContainingComponent(el.parentNode, true, conditionFunc);
 }
 
-},{"../config":49,"../util/check":73}],30:[function(require,module,exports){
+},{"../config":50,"../util/check":74}],30:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3831,7 +3830,7 @@ function createInternalData(sourceMessage, message, data) {
 	return internalData;
 };
 
-},{"../../messenger/m_api":55,"../../util/check":73,"./de_data":32,"mol-proto":88}],32:[function(require,module,exports){
+},{"../../messenger/m_api":56,"../../util/check":74,"./de_data":32,"mol-proto":89}],32:[function(require,module,exports){
 'use strict';
 
 
@@ -3959,7 +3958,7 @@ function inputChangeEvent(el) {
 			: inputElementTypes.byDefault.event;
 }
 
-},{"mol-proto":88}],33:[function(require,module,exports){
+},{"mol-proto":89}],33:[function(require,module,exports){
 'use strict';
 
 // <a name="components-dom-constructors"></a>
@@ -4010,7 +4009,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"mol-proto":88}],34:[function(require,module,exports){
+},{"mol-proto":89}],34:[function(require,module,exports){
 'use strict';
 
 // <a name="components-source-dom"></a>
@@ -4099,7 +4098,7 @@ function trigger(eventType, properties) {
 	return notCancelled;
 }
 
-},{"../../messenger/m_source":57,"../../util/check":73,"../c_class":12,"./de_constrs":33,"mol-proto":88}],35:[function(require,module,exports){
+},{"../../messenger/m_source":58,"../../util/check":74,"../c_class":12,"./de_constrs":33,"mol-proto":89}],35:[function(require,module,exports){
 'use strict';
 
 // <a name="components-source-iframe"></a>
@@ -4173,7 +4172,7 @@ function handleEvent(event) {
 	this.dispatchMessage(event.data.type, event);
 }
 
-},{"../../messenger/m_source":57,"../../util/check":73,"../../util/error":77,"../c_class":12,"mol-proto":88}],36:[function(require,module,exports){
+},{"../../messenger/m_source":58,"../../util/check":74,"../../util/error":78,"../c_class":12,"mol-proto":89}],36:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -4368,7 +4367,7 @@ function Scope$_clean() {
 	}, this);
 }
 
-},{"../util/check":73,"../util/error":77,"../util/logger":80,"mol-proto":88}],37:[function(require,module,exports){
+},{"../util/check":74,"../util/error":78,"../util/logger":81,"mol-proto":89}],37:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -4479,7 +4478,91 @@ function onOptionsChange(msg, data) {
 	});
 }
 
-},{"../c_class":12,"../c_registry":28,"mol-proto":88}],39:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":28,"mol-proto":89}],39:[function(require,module,exports){
+'use strict';
+
+var Component = require('../c_class')
+	, componentsRegistry = require('../c_registry')
+	, _ = require('mol-proto');
+
+var COMBO_LIST_CHANGE_MESSAGE = 'mlcombolistchange';
+
+
+var MLComboList = Component.createComponentClass('MLComboList', {
+	dom: {
+		cls: 'ml-ui-combo-list'
+	},
+	data: {
+		get: MLComboList_get,
+		set: MLComboList_set,
+		del: MLComboList_del,
+		event: COMBO_LIST_CHANGE_MESSAGE
+	},
+	events: undefined,
+	model: {
+		// messages: {
+		// 	'***': onItemsChange
+		// }
+	},
+	template: {
+		template: '<div ml-bind="MLList:list">\
+			           <div ml-bind="[item]:item">\
+			               <span ml-bind="[data]:label"></span>\
+			               <button ml-bind="[events]:delete">x</button>\
+			           </div>\
+			       </div>\
+			       <div ml-bind="MLSuperCombo:combo" style="width:250px; background-color: #ccc;"></div>'
+	}
+});
+
+
+componentsRegistry.add(MLComboList);
+
+module.exports = MLComboList;
+
+
+_.extendProto(MLComboList, {
+	init: MLComboList$init,
+});
+
+
+function MLComboList$init() {
+	Component.prototype.init.apply(this, arguments);
+	
+	this.on('childrenbound', onChildrenBound);
+	
+	// _.defineProperties(this, {
+	// 	_optionsData: [],
+	// 	_filteredOptionsData: []
+	// }, _.WRIT);
+}
+
+
+function onChildrenBound() {
+	this.off('childrenbound', onChildrenBound);
+	this.template.render().binder();
+	componentSetup.call(this);
+}
+
+function componentSetup() {
+	console.log('componentSetup', this.container.scope);
+}
+
+function MLComboList_get() {
+	return this.model.get();
+}
+
+function MLComboList_set(value) {
+	this.model.set(value);
+}
+
+function MLComboList_del() {
+	return this.model.set([]);
+}
+
+
+
+},{"../c_class":12,"../c_registry":28,"mol-proto":89}],40:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -4498,7 +4581,7 @@ componentsRegistry.add(MLDate);
 
 module.exports = MLDate;
 
-},{"../c_class":12,"../c_registry":28}],40:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":28}],41:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -4518,7 +4601,7 @@ componentsRegistry.add(MLGroup);
 
 module.exports = MLGroup;
 
-},{"../c_class":12,"../c_registry":28}],41:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":28}],42:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -4537,7 +4620,7 @@ componentsRegistry.add(MLHyperlink);
 
 module.exports = MLHyperlink;
 
-},{"../c_class":12,"../c_registry":28}],42:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":28}],43:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -4564,30 +4647,33 @@ _.extendProto(MLInput, {
 function MLInput$disable(disable) {
 	this.el.disabled = disable;
 }
-},{"../c_class":12,"../c_registry":28}],43:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":28}],44:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
 	, componentsRegistry = require('../c_registry')
 	, _ = require('mol-proto');
 
+var LIST_CHANGE_MESSAGE = 'mllistchange';
+
 
 var MLList = Component.createComponentClass('MLList', {
 	dom: {
 		cls: 'ml-ui-list'
 	},
-	data: undefined,
+	data: {
+		get: MLList_get,
+		set: MLList_set,
+		del: MLList_del,
+		event: LIST_CHANGE_MESSAGE
+	},
 	events: undefined,
 	model: {
-		messages: {
-			'***': onOptionsChange
-		}
+		// messages: {
+		// 	'***': onItemsChange
+		// }
 	},
-	template: {
-		template: '{{~ it.selectOptions :option }} \
-						<option value="{{= option.value }}">{{= option.label }}</option> \
-				   {{~}}'
-	}
+	list: undefined
 });
 
 
@@ -4597,21 +4683,57 @@ module.exports = MLList;
 
 
 _.extendProto(MLList, {
-	disable: MLList$disable
+	init: MLList$init,
 });
 
 
-function MLList$disable(disable) {
-	this.el.disabled = disable;
+function MLList$init() {
+	Component.prototype.init.apply(this, arguments);
+	this.on('childrenbound', onChildrenBound);
 }
 
 
-function onOptionsChange(path, data) {
-	var component = this._hostObject.owner;
-	component.template.render({ selectOptions: this.get() });
+function MLList_get() {
+	return this.model.get();
 }
 
-},{"../c_class":12,"../c_registry":28,"mol-proto":88}],44:[function(require,module,exports){
+function MLList_set(value) {
+	this.model.set(value);
+}
+
+function MLList_del() {
+	return this.model.set([]);
+}
+
+
+function onChildrenBound() {
+	this.model.set([]);
+	milo.minder(this.model, '<<<->>>', this.data);
+	this.data.on('', {subscriber: onItemsChange, context: this});
+}
+
+
+function onItemsChange(path, data) {
+	if (data.removed.length) return;
+	var index = data.index;
+	var newItem = this.list.item(index);
+	var btn = newItem.container.scope.delete;
+	btn.events.on('click', {subscriber: onItemDelete, context: newItem});
+	//this.data.getMessageSource().dispatchMessage(LIST_CHANGE_MESSAGE);
+}
+
+
+function onItemDelete(msg, event) {
+	var id = this.data.getKey();
+	var parent = this.getScopeParent('list');
+	var btn = this.container.scope.delete;
+	btn.events.off('click', {subscriber: onItemDelete, context: this});
+
+	parent.model.splice(id, 1);
+	//this.data.getMessageSource().dispatchMessage(LIST_CHANGE_MESSAGE);
+}
+
+},{"../c_class":12,"../c_registry":28,"mol-proto":89}],45:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -4756,7 +4878,7 @@ function onOptionsChange(path, data) {
 	_.forEach(radioEls, options.push, options);
 }
 
-},{"../../util/count":75,"../c_class":12,"../c_registry":28}],45:[function(require,module,exports){
+},{"../../util/count":76,"../c_class":12,"../c_registry":28}],46:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -4802,25 +4924,30 @@ function onOptionsChange(path, data) {
 	this.template.render({ selectOptions: this.model.get() });
 }
 
-},{"../c_class":12,"../c_registry":28,"mol-proto":88}],46:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":28,"mol-proto":89}],47:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
 	, componentsRegistry = require('../c_registry')
-	, _ = require('mol-proto');
+	, _ = require('mol-proto')
+	, doT = require('dot');
 
 
 var COMBO_CHANGE_MESSAGE = 'mlsupercombochange';
 
-var OPTIONS_TEMPLATE = '{{~ it.comboOptions :option }}\
-							<div data-value="{{= option.value }}">{{= option.label }}</div>\
+var OPTIONS_TEMPLATE = '{{~ it.comboOptions :option:index }}\
+							<div data-value="{{= index }}">{{= option.label }}</div>\
 						{{~}}';
 
 var MAX_RENDERED = 100;
-var BUFFER = 50;
+var BUFFER = 25;
 
 var MLSuperCombo = Component.createComponentClass('MLSuperCombo', {
-	events: undefined,
+	events: {
+		messages: {
+			'mouseleave': {subscriber: onMouseLeave, context: 'owner'}
+		}
+	},
 	data: {
 		get: MLSuperCombo_get,
 		set: MLSuperCombo_set,
@@ -4830,6 +4957,15 @@ var MLSuperCombo = Component.createComponentClass('MLSuperCombo', {
 	},
 	dom: {
 		cls: 'ml-ui-supercombo'
+	},
+	template: {
+		template: '<input ml-bind="[data, events]:input">\
+		           <button ml-bind="[events]:openBtn">+</button>\
+		           <div ml-bind="[dom, events]:list">\
+		               <div ml-bind="[dom]:before"></div>\
+		               <div ml-bind="[template, dom, events]:options"></div>\
+		               <div ml-bind="[dom]:after"></div>\
+		           </div>'
 	},
 	container: undefined
 });
@@ -4852,22 +4988,64 @@ _.extendProto(MLSuperCombo, {
 
 function MLSuperCombo$init() {
 	Component.prototype.init.apply(this, arguments);
+	
 	this.on('childrenbound', onChildrenBound);
+	
 	_.defineProperties(this, {
 		_optionsData: [],
 		_filteredOptionsData: []
 	}, _.WRIT);
 }
 
+
+function onChildrenBound() {
+	this.off('childrenbound', onChildrenBound);
+	this.template.render().binder();
+	componentSetup.call(this);
+}
+
+function componentSetup() {
+	_.defineProperties(this, {
+		'_comboInput': this.container.scope.input,
+		'_comboList': this.container.scope.list,
+		'_comboOptions': this.container.scope.options,
+		'_comboBefore': this.container.scope.before,
+		'_comboAfter': this.container.scope.after,
+		'_comboOpenBtn': this.container.scope.openBtn,
+		'_optionTemplate': doT.compile(OPTIONS_TEMPLATE)
+	});
+
+	_.defineProperties(this, {
+		'_startIndex': 0,
+		'_endIndex': MAX_RENDERED,
+		'_hidden': false,
+		'_elementHeight': 0,
+		'_total': 0,
+		'_optionsHeight': 200,
+		'_lastScrollPos': 0,
+		'_currentValue': null
+	}, _.WRIT);
+
+	// Component Setup
+	this.dom.setStyles({ position: 'relative' });
+	setupComboList(this._comboList, this._comboOptions, this);
+	setupComboInput(this._comboInput, this);
+	setupComboBtn(this._comboOpenBtn, this);
+}
+
+
 function MLSuperCombo$toggleOptions(show) {
+	this._hidden = !show;
 	this._comboList.dom.toggle(show);
 }
 
 function MLSuperCombo$showOptions() {
+	this._hidden = false;
 	this._comboList.dom.toggle(true);
 }
 
 function MLSuperCombo$hideOptions() {
+	this._hidden = true;
 	this._comboList.dom.toggle(false);
 }
 
@@ -4883,64 +5061,37 @@ function MLSuperCombo$setFilteredOptions(arr) {
 }
 
 function MLSuperCombo$update() {
-	// var wasHidden = this._isHidden
-	// if (wasHidden)
-	// 	this.showOptions();
+	var wasHidden = this._hidden;
+	if (wasHidden)
+		this.showOptions();
 
 	var arrToShow = this._filteredOptionsData.slice(this._startIndex, this._endIndex);
+	
 	this._comboOptions.template.render({
 		comboOptions: arrToShow
 	});
 
 	var firstEl = this._comboOptions.el.firstChild;
-	this._elementHeight = firstEl ? firstEl.offsetHeight : 0;
+	this._elementHeight = firstEl ? firstEl.offsetHeight : this._elementHeight;
 
-	// if (wasHidden)
-	// 	this.hideOptions();
+	if (wasHidden)
+		this.hideOptions();
 
 	var beforeHeight = this._startIndex * this._elementHeight;
 	var afterHeight = (this._total - this._endIndex) * this._elementHeight;
-	var optionsHeight = this._comboOptions.el.childNodes.length * this._elementHeight;
-
-	this._comboOptions.el.style.height = optionsHeight + 'px';
 	this._comboBefore.el.style.height = beforeHeight + 'px';
 	this._comboAfter.el.style.height = afterHeight > 0 ? afterHeight + 'px' : '0px';
 }
 
-function onChildrenBound() {
-	_.defineProperties(this, {
-		'_comboInput': this.container.scope.input,
-		'_comboList': this.container.scope.list,
-		'_comboOptions': this.container.scope.options,
-		'_comboBefore': this.container.scope.before,
-		'_comboAfter': this.container.scope.after,
-		'_comboOpenBtn': this.container.scope.openBtn
-	});
-
-	_.defineProperties(this, {
-		'_startIndex': 0,
-		'_endIndex': MAX_RENDERED,
-		'_hidden': false,
-		'_elementHeight': 0,
-		'_total': 0
-	}, _.WRIT);
-
-	// Component Setup
-	this.dom.setStyles({ position: 'relative' });
-
-	setupComboList(this._comboList, this._comboOptions, this);
-	setupComboInput(this._comboInput, this);
-	setupComboBtn(this._comboOpenBtn, this);
-}
 
 function setupComboList(list, options, self) {
 	options.template.set(OPTIONS_TEMPLATE);
 	var xPos = self._comboInput.el.clientLeft;
-	var yPos = self._comboInput.el.clientTop + self._comboInput.el.offsetHeight + 4;
+	var yPos = self._comboInput.el.clientTop + self._comboInput.el.offsetHeight;
 	
 	list.dom.setStyles({
 		overflow: 'scroll',
-		height: '200px',
+		height: self._optionsHeight + 'px',
 		width: '100%',
 		position: 'absolute',
 		top: yPos + 'px',
@@ -4948,34 +5099,35 @@ function setupComboList(list, options, self) {
 		backgroundColor: '#FFFFFF'
 	});
 
-	//list.dom.hide();
-	var scrollHandler = _.throttle(onListScroll, 50);
+	self.hideOptions();
 	list.events.onMessages({
 		'click': {subscriber: onListClick, context: self},
-		'scroll': {subscriber: scrollHandler, context: self}
+		'scroll': {subscriber: onListScroll, context: self}
 	});
 }
 
 function setupComboInput(input, self) {
 	input.data.on('', { subscriber: onDataChange, context: self });
+	input.events.on('click', {subscriber: onInputClick, context: self });
 }
 
 function setupComboBtn(btn, self) {
-	btn.events.on('click', { subscriber: onBtnClick, context: self });
+	btn.events.on('click', { subscriber: onAddBtn, context: self });
 }
 
 /* Data Facet */
 function MLSuperCombo_get() {
-	// if (! this._comboInput) return;
-	// return this._comboInput.data.get();
+	return this._currentValue;
 }
 
-function MLSuperCombo_set(value) {
-	// return changeComboData.call(this, 'set', value);
+function MLSuperCombo_set(obj) {
+	this._currentValue = obj;
+	this._comboInput.data.set(obj.label);
 }
 
 function MLSuperCombo_del() {
-	// return changeComboData.call(this, 'del', value);
+	this._currentValue = null;
+	this._comboInput.data.set('');
 }
 
 
@@ -4983,39 +5135,67 @@ function MLSuperCombo_del() {
 function onDataChange(msg, data) {
 	var text = data.newValue;
 	var filteredArr = _.filter(this._optionsData, function(option) {
-		return option.label.indexOf(text) != -1;
+		var label = option.label.toLowerCase();
+		text = text.toLowerCase();
+		return label.indexOf(text) != -1;
 	});
+	this.showOptions();
 	this.setFilteredOptions(filteredArr);
 	this._comboList.el.scrollTop = 0;
-
-	//this.data.getMessageSource().dispatchMessage(COMBO_CHANGE_MESSAGE);
 }
 
-function onBtnClick (type, event) {
-	this._hidden = !this._hidden;
-	this.toggleOptions(this._hidden);
+function onMouseLeave(type, event) {
+	this.hideOptions();
 }
+
+
+function onInputClick(type, event) {
+	this.showOptions();
+}
+
+
+function onAddBtn (type, event) {
+	
+}
+
 
 function onListClick (type, event) {
-	//cnsole.log('value: ', event.target.getAttribute('data-value'));
+	this.hideOptions();
+	this._comboInput.data.off('', { subscriber: onDataChange, context: this });
+
+	var index = Number(event.target.getAttribute('data-value')) + this._startIndex;
+	var data = this._filteredOptionsData[index];
+	this.data.set(data);
+	this.data.getMessageSource().dispatchMessage(COMBO_CHANGE_MESSAGE);
+
+	this._comboInput.data.on('', { subscriber: onDataChange, context: this });
 }
+
 
 function onListScroll (type, event) {
-	var scrollPos = event.target.scrollTop;
-	var totalElementsBefore = Math.floor(scrollPos / this._elementHeight) - BUFFER;
+	var scrollPos = event.target.scrollTop
+		, direction = scrollPos > this._lastScrollPos ? 'down' : 'up'
+		, firstChild = this._comboOptions.el.lastChild
+		, lastChild = this._comboOptions.el.firstChild
+		, lastElPosition = firstChild ? firstChild.offsetTop : 0
+		, firstElPosition = lastChild ? lastChild.offsetTop : 0
+		, distFromLastEl = lastElPosition - scrollPos - this._optionsHeight + this._elementHeight
+		, distFromFirstEl = scrollPos - firstElPosition
+		, elsFromStart = Math.floor(distFromFirstEl / this._elementHeight)
+		, elsToTheEnd = Math.floor(distFromLastEl / this._elementHeight)
+		, totalElementsBefore = Math.floor(scrollPos / this._elementHeight) - BUFFER;
+		
+		this._startIndex = totalElementsBefore > 0 ? totalElementsBefore : 0;
+		this._endIndex = totalElementsBefore + MAX_RENDERED;
 
-	this._startIndex = totalElementsBefore > 0 ? totalElementsBefore : 0;
-	this._endIndex = totalElementsBefore + MAX_RENDERED;
-	this.update();
+	if ((direction == 'down' && elsToTheEnd < BUFFER) 
+	 	 || (direction == 'up' && elsFromStart < BUFFER)) {
+		this.update();
+	}
+	this._lastScrollPos = scrollPos;
 }
 
-
-
-
-
-
-
-},{"../c_class":12,"../c_registry":28,"mol-proto":88}],47:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":28,"dot":88,"mol-proto":89}],48:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -5034,7 +5214,7 @@ componentsRegistry.add(MLTextarea);
 
 module.exports = MLTextarea;
 
-},{"../c_class":12,"../c_registry":28}],48:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":28}],49:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -5053,7 +5233,7 @@ componentsRegistry.add(MLTime);
 
 module.exports = MLTime;
 
-},{"../c_class":12,"../c_registry":28}],49:[function(require,module,exports){
+},{"../c_class":12,"../c_registry":28}],50:[function(require,module,exports){
 'use strict';
 
 
@@ -5097,7 +5277,7 @@ config({
 	check: true
 });
 
-},{"dot":87,"mol-proto":88}],50:[function(require,module,exports){
+},{"dot":88,"mol-proto":89}],51:[function(require,module,exports){
 'use strict';
 
 // <a name="loader"></a>
@@ -5219,7 +5399,7 @@ function loadView(el, callback) {
 	});
 }
 
-},{"./attributes/a_load":8,"./config":49,"./mail":51,"./util/dom":76,"./util/error":77,"./util/logger":80,"./util/request":83}],51:[function(require,module,exports){
+},{"./attributes/a_load":8,"./config":50,"./mail":52,"./util/dom":77,"./util/error":78,"./util/logger":81,"./util/request":84}],52:[function(require,module,exports){
 'use strict';
 
 // <a name="mail"></a>
@@ -5251,7 +5431,7 @@ miloMail._setMessageSource(mailMsgSource);
 
 module.exports = miloMail;
 
-},{"../messenger":54,"./mail_api":52,"./mail_source":53,"mol-proto":88}],52:[function(require,module,exports){
+},{"../messenger":55,"./mail_api":53,"./mail_source":54,"mol-proto":89}],53:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('../messenger/m_api')
@@ -5296,7 +5476,7 @@ function filterSourceMessage(sourceMessage, msgType, msgData) {
 		return windowMessagePrefix + msgData.data.type == msgType;
 };
 
-},{"../messenger/m_api":55,"../util/check":73,"mol-proto":88}],53:[function(require,module,exports){
+},{"../messenger/m_api":56,"../util/check":74,"mol-proto":89}],54:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../messenger/m_source')
@@ -5375,7 +5555,7 @@ function trigger(msgType, data) {
 		window.postMessage(data, '*')
 }
 
-},{"../components/msg_src/de_constrs":33,"../messenger/m_source":57,"../util/check":73,"../util/error":77,"mol-proto":88}],54:[function(require,module,exports){
+},{"../components/msg_src/de_constrs":33,"../messenger/m_source":58,"../util/check":74,"../util/error":78,"mol-proto":89}],55:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -5909,7 +6089,7 @@ function getMessageSource() {
 	return this._messageSource
 }
 
-},{"../abstract/mixin":4,"../util/check":73,"../util/error":77,"./m_source":57,"mol-proto":88}],55:[function(require,module,exports){
+},{"../abstract/mixin":4,"../util/check":74,"../util/error":78,"./m_source":58,"mol-proto":89}],56:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -6092,7 +6272,7 @@ function filterSourceMessage(sourceMessage, message, internalData) {
 	return true;
 }
 
-},{"mol-proto":88}],56:[function(require,module,exports){
+},{"mol-proto":89}],57:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('./m_api')
@@ -6177,7 +6357,7 @@ function getInternalMessages(sourceMessage) {
 	return internalMessages;
 }
 
-},{"./m_api":55,"mol-proto":88}],57:[function(require,module,exports){
+},{"./m_api":56,"mol-proto":89}],58:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -6329,7 +6509,7 @@ function dispatchMessage(sourceMessage, sourceData) {
 		}, this);
 }
 
-},{"../abstract/mixin":4,"../util/check":73,"../util/error":77,"../util/logger":80,"./m_api":55,"mol-proto":88}],58:[function(require,module,exports){
+},{"../abstract/mixin":4,"../util/check":74,"../util/error":78,"../util/logger":81,"./m_api":56,"mol-proto":89}],59:[function(require,module,exports){
 'use strict';
 
 
@@ -6386,7 +6566,7 @@ function removeSourceSubscriber(sourceMessage) {
 	this.sourceMessenger.off(sourceMessage, { context: this, subscriber: this.dispatchMessage });
 }
 
-},{"../util/check":73,"./m_source":57,"mol-proto":88}],59:[function(require,module,exports){
+},{"../util/check":74,"./m_source":58,"mol-proto":89}],60:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -6459,7 +6639,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./attributes":9,"./binder":10,"./classes":11,"./components/c_class":12,"./components/c_facet":13,"./config":49,"./loader":50,"./mail":51,"./messenger":54,"./minder":60,"./model":63,"./registry":70,"./use_components":71,"./use_facets":72,"./util":78,"mol-proto":88}],60:[function(require,module,exports){
+},{"./attributes":9,"./binder":10,"./classes":11,"./components/c_class":12,"./components/c_facet":13,"./config":50,"./loader":51,"./mail":52,"./messenger":55,"./minder":61,"./model":64,"./registry":71,"./use_components":72,"./use_facets":73,"./util":79,"mol-proto":89}],61:[function(require,module,exports){
 'use strict';
 
 var Connector = require('./model/connector');
@@ -6495,7 +6675,7 @@ function minder(ds1, mode, ds2, options) {
 		return new Connector(ds1, mode, ds2, options);
 }
 
-},{"./model/connector":62}],61:[function(require,module,exports){
+},{"./model/connector":63}],62:[function(require,module,exports){
 'use strict';
 
 
@@ -6597,7 +6777,7 @@ function _processChanges(callback) {
 	this.postMessage('changecompleted');
 }
 
-},{"mol-proto":88}],62:[function(require,module,exports){
+},{"mol-proto":89}],63:[function(require,module,exports){
 'use strict';
 
 var ConnectorError = require('../util/error').Connector
@@ -6811,7 +6991,7 @@ function turnOff() {
 	}
 }
 
-},{"../util/error":77,"../util/logger":80,"mol-proto":88}],63:[function(require,module,exports){
+},{"../util/error":78,"../util/logger":81,"mol-proto":89}],64:[function(require,module,exports){
 'use strict';
 
 var ModelPath = require('./m_path')
@@ -7006,7 +7186,7 @@ _.extend(Model, {
 	Path: ModelPath
 });
 
-},{"../abstract/mixin":4,"../messenger":54,"../messenger/msngr_source":58,"../util/check":73,"../util/error":77,"../util/logger":80,"./change_data":61,"./m_msg_api":64,"./m_path":65,"./path_utils":68,"./synthesize":69,"mol-proto":88}],64:[function(require,module,exports){
+},{"../abstract/mixin":4,"../messenger":55,"../messenger/msngr_source":59,"../util/check":74,"../util/error":78,"../util/logger":81,"./change_data":62,"./m_msg_api":65,"./m_path":66,"./path_utils":69,"./synthesize":70,"mol-proto":89}],65:[function(require,module,exports){
 'use strict';
 
 var MessengerRegexpAPI = require('../messenger/m_api_rx')
@@ -7045,7 +7225,7 @@ function translateToSourceMessage(accessPath) {
 	return pathUtils.createRegexPath(accessPath);
 }
 
-},{"../messenger/m_api_rx":56,"./path_utils":68,"mol-proto":88}],65:[function(require,module,exports){
+},{"../messenger/m_api_rx":57,"./path_utils":69,"mol-proto":89}],66:[function(require,module,exports){
 'use strict';
 
 var synthesize = require('./synthesize')
@@ -7276,7 +7456,7 @@ function _prepareMessenger() {
 	_.defineProperty(this, '_messenger', mPathMessenger);
 }
 
-},{"../messenger":54,"../messenger/msngr_source":58,"../util/check":73,"./change_data":61,"./path_msg_api":67,"./path_utils":68,"./synthesize":69,"mol-proto":88}],66:[function(require,module,exports){
+},{"../messenger":55,"../messenger/msngr_source":59,"../util/check":74,"./change_data":62,"./path_msg_api":68,"./path_utils":69,"./synthesize":70,"mol-proto":89}],67:[function(require,module,exports){
 'use strict';
 
 
@@ -7297,7 +7477,7 @@ function normalizeSpliceIndex(spliceIndex, length) {
 					: 0;
 }
 
-},{}],67:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('../messenger/m_api')
@@ -7376,7 +7556,7 @@ function createInternalData(fullSourceAccessPath, accessPath, sourceData) {
 	return internalData;
 }
 
-},{"../messenger/m_api":55,"../util/logger":80,"./path_utils":68,"mol-proto":88}],68:[function(require,module,exports){
+},{"../messenger/m_api":56,"../util/logger":81,"./path_utils":69,"mol-proto":89}],69:[function(require,module,exports){
 'use strict';
 
 // <a name="model-path"></a>
@@ -7521,7 +7701,7 @@ function wrapMessengerMethods(methodsNames) {
 	_.defineProperties(this, wrappedMethods);
 }
 
-},{"../util/check":73,"../util/error":77,"mol-proto":88}],69:[function(require,module,exports){
+},{"../util/check":74,"../util/error":78,"mol-proto":89}],70:[function(require,module,exports){
 'use strict';
 
 var pathUtils = require('../path_utils')
@@ -7691,7 +7871,7 @@ _.extend(synthesizePathMethods, {
 	modelSplice: _synthesize(modelSpliceSynthesizer, '', [])
 });
 
-},{"../model_utils":66,"../path_utils":68,"dot":87,"fs":85,"mol-proto":88}],70:[function(require,module,exports){
+},{"../model_utils":67,"../path_utils":69,"dot":88,"fs":86,"mol-proto":89}],71:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7705,7 +7885,7 @@ var registry = module.exports = {
 	components: require('./components/c_registry')
 };
 
-},{"./components/c_facets/cf_registry":26,"./components/c_registry":28}],71:[function(require,module,exports){
+},{"./components/c_facets/cf_registry":26,"./components/c_registry":28}],72:[function(require,module,exports){
 'use strict';
 
 require('./components/classes/View');
@@ -7721,7 +7901,8 @@ require('./components/ui/Time');
 require('./components/ui/Date');
 require('./components/ui/Combo');
 require('./components/ui/SuperCombo');
-},{"./components/classes/View":30,"./components/ui/Button":37,"./components/ui/Combo":38,"./components/ui/Date":39,"./components/ui/Group":40,"./components/ui/Hyperlink":41,"./components/ui/Input":42,"./components/ui/List":43,"./components/ui/RadioGroup":44,"./components/ui/Select":45,"./components/ui/SuperCombo":46,"./components/ui/Textarea":47,"./components/ui/Time":48}],72:[function(require,module,exports){
+require('./components/ui/ComboList');
+},{"./components/classes/View":30,"./components/ui/Button":37,"./components/ui/Combo":38,"./components/ui/ComboList":39,"./components/ui/Date":40,"./components/ui/Group":41,"./components/ui/Hyperlink":42,"./components/ui/Input":43,"./components/ui/List":44,"./components/ui/RadioGroup":45,"./components/ui/Select":46,"./components/ui/SuperCombo":47,"./components/ui/Textarea":48,"./components/ui/Time":49}],73:[function(require,module,exports){
 'use strict';
 
 require('./components/c_facets/Dom');
@@ -7737,7 +7918,7 @@ require('./components/c_facets/List');
 require('./components/c_facets/Item');
 require('./components/c_facets/Transfer');
 
-},{"./components/c_facets/Container":14,"./components/c_facets/Data":15,"./components/c_facets/Dom":16,"./components/c_facets/Drag":17,"./components/c_facets/Drop":18,"./components/c_facets/Events":19,"./components/c_facets/Frame":20,"./components/c_facets/Item":21,"./components/c_facets/List":22,"./components/c_facets/ModelFacet":23,"./components/c_facets/Template":24,"./components/c_facets/Transfer":25}],73:[function(require,module,exports){
+},{"./components/c_facets/Container":14,"./components/c_facets/Data":15,"./components/c_facets/Dom":16,"./components/c_facets/Drag":17,"./components/c_facets/Drop":18,"./components/c_facets/Events":19,"./components/c_facets/Frame":20,"./components/c_facets/Item":21,"./components/c_facets/List":22,"./components/c_facets/ModelFacet":23,"./components/c_facets/Template":24,"./components/c_facets/Transfer":25}],74:[function(require,module,exports){
 'use strict';
 
 // <a name="utils-check"></a>
@@ -8112,7 +8293,7 @@ function _prependPath(key, base) {
 };
 
 
-},{"../config":49,"mol-proto":88}],74:[function(require,module,exports){
+},{"../config":50,"mol-proto":89}],75:[function(require,module,exports){
 'use strict';
 
 var count = require('./count')
@@ -8126,7 +8307,7 @@ function componentName() {
 	return prefix + count();
 }
 
-},{"../config":49,"./count":75}],75:[function(require,module,exports){
+},{"../config":50,"./count":76}],76:[function(require,module,exports){
 // <a name="utils-count"></a>
 // milo.utils.count
 // ----------------
@@ -8157,7 +8338,7 @@ componentCount.get = function() {
 
 module.exports = componentCount;
 
-},{}],76:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 'use strict';
 
 
@@ -8341,7 +8522,7 @@ function unwrapElement(el) {
     }
 }
 
-},{}],77:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 // <a name="utils-error"></a>
 // milo.utils.error
 // -----------
@@ -8384,7 +8565,7 @@ function error$toBeImplemented() {
 	throw new error.AbstractClass('calling the method of an absctract class');
 }
 
-},{"mol-proto":88}],78:[function(require,module,exports){
+},{"mol-proto":89}],79:[function(require,module,exports){
 'use strict';
 
 /**
@@ -8405,7 +8586,7 @@ var util = {
 
 module.exports = util;
 
-},{"./check":73,"./component_name":74,"./count":75,"./dom":76,"./error":77,"./json_parse":79,"./logger":80,"./promise":82,"./request":83,"./selection":84}],79:[function(require,module,exports){
+},{"./check":74,"./component_name":75,"./count":76,"./dom":77,"./error":78,"./json_parse":80,"./logger":81,"./promise":83,"./request":84,"./selection":85}],80:[function(require,module,exports){
 'use strict';
 
 
@@ -8425,7 +8606,7 @@ function jsonParse(str) {
 	} catch (e) {}
 }
 
-},{}],80:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 'use strict';
 
 // <a name="utils-logger"></a>
@@ -8455,7 +8636,7 @@ var logger = new Logger({ level: 3 });
 
 module.exports = logger;
 
-},{"./logger_class":81}],81:[function(require,module,exports){
+},{"./logger_class":82}],82:[function(require,module,exports){
 'use strict';
 
 // ### Logger Class
@@ -8567,7 +8748,7 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"mol-proto":88}],82:[function(require,module,exports){
+},{"mol-proto":89}],83:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -8690,7 +8871,7 @@ function Promise$transform(transformDataFunc) {
 	return promise;
 }
 
-},{"mol-proto":88}],83:[function(require,module,exports){
+},{"mol-proto":89}],84:[function(require,module,exports){
 'use strict';
 
 // milo.utils.request
@@ -8771,7 +8952,7 @@ function request$json(url, callback) {
 	return jsonPromise;
 }
 
-},{"./promise":82,"mol-proto":88}],84:[function(require,module,exports){
+},{"./promise":83,"mol-proto":89}],85:[function(require,module,exports){
 'use strict';
 
 
@@ -9058,13 +9239,13 @@ function TextSelection$del(endContainer) {
 
 
 
-},{"../components/c_class":12,"./dom":76,"mol-proto":88}],85:[function(require,module,exports){
+},{"../components/c_class":12,"./dom":77,"mol-proto":89}],86:[function(require,module,exports){
 
 // not implemented
 // The reason for having an empty file and not throwing is to allow
 // untraditional implementation of this module.
 
-},{}],86:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 // doT.js
 // 2011, Laura Doktorova, https://github.com/olado/doT
 // Licensed under the MIT license.
@@ -9201,7 +9382,7 @@ function TextSelection$del(endContainer) {
 	};
 }());
 
-},{}],87:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 /* doT + auto-compilation of doT templates
  *
  * 2012, Laura Doktorova, https://github.com/olado/doT
@@ -9346,7 +9527,7 @@ InstallDots.prototype.compileAll = function() {
 	return this.__rendermodule;
 };
 
-},{"./doT":86,"fs":85}],88:[function(require,module,exports){
+},{"./doT":87,"fs":86}],89:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -9505,7 +9686,7 @@ if (typeof module == 'object' && module.exports)
 	// export for node/browserify
 	module.exports = Proto;
 
-},{"./proto_array":89,"./proto_function":90,"./proto_object":91,"./proto_prototype":92,"./proto_string":93,"./utils":94}],89:[function(require,module,exports){
+},{"./proto_array":90,"./proto_function":91,"./proto_object":92,"./proto_prototype":93,"./proto_string":94,"./utils":95}],90:[function(require,module,exports){
 'use strict';
 
 var __ = require('./proto_object')
@@ -9659,7 +9840,7 @@ function mapToObject(callback, thisArg) {
 	return result;
 }
 
-},{"./proto_object":91,"./utils":94}],90:[function(require,module,exports){
+},{"./proto_object":92,"./utils":95}],91:[function(require,module,exports){
 'use strict';
 
 /**
@@ -9879,7 +10060,7 @@ function throttle(wait, options) {
 	}
 }
 
-},{}],91:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 'use strict';
 
 
@@ -10399,7 +10580,7 @@ function omitKeys() { // , ... keys
 	return obj;
 }
 
-},{"./utils":94}],92:[function(require,module,exports){
+},{"./utils":95}],93:[function(require,module,exports){
 'use strict';
 
 /**
@@ -10513,7 +10694,7 @@ function makeSubclass(Superclass) {
 	return this;
 }
 
-},{"./proto_function":90,"./proto_object":91}],93:[function(require,module,exports){
+},{"./proto_function":91,"./proto_object":92}],94:[function(require,module,exports){
 'use strict';
 
 /**
@@ -10545,7 +10726,7 @@ function firstLowerCase() {
 	return this[0].toLowerCase() + this.slice(1);
 }
 
-},{}],94:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 'use strict';
 
 var utils = module.exports = {
@@ -10610,5 +10791,5 @@ function makeFindMethod(eachMethod, findWhat) {
 	}
 }
 
-},{}]},{},[59])
+},{}]},{},[60])
 ;
