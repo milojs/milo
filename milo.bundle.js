@@ -4523,6 +4523,7 @@ module.exports = MLComboList;
 
 _.extendProto(MLComboList, {
 	init: MLComboList$init,
+	setOptions: MLComboList$setOptions
 });
 
 
@@ -4531,10 +4532,11 @@ function MLComboList$init() {
 	
 	this.on('childrenbound', onChildrenBound);
 	
-	// _.defineProperties(this, {
-	// 	_optionsData: [],
-	// 	_filteredOptionsData: []
-	// }, _.WRIT);
+}
+
+
+function MLComboList$setOptions(arr) {
+	this._combo.setOptions(arr);
 }
 
 
@@ -4545,7 +4547,18 @@ function onChildrenBound() {
 }
 
 function componentSetup() {
+	_.defineProperties(this, {
+		'_combo': this.container.scope.combo,
+		'_list': this.container.scope.list
+	});
 
+	this._combo.data.on('', {subscriber: onComboChange, context: this });    
+}
+
+function onComboChange(msg, data) {
+	if (data.newValue)
+		this._list.model.push(data.newValue);
+	this._combo.data.del();
 }
 
 function MLComboList_get() {
@@ -9593,8 +9606,6 @@ var	arrayMethods = require('./proto_array');
  * - [memoize](proto_function.js.html#memoize)
  * - [delay](proto_function.js.html#delay)
  * - [defer](proto_function.js.html#defer)
- * - [debounce](proto_function.js.html#debounce)
- * - [throttle](proto_function.js.html#throttle) 
  */
 var	functionMethods = require('./proto_function');
 
@@ -10018,7 +10029,7 @@ function debounce(wait, immediate) {
 	        }
 		}
     };
-}
+};
 
 
 /**
@@ -10035,9 +10046,13 @@ function throttle(wait, options) {
 	var timeout = null;
 	var previous = 0;
 	options || (options = {});
-
+	var later = function() {
+	    previous = options.leading === false ? 0 : new Date;
+	    timeout = null;
+	    result = func.apply(context, args);
+	};
 	return function() {
-	    var now = Date.now();
+	    var now = new Date;
 	    if (!previous && options.leading === false) previous = now;
 	    var remaining = wait - (now - previous);
 	    context = this;
@@ -10047,18 +10062,12 @@ function throttle(wait, options) {
 	        timeout = null;
 	        previous = now;
 	        result = func.apply(context, args);
-	    } else if (!timeout && options.trailing !== false)
+	    } else if (!timeout && options.trailing !== false) {
 	        timeout = setTimeout(later, remaining);
-
+	    }
 	    return result;
 	};
-
-	function later() {
-	    previous = options.leading === false ? 0 : Date.now();
-	    timeout = null;
-	    result = func.apply(context, args);
-	}
-}
+};
 
 },{}],92:[function(require,module,exports){
 'use strict';

@@ -58,9 +58,11 @@ describe('milo binder', function() {
         ctrl.mySuperCombo.data.on('', function(msg, data) {
             ctrl.myMLList.model.push(data.newValue);
         });
-        ctrl.myMLList.data.on('', function(msg, data) {
-            //cnsole.log('on mylist data', msg, data);
-        });
+
+
+        // Setting comboList
+
+        ctrl.myComboList.setOptions(comboTestArray);
 
     // });
 
