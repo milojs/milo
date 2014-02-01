@@ -2505,16 +2505,21 @@ function toggle(doShow) {
 
 
 function _manageCssClasses(methodName, cssClasses, enforce) {
-	var classList = this.owner.el.classList;
+	var classList = this.owner.el.classList
+		, doToggle = methodName == 'toggle';
 
 	if (Array.isArray(cssClasses))
-		cssClasses.forEach(function(cls) {
-			classList[methodName](cls, enforce)
-		});
+		cssClasses.forEach(callMethod);
 	else if (typeof cssClasses == 'string')
-		classList[methodName](cssClasses, enforce);
+		callMethod(cssClasses);
 	else
 		throw new DomFacetError('unknown type of CSS classes parameter');
+
+	function callMethod(cssCls) {
+		doToggle
+			? classList[methodName](cssCls, enforce)
+			: classList[methodName](cssCls);
+	}
 }
 
 
@@ -9606,6 +9611,8 @@ var	arrayMethods = require('./proto_array');
  * - [memoize](proto_function.js.html#memoize)
  * - [delay](proto_function.js.html#delay)
  * - [defer](proto_function.js.html#defer)
+ * - [debounce](proto_function.js.html#debounce)
+ * - [throttle](proto_function.js.html#throttle) 
  */
 var	functionMethods = require('./proto_function');
 
@@ -10029,7 +10036,7 @@ function debounce(wait, immediate) {
 	        }
 		}
     };
-};
+}
 
 
 /**
@@ -10046,13 +10053,9 @@ function throttle(wait, options) {
 	var timeout = null;
 	var previous = 0;
 	options || (options = {});
-	var later = function() {
-	    previous = options.leading === false ? 0 : new Date;
-	    timeout = null;
-	    result = func.apply(context, args);
-	};
+
 	return function() {
-	    var now = new Date;
+	    var now = Date.now();
 	    if (!previous && options.leading === false) previous = now;
 	    var remaining = wait - (now - previous);
 	    context = this;
@@ -10062,12 +10065,18 @@ function throttle(wait, options) {
 	        timeout = null;
 	        previous = now;
 	        result = func.apply(context, args);
-	    } else if (!timeout && options.trailing !== false) {
+	    } else if (!timeout && options.trailing !== false)
 	        timeout = setTimeout(later, remaining);
-	    }
+
 	    return result;
 	};
-};
+
+	function later() {
+	    previous = options.leading === false ? 0 : Date.now();
+	    timeout = null;
+	    result = func.apply(context, args);
+	}
+}
 
 },{}],92:[function(require,module,exports){
 'use strict';
