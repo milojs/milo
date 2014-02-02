@@ -4513,7 +4513,7 @@ var MLComboList = Component.createComponentClass('MLComboList', {
 		template: '<div ml-bind="MLList:list">\
 			           <div ml-bind="[item]:item">\
 			               <span ml-bind="[data]:label"></span>\
-			               <button ml-bind="[events]:delete">x</button>\
+			               <button ml-bind="[events]:deleteBtn">x</button>\
 			           </div>\
 			       </div>\
 			       <div ml-bind="MLSuperCombo:combo" style="width:250px; background-color: #ccc;"></div>'
@@ -4672,7 +4672,8 @@ var Component = require('../c_class')
 	, componentsRegistry = require('../c_registry')
 	, _ = require('mol-proto');
 
-var LIST_CHANGE_MESSAGE = 'mllistchange';
+var LIST_CHANGE_MESSAGE = 'mllistchange'
+	, DELETE_BUTTON_NAME = 'deleteBtn';
 
 
 var MLList = Component.createComponentClass('MLList', {
@@ -4683,13 +4684,13 @@ var MLList = Component.createComponentClass('MLList', {
 		get: MLList_get,
 		set: MLList_set,
 		del: MLList_del,
-		event: LIST_CHANGE_MESSAGE
+		event: LIST_CHANGE_MESSAGE,
 	},
 	events: undefined,
 	model: {
-		// messages: {
-		// 	'***': onItemsChange
-		// }
+		messages: {
+			'**': { subscriber: onItemsChange, context: 'owner' }
+		}
 	},
 	list: undefined
 });
@@ -4727,28 +4728,29 @@ function MLList_del() {
 function onChildrenBound() {
 	this.model.set([]);
 	milo.minder(this.model, '<<<->>>', this.data);
-	this.data.on('', {subscriber: onItemsChange, context: this});
 }
 
 
-function onItemsChange(path, data) {
-	if (data.removed.length) return;
-	var index = data.index;
-	var newItem = this.list.item(index);
-	var btn = newItem.container.scope.delete;
-	btn.events.on('click', {subscriber: onItemDelete, context: newItem});
-	//this.data.getMessageSource().dispatchMessage(LIST_CHANGE_MESSAGE);
-}
+var ITEM_PATH_REGEX = /^\[([0-9]+)\]$/;
+function onItemsChange(msg, data) {
+	var self = this;
+	_.defer(function() {
+		if (data.type == 'added' && ITEM_PATH_REGEX.test(data.path)) {
+			var index = +data.path.match(ITEM_PATH_REGEX)[1];
+			var newItem = self.list.item(index);
+			var btn = newItem.container.scope[DELETE_BUTTON_NAME];
+			btn.events.on('click',
+				{ subscriber: deleteItem, context: newItem });
+		}
 
-
-function onItemDelete(msg, event) {
-	var id = this.data.getKey();
-	var parent = this.getScopeParent('list');
-	var btn = this.container.scope.delete;
-	btn.events.off('click', {subscriber: onItemDelete, context: this});
-
-	parent.model.splice(id, 1);
-	//this.data.getMessageSource().dispatchMessage(LIST_CHANGE_MESSAGE);
+		function deleteItem(msg, data) {
+			btn.events.off('click',
+				{ subscriber: deleteItem, context: this });
+			var index = this.data.getKey();
+			self.model.splice(index, 1);
+			//this.data.getMessageSource().dispatchMessage(LIST_CHANGE_MESSAGE);
+		}
+	});
 }
 
 },{"../c_class":12,"../c_registry":28,"mol-proto":89}],45:[function(require,module,exports){
