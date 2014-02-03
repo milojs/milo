@@ -4516,7 +4516,7 @@ var MLComboList = Component.createComponentClass('MLComboList', {
 			               <button ml-bind="[events]:deleteBtn">x</button>\
 			           </div>\
 			       </div>\
-			       <div ml-bind="MLSuperCombo:combo" style="width:250px; background-color: #ccc;"></div>'
+			       <div ml-bind="MLSuperCombo:combo"></div>'
 	}
 });
 
@@ -4556,6 +4556,8 @@ function componentSetup() {
 		'_combo': this.container.scope.combo,
 		'_list': this.container.scope.list
 	});
+
+	milo.minder(this._list.model, '<<<->>>', this.model);
 
 	this._combo.data.on('', {subscriber: onComboChange, context: this });    
 }
@@ -4723,7 +4725,6 @@ function MLList_set(value) {
 function MLList_del() {
 	return this.model.set([]);
 }
-
 
 function onChildrenBound() {
 	this.model.set([]);
@@ -4979,9 +4980,9 @@ var MLSuperCombo = Component.createComponentClass('MLSuperCombo', {
 		cls: 'ml-ui-supercombo'
 	},
 	template: {
-		template: '<input ml-bind="[data, events]:input">\
+		template: '<input ml-bind="[data, events]:input" class="form-control ml-ui-input">\
 		           <button ml-bind="[events]:openBtn">+</button>\
-		           <div ml-bind="[dom, events]:list">\
+		           <div ml-bind="[dom, events]:list" class="ml-ui-supercombo-dropdown">\
 		               <div ml-bind="[dom]:before"></div>\
 		               <div ml-bind="[template, dom, events]:options"></div>\
 		               <div ml-bind="[dom]:after"></div>\
@@ -5106,17 +5107,17 @@ function MLSuperCombo$update() {
 
 function setupComboList(list, options, self) {
 	options.template.set(OPTIONS_TEMPLATE);
-	var xPos = self._comboInput.el.clientLeft;
-	var yPos = self._comboInput.el.clientTop + self._comboInput.el.offsetHeight;
+	// var xPos = self._comboInput.el.clientLeft;
+	// var yPos = self._comboInput.el.clientTop + self._comboInput.el.offsetHeight;
 	
 	list.dom.setStyles({
 		overflow: 'scroll',
 		height: self._optionsHeight + 'px',
 		width: '100%',
 		position: 'absolute',
-		top: yPos + 'px',
-		left: xPos + 'px',
-		backgroundColor: '#FFFFFF'
+		zIndex: 10
+		// top: yPos + 'px',
+		// left: xPos + 'px',
 	});
 
 	self.hideOptions();
@@ -9624,8 +9625,6 @@ var	arrayMethods = require('./proto_array');
  * - [memoize](proto_function.js.html#memoize)
  * - [delay](proto_function.js.html#delay)
  * - [defer](proto_function.js.html#defer)
- * - [debounce](proto_function.js.html#debounce)
- * - [throttle](proto_function.js.html#throttle) 
  */
 var	functionMethods = require('./proto_function');
 
@@ -10049,7 +10048,7 @@ function debounce(wait, immediate) {
 	        }
 		}
     };
-}
+};
 
 
 /**
@@ -10066,9 +10065,13 @@ function throttle(wait, options) {
 	var timeout = null;
 	var previous = 0;
 	options || (options = {});
-
+	var later = function() {
+	    previous = options.leading === false ? 0 : new Date;
+	    timeout = null;
+	    result = func.apply(context, args);
+	};
 	return function() {
-	    var now = Date.now();
+	    var now = new Date;
 	    if (!previous && options.leading === false) previous = now;
 	    var remaining = wait - (now - previous);
 	    context = this;
@@ -10078,18 +10081,12 @@ function throttle(wait, options) {
 	        timeout = null;
 	        previous = now;
 	        result = func.apply(context, args);
-	    } else if (!timeout && options.trailing !== false)
+	    } else if (!timeout && options.trailing !== false) {
 	        timeout = setTimeout(later, remaining);
-
+	    }
 	    return result;
 	};
-
-	function later() {
-	    previous = options.leading === false ? 0 : Date.now();
-	    timeout = null;
-	    result = func.apply(context, args);
-	}
-}
+};
 
 },{}],92:[function(require,module,exports){
 'use strict';

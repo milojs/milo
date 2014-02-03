@@ -8,13 +8,13 @@ describe('milo binder', function() {
     	var ctrl = milo.binder();
 
     	ctrl.articleButton.events.on('click mouseenter', function(eType, evt) {
-    		console.log('button', eType, evt);
+    		//cnsole.log('button', eType, evt);
     	});
 
     	ctrl.articleIdInput.data.on('', logData);
 
     	function logData(message, data) {
-    		console.log(message, data);
+    		//cnsole.log(message, data);
     	}
 
         var myTmplComps = ctrl.myTemplate.template
@@ -33,7 +33,7 @@ describe('milo binder', function() {
         ]);
 
         radio.data.on('', function(msg, data) {
-            console.log('Radio Group Event', msg, data);
+            //cnsole.log('Radio Group Event', msg, data);
         });
 
         radio.data.set('male');
@@ -92,14 +92,14 @@ describe('milo binder', function() {
         });
 
         ctrl.connectButton.events.on('click', function() {
-            console.log('connecting');
+            //cnsole.log('connecting');
             ctrl.linkState.data.set('linked');
             cnct[0].turnOn();
             cnct[1].turnOn();
         });
 
         ctrl.disconnectButton.events.on('click', function() {
-            console.log('disconnecting');
+            //cnsole.log('disconnecting');
             ctrl.linkState.data.set('not linked');
             cnct[0].turnOff();
             cnct[1].turnOff();
