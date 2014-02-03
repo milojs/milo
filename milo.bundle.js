@@ -8372,6 +8372,7 @@ module.exports = {
     setSelection: setSelection,
     removeElement: removeElement,
     unwrapElement: unwrapElement,
+    wrapInElement: wrapInElement,
     firstTextNode: firstTextNode,
     lastTextNode: lastTextNode
 };
@@ -8539,6 +8540,16 @@ function unwrapElement(el) {
         var children = _.slice(el.childNodes);
         children.forEach(frag.appendChild, frag);
         parent.replaceChild(frag, el);
+    }
+}
+
+
+function wrapInElement(wrapIntoEl, el) {
+    var parent = el.parentNode;
+
+    if (parent) {
+        parent.insertBefore(wrapIntoEl, el);
+        wrapIntoEl.appendChild(el);
     }
 }
 
