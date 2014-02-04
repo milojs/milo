@@ -4511,9 +4511,9 @@ var MLComboList = Component.createComponentClass('MLComboList', {
 	},
 	template: {
 		template: '<div ml-bind="MLList:list">\
-			           <div ml-bind="[item]:item">\
+			           <div ml-bind="[item]:item" class="list-item">\
 			               <span ml-bind="[data]:label"></span>\
-			               <button ml-bind="[events]:deleteBtn">x</button>\
+			               <span ml-bind="[events]:deleteBtn" class="glyphicon glyphicon-remove"></span>\
 			           </div>\
 			       </div>\
 			       <div ml-bind="MLSuperCombo:combo"></div>'
@@ -4962,6 +4962,7 @@ var OPTIONS_TEMPLATE = '{{~ it.comboOptions :option:index }}\
 
 var MAX_RENDERED = 100;
 var BUFFER = 25;
+var ELEMENT_HEIGHT = 20;
 
 var MLSuperCombo = Component.createComponentClass('MLSuperCombo', {
 	events: {
@@ -4981,7 +4982,7 @@ var MLSuperCombo = Component.createComponentClass('MLSuperCombo', {
 	},
 	template: {
 		template: '<input ml-bind="[data, events]:input" class="form-control ml-ui-input">\
-		           <button ml-bind="[events]:openBtn">+</button>\
+		           <button ml-bind="[events]:openBtn" class="btn btn-default ml-ui-button">Add</button>\
 		           <div ml-bind="[dom, events]:list" class="ml-ui-supercombo-dropdown">\
 		               <div ml-bind="[dom]:before"></div>\
 		               <div ml-bind="[template, dom, events]:options"></div>\
@@ -5092,8 +5093,10 @@ function MLSuperCombo$update() {
 		comboOptions: arrToShow
 	});
 
-	var firstEl = this._comboOptions.el.firstChild;
-	this._elementHeight = firstEl ? firstEl.offsetHeight : this._elementHeight;
+	// var firstEl = this._comboOptions.el.firstChild;
+	// this._elementHeight = firstEl ? firstEl.offsetHeight : this._elementHeight;
+
+	this._elementHeight = ELEMENT_HEIGHT;
 
 	if (wasHidden)
 		this.hideOptions();
@@ -5156,9 +5159,9 @@ function MLSuperCombo_del() {
 function onDataChange(msg, data) {
 	var text = data.newValue;
 	var filteredArr = _.filter(this._optionsData, function(option) {
-		var label = option.label.toLowerCase();
+		var label = option.label ? option.label.toLowerCase() : null;
 		text = text.toLowerCase();
-		return label.indexOf(text) != -1;
+		return label ? label.indexOf(text) != -1 : false;
 	});
 	this.showOptions();
 	this.setFilteredOptions(filteredArr);
@@ -5187,6 +5190,7 @@ function onListClick (type, event) {
 	var index = Number(event.target.getAttribute('data-value')) + this._startIndex;
 	var data = this._filteredOptionsData[index];
 	this.data.set(data);
+	console.log(this.data.get());
 	this.data.getMessageSource().dispatchMessage(COMBO_CHANGE_MESSAGE);
 
 	this._comboInput.data.on('', { subscriber: onDataChange, context: this });
@@ -5211,6 +5215,7 @@ function onListScroll (type, event) {
 
 	if ((direction == 'down' && elsToTheEnd < BUFFER) 
 	 	 || (direction == 'up' && elsFromStart < BUFFER)) {
+		this._elementHeight = firstChild.style.height;
 		this.update();
 	}
 	this._lastScrollPos = scrollPos;
