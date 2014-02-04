@@ -6899,6 +6899,13 @@ function Connector(ds1, mode, ds2, options) {
 			dataTranslation2: dataTranslation['->']
 		});
 
+	var dataValidation = options && options.dataValidation;
+	if (dataValidation)
+		_.extend(this, {
+			dataValidation1: dataValidation['<-'],
+			dataValidation2: dataValidation['->']
+		});
+
 	this.turnOn();
 
 	function modeParseError() {
@@ -6941,14 +6948,14 @@ function turnOn() {
 
 	var self = this;
 	if (this.depth1)
-		this._link1 = linkDataSource('_link2', this.ds1, this.ds2, subscriptionPath, this.pathTranslation1, this.pathTranslation2, this.dataTranslation1);
+		this._link1 = linkDataSource('_link2', this.ds1, this.ds2, subscriptionPath, this.pathTranslation1, this.pathTranslation2, this.dataTranslation1, this.dataValidation1);
 	if (this.depth2)
-		this._link2 = linkDataSource('_link1', this.ds2, this.ds1, subscriptionPath, this.pathTranslation2, this.pathTranslation1, this.dataTranslation2);
+		this._link2 = linkDataSource('_link1', this.ds2, this.ds1, subscriptionPath, this.pathTranslation2, this.pathTranslation1, this.dataTranslation2, this.dataValidation2);
 
 	this.isOn = true;
 
 
-	function linkDataSource(reverseLink, linkToDS, linkedDS, subscriptionPath, pathTranslation, reversePathTranslation, dataTranslation) {
+	function linkDataSource(reverseLink, linkToDS, linkedDS, subscriptionPath, pathTranslation, reversePathTranslation, dataTranslation, dataValidation) {
 		var onData = function onData(message, data) {
 			// store untranslated path
 			var sourcePath = data.path
@@ -6978,12 +6985,41 @@ function turnOn() {
 				}
 			}
 
-			// prevent endless loop of updates for 2-way connection
-			if (self[reverseLink])
-				var callback = subscriptionSwitch;
+			// translate data
+			if (dataValidation) {
+				var validators = dataValidation[sourcePath]
+					, passedCount = 0
+					, alreadyFailed = false;
 
-			// send data change instruction as message
-			linkToDS.postMessage('changedata', data, callback);
+				if (validators)
+					validators.forEach(callValidator);
+				else
+					propagateData();
+			} else
+				propagateData();
+
+
+			function callValidator(validator) {
+				validator(data.newValue, function(err, response) {
+					response.path = sourcePath;
+					if (! alreadyFailed && (err || response.valid) && ++passedCount == validators.length) {
+						propagateData();
+						linkedDS.postMessage('validated', response);
+					} else if (! response.valid) {
+						alreadyFailed = true;
+						linkedDS.postMessage('validated', response);
+					}
+				});
+			}
+
+			function propagateData() {
+				// prevent endless loop of updates for 2-way connection
+				if (self[reverseLink])
+					var callback = subscriptionSwitch;
+
+				// send data change instruction as message
+				linkToDS.postMessage('changedata', data, callback);
+			}
 
 			function subscriptionSwitch(err, changeFinished) {
 				if (err) return;
