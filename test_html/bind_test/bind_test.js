@@ -63,6 +63,9 @@ describe('milo binder', function() {
         // Setting comboList
 
         ctrl.myComboList.setOptions(comboTestArray);
+        ctrl.myComboList.data.on('', function(msg, data) {
+            //cnsole.log('COMBO LIST DATA', msg, data);
+        });
 
     // });
 
