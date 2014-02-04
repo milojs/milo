@@ -1210,9 +1210,7 @@ function Component$$createFromState(state, rootScope, newUniqueName) {
 	// restore component state
 	component.setState(state);
 
-    _.defer(function() {
-    	component.broadcast('stateready');
-    });
+    _.deferMethod(component, 'broadcast', 'stateready');
 
 	return component;	
 }
@@ -9625,6 +9623,10 @@ var	arrayMethods = require('./proto_array');
  * - [memoize](proto_function.js.html#memoize)
  * - [delay](proto_function.js.html#delay)
  * - [defer](proto_function.js.html#defer)
+ * - [delayMethod](proto_function.js.html#delayMethod)
+ * - [deferMethod](proto_function.js.html#deferMethod)
+ * - [debounce](proto_function.js.html#debounce)
+ * - [throttle](proto_function.js.html#throttle) 
  */
 var	functionMethods = require('./proto_function');
 
@@ -9880,6 +9882,8 @@ function mapToObject(callback, thisArg) {
  * - [memoize](#memoize)
  * - [delay](#delay)
  * - [defer](#defer)
+ * - [delayMethod](#delayMethod)
+ * - [deferMethod](#deferMethod)
  * - [debounce](#debounce)
  * - [throttle](#throttle)
  *
@@ -9892,6 +9896,8 @@ var functionMethods = module.exports = {
 	memoize: memoize,
 	delay: delay,
 	defer: defer,
+	delayMethod: delayMethod,
+	deferMethod: deferMethod,
 	debounce: debounce,
 	throttle: throttle
 };
@@ -10016,6 +10022,39 @@ function _delay(func, wait, args) {
 
 
 /**
+ * Works like _.delay but allows to defer method call of `self` which will be the first _.delayMethod parameter
+ *
+ * @param {Object} self object to delay method call of
+ * @param {String} methodName name of method
+ * @param {Number} wait approximate dalay time in milliseconds
+ * @param {List} arguments arguments to pass to method
+ */
+function delayMethod(methodName, wait) { // , ... arguments
+	var args = slice.call(arguments, 2);
+	_delayMethod(this, methodName, wait, args);
+}
+
+
+/**
+ * Works like _.defer but allows to defer method call of `self` which will be the first _.deferMethod parameter
+ *
+ * @param {Object} self object to defer method call of
+ * @param {String} methodName name of method
+ * @param {List} arguments arguments to pass to method
+ */
+function deferMethod(methodName) { // , ... arguments
+	var args = slice.call(arguments, 1);
+	_delayMethod(this, methodName, 1, args);
+}
+
+function _delayMethod(object, methodName, wait, args) {
+	return setTimeout(function() {
+		object[methodName].apply(object, args);
+	}, wait);
+}
+
+
+/**
  * Creates a function that will call original function once it has not been called for a specified time
  *
  * @param {Function} self function that execution has to be delayed
@@ -10048,7 +10087,7 @@ function debounce(wait, immediate) {
 	        }
 		}
     };
-};
+}
 
 
 /**
@@ -10065,13 +10104,9 @@ function throttle(wait, options) {
 	var timeout = null;
 	var previous = 0;
 	options || (options = {});
-	var later = function() {
-	    previous = options.leading === false ? 0 : new Date;
-	    timeout = null;
-	    result = func.apply(context, args);
-	};
+
 	return function() {
-	    var now = new Date;
+	    var now = Date.now();
 	    if (!previous && options.leading === false) previous = now;
 	    var remaining = wait - (now - previous);
 	    context = this;
@@ -10081,12 +10116,18 @@ function throttle(wait, options) {
 	        timeout = null;
 	        previous = now;
 	        result = func.apply(context, args);
-	    } else if (!timeout && options.trailing !== false) {
+	    } else if (!timeout && options.trailing !== false)
 	        timeout = setTimeout(later, remaining);
-	    }
+
 	    return result;
 	};
-};
+
+	function later() {
+	    previous = options.leading === false ? 0 : Date.now();
+	    timeout = null;
+	    result = func.apply(context, args);
+	}
+}
 
 },{}],92:[function(require,module,exports){
 'use strict';
