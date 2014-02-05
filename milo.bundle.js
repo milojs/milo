@@ -5770,12 +5770,10 @@ module.exports = Messenger;
  * @param {Object} proxyMethods Optional map of method names; key - proxy method name, value - messenger's method name.
  * @param {MessageSource} messageSource Optional messageSource linked to the messenger. If messageSource is supplied, the reference to the messenger will stored on its 'messenger' property
  */
-function init(hostObject, proxyMethods, messageSource, options) {
+function init(hostObject, proxyMethods, messageSource) {
 	// hostObject and proxyMethods are used in Mixin and checked there
 	if (messageSource)
 		this._setMessageSource(messageSource);
-
-	this.options = options || {};
 
  	// messenger data
  	_.defineProperties(this, {
@@ -6068,7 +6066,7 @@ function postMessage(message, data, callback) {
 	this._callSubscribers(message, data, callback, msgSubscribers);
 
 	if (typeof message == 'string')
-		this._callPatternSubscribers(message, data, callback);
+		this._callPatternSubscribers(message, data, callback, msgSubscribers);
 }
 
 
@@ -6081,16 +6079,20 @@ function postMessage(message, data, callback) {
  * @param {String} message message to be dispatched. Pattern subscribers registered with the pattern that matches the dispatched message will be called.
  * @param {Any} data data that will be passed to the subscriber as the second parameter. Messenger does not modify this data in any way.
  * @param {Function} callback optional callback to pass to subscriber
+ * @param {Array[Function|Object]} calledMsgSubscribers array of subscribers already called, they won't be called again if they are among pattern subscribers.
  */
-function _callPatternSubscribers(message, data, callback) {
+function _callPatternSubscribers(message, data, callback, calledMsgSubscribers) {
 	_.eachKey(this._patternMessageSubscribers, 
 		function(patternSubscribers) {
 			var pattern = patternSubscribers.pattern;
 			if (pattern.test(message)) {
-				var msgType = this.options.postPatternAsMessage
-								? pattern
-								: message;
-				this._callSubscribers(msgType, data, callback, patternSubscribers);
+				if (calledMsgSubscribers) {
+					var patternSubscribers = patternSubscribers.filter(function(subscriber) {
+						var index = _indexOfSubscriber(calledMsgSubscribers, subscriber);
+						return index == -1;
+					});
+				}
+				this._callSubscribers(message, data, callback, patternSubscribers);
 			}
 		}
 	, this);
@@ -6501,8 +6503,8 @@ module.exports = MessageSource;
  * Methods below should be implemented in subclass:
  *
  * - [trigger](#trigger) - triggers messages on the source (an optional method)
- * - [addSourceListener](#addSourceListener) - adds listener/subscriber to external message
- * - [removeSourceListener](#removeSourceListener) - removes listener/subscriber from external message
+ * - [addSourceSubscriber](#addSourceSubscriber) - adds listener/subscriber to external message
+ * - [removeSourceSubscriber](#removeSourceSubscriber) - removes listener/subscriber from external message
  */
 _.extendProto(MessageSource, {
 	init: init,
@@ -6606,9 +6608,6 @@ function dispatchMessage(sourceMessage, sourceData) {
 	var api = this.messengerAPI
 		, internalMessages = api.getInternalMessages(sourceMessage);
 
-	// if (/^\.list(\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]|)(\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]|)(\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]|)$/.test(sourceMessage))
-	// 	cnsl.log('dispatchMessage found', this._hostObject, sourceMessage, internalMessages);
-							
 	if (internalMessages) 
 		internalMessages.forEach(function (message) {
 			var internalData = api.createInternalData(sourceMessage, message, sourceData);
@@ -7306,17 +7305,15 @@ var modelMethodsToProxy = ['path', 'get', 'set', 'splice', 'len', 'push', 'pop',
  * External messenger's methods are proxied on the model and they allows "*" subscriptions.
  */
 function _prepareMessengers() {
-	var options = { postPatternAsMessage: true };
-
 	// model will post all its changes on internal messenger
-	var internalMessenger = new Messenger(this, undefined, undefined, options);
+	var internalMessenger = new Messenger(this, undefined, undefined);
 
 	// message source to connect internal messenger to external
 	var internalMessengerSource = new MessengerMessageSource(this, undefined, new ModelMsgAPI, internalMessenger);
 
 	// external messenger to which all model users will subscribe,
 	// that will allow "*" subscriptions and support "changedata" message api.
-	var externalMessenger = new Messenger(this, Messenger.defaultMethods, internalMessengerSource, options);
+	var externalMessenger = new Messenger(this, Messenger.defaultMethods, internalMessengerSource);
 
 	_.defineProperties(this, {
 		_messenger: externalMessenger,
