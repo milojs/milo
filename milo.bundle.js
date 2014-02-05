@@ -9733,6 +9733,7 @@ var	objectMethods = require('./proto_object');
  * - [toArray](proto_array.js.html#toArray)
  * - [object](proto_array.js.html#object)
  * - [mapToObject](proto_array.js.html#mapToObject)
+ * - [unique](proto_array.js.html#unique)
  *
  * Functions that Array [implements natively](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/prototype#Methods) are also added - they can be used with array-like objects and for chaining (native functions are always called).
  */
@@ -9858,6 +9859,7 @@ var __ = require('./proto_object')
  * - [toArray](#toArray)
  * - [object](#object)
  * - [mapToObject](#mapToObject)
+ * - [unique](#unique)
  *
  * These methods can be [chained](proto.js.html#Proto).
  */
@@ -9869,6 +9871,7 @@ var arrayMethods = module.exports = {
 	toArray: toArray,
 	object: object,
 	mapToObject: mapToObject,
+	unique: unique
 };
 
 
@@ -9995,6 +9998,39 @@ function mapToObject(callback, thisArg) {
 		result[value] = callback.call(thisArg, value, index, this);
 	}, this);
 	return result;
+}
+
+
+/**
+ * Returns array without duplicates. Does not modify original array.
+ *
+ * @param {Array} self original array
+ * @param {Function} callback comparison function, should return true for equal items, "===" is used if not passed.
+ * @return {Array}
+ */
+function unique(callback) {
+	var filtered = [];
+	if (! callback)
+		itemIndex = itemIndexOf;
+
+	this.forEach(function(item) {
+		var index = itemIndex(item);
+		if (index == -1)
+			filtered.push(item);
+	});
+
+	return filtered;
+
+
+	function itemIndex(item) {
+		return arrayMethods.findIndex.call(filtered, function(it) {
+			return callback(item, it);
+		});
+	}
+
+	function itemIndexOf(item) {
+		return filtered.indexOf(item);
+	}
 }
 
 },{"./proto_object":93,"./utils":96}],92:[function(require,module,exports){
