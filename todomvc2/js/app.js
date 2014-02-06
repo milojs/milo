@@ -13,19 +13,24 @@ milo(function() {
         , footer = scope.footer
         , modelView = scope.modelView;
 
-    // model
-    var m = new milo.Model([]);
+    var storedModelDataStr = window.localStorage.getItem('todos-milo');
+    if (storedModelDataStr)
+        var storedModelData = milo.util.jsonParse(storedModelDataStr);
 
-    showCounters();
+    var m = new milo.Model;
 
     // connect model to list of todos
     milo.minder(m, '<<<->>>', todos.data);
-
-    m.on(/.*/, function showModel(msg, data) {
-        modelView.data.set(JSON.stringify(m.get()));
+    m.on('[*]', onItemAdded);
+    m.on('[*].completed', onCompleteTodo);
+    m.on('**', function showModel(msg, data) {
+        var modelDataStr = JSON.stringify(m.get());
+        modelView.data.set(modelDataStr);
+        window.localStorage.setItem('todos-milo', modelDataStr);
     });
-
-    m.on('[*].checked', onCompleteTodo);
+    // set model
+    m.set(storedModelData || []);
+    showCounters();
 
     newTodo.events.on('keypress', onKeyPressed);
     toggleAll.data.on('', onToggleAll);
@@ -38,13 +43,13 @@ milo(function() {
     function onToggleAll(msg, data) {
         var count = m('.length').get();
         for (var i = 0; i < count; i++)
-            m('[$1].checked', i).set(data.newValue);
+            m('[$1].completed', i).set(data.newValue);
     }
 
     function onClearCompleted() {
         var i = 0, len = m('.length').get();
         while (i < len)
-            if (m('[$1].checked', i).get()) {
+            if (m('[$1].completed', i).get()) {
                 m.splice(i, 1);
                 len--;
             } else
@@ -59,20 +64,36 @@ milo(function() {
         var newCount = m.push(itemData);
         var id = newCount - 1; // push returns new length, as Array push does
         newTodo.data.set('');
-        showCounters();
-        
+    }
+
+    function onItemAdded(msg, data) {
         _.defer(function() {
-            var newItem = todos.list.item(id); // item is already shown, we just need to get hold of it
-            var scope = newItem.container.scope; // get scope inside item
-            scope.deleteBtn.events.on('click', { context: newItem, subscriber: removeTodo });
+            console.log('onItemAdded', msg, data);
+            if (data.type != 'added') return;
+            var item = itemForPath(data.path);
+            if (item) connectDeleteButton(item);
+            showCounters();
         });
     }
 
+    function connectDeleteButton(item) {
+        var scope = item.container.scope; // get scope inside item
+        scope.deleteBtn.events.on('click', { context: item, subscriber: removeTodo });
+    }
+
     function onCompleteTodo(msg, data) {
-        var id = +data.path.replace(/^\[([0-9]*)\].*$/, '$1');
-        var item = todos.list.item(id);
-        item.el.classList.toggle('completed', data.newValue);
-        showCounters();
+        _.defer(function() {
+            console.log('onCompleteTodo', msg, data);
+            var item = itemForPath(data.path);
+            if (item)
+                item.el.classList.toggle('completed', data.newValue);
+            showCounters();
+        });
+    }
+
+    function itemForPath(path) {
+        var id = +path.replace(/^\[([0-9]*)\].*$/, '$1');
+        return todos.list.item(id);
     }
 
     function removeTodo(eventType, event) {
@@ -85,7 +106,7 @@ milo(function() {
         var list = m.get()
             , totalCount = list.length
             , activeCount = list.reduce(function(memo, item) {
-                return memo + (item.checked ? 0 : 1);
+                return memo + (item.completed ? 0 : 1);
             }, 0)
             , completedCount = totalCount - activeCount;
 
