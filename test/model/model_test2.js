@@ -6,6 +6,7 @@ var Model = require('../../lib/model')
 
 
 describe('Model class', function() {
+	// TODO this test fails
 	it.skip('should not dispatch duplicate messages when several "*" subscriptions are present', function() {
 		var m = new Model;
 		m.on('*', logPost);
