@@ -2,10 +2,6 @@
 .idea
 node_modules/
 
-milo.bundle.js
-milo.min.js
-milo.min.js.map
-
 test_html/bind_test.bundle.js
 
 .tmp-test-browser
