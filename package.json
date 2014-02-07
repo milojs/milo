@@ -4,7 +4,8 @@
   "description": "A minimalist browser framework that binds HTML elements to JS components",
   "main": "lib/milo.js",
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt test",
+    "install": "grunt browserify uglify"
   },
   "repository": {
     "type": "git",
