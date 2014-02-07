@@ -5,7 +5,7 @@
   "main": "lib/milo.js",
   "scripts": {
     "test": "grunt test",
-    "install": "grunt browserify uglify"
+    "postinstall": "grunt browserify uglify"
   },
   "repository": {
     "type": "git",
