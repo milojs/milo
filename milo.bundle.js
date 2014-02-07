@@ -5330,11 +5330,15 @@ var directionMap = { '40': 1, '38': -1 };
  * @param  {Event} event
  */
 function changeSelected(type, event) {
+	// TODO: refactor and tidy up, looks like some code duplication.
 	var direction = directionMap[event.keyCode];
 
 	if (direction) {
-		var selected = this.el.querySelectorAll('.selected')[0];
-
+		var selected = this.el.querySelectorAll('.selected')[0]
+			, scrollPos = this._comboList.el.scrollTop
+			, selectedPos = selected ? selected.offsetTop : 0
+			, relativePos = selectedPos - scrollPos;
+		
 		if (selected) {
 			var index = _getDataValueFromElement.call(this, selected),
 			thisItem = this._filteredOptionsData[index],
@@ -5352,7 +5356,12 @@ function changeSelected(type, event) {
 				this.update();
 			}
 		}
-		
+
+		if (relativePos > this._optionsHeight - this._elementHeight*2 && direction === 1)
+			this._comboList.el.scrollTop += this._elementHeight*direction;
+
+		if (relativePos < this._elementHeight && direction === -1)
+			this._comboList.el.scrollTop += this._elementHeight*direction;
 	}
 }
 
@@ -8789,7 +8798,9 @@ module.exports = {
     unwrapElement: unwrapElement,
     wrapInElement: wrapInElement,
     firstTextNode: firstTextNode,
-    lastTextNode: lastTextNode
+    lastTextNode: lastTextNode,
+    trimNodeRight: trimNodeRight,
+    trimNodeLeft: trimNodeLeft
 };
 
 
@@ -8958,7 +8969,11 @@ function unwrapElement(el) {
     }
 }
 
-
+/**
+ * Wraps an element in another element
+ * @param  {Node} wrapIntoEl
+ * @param  {Element} el
+ */
 function wrapInElement(wrapIntoEl, el) {
     var parent = el.parentNode;
 
@@ -8967,6 +8982,35 @@ function wrapInElement(wrapIntoEl, el) {
         wrapIntoEl.appendChild(el);
     }
 }
+
+/**
+ * Trims a text node of trailing spaces, and returns true if a trim was performed.
+ * @param  {TextNode} node
+ * @return {Boolean}
+ */
+function trimNodeRight(node) {
+    var lengthBefore = node.length;
+    node.textContent = node.textContent.trimRight();
+    var lengthAfter = node.length;
+
+    return lengthBefore !== lengthAfter;
+}
+
+/**
+ * Trims a text node of leading spaces, and returns true if a trim was performed.
+ * @param  {TextNode} node
+ * @return {Boolean}
+ */
+function trimNodeLeft(node) {
+    var lengthBefore = node.length;
+    node.textContent = node.textContent.trimLeft();
+    var lengthAfter = node.length;
+
+    return lengthBefore !== lengthAfter;
+}
+
+
+
 
 },{}],80:[function(require,module,exports){
 // <a name="utils-error"></a>
