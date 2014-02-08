@@ -8,3 +8,6 @@ test_html/bind_test.bundle.js
 docs/
 npm-debug.log
 bower_components
+
+milo.min.js
+milo.min.js.map
