@@ -221,7 +221,7 @@ function FacetedObject$$createFacetedClass(name, facetsClasses, facetsConfig) {
 	}
 };
 
-},{"../util/check":75,"../util/error":79,"./facet":1,"mol-proto":90}],3:[function(require,module,exports){
+},{"../util/check":74,"../util/error":78,"./facet":1,"mol-proto":90}],3:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -323,7 +323,7 @@ function _createProxyMethods(proxyMethods, hostObject) {
 		}, this);
 }
 
-},{"../util/check":75,"../util/error":79,"mol-proto":90}],4:[function(require,module,exports){
+},{"../util/check":74,"../util/error":78,"mol-proto":90}],4:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -443,7 +443,7 @@ function setClass(FoundationClass) {
 	_.defineProperty(this, 'FoundationClass', FoundationClass, _.ENUM);
 }
 
-},{"../util/check":75,"../util/error":79,"mol-proto":90}],5:[function(require,module,exports){
+},{"../util/check":74,"../util/error":78,"mol-proto":90}],5:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -565,7 +565,7 @@ function render() {
 				.replace('%compName', this.compName);
 }
 
-},{"../config":50,"../util/check":75,"../util/error":79,"./a_class":6,"mol-proto":90}],6:[function(require,module,exports){
+},{"../config":50,"../util/check":74,"../util/error":78,"./a_class":6,"mol-proto":90}],6:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -648,7 +648,7 @@ function decorate() {
 	this.set(this.render());
 }
 
-},{"../util/check":75,"../util/error":79,"mol-proto":90}],7:[function(require,module,exports){
+},{"../util/check":74,"../util/error":78,"mol-proto":90}],7:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -735,7 +735,7 @@ function render() {
 	return this.loadUrl;
 }
 
-},{"../config":50,"../util/error":79,"./a_class":6,"mol-proto":90}],8:[function(require,module,exports){
+},{"../config":50,"../util/error":78,"./a_class":6,"mol-proto":90}],8:[function(require,module,exports){
 'use strict';
 
 /**
@@ -904,7 +904,7 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
 	}
 }
 
-},{"./attributes/a_bind":5,"./components/c_facets/cf_registry":25,"./components/c_info":26,"./components/c_registry":27,"./components/scope":35,"./mail":52,"./util/check":75,"./util/dom":78,"./util/error":79,"mol-proto":90}],10:[function(require,module,exports){
+},{"./attributes/a_bind":5,"./components/c_facets/cf_registry":25,"./components/c_info":26,"./components/c_registry":27,"./components/scope":35,"./mail":52,"./util/check":74,"./util/dom":77,"./util/error":78,"mol-proto":90}],10:[function(require,module,exports){
 'use strict';
 
 // <a name="classes"></a>
@@ -943,7 +943,9 @@ var FacetedObject = require('../abstract/faceted_object')
 	, domUtils = require('../util/dom')
 	, ComponentError = require('../util/error').Component
 	, BindAttribute = require('../attributes/a_bind')
-	, Scope = require('./scope');
+	, Scope = require('./scope')
+	, DOMStorage = require('../util/storage')
+	, jsonParse = require('../util/json_parse');
 
 var _makeComponentConditionFunc = componentUtils._makeComponentConditionFunc;
 
@@ -999,6 +1001,8 @@ var Component = _.createSubclass(FacetedObject, 'Component', true);
 
 module.exports = Component;
 
+_registerWithDomStorage('Component');
+
 
 /**
  * ####Component class methods####
@@ -1022,7 +1026,7 @@ _.extend(Component, {
 	getComponent: componentUtils.getComponent,
 	getContainingComponent: componentUtils.getContainingComponent,
 	createFromState: Component$$createFromState,
-	createFromDataTransfer: createFromDataTransfer
+	createFromDataTransfer: Component$$createFromDataTransfer
 });
 delete Component.createFacetedClass;
 
@@ -1114,8 +1118,30 @@ function Component$$createComponentClass(name, facetsConfig) {
 	// create subclass of Component using method of FacetedObject
 	var ComponentClass = FacetedObject.createFacetedClass.call(this, name, facetsClasses, facetsConfig);
 	
+	_registerWithDomStorage(name);
+
 	return ComponentClass;
 };
+
+
+function _registerWithDomStorage(className) {
+	DOMStorage.registerDataType(className, Component_domStorageSerializer, Component_domStorageParser);
+}
+
+
+function Component_domStorageSerializer(component) {
+	var state = component.getState();
+	return JSON.stringify(state);	
+}
+
+
+function Component_domStorageParser(compStr, compClassName) {
+	var componentsRegistry = require('./c_registry')
+		, ComponentClass = componentsRegistry.get(compClassName);
+	var state = jsonParse(compStr);
+	if (ComponentClass && state)
+		return ComponentClass.createFromState(state);
+}
 
 
 /**
@@ -1193,7 +1219,8 @@ function Component$$createOnElement(el, innerHTML, rootScope, extraFacets) {
 
 	// create element if it wasn't passed
 	if (! el) {
-		var domFacetConfig = this.prototype.facetsConfig.dom
+		var facetsConfig = this.prototype.facetsConfig
+			, domFacetConfig = facetsConfig && facetsConfig.dom
 			, tagName = domFacetConfig && domFacetConfig.tagName || 'div';
 		el = document.createElement(tagName);
 	}
@@ -1293,15 +1320,13 @@ function _createComponentWrapElement(state, newUniqueName) {
  * @see https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer
  * @param {DataTransfer} dataTransfer Data transfer
  */
-function createFromDataTransfer(dataTransfer) {
+function Component$$createFromDataTransfer(dataTransfer) {
 	var dataType = _.find(dataTransfer.types, function (type) {
 		return COMPONENT_DATA_TYPE_REGEX.test(type);
 	});
-
 	if (!dataType) return;
 
 	var state = milo.util.jsonParse(dataTransfer.getData(dataType));
-
 	if (!state) return;
 
 	return Component.createFromState(state, undefined, true);
@@ -1668,7 +1693,7 @@ function Component$destroy() {
 		domUtils.removeElement(this.el);
 }
 
-},{"../abstract/faceted_object":2,"../attributes/a_bind":5,"../binder":9,"../config":50,"../messenger":55,"../util/check":75,"../util/component_name":76,"../util/dom":78,"../util/error":79,"../util/logger":82,"./c_facets/cf_registry":25,"./c_utils":28,"./scope":35,"mol-proto":90}],12:[function(require,module,exports){
+},{"../abstract/faceted_object":2,"../attributes/a_bind":5,"../binder":9,"../config":50,"../messenger":55,"../util/check":74,"../util/component_name":75,"../util/dom":77,"../util/error":78,"../util/json_parse":80,"../util/logger":81,"../util/storage":86,"./c_facets/cf_registry":25,"./c_registry":27,"./c_utils":28,"./scope":35,"mol-proto":90}],12:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facet"></a>
@@ -1870,7 +1895,7 @@ function requiresFacet(facetName) {
 						|| facetRequire.indexOf(_.firstLowerCase(facetName)) >= 0);
 }
 
-},{"../abstract/facet":1,"../messenger":55,"../util/error":79,"./c_utils":28,"mol-proto":90}],13:[function(require,module,exports){
+},{"../abstract/facet":1,"../messenger":55,"../util/error":78,"./c_utils":28,"mol-proto":90}],13:[function(require,module,exports){
 'use strict';
 
 
@@ -1968,7 +1993,7 @@ function Container$setState(state) {
 }
 
 
-},{"../../binder":9,"../../util/logger":82,"../c_facet":12,"../scope":35,"./cf_registry":25,"mol-proto":90}],14:[function(require,module,exports){
+},{"../../binder":9,"../../util/logger":81,"../c_facet":12,"../scope":35,"./cf_registry":25,"mol-proto":90}],14:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../../abstract/mixin')
@@ -2486,7 +2511,7 @@ function Data$setState(state) {
 	return this.set(state.state);
 }
 
-},{"../../abstract/mixin":3,"../../messenger":55,"../../model/change_data":62,"../../model/model_utils":68,"../../model/path_utils":70,"../../util/logger":82,"../c_facet":12,"../msg_api/data":30,"../msg_api/de_data":31,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":90}],15:[function(require,module,exports){
+},{"../../abstract/mixin":3,"../../messenger":55,"../../model/change_data":62,"../../model/model_utils":67,"../../model/path_utils":69,"../../util/logger":81,"../c_facet":12,"../msg_api/data":30,"../msg_api/de_data":31,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":90}],15:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-dom"></a>
@@ -2775,7 +2800,7 @@ function hasTextAfterSelection() {
 	return isText;
 }
 
-},{"../../attributes/a_bind":5,"../../binder":9,"../../config":50,"../../util/check":75,"../../util/dom":78,"../../util/error":79,"../c_facet":12,"./cf_registry":25,"mol-proto":90}],16:[function(require,module,exports){
+},{"../../attributes/a_bind":5,"../../binder":9,"../../config":50,"../../util/check":74,"../../util/dom":77,"../../util/error":78,"../c_facet":12,"./cf_registry":25,"mol-proto":90}],16:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drag"></a>
@@ -2896,7 +2921,7 @@ function targetInDragHandle() {
 	return ! this._dragHandle || this._dragHandle.contains(this.__mouseDownTarget);
 }
 
-},{"../../util/logger":82,"../c_class":11,"../c_facet":12,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":90}],17:[function(require,module,exports){
+},{"../../util/logger":81,"../c_class":11,"../c_facet":12,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":90}],17:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drop"></a>
@@ -3158,7 +3183,7 @@ function ItemFacet$removeItem() {
 	this.list.removeItem(this.index, true);
 }
 
-},{"../../mail":52,"../../model":65,"../c_facet":12,"./cf_registry":25,"mol-proto":90}],21:[function(require,module,exports){
+},{"../../mail":52,"../../model":64,"../c_facet":12,"./cf_registry":25,"mol-proto":90}],21:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -3399,7 +3424,7 @@ function each(callback, thisArg) {
     }, thisArg || this);
 }
 
-},{"../../binder":9,"../../config":50,"../../mail":52,"../../model":65,"../../util":80,"../c_class":11,"../c_facet":12,"./cf_registry":25,"dot":89,"mol-proto":90}],22:[function(require,module,exports){
+},{"../../binder":9,"../../config":50,"../../mail":52,"../../model":64,"../../util":79,"../c_class":11,"../c_facet":12,"./cf_registry":25,"dot":89,"mol-proto":90}],22:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-model"></a>
@@ -3463,7 +3488,7 @@ function ModelFacet$_createMessenger() { // Called by inherited init
 	this.m.proxyMethods(this); // Creates model's methods directly on facet
 }
 
-},{"../../model":65,"../c_facet":12,"./cf_registry":25,"mol-proto":90}],23:[function(require,module,exports){
+},{"../../model":64,"../c_facet":12,"./cf_registry":25,"mol-proto":90}],23:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-template"></a>
@@ -3547,7 +3572,7 @@ function Template$binder() {
 	this.owner.container.binder();
 }
 
-},{"../../binder":9,"../../util/check":75,"../c_facet":12,"./cf_registry":25,"mol-proto":90}],24:[function(require,module,exports){
+},{"../../binder":9,"../../util/check":74,"../c_facet":12,"./cf_registry":25,"mol-proto":90}],24:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -3697,7 +3722,7 @@ function hasContainerFacet(ComponentClass, extraFacetsClasses) {
 	}
 }
 
-},{"../util/error":79,"./c_facets/cf_registry":25,"./c_registry":27,"mol-proto":90}],27:[function(require,module,exports){
+},{"../util/error":78,"./c_facets/cf_registry":25,"./c_registry":27,"mol-proto":90}],27:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -3805,7 +3830,7 @@ function _getContainingComponent(el, returnCurrent, conditionFunc) {
 		return _getContainingComponent(el.parentNode, true, conditionFunc);
 }
 
-},{"../config":50,"../util/check":75}],29:[function(require,module,exports){
+},{"../config":50,"../util/check":74}],29:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -3903,7 +3928,7 @@ function createInternalData(sourceMessage, message, data) {
 	return internalData;
 };
 
-},{"../../messenger/m_api":56,"../../util/check":75,"./de_data":31,"mol-proto":90}],31:[function(require,module,exports){
+},{"../../messenger/m_api":56,"../../util/check":74,"./de_data":31,"mol-proto":90}],31:[function(require,module,exports){
 'use strict';
 
 
@@ -4171,7 +4196,7 @@ function trigger(eventType, properties) {
 	return notCancelled;
 }
 
-},{"../../messenger/m_source":58,"../../util/check":75,"../c_class":11,"./de_constrs":32,"mol-proto":90}],34:[function(require,module,exports){
+},{"../../messenger/m_source":58,"../../util/check":74,"../c_class":11,"./de_constrs":32,"mol-proto":90}],34:[function(require,module,exports){
 'use strict';
 
 // <a name="components-source-iframe"></a>
@@ -4245,7 +4270,7 @@ function handleEvent(event) {
 	this.dispatchMessage(event.data.type, event);
 }
 
-},{"../../messenger/m_source":58,"../../util/check":75,"../../util/error":79,"../c_class":11,"mol-proto":90}],35:[function(require,module,exports){
+},{"../../messenger/m_source":58,"../../util/check":74,"../../util/error":78,"../c_class":11,"mol-proto":90}],35:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -4440,7 +4465,7 @@ function Scope$_clean() {
 	}, this);
 }
 
-},{"../util/check":75,"../util/error":79,"../util/logger":82,"mol-proto":90}],36:[function(require,module,exports){
+},{"../util/check":74,"../util/error":78,"../util/logger":81,"mol-proto":90}],36:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -4977,7 +5002,7 @@ function onOptionsChange(path, data) {
 	_.forEach(radioEls, options.push, options);
 }
 
-},{"../../util/count":77,"../c_class":11,"../c_registry":27}],45:[function(require,module,exports){
+},{"../../util/count":76,"../c_class":11,"../c_registry":27}],45:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -5596,6 +5621,10 @@ config({
 	template: {
 		compile: doT.compile
 	},
+	domStorage: {
+		typeSuffix: ':___milo_data_type',
+		prefixSeparator: '/'
+	},
 	check: true
 });
 
@@ -5721,7 +5750,7 @@ function loadView(el, callback) {
 	});
 }
 
-},{"./attributes/a_load":7,"./config":50,"./mail":52,"./util/dom":78,"./util/error":79,"./util/logger":82,"./util/request":85}],52:[function(require,module,exports){
+},{"./attributes/a_load":7,"./config":50,"./mail":52,"./util/dom":77,"./util/error":78,"./util/logger":81,"./util/request":84}],52:[function(require,module,exports){
 'use strict';
 
 // <a name="mail"></a>
@@ -5798,7 +5827,7 @@ function filterSourceMessage(sourceMessage, msgType, msgData) {
 		return windowMessagePrefix + msgData.data.type == msgType;
 };
 
-},{"../messenger/m_api":56,"../util/check":75,"mol-proto":90}],54:[function(require,module,exports){
+},{"../messenger/m_api":56,"../util/check":74,"mol-proto":90}],54:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../messenger/m_source')
@@ -5877,7 +5906,7 @@ function trigger(msgType, data) {
 		window.postMessage(data, '*')
 }
 
-},{"../components/msg_src/de_constrs":32,"../messenger/m_source":58,"../util/check":75,"../util/error":79,"mol-proto":90}],55:[function(require,module,exports){
+},{"../components/msg_src/de_constrs":32,"../messenger/m_source":58,"../util/check":74,"../util/error":78,"mol-proto":90}],55:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -6413,7 +6442,7 @@ function getMessageSource() {
 	return this._messageSource
 }
 
-},{"../abstract/mixin":3,"../util/check":75,"../util/error":79,"./m_source":58,"mol-proto":90}],56:[function(require,module,exports){
+},{"../abstract/mixin":3,"../util/check":74,"../util/error":78,"./m_source":58,"mol-proto":90}],56:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -6836,7 +6865,7 @@ function dispatchMessage(sourceMessage, sourceData) {
 		}, this);
 }
 
-},{"../abstract/mixin":3,"../util/check":75,"../util/error":79,"../util/logger":82,"./m_api":56,"mol-proto":90}],59:[function(require,module,exports){
+},{"../abstract/mixin":3,"../util/check":74,"../util/error":78,"../util/logger":81,"./m_api":56,"mol-proto":90}],59:[function(require,module,exports){
 'use strict';
 
 
@@ -6893,7 +6922,7 @@ function removeSourceSubscriber(sourceMessage) {
 	this.sourceMessenger.off(sourceMessage, { context: this, subscriber: this.dispatchMessage });
 }
 
-},{"../util/check":75,"./m_source":58,"mol-proto":90}],60:[function(require,module,exports){
+},{"../util/check":74,"./m_source":58,"mol-proto":90}],60:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -6966,7 +6995,7 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object')
 	window.milo = milo;
 
-},{"./attributes":8,"./binder":9,"./classes":10,"./components/c_class":11,"./components/c_facet":12,"./config":50,"./loader":51,"./mail":52,"./messenger":55,"./minder":61,"./model":65,"./registry":72,"./use_components":73,"./use_facets":74,"./util":80,"mol-proto":90}],61:[function(require,module,exports){
+},{"./attributes":8,"./binder":9,"./classes":10,"./components/c_class":11,"./components/c_facet":12,"./config":50,"./loader":51,"./mail":52,"./messenger":55,"./minder":61,"./model":64,"./registry":71,"./use_components":72,"./use_facets":73,"./util":79,"mol-proto":90}],61:[function(require,module,exports){
 'use strict';
 
 var Connector = require('./model/connector');
@@ -7354,94 +7383,7 @@ function turnOff() {
 	}
 }
 
-},{"../util/error":79,"../util/logger":82,"mol-proto":90}],64:[function(require,module,exports){
-'use strict';
-
-
-var Messenger = require('../../messenger')
-	, _ = require('mol-proto');
-
-module.exports = DOMStorage;
-
-
-/**
- * DOMStorage adapter complying with datasource API of [Connector](../connector.js.html)
- * It allows to persist [Model](../index.js.html)s to `window.localStorage` and `window.sessionStorage` using reactive connection to Model created with Connector/[milo.minder](../../minder.js.html).
- *
- * @constructor
- * @param {String} rootPath root path in the storage. Should be unique within the application.
- * @param {Boolean} sessionOnly optional parameter, if true connected Model will be stored to sessionStorage rather than to localStorage (default).
- * @return {DOMStorage}
- */
-function DOMStorage(rootPath, sessionOnly) {
-	if (typeof window == 'undefiend') return;
-
-	this.rootPath = rootPath;
-
-	_.defineProperties(this, {
-		_storage: sessionOnly ? window.sessionStorage : window.localStorage,
-		_messenger: new Messenger(this, Messenger.defaultMethods)
-	});
-}
-
-
-_.extendProto(DOMStorage, {
-	path: DOMStorage$path,
-	get: DOMStorage$get,
-	set: DOMStorage$set,
-	del: DOMStorage$del,
-	splice: DOMStorage$splice
-});
-
-
-function DOMStorage$path() {
-
-}
-
-
-function DOMStorage$get() {
-
-}
-
-
-function DOMStorage$set(value) {
-	_setTree(this._storage, this.rootPath, value);
-}
-
-
-function _setTree(storage, path, obj) {
-	if (Array.isArray(obj)) {
-		var pathSyntax = path + '[$$]';
-		obj.forEach(function(value, index) {
-			_setItem(value, index, pathSyntax);
-		});
-	} else if (typeof obj == 'object' && obj != null) {
-		var pathSyntax = path + '.$$';
-		_.eachKey(obj, function(value, key) {
-			_setItem(value, key, pathSyntax);
-		});
-	} else
-		storage.setItem(path, obj);
-
-	function _setItem(value, key) {
-		var nextPath = pathSyntax.replace('$$', key);
-		_setTree(storage, nextPath, value);		
-	}
-}
-
-
-
-
-function DOMStorage$del() {
-
-}
-
-
-function DOMStorage$splice() {
-
-}
-
-},{"../../messenger":55,"mol-proto":90}],65:[function(require,module,exports){
+},{"../util/error":78,"../util/logger":81,"mol-proto":90}],64:[function(require,module,exports){
 'use strict';
 
 var ModelPath = require('./m_path')
@@ -7456,7 +7398,8 @@ var ModelPath = require('./m_path')
 	, _ = require('mol-proto')
 	, check = require('../util/check')
 	, Match = check.Match
-	, logger = require('../util/logger');
+	, logger = require('../util/logger')
+	, jsonParse = require('../util/json_parse');
 
 
 module.exports = Model;
@@ -7531,10 +7474,12 @@ _.extendProto(Model, {
 
 
 /**
- * DOMStorage class to store models in localStorage and sessionStorage
+ * - Path: ModelPath class as `milo.Model.Path`
+ * - [registerWithDOMStorage](Model$$registerWithDOMStorage)
  */
 _.extend(Model, {
-	DOMStorage: require('./data/domstorage.js')
+	Path: ModelPath,
+	registerWithDOMStorage: Model$$registerWithDOMStorage
 });
 
 
@@ -7635,14 +7580,25 @@ function _prepareMessengers() {
 }
 
 
-/**
- * Export ModelPath object as `milo.Model.Path`.
- */
-_.extend(Model, {
-	Path: ModelPath
-});
+function Model$$registerWithDOMStorage() {
+	var DOMStorage = require('../util/storage');
+	DOMStorage.registerDataType('Model', Model_domStorageSerializer, Model_domStorageParser);
+	DOMStorage.registerDataType('ModelPath', Model_domStorageSerializer, Model_domStorageParser, 'Model');
+}
 
-},{"../abstract/mixin":3,"../messenger":55,"../messenger/msngr_source":59,"../util/check":75,"../util/error":79,"../util/logger":82,"./change_data":62,"./data/domstorage.js":64,"./m_msg_api":66,"./m_path":67,"./path_utils":70,"./synthesize":71,"mol-proto":90}],66:[function(require,module,exports){
+
+function Model_domStorageSerializer(value) {
+	var data = value.get();
+	return JSON.stringify(data);
+}
+
+
+function Model_domStorageParser(valueStr) {
+	var data = jsonParse(valueStr);
+	return new Model(data);
+}
+
+},{"../abstract/mixin":3,"../messenger":55,"../messenger/msngr_source":59,"../util/check":74,"../util/error":78,"../util/json_parse":80,"../util/logger":81,"../util/storage":86,"./change_data":62,"./m_msg_api":65,"./m_path":66,"./path_utils":69,"./synthesize":70,"mol-proto":90}],65:[function(require,module,exports){
 'use strict';
 
 var MessengerRegexpAPI = require('../messenger/m_api_rx')
@@ -7681,7 +7637,7 @@ function translateToSourceMessage(accessPath) {
 	return pathUtils.createRegexPath(accessPath);
 }
 
-},{"../messenger/m_api_rx":57,"./path_utils":70,"mol-proto":90}],67:[function(require,module,exports){
+},{"../messenger/m_api_rx":57,"./path_utils":69,"mol-proto":90}],66:[function(require,module,exports){
 'use strict';
 
 var synthesize = require('./synthesize')
@@ -7912,7 +7868,7 @@ function _prepareMessenger() {
 	_.defineProperty(this, '_messenger', mPathMessenger);
 }
 
-},{"../messenger":55,"../messenger/msngr_source":59,"../util/check":75,"./change_data":62,"./path_msg_api":69,"./path_utils":70,"./synthesize":71,"mol-proto":90}],68:[function(require,module,exports){
+},{"../messenger":55,"../messenger/msngr_source":59,"../util/check":74,"./change_data":62,"./path_msg_api":68,"./path_utils":69,"./synthesize":70,"mol-proto":90}],67:[function(require,module,exports){
 'use strict';
 
 
@@ -7933,7 +7889,7 @@ function normalizeSpliceIndex(spliceIndex, length) {
 					: 0;
 }
 
-},{}],69:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('../messenger/m_api')
@@ -8012,7 +7968,7 @@ function createInternalData(fullSourceAccessPath, accessPath, sourceData) {
 	return internalData;
 }
 
-},{"../messenger/m_api":56,"../util/logger":82,"./path_utils":70,"mol-proto":90}],70:[function(require,module,exports){
+},{"../messenger/m_api":56,"../util/logger":81,"./path_utils":69,"mol-proto":90}],69:[function(require,module,exports){
 'use strict';
 
 // <a name="model-path"></a>
@@ -8157,7 +8113,7 @@ function wrapMessengerMethods(methodsNames) {
 	_.defineProperties(this, wrappedMethods);
 }
 
-},{"../util/check":75,"../util/error":79,"mol-proto":90}],71:[function(require,module,exports){
+},{"../util/check":74,"../util/error":78,"mol-proto":90}],70:[function(require,module,exports){
 'use strict';
 
 var pathUtils = require('../path_utils')
@@ -8327,7 +8283,7 @@ _.extend(synthesizePathMethods, {
 	modelSplice: _synthesize(modelSpliceSynthesizer, '', [])
 });
 
-},{"../model_utils":68,"../path_utils":70,"dot":89,"fs":87,"mol-proto":90}],72:[function(require,module,exports){
+},{"../model_utils":67,"../path_utils":69,"dot":89,"fs":87,"mol-proto":90}],71:[function(require,module,exports){
 'use strict';
 
 /**
@@ -8341,7 +8297,7 @@ var registry = module.exports = {
 	components: require('./components/c_registry')
 };
 
-},{"./components/c_facets/cf_registry":25,"./components/c_registry":27}],73:[function(require,module,exports){
+},{"./components/c_facets/cf_registry":25,"./components/c_registry":27}],72:[function(require,module,exports){
 'use strict';
 
 require('./components/classes/View');
@@ -8359,7 +8315,7 @@ require('./components/ui/Date');
 require('./components/ui/Combo');
 require('./components/ui/SuperCombo');
 require('./components/ui/ComboList');
-},{"./components/classes/View":29,"./components/ui/Button":36,"./components/ui/Combo":37,"./components/ui/ComboList":38,"./components/ui/Date":39,"./components/ui/Group":40,"./components/ui/Hyperlink":41,"./components/ui/Input":42,"./components/ui/List":43,"./components/ui/RadioGroup":44,"./components/ui/Select":45,"./components/ui/SuperCombo":46,"./components/ui/Textarea":47,"./components/ui/Time":48,"./components/ui/Wrapper":49}],74:[function(require,module,exports){
+},{"./components/classes/View":29,"./components/ui/Button":36,"./components/ui/Combo":37,"./components/ui/ComboList":38,"./components/ui/Date":39,"./components/ui/Group":40,"./components/ui/Hyperlink":41,"./components/ui/Input":42,"./components/ui/List":43,"./components/ui/RadioGroup":44,"./components/ui/Select":45,"./components/ui/SuperCombo":46,"./components/ui/Textarea":47,"./components/ui/Time":48,"./components/ui/Wrapper":49}],73:[function(require,module,exports){
 'use strict';
 
 require('./components/c_facets/Dom');
@@ -8375,7 +8331,7 @@ require('./components/c_facets/List');
 require('./components/c_facets/Item');
 require('./components/c_facets/Transfer');
 
-},{"./components/c_facets/Container":13,"./components/c_facets/Data":14,"./components/c_facets/Dom":15,"./components/c_facets/Drag":16,"./components/c_facets/Drop":17,"./components/c_facets/Events":18,"./components/c_facets/Frame":19,"./components/c_facets/Item":20,"./components/c_facets/List":21,"./components/c_facets/ModelFacet":22,"./components/c_facets/Template":23,"./components/c_facets/Transfer":24}],75:[function(require,module,exports){
+},{"./components/c_facets/Container":13,"./components/c_facets/Data":14,"./components/c_facets/Dom":15,"./components/c_facets/Drag":16,"./components/c_facets/Drop":17,"./components/c_facets/Events":18,"./components/c_facets/Frame":19,"./components/c_facets/Item":20,"./components/c_facets/List":21,"./components/c_facets/ModelFacet":22,"./components/c_facets/Template":23,"./components/c_facets/Transfer":24}],74:[function(require,module,exports){
 'use strict';
 
 // <a name="utils-check"></a>
@@ -8750,7 +8706,7 @@ function _prependPath(key, base) {
 };
 
 
-},{"../config":50,"mol-proto":90}],76:[function(require,module,exports){
+},{"../config":50,"mol-proto":90}],75:[function(require,module,exports){
 'use strict';
 
 var count = require('./count')
@@ -8764,7 +8720,7 @@ function componentName() {
 	return prefix + count();
 }
 
-},{"../config":50,"./count":77}],77:[function(require,module,exports){
+},{"../config":50,"./count":76}],76:[function(require,module,exports){
 // <a name="utils-count"></a>
 // milo.utils.count
 // ----------------
@@ -8795,7 +8751,7 @@ componentCount.get = function() {
 
 module.exports = componentCount;
 
-},{}],78:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 'use strict';
 
 
@@ -9046,7 +9002,7 @@ function detachComponent(el) {
     delete el[config.componentRef];
 }
 
-},{"../config":50}],79:[function(require,module,exports){
+},{"../config":50}],78:[function(require,module,exports){
 // <a name="utils-error"></a>
 // milo.utils.error
 // -----------
@@ -9089,7 +9045,7 @@ function error$toBeImplemented() {
 	throw new error.AbstractClass('calling the method of an absctract class');
 }
 
-},{"mol-proto":90}],80:[function(require,module,exports){
+},{"mol-proto":90}],79:[function(require,module,exports){
 'use strict';
 
 /**
@@ -9105,12 +9061,13 @@ var util = {
 	componentName: require('./component_name'),
 	dom: require('./dom'),
 	selection: require('./selection'),
-	jsonParse: require('./json_parse')
+	jsonParse: require('./json_parse'),
+	storage: require('./storage')
 };
 
 module.exports = util;
 
-},{"./check":75,"./component_name":76,"./count":77,"./dom":78,"./error":79,"./json_parse":81,"./logger":82,"./promise":84,"./request":85,"./selection":86}],81:[function(require,module,exports){
+},{"./check":74,"./component_name":75,"./count":76,"./dom":77,"./error":78,"./json_parse":80,"./logger":81,"./promise":83,"./request":84,"./selection":85,"./storage":86}],80:[function(require,module,exports){
 'use strict';
 
 
@@ -9130,7 +9087,7 @@ function jsonParse(str) {
 	} catch (e) {}
 }
 
-},{}],82:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 'use strict';
 
 // <a name="utils-logger"></a>
@@ -9160,7 +9117,7 @@ var logger = new Logger({ level: 3 });
 
 module.exports = logger;
 
-},{"./logger_class":83}],83:[function(require,module,exports){
+},{"./logger_class":82}],82:[function(require,module,exports){
 'use strict';
 
 // ### Logger Class
@@ -9272,7 +9229,7 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"mol-proto":90}],84:[function(require,module,exports){
+},{"mol-proto":90}],83:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -9395,7 +9352,7 @@ function Promise$transform(transformDataFunc) {
 	return promise;
 }
 
-},{"mol-proto":90}],85:[function(require,module,exports){
+},{"mol-proto":90}],84:[function(require,module,exports){
 'use strict';
 
 // milo.utils.request
@@ -9476,7 +9433,7 @@ function request$json(url, callback) {
 	return jsonPromise;
 }
 
-},{"./promise":84,"mol-proto":90}],86:[function(require,module,exports){
+},{"./promise":83,"mol-proto":90}],85:[function(require,module,exports){
 'use strict';
 
 
@@ -9763,7 +9720,296 @@ function TextSelection$del(endContainer) {
 
 
 
-},{"../components/c_class":11,"./dom":78,"mol-proto":90}],87:[function(require,module,exports){
+},{"../components/c_class":11,"./dom":77,"mol-proto":90}],86:[function(require,module,exports){
+'use strict';
+
+
+var DOMStorageError = require('./error').createClass('DomStorageError')
+	, config = require('../config')
+	, jsonParse = require('./json_parse')
+	, _ = require('mol-proto')
+	, check = require('./check')
+	, Match = check.Match;
+
+
+module.exports = DOMStorage;
+
+
+/**
+ * DOMStorage class to simplify storage and retrieval of multiple items with types preservation to DOM storage (localStorage and sessionStorage).
+ * Types will be stored in the key created from value keys with appended `milo.config.domStorage.typeSuffix`
+ * 
+ * @param {String} keyPrefix prefix that will be added to all keys followed by `milo.config.domStorage.prefixSeparator` ("/" by default).
+ * @param {Boolean} sessionOnly true to use sessionStorage. localStorage will be used by default.
+ */
+function DOMStorage(keyPrefix, sessionOnly) {
+	if (typeof window == 'undefined') return;
+
+	_.defineProperties(this, {
+		keyPrefix: keyPrefix + config.domStorage.prefixSeparator,
+		_storage: sessionOnly ? window.sessionStorage : window.localStorage,
+		_typeSuffix: config.domStorage.typeSuffix
+	});
+}
+
+
+_.extendProto(DOMStorage, {
+	get: DOMStorage$get,
+	set: DOMStorage$set,
+	remove: DOMStorage$remove,
+	getItem: DOMStorage$getItem,
+	setItem: DOMStorage$setItem,
+	removeItem: DOMStorage$removeItem,
+	_storageKey: DOMStorage$_storageKey
+});
+
+
+_.extend(DOMStorage, {
+	registerDataType: DOMStorage$$registerDataType
+});
+
+
+/**
+ * Sets data to DOM storage. `this.keyPrefix` is prepended to keys.
+ * 
+ * @param {Object} data single object can be passed in which case keys will be used as keys in local storage.
+ * @param {List} arguments alternatively just the list of arguments can be passed where arguments can be sequentially used as keys and values.
+ */
+function DOMStorage$set(data) { // or arguments
+	if (typeof data == 'object')
+		_.eachKey(data, function(value, key) {			
+			this.setItem(key, value);
+		}, this);
+	else {
+		var argsLen = arguments.length;
+		if (argsLen % 2)
+			throw new DomStorageError('DOMStorage: set should have even number of arguments or object');
+
+		for (var i = 0; i < argsLen; i++) {
+			var key = arguments[i]
+				, value = arguments[++i];
+
+			this.setItem(key, value);
+		}
+	}
+}
+
+
+/**
+ * Gets data from DOM storage. `this.keyPrefix` is prepended to passed keys, but returned object will have keys without root keys.
+ * 
+ * @param {List} arguments keys can be passed as strings or arrays of strings
+ * @returns {Object}
+ */
+function DOMStorage$get() { // , ... arguments
+	var data = {};
+	_.deepForEach(arguments, function(key) {
+		data[key] = this.getItem(key);
+	}, this);
+	return data;
+}
+
+
+/**
+ * Removes keys from DOM storage. `this.keyPrefix` is prepended to passed keys.
+ * 
+ * @param {List} arguments keys can be passed as strings or arrays of strings
+ */
+function DOMStorage$remove() { //, ... arguments
+	_.deepForEach(arguments, function(key) {
+		this.removeItem(key);
+	}, this);
+}
+
+
+/**
+ * Gets single item from DOM storage prepending `this.keyPrefix` to passed key.
+ * Reads type of the originally stored value from `key + this._typeSuffix` and converts data to the original type.
+ * 
+ * @param {String} key
+ * @return {Any}
+ */
+function DOMStorage$getItem(key) {
+	var pKey = this._storageKey(key);
+	var dataType = _getKeyDataType.call(this, pKey);
+	var valueStr = this._storage.getItem(pKey);
+	var value = _parseData(valueStr, dataType);
+	return value;
+}
+
+
+/**
+ * Sets single item to DOM storage prepending `this.keyPrefix` to passed key.
+ * Stores type of the stored value to `key + this._typeSuffix`.
+ * 
+ * @param {String} key
+ * @return {Any}
+ */
+function DOMStorage$setItem(key, value) {
+	var pKey = this._storageKey(key);
+	var dataType = _setKeyDataType.call(this, pKey, value);
+	var valueStr = _serializeData(value, dataType);
+	this._storage.setItem(pKey, valueStr);
+}
+
+
+/**
+ * Removes single item from DOM storage prepending `this.keyPrefix` to passed key.
+ * Type of the stored value (in `key + this._typeSuffix` key) is also removed.
+ * 
+ * @param {String} key
+ * @return {Any}
+ */
+function DOMStorage$removeItem(key) {
+	var pKey = this._storageKey(key);
+	this._storage.removeItem(pKey);
+	_removeKeyDataType.call(this, pKey)
+}
+
+
+/**
+ * Returns prefixed key for DOM storage for given unprefixed key.
+ * 
+ * @param {String} key
+ * @return {String}
+ */
+function DOMStorage$_storageKey(key) {
+	return this.keyPrefix + key;
+}
+
+
+/**
+ * Gets originally stored data type for given (prefixed) `key`.
+ *
+ * @param  {String} pKey prefixed key of stored value
+ * @return {String}
+ */
+function _getKeyDataType(pKey) {
+	pKey = _dataTypeKey.call(this, pKey);
+	return this._storage.getItem(pKey);
+}
+
+
+/**
+ * Stores data type for given (prefixed) `key` and `value`.
+ * Returns data type for `value`.
+ * 
+ * @param {String} pKey prefixed key of stored value
+ * @param {Any} value
+ * @return {String}
+ */
+function _setKeyDataType(pKey, value) {
+	var dataType = _getValueType(value);
+	pKey = _dataTypeKey.call(this, pKey);
+	this._storage.setItem(pKey, dataType);
+	return dataType;
+}
+
+
+/**
+ * Removes stored data type for given (prefixed) `key`.
+ * 
+ * @param  {String} pKey prefixed key of stored value
+ */
+function _removeKeyDataType(pKey) {
+	pKey = _dataTypeKey.call(this, pKey);
+	this._storage.removeItem(pKey);
+}
+
+
+/**
+ * Returns the key to store data type for given (prefixed) `key`.
+ * 
+ * @param  {String} pKey prefixed key of stored value
+ * @return {String}
+ */
+function _dataTypeKey(pKey) {
+	return pKey + this._typeSuffix;
+}
+
+
+/**
+ * Returns type of value as string. Class name returned for objects ('null' for null).
+ * @param  {Any} value
+ * @return {String}
+ */
+function _getValueType(value) {
+	var valueType = typeof value
+		, className = value && value.constructor.name
+		, dataType = valuesDataTypes[className];
+	return dataType || (
+			valueType != 'object'
+				? valueType
+				: value == null
+					? 'null'
+					: value.constructor.name);
+}
+var valuesDataTypes = {
+	// can be registered with `registerDataType`
+}
+
+
+/**
+ * Serializes value to be stored in DOM storage.
+ * 
+ * @param  {Any} value value to be serialized
+ * @param  {String} valueType optional data type to define serializer, _getValueType is used if not passed.
+ * @return {String}
+ */
+function _serializeData(value, valueType) {
+	valueType = valueType || _getValueType(value);
+	var serializer = dataSerializers[valueType];
+	return serializer
+			? serializer(value, valueType)
+			: value && value.toString == Object.prototype.toString
+				? JSON.stringify(value)
+				: '' + value;
+}
+var dataSerializers = {
+	'Array': JSON.stringify
+}
+
+
+/**
+ * Parses string retrieved from DOM storage.
+ * 
+ * @param  {String} valueStr
+ * @param  {String} valueType data type that defines parser. Original sring will be returned if parser is not defined.
+ * @return {Any}
+ */
+function _parseData(valueStr, valueType) {
+	var parser = dataParsers[valueType];
+	return parser
+			? parser(valueStr, valueType)
+			: valueStr;
+}
+var regexpStringPattern = /^\/(.*)\/([gimy]*)$/;
+var dataParsers = {
+	Object: jsonParse,
+	Array: jsonParse,
+	Date: function(valStr) { return new Date(valStr); },
+	boolean: function(valStr) { return valStr == 'true'; },
+	number: function(valStr) { return Number(valStr); },
+	function: function(valStr) { return _.toFunction(valStr); },
+	RegExp: function(valStr) { return _.toRegExp(valStr); }
+};
+
+
+/**
+ * Registers data type to be saved in DOM storage. Class name can be used or result of `typeof` operator for non-objects to override default conversions.
+ * 
+ * @param {String} valueType class (constructor) name or the string returned by typeof.
+ * @param {Function} serializer optional serializer for this type
+ * @param {Function} parser optional parser for this type
+ * @param {[String]} storeAsDataType optional name of stored data type if different from valueType
+ */
+function DOMStorage$$registerDataType(valueType, serializer, parser, storeAsDataType) {
+	if (serializer) dataSerializers[valueType] = serializer;
+	if (parser) dataParsers[valueType] = parser;
+	valuesDataTypes[valueType] = storeAsDataType || valueType;
+}
+
+},{"../config":50,"./check":74,"./error":78,"./json_parse":80,"mol-proto":90}],87:[function(require,module,exports){
 
 // not implemented
 // The reason for having an empty file and not throwing is to allow
@@ -10103,6 +10349,7 @@ var	objectMethods = require('./proto_object');
  * - [toArray](proto_array.js.html#toArray)
  * - [object](proto_array.js.html#object)
  * - [mapToObject](proto_array.js.html#mapToObject)
+ * - [deepForEach](proto_array.js.html#deepForEach)
  *
  * Functions that Array [implements natively](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/prototype#Methods) are also added - they can be used with array-like objects and for chaining (native functions are always called).
  */
@@ -10131,6 +10378,8 @@ var	functionMethods = require('./proto_function');
  *
  * - [firstUpperCase](proto_string.js.html#firstUpperCase)
  * - [firstLowerCase](proto_string.js.html#firstLowerCase)
+ * - [toRegExp](proto_string.js.html#toRegExp)
+ * - [toFunction](proto_string.js.html#toFunction)
  */
 var	stringMethods = require('./proto_string');
 
@@ -10228,6 +10477,7 @@ var __ = require('./proto_object')
  * - [toArray](#toArray)
  * - [object](#object)
  * - [mapToObject](#mapToObject)
+ * - [deepForEach](#deepForEach)
  *
  * These methods can be [chained](proto.js.html#Proto).
  */
@@ -10239,6 +10489,7 @@ var arrayMethods = module.exports = {
 	toArray: toArray,
 	object: object,
 	mapToObject: mapToObject,
+	deepForEach: deepForEach
 };
 
 
@@ -10354,7 +10605,7 @@ function object(values) {
  * Maps array to object.
  * Array elements become keys, value are taken from `callback`.
  * 
- * @param {Array} self An object which values will become keys of the result
+ * @param {Array} self An array which values will become keys of the result
  * @param {Function} callback Callback is passed `value`, `index` and `self` and should return value that will be included in the result.
  * @param {Object} thisArg An optional context of iteration (the valueof `this`), will be undefined if this parameter is not passed.
  * @return {Object}
@@ -10365,6 +10616,28 @@ function mapToObject(callback, thisArg) {
 		result[value] = callback.call(thisArg, value, index, this);
 	}, this);
 	return result;
+}
+
+
+/**
+ * Iterates array and elements that are arrays calling callback with each element that is not an array. Can be used to iterate over arguments list to avoid checking whether array or list of parameters is passed.
+ *
+ * @param {Array|Array-like} self array of elements and arraysto iterate.
+ * @param {Function} callback called for each item that is not an array. Callback is passed item, index and original array as parameters.
+ * @param {Any} thisArg optional callback envocation context
+ */
+function deepForEach(callback, thisArg) {
+	var index = 0, arr = this;
+	_deepForEach.call(this);
+
+	function _deepForEach() {
+		arrayMethods.forEach.call(this, function(value) {
+			if (Array.isArray(value))
+				_deepForEach.call(value);
+			else
+				callback.call(thisArg, value, index++, arr);
+		});
+	}
 }
 
 },{"./proto_object":93,"./utils":96}],92:[function(require,module,exports){
@@ -11281,10 +11554,14 @@ function makeSubclass(Superclass) {
 /**
  * - [firstUpperCase](#firstUpperCase)
  * - [firstLowerCase](#firstLowerCase)
+ * - [toRegExp](#toRegExp)
+ * - [toFunction](#toFunction)
  */
  var stringMethods = module.exports = {
 	firstUpperCase: firstUpperCase,
-	firstLowerCase: firstLowerCase
+	firstLowerCase: firstLowerCase,
+	toRegExp: toRegExp,
+	toFunction: toFunction
 };
 
 
@@ -11305,6 +11582,37 @@ function firstUpperCase() {
  */
 function firstLowerCase() {
 	return this[0].toLowerCase() + this.slice(1);
+}
+
+
+/**
+ * Converts string created by `toString` method of RegExp back to RegExp
+ *
+ * @param {String} self string containing regular expression including enclosing "/" symbols and flags
+ * @return {RegExp}
+ */
+function toRegExp() {
+	var rx = this.match(regexpStringPattern);
+	if (rx) return new RegExp(rx[1], rx[2]);
+}
+var regexpStringPattern = /^\/(.*)\/([gimy]*)$/;
+
+
+/**
+ * Converts string created by `toString` method of function back to function
+ *
+ * @param {String} self string containing full function code
+ * @return {Function}
+ */
+function toFunction() {
+	var func;
+	var code = 'func = ' + this + ';';
+	try {
+		eval(code);
+		return func;
+	} catch(e) {
+		return;
+	}
 }
 
 },{}],96:[function(require,module,exports){
