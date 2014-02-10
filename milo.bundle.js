@@ -104,7 +104,8 @@ function FacetedObject() {
  */
 _.extend(FacetedObject, {
 	createFacetedClass: FacetedObject$$createFacetedClass,
-	hasFacet: FacetedObject$$hasFacet
+	hasFacet: FacetedObject$$hasFacet,
+	getFacetConfig: FacetedObject$$getFacetConfig
 });
 
 
@@ -168,6 +169,16 @@ function FacetedObject$$hasFacet(facetName) {
 	// this refers to the FacetedObject class (or subclass), not instance
 	var protoFacets = this.prototype.facetsClasses;
 	return protoFacets && protoFacets[facetName];
+}
+
+/**
+ * FacetedObject class method
+ * Return the configuration of a facet
+ * @param {String} facetName the facet whose config that should be retrieve
+ * @return {Object} the configuration object that was passed to the facet
+ */
+function FacetedObject$$getFacetConfig(facetName) {
+	return this.hasFacet(facetName) ? this.prototype.facetsConfig[facetName] : null;
 }
 
 
@@ -1212,15 +1223,26 @@ function Component$$createOnElement(el, innerHTML, rootScope, extraFacets) {
 	check(rootScope, Match.Optional(Scope));
 	check(extraFacets, Match.Optional([String]));
 
+	var Dom = facetsRegistry.get(_.firstUpperCase('dom'));
+	var elementPassed = !!el;
+
 	// should required here to resolve circular dependency
 	var miloBinder = require('../binder')
 
 	// create element if it wasn't passed
-	if (! el) {
-		var facetsConfig = this.prototype.facetsConfig
-			, domFacetConfig = facetsConfig && facetsConfig.dom
-			, tagName = domFacetConfig && domFacetConfig.tagName || 'div';
-		el = document.createElement(tagName);
+	if (! elementPassed) {
+		var domFacetConfig = this.getFacetConfig('dom')
+			, templateFacetConfig = this.getFacetConfig('template')
+			, tagName = domFacetConfig && domFacetConfig.tagName || 'div'
+			, template = templateFacetConfig && templateFacetConfig.template;
+
+		var elConfig = {
+			tagName: tagName,
+			template: template,
+			content: innerHTML
+		}
+
+		el = Dom.createElement(elConfig);
 	}
 
 	// find scope to attach component to
@@ -1240,7 +1262,7 @@ function Component$$createOnElement(el, innerHTML, rootScope, extraFacets) {
 	attr.decorate();
 
 	// insert HTML
-	if (innerHTML)
+	if (elementPassed && innerHTML)
 		el.innerHTML = innerHTML;
 
 	miloBinder(el, rootScope);
@@ -2524,11 +2546,50 @@ var ComponentFacet = require('../c_facet')
 	, BindAttribute = require('../../attributes/a_bind')
 	, DomFacetError = require('../../util/error').DomFacet
 	, domUtils = require('../../util/dom')
-	, config = require('../../config');
+	, config = require('../../config')
+	, doT = require('dot');
 
 
 // data model connection facet
 var Dom = _.createSubclass(ComponentFacet, 'Dom');
+
+_.extend(Dom, {
+	createElement: Dom$$createElement
+});
+
+
+/**
+ * Facet class method
+ * Creates an element from a passed configuation object
+ * 
+ * @param {Object} config with the properties `tagName`, `cssClasses`, `attributes`, `content`, `template`
+ * @return {Element} an html element 
+ */
+function Dom$$createElement(config) {
+	var tagName = config.tagName || 'div'
+		, newEl = document.createElement(tagName)
+		, cssClasses = config.cssClasses
+		, configAttributes = config.attributes
+		, content = config.content
+		, template = config.template;
+
+	if (configAttributes)
+		_.eachKey(configAttributes, function(attrValue, attrName) {
+			newEl.setAttribute(attrName, attrValue);
+		});
+
+	if (cssClasses)
+		_attachCssClasses('add', cssClasses, el);
+
+	if (content) {
+		if (template)
+			newEl.innerHTML = doT.template(template)({content: content});
+		else
+			newEl.innerHTML = content;
+	}
+
+	return newEl;
+}
 
 _.extendProto(Dom, {
 	init: init,
@@ -2595,7 +2656,14 @@ function toggle(doShow) {
 
 
 function _manageCssClasses(methodName, cssClasses, enforce) {
-	var classList = this.owner.el.classList
+	var el = this.owner.el;
+
+	_attachCssClasses(methodName, cssClasses, el);
+}
+
+
+function _attachCssClasses(methodName, cssClasses, el) {
+	var classList = el.classList
 		, doToggle = methodName == 'toggle';
 
 	if (Array.isArray(cssClasses))
@@ -2798,7 +2866,7 @@ function hasTextAfterSelection() {
 	return isText;
 }
 
-},{"../../attributes/a_bind":5,"../../binder":9,"../../config":50,"../../util/check":74,"../../util/dom":77,"../../util/error":78,"../c_facet":12,"./cf_registry":25,"mol-proto":90}],16:[function(require,module,exports){
+},{"../../attributes/a_bind":5,"../../binder":9,"../../config":50,"../../util/check":74,"../../util/dom":77,"../../util/error":78,"../c_facet":12,"./cf_registry":25,"dot":89,"mol-proto":90}],16:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drag"></a>
