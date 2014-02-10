@@ -9981,7 +9981,6 @@ function _parseData(valueStr, valueType) {
 			? parser(valueStr, valueType)
 			: valueStr;
 }
-var regexpStringPattern = /^\/(.*)\/([gimy]*)$/;
 var dataParsers = {
 	Object: jsonParse,
 	Array: jsonParse,
