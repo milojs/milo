@@ -1046,7 +1046,7 @@ delete Component.createFacetedClass;
  * ####Component instance methods####
  *
  * - [init](#Component$init)
- * - [initElement](#Component$initElement)
+ * - [createElement](#Component$createElement)
  * - [hasFacet](#Component$hasFacet)
  * - [addFacet](#Component$addFacet)
  * - [allFacets](#Component$allFacets)
@@ -1073,7 +1073,7 @@ delete Component.createFacetedClass;
  */
 _.extendProto(Component, {
 	init: Component$init,
-	initElement: Component$initElement,
+	createElement: Component$createElement,
 	hasFacet: Component$hasFacet,
 	addFacet: Component$addFacet,
 	allFacets: Component$allFacets,
@@ -1369,7 +1369,7 @@ function Component$$createFromDataTransfer(dataTransfer) {
  */
 function Component$init(scope, element, name, componentInfo) {
 	// create DOM element if it wasn't passed to Constructor
-	this.el = element || this.initElement();
+	this.el = element || this.createElement();
 
 	// store reference to component on DOM element
 	if (this.el) {
@@ -1414,12 +1414,12 @@ function Component$init(scope, element, name, componentInfo) {
  * 
  * @return {Element}
  */
-function Component$initElement() {
+function Component$createElement() {
 	if (typeof document == 'undefined')
 		return;
 
 	if (this.dom)
-		this.dom.newElement();
+		this.dom.createElement();
 	else
 		this.el = document.createElement('DIV');
 
@@ -2591,6 +2591,7 @@ function Dom$$createElement(config) {
 	return newEl;
 }
 
+
 _.extendProto(Dom, {
 	init: init,
 	start: start,
@@ -2610,6 +2611,7 @@ _.extendProto(Dom, {
 	setStyle: setStyle,
 	setStyles: setStyles,
 	copy: copy,
+	createElement: createElement,
 
 	addCssClasses: _.partial(_manageCssClasses, 'add'),
 	removeCssClasses: _.partial(_manageCssClasses, 'remove'),
@@ -2724,18 +2726,8 @@ function copy(isDeep) {
 }
 
 
-function newElement() {
-	var tagName = this.config.tagName || 'DIV';
-	var newEl = document.createElement(tagName);
-
-	var attributes = this.config.attributes;
-	if (attributes)
-		_.eachKey(attributes, function(attrValue, attrName) {
-			newEl.setAttribute(attrName, attrValue);
-		});
-
-	this.owner.el = newEl;
-
+function createElement() {
+	var newEl = Dom.createElement(this.config);
 	return newEl;
 }
 
