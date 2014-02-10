@@ -9323,7 +9323,18 @@ function Promise(dataSource) {
 
 
 /**
- * Promise instance method
+ * Promise class methods
+ * 
+ * - [processData](#processData)
+ */
+_.extend(Promise, {
+	transformData: Promise$$transformData,
+	thenData: Promise$$thenData
+});
+
+
+/**
+ * Promise instance methods
  * 
  * - [then](#Promise$then) - register callback to be called when promise data is set
  * - [error](#Promise$error) - register callback to be called when promise dataError is set
@@ -9336,6 +9347,37 @@ _.extendProto(Promise, {
 	setData: Promise$setData,
 	transform: Promise$transform
 });
+
+
+/**
+ * Passes data to function; if promise does it when promise gets resolved
+ * Returns transformed promise if promise was passed, processed data otherwise
+ * 
+ * @param {Promise|Any} data data to be passed
+ * @param {Function} transformFunc
+ * @return {Promise|Any}
+ */
+function Promise$$transformData(data, transformFunc) {
+	if (data instanceof Promise)
+		return data.transform(transformFunc);
+	else
+		return transformFunc(data);
+}
+
+
+/**
+ * If promise is passed, resolves it, simply calls funciton with data otherwise
+ * 
+ * @param {Promise|Any} data data to be passed
+ * @param {Function} thenFunc
+ * @return {Promise|Any}
+ */
+function Promise$$thenData(data, thenFunc) {
+	if (data instanceof Promise)
+		return data.then(thenFunc);
+	else
+		return thenFunc(null, data);
+}
 
 
 /**
@@ -10451,6 +10493,14 @@ var	stringMethods = require('./proto_string');
 
 
 /**
+ * [__Utility functions__](proto_util.js.html)
+ * 
+ * - [tap](proto_util.js.html#tap)
+ */
+var utilMethods = require('./proto_util');
+
+
+/**
  * Chaining
  * ========
  *
@@ -10491,6 +10541,8 @@ __.extend.call(__, prototypeMethods);
 __.extend.call(__, arrayMethods);
 __.extend.call(__, stringMethods);
 __.extend.call(__, functionMethods);
+__.extend.call(__, utilMethods);
+
 
 // add __ as property of Proto, so they can be used as mixins in other classes
 __.defineProperty(Proto, '__', __);
@@ -10528,7 +10580,7 @@ if (typeof module == 'object' && module.exports)
 	// export for node/browserify
 	module.exports = Proto;
 
-},{"./proto_array":91,"./proto_function":92,"./proto_object":93,"./proto_prototype":94,"./proto_string":95,"./utils":96}],91:[function(require,module,exports){
+},{"./proto_array":91,"./proto_function":92,"./proto_object":93,"./proto_prototype":94,"./proto_string":95,"./proto_util":96,"./utils":97}],91:[function(require,module,exports){
 'use strict';
 
 var __ = require('./proto_object')
@@ -10741,7 +10793,7 @@ function deepForEach(callback, thisArg) {
 	}
 }
 
-},{"./proto_object":93,"./utils":96}],92:[function(require,module,exports){
+},{"./proto_object":93,"./utils":97}],92:[function(require,module,exports){
 'use strict';
 
 /**
@@ -11535,7 +11587,7 @@ function omitKeys() { // , ... keys
 	return obj;
 }
 
-},{"./utils":96}],94:[function(require,module,exports){
+},{"./utils":97}],94:[function(require,module,exports){
 'use strict';
 
 /**
@@ -11717,6 +11769,29 @@ function toFunction() {
 }
 
 },{}],96:[function(require,module,exports){
+'use strict';
+
+/**
+ * - [tap](#tap)
+ */
+var utilMethods = module.exports = {
+	tap: tap
+};
+
+
+/**
+ * Function to tap into chained methods and to inspect intermediary result
+ *
+ * @param {Any} self value that's passed between chained methods
+ * @param {Function} func function that will be called with the value
+ * @return {Any}
+ */
+function tap(func) {
+	func(this);
+	return this;
+};
+
+},{}],97:[function(require,module,exports){
 'use strict';
 
 var utils = module.exports = {
