@@ -1200,9 +1200,8 @@ function Component$$copy(component, deepCopy) {
 
 	// create component of the same class on the element
 	var aComponent = ComponentClass.createOnElement(newEl, undefined, component.scope, component.extraFacets);
-
-	aComponent.setState(component._getState(deepCopy || false));
-
+	var state = component._getState(deepCopy || false);
+	aComponent.setState(state);
 	return aComponent;
 }
 
@@ -1266,8 +1265,9 @@ function Component$$createOnElement(el, innerHTML, rootScope, extraFacets) {
 		el.innerHTML = innerHTML;
 
 	miloBinder(el, rootScope);
-
-	return rootScope[attr.compName];
+	var aComponent = rootScope[attr.compName];
+	_.deferMethod(aComponent, 'broadcast', 'stateready');
+	return aComponent;
 }
 
 
