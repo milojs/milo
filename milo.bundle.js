@@ -127,9 +127,10 @@ _.extendProto(FacetedObject, {
  * @param {Function} FacetClass facet class constructor
  * @param {Object} facetConfig optional facet configuration
  * @param {String} facetName optional facet name, FacetClass.name will be used if facetName is not passed.
+ * @param {Boolean} throwOnErrors If set to false, then errors will only be logged to console. True by default.
  * @return {Facet}
  */
-function FacetedObject$addFacet(FacetClass, facetConfig, facetName) {
+function FacetedObject$addFacet(FacetClass, facetConfig, facetName, throwOnErrors) {
 	check(FacetClass, Function);
 	check(facetName, Match.Optional(String));
 
@@ -144,8 +145,13 @@ function FacetedObject$addFacet(FacetClass, facetConfig, facetName) {
 		throw new FacetError('facet ' + facetName + ' is already part of the class ' + this.constructor.name);
 
 	// check that this faceName does not already exist on the faceted object
-	if (this[facetName])
-		throw new FacetError('facet ' + facetName + ' is already present in object');
+	if (this[facetName]) {
+		var message = 'facet ' + facetName + ' is already present in object';
+		if (throwOnErrors === false)
+			return logger.error('FacetedObject addFacet: ', message);
+		else
+			throw new FacetError(message);
+	}
 
 	// instantiate the facet
 	var newFacet = this.facets[facetName] = new FacetClass(this, facetConfig);
@@ -804,34 +810,36 @@ module.exports = binder;
  * @param {Element} scopeEl root element inside which DOM will be scanned and bound
  * @param {Scope} rootScope Optional Root scope object where top level components will be saved.
  * @param {Boolean} bindRootElement If set to false, then the root element will not be bound. True by default.
+ * @param {Boolean} throwOnErrors If set to false, then errors will only be logged to console. True by default.
  * @return {Scope}
  */
-function binder(scopeEl, rootScope, bindRootElement) {
-	return createBinderScope(scopeEl, function(scope, el, attr) {
-		var info = new ComponentInfo(scope, el, attr);
-		return Component.create(info);
-	}, rootScope, bindRootElement);
+function binder(scopeEl, rootScope, bindRootElement, throwOnErrors) {
+	return createBinderScope(scopeEl, function(scope, el, attr, throwOnErrors) {
+		var info = new ComponentInfo(scope, el, attr, throwOnErrors);
+		return Component.create(info, throwOnErrors);
+	}, rootScope, bindRootElement, throwOnErrors);
 }
 
 
 // bind in two passes
-function twoPass(scopeEl, rootScope, bindRootElement) {
-	var scanScope = binder.scan(scopeEl, rootScope, bindRootElement);
-	return binder.create(scanScope);
+function twoPass(scopeEl, rootScope, bindRootElement, throwOnErrors) {
+	var scanScope = binder.scan(scopeEl, rootScope, bindRootElement, throwOnErrors);
+	return binder.create(scanScope, undefined, throwOnErrors);
 }
 
 
 // scan DOM for BindAttribute
-function scan(scopeEl, rootScope, bindRootElement) {
-	return createBinderScope(scopeEl, function(scope, el, attr) {
-		return new ComponentInfo(scope, el, attr);
-	}, rootScope, bindRootElement);
+function scan(scopeEl, rootScope, bindRootElement, throwOnErrors) {
+	return createBinderScope(scopeEl, function(scope, el, attr, throwOnErrors) {
+		return new ComponentInfo(scope, el, attr, throwOnErrors);
+	}, rootScope, bindRootElement, throwOnErrors);
 }
 
 
 // create bound components
-function create(scanScope, hostObject) {
-	var scope = new Scope(scanScope._rootEl, hostObject);
+function create(scanScope, hostObject, throwOnErrors) {
+	var scope = new Scope(scanScope._rootEl, hostObject)
+		, addMethod = throwOnErrors === false ? '_safeAdd' : '_add';
 
 	scanScope._each(function(compInfo) {
 		// set correct component's scope
@@ -839,20 +847,21 @@ function create(scanScope, hostObject) {
 		info.scope = scope;
 
 		// create component
-		var aComponent = Component.create(info);
+		var aComponent = Component.create(info, throwOnErrors);
 		
-		scope._add(aComponent, aComponent.name);
+		scope[addMethod](aComponent, aComponent.name);
 		if (aComponent.container)
-			aComponent.container.scope = create(compInfo.container.scope, aComponent.container);
+			aComponent.container.scope = create(compInfo.container.scope, aComponent.container, throwOnErrors);
 	});
 
 	return scope;
 }
 
 
-function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootElement) {
+function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootElement, throwOnErrors) {
 	var scopeEl = scopeEl || document.body
-		, scope = rootScope || new Scope(scopeEl);
+		, scope = rootScope || new Scope(scopeEl)
+		, addMethod = throwOnErrors === false ? '_safeAdd' : '_add';
 
 	createScopeForElement(scope, scopeEl, bindRootElement);
 	
@@ -863,9 +872,9 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
 		// get element's binding attribute (ml-bind by default)
 		var attr = new BindAttribute(el);
 
-		// if eleent has bind attribute crate scope object (Component or ComponentInfo)
+		// if element has bind attribute crate scope object (Component or ComponentInfo)
 		if (attr.node && bindRootElement !== false) {
-			var scopedObject = scopeObjectFactory(scope, el, attr)
+			var scopedObject = scopeObjectFactory(scope, el, attr, throwOnErrors)
 				, isContainer = typeof scopedObject != 'undefined' && scopedObject.container;
 		}
 
@@ -888,7 +897,7 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
 
 		// TODO condition after && is a hack, should not be used!
 		if (scopedObject) // && ! scope[attr.compName])
-			scope._add(scopedObject, attr.compName);
+			scope[addMethod](scopedObject, attr.compName);
 
 		// _.defer(postChildrenBoundMessage, el);
 		postChildrenBoundMessage(el);
@@ -909,7 +918,7 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
 		var children = utilDom.children(containerEl);
 
 		_.forEach(children, function(node) {
-			createScopeForElement(scope, node);
+			createScopeForElement(scope, node, true);
 		});
 		return scope;
 	}
@@ -1159,16 +1168,27 @@ function Component_domStorageParser(compStr, compClassName) {
  * Component of any registered class (see [componentsRegistry](./c_registry.js.html)) with any additional registered facets (see [facetsRegistry](./c_facets/cf_registry.js.html)) can be created using this method.
  *
  * @param {ComponentInfo} info
+ * @param {Boolean} throwOnErrors If set to false, then errors will only be logged to console. True by default.
  @ @return {Component}
  */
-function Component$$create(info) {
+function Component$$create(info, throwOnErrors) {
 	var ComponentClass = info.ComponentClass;
+
+	if (typeof ComponentClass != 'function') {
+		var message = 'create: component class should be function, "' + typeof ComponentClass + '" passed'; 
+		if (throwOnErrors === false) {
+			logger.error('Component', message, ';using base Component class instead');
+			ComponentClass = Component;
+		} else
+			throw new ComponentError(message);
+	}
+
 	var aComponent = new ComponentClass(info.scope, info.el, info.name, info);
 
 	if (info.extraFacetsClasses)
 		_.eachKey(info.extraFacetsClasses, function(FacetClass) {
 			if (! aComponent.hasFacet(FacetClass))
-				aComponent.addFacet(FacetClass);
+				aComponent.addFacet(FacetClass, undefined, undefined, throwOnErrors);
 		});
 
 	return aComponent;
@@ -1279,9 +1299,10 @@ function Component$$createOnElement(el, innerHTML, rootScope, extraFacets) {
  * @param {Object} state state from which component will be created
  * @param {Scope} rootScope scope to which component will be added
  * @param {Boolean} newUniqueName optional `true` to create component with the name different from the original one. `False` by default.
+ * @param {Boolean} throwOnErrors If set to false, then errors will only be logged to console. True by default.
  * @return {Component} component
  */
-function Component$$createFromState(state, rootScope, newUniqueName) {
+function Component$$createFromState(state, rootScope, newUniqueName, throwOnErrors) {
 	check(state, Match.ObjectIncluding({
 		compName: Match.Optional(String),
 		compClass: Match.Optional(String),
@@ -1296,7 +1317,7 @@ function Component$$createFromState(state, rootScope, newUniqueName) {
 	var wrapEl = _createComponentWrapElement(state, newUniqueName);
 
 	// instantiate all components from HTML
-	var scope = miloBinder(wrapEl);
+	var scope = miloBinder(wrapEl, undefined, undefined, throwOnErrors);
 
 	// as there should only be one component, call to _any will return it
 	var component = scope._any();
@@ -1454,8 +1475,9 @@ function Component$hasFacet(facetNameOrClass) {
  * @param {String|Subclass(Component)} facetNameOrClass name of facet class or the class itself. If name is passed, the class will be retireved from facetsRegistry
  * @param {Object} facetConfig optional facet configuration
  * @param {String} facetName optional facet name. Allows to add facet under a name different from the class name supplied.
+ * @param {Boolean} throwOnErrors If set to false, then errors will only be logged to console. True by default.
  */
-function Component$addFacet(facetNameOrClass, facetConfig, facetName) {
+function Component$addFacet(facetNameOrClass, facetConfig, facetName, throwOnErrors) {
 	check(facetNameOrClass, Match.OneOf(String, Match.Subclass(ComponentFacet)));
 	check(facetConfig, Match.Optional(Object));
 	check(facetName, Match.Optional(String));
@@ -1472,7 +1494,7 @@ function Component$addFacet(facetNameOrClass, facetConfig, facetName) {
 	this.extraFacets.push(facetName);
 
 	// add facet using method of FacetedObject
-	var newFacet = FacetedObject.prototype.addFacet.call(this, FacetClass, facetConfig, facetName);
+	var newFacet = FacetedObject.prototype.addFacet.call(this, FacetClass, facetConfig, facetName, throwOnErrors);
 
 	// check depenedencies and start facet
 	newFacet.check && newFacet.check();
@@ -3709,10 +3731,12 @@ module.exports = facetsRegistry;
 var componentsRegistry = require('./c_registry')
 	, facetsRegistry = require('./c_facets/cf_registry')
 	, BinderError = require('../util/error').Binder
+	, logger = require('../util/logger')
 	, _ = require('mol-proto');
 
 
 module.exports = ComponentInfo;
+
 
 /**
  * Simple class to hold information allowing to create/copy component using [`Component.create`](./c_class.js.html#create) and [`Component.copy`](./c_class.js.html#copy).
@@ -3721,30 +3745,35 @@ module.exports = ComponentInfo;
  * @param {Scope} scope scope object the component belogs to, usually either top level scope that will be returned by [milo.binder](../binder.js.html) or `scope` property of [Container](./c_facets/Container.js.html) facet of containing component
  * @param {Element} el DOM element the component is attached to
  * @param {BindAttribute} attr BindAttribute instance that the component was created with
+ * @param {Boolean} throwOnErrors If set to false, then errors will only be logged to console. True by default.
  * @return {ComponentInfo}
  */
-function ComponentInfo(scope, el, attr) {
+function ComponentInfo(scope, el, attr, throwOnErrors) {
 	attr.parse().validate();
 
 	this.scope = scope;
 	this.el = el;
 	this.attr = attr;
 	this.name = attr.compName;
-	this.ComponentClass = getComponentClass(attr);
-	this.extraFacetsClasses = getComponentExtraFacets(this.ComponentClass, attr);
+	this.ComponentClass = getComponentClass(attr, throwOnErrors);
+	this.extraFacetsClasses = getComponentExtraFacets(this.ComponentClass, attr, throwOnErrors);
 
-	if (hasContainerFacet(this.ComponentClass, this.extraFacetsClasses))
+	if (this.ComponentClass
+			&& hasContainerFacet(this.ComponentClass, this.extraFacetsClasses)) {
 		this.container = {};
+	}
 }
 
-function getComponentClass(attr) {
+
+function getComponentClass(attr, throwOnErrors) {
 	var ComponentClass = componentsRegistry.get(attr.compClass);
 	if (! ComponentClass)
-		throw new BinderError('class ' + attr.compClass + ' is not registered');
+		reportBinderError(throwOnErrors, 'class ' + attr.compClass + ' is not registered');
 	return ComponentClass;
 }
 
-function getComponentExtraFacets(ComponentClass, attr) {
+
+function getComponentExtraFacets(ComponentClass, attr, throwOnErrors) {
 	var facets = attr.compFacets
 		, extraFacetsClasses = {};
 
@@ -3752,10 +3781,10 @@ function getComponentExtraFacets(ComponentClass, attr) {
 		facets.forEach(function(fctName) {
 			fctName = _.firstUpperCase(fctName);
 			if (ComponentClass.hasFacet(fctName))
-				throw new BinderError('class ' + ComponentClass.name
+				reportBinderError(throwOnErrors, 'class ' + ComponentClass.name
 									  + ' already has facet ' + fctName);
 			if (extraFacetsClasses[fctName])
-				throw new BinderError('component ' + attr.compName
+				reportBinderError(throwOnErrors, 'component ' + attr.compName
 									  + ' already has facet ' + fctName);
 			var FacetClass = facetsRegistry.get(fctName);
 			extraFacetsClasses[fctName] = FacetClass;
@@ -3763,6 +3792,15 @@ function getComponentExtraFacets(ComponentClass, attr) {
 
 	return extraFacetsClasses;
 }
+
+
+function reportBinderError(throwOnErrors, message) {
+	if (throwOnErrors === false)
+		logger.error('ComponentInfo binder error:', message);
+	else
+		throw new BinderError(message);
+};
+
 
 function hasContainerFacet(ComponentClass, extraFacetsClasses) {
 	return (ComponentClass.hasFacet('container')
@@ -3780,7 +3818,7 @@ function hasContainerFacet(ComponentClass, extraFacetsClasses) {
 	}
 }
 
-},{"../util/error":78,"./c_facets/cf_registry":25,"./c_registry":27,"mol-proto":90}],27:[function(require,module,exports){
+},{"../util/error":78,"../util/logger":81,"./c_facets/cf_registry":25,"./c_registry":27,"mol-proto":90}],27:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -4332,6 +4370,7 @@ function handleEvent(event) {
 'use strict';
 
 var _ = require('mol-proto')
+	, componentName = require('../util/component_name')
 	, check = require('../util/check')
 	, Match = check.Match
 	, ScopeError = require('../util/error').Scope
@@ -4353,10 +4392,10 @@ function Scope(rootEl, hostObject) {
 
 _.extendProto(Scope, {
 	_add: Scope$_add,
+	_safeAdd: Scope$_safeAdd,
 	_copy: Scope$_copy,
 	_each: Scope$_each,
 	_move: Scope$_move,
-	_addNew: Scope$_addNew,
 	_merge: Scope$_merge,
 	_length: Scope$_length,
 	_any: Scope$_any,
@@ -4371,9 +4410,9 @@ var allowedNamePattern = /^[A-Za-z][A-Za-z0-9\_\$]*$/;
 
 
 /**
- * Instance method.
- * Adds a component to the scope, throwing if name is not unique
- * @param {Component} object component to add to the scope
+ * Scope instance method.
+ * Adds object to the scope, throwing if name is not unique
+ * @param {Component|ComponentInfo} object component or component info to add to the scope
  * @param {String} name the name of the component to add
  */
 function Scope$_add(object, name) {
@@ -4382,16 +4421,50 @@ function Scope$_add(object, name) {
     else
 		name = object.name;
 	
-	if (this[name])
+	if (this.hasOwnProperty(name))
 		throw new ScopeError('duplicate object name: ' + name);
 
 	checkName(name);
+	__add.call(this, object, name);
+}
 
+
+/**
+ * Scope instance method
+ * Adds object to scope renaming it if name is not unique
+ * @param {Component|ComponentInfo} object component or component info to add to the scope
+ * @param {String} name the name of the component to add
+ */
+function Scope$_safeAdd(object, name) {
+	if (typeof name == 'string')
+		object.name = name;
+    else
+		name = object.name;
+
+	var shouldRename = this.hasOwnProperty(name);
+	if (shouldRename)
+		logger.error('Scope: duplicate object name: ' + name);
+	else {
+		shouldRename = ! allowedNamePattern.test(name);
+		if (shouldRename)
+			logger.error('Scope: name should start from letter, this name is not allowed: ' + name);
+	}
+
+	if (shouldRename) {
+		name = componentName();
+		object.name = name;
+	}
+
+	__add.call(this, object, name);
+}
+
+
+function __add(object, name) {
 	this[name] = object;
 	object.scope = this;
 
     if (typeof object.postMessage === 'function')
-        object.postMessage('addedtoscope');
+        object.postMessage('addedtoscope');	
 }
 
 
@@ -4418,11 +4491,6 @@ function Scope$_move(component, otherScope) {
 	otherScope._add(component);
 	this._remove(component.name);
 	component.scope = otherScope;
-}
-
-
-function Scope$_addNew(object, name) {
-// TODO
 }
 
 
@@ -4523,7 +4591,7 @@ function Scope$_clean() {
 	}, this);
 }
 
-},{"../util/check":74,"../util/error":78,"../util/logger":81,"mol-proto":90}],36:[function(require,module,exports){
+},{"../util/check":74,"../util/component_name":75,"../util/error":78,"../util/logger":81,"mol-proto":90}],36:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
