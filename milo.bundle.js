@@ -1066,6 +1066,7 @@ delete Component.createFacetedClass;
  * - [hasFacet](#Component$hasFacet)
  * - [addFacet](#Component$addFacet)
  * - [allFacets](#Component$allFacets)
+ * - [rename](#Component$rename)
  * - [remove](#Component$remove)
  * - [getState](#Component$getState)
  * - [getTransferState](#Component$getTransferState)
@@ -1076,6 +1077,7 @@ delete Component.createFacetedClass;
  * - [getTopScopeParentWithClass](#Component$getTopScopeParentWithClass)
  * - [walkScopeTree](#Component$walkScopeTree)
  * - [broadcast](#Component$broadcast)
+ * - [destroy](#Component$destroy)
  *
  *
  * #####[Messenger](../messenger/index.js.html) methods available on component#####
@@ -1093,6 +1095,7 @@ _.extendProto(Component, {
 	hasFacet: Component$hasFacet,
 	addFacet: Component$addFacet,
 	allFacets: Component$allFacets,
+	rename: Component$rename,
 	remove: Component$remove,
 	getState: Component$getState,
 	getTransferState: Component$getTransferState,
@@ -1446,10 +1449,9 @@ function Component$createElement() {
 	if (typeof document == 'undefined')
 		return;
 
-	if (this.dom)
-		this.dom.createElement();
-	else
-		this.el = document.createElement('DIV');
+	this.el = this.dom
+				? this.dom.createElement()
+				: document.createElement('DIV');
 
 	return this.el;
 }
@@ -1529,13 +1531,32 @@ function Component$allFacets(method) { // ,... arguments
 
 /**
  * Component instance method.
+ * 
+ * @param {[String]} name optional new name of component, 
+ */
+function Component$rename(name) {
+	name = name || miloComponentName();
+	this.componentInfo.rename(name, false);
+	if (this.scope) {
+		this.scope._remove(this.name);
+		this.scope._add(this, name);
+	} else
+		this.name = name;
+}
+
+
+/**
+ * Component instance method.
  * Removes component from its scope.
  *
  * @param {Boolean} preserveScopeProperty true not to delete scope property of component
  */
 function Component$remove(preserveScopeProperty) {
-	if (this.scope)
-		this.scope._remove(this.name, preserveScopeProperty);
+	if (this.scope) {
+		this.scope._remove(this.name);
+		if (! preserveScopeProperty)
+			delete this.scope;
+	}
 }
 
 
@@ -3744,6 +3765,7 @@ module.exports = facetsRegistry;
 
 var componentsRegistry = require('./c_registry')
 	, facetsRegistry = require('./c_facets/cf_registry')
+	, componentName = require('../util/component_name')
 	, BinderError = require('../util/error').Binder
 	, logger = require('../util/logger')
 	, _ = require('mol-proto');
@@ -3779,14 +3801,47 @@ function ComponentInfo(scope, el, attr, throwOnErrors) {
 }
 
 
+/**
+ * ####ComponentInfo instance methods####
+ * 
+ * - [destroy](#ComponentInfo$destroy)
+ * - [rename](#ComponentInfo$rename)
+ */
 _.extendProto(ComponentInfo, {
-	destroy: ComponentInfo$destroy
+	destroy: ComponentInfo$destroy,
+	rename: ComponentInfo$rename
 });
 
+
+/**
+ * ComponentInfo instance method
+ * Destroys ComponentInfo by removing the references to DOM element
+ */
 function ComponentInfo$destroy() {
 	delete this.el;
 	this.attr.destroy();
 }
+
+
+/**
+ * ComponentInfo instance method
+ * Renames ComponentInfo object
+ *
+ * @param {[String]} name optional new component name, generated from timestamp by default
+ * @param {[Boolean]} renameInScope optional false to not rename ComponentInfo object in its scope, true by default
+ */
+function ComponentInfo$rename(name, renameInScope) {
+	name = name || componentName();
+	if (this.scope && renameInScope !== false) {
+		this.scope._remove(this.name);
+		this.scope._add(this, name);
+	} else
+		this.name = name;
+
+	this.attr.compName = name;
+	this.attr.decorate();
+}
+
 
 function getComponentClass(attr, throwOnErrors) {
 	var ComponentClass = componentsRegistry.get(attr.compClass);
@@ -3841,7 +3896,7 @@ function hasContainerFacet(ComponentClass, extraFacetsClasses) {
 	}
 }
 
-},{"../util/error":79,"../util/logger":82,"./c_facets/cf_registry":25,"./c_registry":27,"mol-proto":91}],27:[function(require,module,exports){
+},{"../util/component_name":76,"../util/error":79,"../util/logger":82,"./c_facets/cf_registry":25,"./c_registry":27,"mol-proto":91}],27:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -4594,16 +4649,13 @@ function Scope$_any() {
  * Instance method.
  * Removes a component from the scope by it's name.
  * @param {String} name the name of the component to remove
- * @param {Boolean} preserveScopeProperty true not to delete scope property of object
  */
-function Scope$_remove(name, preserveScopeProperty) {
+function Scope$_remove(name) {
 	if (! (name in this))
 		return logger.warn('removing object that is not in scope');
 
 	var object = this[name];
 
-	if (! preserveScopeProperty)
-		delete object.scope;
 	delete this[name];
 
 	if (typeof object.postMessage === 'function')
