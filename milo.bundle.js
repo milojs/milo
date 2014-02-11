@@ -10013,6 +10013,7 @@ _.extendProto(DOMStorage, {
 	get: DOMStorage$get,
 	set: DOMStorage$set,
 	remove: DOMStorage$remove,
+	hasItem: DOMStorage$hasItem,
 	getItem: DOMStorage$getItem,
 	setItem: DOMStorage$setItem,
 	removeItem: DOMStorage$removeItem,
@@ -10075,6 +10076,18 @@ function DOMStorage$remove() { //, ... arguments
 	_.deepForEach(arguments, function(key) {
 		this.removeItem(key);
 	}, this);
+}
+
+
+/**
+ * Check for presence of single item in DOM storage. `this.keyPrefix` is prepended to passed key.
+ * 
+ * @param {String} key
+ * @return {Boolean}
+ */
+function DOMStorage$hasItem(key) {
+	var pKey = this._storageKey(key);
+	return this._storage.getItem(pKey) != null;
 }
 
 
