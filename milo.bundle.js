@@ -10616,6 +10616,14 @@ var	stringMethods = require('./proto_string');
 
 
 /**
+ * [__Number functions__](proto_number.js.html)
+ * 
+ * - [isNumeric](proto_number.js.html#isNumeric)
+ */
+var numberMethods = require('./proto_number');
+
+
+/**
  * [__Utility functions__](proto_util.js.html)
  * 
  * - [tap](proto_util.js.html#tap)
@@ -10663,6 +10671,7 @@ objectMethods.extend.call(__, objectMethods);
 __.extend.call(__, prototypeMethods);
 __.extend.call(__, arrayMethods);
 __.extend.call(__, stringMethods);
+__.extend.call(__, numberMethods);
 __.extend.call(__, functionMethods);
 __.extend.call(__, utilMethods);
 
@@ -10703,7 +10712,7 @@ if (typeof module == 'object' && module.exports)
 	// export for node/browserify
 	module.exports = Proto;
 
-},{"./proto_array":91,"./proto_function":92,"./proto_object":93,"./proto_prototype":94,"./proto_string":95,"./proto_util":96,"./utils":97}],91:[function(require,module,exports){
+},{"./proto_array":91,"./proto_function":92,"./proto_number":93,"./proto_object":94,"./proto_prototype":95,"./proto_string":96,"./proto_util":97,"./utils":98}],91:[function(require,module,exports){
 'use strict';
 
 var __ = require('./proto_object')
@@ -10916,7 +10925,7 @@ function deepForEach(callback, thisArg) {
 	}
 }
 
-},{"./proto_object":93,"./utils":97}],92:[function(require,module,exports){
+},{"./proto_object":94,"./utils":98}],92:[function(require,module,exports){
 'use strict';
 
 /**
@@ -11174,6 +11183,27 @@ function throttle(wait, options) {
 }
 
 },{}],93:[function(require,module,exports){
+'use strict';
+
+/**
+ * - [isNumeric](#isNumeric)
+ */
+var numberMethods = module.exports = {
+	isNumeric: isNumeric
+};
+
+
+/**
+ * Function to test if a value is numeric
+ *
+ * @param {Any} self value to be tested
+ * @return {Boolean} true if it is a numeric value
+ */
+function isNumeric() {
+	return !isNaN(parseFloat(this)) && isFinite(this);
+};
+
+},{}],94:[function(require,module,exports){
 'use strict';
 
 
@@ -11710,7 +11740,7 @@ function omitKeys() { // , ... keys
 	return obj;
 }
 
-},{"./utils":97}],94:[function(require,module,exports){
+},{"./utils":98}],95:[function(require,module,exports){
 'use strict';
 
 /**
@@ -11824,7 +11854,7 @@ function makeSubclass(Superclass) {
 	return this;
 }
 
-},{"./proto_function":92,"./proto_object":93}],95:[function(require,module,exports){
+},{"./proto_function":92,"./proto_object":94}],96:[function(require,module,exports){
 'use strict';
 
 /**
@@ -11891,7 +11921,7 @@ function toFunction() {
 	}
 }
 
-},{}],96:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 'use strict';
 
 /**
@@ -11914,7 +11944,7 @@ function tap(func) {
 	return this;
 };
 
-},{}],97:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 'use strict';
 
 var utils = module.exports = {
