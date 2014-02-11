@@ -629,6 +629,8 @@ _.extendProto(Attribute, {
 	set: set,
 	decorate: decorate,
 
+	destroy: Attribute$destroy,
+
 	// should be defined in subclass
 	attrName: toBeImplemented,
 	parse: toBeImplemented,
@@ -636,6 +638,11 @@ _.extendProto(Attribute, {
 	render: toBeImplemented
 });
 
+
+function Attribute$destroy() {
+	delete this.el;
+	delete this.node;
+}
 
 /**
  * Attribute instance method that returns attribute value as string.
@@ -1725,13 +1732,13 @@ function Component$broadcast(msg, data, callback) {
 
 function Component$destroy() {
 	this.remove();
-	if (this.el)
-		domUtils.removeElement(this.el);
 	this.walkScopeTree(function(component) {
 		component.allFacets('destroy');
 		if (! component.el) return;
 		domUtils.detachComponent(component.el);
+		domUtils.removeElement(component.el);
 		delete component.el;
+		component.componentInfo.destroy();
 	});
 }
 
@@ -1981,7 +1988,8 @@ _.extendProto(Container, {
 	start: Container$start,
 	getState: Container$getState,
 	setState: Container$setState,
-	binder: Container$binder
+	binder: Container$binder,
+	destroy: Container$destroy
 });
 
 facetsRegistry.add(Container);
@@ -2043,7 +2051,10 @@ function Container$setState(state) {
 	}, this);
 }
 
-
+function Container$destroy() {
+	ComponentFacet.prototype.destroy.apply(this, arguments);
+	this.scope._detachElement();
+}
 },{"../../binder":9,"../../util/logger":81,"../c_facet":12,"../scope":35,"./cf_registry":25,"mol-proto":90}],14:[function(require,module,exports){
 'use strict';
 
@@ -3768,6 +3779,15 @@ function ComponentInfo(scope, el, attr, throwOnErrors) {
 }
 
 
+_.extendProto(ComponentInfo, {
+	destroy: ComponentInfo$destroy
+});
+
+function ComponentInfo$destroy() {
+	delete this.el;
+	this.attr.destroy();
+}
+
 function getComponentClass(attr, throwOnErrors) {
 	var ComponentClass = componentsRegistry.get(attr.compClass);
 	if (! ComponentClass)
@@ -4410,7 +4430,8 @@ _.extendProto(Scope, {
 	_length: Scope$_length,
 	_any: Scope$_any,
 	_remove: Scope$_remove,
-	_clean: Scope$_clean
+	_clean: Scope$_clean,
+	_detachElement: Scope$_detachElement
 });
 
 module.exports = Scope;
@@ -4599,6 +4620,10 @@ function Scope$_clean() {
 		delete this[name].scope;
 		delete this[name];
 	}, this);
+}
+
+function Scope$_detachElement() {
+	this._rootEl = null;
 }
 
 },{"../util/check":74,"../util/component_name":75,"../util/error":78,"../util/logger":81,"mol-proto":90}],36:[function(require,module,exports){
