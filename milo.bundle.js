@@ -1725,14 +1725,14 @@ function Component$broadcast(msg, data, callback) {
 
 function Component$destroy() {
 	this.remove();
+	if (this.el)
+		domUtils.removeElement(this.el);
 	this.walkScopeTree(function(component) {
-		// component.allFacets('destroy');
+		component.allFacets('destroy');
 		if (! component.el) return;
 		domUtils.detachComponent(component.el);
 		delete component.el;
 	});
-	if (this.el)
-		domUtils.removeElement(this.el);
 }
 
 },{"../abstract/faceted_object":2,"../attributes/a_bind":5,"../binder":9,"../config":50,"../messenger":55,"../util/check":74,"../util/component_name":75,"../util/dom":77,"../util/error":78,"../util/json_parse":80,"../util/logger":81,"../util/storage":86,"./c_facets/cf_registry":25,"./c_utils":28,"./scope":35,"mol-proto":90}],12:[function(require,module,exports){
@@ -1786,6 +1786,7 @@ _.extendProto(ComponentFacet, {
 	init: ComponentFacet$init,
 	start: ComponentFacet$start,
 	check: ComponentFacet$check,
+	destroy: ComponentFacet$destroy,
 	onConfigMessages: ComponentFacet$onConfigMessages,
 	domParent: domParent,
 	postDomParent: postDomParent,
@@ -1809,6 +1810,7 @@ function ComponentFacet$init() {
 }
 
 
+// some classes (e.g. ModelFacet) overrride this method and do not create their own messenger
 function _createMessenger(){
 	var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
 
@@ -1871,6 +1873,13 @@ function ComponentFacet$check() {
 				this.owner.addFacet(reqFacet);
 		}, this);
 	}
+}
+
+
+// destroys facet
+function ComponentFacet$destroy() {
+	if(this._messenger)
+		this._messenger.destroy();
 }
 
 
@@ -2615,7 +2624,6 @@ function Dom$$createElement(config) {
 
 
 _.extendProto(Dom, {
-	init: init,
 	start: start,
 
 	show: show,
@@ -2649,11 +2657,6 @@ facetsRegistry.add(Dom);
 
 module.exports = Dom;
 
-
-// initialize Dom facet
-function init() {
-	ComponentFacet.prototype.init.apply(this, arguments);
-}
 
 // start Dom facet
 function start() {
@@ -4222,6 +4225,7 @@ var DOMEventsSource = _.createSubclass(MessageSource, 'DOMMessageSource', true);
 _.extendProto(DOMEventsSource, {
 	// implementing MessageSource interface
 	init: init,
+	destroy: DOMEventsSource$destroy,
  	addSourceSubscriber: _.partial(sourceSubscriberMethod, 'addEventListener'),
  	removeSourceSubscriber: _.partial(sourceSubscriberMethod, 'removeEventListener'),
  	trigger: trigger,
@@ -4243,6 +4247,12 @@ function init(hostObject, proxyMethods, messengerAPIOrClass, component) {
 	check(component, Component);
 	this.component = component;
 	MessageSource.prototype.init.apply(this, arguments);
+}
+
+
+function DOMEventsSource$destroy() {
+	MessageSource.prototype.destroy.apply(this, arguments);
+	delete this.component;
 }
 
 
@@ -6092,12 +6102,14 @@ var messagesSplitRegExp = Messenger.messagesSplitRegExp = /\s*(?:\,|\s)\s*/;
  */
 _.extendProto(Messenger, {
 	init: init, // called by Mixin (superclass)
+	destroy: Messenger$destroy,
 	on: Messenger$on,
 	onMessage: Messenger$on, // deprecated
 	off: Messenger$off,
 	offMessage: Messenger$off, // deprecated
 	onMessages: onMessages,
 	offMessages: offMessages,
+	offAll: Messenger$offAll,
 	postMessage: postMessage,
 	getSubscribers: getSubscribers,
 	getMessageSource: getMessageSource,
@@ -6142,11 +6154,26 @@ function init(hostObject, proxyMethods, messageSource) {
 	if (messageSource)
 		this._setMessageSource(messageSource);
 
- 	// messenger data
+ 	_initializeSubscribers.call(this);
+}
+
+
+function _initializeSubscribers() {
  	_.defineProperties(this, {
  		_messageSubscribers: {},
  		_patternMessageSubscribers: {},
- 	});
+ 	}, _.CONF);
+}
+
+
+/**
+ * Destroys messenger. Maybe needs to unsubscribe all subscribers
+ */
+function Messenger$destroy() {
+ 	this.offAll();
+	var messageSource = this.getMessageSource();
+	if (messageSource)
+		messageSource.destroy();
 }
 
 
@@ -6408,6 +6435,22 @@ function offMessages(messageSubscribers) {
 }
 
 
+/**
+ * Unsubscribes all subscribers
+ */
+function Messenger$offAll() {
+	_offAllSubscribers.call(this, this._patternMessageSubscribers);
+	_offAllSubscribers.call(this, this._messageSubscribers);
+}
+
+
+function _offAllSubscribers(subscribersHash) {
+	_.eachKey(subscribersHash, function(subscribers, message) {
+		this._removeAllSubscribers(subscribersHash, message);
+	}, this);
+}
+
+
 // TODO - send event to messageSource
 
 
@@ -6571,7 +6614,8 @@ function getMessageSource() {
 },{"../abstract/mixin":3,"../util/check":74,"../util/error":78,"./m_source":58,"mol-proto":90}],56:[function(require,module,exports){
 'use strict';
 
-var _ = require('mol-proto');
+var _ = require('mol-proto')
+	, logger = require('../util/logger');
 
 
 module.exports = MessengerAPI;
@@ -6613,6 +6657,7 @@ function MessengerAPI() {
  */
 _.extendProto(MessengerAPI, {
 	init: init,
+	destroy: MessengerAPI$destroy,
 	addInternalMessage: addInternalMessage,
 	removeInternalMessage: removeInternalMessage,
 	getInternalMessages: getInternalMessages,
@@ -6630,6 +6675,14 @@ _.extendProto(MessengerAPI, {
  */
 function init() {
 	_.defineProperty(this, '_internalMessages', {});
+}
+
+
+/**
+ * Destroys messenger API
+ */
+function MessengerAPI$destroy() {
+
 }
 
 
@@ -6751,7 +6804,7 @@ function filterSourceMessage(sourceMessage, message, internalData) {
 	return true;
 }
 
-},{"mol-proto":90}],57:[function(require,module,exports){
+},{"../util/logger":81,"mol-proto":90}],57:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('./m_api')
@@ -6881,6 +6934,7 @@ module.exports = MessageSource;
  */
 _.extendProto(MessageSource, {
 	init: init,
+	destroy: MessageSource$destroy,
 	setMessenger: setMessenger,
 	onSubscriberAdded: onSubscriberAdded,
  	onSubscriberRemoved: onSubscriberRemoved, 
@@ -6906,6 +6960,15 @@ _.extendProto(MessageSource, {
  */
 function init(hostObject, proxyMethods, messengerAPI) {
 	this._prepareMessengerAPI(messengerAPI);
+}
+
+
+/**
+ * Destroys message source
+ */
+function MessageSource$destroy() {
+	if (this.messengerAPI)
+		this.messengerAPI.destroy();
 }
 
 
