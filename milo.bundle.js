@@ -10094,8 +10094,10 @@ function TextSelection$eachContainedComponent(callback, thisArg) {
 /**
  * TextSelection instance method
  * Deletes the current selection and all components in it
+ * 
+ * @param {Boolean} selectEndContainer set to true if the end container should be selected after deletion
  */
-function TextSelection$del(endContainer) {
+function TextSelection$del(selectEndContainer) {
 	if (this.isCollapsed || ! this.range) return;
 
 	this.eachContainedComponent(function(comp) {
@@ -10104,12 +10106,15 @@ function TextSelection$del(endContainer) {
 
 	var selStart = this.range.startContainer;
 	var startOffset = this.range.startOffset;
-	if (endContainer && this.range.startContainer != this.range.endContainer) {
+	if (selectEndContainer && this.range.startContainer != this.range.endContainer) {
 		selStart = this.range.endContainer;
 		startOffset = 0;
 	}
 
 	this.range.deleteContents();
+
+	// if (selStart.textContent)
+	// 	selStart.textContent = '&nbsp;';
 	
 	selStart.textContent = selStart.textContent.trimRight();
 	var position = startOffset > selStart.length ? selStart.length : startOffset;
