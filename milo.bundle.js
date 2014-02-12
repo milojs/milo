@@ -10789,6 +10789,7 @@ var	arrayMethods = require('./proto_array');
  * - [memoize](proto_function.js.html#memoize)
  * - [delay](proto_function.js.html#delay)
  * - [defer](proto_function.js.html#defer)
+ * - [deferTicks](proto_function.js.html#deferTicks)
  * - [delayMethod](proto_function.js.html#delayMethod)
  * - [deferMethod](proto_function.js.html#deferMethod)
  * - [debounce](proto_function.js.html#debounce)
@@ -10819,6 +10820,8 @@ var numberMethods = require('./proto_number');
 /**
  * [__Utility functions__](proto_util.js.html)
  * 
+ * - [times](proto_util.js.html#times)
+ * - [repeat](proto_util.js.html#repeat)
  * - [tap](proto_util.js.html#tap)
  */
 var utilMethods = require('./proto_util');
@@ -11121,6 +11124,11 @@ function deepForEach(callback, thisArg) {
 },{"./proto_object":95,"./utils":99}],93:[function(require,module,exports){
 'use strict';
 
+
+var makeProtoFunction = require('./utils').makeProtoFunction
+	, repeat = require('./proto_util').repeat;
+
+
 /**
  * - [makeFunction](#makeFunction)
  * - [partial](#partial)
@@ -11128,6 +11136,7 @@ function deepForEach(callback, thisArg) {
  * - [memoize](#memoize)
  * - [delay](#delay)
  * - [defer](#defer)
+ * - [deferTicks](#deferTicks)
  * - [delayMethod](#delayMethod)
  * - [deferMethod](#deferMethod)
  * - [debounce](#debounce)
@@ -11142,6 +11151,7 @@ var functionMethods = module.exports = {
 	memoize: memoize,
 	delay: delay,
 	defer: defer,
+	deferTicks: deferTicks,
 	delayMethod: delayMethod,
 	deferMethod: deferMethod,
 	debounce: debounce,
@@ -11266,6 +11276,26 @@ function _delay(func, wait, args) {
 	return setTimeout(func.apply.bind(func, null, args), wait);
 }
 
+/**
+ * Same as _.defer, takes first argument as the function to be deferred
+ */
+var deferFunc = makeProtoFunction(defer);
+
+/**
+ * Defers function execution for `times` ticks (executes after execution loop becomes free `times` times)
+ * The context in function when it is executed is set to `null`.
+ *
+ * @param {Function} self function that execution has to be delayed
+ * @param {Integer} ticks number of times to defer execution
+ * @param {List} arguments optional arguments that will be passed to the function
+ */
+function deferTicks(ticks) { // , arguments
+	if (ticks < 2) return defer.apply(this, arguments);
+	var args = repeat.call(deferFunc, ticks - 1);
+	args = args.concat(this, slice.call(arguments, 1));	
+	deferFunc.apply(null, args);
+}
+
 
 /**
  * Works like _.delay but allows to defer method call of `self` which will be the first _.delayMethod parameter
@@ -11375,7 +11405,7 @@ function throttle(wait, options) {
 	}
 }
 
-},{}],94:[function(require,module,exports){
+},{"./proto_util":98,"./utils":99}],94:[function(require,module,exports){
 'use strict';
 
 /**
@@ -12118,11 +12148,45 @@ function toFunction() {
 'use strict';
 
 /**
+ * - [times](#times)
+ * - [repeat](#repeat)
  * - [tap](#tap)
  */
 var utilMethods = module.exports = {
+	times: times,
+	repeat: repeat,
 	tap: tap
 };
+
+
+/**
+ * Calls `callback` `self` times with `thisArg` as context. Callback is passed iteration index from 0 to `self-1`
+ * 
+ * @param {Integer} self
+ * @param {Function} callback
+ * @param {Any} thisArg
+ * @return {Array}
+ */
+function times(callback, thisArg) {
+	var arr = Array(Math.max(0, this));
+	for (var i = 0; i < this; i++)
+		arr[i] = callback.call(thisArg, i);
+    return arr;
+}
+
+
+/**
+ * Returns array with the first argument repeated `times` times
+ * @param  {Any} self
+ * @param  {Integer} times
+ * @return {Array[Any]}
+ */
+function repeat(times) {
+	var arr = Array(Math.max(0, times));;
+	for (var i = 0; i < times; i++)
+		arr[i] = this;
+	return arr;
+}
 
 
 /**
