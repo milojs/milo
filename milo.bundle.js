@@ -9379,7 +9379,7 @@ var errorClassNames = ['AbstractClass', 'Mixin', 'Messenger', 'Component',
 					   'Attribute', 'Binder', 'Loader', 'MailMessageSource', 'Facet',
 					   'Scope', 'Model', 'DomFacet', 'EditableFacet',
 					   'List', 'Connector', 'Registry', 'FrameMessageSource',
-					   'Angular'];
+					   'Angular', 'Clipboard'];
 
 var error = {
 	toBeImplemented: error$toBeImplemented,
