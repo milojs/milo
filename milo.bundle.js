@@ -10061,13 +10061,15 @@ function request(url, opts, callback) {
 	var promise = new Promise(req);
 
 	req.onreadystatechange = function () {
-		if (req.readyState == 4 && req.statusText.toUpperCase() == 'OK' ) {
-			callback && callback(null, req.responseText, req);
-			promise.setData(null, req.responseText);
-		} // else {
-		//  	callback && callback(req.status, req.responseText, req);
-		// 	promise.setData(req.status, req.responseText);
-		// }
+		if (req.readyState == 4) {
+            if (req.statusText.toUpperCase() == 'OK' ) {
+                callback && callback(null, req.responseText, req);
+                promise.setData(null, req.responseText);
+            } else {
+                callback && callback(req.status, req.responseText, req);
+                promise.setData(req.status, req.responseText);
+            }
+		}
 	};
 	req.send(JSON.stringify(opts.data));
 
