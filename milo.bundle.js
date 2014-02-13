@@ -1000,6 +1000,8 @@ var _makeComponentConditionFunc = componentUtils._makeComponentConditionFunc;
  * - 'childrenbound' - synchronously dispatched when children of DOM element which compnent is connected to are connected to components. The event is dispatched when component is created with `milo.binder` (as is almost always the case, as all Component class methods that create/copy components use `milo.binder` internally - component constructor and Component.create methods are not used in framework outside of `milo.binder` and rarely if ever need to be used in aplication).
  * - 'addedtoscope' - synchronously dispatched when component is added to scope.
  * - 'stateready' - aynchronously dispatched when component (together with its scope children) is created with [Component.createFromState](#Component$$createFromState) (or `createFromDataTransfer`) method. Can be dispatched by application if the component's state is set with some other mechanism. This event is not used in `milo`, it can be used in application in particular subclasses of component.
+ * - 'getstatestarted' - emitted synchronously just before getState executes so components and facets can clean up their state for serialization. 
+ * - 'getstatecompleted' - emitted synchronously after getState executes so components and facets can restore their state after serialization.
  *
  *
  * ####Component "lifecycle"####
@@ -1554,6 +1556,7 @@ function Component$rename(name) {
  * @param {Boolean} preserveScopeProperty true not to delete scope property of component
  */
 function Component$remove(preserveScopeProperty) {
+	// cnsole.log('Component$remove', this, this.scope);
 	if (this.scope) {
 		this.scope._remove(this.name);
 		if (! preserveScopeProperty)
@@ -1572,8 +1575,10 @@ function Component$remove(preserveScopeProperty) {
  * @return {Object}
  */
 function Component$getState() {
+	this.broadcast('getstatestarted');
 	var state = this._getState(true);
 	state.outerHTML = this.el.outerHTML;
+	this.broadcast('getstatecompleted');
 	return state;
 }
 
@@ -1605,6 +1610,7 @@ function Component$getTransferState() {
  * @return {Object}
  */
 function Component$_getState(deepState){
+
 	var facetsStates = this.allFacets('getState', deepState === false ? false : true);
 	facetsStates = _.filterKeys(facetsStates, function(fctState) {
 		return !! fctState;
@@ -1753,6 +1759,9 @@ function Component$broadcast(msg, data, callback) {
 }
 
 
+/**
+ * Destroy component: removes component from DOM, removes it from scope, deletes all references to DOM nodes and unsubscribes from all messages both component and all facets
+ */
 function Component$destroy() {
 	this.remove();
 	this.walkScopeTree(function(component) {
@@ -6302,6 +6311,7 @@ var messagesSplitRegExp = Messenger.messagesSplitRegExp = /\s*(?:\,|\s)\s*/;
  * - [off](#Messenger$off) (alias - offMessage, deprecated)
  * - [onMessages](#onMessages)
  * - [offMessages](#offMessages)
+ * - [once](#once)
  * - [postMessage](#postMessage)
  * - [getSubscribers](#getSubscribers)
  *
@@ -6320,6 +6330,7 @@ _.extendProto(Messenger, {
 	init: init, // called by Mixin (superclass)
 	destroy: Messenger$destroy,
 	on: Messenger$on,
+	once: Messenger$once,
 	onMessage: Messenger$on, // deprecated
 	off: Messenger$off,
 	offMessage: Messenger$off, // deprecated
@@ -6345,6 +6356,7 @@ _.extendProto(Messenger, {
  */
 Messenger.defaultMethods = {
 	on: 'on',
+	once: 'once',
 	off: 'off',
 	onMessages: 'onMessages',
 	offMessages: 'offMessages',
@@ -6428,7 +6440,21 @@ function Messenger$destroy() {
  */
 function Messenger$on(messages, subscriber) {
 	check(messages, Match.OneOf(String, [String], RegExp));
-	check(subscriber, Match.OneOf(Function, { subscriber: Function, context: Match.Any }));
+	check(subscriber, Match.OneOf(Function, {
+		subscriber: Function,
+		context: Match.Any,
+		options: Match.Optional(Object)
+	}));
+
+	return _Messenger_on.call(this, messages, subscriber)
+}
+
+function _Messenger_on(messages, subscriber) {
+	// can be needed for 'once' subscription to unsubscribe from all messages
+	// passed to once
+	// !!! should NOT be moved to 'once' as options property can be used without 'once'
+	if (typeof subscriber == 'object')
+		_.defineProperty(subscriber, '__messages', messages);
 
 	if (typeof messages == 'string')
 		messages = messages.split(messagesSplitRegExp);
@@ -6447,7 +6473,24 @@ function Messenger$on(messages, subscriber) {
 		}, this);
 
 		return wasRegistered;
-	}
+	}	
+}
+
+
+function Messenger$once(messages, subscriber) {
+	check(messages, Match.OneOf(String, [String], RegExp));
+	check(subscriber, Match.OneOf(Function, {
+		subscriber: Function,
+		context: Match.Any,
+		options: Match.Optional(Object),
+	}));
+
+	if (typeof subscriber == 'function')
+		subscriber = { context: this._hostObject, subscriber: subscriber };
+
+	subscriber.options = { dispatchTimes: 1 };
+
+	return _Messenger_on.call(this, messages, subscriber);
 }
 
 
@@ -6474,7 +6517,7 @@ function _registerSubscriber(subscribersHash, message, subscriber) {
 	}
 
 	var msgSubscribers = subscribersHash[message];
-	var notYetRegistered = noSubscribers || _indexOfSubscriber(msgSubscribers, subscriber) == -1;
+	var notYetRegistered = noSubscribers || _indexOfSubscriber.call(this, msgSubscribers, subscriber) == -1;
 
 	if (notYetRegistered)
 		msgSubscribers.push(subscriber);
@@ -6490,13 +6533,24 @@ function _registerSubscriber(subscribersHash, message, subscriber) {
  * @param {Function|Object} subscriber subscriber function or object with properties `subscriber` (function) and `context` ("this" object)
  */
 function _indexOfSubscriber(list, subscriber) {
-	var isFunc = typeof subscriber == 'function';
+	var isFunc = typeof subscriber == 'function'
+		, self = this;
 	return _.findIndex(list, function(subscr){
-		return isFunc
-				? subscriber == subscr
-				: (subscriber.subscriber == subscr.subscriber 
-					&& subscriber.context == subscr.context);
+		var subscrIsFunc = typeof subscr == 'function';
+		return isFunc == subscrIsFunc
+				? ( isFunc
+					? subscriber == subscr
+					: (subscriber.subscriber == subscr.subscriber 
+						&& subscriber.context == subscr.context) )
+				: subscrIsFunc
+					? _subcribersFuncEqObj(subscr, subscriber)
+					: _subcribersFuncEqObj(subscriber, subscr)
 	});
+
+	function _subcribersFuncEqObj(func, obj) {
+		return func == obj.subscriber
+				&& self._hostObject == obj.context;
+	}
 }
 
 
@@ -6551,8 +6605,17 @@ function onMessages(messageSubscribers) {
  */
 function Messenger$off(messages, subscriber) {
 	check(messages, Match.OneOf(String, [String], RegExp));
-	check(subscriber, Match.Optional(Match.OneOf(Function, { subscriber: Function, context: Match.Any }))); 
+	check(subscriber, Match.Optional(Match.OneOf(Function, {
+		subscriber: Function,
+		context: Match.Any,
+		options: Match.Optional(Object),
+		// __messages: Match.Optional(Match.OneOf(String, [String], RegExp))
+	}))); 
 
+	return _Messenger_off.call(this, messages, subscriber);
+}
+
+function _Messenger_off(messages, subscriber) {
 	if (typeof messages == 'string')
 		messages = messages.split(messagesSplitRegExp);
 
@@ -6592,7 +6655,7 @@ function _removeSubscriber(subscribersHash, message, subscriber) {
 		return false; // nothing removed
 
 	if (subscriber) {
-		var subscriberIndex = _indexOfSubscriber(msgSubscribers, subscriber);
+		var subscriberIndex = _indexOfSubscriber.call(this, msgSubscribers, subscriber);
 		if (subscriberIndex == -1) 
 			return false; // nothing removed
 		msgSubscribers.splice(subscriberIndex, 1);
@@ -6714,7 +6777,7 @@ function _callPatternSubscribers(message, data, callback, calledMsgSubscribers) 
 			if (pattern.test(message)) {
 				if (calledMsgSubscribers) {
 					var patternSubscribers = patternSubscribers.filter(function(subscriber) {
-						var index = _indexOfSubscriber(calledMsgSubscribers, subscriber);
+						var index = _indexOfSubscriber.call(this, calledMsgSubscribers, subscriber);
 						return index == -1;
 					});
 				}
@@ -6741,8 +6804,15 @@ function _callSubscribers(message, data, callback, msgSubscribers) {
 		msgSubscribers.forEach(function(subscriber) {
 			if (typeof subscriber == 'function')
 				subscriber.call(this._hostObject, message, data, callback);
-			else
+			else {
 				subscriber.subscriber.call(subscriber.context, message, data, callback);
+				var dispatchTimes = subscriber.options && subscriber.options.dispatchTimes;
+				if (dispatchTimes <= 1) {
+					var messages = subscriber.__messages;					
+					this.off(messages, subscriber);
+				} else if (dispatchTimes > 1)
+					subscriber.options.dispatchTimes--;
+			}
 		}, this);
 }
 

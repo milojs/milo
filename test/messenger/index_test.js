@@ -11,8 +11,9 @@ describe('Messenger class', function() {
         var host = {};
         var messenger = new Messenger(host, {
             init: 'init',
-            on: 'onMessage',
-            off: 'offMessage',
+            on: 'on',
+            once: 'once',
+            off: 'off',
             onEvents: 'onMessages',
             offEvents: 'offMessages',
             post: 'postMessage',
@@ -73,7 +74,7 @@ describe('Messenger class', function() {
             , handler1 = function(){}
             , handler2 = function(){};
 
-        assert(host.on('event1 event2', handler1), 'subscribe with string');
+        assert(host.on('event1 event2', handler1));
         assert(Match.test(messenger._messageSubscribers, {event1: [Function], event2: [Function]}),
                 '_messageSubscribers hash has events');
         assert.equal( host.on('event1 event2', handler1), false, 'subscribe with string the second time');
@@ -306,10 +307,11 @@ describe('Messenger class', function() {
         host.on('event', { subscriber: localHandler, context: myContext });
         host.on('event', handler1);
             var subscribers = host.getListeners('event');
+
             assert.deepEqual(subscribers, [
                 { subscriber: localHandler, context: myContext },
                 handler1
-            ], 'should have 2 subscribers');
+            ]);
 
         host.post('event', { test: 1 });
             assert.deepEqual(posted, { 'event': { test: 1 } });
@@ -317,5 +319,24 @@ describe('Messenger class', function() {
         host.off('event', { subscriber: localHandler, context: myContext });
             var subscribers = host.getListeners('event');
             assert.deepEqual(subscribers, [handler1], 'should have 1 subscribers');
+    });
+
+
+    it('should define once method to subscribe to message that will be dispatched only once', function() {
+        var result = getHostWithMessenger()
+            , host = result.host
+            , messenger = result.messenger
+            , myContext = {}
+            , posted = [];
+
+        function localHandler(msg, data) {
+            assert.equal(this, host);
+            posted.push({ msg: msg, data: data });
+        }
+
+        host.once('event', localHandler);
+        host.post('event', { test: 1 });
+        host.post('event', { test: 2 });
+            assert.deepEqual(posted, [{ msg: 'event', data: { test: 1 } }]);
     });
 });
