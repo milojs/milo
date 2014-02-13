@@ -3190,6 +3190,17 @@ var ComponentFacet = require('../c_facet')
 
 
 /**
+ * Calls passed function when frame DOM becomes ready. If already ready calls immediately
+ */
+var Frame$whenReady = _makeWhenReadyFunc(Frame$isReady, 'domready');
+
+/**
+ * Calls passed function when frame milo becomes ready. If already ready calls immediately
+ */
+var Frame$whenMiloReady = _makeWhenReadyFunc(Frame$isMiloReady, 'message:miloready');
+
+
+/**
  * ####Events facet instance methods####
  *
  * - [init](#Frame$init) - called by constructor automatically
@@ -3198,7 +3209,10 @@ _.extendProto(Frame, {
 	init: Frame$init,
 	start: Frame$start,
 	getWindow: Frame$getWindow,
-	isReady: Frame$isReady
+	isReady: Frame$isReady,
+	whenReady: Frame$whenReady,
+	isMiloReady: Frame$isMiloReady,
+	whenMiloReady: Frame$whenMiloReady
 	// _reattach: _reattachEventsOnElementChange
 });
 
@@ -3230,6 +3244,7 @@ function Frame$start() {
 	ComponentFacet.prototype.start.apply(this, arguments);
 	var self = this;
 	var doc = this.getWindow().document;
+
 	if (doc.readyState == 'loading') {
 		doc.addEventListener('readystatechange', function(event) {
 			self.postMessage('domready', event);
@@ -3262,6 +3277,34 @@ function Frame$getWindow() {
 function Frame$isReady() {
 	var readyState = this.getWindow().document.readyState;
 	return  readyState != 'loading' ? readyState : false;
+}
+
+
+/**
+ * Frame facet instance method
+ * Returns true if milo is loaded and has finished initializing inside the frame
+ *
+ * @return {Boolean}
+ */
+function Frame$isMiloReady() {
+	var frameMilo = this.getWindow().milo;
+	return this.isReady() && frameMilo && frameMilo.milo_version;
+}
+
+
+function _makeWhenReadyFunc(isReadyFunc, event) {
+	return function Frame_whenReadyFunc(func) {
+		var self = this
+			, args = _.slice(arguments, 1);
+		if (isReadyFunc.call(this))
+			callFunc();
+		else
+			this.on(event, callFunc);
+
+		function callFunc() {
+			func.apply(self, args);
+		}
+	}
 }
 
 },{"../../messenger":56,"../c_facet":12,"../msg_src/de_constrs":32,"../msg_src/frame":34,"./cf_registry":25,"mol-proto":91}],20:[function(require,module,exports){
@@ -7338,7 +7381,8 @@ _.extend(milo, {
 	Component: require('./components/c_class'),
 	Messenger: require('./messenger'),
 	Model: require('./model'),
-	registry: require('./registry')
+	registry: require('./registry'),
+	milo_version: '0.1'
 });
 
 
@@ -7354,13 +7398,18 @@ if (typeof module == 'object' && module.exports)
 	module.exports = milo;
 
 // global milo for browser
-if (typeof window == 'object')
+if (typeof window == 'object') {
 	window.milo = milo;
+	milo.mail.trigger('miloready');
+}
 
 },{"./attributes":8,"./binder":9,"./classes":10,"./components/c_class":11,"./components/c_facet":12,"./config":51,"./loader":52,"./mail":53,"./messenger":56,"./minder":62,"./model":65,"./registry":72,"./use_components":73,"./use_facets":74,"./util":80,"mol-proto":91}],62:[function(require,module,exports){
 'use strict';
 
-var Connector = require('./model/connector');
+var Connector = require('./model/connector')
+	, Messenger = require('./messenger')
+	, _ = require('mol-proto')
+	, logger = require('./util/logger');
 
 
 module.exports = minder;
@@ -7388,12 +7437,85 @@ function minder(ds1, mode, ds2, options) {
 		var connectors = connDescriptions.map(function(descr) {
 			return new Connector(descr[0], descr[1], descr[2], descr[3]);
 		});
+		connectors.forEach(_addConnector);
 		return connectors;
-	} else
-		return new Connector(ds1, mode, ds2, options);
+	} else {
+		var cnct = new Connector(ds1, mode, ds2, options);
+		_addConnector(cnct);
+		return cnct;
+	}
 }
 
-},{"./model/connector":64}],63:[function(require,module,exports){
+
+/**
+ * messenger of minder where it emits events related to all connectors
+ * @type {Messenger}
+ */
+var _messenger = new Messenger(minder, Messenger.defaultMethods);
+
+
+var _connectors = []
+	, _receivedMessages = []
+	, _idleCheckDeferred = false;
+
+
+_.extend(minder, {
+	getConnectors: minder_getConnectors,
+	destroyConnector: minder_destroyConnector
+});
+
+
+function _addConnector(cnct) {
+	cnct.___minder_id = _connectors.push(cnct) - 1;
+	cnct.on(/.*/, onConnectorMessage);
+	minder.postMessage('added', { connector: cnct });
+	minder.postMessage('turnedon', { connector: cnct });
+}
+
+
+function onConnectorMessage(msg, data) {
+	var data = data ? _.clone(data) : {};
+	_.extend(data, {
+		id: this.___minder_id,
+		connector: this
+	});
+	minder.postMessage(msg, data);
+	if (! _receivedMessages.length && ! _idleCheckDeferred) {
+		_.defer(_idleCheck);
+		_idleCheckDeferred = true;
+	}
+
+	_receivedMessages.push({ msg: msg, data: data });
+}
+
+
+function _idleCheck() {
+	if (_receivedMessages.length) {
+		_receivedMessages.length = 0;
+		_.defer(_idleCheck);
+		minder.postMessage('propagationticked');
+	} else {
+		_idleCheckDeferred = false;
+		minder.postMessage('propagationcompleted');
+	}
+}
+
+
+function minder_getConnectors() {
+	return _connectors;
+}
+
+
+function minder_destroyConnector(cnct) {
+	cnct.destroy();
+	var index = _connectors.indexOf(cnct);
+	if (index >= 0)
+		delete _connectors[index];
+	else
+		logger.warn('minder: connector destroyed that is not registered in minder');
+}
+
+},{"./messenger":56,"./model/connector":64,"./util/logger":82,"mol-proto":91}],63:[function(require,module,exports){
 'use strict';
 
 
@@ -7499,6 +7621,7 @@ function _processChanges(callback) {
 'use strict';
 
 var ConnectorError = require('../util/error').Connector
+	, Messenger = require('../messenger')
 	, _ = require('mol-proto')
 	, logger = require('../util/logger');
 
@@ -7520,6 +7643,12 @@ var modePattern = /^(\<*)\-+(\>*)$/;
  * off(path, subscriber)
  * path(accessPath) - to return the object that gives reference to some part of datasource
  * and complies with that api too.
+ *
+ * ####Events####
+ *
+ * - 'turnedon' - connector was turned on
+ * - 'turnedoff' - connector was turned off
+ * 
  * @param {Object} ds1 the first data source.
  * @param {String} mode the connection mode that defines the direction and the depth of connection. Possible values are '->', '<<-', '<<<->>>', etc.
  * @param {Object} ds2 the second data source
@@ -7547,7 +7676,8 @@ function Connector(ds1, mode, ds2, options) {
 		mode: mode,
 		depth1: depth1,
 		depth2: depth2,
-		isOn: false	
+		isOn: false,
+		_messenger: new Messenger(this, Messenger.defaultMethods)
 	});
 
 	var pathTranslation = options && options.pathTranslation;
@@ -7580,8 +7710,9 @@ function Connector(ds1, mode, ds2, options) {
 
 
 _.extendProto(Connector, {
-	turnOn: turnOn,
-	turnOff: turnOff
+	turnOn: Connector$turnOn,
+	turnOff: Connector$turnOff,
+	destroy: Connector$destroy
 });
 
 
@@ -7604,7 +7735,7 @@ function reverseTranslationRules(rules) {
  * turnOn
  * Method of Connector that enables connection (if it was previously disabled)
  */
-function turnOn() {
+function Connector$turnOn() {
 	if (this.isOn)
 		return logger.warn('data sources are already connected');
 
@@ -7618,6 +7749,7 @@ function turnOn() {
 		this._link2 = linkDataSource('_link1', this.ds2, this.ds1, subscriptionPath, this.pathTranslation2, this.pathTranslation1, this.dataTranslation2, this.dataValidation2);
 
 	this.isOn = true;
+	this.postMessage('turnedon');
 
 
 	function linkDataSource(reverseLink, linkToDS, linkedDS, subscriptionPath, pathTranslation, reversePathTranslation, dataTranslation, dataValidation) {
@@ -7690,6 +7822,9 @@ function turnOn() {
 				if (err) return;
 				var onOff = changeFinished ? 'on' : 'off';
 				subscribeToDS(linkToDS, onOff, self[reverseLink], subscriptionPath, reversePathTranslation);
+
+				var message = changeFinished ? 'changecompleted' : 'changestarted';
+				self.postMessage(message, { source: linkedDS, target: linkToDS });
 			}
 		};
 
@@ -7725,7 +7860,7 @@ function subscribeToDS(dataSource, onOff, subscriber, subscriptionPath, pathTran
  * turnOff
  * Method of Connector that disables connection (if it was previously enabled)
  */
-function turnOff() {
+function Connector$turnOff() {
 	if (! this.isOn)
 		return logger.warn('data sources are already disconnected');
 
@@ -7734,6 +7869,7 @@ function turnOff() {
 	unlinkDataSource(this.ds2, '_link1', this.pathTranslation1);
 
 	this.isOn = false;
+	this.postMessage('turnedoff');
 
 
 	function unlinkDataSource(linkedDS, linkName, pathTranslation) {
@@ -7745,7 +7881,20 @@ function turnOff() {
 	}
 }
 
-},{"../util/error":79,"../util/logger":82,"mol-proto":91}],65:[function(require,module,exports){
+
+/**
+ * Destroys connector object by turning it off and removing references to connected sources
+ */
+function Connector$destroy() {
+	this.turnOff();
+	this.postMessage('destroyed');
+	this._messenger.destroy();
+	_.eachKey(this, function(value, key) {
+		delete this[key];
+	}, this);
+}
+
+},{"../messenger":56,"../util/error":79,"../util/logger":82,"mol-proto":91}],65:[function(require,module,exports){
 'use strict';
 
 var ModelPath = require('./m_path')
@@ -9381,7 +9530,7 @@ var errorClassNames = ['AbstractClass', 'Mixin', 'Messenger', 'Component',
 					   'Attribute', 'Binder', 'Loader', 'MailMessageSource', 'Facet',
 					   'Scope', 'Model', 'DomFacet', 'EditableFacet',
 					   'List', 'Connector', 'Registry', 'FrameMessageSource',
-					   'Angular', 'Clipboard'];
+					   'Angular'];
 
 var error = {
 	toBeImplemented: error$toBeImplemented,
