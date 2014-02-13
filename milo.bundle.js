@@ -610,12 +610,17 @@ function Attribute(el, name) {
 }
 
 
+_.extend(Attribute, {
+	remove: Attribute$$remove
+});
+
+
 /**
  * ####Attribute instance methods####
  *
- * - [get](#get)
- * - [set](#set)
- * - [decorate](#decorate)
+ * - [get](#Attribute$get)
+ * - [set](#Attribute$set)
+ * - [decorate](#Attribute$decorate)
  *
  * The following instance methods should be defined by subclass
  *
@@ -625,9 +630,10 @@ function Attribute(el, name) {
  * - render - should return attribute value for a given attribute state (other properties, as defined in subclass)
  */
 _.extendProto(Attribute, {
-	get: get,
-	set: set,
-	decorate: decorate,
+	get: Attribute$get,
+	set: Attribute$set,
+	remove: Attribute$remove,
+	decorate: Attribute$decorate,
 
 	destroy: Attribute$destroy,
 
@@ -637,6 +643,25 @@ _.extendProto(Attribute, {
 	validate: toBeImplemented,
 	render: toBeImplemented
 });
+
+
+function Attribute$$remove(el, deep) {
+	var name = this.prototype.attrName();
+	el.removeAttribute(name);
+
+	if (deep) {
+		var selector = '[' + name + ']';
+		var children = el.querySelectorAll(selector);
+		_.forEach(children, function(childEl) {
+			childEl.removeAttribute(name);
+		})
+	}
+}
+
+
+function Attribute$remove() {
+	delete this.node;
+}
 
 
 function Attribute$destroy() {
@@ -649,7 +674,7 @@ function Attribute$destroy() {
  *
  * @return {String}
  */
-function get() {
+function Attribute$get() {
 	return this.el.getAttribute(this.name);
 }
 
@@ -659,7 +684,7 @@ function get() {
  *
  * @param {String} value
  */
-function set(value) {
+function Attribute$set(value) {
 	this.el.setAttribute(this.name, value);
 }
 
@@ -668,7 +693,7 @@ function set(value) {
  * Attribute instance method that decorates element with its rendered value.
  * Uses `render` method that should be defiend in subclass.
  */
-function decorate() {
+function Attribute$decorate() {
 	this.set(this.render());
 }
 
@@ -1001,7 +1026,7 @@ var _makeComponentConditionFunc = componentUtils._makeComponentConditionFunc;
  * - 'addedtoscope' - synchronously dispatched when component is added to scope.
  * - 'stateready' - aynchronously dispatched when component (together with its scope children) is created with [Component.createFromState](#Component$$createFromState) (or `createFromDataTransfer`) method. Can be dispatched by application if the component's state is set with some other mechanism. This event is not used in `milo`, it can be used in application in particular subclasses of component.
  * - 'getstatestarted' - emitted synchronously just before getState executes so components and facets can clean up their state for serialization. 
- * - 'getstatecompleted' - emitted synchronously after getState executes so components and facets can restore their state after serialization.
+ * - 'getstatecompleted' - emitted asynchronously after getState executes so components and facets can restore their state after serialization.
  *
  *
  * ####Component "lifecycle"####
@@ -1578,7 +1603,7 @@ function Component$getState() {
 	this.broadcast('getstatestarted');
 	var state = this._getState(true);
 	state.outerHTML = this.el.outerHTML;
-	this.broadcast('getstatecompleted');
+	_.deferMethod(this, 'broadcast', 'getstatecompleted');
 	return state;
 }
 
