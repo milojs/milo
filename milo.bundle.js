@@ -5140,6 +5140,7 @@ function onModelChange(path, data) {
     var src = this.model.m('.src').get();
     if (src)
         this.el.src = src;
+    dispatchChangeMessage.call(this);
 }
 
 },{"../../util/count":77,"../c_class":11,"../c_registry":27}],43:[function(require,module,exports){
