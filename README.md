@@ -1,7 +1,7 @@
 Milo
 ====
 
-A minimalist browser framework that binds DOM elements to JS components and components to models.
+Browser/nodejs [reactive programming](http://en.wikipedia.org/wiki/Reactive_programming) and data driven DOM manipulation with modular components.
 
 [![Build Status](https://travis-ci.org/MailOnline/milo.png?branch=master)](https://travis-ci.org/MailOnline/milo)
 
@@ -132,7 +132,7 @@ Milo itself uses browserify to package bundle, but any modules system can be use
 
 Component is designed to simplify the management of DOM. Component is attached to a certain DOM element. Attaching several components to the same DOM element is usually an application (or milo) design mistake, so if it happens an error will be logged to console.
 
-Components allow very easy creation of subclasses that are defined as a collection of configured facets. For example, see the definition of [MLSelect](http://mailonline.github.io/milo/components/ui/Select.js.html) UI component.
+Components allow very easy creation of subclasses that are defined as a collection of configured "facets". For example, see the definition of [MLSelect](http://mailonline.github.io/milo/components/ui/Select.js.html) UI component.
 
 There is a [Component template](https://github.com/MailOnline/milo/blob/master/lib/components/ComponentTemplate.js) to simplify creation of your own components.
 
@@ -242,6 +242,7 @@ All frameworks we could lay our hands on were either too primitive leaving us to
 What we always wanted was a framework that would allow
 
 - developing applications in a __declarative__ way with __reactive__ bindings of models to views
+- creating reactive data bindings between different models in application to manage data propagation in a declarative rather than in imperative style
 - inserting __validators__ and __translators__ in these bindings, so we can bind views to data models rather than to view models like in AngularJS.
 - __precise control__ over components linked to DOM elements.
 - flexibility of views management allowing both to automatically __manipulate DOM__ on model changes and to re-render some sections using any __ templating engine__ in cases where rendering is more efficient than DOM manipulation
@@ -262,7 +263,7 @@ __milo__ relies on JavaScript prototypes to build framework blocks.
 JavaScript is a very dynamic language. It allows writing functions that create classes (```Component.createComponentClass```) which allowed to implement a composition pattern where each component class is created as collection of pre-defined blocks (facets) with configuration of a facet that is specific to a constructed class (it has some similarity to Ext components, although they are not created from blocks).
 
 
-### Run-time "compilation"
+### Run-time code "generation"
 
 JavaScript also allows to create constructor functions that create functions making possible a very expressive syntax for model objects and also run-time "compilation" of model access paths into functions.
 
@@ -271,7 +272,9 @@ JavaScript also allows to create constructor functions that create functions mak
 
 Component class is based on an abstract ```FacetedObject``` class that can be applied to any domain where objects can be represented via collection of facets (a facet is an object of a certain class, it holds its own configuration, data and methods).
 
-In a way, facets pattern is an inversion of adapter pattern - while the latter allows finding a class/methods that has specific functionality, faceted object is simply constructed to have these functionalities. In this way it is possible to create a virtually unlimited number of component classes with a very limited number of building blocks without having any hierarchy of classes - all components inherit directly from Component class.
+In a way, facets pattern is an inversion of adapter pattern - while the latter allows finding a class/methods that has specific functionality, faceted object is simply constructed to have these functionalities. In this way it is possible to create a virtually unlimited number of component classes with a very limited number of building blocks without having tall hierarchy of classes - most components inherit directly from Component class.
+
+At the same time milo supports inheritance mechanism when subclass can add facets to those that are already in superclass and to redefine configuration of inherited facets.
 
 
 ### Mixins
@@ -287,7 +290,8 @@ Components and Facets register themselves in registries that allows to avoid req
 Dependencies
 ------------
 
-The only dependencies of Milo are [__Proto__](https://github.com/MailOnline/proto), an object manipulation library and [__doT__](http://olado.github.io/doT/index.html), a templating engine.
+The dependencies of Milo are [__Proto__](https://github.com/MailOnline/proto), an object manipulation library and [__doT__](http://olado.github.io/doT/index.html), a templating engine (both are included in milo bundle).
+
 
 ### No jQuery, Zepto, etc.
 
@@ -297,7 +301,7 @@ We do not use any DOM traversal library because:
 - we do not want browser compatibility code to be part of the framework. If needed for some application, it can be implemented with polyfills. We may develop them for Milo if we need them, but feel free to contribute.
 - application start time is noticably faster
 
-Instead, Milo Components can have __Dom__ facet that includes several convenience functions to manipulate DOM elements.
+Instead, Milo Components can have __Dom__ facet that includes several convenience functions to manipulate DOM elements and there is ```milo.util.dom``` - a similar collection of functions that can be used without components.
 
 
 ### No underscore, lo-dash, etc.

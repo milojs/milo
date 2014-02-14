@@ -8036,7 +8036,7 @@ function Model(data, hostObject) {
 	// to get/set model properties, to subscribe to property changes, etc.
 	// Additional arguments of modelPath can be used in the path using interpolation - see ModelPath below.
 	var model = function modelPath(accessPath) { // , ... arguments that will be interpolated
-		return model.path.apply(model, arguments);
+		return Model$path.apply(model, arguments);
 	};
 	model.__proto__ = Model.prototype;
 
@@ -8283,7 +8283,17 @@ function ModelPath(model, path) { // ,... - additional arguments for interpolati
 	// check(model, Model);
 	check(path, String);
 
-	_.defineProperties(this, {
+	// `modelPath` will be returned by constructor instead of `this`. `modelPath`
+	// (`modelPath_path` function) should also return a ModelPath object with "synthesized" methods
+	// to get/set model properties, to subscribe to property changes, etc.
+	// Additional arguments of modelPath can be used in the path using interpolation - see ModelPath below.
+	var modelPath = function modelPath_path(accessPath) { // , ... arguments that will be interpolated
+		return ModelPath$path.apply(modelPath, arguments);
+	};
+	modelPath.__proto__ = ModelPath.prototype;
+
+
+	_.defineProperties(modelPath, {
 		_model: model,
 		_path: path,
 		_args: _.slice(arguments, 1), // path will be the first element of this array
@@ -8294,23 +8304,27 @@ function ModelPath(model, path) { // ,... - additional arguments for interpolati
 	var parsedPath = pathUtils.parseAccessPath(path);
 
 	// compute access path string
-	_.defineProperty(this, '_accessPath', interpolateAccessPath(parsedPath, this._args));
+	_.defineProperty(modelPath, '_accessPath', interpolateAccessPath(parsedPath, modelPath._args));
 
 	// messenger fails on "*" subscriptions
-	this._prepareMessenger();
+	modelPath._prepareMessenger();
 
 	// compiling getter and setter
 	var methods = synthesize(path, parsedPath);
 
 	// adding methods to model path
-	_.defineProperties(this, methods);
+	_.defineProperties(modelPath, methods);
 
 	// subscribe to "changedata" message to enable reactive connections
-	changeDataHandler.initialize.call(this);
-	this.on('changedata', changeDataHandler);
+	changeDataHandler.initialize.call(modelPath);
+	modelPath.on('changedata', changeDataHandler);
 
-	Object.freeze(this);
+	Object.freeze(modelPath);
+
+	return modelPath;
 }
+
+ModelPath.prototype.__proto__ = ModelPath.__proto__;
 
 
 /**

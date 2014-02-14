@@ -986,4 +986,14 @@ describe('Model class', function() {
 		m.set({ test: 2 });
 		assert.deepEqual(m._data, { test: 2 });
 	});
+
+
+	it('should return ModelPath that is also callable to get further path', function() {
+		var m = new Model
+			, mPath = m('.info');
+
+		mPath('.test').set(1);
+
+		assert.deepEqual(m.get(), { info: { test: 1 } });
+	});
 });
