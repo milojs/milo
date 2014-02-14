@@ -2104,7 +2104,7 @@ function Container$setState(state) {
 		if (component)
 			component.setState(compData);
 		else
-			logger.warn('component "' + compName + '" does not exist on scope');
+			logger.warn('component "' + compName + '" does not exist on scope', compData);
 	}, this);
 }
 
@@ -3344,7 +3344,7 @@ function Frame$isMiloReady() {
 
 
 function _makeWhenReadyFunc(isReadyFunc, event) {
-	return function Frame_whenReadyFunc(func) {
+	return function Frame_whenReadyFunc(func) { // , arguments
 		var self = this
 			, args = _.slice(arguments, 1);
 		if (isReadyFunc.call(this))
