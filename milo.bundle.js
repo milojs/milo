@@ -1105,6 +1105,7 @@ delete Component.createFacetedClass;
  * - [walkScopeTree](#Component$walkScopeTree)
  * - [broadcast](#Component$broadcast)
  * - [destroy](#Component$destroy)
+ * - [isDestroyed](#Component$isDestroyed)
  *
  *
  * #####[Messenger](../messenger/index.js.html) methods available on component#####
@@ -1134,7 +1135,8 @@ _.extendProto(Component, {
 	getTopScopeParentWithClass: Component$getTopScopeParentWithClass,
     walkScopeTree: Component$walkScopeTree,
     broadcast: Component$broadcast,
-    destroy: Component$destroy
+    destroy: Component$destroy,
+    isDestroyed: Component$isDestroyed
 });
 
 var COMPONENT_DATA_TYPE_PREFIX = 'x-application/milo-component';
@@ -1788,15 +1790,26 @@ function Component$broadcast(msg, data, callback) {
  * Destroy component: removes component from DOM, removes it from scope, deletes all references to DOM nodes and unsubscribes from all messages both component and all facets
  */
 function Component$destroy() {
-	this.remove();
 	this.walkScopeTree(function(component) {
+		component.remove();
 		component.allFacets('destroy');
 		if (! component.el) return;
 		domUtils.detachComponent(component.el);
 		domUtils.removeElement(component.el);
 		delete component.el;
 		component.componentInfo.destroy();
+		component._destroyed = true;
 	});
+}
+
+
+/**
+ * Returns true if component was destroyed
+ *
+ * @return {Boolean}
+ */
+function Component$isDestroyed() {
+	return this._destroyed;
 }
 
 },{"../abstract/faceted_object":2,"../attributes/a_bind":5,"../binder":9,"../config":52,"../messenger":57,"../util/check":76,"../util/component_name":77,"../util/dom":79,"../util/error":81,"../util/json_parse":83,"../util/logger":84,"../util/storage":89,"./c_facets/cf_registry":25,"./c_utils":28,"./scope":35,"mol-proto":93}],12:[function(require,module,exports){
@@ -8956,7 +8969,8 @@ require('./components/ui/Combo');
 require('./components/ui/SuperCombo');
 require('./components/ui/ComboList');
 require('./components/ui/Image');
-require('./components/ui/DropTarget')
+require('./components/ui/DropTarget');
+
 },{"./components/classes/View":29,"./components/ui/Button":36,"./components/ui/Combo":37,"./components/ui/ComboList":38,"./components/ui/Date":39,"./components/ui/DropTarget":40,"./components/ui/Group":41,"./components/ui/Hyperlink":42,"./components/ui/Image":43,"./components/ui/Input":44,"./components/ui/List":45,"./components/ui/RadioGroup":46,"./components/ui/Select":47,"./components/ui/SuperCombo":48,"./components/ui/Textarea":49,"./components/ui/Time":50,"./components/ui/Wrapper":51}],75:[function(require,module,exports){
 'use strict';
 
