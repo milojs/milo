@@ -2999,6 +2999,7 @@ module.exports = Drag;
 
 function Drag$init() {
 	ComponentFacet.prototype.init.apply(this, arguments);	
+
 	this._createMessageSourceWithAPI(DOMEventsSource);
 	this._dragData = {};
 
@@ -3046,6 +3047,11 @@ function Drag$start() {
 }
 
 
+/**
+ * Adds draggable attribute to component's element
+ *
+ * @private
+ */
 function _addDragAttribute() {
 	this.owner.el.setAttribute('draggable', true);
 }
@@ -3073,6 +3079,11 @@ function onMouseMovement(eventType, event) {
 
 
 function onDragStart(eventType, event) {
+	if (this.config.off) {
+		event.preventDefault();
+		return;
+	}
+
 	var transferState = this.owner.getTransferState();
 	this.__dragData = JSON.stringify(transferState);
 	this.__dataType = 'x-application/milo-component/' + transferState.compClass + '/'
@@ -3082,6 +3093,11 @@ function onDragStart(eventType, event) {
 
 
 function onDragging(eventType, event) {
+	if (this.config.off) {
+		event.preventDefault();
+		return;
+	}
+
 	setDragData.call(this, event);
 }
 
