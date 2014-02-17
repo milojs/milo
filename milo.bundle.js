@@ -1583,7 +1583,6 @@ function Component$rename(name) {
  * @param {Boolean} preserveScopeProperty true not to delete scope property of component
  */
 function Component$remove(preserveScopeProperty) {
-	// cnsole.log('Component$remove', this, this.scope);
 	if (this.scope) {
 		this.scope._remove(this.name);
 		if (! preserveScopeProperty)
@@ -1602,10 +1601,10 @@ function Component$remove(preserveScopeProperty) {
  * @return {Object}
  */
 function Component$getState() {
-	this.broadcast('getstatestarted', { component: this });
+	this.broadcast('getstatestarted', { rootComponent: this });
 	var state = this._getState(true);
 	state.outerHTML = this.el.outerHTML;
-	_.deferMethod(this, 'broadcast', 'getstatecompleted', { component: this });
+	_.deferMethod(this, 'broadcast', 'getstatecompleted', { rootComponent: this });
 	return state;
 }
 
