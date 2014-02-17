@@ -1602,10 +1602,10 @@ function Component$remove(preserveScopeProperty) {
  * @return {Object}
  */
 function Component$getState() {
-	this.broadcast('getstatestarted');
+	this.broadcast('getstatestarted', { component: this });
 	var state = this._getState(true);
 	state.outerHTML = this.el.outerHTML;
-	_.deferMethod(this, 'broadcast', 'getstatecompleted');
+	_.deferMethod(this, 'broadcast', 'getstatecompleted', { component: this });
 	return state;
 }
 
