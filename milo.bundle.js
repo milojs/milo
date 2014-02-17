@@ -5276,7 +5276,6 @@ function onChildrenBound() {
 }
 
 function componentSetup() {
-    console.log(this.container);
     _.defineProperties(this, {
         '_input': this.container.scope.input,
         '_button': this.container.scope.button,
