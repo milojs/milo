@@ -4707,7 +4707,10 @@ function Scope$_move(component, otherScope) {
  * @param {Scope} scope the scope to absorb
  */
 function Scope$_merge(scope) {
-	scope._each(Scope$_add, this);
+	scope._each(function (comp) {
+		this._add(comp, comp.name);
+		scope._remove(comp.name);
+	}, this);
 }
 
 
