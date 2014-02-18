@@ -4606,7 +4606,8 @@ _.extendProto(Scope, {
     _any: Scope$_any,
     _remove: Scope$_remove,
     _clean: Scope$_clean,
-    _detachElement: Scope$_detachElement
+    _detachElement: Scope$_detachElement,
+    _has: Scope$_has
 });
 
 module.exports = Scope;
@@ -4799,6 +4800,16 @@ function Scope$_clean() {
 
 function Scope$_detachElement() {
     this._rootEl = null;
+}
+
+
+/**
+ * Checks if scope has object by object name
+ * @param {Object} object
+ * @return {Boolean}
+ */
+function Scope$_has(object) {
+    return this.hasOwnProperty(object.name);
 }
 
 },{"../util/check":77,"../util/component_name":78,"../util/error":82,"../util/logger":85,"mol-proto":94}],36:[function(require,module,exports){
