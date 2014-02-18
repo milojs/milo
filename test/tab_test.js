@@ -14,7 +14,7 @@ describe('tab characters', function() {
         exec('grep -R -l --include=*.{js,scss,html,dot} "\t" ' + dir, function(err, stdout, stderr) {
             var files = stdout.split('\n').filter(notExcluded);
 
-            assert.ok(files.length == 0, 'tab characters should be replaced with 4 spaces in the following files: ' + files);
+            assert.ok(files.length == 0, 'tab characters should be replaced with 4 spaces (use ./expandTabs) in the following files: ' + files);
             
             next();
         })
