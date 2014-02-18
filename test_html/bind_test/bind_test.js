@@ -3,19 +3,19 @@
 
 describe('milo binder', function() {
     it('should bind components based on ml-bind attribute', function() {
-		expect({p: 1}).property('p', 1);
+        expect({p: 1}).property('p', 1);
 
-    	var ctrl = milo.binder();
+        var ctrl = milo.binder();
 
-    	ctrl.articleButton.events.on('click mouseenter', function(eType, evt) {
-    		//cnsole.log('button', eType, evt);
-    	});
+        ctrl.articleButton.events.on('click mouseenter', function(eType, evt) {
+            //cnsole.log('button', eType, evt);
+        });
 
-    	ctrl.articleIdInput.data.on('', logData);
+        ctrl.articleIdInput.data.on('', logData);
 
-    	function logData(message, data) {
-    		//cnsole.log(message, data);
-    	}
+        function logData(message, data) {
+            //cnsole.log(message, data);
+        }
 
         var myTmplComps = ctrl.myTemplate.template
                 .set('<p ml-bind=":innerPara">I am rendered from template</p>')

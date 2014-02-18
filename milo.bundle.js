@@ -15,10 +15,10 @@ module.exports = Facet;
  * @param {Object} config optional facet configuration, used in subclasses
  */
 function Facet(owner, config) {
-	this.name = _.firstLowerCase(this.constructor.name);
-	this.owner = owner;
-	this.config = config || {};
-	this.init.apply(this, arguments);
+    this.name = _.firstLowerCase(this.constructor.name);
+    this.owner = owner;
+    this.config = config || {};
+    this.init.apply(this, arguments);
 }
 
 
@@ -26,7 +26,7 @@ function Facet(owner, config) {
  * `init` method of subclass will be called by Facet constructor.
  */
 _.extendProto(Facet, {
-	init: function() {}
+    init: function() {}
 });
 
 },{"mol-proto":94}],2:[function(require,module,exports){
@@ -34,10 +34,10 @@ _.extendProto(Facet, {
 
 
 var Facet = require('./facet')
-	, _ = require('mol-proto')
-	, check = require('../util/check')
-	, Match = check.Match
-	, FacetError = require('../util/error').Facet;
+    , _ = require('mol-proto')
+    , check = require('../util/check')
+    , Match = check.Match
+    , FacetError = require('../util/error').Facet;
 
 module.exports = FacetedObject;
 
@@ -53,46 +53,46 @@ module.exports = FacetedObject;
  * @return {FacetedObject}
  */
 function FacetedObject() {
-	// this.facetsConfig and this.facetsClasses were stored on a specific class prototype
-	// when the class was created by FacetedObject.createFacetedClass
-	var facetsConfig = this.facetsConfig || {};
+    // this.facetsConfig and this.facetsClasses were stored on a specific class prototype
+    // when the class was created by FacetedObject.createFacetedClass
+    var facetsConfig = this.facetsConfig || {};
 
-	var facetsDescriptors = {}
-		, facets = {};
+    var facetsDescriptors = {}
+        , facets = {};
 
-	// FacetedObject class itself is not meant to be instantiated - it has no facets
-	// It may change, as adding facets is possible to instances
-	if (this.constructor == FacetedObject)		
-		throw new FacetError('FacetedObject is an abstract class, can\'t be instantiated');
+    // FacetedObject class itself is not meant to be instantiated - it has no facets
+    // It may change, as adding facets is possible to instances
+    if (this.constructor == FacetedObject)      
+        throw new FacetError('FacetedObject is an abstract class, can\'t be instantiated');
 
-	// instantiate class facets
-	if (this.facetsClasses)
-		_.eachKey(this.facetsClasses, instantiateFacet, this, true);
+    // instantiate class facets
+    if (this.facetsClasses)
+        _.eachKey(this.facetsClasses, instantiateFacet, this, true);
 
-	// add facets to the class as properties under their own name
-	Object.defineProperties(this, facetsDescriptors);
+    // add facets to the class as properties under their own name
+    Object.defineProperties(this, facetsDescriptors);
 
-	// store all facets on `facets` property so that they can be enumerated
-	_.defineProperty(this, 'facets', facets);	
+    // store all facets on `facets` property so that they can be enumerated
+    _.defineProperty(this, 'facets', facets);   
 
-	// call `init`method if it is defined in subclass
-	if (this.init)
-		this.init.apply(this, arguments);
+    // call `init`method if it is defined in subclass
+    if (this.init)
+        this.init.apply(this, arguments);
 
-	// instantiate facet with a given class (FacetClass) and name (facetName)
-	function instantiateFacet(FacetClass, facetName) {
-		// get facet configuration
-		var fctConfig = facetsConfig[facetName];
+    // instantiate facet with a given class (FacetClass) and name (facetName)
+    function instantiateFacet(FacetClass, facetName) {
+        // get facet configuration
+        var fctConfig = facetsConfig[facetName];
 
-		// instatiate facets
-		facets[facetName] = new FacetClass(this, fctConfig);
+        // instatiate facets
+        facets[facetName] = new FacetClass(this, fctConfig);
 
-		// add facet to property descriptors
-		facetsDescriptors[facetName] = {
-			enumerable: true,
-			value: facets[facetName]
-		};
-	}
+        // add facet to property descriptors
+        facetsDescriptors[facetName] = {
+            enumerable: true,
+            value: facets[facetName]
+        };
+    }
 }
 
 
@@ -103,9 +103,9 @@ function FacetedObject() {
  * - [hasFacet](#FacetedObject$$hasFacet)
  */
 _.extend(FacetedObject, {
-	createFacetedClass: FacetedObject$$createFacetedClass,
-	hasFacet: FacetedObject$$hasFacet,
-	getFacetConfig: FacetedObject$$getFacetConfig
+    createFacetedClass: FacetedObject$$createFacetedClass,
+    hasFacet: FacetedObject$$hasFacet,
+    getFacetConfig: FacetedObject$$getFacetConfig
 });
 
 
@@ -115,7 +115,7 @@ _.extend(FacetedObject, {
  * - [addFacet](#FacetedObject$addFacet)
  */
 _.extendProto(FacetedObject, {
-	addFacet: FacetedObject$addFacet
+    addFacet: FacetedObject$addFacet
 });
 
 
@@ -131,35 +131,35 @@ _.extendProto(FacetedObject, {
  * @return {Facet}
  */
 function FacetedObject$addFacet(FacetClass, facetConfig, facetName, throwOnErrors) {
-	check(FacetClass, Function);
-	check(facetName, Match.Optional(String));
+    check(FacetClass, Function);
+    check(facetName, Match.Optional(String));
 
-	// first letter of facet name should be lowercase
-	facetName = _.firstLowerCase(facetName || FacetClass.name);
+    // first letter of facet name should be lowercase
+    facetName = _.firstLowerCase(facetName || FacetClass.name);
 
-	// get facets defined in class
-	var protoFacets = this.constructor.prototype.facetsClasses;
+    // get facets defined in class
+    var protoFacets = this.constructor.prototype.facetsClasses;
 
-	// check that this facetName was not already used in the class
-	if (protoFacets && protoFacets[facetName])
-		throw new FacetError('facet ' + facetName + ' is already part of the class ' + this.constructor.name);
+    // check that this facetName was not already used in the class
+    if (protoFacets && protoFacets[facetName])
+        throw new FacetError('facet ' + facetName + ' is already part of the class ' + this.constructor.name);
 
-	// check that this faceName does not already exist on the faceted object
-	if (this[facetName]) {
-		var message = 'facet ' + facetName + ' is already present in object';
-		if (throwOnErrors === false)
-			return logger.error('FacetedObject addFacet: ', message);
-		else
-			throw new FacetError(message);
-	}
+    // check that this faceName does not already exist on the faceted object
+    if (this[facetName]) {
+        var message = 'facet ' + facetName + ' is already present in object';
+        if (throwOnErrors === false)
+            return logger.error('FacetedObject addFacet: ', message);
+        else
+            throw new FacetError(message);
+    }
 
-	// instantiate the facet
-	var newFacet = this.facets[facetName] = new FacetClass(this, facetConfig);
+    // instantiate the facet
+    var newFacet = this.facets[facetName] = new FacetClass(this, facetConfig);
 
-	// add facet to faceted object
-	_.defineProperty(this, facetName, newFacet, _.ENUM);
+    // add facet to faceted object
+    _.defineProperty(this, facetName, newFacet, _.ENUM);
 
-	return newFacet;
+    return newFacet;
 }
 
 
@@ -172,9 +172,9 @@ function FacetedObject$addFacet(FacetClass, facetConfig, facetName, throwOnError
  * @return {Subclass(Facet)|undefined} 
  */
 function FacetedObject$$hasFacet(facetName) {
-	// this refers to the FacetedObject class (or subclass), not instance
-	var protoFacets = this.prototype.facetsClasses;
-	return protoFacets && protoFacets[facetName];
+    // this refers to the FacetedObject class (or subclass), not instance
+    var protoFacets = this.prototype.facetsClasses;
+    return protoFacets && protoFacets[facetName];
 }
 
 /**
@@ -184,7 +184,7 @@ function FacetedObject$$hasFacet(facetName) {
  * @return {Object} the configuration object that was passed to the facet
  */
 function FacetedObject$$getFacetConfig(facetName) {
-	return this.hasFacet(facetName) ? this.prototype.facetsConfig[facetName] : null;
+    return this.hasFacet(facetName) ? this.prototype.facetsConfig[facetName] : null;
 }
 
 
@@ -200,51 +200,51 @@ function FacetedObject$$getFacetConfig(facetName) {
  * @return {Subclass(FacetedObject)}
  */
 function FacetedObject$$createFacetedClass(name, facetsClasses, facetsConfig) {
-	check(name, String);
-	check(facetsClasses, Match.ObjectHash(Match.Subclass(Facet, true)));
-	check(facetsConfig, Match.Optional(Object));
+    check(name, String);
+    check(facetsClasses, Match.ObjectHash(Match.Subclass(Facet, true)));
+    check(facetsConfig, Match.Optional(Object));
 
-	// throw exception if config passed for facet for which there is no class
-	if (facetsConfig)
-		_.eachKey(facetsConfig, function(fctConfig, fctName) {
-			if (! facetsClasses.hasOwnProperty(fctName))
-				throw new FacetError('configuration for facet (' + fctName + ') passed that is not in class');
-		});
+    // throw exception if config passed for facet for which there is no class
+    if (facetsConfig)
+        _.eachKey(facetsConfig, function(fctConfig, fctName) {
+            if (! facetsClasses.hasOwnProperty(fctName))
+                throw new FacetError('configuration for facet (' + fctName + ') passed that is not in class');
+        });
 
-	// create subclass of the current class (this refers to the class that calls this method)
-	var FacetedClass = _.createSubclass(this, name, true);
+    // create subclass of the current class (this refers to the class that calls this method)
+    var FacetedClass = _.createSubclass(this, name, true);
 
-	// get facets classes and configurations from parent class
-	facetsClasses = addInheritedFacets(this, facetsClasses, 'facetsClasses');
-	facetsConfig = addInheritedFacets(this, facetsConfig, 'facetsConfig');
+    // get facets classes and configurations from parent class
+    facetsClasses = addInheritedFacets(this, facetsClasses, 'facetsClasses');
+    facetsConfig = addInheritedFacets(this, facetsConfig, 'facetsConfig');
 
-	// store facets classes and configurations of class prototype
-	_.extendProto(FacetedClass, {
-		facetsClasses: facetsClasses,
-		facetsConfig: facetsConfig
-	});
+    // store facets classes and configurations of class prototype
+    _.extendProto(FacetedClass, {
+        facetsClasses: facetsClasses,
+        facetsConfig: facetsConfig
+    });
 
-	return FacetedClass;
+    return FacetedClass;
 
 
-	function addInheritedFacets(superClass, facetsInfo, facetsInfoName) {
-		var inheritedFacetsInfo = superClass.prototype[facetsInfoName];
-		if (inheritedFacetsInfo)
-			return _(inheritedFacetsInfo)
-					.clone()
-					.extend(facetsInfo)._();
-		else
-			return facetsInfo;
-	}
+    function addInheritedFacets(superClass, facetsInfo, facetsInfoName) {
+        var inheritedFacetsInfo = superClass.prototype[facetsInfoName];
+        if (inheritedFacetsInfo)
+            return _(inheritedFacetsInfo)
+                    .clone()
+                    .extend(facetsInfo)._();
+        else
+            return facetsInfo;
+    }
 };
 
 },{"../util/check":77,"../util/error":82,"./facet":1,"mol-proto":94}],3:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
-	, check = require('../util/check')
-	, Match = check.Match
-	, MixinError = require('../util/error').Mixin;
+    , check = require('../util/check')
+    , Match = check.Match
+    , MixinError = require('../util/error').Mixin;
 
 
 module.exports = Mixin;
@@ -265,18 +265,18 @@ module.exports = Mixin;
  * @return {Mixin}
  */
 function Mixin(hostObject, proxyMethods) { // , other args - passed to init method
-	check(hostObject, Match.Optional(Match.OneOf(Object, Function)));
+    check(hostObject, Match.Optional(Match.OneOf(Object, Function)));
 
-	// store hostObject
-	_.defineProperty(this, '_hostObject', hostObject);
+    // store hostObject
+    _.defineProperty(this, '_hostObject', hostObject);
 
-	// proxy methods to hostObject
-	if (proxyMethods)
-		this._createProxyMethods(proxyMethods);
+    // proxy methods to hostObject
+    if (proxyMethods)
+        this._createProxyMethods(proxyMethods);
 
-	// calling init if it is defined in the class
-	if (this.init)
-		this.init.apply(this, arguments);
+    // calling init if it is defined in the class
+    if (this.init)
+        this.init.apply(this, arguments);
 }
 
 
@@ -288,8 +288,8 @@ function Mixin(hostObject, proxyMethods) { // , other args - passed to init meth
  * - [_createProxyMethods](#_createProxyMethods)
  */
 _.extendProto(Mixin, {
-	_createProxyMethod: _createProxyMethod,
-	_createProxyMethods: _createProxyMethods
+    _createProxyMethod: _createProxyMethod,
+    _createProxyMethods: _createProxyMethods
 });
 
 
@@ -301,19 +301,19 @@ _.extendProto(Mixin, {
  * @param {Object} hostObject Optional reference to the host object; if not specified the host object passed to constructor wil be used. It allows to use the same instance of Mixin on two host objects.
  */
 function _createProxyMethod(proxyMethodName, mixinMethodName, hostObject) {
-	hostObject = hostObject || this._hostObject;
+    hostObject = hostObject || this._hostObject;
 
-	// Mixin class does not allow shadowing methods that exist on the host object
-	if (hostObject[proxyMethodName])
-		throw new MixinError('method ' + proxyMethodName +
-								 ' already defined in host object');
+    // Mixin class does not allow shadowing methods that exist on the host object
+    if (hostObject[proxyMethodName])
+        throw new MixinError('method ' + proxyMethodName +
+                                 ' already defined in host object');
 
-	check(this[mixinMethodName], Function);
+    check(this[mixinMethodName], Function);
 
-	// Bind proxied Mixin's method to Mixin instance
-	var boundMethod = this[mixinMethodName].bind(this);
+    // Bind proxied Mixin's method to Mixin instance
+    var boundMethod = this[mixinMethodName].bind(this);
 
-	_.defineProperty(hostObject, proxyMethodName, boundMethod, _.WRIT);
+    _.defineProperty(hostObject, proxyMethodName, boundMethod, _.WRIT);
 }
 
 
@@ -324,29 +324,29 @@ function _createProxyMethod(proxyMethodName, mixinMethodName, hostObject) {
  * @param {Object} hostObject an optional reference to the host object; if not specified the host object passed to constructor wil be used. It allows to use the same instance of Mixin on two host objects.
  */
 function _createProxyMethods(proxyMethods, hostObject) {
-	check(proxyMethods, Match.Optional(Match.OneOf([String], Match.ObjectHash(String))));
+    check(proxyMethods, Match.Optional(Match.OneOf([String], Match.ObjectHash(String))));
 
-	// creating and binding proxy methods on the host object
-	if (Array.isArray(proxyMethods))
-		proxyMethods.forEach(function(methodName) {
-			// method called this way to allow using _createProxyMethods with objects that are not inheriting from Mixin
-			_createProxyMethod.call(this, methodName, methodName, hostObject);
-		}, this);
-	else
-		_.eachKey(proxyMethods, function(mixinMethodName, proxyMethodName) {
+    // creating and binding proxy methods on the host object
+    if (Array.isArray(proxyMethods))
+        proxyMethods.forEach(function(methodName) {
+            // method called this way to allow using _createProxyMethods with objects that are not inheriting from Mixin
+            _createProxyMethod.call(this, methodName, methodName, hostObject);
+        }, this);
+    else
+        _.eachKey(proxyMethods, function(mixinMethodName, proxyMethodName) {
 
-			// method called this way to allow using _createProxyMethods with objects that are not inheriting from Mixin
-			_createProxyMethod.call(this, proxyMethodName, mixinMethodName, hostObject);
-		}, this);
+            // method called this way to allow using _createProxyMethods with objects that are not inheriting from Mixin
+            _createProxyMethod.call(this, proxyMethodName, mixinMethodName, hostObject);
+        }, this);
 }
 
 },{"../util/check":77,"../util/error":82,"mol-proto":94}],4:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
-	, RegistryError = require('../util/error').Registry
-	, check = require('../util/check')
-	, Match = check.Match;
+    , RegistryError = require('../util/error').Registry
+    , check = require('../util/check')
+    , Match = check.Match;
 
 module.exports = ClassRegistry;
 
@@ -359,10 +359,10 @@ module.exports = ClassRegistry;
  * @return {Object}
  */
 function ClassRegistry (FoundationClass) {
-	if (FoundationClass)
-		this.setClass(FoundationClass);
+    if (FoundationClass)
+        this.setClass(FoundationClass);
 
-	this.__registeredClasses = {};
+    this.__registeredClasses = {};
 }
 
 
@@ -376,11 +376,11 @@ function ClassRegistry (FoundationClass) {
  * - [setClass](#setClass)
  */
 _.extendProto(ClassRegistry, {
-	add: add,
-	get: get,
-	remove: remove,
-	clean: clean,
-	setClass: setClass
+    add: add,
+    get: get,
+    remove: remove,
+    clean: clean,
+    setClass: setClass
 });
 
 
@@ -393,20 +393,20 @@ _.extendProto(ClassRegistry, {
  * @param {String} name Optional class name. If class name is not specified, it will be taken from constructor function name. Class name should be a valid identifier and cannot be an empty string.
  */
 function add(aClass, name) {
-	name = name || aClass.name;
+    name = name || aClass.name;
 
-	check(name, Match.IdentifierString, 'class name must be identifier string');
+    check(name, Match.IdentifierString, 'class name must be identifier string');
 
-	if (this.FoundationClass) {
-		if (aClass != this.FoundationClass)
-			check(aClass, Match.Subclass(this.FoundationClass), 'class must be a sub(class) of a foundation class');
-	} else
-		throw new RegistryError('foundation class must be set before adding classes to registry');
+    if (this.FoundationClass) {
+        if (aClass != this.FoundationClass)
+            check(aClass, Match.Subclass(this.FoundationClass), 'class must be a sub(class) of a foundation class');
+    } else
+        throw new RegistryError('foundation class must be set before adding classes to registry');
 
-	if (this.__registeredClasses[name])
-		throw new RegistryError('class "' + name + '" is already registered');
+    if (this.__registeredClasses[name])
+        throw new RegistryError('class "' + name + '" is already registered');
 
-	this.__registeredClasses[name] = aClass;
+    this.__registeredClasses[name] = aClass;
 };
 
 
@@ -417,8 +417,8 @@ function add(aClass, name) {
  * @return {Function}
  */
 function get(name) {
-	check(name, String, 'class name must be string');
-	return this.__registeredClasses[name];
+    check(name, String, 'class name must be string');
+    return this.__registeredClasses[name];
 };
 
 
@@ -429,16 +429,16 @@ function get(name) {
  * @param {String|Function} nameOrClass Class name. If class constructor is supplied, its name will be used.
  */
 function remove(nameOrClass) {
-	check(nameOrClass, Match.OneOf(String, Function), 'class or name must be supplied');
+    check(nameOrClass, Match.OneOf(String, Function), 'class or name must be supplied');
 
-	var name = typeof nameOrClass == 'string'
-						? nameOrClass
-						: nameOrClass.name;
-						
-	if (! this.__registeredClasses[name])
-		throw new RegistryError('class is not registered');
+    var name = typeof nameOrClass == 'string'
+                        ? nameOrClass
+                        : nameOrClass.name;
+                        
+    if (! this.__registeredClasses[name])
+        throw new RegistryError('class is not registered');
 
-	delete this.__registeredClasses[name];
+    delete this.__registeredClasses[name];
 };
 
 
@@ -446,7 +446,7 @@ function remove(nameOrClass) {
  * Removes all classes from registry.
  */
 function clean() {
-	this.__registeredClasses = {};
+    this.__registeredClasses = {};
 };
 
 
@@ -456,24 +456,24 @@ function clean() {
  * @param {Function} FoundationClass Any class that will be added to the registry should be a subclass of this class. FoundationClass itself can be added to the registry too.
  */
 function setClass(FoundationClass) {
-	check(FoundationClass, Function);
-	_.defineProperty(this, 'FoundationClass', FoundationClass, _.ENUM);
+    check(FoundationClass, Function);
+    _.defineProperty(this, 'FoundationClass', FoundationClass, _.ENUM);
 }
 
 },{"../util/check":77,"../util/error":82,"mol-proto":94}],5:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
-	, AttributeError = require('../util/error').Attribute
-	, config = require('../config')
-	, _ = require('mol-proto')
-	, check = require('../util/check')
-	, Match = check.Match;
+    , AttributeError = require('../util/error').Attribute
+    , config = require('../config')
+    , _ = require('mol-proto')
+    , check = require('../util/check')
+    , Match = check.Match;
 
 
 var ATTRIBUTE_REGEXP= /^([^\:\[\]]*)(?:\[([^\:\[\]]*)\])?\:?([^:]*)$/
-	, FACETS_SPLIT_REGEXP = /\s*(?:\,|\s)\s*/
-	, ATTRIBUTE_TEMPLATE = '%compClass%compFacets:%compName';
+    , FACETS_SPLIT_REGEXP = /\s*(?:\,|\s)\s*/
+    , ATTRIBUTE_TEMPLATE = '%compClass%compFacets:%compName';
 
 
 /**
@@ -500,10 +500,10 @@ var BindAttribute = _.createSubclass(Attribute, 'BindAttribute', true);
  * - [render](#render)
  */
 _.extendProto(BindAttribute, {
-	attrName: attrName,
-	parse: parse,
-	validate: validate,
-	render: render
+    attrName: attrName,
+    parse: parse,
+    validate: validate,
+    render: render
 });
 
 
@@ -520,7 +520,7 @@ module.exports = BindAttribute;
  * @return {String}
  */
 function attrName() {
-	return config.attrs.bind;
+    return config.attrs.bind;
 }
 
 
@@ -532,21 +532,21 @@ function attrName() {
  * @return {BindAttribute}
  */
  function parse() {
-	if (! this.node) return;
+    if (! this.node) return;
 
-	var value = this.get();
+    var value = this.get();
 
-	if (value)
-		var bindTo = value.match(ATTRIBUTE_REGEXP);
+    if (value)
+        var bindTo = value.match(ATTRIBUTE_REGEXP);
 
-	if (! bindTo)
-		throw new AttributeError('invalid bind attribute ' + value);
+    if (! bindTo)
+        throw new AttributeError('invalid bind attribute ' + value);
 
-	this.compClass = bindTo[1] || 'Component';
-	this.compFacets = (bindTo[2] && bindTo[2].split(FACETS_SPLIT_REGEXP)) || undefined;
-	this.compName = bindTo[3] || undefined;
+    this.compClass = bindTo[1] || 'Component';
+    this.compFacets = (bindTo[2] && bindTo[2].split(FACETS_SPLIT_REGEXP)) || undefined;
+    this.compName = bindTo[3] || undefined;
 
-	return this;
+    return this;
 }
 
 
@@ -557,12 +557,12 @@ function attrName() {
  * @return {BindAttribute}
  */
 function validate() {
-	check(this.compName, Match.IdentifierString);
+    check(this.compName, Match.IdentifierString);
 
-	if (! this.compClass)
-		throw new AttributeError('empty component class name ' + this.compClass);
+    if (! this.compClass)
+        throw new AttributeError('empty component class name ' + this.compClass);
 
-	return this;
+    return this;
 }
 
 
@@ -573,22 +573,22 @@ function validate() {
  * @return {String}
  */
 function render() {
-	this.compName = this.compName || milo.util.componentName();
-	return ATTRIBUTE_TEMPLATE
-				.replace('%compClass', this.compClass || '')
-				.replace('%compFacets', this.compFacets && this.compFacets.length
-											? '[' + this.compFacets.join(', ') + ']'
-											: '')
-				.replace('%compName', this.compName);
+    this.compName = this.compName || milo.util.componentName();
+    return ATTRIBUTE_TEMPLATE
+                .replace('%compClass', this.compClass || '')
+                .replace('%compFacets', this.compFacets && this.compFacets.length
+                                            ? '[' + this.compFacets.join(', ') + ']'
+                                            : '')
+                .replace('%compName', this.compName);
 }
 
 },{"../config":53,"../util/check":77,"../util/error":82,"./a_class":6,"mol-proto":94}],6:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
-	, check = require('../util/check')
-	, Match = check.Match
-	, toBeImplemented = require('../util/error').toBeImplemented;
+    , check = require('../util/check')
+    , Match = check.Match
+    , toBeImplemented = require('../util/error').toBeImplemented;
 
 
 module.exports = Attribute;
@@ -602,16 +602,16 @@ module.exports = Attribute;
  * @param {String} name Optional name of the attribute, usually supplied by subclass via `attrName` method
  */
 function Attribute(el, name) {
-	this.name = name || this.attrName();
-	this.el = el;
+    this.name = name || this.attrName();
+    this.el = el;
 
-	// attribute node
-	this.node = el.attributes[this.name];
+    // attribute node
+    this.node = el.attributes[this.name];
 }
 
 
 _.extend(Attribute, {
-	remove: Attribute$$remove
+    remove: Attribute$$remove
 });
 
 
@@ -630,43 +630,43 @@ _.extend(Attribute, {
  * - render - should return attribute value for a given attribute state (other properties, as defined in subclass)
  */
 _.extendProto(Attribute, {
-	get: Attribute$get,
-	set: Attribute$set,
-	remove: Attribute$remove,
-	decorate: Attribute$decorate,
+    get: Attribute$get,
+    set: Attribute$set,
+    remove: Attribute$remove,
+    decorate: Attribute$decorate,
 
-	destroy: Attribute$destroy,
+    destroy: Attribute$destroy,
 
-	// should be defined in subclass
-	attrName: toBeImplemented,
-	parse: toBeImplemented,
-	validate: toBeImplemented,
-	render: toBeImplemented
+    // should be defined in subclass
+    attrName: toBeImplemented,
+    parse: toBeImplemented,
+    validate: toBeImplemented,
+    render: toBeImplemented
 });
 
 
 function Attribute$$remove(el, deep) {
-	var name = this.prototype.attrName();
-	el.removeAttribute(name);
+    var name = this.prototype.attrName();
+    el.removeAttribute(name);
 
-	if (deep) {
-		var selector = '[' + name + ']';
-		var children = el.querySelectorAll(selector);
-		_.forEach(children, function(childEl) {
-			childEl.removeAttribute(name);
-		})
-	}
+    if (deep) {
+        var selector = '[' + name + ']';
+        var children = el.querySelectorAll(selector);
+        _.forEach(children, function(childEl) {
+            childEl.removeAttribute(name);
+        })
+    }
 }
 
 
 function Attribute$remove() {
-	delete this.node;
+    delete this.node;
 }
 
 
 function Attribute$destroy() {
-	delete this.el;
-	delete this.node;
+    delete this.el;
+    delete this.node;
 }
 
 /**
@@ -675,7 +675,7 @@ function Attribute$destroy() {
  * @return {String}
  */
 function Attribute$get() {
-	return this.el.getAttribute(this.name);
+    return this.el.getAttribute(this.name);
 }
 
 
@@ -685,7 +685,7 @@ function Attribute$get() {
  * @param {String} value
  */
 function Attribute$set(value) {
-	this.el.setAttribute(this.name, value);
+    this.el.setAttribute(this.name, value);
 }
 
 
@@ -694,16 +694,16 @@ function Attribute$set(value) {
  * Uses `render` method that should be defiend in subclass.
  */
 function Attribute$decorate() {
-	this.set(this.render());
+    this.set(this.render());
 }
 
 },{"../util/check":77,"../util/error":82,"mol-proto":94}],7:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
-	, AttributeError = require('../util/error').Attribute
-	, config = require('../config')
-	, _ = require('mol-proto');
+    , AttributeError = require('../util/error').Attribute
+    , config = require('../config')
+    , _ = require('mol-proto');
 
 
 /**
@@ -724,10 +724,10 @@ var LoadAttribute = _.createSubclass(Attribute, 'LoadAttribute', true);
  * - [render](#render)
  */
 _.extendProto(LoadAttribute, {
-	attrName: attrName,
-	parse: parse,
-	validate: validate,
-	render: render
+    attrName: attrName,
+    parse: parse,
+    validate: validate,
+    render: render
 });
 
 module.exports = LoadAttribute;
@@ -743,7 +743,7 @@ module.exports = LoadAttribute;
  * @return {String}
  */
 function attrName() {
-	return config.attrs.load;
+    return config.attrs.load;
 }
 
 
@@ -755,10 +755,10 @@ function attrName() {
  * @return {LoadAttribute}
  */
 function parse() {
-	if (! this.node) return;
+    if (! this.node) return;
 
-	this.loadUrl = this.get();
-	return this;
+    this.loadUrl = this.get();
+    return this;
 }
 
 
@@ -770,8 +770,8 @@ function parse() {
  * @return {LoadAttribute}
  */
 function validate() {
-	// TODO url validation
-	return this;
+    // TODO url validation
+    return this;
 }
 
 
@@ -781,7 +781,7 @@ function validate() {
  * @return {String}
  */
 function render() {
-	return this.loadUrl;
+    return this.loadUrl;
 }
 
 },{"../config":53,"../util/error":82,"./a_class":6,"mol-proto":94}],8:[function(require,module,exports){
@@ -794,25 +794,25 @@ function render() {
  * - [LoadAttribute](./a_load.js.html)
  */
 var attributes = module.exports = {
-	bind: require('./a_bind'),
-	load: require('./a_load')
+    bind: require('./a_bind'),
+    load: require('./a_load')
 };
 
 },{"./a_bind":5,"./a_load":7}],9:[function(require,module,exports){
 'use strict';
 
 var miloMail = require('./mail')
-	, componentsRegistry = require('./components/c_registry')
-	, facetsRegistry = require('./components/c_facets/cf_registry')
-	, Component = componentsRegistry.get('Component')
-	, ComponentInfo = require('./components/c_info')
-	, Scope = require('./components/scope')
-	, BindAttribute = require('./attributes/a_bind')
-	, BinderError = require('./util/error').Binder
-	, _ = require('mol-proto')
-	, check = require('./util/check')
-	, utilDom = require('./util/dom')
-	, Match =  check.Match;
+    , componentsRegistry = require('./components/c_registry')
+    , facetsRegistry = require('./components/c_facets/cf_registry')
+    , Component = componentsRegistry.get('Component')
+    , ComponentInfo = require('./components/c_info')
+    , Scope = require('./components/scope')
+    , BindAttribute = require('./attributes/a_bind')
+    , BinderError = require('./util/error').Binder
+    , _ = require('mol-proto')
+    , check = require('./util/check')
+    , utilDom = require('./util/dom')
+    , Match =  check.Match;
 
 
 binder.scan = scan;
@@ -846,114 +846,114 @@ module.exports = binder;
  * @return {Scope}
  */
 function binder(scopeEl, rootScope, bindRootElement, throwOnErrors) {
-	return createBinderScope(scopeEl, function(scope, el, attr, throwOnErrors) {
-		var info = new ComponentInfo(scope, el, attr, throwOnErrors);
-		return Component.create(info, throwOnErrors);
-	}, rootScope, bindRootElement, throwOnErrors);
+    return createBinderScope(scopeEl, function(scope, el, attr, throwOnErrors) {
+        var info = new ComponentInfo(scope, el, attr, throwOnErrors);
+        return Component.create(info, throwOnErrors);
+    }, rootScope, bindRootElement, throwOnErrors);
 }
 
 
 // bind in two passes
 function twoPass(scopeEl, rootScope, bindRootElement, throwOnErrors) {
-	var scanScope = binder.scan(scopeEl, rootScope, bindRootElement, throwOnErrors);
-	return binder.create(scanScope, undefined, throwOnErrors);
+    var scanScope = binder.scan(scopeEl, rootScope, bindRootElement, throwOnErrors);
+    return binder.create(scanScope, undefined, throwOnErrors);
 }
 
 
 // scan DOM for BindAttribute
 function scan(scopeEl, rootScope, bindRootElement, throwOnErrors) {
-	return createBinderScope(scopeEl, function(scope, el, attr, throwOnErrors) {
-		return new ComponentInfo(scope, el, attr, throwOnErrors);
-	}, rootScope, bindRootElement, throwOnErrors);
+    return createBinderScope(scopeEl, function(scope, el, attr, throwOnErrors) {
+        return new ComponentInfo(scope, el, attr, throwOnErrors);
+    }, rootScope, bindRootElement, throwOnErrors);
 }
 
 
 // create bound components
 function create(scanScope, hostObject, throwOnErrors) {
-	var scope = new Scope(scanScope._rootEl, hostObject)
-		, addMethod = throwOnErrors === false ? '_safeAdd' : '_add';
+    var scope = new Scope(scanScope._rootEl, hostObject)
+        , addMethod = throwOnErrors === false ? '_safeAdd' : '_add';
 
-	scanScope._each(function(compInfo) {
-		// set correct component's scope
-		var info = _.clone(compInfo)
-		info.scope = scope;
+    scanScope._each(function(compInfo) {
+        // set correct component's scope
+        var info = _.clone(compInfo)
+        info.scope = scope;
 
-		// create component
-		var aComponent = Component.create(info, throwOnErrors);
-		
-		scope[addMethod](aComponent, aComponent.name);
-		if (aComponent.container)
-			aComponent.container.scope = create(compInfo.container.scope, aComponent.container, throwOnErrors);
-	});
+        // create component
+        var aComponent = Component.create(info, throwOnErrors);
+        
+        scope[addMethod](aComponent, aComponent.name);
+        if (aComponent.container)
+            aComponent.container.scope = create(compInfo.container.scope, aComponent.container, throwOnErrors);
+    });
 
-	return scope;
+    return scope;
 }
 
 
 function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootElement, throwOnErrors) {
-	var scopeEl = scopeEl || document.body
-		, scope = rootScope || new Scope(scopeEl)
-		, addMethod = throwOnErrors === false ? '_safeAdd' : '_add';
+    var scopeEl = scopeEl || document.body
+        , scope = rootScope || new Scope(scopeEl)
+        , addMethod = throwOnErrors === false ? '_safeAdd' : '_add';
 
-	createScopeForElement(scope, scopeEl, bindRootElement);
-	
-	return scope;
+    createScopeForElement(scope, scopeEl, bindRootElement);
+    
+    return scope;
 
 
-	function createScopeForElement(scope, el, bindRootElement) {
-		// get element's binding attribute (ml-bind by default)
-		var attr = new BindAttribute(el);
+    function createScopeForElement(scope, el, bindRootElement) {
+        // get element's binding attribute (ml-bind by default)
+        var attr = new BindAttribute(el);
 
-		// if element has bind attribute crate scope object (Component or ComponentInfo)
-		if (attr.node && bindRootElement !== false) {
-			var scopedObject = scopeObjectFactory(scope, el, attr, throwOnErrors)
-				, isContainer = typeof scopedObject != 'undefined' && scopedObject.container;
-		}
+        // if element has bind attribute crate scope object (Component or ComponentInfo)
+        if (attr.node && bindRootElement !== false) {
+            var scopedObject = scopeObjectFactory(scope, el, attr, throwOnErrors)
+                , isContainer = typeof scopedObject != 'undefined' && scopedObject.container;
+        }
 
-		// if there are childNodes add children to new scope if this element has component with Container facet
-		// otherwise create a new scope
-		if (el.childNodes && el.childNodes.length) {
+        // if there are childNodes add children to new scope if this element has component with Container facet
+        // otherwise create a new scope
+        if (el.childNodes && el.childNodes.length) {
             if (isContainer) {
                 var innerScope = new Scope(el);
                 scopedObject.container.scope = innerScope;
                 innerScope._hostObject = scopedObject.container;
             }
 
-			createScopeForChildren(el, isContainer ? innerScope : scope);
-		}
+            createScopeForChildren(el, isContainer ? innerScope : scope);
+        }
 
-		// if scope wasn't previously created on container facet, create empty scope anyway
-		if (isContainer && ! scopedObject.container.scope)
-			scopedObject.container.scope = new Scope(el);
-
-
-		// TODO condition after && is a hack, should not be used!
-		if (scopedObject) // && ! scope[attr.compName])
-			scope[addMethod](scopedObject, attr.compName);
-
-		// _.defer(postChildrenBoundMessage, el);
-		postChildrenBoundMessage(el);
-
-		return scopedObject;
+        // if scope wasn't previously created on container facet, create empty scope anyway
+        if (isContainer && ! scopedObject.container.scope)
+            scopedObject.container.scope = new Scope(el);
 
 
-		function postChildrenBoundMessage(el) {
-			var elComp = Component.getComponent(el);
+        // TODO condition after && is a hack, should not be used!
+        if (scopedObject) // && ! scope[attr.compName])
+            scope[addMethod](scopedObject, attr.compName);
 
-			if (elComp)
-				elComp.postMessage('childrenbound');
-		}
-	}
+        // _.defer(postChildrenBoundMessage, el);
+        postChildrenBoundMessage(el);
+
+        return scopedObject;
 
 
-	function createScopeForChildren(containerEl, scope) {
-		var children = utilDom.children(containerEl);
+        function postChildrenBoundMessage(el) {
+            var elComp = Component.getComponent(el);
 
-		_.forEach(children, function(node) {
-			createScopeForElement(scope, node, true);
-		});
-		return scope;
-	}
+            if (elComp)
+                elComp.postMessage('childrenbound');
+        }
+    }
+
+
+    function createScopeForChildren(containerEl, scope) {
+        var children = utilDom.children(containerEl);
+
+        _.forEach(children, function(node) {
+            createScopeForElement(scope, node, true);
+        });
+        return scope;
+    }
 }
 
 },{"./attributes/a_bind":5,"./components/c_facets/cf_registry":25,"./components/c_info":26,"./components/c_registry":27,"./components/scope":35,"./mail":55,"./util/check":77,"./util/dom":80,"./util/error":82,"mol-proto":94}],10:[function(require,module,exports){
@@ -966,13 +966,13 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
 // This module contains foundation classes and class registries.
 
 var classes = {
-	Facet: require('./abstract/facet'),
-	FacetedObject: require('./abstract/faceted_object'),
-	ClassRegistry: require('./abstract/registry'),
-	Mixin: require('./abstract/mixin'),
-	MessageSource: require('./messenger/m_source'),
-	MessengerAPI: require('./messenger/m_api'),
-	DOMEventsSource: require('./components/msg_src/dom_events')
+    Facet: require('./abstract/facet'),
+    FacetedObject: require('./abstract/faceted_object'),
+    ClassRegistry: require('./abstract/registry'),
+    Mixin: require('./abstract/mixin'),
+    MessageSource: require('./messenger/m_source'),
+    MessengerAPI: require('./messenger/m_api'),
+    DOMEventsSource: require('./components/msg_src/dom_events')
 };
 
 module.exports = classes;
@@ -982,22 +982,22 @@ module.exports = classes;
 
 
 var FacetedObject = require('../abstract/faceted_object')
-	, facetsRegistry = require('./c_facets/cf_registry')
-	, ComponentFacet = facetsRegistry.get('ComponentFacet')
-	, componentUtils = require('./c_utils')
-	, Messenger = require('../messenger')
-	, _ = require('mol-proto')
-	, check = require('../util/check')
-	, Match = check.Match
-	, config = require('../config')
-	, miloComponentName = require('../util/component_name')
-	, logger = require('../util/logger')
-	, domUtils = require('../util/dom')
-	, ComponentError = require('../util/error').Component
-	, BindAttribute = require('../attributes/a_bind')
-	, Scope = require('./scope')
-	, DOMStorage = require('../util/storage')
-	, jsonParse = require('../util/json_parse');
+    , facetsRegistry = require('./c_facets/cf_registry')
+    , ComponentFacet = facetsRegistry.get('ComponentFacet')
+    , componentUtils = require('./c_utils')
+    , Messenger = require('../messenger')
+    , _ = require('mol-proto')
+    , check = require('../util/check')
+    , Match = check.Match
+    , config = require('../config')
+    , miloComponentName = require('../util/component_name')
+    , logger = require('../util/logger')
+    , domUtils = require('../util/dom')
+    , ComponentError = require('../util/error').Component
+    , BindAttribute = require('../attributes/a_bind')
+    , Scope = require('./scope')
+    , DOMStorage = require('../util/storage')
+    , jsonParse = require('../util/json_parse');
 
 var _makeComponentConditionFunc = componentUtils._makeComponentConditionFunc;
 
@@ -1072,15 +1072,15 @@ _registerWithDomStorage('Component');
  * - [createFromDataTransfer](#Component$$createFromDataTransfer)
  */
 _.extend(Component, {
-	createComponentClass: Component$$createComponentClass,
-	create: Component$$create,
-	copy: Component$$copy,
-	createOnElement: Component$$createOnElement,
-	isComponent: componentUtils.isComponent,
-	getComponent: componentUtils.getComponent,
-	getContainingComponent: componentUtils.getContainingComponent,
-	createFromState: Component$$createFromState,
-	createFromDataTransfer: Component$$createFromDataTransfer
+    createComponentClass: Component$$createComponentClass,
+    create: Component$$create,
+    copy: Component$$copy,
+    createOnElement: Component$$createOnElement,
+    isComponent: componentUtils.isComponent,
+    getComponent: componentUtils.getComponent,
+    getContainingComponent: componentUtils.getContainingComponent,
+    createFromState: Component$$createFromState,
+    createFromDataTransfer: Component$$createFromDataTransfer
 });
 delete Component.createFacetedClass;
 
@@ -1118,21 +1118,21 @@ delete Component.createFacetedClass;
  * - [getSubscribers](../messenger/index.js.html#Messenger$getSubscribers) - get subscribers for a given message
  */
 _.extendProto(Component, {
-	init: Component$init,
-	createElement: Component$createElement,
-	hasFacet: Component$hasFacet,
-	addFacet: Component$addFacet,
-	allFacets: Component$allFacets,
-	rename: Component$rename,
-	remove: Component$remove,
-	getState: Component$getState,
-	getTransferState: Component$getTransferState,
-	_getState: Component$_getState,
-	setState: Component$setState,
-	getScopeParent: Component$getScopeParent,
-	getTopScopeParent: Component$getTopScopeParent,
-	getScopeParentWithClass: Component$getScopeParentWithClass,
-	getTopScopeParentWithClass: Component$getTopScopeParentWithClass,
+    init: Component$init,
+    createElement: Component$createElement,
+    hasFacet: Component$hasFacet,
+    addFacet: Component$addFacet,
+    allFacets: Component$allFacets,
+    rename: Component$rename,
+    remove: Component$remove,
+    getState: Component$getState,
+    getTransferState: Component$getTransferState,
+    _getState: Component$_getState,
+    setState: Component$setState,
+    getScopeParent: Component$getScopeParent,
+    getTopScopeParent: Component$getTopScopeParent,
+    getScopeParentWithClass: Component$getScopeParentWithClass,
+    getTopScopeParentWithClass: Component$getTopScopeParentWithClass,
     walkScopeTree: Component$walkScopeTree,
     broadcast: Component$broadcast,
     destroy: Component$destroy,
@@ -1155,49 +1155,49 @@ var COMPONENT_DATA_TYPE_REGEX = /x-application\/milo-component\/([a-z_$][0-9a-z_
  * @return {Subclass(Component)}
  */
 function Component$$createComponentClass(name, facetsConfig) {
-	var facetsClasses = {};
+    var facetsClasses = {};
 
-	// convert array of facet names to map of empty facets configurations
-	if (Array.isArray(facetsConfig)) {
-		var configMap = {};
-		facetsConfig.forEach(function(fct) {
-			var fctName = _.firstLowerCase(fct);
-			configMap[fctName] = {};
-		});
-		facetsConfig = configMap;
-	}
+    // convert array of facet names to map of empty facets configurations
+    if (Array.isArray(facetsConfig)) {
+        var configMap = {};
+        facetsConfig.forEach(function(fct) {
+            var fctName = _.firstLowerCase(fct);
+            configMap[fctName] = {};
+        });
+        facetsConfig = configMap;
+    }
 
-	// construct map of facets classes from facetRegistry
-	_.eachKey(facetsConfig, function(fctConfig, fct) {
-		var fctName = _.firstLowerCase(fct);
-		var fctClassName = _.firstUpperCase(fct);
-		facetsClasses[fctName] = facetsRegistry.get(fctClassName);
-	});
+    // construct map of facets classes from facetRegistry
+    _.eachKey(facetsConfig, function(fctConfig, fct) {
+        var fctName = _.firstLowerCase(fct);
+        var fctClassName = _.firstUpperCase(fct);
+        facetsClasses[fctName] = facetsRegistry.get(fctClassName);
+    });
 
-	// create subclass of Component using method of FacetedObject
-	var ComponentClass = FacetedObject.createFacetedClass.call(this, name, facetsClasses, facetsConfig);
-	
-	_registerWithDomStorage(name);
+    // create subclass of Component using method of FacetedObject
+    var ComponentClass = FacetedObject.createFacetedClass.call(this, name, facetsClasses, facetsConfig);
+    
+    _registerWithDomStorage(name);
 
-	return ComponentClass;
+    return ComponentClass;
 };
 
 
 function _registerWithDomStorage(className) {
-	DOMStorage.registerDataType(className, Component_domStorageSerializer, Component_domStorageParser);
+    DOMStorage.registerDataType(className, Component_domStorageSerializer, Component_domStorageParser);
 }
 
 
 function Component_domStorageSerializer(component) {
-	var state = component.getState();
-	return JSON.stringify(state);	
+    var state = component.getState();
+    return JSON.stringify(state);   
 }
 
 
 function Component_domStorageParser(compStr, compClassName) {
-	var state = jsonParse(compStr);
-	if (state)
-		return Component.createFromState(state);
+    var state = jsonParse(compStr);
+    if (state)
+        return Component.createFromState(state);
 }
 
 
@@ -1211,26 +1211,26 @@ function Component_domStorageParser(compStr, compClassName) {
  @ @return {Component}
  */
 function Component$$create(info, throwOnErrors) {
-	var ComponentClass = info.ComponentClass;
+    var ComponentClass = info.ComponentClass;
 
-	if (typeof ComponentClass != 'function') {
-		var message = 'create: component class should be function, "' + typeof ComponentClass + '" passed'; 
-		if (throwOnErrors === false) {
-			logger.error('Component', message, ';using base Component class instead');
-			ComponentClass = Component;
-		} else
-			throw new ComponentError(message);
-	}
+    if (typeof ComponentClass != 'function') {
+        var message = 'create: component class should be function, "' + typeof ComponentClass + '" passed'; 
+        if (throwOnErrors === false) {
+            logger.error('Component', message, ';using base Component class instead');
+            ComponentClass = Component;
+        } else
+            throw new ComponentError(message);
+    }
 
-	var aComponent = new ComponentClass(info.scope, info.el, info.name, info);
+    var aComponent = new ComponentClass(info.scope, info.el, info.name, info);
 
-	if (info.extraFacetsClasses)
-		_.eachKey(info.extraFacetsClasses, function(FacetClass) {
-			if (! aComponent.hasFacet(FacetClass))
-				aComponent.addFacet(FacetClass, undefined, undefined, throwOnErrors);
-		});
+    if (info.extraFacetsClasses)
+        _.eachKey(info.extraFacetsClasses, function(FacetClass) {
+            if (! aComponent.hasFacet(FacetClass))
+                aComponent.addFacet(FacetClass, undefined, undefined, throwOnErrors);
+        });
 
-	return aComponent;
+    return aComponent;
 }
 
 
@@ -1244,24 +1244,24 @@ function Component$$create(info, throwOnErrors) {
  * @return {Component}
  */
 function Component$$copy(component, deepCopy) {
-	check(component, Component);
-	check(deepCopy, Match.Optional(Boolean));
+    check(component, Component);
+    check(deepCopy, Match.Optional(Boolean));
 
-	if (deepCopy && !component.container) 
-		throw new ComponentError('Cannot deep copy component without container facet');
+    if (deepCopy && !component.container) 
+        throw new ComponentError('Cannot deep copy component without container facet');
 
-	// copy DOM element, using Dom facet if it is available
-	var newEl = component.dom 
-					? component.dom.copy(deepCopy)
-					: component.el.cloneNode(deepCopy);
+    // copy DOM element, using Dom facet if it is available
+    var newEl = component.dom 
+                    ? component.dom.copy(deepCopy)
+                    : component.el.cloneNode(deepCopy);
 
-	var ComponentClass = component.constructor;
+    var ComponentClass = component.constructor;
 
-	// create component of the same class on the element
-	var aComponent = ComponentClass.createOnElement(newEl, undefined, component.scope, component.extraFacets);
-	var state = component._getState(deepCopy || false);
-	aComponent.setState(state);
-	return aComponent;
+    // create component of the same class on the element
+    var aComponent = ComponentClass.createOnElement(newEl, undefined, component.scope, component.extraFacets);
+    var state = component._getState(deepCopy || false);
+    aComponent.setState(state);
+    return aComponent;
 }
 
 
@@ -1277,56 +1277,56 @@ function Component$$copy(component, deepCopy) {
  * @return {Subclass(Component)}
  */
 function Component$$createOnElement(el, innerHTML, rootScope, extraFacets) {
-	check(innerHTML, Match.Optional(String));
-	check(rootScope, Match.Optional(Scope));
-	check(extraFacets, Match.Optional([String]));
+    check(innerHTML, Match.Optional(String));
+    check(rootScope, Match.Optional(Scope));
+    check(extraFacets, Match.Optional([String]));
 
-	var Dom = facetsRegistry.get(_.firstUpperCase('dom'));
-	var elementPassed = !!el;
+    var Dom = facetsRegistry.get(_.firstUpperCase('dom'));
+    var elementPassed = !!el;
 
-	// should required here to resolve circular dependency
-	var miloBinder = require('../binder')
+    // should required here to resolve circular dependency
+    var miloBinder = require('../binder')
 
-	// create element if it wasn't passed
-	if (! elementPassed) {
-		var domFacetConfig = this.getFacetConfig('dom')
-			, templateFacetConfig = this.getFacetConfig('template')
-			, tagName = domFacetConfig && domFacetConfig.tagName || 'div'
-			, template = templateFacetConfig && templateFacetConfig.template;
+    // create element if it wasn't passed
+    if (! elementPassed) {
+        var domFacetConfig = this.getFacetConfig('dom')
+            , templateFacetConfig = this.getFacetConfig('template')
+            , tagName = domFacetConfig && domFacetConfig.tagName || 'div'
+            , template = templateFacetConfig && templateFacetConfig.template;
 
-		var elConfig = {
-			tagName: tagName,
-			template: template,
-			content: innerHTML
-		}
+        var elConfig = {
+            tagName: tagName,
+            template: template,
+            content: innerHTML
+        }
 
-		el = Dom.createElement(elConfig);
-	}
+        el = Dom.createElement(elConfig);
+    }
 
-	// find scope to attach component to
-	if (! rootScope) {
-		var parentComponent = Component.getContainingComponent(el, false, 'Container');
-		if (parentComponent)
-			rootScope = parentComponent.container.scope;
-		else
-			rootScope = new Scope(el);
-	}
+    // find scope to attach component to
+    if (! rootScope) {
+        var parentComponent = Component.getContainingComponent(el, false, 'Container');
+        if (parentComponent)
+            rootScope = parentComponent.container.scope;
+        else
+            rootScope = new Scope(el);
+    }
 
-	// add bind attribute to element
-	var attr = new BindAttribute(el);
-	// "this" refers to the class of component here, as this is a class method
-	attr.compClass = this.name;
-	attr.compFacets = extraFacets;
-	attr.decorate();
+    // add bind attribute to element
+    var attr = new BindAttribute(el);
+    // "this" refers to the class of component here, as this is a class method
+    attr.compClass = this.name;
+    attr.compFacets = extraFacets;
+    attr.decorate();
 
-	// insert HTML
-	if (elementPassed && innerHTML)
-		el.innerHTML = innerHTML;
+    // insert HTML
+    if (elementPassed && innerHTML)
+        el.innerHTML = innerHTML;
 
-	miloBinder(el, rootScope);
-	var aComponent = rootScope[attr.compName];
-	_.deferMethod(aComponent, 'broadcast', 'stateready');
-	return aComponent;
+    miloBinder(el, rootScope);
+    var aComponent = rootScope[attr.compName];
+    _.deferMethod(aComponent, 'broadcast', 'stateready');
+    return aComponent;
 }
 
 
@@ -1342,56 +1342,56 @@ function Component$$createOnElement(el, innerHTML, rootScope, extraFacets) {
  * @return {Component} component
  */
 function Component$$createFromState(state, rootScope, newUniqueName, throwOnErrors) {
-	check(state, Match.ObjectIncluding({
-		compName: Match.Optional(String),
-		compClass: Match.Optional(String),
-		extraFacets: Match.Optional([String]),
-		facetsStates: Match.Optional(Object),
-		outerHTML: String
-	}));
+    check(state, Match.ObjectIncluding({
+        compName: Match.Optional(String),
+        compClass: Match.Optional(String),
+        extraFacets: Match.Optional([String]),
+        facetsStates: Match.Optional(Object),
+        outerHTML: String
+    }));
 
-	var miloBinder = require('../binder');
+    var miloBinder = require('../binder');
 
-	// create wrapper element optionally renaming component
-	var wrapEl = _createComponentWrapElement(state, newUniqueName);
+    // create wrapper element optionally renaming component
+    var wrapEl = _createComponentWrapElement(state, newUniqueName);
 
-	// instantiate all components from HTML
-	var scope = miloBinder(wrapEl, undefined, undefined, throwOnErrors);
+    // instantiate all components from HTML
+    var scope = miloBinder(wrapEl, undefined, undefined, throwOnErrors);
 
-	// as there should only be one component, call to _any will return it
-	var component = scope._any();
+    // as there should only be one component, call to _any will return it
+    var component = scope._any();
 
-	// set component's scope
-	if (rootScope) {
-		component.scope = rootScope;
-		rootScope._add(component);
-	}
+    // set component's scope
+    if (rootScope) {
+        component.scope = rootScope;
+        rootScope._add(component);
+    }
 
-	// restore component state
-	component.setState(state);
+    // restore component state
+    component.setState(state);
 
     _.deferMethod(component, 'broadcast', 'stateready');
 
-	return component;	
+    return component;   
 }
 
 
 // used by Component$$createFromState
 function _createComponentWrapElement(state, newUniqueName) {
-	var wrapEl = document.createElement('div');
-	wrapEl.innerHTML = state.outerHTML;
+    var wrapEl = document.createElement('div');
+    wrapEl.innerHTML = state.outerHTML;
 
-	var children = domUtils.children(wrapEl);
-	if (children.length != 1)
-		throw new ComponentError('cannot create component: incorrect HTML, elements number: ' + children.length + ' (should be 1)');
-	var compEl = children[0];
-	var attr = new BindAttribute(compEl);
-	attr.compName = newUniqueName ? miloComponentName() : state.compName;
-	attr.compClass = state.compClass;
-	attr.compFacets = state.extraFacets;
-	attr.decorate();
+    var children = domUtils.children(wrapEl);
+    if (children.length != 1)
+        throw new ComponentError('cannot create component: incorrect HTML, elements number: ' + children.length + ' (should be 1)');
+    var compEl = children[0];
+    var attr = new BindAttribute(compEl);
+    attr.compName = newUniqueName ? miloComponentName() : state.compName;
+    attr.compClass = state.compClass;
+    attr.compFacets = state.extraFacets;
+    attr.decorate();
 
-	return wrapEl;
+    return wrapEl;
 }
 
 /**
@@ -1401,15 +1401,15 @@ function _createComponentWrapElement(state, newUniqueName) {
  * @param {DataTransfer} dataTransfer Data transfer
  */
 function Component$$createFromDataTransfer(dataTransfer) {
-	var dataType = _.find(dataTransfer.types, function (type) {
-		return COMPONENT_DATA_TYPE_REGEX.test(type);
-	});
-	if (!dataType) return;
+    var dataType = _.find(dataTransfer.types, function (type) {
+        return COMPONENT_DATA_TYPE_REGEX.test(type);
+    });
+    if (!dataType) return;
 
-	var state = milo.util.jsonParse(dataTransfer.getData(dataType));
-	if (!state) return;
+    var state = milo.util.jsonParse(dataTransfer.getData(dataType));
+    if (!state) return;
 
-	return Component.createFromState(state, undefined, true);
+    return Component.createFromState(state, undefined, true);
 }
 
 
@@ -1428,40 +1428,40 @@ function Component$$createFromDataTransfer(dataTransfer) {
  *  TODO try removing it
  */
 function Component$init(scope, element, name, componentInfo) {
-	// create DOM element if it wasn't passed to Constructor
-	this.el = element || this.createElement();
+    // create DOM element if it wasn't passed to Constructor
+    this.el = element || this.createElement();
 
-	// store reference to component on DOM element
-	if (this.el) {
-		// check that element does not have a component already atached
-		var elComp = this.el[config.componentRef];
-		if (elComp)
-		 	logger.warn('component ' + name + ' attached to element that already has component ' + elComp.name);
+    // store reference to component on DOM element
+    if (this.el) {
+        // check that element does not have a component already atached
+        var elComp = this.el[config.componentRef];
+        if (elComp)
+            logger.warn('component ' + name + ' attached to element that already has component ' + elComp.name);
 
-		this.el[config.componentRef] = this;
-	}
+        this.el[config.componentRef] = this;
+    }
 
-	_.defineProperties(this, {
-		componentInfo: componentInfo,
-		extraFacets: []
-	}, _.ENUM);
+    _.defineProperties(this, {
+        componentInfo: componentInfo,
+        extraFacets: []
+    }, _.ENUM);
 
-	this.name = name;
-	this.scope = scope;
+    this.name = name;
+    this.scope = scope;
 
-	// create component messenger
-	var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
+    // create component messenger
+    var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
 
-	_.defineProperty(this, '_messenger', messenger);
+    _.defineProperty(this, '_messenger', messenger);
 
-	// check all facets dependencies (required facets)
-	this.allFacets('check');
+    // check all facets dependencies (required facets)
+    this.allFacets('check');
 
-	// start all facets
-	this.allFacets('start');
+    // start all facets
+    this.allFacets('start');
 
-	// call start method if it's defined in subclass
-	this.start && this.start();
+    // call start method if it's defined in subclass
+    this.start && this.start();
 }
 
 
@@ -1475,14 +1475,14 @@ function Component$init(scope, element, name, componentInfo) {
  * @return {Element}
  */
 function Component$createElement() {
-	if (typeof document == 'undefined')
-		return;
+    if (typeof document == 'undefined')
+        return;
 
-	this.el = this.dom
-				? this.dom.createElement()
-				: document.createElement('DIV');
+    this.el = this.dom
+                ? this.dom.createElement()
+                : document.createElement('DIV');
 
-	return this.el;
+    return this.el;
 }
 
 
@@ -1494,15 +1494,15 @@ function Component$createElement() {
  * @return {Boolean}
  */
 function Component$hasFacet(facetNameOrClass) {
-	var facetName = _.firstLowerCase(typeof facetNameOrClass == 'function'
-										? facetNameOrClass.name
-										: facetNameOrClass);
+    var facetName = _.firstLowerCase(typeof facetNameOrClass == 'function'
+                                        ? facetNameOrClass.name
+                                        : facetNameOrClass);
 
-	var facet = this[facetName];
-	if (! facet instanceof ComponentFacet)
-	 	logger.warn('expected facet', facetName, 'but this property name is used for something else');
+    var facet = this[facetName];
+    if (! facet instanceof ComponentFacet)
+        logger.warn('expected facet', facetName, 'but this property name is used for something else');
 
-	return !! facet;
+    return !! facet;
 }
 
 
@@ -1516,29 +1516,29 @@ function Component$hasFacet(facetNameOrClass) {
  * @param {Boolean} throwOnErrors If set to false, then errors will only be logged to console. True by default.
  */
 function Component$addFacet(facetNameOrClass, facetConfig, facetName, throwOnErrors) {
-	check(facetNameOrClass, Match.OneOf(String, Match.Subclass(ComponentFacet)));
-	check(facetConfig, Match.Optional(Object));
-	check(facetName, Match.Optional(String));
+    check(facetNameOrClass, Match.OneOf(String, Match.Subclass(ComponentFacet)));
+    check(facetConfig, Match.Optional(Object));
+    check(facetName, Match.Optional(String));
 
-	var FacetClass;
-	// if only name passed, retrieve facet class from registry
-	if (typeof facetNameOrClass == 'string') {
-		var facetClassName = _.firstUpperCase(facetNameOrClass);
-		FacetClass = facetsRegistry.get(facetClassName);
-	} else 
-		FacetClass = facetNameOrClass;
+    var FacetClass;
+    // if only name passed, retrieve facet class from registry
+    if (typeof facetNameOrClass == 'string') {
+        var facetClassName = _.firstUpperCase(facetNameOrClass);
+        FacetClass = facetsRegistry.get(facetClassName);
+    } else 
+        FacetClass = facetNameOrClass;
 
-	if (!facetName)
-		facetName = _.firstLowerCase(FacetClass.name)
+    if (!facetName)
+        facetName = _.firstLowerCase(FacetClass.name)
 
-	this.extraFacets.push(facetName);
+    this.extraFacets.push(facetName);
 
-	// add facet using method of FacetedObject
-	var newFacet = FacetedObject.prototype.addFacet.call(this, FacetClass, facetConfig, facetName, throwOnErrors);
+    // add facet using method of FacetedObject
+    var newFacet = FacetedObject.prototype.addFacet.call(this, FacetClass, facetConfig, facetName, throwOnErrors);
 
-	// check depenedencies and start facet
-	newFacet.check && newFacet.check();
-	newFacet.start && newFacet.start();
+    // check depenedencies and start facet
+    newFacet.check && newFacet.check();
+    newFacet.start && newFacet.start();
 }
 
 
@@ -1551,12 +1551,12 @@ function Component$addFacet(facetNameOrClass, facetConfig, facetName, throwOnErr
  * @return {Object}
  */
 function Component$allFacets(method) { // ,... arguments
-	var args = _.slice(arguments, 1);
+    var args = _.slice(arguments, 1);
 
-	return _.mapKeys(this.facets, function(facet, fctName) {
-		if (facet && typeof facet[method] == 'function')
-			return facet[method].apply(facet, args);
-	});
+    return _.mapKeys(this.facets, function(facet, fctName) {
+        if (facet && typeof facet[method] == 'function')
+            return facet[method].apply(facet, args);
+    });
 }
 
 
@@ -1566,13 +1566,13 @@ function Component$allFacets(method) { // ,... arguments
  * @param {[String]} name optional new name of component, 
  */
 function Component$rename(name) {
-	name = name || miloComponentName();
-	this.componentInfo.rename(name, false);
-	if (this.scope) {
-		this.scope._remove(this.name);
-		this.scope._add(this, name);
-	} else
-		this.name = name;
+    name = name || miloComponentName();
+    this.componentInfo.rename(name, false);
+    if (this.scope) {
+        this.scope._remove(this.name);
+        this.scope._add(this, name);
+    } else
+        this.name = name;
 }
 
 
@@ -1583,11 +1583,11 @@ function Component$rename(name) {
  * @param {Boolean} preserveScopeProperty true not to delete scope property of component
  */
 function Component$remove(preserveScopeProperty) {
-	if (this.scope) {
-		this.scope._remove(this.name);
-		if (! preserveScopeProperty)
-			delete this.scope;
-	}
+    if (this.scope) {
+        this.scope._remove(this.name);
+        if (! preserveScopeProperty)
+            delete this.scope;
+    }
 }
 
 
@@ -1601,11 +1601,11 @@ function Component$remove(preserveScopeProperty) {
  * @return {Object}
  */
 function Component$getState() {
-	this.broadcast('getstatestarted', { rootComponent: this });
-	var state = this._getState(true);
-	state.outerHTML = this.el.outerHTML;
-	_.deferMethod(this, 'broadcast', 'getstatecompleted', { rootComponent: this });
-	return state;
+    this.broadcast('getstatestarted', { rootComponent: this });
+    var state = this._getState(true);
+    state.outerHTML = this.el.outerHTML;
+    _.deferMethod(this, 'broadcast', 'getstatecompleted', { rootComponent: this });
+    return state;
 }
 
 
@@ -1620,9 +1620,9 @@ function Component$getState() {
  * @return {Object}
  */
 function Component$getTransferState() {
-	return this.transfer
-			? this.transfer.getState()
-			: this.getState();
+    return this.transfer
+            ? this.transfer.getState()
+            : this.getState();
 }
 
 
@@ -1637,17 +1637,17 @@ function Component$getTransferState() {
  */
 function Component$_getState(deepState){
 
-	var facetsStates = this.allFacets('getState', deepState === false ? false : true);
-	facetsStates = _.filterKeys(facetsStates, function(fctState) {
-		return !! fctState;
-	});
+    var facetsStates = this.allFacets('getState', deepState === false ? false : true);
+    facetsStates = _.filterKeys(facetsStates, function(fctState) {
+        return !! fctState;
+    });
 
-	return {
-		compName: this.name,
-		compClass: this.constructor.name,
-		extraFacets: this.extraFacets,
-		facetsStates: facetsStates
-	};
+    return {
+        compName: this.name,
+        compClass: this.constructor.name,
+        extraFacets: this.extraFacets,
+        facetsStates: facetsStates
+    };
 }
 
 
@@ -1660,12 +1660,12 @@ function Component$_getState(deepState){
  * @param {Object} state state to set the component
  */
 function Component$setState(state) {
-	if (state.facetsStates)
-		_.eachKey(state.facetsStates, function(fctState, fctName) {
-			var facet = this[fctName];
-			if (facet && typeof facet.setState == 'function')
-				facet.setState(fctState);
-		}, this);
+    if (state.facetsStates)
+        _.eachKey(state.facetsStates, function(fctState, fctName) {
+            var facet = this[fctName];
+            if (facet && typeof facet.setState == 'function')
+                facet.setState(fctState);
+        }, this);
 }
 
 
@@ -1678,23 +1678,23 @@ function Component$setState(state) {
  * @return {Component|undefined}
  */
 function Component$getScopeParent(conditionOrFacet) {
-	check(conditionOrFacet, Match.Optional(Match.OneOf(Function, String)));
-	var conditionFunc = _makeComponentConditionFunc(conditionOrFacet);
-	return _getScopeParent.call(this, conditionFunc);	
+    check(conditionOrFacet, Match.Optional(Match.OneOf(Function, String)));
+    var conditionFunc = _makeComponentConditionFunc(conditionOrFacet);
+    return _getScopeParent.call(this, conditionFunc);   
 }
 
 function _getScopeParent(conditionFunc) {
-	var parentContainer = this.scope && this.scope._hostObject
-		, parent = parentContainer && parentContainer.owner;
+    var parentContainer = this.scope && this.scope._hostObject
+        , parent = parentContainer && parentContainer.owner;
 
-	// Where there is no parent, this function will return undefined
-	// The parent component is checked recursively
-	if (parent) {
-		if (! conditionFunc || conditionFunc(parent) )
-			return parent;
-		else
-			return _getScopeParent.call(parent, conditionFunc);
-	}
+    // Where there is no parent, this function will return undefined
+    // The parent component is checked recursively
+    if (parent) {
+        if (! conditionFunc || conditionFunc(parent) )
+            return parent;
+        else
+            return _getScopeParent.call(parent, conditionFunc);
+    }
 }
 
 
@@ -1706,10 +1706,10 @@ function _getScopeParent(conditionFunc) {
  * @return {Component}
  */
 function Component$getScopeParentWithClass(ComponentClass) {
-	ComponentClass = ComponentClass || this.constructor;
-	return _getScopeParent.call(this, function(comp) {
-		return comp instanceof ComponentClass;
-	})
+    ComponentClass = ComponentClass || this.constructor;
+    return _getScopeParent.call(this, function(comp) {
+        return comp instanceof ComponentClass;
+    })
 }
 
 
@@ -1722,21 +1722,21 @@ function Component$getScopeParentWithClass(ComponentClass) {
  * @return {Component|undefined}
  */
 function Component$getTopScopeParent(conditionOrFacet) {
-	check(conditionOrFacet, Match.Optional(Match.OneOf(Function, String)));
-	var conditionFunc = _makeComponentConditionFunc(conditionOrFacet);
-	return _getTopScopeParent.call(this, conditionFunc);	
+    check(conditionOrFacet, Match.Optional(Match.OneOf(Function, String)));
+    var conditionFunc = _makeComponentConditionFunc(conditionOrFacet);
+    return _getTopScopeParent.call(this, conditionFunc);    
 }
 
 function _getTopScopeParent(conditionFunc) {
-	var topParent
-		, parent = this;
-	do {
-		parent = _getScopeParent.call(parent, conditionFunc);
-		if (parent)
-			topParent = parent;
-	} while (parent);
+    var topParent
+        , parent = this;
+    do {
+        parent = _getScopeParent.call(parent, conditionFunc);
+        if (parent)
+            topParent = parent;
+    } while (parent);
 
-	return topParent;
+    return topParent;
 }
 
 
@@ -1748,10 +1748,10 @@ function _getTopScopeParent(conditionFunc) {
  * @return {Component}
  */
 function Component$getTopScopeParentWithClass(ComponentClass) {
-	ComponentClass = ComponentClass || this.constructor;
-	return _getTopScopeParent.call(this, function(comp) {
-		return comp instanceof ComponentClass;
-	})
+    ComponentClass = ComponentClass || this.constructor;
+    return _getTopScopeParent.call(this, function(comp) {
+        return comp instanceof ComponentClass;
+    })
 }
 
 
@@ -1779,9 +1779,9 @@ function Component$walkScopeTree(callback, thisArg) {
  * @param {[Function]} callback optional callback
  */
 function Component$broadcast(msg, data, callback) {
-	this.walkScopeTree(function(component) {
-		component.postMessage(msg, data, callback)
-	});
+    this.walkScopeTree(function(component) {
+        component.postMessage(msg, data, callback)
+    });
 }
 
 
@@ -1789,16 +1789,16 @@ function Component$broadcast(msg, data, callback) {
  * Destroy component: removes component from DOM, removes it from scope, deletes all references to DOM nodes and unsubscribes from all messages both component and all facets
  */
 function Component$destroy() {
-	this.walkScopeTree(function(component) {
-		component.remove();
-		component.allFacets('destroy');
-		if (! component.el) return;
-		domUtils.detachComponent(component.el);
-		domUtils.removeElement(component.el);
-		delete component.el;
-		component.componentInfo.destroy();
-		component._destroyed = true;
-	});
+    this.walkScopeTree(function(component) {
+        component.remove();
+        component.allFacets('destroy');
+        if (! component.el) return;
+        domUtils.detachComponent(component.el);
+        domUtils.removeElement(component.el);
+        delete component.el;
+        component.componentInfo.destroy();
+        component._destroyed = true;
+    });
 }
 
 
@@ -1808,7 +1808,7 @@ function Component$destroy() {
  * @return {Boolean}
  */
 function Component$isDestroyed() {
-	return this._destroyed;
+    return this._destroyed;
 }
 
 },{"../abstract/faceted_object":2,"../attributes/a_bind":5,"../binder":9,"../config":53,"../messenger":58,"../util/check":77,"../util/component_name":78,"../util/dom":80,"../util/error":82,"../util/json_parse":84,"../util/logger":85,"../util/storage":90,"./c_facets/cf_registry":25,"./c_utils":28,"./scope":35,"mol-proto":94}],12:[function(require,module,exports){
@@ -1827,10 +1827,10 @@ function Component$isDestroyed() {
 // - ComponentFacet - basic 
 
 var Facet = require('../abstract/facet')
-	, Messenger = require('../messenger')
-	, FacetError = require('../util/error').Facet
-	, componentUtils = require('./c_utils')
-	, _ = require('mol-proto');
+    , Messenger = require('../messenger')
+    , FacetError = require('../util/error').Facet
+    , componentUtils = require('./c_utils')
+    , _ = require('mol-proto');
 
 var ComponentFacet = _.createSubclass(Facet, 'ComponentFacet');
 
@@ -1859,103 +1859,103 @@ var postScopeParent = _.partial(_postParent, scopeParent);
 
 
 _.extendProto(ComponentFacet, {
-	init: ComponentFacet$init,
-	start: ComponentFacet$start,
-	check: ComponentFacet$check,
-	destroy: ComponentFacet$destroy,
-	onConfigMessages: ComponentFacet$onConfigMessages,
-	domParent: domParent,
-	postDomParent: postDomParent,
-	scopeParent: scopeParent,
-	postScopeParent: postScopeParent,
-	getMessageSource: getMessageSource,
-	_createMessenger: _createMessenger,
-	_setMessageSource: _setMessageSource,
-	_createMessageSource: _createMessageSource,
-	_createMessageSourceWithAPI: _createMessageSourceWithAPI
+    init: ComponentFacet$init,
+    start: ComponentFacet$start,
+    check: ComponentFacet$check,
+    destroy: ComponentFacet$destroy,
+    onConfigMessages: ComponentFacet$onConfigMessages,
+    domParent: domParent,
+    postDomParent: postDomParent,
+    scopeParent: scopeParent,
+    postScopeParent: postScopeParent,
+    getMessageSource: getMessageSource,
+    _createMessenger: _createMessenger,
+    _setMessageSource: _setMessageSource,
+    _createMessageSource: _createMessageSource,
+    _createMessageSourceWithAPI: _createMessageSourceWithAPI
 });
 
 _.extend(ComponentFacet, {
-	requiresFacet: requiresFacet
+    requiresFacet: requiresFacet
 });
 
 
 // initComponentFacet
 function ComponentFacet$init() {
-	this._createMessenger();
+    this._createMessenger();
 }
 
 
 // some classes (e.g. ModelFacet) overrride this method and do not create their own messenger
 function _createMessenger(){
-	var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
+    var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
 
-	_.defineProperties(this, {
-		_messenger: messenger
-	});
+    _.defineProperties(this, {
+        _messenger: messenger
+    });
 }
 
 
 // startComponentFacet
 function ComponentFacet$start() {
-	if (this.config.messages)
-		this.onConfigMessages(this.config.messages);
+    if (this.config.messages)
+        this.onConfigMessages(this.config.messages);
 }
 
 
 function ComponentFacet$onConfigMessages(messageSubscribers) {
-	var notYetRegisteredMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
-		var subscriberType = typeof subscriber;
-		if (subscriberType == 'function')
-			return this.on(messages, subscriber);
+    var notYetRegisteredMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
+        var subscriberType = typeof subscriber;
+        if (subscriberType == 'function')
+            return this.on(messages, subscriber);
 
-		if (subscriberType == 'object') {
-			var contextType = typeof subscriber.context;
-			if (contextType == 'object')
-				return this.on(messages, subscriber);
-			
-			if (contextType == 'string') {
-				if (subscriber.context == this.name || subscriber.context == 'facet')
-					subscriber = {
-						subscriber: subscriber.subscriber,
-						context: this
-					};
-				else if (subscriber.context == 'owner')
-					subscriber = {
-						subscriber: subscriber.subscriber,
-						context: this.owner
-					};
-				else
-					throw new FacetError('unknown subscriber context in configuration: ' + subscriber.context);
+        if (subscriberType == 'object') {
+            var contextType = typeof subscriber.context;
+            if (contextType == 'object')
+                return this.on(messages, subscriber);
+            
+            if (contextType == 'string') {
+                if (subscriber.context == this.name || subscriber.context == 'facet')
+                    subscriber = {
+                        subscriber: subscriber.subscriber,
+                        context: this
+                    };
+                else if (subscriber.context == 'owner')
+                    subscriber = {
+                        subscriber: subscriber.subscriber,
+                        context: this.owner
+                    };
+                else
+                    throw new FacetError('unknown subscriber context in configuration: ' + subscriber.context);
 
-				return this.on(messages, subscriber);
-			}
+                return this.on(messages, subscriber);
+            }
 
-			throw new FacetError('unknown subscriber context type in configuration: ' + contextType);
-		}
-		
-		throw new FacetError('unknown subscriber type in configuration: ' + subscriberType);
-	}, this);
+            throw new FacetError('unknown subscriber context type in configuration: ' + contextType);
+        }
+        
+        throw new FacetError('unknown subscriber type in configuration: ' + subscriberType);
+    }, this);
 
-	return notYetRegisteredMap;
+    return notYetRegisteredMap;
 }
 
 
 // checkDependencies
 function ComponentFacet$check() {
-	if (this.require) {
-		this.require.forEach(function(reqFacet) {
-			if (! this.owner.hasFacet(reqFacet))
-				this.owner.addFacet(reqFacet);
-		}, this);
-	}
+    if (this.require) {
+        this.require.forEach(function(reqFacet) {
+            if (! this.owner.hasFacet(reqFacet))
+                this.owner.addFacet(reqFacet);
+        }, this);
+    }
 }
 
 
 // destroys facet
 function ComponentFacet$destroy() {
-	if(this._messenger)
-		this._messenger.destroy();
+    if(this._messenger)
+        this._messenger.destroy();
 }
 
 
@@ -1965,8 +1965,8 @@ function ComponentFacet$destroy() {
  * @return {ComponentFacet} reference to the facet of the same class of the closest parent DOM element, that has a component with the same facet class attached to it. If such element doesn't exist method will return undefined.
  */
 function domParent() {
-	var parentComponent = componentUtils.getContainingComponent(this.owner.el, false, this.name);
-	return parentComponent && parentComponent[this.name];
+    var parentComponent = componentUtils.getContainingComponent(this.owner.el, false, this.name);
+    return parentComponent && parentComponent[this.name];
 }
 
 
@@ -1976,50 +1976,50 @@ function domParent() {
  * @return {ComponentFacet} reference to the facet of the same class as `this` facet of the closest scope parent (i.e., the component that has the scope of the current component in its container facet).
  */
 function scopeParent() {
-	var parentComponent = this.owner.getScopeParent(this.name);
-	return parentComponent && parentComponent[this.name];
+    var parentComponent = this.owner.getScopeParent(this.name);
+    return parentComponent && parentComponent[this.name];
 }
 
 
 function _postParent(getParentMethod, messageType, messageData) {
-	var parentFacet = getParentMethod.call(this);
-	if (parentFacet)
-		parentFacet.postMessage(messageType, messageData);
+    var parentFacet = getParentMethod.call(this);
+    if (parentFacet)
+        parentFacet.postMessage(messageType, messageData);
 }
 
 
 function _setMessageSource(messageSource) {
-	this._messenger._setMessageSource(messageSource);
+    this._messenger._setMessageSource(messageSource);
 }
 
 
 function getMessageSource() {
-	return this._messenger.getMessageSource();
+    return this._messenger.getMessageSource();
 }
 
 
 function _createMessageSource(MessageSourceClass, options) {
-	var messageSource = new MessageSourceClass(this, undefined, this.owner, options);
-	this._setMessageSource(messageSource)
+    var messageSource = new MessageSourceClass(this, undefined, this.owner, options);
+    this._setMessageSource(messageSource)
 
-	_.defineProperty(this, '_messageSource', messageSource);
+    _.defineProperty(this, '_messageSource', messageSource);
 }
 
 
 function _createMessageSourceWithAPI(MessageSourceClass, messengerAPIOrClass, options) {
-	var messageSource = new MessageSourceClass(this, undefined, messengerAPIOrClass, this.owner, options);
-	this._setMessageSource(messageSource)
+    var messageSource = new MessageSourceClass(this, undefined, messengerAPIOrClass, this.owner, options);
+    this._setMessageSource(messageSource)
 
-	_.defineProperty(this, '_messageSource', messageSource);
+    _.defineProperty(this, '_messageSource', messageSource);
 }
 
 
 function requiresFacet(facetName) {
-	// 'this' refers to the Facet Class
-	var facetRequire = this.prototype.require;
+    // 'this' refers to the Facet Class
+    var facetRequire = this.prototype.require;
 
-	return facetRequire && (facetRequire.indexOf(_.firstUpperCase(facetName)) >= 0 
-						|| facetRequire.indexOf(_.firstLowerCase(facetName)) >= 0);
+    return facetRequire && (facetRequire.indexOf(_.firstUpperCase(facetName)) >= 0 
+                        || facetRequire.indexOf(_.firstLowerCase(facetName)) >= 0);
 }
 
 },{"../abstract/facet":1,"../messenger":58,"../util/error":82,"./c_utils":28,"mol-proto":94}],13:[function(require,module,exports){
@@ -2027,11 +2027,11 @@ function requiresFacet(facetName) {
 
 
 var ComponentFacet = require('../c_facet')
-	, miloBinder = require('../../binder')
-	, Scope = require('../scope')
-	, _ = require('mol-proto')
-	, facetsRegistry = require('./cf_registry')
-	, logger = require('../../util/logger');
+    , miloBinder = require('../../binder')
+    , Scope = require('../scope')
+    , _ = require('mol-proto')
+    , facetsRegistry = require('./cf_registry')
+    , logger = require('../../util/logger');
 
 
 /**
@@ -2054,11 +2054,11 @@ var Container = _.createSubclass(ComponentFacet, 'Container');
  * - [binder](#Container$binder) - create components from DOM inside the current one
  */
 _.extendProto(Container, {
-	start: Container$start,
-	getState: Container$getState,
-	setState: Container$setState,
-	binder: Container$binder,
-	destroy: Container$destroy
+    start: Container$start,
+    getState: Container$getState,
+    setState: Container$setState,
+    binder: Container$binder,
+    destroy: Container$destroy
 });
 
 facetsRegistry.add(Container);
@@ -2071,7 +2071,7 @@ module.exports = Container;
  * Scans DOM, creates components and adds to scope children of component element.
  */
 function Container$binder() {
-	return miloBinder(this.owner.el, this.scope, false);
+    return miloBinder(this.owner.el, this.scope, false);
 }
 
 
@@ -2080,8 +2080,8 @@ function Container$binder() {
  * Setup empty scope object on start
  */
 function Container$start() {
-	ComponentFacet.prototype.start.apply(this, arguments);
-	this.scope = new Scope(this.owner.el, this);
+    ComponentFacet.prototype.start.apply(this, arguments);
+    this.scope = new Scope(this.owner.el, this);
 }
 
 
@@ -2094,12 +2094,12 @@ function Container$start() {
  * @return {Object}
  */
 function Container$getState(deepCopy) {
-	var state = { scope: {} };
-	if (deepCopy !== false)
-		this.scope._each(function(component, compName) {
-			state.scope[compName] = component._getState();
-		});
-	return state;
+    var state = { scope: {} };
+    if (deepCopy !== false)
+        this.scope._each(function(component, compName) {
+            state.scope[compName] = component._getState();
+        });
+    return state;
 }
 
 
@@ -2111,36 +2111,36 @@ function Container$getState(deepCopy) {
  * @param {Object} data data to set on facet's model
  */
 function Container$setState(state) {
-	_.eachKey(state.scope, function(compData, compName) {
-		var component = this.scope[compName];
-		if (component)
-			component.setState(compData);
-		else
-			logger.warn('component "' + compName + '" does not exist on scope', compData);
-	}, this);
+    _.eachKey(state.scope, function(compData, compName) {
+        var component = this.scope[compName];
+        if (component)
+            component.setState(compData);
+        else
+            logger.warn('component "' + compName + '" does not exist on scope', compData);
+    }, this);
 }
 
 function Container$destroy() {
-	ComponentFacet.prototype.destroy.apply(this, arguments);
-	this.scope._detachElement();
+    ComponentFacet.prototype.destroy.apply(this, arguments);
+    this.scope._detachElement();
 }
 },{"../../binder":9,"../../util/logger":85,"../c_facet":12,"../scope":35,"./cf_registry":25,"mol-proto":94}],14:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../../abstract/mixin')
-	, ComponentFacet = require('../c_facet')
-	, facetsRegistry = require('./cf_registry')
+    , ComponentFacet = require('../c_facet')
+    , facetsRegistry = require('./cf_registry')
 
-	, Messenger = require('../../messenger')
-	, DOMEventsSource = require('../msg_src/dom_events')
-	, DataMsgAPI = require('../msg_api/data')
-	, getElementDataAccess = require('../msg_api/de_data')
-	, pathUtils = require('../../model/path_utils')
-	, modelUtils = require('../../model/model_utils')
-	, changeDataHandler = require('../../model/change_data')
+    , Messenger = require('../../messenger')
+    , DOMEventsSource = require('../msg_src/dom_events')
+    , DataMsgAPI = require('../msg_api/data')
+    , getElementDataAccess = require('../msg_api/de_data')
+    , pathUtils = require('../../model/path_utils')
+    , modelUtils = require('../../model/model_utils')
+    , changeDataHandler = require('../../model/change_data')
 
-	, _ = require('mol-proto')
-	, logger = require('../../util/logger');
+    , _ = require('mol-proto')
+    , logger = require('../../util/logger');
 
 
 /**
@@ -2159,22 +2159,22 @@ var Data = _.createSubclass(ComponentFacet, 'Data');
  * - [path](#Data$path) - get reference to Data facet by path
  */
 _.extendProto(Data, {
-	start: Data$start,
-	getState: Data$getState,
-	setState: Data$setState,
+    start: Data$start,
+    getState: Data$getState,
+    setState: Data$setState,
 
-	get: Data$get,
-	set: Data$set,
-	del: Data$del,
-	splice: Data$splice,
-	path: Data$path,
-	getPath: Data$getPath,
-	getKey: Data$getKey,
+    get: Data$get,
+    set: Data$set,
+    del: Data$del,
+    splice: Data$splice,
+    path: Data$path,
+    getPath: Data$getPath,
+    getKey: Data$getKey,
 
-	_setScalarValue: Data$_setScalarValue,
-	_getScalarValue: Data$_getScalarValue,
-	_postDataChanged: Data$_postDataChanged,
-	_prepareMessageSource: _prepareMessageSource,
+    _setScalarValue: Data$_setScalarValue,
+    _getScalarValue: Data$_getScalarValue,
+    _postDataChanged: Data$_postDataChanged,
+    _prepareMessageSource: _prepareMessageSource,
 });
 
 facetsRegistry.add(Data);
@@ -2184,9 +2184,9 @@ module.exports = Data;
 
 // these methods will be wrapped to support "*" pattern subscriptions
 var proxyDataSourceMethods = {
-		// value: 'value',
-		trigger: 'trigger'
-	};
+        // value: 'value',
+        trigger: 'trigger'
+    };
 
 
 /**
@@ -2195,41 +2195,41 @@ var proxyDataSourceMethods = {
  * Called by component after component is initialized.
  */
 function Data$start() {
-	ComponentFacet.prototype.start.apply(this, arguments);
+    ComponentFacet.prototype.start.apply(this, arguments);
 
-	// get/set methods to set data of element
-	this.elData = getElementDataAccess(this.owner.el);
+    // get/set methods to set data of element
+    this.elData = getElementDataAccess(this.owner.el);
 
-	// initializes queue of "changedata" messages
-	changeDataHandler.initialize.call(this);
+    // initializes queue of "changedata" messages
+    changeDataHandler.initialize.call(this);
 
-	this._prepareMessageSource();
+    this._prepareMessageSource();
 
-	// store facet data path
-	this._path = '.' + this.owner.name;
+    // store facet data path
+    this._path = '.' + this.owner.name;
 
-	// current value
-	this._value = this.get();
+    // current value
+    this._value = this.get();
 
-	// change messenger methods to work with "*" subscriptions (like Model class)
-	pathUtils.wrapMessengerMethods.call(this);
+    // change messenger methods to work with "*" subscriptions (like Model class)
+    pathUtils.wrapMessengerMethods.call(this);
 
-	// prepare internal and external messengers
-	// this._prepareMessengers();
+    // prepare internal and external messengers
+    // this._prepareMessengers();
 
-	// if (this.config.subscribeToComponent)
-	// 	var subscribeObj = this.owner;
-	// else
-	// 	var subscribeObj = this;
+    // if (this.config.subscribeToComponent)
+    //  var subscribeObj = this.owner;
+    // else
+    //  var subscribeObj = this;
 
-	// subscribe to DOM event
-	this.on('', onDataChange);
+    // subscribe to DOM event
+    this.on('', onDataChange);
 
-	// subscribe to changes in scope children with Data facet
-	this.on('childdata', onChildData);
+    // subscribe to changes in scope children with Data facet
+    this.on('childdata', onChildData);
 
-	// subscribe to "changedata" event to enable reactive connections
-	this.on('changedata', changeDataHandler)
+    // subscribe to "changedata" event to enable reactive connections
+    this.on('changedata', changeDataHandler)
 }
 
 
@@ -2239,20 +2239,20 @@ function Data$start() {
  * External messenger's methods are proxied on the Data facet and they allows "*" subscriptions.
  */
 function _prepareMessengers() {
-	// model will post all its changes on internal messenger
-	var internalMessenger = new Messenger(this);
+    // model will post all its changes on internal messenger
+    var internalMessenger = new Messenger(this);
 
-	// message source to connect internal messenger to external
-	var internalMessengerSource = new MessengerMessageSource(this, undefined, new ModelMsgAPI, internalMessenger);
+    // message source to connect internal messenger to external
+    var internalMessengerSource = new MessengerMessageSource(this, undefined, new ModelMsgAPI, internalMessenger);
 
-	// external messenger to which all model users will subscribe,
-	// that will allow "*" subscriptions and support "changedata" message api.
-	var externalMessenger = new Messenger(this, Messenger.defaultMethods, internalMessengerSource);
+    // external messenger to which all model users will subscribe,
+    // that will allow "*" subscriptions and support "changedata" message api.
+    var externalMessenger = new Messenger(this, Messenger.defaultMethods, internalMessengerSource);
 
-	_.defineProperties(this, {
-		_messenger: externalMessenger,
-		_internalMessenger: internalMessenger
-	});
+    _.defineProperties(this, {
+        _messenger: externalMessenger,
+        _internalMessenger: internalMessenger
+    });
 }
 
 /**
@@ -2262,15 +2262,15 @@ function _prepareMessengers() {
  * @private
  */
 function _prepareMessageSource() {
-	var dataAPI = new DataMsgAPI(this.owner)
-		, dataEventsSource = new DOMEventsSource(this, proxyDataSourceMethods, dataAPI, this.owner);
-	this._setMessageSource(dataEventsSource);
+    var dataAPI = new DataMsgAPI(this.owner)
+        , dataEventsSource = new DOMEventsSource(this, proxyDataSourceMethods, dataAPI, this.owner);
+    this._setMessageSource(dataEventsSource);
 
-	_.defineProperty(this, '_dataEventsSource', dataEventsSource);
+    _.defineProperty(this, '_dataEventsSource', dataEventsSource);
 
-	// make value method of DataMsgAPI available on Data facet
-	// this is a private method, get() should be used to get data.
-	Mixin.prototype._createProxyMethod.call(dataAPI, 'value', 'value', this);
+    // make value method of DataMsgAPI available on Data facet
+    // this is a private method, get() should be used to get data.
+    Mixin.prototype._createProxyMethod.call(dataAPI, 'value', 'value', this);
 }
 
 
@@ -2282,7 +2282,7 @@ function _prepareMessageSource() {
  * @param {Object} data data change information
  */
 function onDataChange(msgType, data) {
-	this._postDataChanged(data);
+    this._postDataChanged(data);
 }
 
 
@@ -2294,8 +2294,8 @@ function onDataChange(msgType, data) {
  * @param {Obejct} data data change information
  */
 function onChildData(msgType, data) {
-	this.postMessage(data.path, data);
-	this._postDataChanged(data);
+    this.postMessage(data.path, data);
+    this._postDataChanged(data);
 }
 
 
@@ -2308,61 +2308,61 @@ function onChildData(msgType, data) {
  * @return {Object|String|Number}
  */
  function Data$set(value) {
- 	var componentSetter = this.config.set;
- 	if (typeof componentSetter == 'function')
- 		return componentSetter.call(this.owner, value);
+    var componentSetter = this.config.set;
+    if (typeof componentSetter == 'function')
+        return componentSetter.call(this.owner, value);
 
-	var valueSet;
-	if (value != null && typeof value == 'object') {
-		if (Array.isArray(value)) {
-			var listFacet = this.owner.list;
-			if (listFacet){
-				var listLength = listFacet.count()
-					, newItemsCount = value.length - listLength;
-			 	if (newItemsCount >= 3) {
-					listFacet.addItems(newItemsCount);
-					_.defer(_updataDataPaths, listFacet, listLength, listFacet.count());
-			 	}
-			}
-			valueSet = [];
-			value.forEach(function(childValue, index) {
-				setChildData.call(this, valueSet, childValue, index, '[$$]');
-			}, this);
-		} else {
-			valueSet = {};
-			_.eachKey(value, function(childValue, key) {
-				setChildData.call(this, valueSet, childValue, key, '.$$');
-			}, this);
-		}
+    var valueSet;
+    if (value != null && typeof value == 'object') {
+        if (Array.isArray(value)) {
+            var listFacet = this.owner.list;
+            if (listFacet){
+                var listLength = listFacet.count()
+                    , newItemsCount = value.length - listLength;
+                if (newItemsCount >= 3) {
+                    listFacet.addItems(newItemsCount);
+                    _.defer(_updataDataPaths, listFacet, listLength, listFacet.count());
+                }
+            }
+            valueSet = [];
+            value.forEach(function(childValue, index) {
+                setChildData.call(this, valueSet, childValue, index, '[$$]');
+            }, this);
+        } else {
+            valueSet = {};
+            _.eachKey(value, function(childValue, key) {
+                setChildData.call(this, valueSet, childValue, key, '.$$');
+            }, this);
+        }
 
-		var listFacet = this.owner.list
-			, listCount = listFacet && listFacet.count()
-			, removeCount = listCount - value.length;
+        var listFacet = this.owner.list
+            , listCount = listFacet && listFacet.count()
+            , removeCount = listCount - value.length;
 
-		while (removeCount-- > 0)
-			listFacet.removeItem(value.length, true);
-	} else
-		valueSet = this._setScalarValue(value);
+        while (removeCount-- > 0)
+            listFacet.removeItem(value.length, true);
+    } else
+        valueSet = this._setScalarValue(value);
 
-	var oldValue = this._value;
-	this._value = valueSet;
+    var oldValue = this._value;
+    this._value = valueSet;
 
-	// this message triggers onDataChange, as well as actuall DOM change
-	// so the parent gets notified
-	this.postMessage('', { path: '', type: 'changed',
-							newValue: valueSet, oldValue: oldValue });
-	
-	return valueSet;
+    // this message triggers onDataChange, as well as actuall DOM change
+    // so the parent gets notified
+    this.postMessage('', { path: '', type: 'changed',
+                            newValue: valueSet, oldValue: oldValue });
+    
+    return valueSet;
 
 
-	function setChildData(valueSet, childValue, key, pathSyntax) {
-		var childPath = pathSyntax.replace('$$', key);
-		var childDataFacet = this.path(childPath, true);
-		if (childDataFacet)
-			valueSet[key] = childDataFacet.set(childValue);
-		// else
-		// 	logger.warn('attempt to set data on path that does not exist: ' + childPath);
-	}
+    function setChildData(valueSet, childValue, key, pathSyntax) {
+        var childPath = pathSyntax.replace('$$', key);
+        var childDataFacet = this.path(childPath, true);
+        if (childDataFacet)
+            valueSet[key] = childDataFacet.set(childValue);
+        // else
+        //  logger.warn('attempt to set data on path that does not exist: ' + childPath);
+    }
 }
 
 
@@ -2373,15 +2373,15 @@ function onChildData(msgType, data) {
  * @param {String|Number} value value to set to DOM element
  */
 function Data$del() {
-	var componentDelete = this.config.del;
-	if (typeof componentDelete == 'function')
- 		return componentDelete.call(this.owner);
+    var componentDelete = this.config.del;
+    if (typeof componentDelete == 'function')
+        return componentDelete.call(this.owner);
 
-	// var itemFacet = this.owner.item;
-	// if (itemFacet)
-	// 	itemFacet.removeItem();
-	// else
-		this.set();
+    // var itemFacet = this.owner.item;
+    // if (itemFacet)
+    //  itemFacet.removeItem();
+    // else
+        this.set();
 }
 
 
@@ -2393,7 +2393,7 @@ function Data$del() {
  * @param {String|Number} value value to set to DOM element
  */
 function Data$_setScalarValue(value) {
-	return this.elData.set(this.owner.el, value);
+    return this.elData.set(this.owner.el, value);
 }
 
 
@@ -2405,13 +2405,13 @@ function Data$_setScalarValue(value) {
  * @param {Object} msgData data change message
  */
 function Data$_postDataChanged(msgData) {
-	var parentData = this.scopeParent();
-	
-	if (parentData) {
-		var parentMsg = _.clone(msgData);
-		parentMsg.path = (this._path || ('.' + thisComp.name))  + parentMsg.path;
-		parentData.postMessage('childdata', parentMsg);
-	}
+    var parentData = this.scopeParent();
+    
+    if (parentData) {
+        var parentMsg = _.clone(msgData);
+        parentMsg.path = (this._path || ('.' + thisComp.name))  + parentMsg.path;
+        parentData.postMessage('childdata', parentMsg);
+    }
 }
 
 
@@ -2424,39 +2424,39 @@ function Data$_postDataChanged(msgData) {
  * @return {Object}
  */
 function Data$get(deepGet) {
-	var componentGetter = this.config.get;
-	if (typeof componentGetter == 'function')
- 		return componentGetter.call(this.owner);
+    var componentGetter = this.config.get;
+    if (typeof componentGetter == 'function')
+        return componentGetter.call(this.owner);
 
- 	if (deepGet === false) // a hack to enable getting shallow state
- 		return;
+    if (deepGet === false) // a hack to enable getting shallow state
+        return;
 
-	var comp = this.owner
-		, scopeData;
+    var comp = this.owner
+        , scopeData;
 
-	if (comp.list) {
-		scopeData = [];
-		comp.list.each(function(listItem, index) {
-			scopeData[index] = listItem.data.get();
-		});
+    if (comp.list) {
+        scopeData = [];
+        comp.list.each(function(listItem, index) {
+            scopeData[index] = listItem.data.get();
+        });
 
-		if (comp.container)
-			comp.container.scope._each(function(scopeItem, name) {
-				if (! comp.list.contains(scopeItem) && scopeItem.data)
-					scopeData[name] = scopeItem.data.get();
-			});
-	} else if (comp.container) {
-		scopeData = {};
-		comp.container.scope._each(function(scopeItem, name) {
-			if (scopeItem.data)
-				scopeData[name] = scopeItem.data.get();
-		});
-	} else
-		scopeData = this._getScalarValue();
+        if (comp.container)
+            comp.container.scope._each(function(scopeItem, name) {
+                if (! comp.list.contains(scopeItem) && scopeItem.data)
+                    scopeData[name] = scopeItem.data.get();
+            });
+    } else if (comp.container) {
+        scopeData = {};
+        comp.container.scope._each(function(scopeItem, name) {
+            if (scopeItem.data)
+                scopeData[name] = scopeItem.data.get();
+        });
+    } else
+        scopeData = this._getScalarValue();
 
-	this._value = scopeData;
+    this._value = scopeData;
 
-	return scopeData;
+    return scopeData;
 }
 
 
@@ -2467,7 +2467,7 @@ function Data$get(deepGet) {
  * @private
  */
 function Data$_getScalarValue() {
-	return this.elData.get(this.owner.el);
+    return this.elData.get(this.owner.el);
 }
 
 
@@ -2482,74 +2482,74 @@ function Data$_getScalarValue() {
  * @return {Array}
  */
 function Data$splice(spliceIndex, spliceHowMany) { //, ... arguments
- 	var listFacet = this.owner.list;
- 	if (! listFacet)
- 		return logger.warn('Data: cannot use splice method without List facet');
+    var listFacet = this.owner.list;
+    if (! listFacet)
+        return logger.warn('Data: cannot use splice method without List facet');
 
- 	var removed = [];
+    var removed = [];
 
- 	var listLength = listFacet.count();
- 	arguments[0] = spliceIndex =
- 		modelUtils.normalizeSpliceIndex(spliceIndex, listLength);
+    var listLength = listFacet.count();
+    arguments[0] = spliceIndex =
+        modelUtils.normalizeSpliceIndex(spliceIndex, listLength);
 
- 	if (spliceHowMany > 0 && listLength > 0) {
- 		for (var i = spliceIndex; i < spliceIndex + spliceHowMany; i++) {
- 			var item = listFacet.item(spliceIndex);
- 			if (item) {
- 				var itemData = item.data.get();
- 				listFacet.removeItem(spliceIndex, true);
- 			} else
- 				logger.warn('Data: no item for index', i);
+    if (spliceHowMany > 0 && listLength > 0) {
+        for (var i = spliceIndex; i < spliceIndex + spliceHowMany; i++) {
+            var item = listFacet.item(spliceIndex);
+            if (item) {
+                var itemData = item.data.get();
+                listFacet.removeItem(spliceIndex, true);
+            } else
+                logger.warn('Data: no item for index', i);
 
- 			removed.push(itemData);
- 		}
+            removed.push(itemData);
+        }
 
- 		_updataDataPaths(listFacet, spliceIndex, listFacet.count());
- 	}
+        _updataDataPaths(listFacet, spliceIndex, listFacet.count());
+    }
 
- 	var added = [];
+    var added = [];
 
- 	var argsLen = arguments.length
- 		, addItems = argsLen > 2
- 		, addedCount = argsLen - 2;
- 	if (addItems) {
- 		listFacet.addItems(addedCount, spliceIndex);
- 		for (var i = 2, j = spliceIndex; i < argsLen; i++, j++) {
- 			var item = listFacet.item(j);
- 			if (item)
- 				var itemData = item.data.set(arguments[i]);
- 			else
- 				logger.warn('Data: no item for index', j);
+    var argsLen = arguments.length
+        , addItems = argsLen > 2
+        , addedCount = argsLen - 2;
+    if (addItems) {
+        listFacet.addItems(addedCount, spliceIndex);
+        for (var i = 2, j = spliceIndex; i < argsLen; i++, j++) {
+            var item = listFacet.item(j);
+            if (item)
+                var itemData = item.data.set(arguments[i]);
+            else
+                logger.warn('Data: no item for index', j);
 
- 			added.push(itemData);
- 		}
+            added.push(itemData);
+        }
 
- 		// change paths of items that were added and items after them
- 		_updataDataPaths(listFacet, spliceIndex, listFacet.count());
- 	}
+        // change paths of items that were added and items after them
+        _updataDataPaths(listFacet, spliceIndex, listFacet.count());
+    }
 
- 	if (Array.isArray(this._value)) {
- 		_.prependArray(added, [spliceIndex, spliceHowMany]);
- 		Array.prototype.splice.apply(this._value, added);
- 	} else
- 		this._value = this.get();
+    if (Array.isArray(this._value)) {
+        _.prependArray(added, [spliceIndex, spliceHowMany]);
+        Array.prototype.splice.apply(this._value, added);
+    } else
+        this._value = this.get();
 
-	this.postMessage('', { path: '', type: 'splice',
-							index: spliceIndex, removed: removed, addedCount: addItems ? addedCount : 0,
-							newValue: this._value });
+    this.postMessage('', { path: '', type: 'splice',
+                            index: spliceIndex, removed: removed, addedCount: addItems ? addedCount : 0,
+                            newValue: this._value });
 }
 
 
 // toIndex is not included
 // no range checking is made
 function _updataDataPaths(listFacet, fromIndex, toIndex) {
-	for (var i = fromIndex; i < toIndex; i++) {
-		var item = listFacet.item(i);
-		if (item)
-			item.data._path = '[' + i + ']';
-		else
-			logger.warn('Data: no item for index', j);		
-	}		
+    for (var i = fromIndex; i < toIndex; i++) {
+        var item = listFacet.item(i);
+        if (item)
+            item.data._path = '[' + i + ']';
+        else
+            logger.warn('Data: no item for index', j);      
+    }       
 }
 
 
@@ -2559,35 +2559,35 @@ function _updataDataPaths(listFacet, fromIndex, toIndex) {
  * @param {String} accessPath data access path
  */
 function Data$path(accessPath, createItem) {
-	// hack
-	createItem = true;
+    // hack
+    createItem = true;
 
-	if (! accessPath)
-		return this;
+    if (! accessPath)
+        return this;
 
-	var parsedPath = pathUtils.parseAccessPath(accessPath)
-		, currentComponent = this.owner;
+    var parsedPath = pathUtils.parseAccessPath(accessPath)
+        , currentComponent = this.owner;
 
-	for (var i = 0, len = parsedPath.length; i < len; i++) {
-		var pathNode = parsedPath[i]
-			, nodeKey = pathUtils.getPathNodeKey(pathNode);
-		if (pathNode.syntax == 'array' && currentComponent.list) {
-			var itemComponent = currentComponent.list.item(nodeKey);
-			if (! itemComponent && createItem) {
-				itemComponent = currentComponent.list.addItem(nodeKey);
-				itemComponent.data._path = pathNode.property;
-			}
-			if (itemComponent)
-				currentComponent = itemComponent;
-		} else if (currentComponent.container)
-			currentComponent = currentComponent.container.scope[nodeKey];
+    for (var i = 0, len = parsedPath.length; i < len; i++) {
+        var pathNode = parsedPath[i]
+            , nodeKey = pathUtils.getPathNodeKey(pathNode);
+        if (pathNode.syntax == 'array' && currentComponent.list) {
+            var itemComponent = currentComponent.list.item(nodeKey);
+            if (! itemComponent && createItem) {
+                itemComponent = currentComponent.list.addItem(nodeKey);
+                itemComponent.data._path = pathNode.property;
+            }
+            if (itemComponent)
+                currentComponent = itemComponent;
+        } else if (currentComponent.container)
+            currentComponent = currentComponent.container.scope[nodeKey];
 
-		var currentDataFacet = currentComponent && currentComponent.data;
-		if (! currentDataFacet)
-			break;
-	}
+        var currentDataFacet = currentComponent && currentComponent.data;
+        if (! currentDataFacet)
+            break;
+    }
 
-	return currentDataFacet;
+    return currentDataFacet;
 }
 
 
@@ -2598,7 +2598,7 @@ function Data$path(accessPath, createItem) {
  * @return {String}
  */
 function Data$getPath() {
-	return this._path;
+    return this._path;
 }
 
 
@@ -2611,10 +2611,10 @@ function Data$getPath() {
  * @return {String|Integer}
  */
 function Data$getKey() {
-	var path = this._path;
-	return path[0] == '['
-			? +path.slice(1, -1) // remove "[" and "]"
-			: path.slice(1) // remove leading "."
+    var path = this._path;
+    return path[0] == '['
+            ? +path.slice(1, -1) // remove "[" and "]"
+            : path.slice(1) // remove leading "."
 }
 
 
@@ -2627,7 +2627,7 @@ function Data$getKey() {
  * @return {Object}
  */
 function Data$getState(deepState) {
-	return { state: this.get(deepState) };
+    return { state: this.get(deepState) };
 }
 
 
@@ -2639,7 +2639,7 @@ function Data$getState(deepState) {
  * @param {Object} state data to set on facet's model
  */
 function Data$setState(state) {
-	return this.set(state.state);
+    return this.set(state.state);
 }
 
 },{"../../abstract/mixin":3,"../../messenger":58,"../../model/change_data":65,"../../model/model_utils":70,"../../model/path_utils":72,"../../util/logger":85,"../c_facet":12,"../msg_api/data":30,"../msg_api/de_data":31,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":94}],15:[function(require,module,exports){
@@ -2649,23 +2649,23 @@ function Data$setState(state) {
 // ###dom facet
 
 var ComponentFacet = require('../c_facet')
-	, facetsRegistry = require('./cf_registry')	
-	, _ = require('mol-proto')
-	, check = require('../../util/check')
-	, Match = check.Match
-	, binder = require('../../binder')
-	, BindAttribute = require('../../attributes/a_bind')
-	, DomFacetError = require('../../util/error').DomFacet
-	, domUtils = require('../../util/dom')
-	, config = require('../../config')
-	, doT = require('dot');
+    , facetsRegistry = require('./cf_registry') 
+    , _ = require('mol-proto')
+    , check = require('../../util/check')
+    , Match = check.Match
+    , binder = require('../../binder')
+    , BindAttribute = require('../../attributes/a_bind')
+    , DomFacetError = require('../../util/error').DomFacet
+    , domUtils = require('../../util/dom')
+    , config = require('../../config')
+    , doT = require('dot');
 
 
 // data model connection facet
 var Dom = _.createSubclass(ComponentFacet, 'Dom');
 
 _.extend(Dom, {
-	createElement: Dom$$createElement
+    createElement: Dom$$createElement
 });
 
 
@@ -2677,60 +2677,60 @@ _.extend(Dom, {
  * @return {Element} an html element 
  */
 function Dom$$createElement(config) {
-	var tagName = config.tagName || 'div'
-		, newEl = document.createElement(tagName)
-		, cssClasses = config.cssClasses
-		, configAttributes = config.attributes
-		, content = config.content
-		, template = config.template;
+    var tagName = config.tagName || 'div'
+        , newEl = document.createElement(tagName)
+        , cssClasses = config.cssClasses
+        , configAttributes = config.attributes
+        , content = config.content
+        , template = config.template;
 
-	if (configAttributes)
-		_.eachKey(configAttributes, function(attrValue, attrName) {
-			newEl.setAttribute(attrName, attrValue);
-		});
+    if (configAttributes)
+        _.eachKey(configAttributes, function(attrValue, attrName) {
+            newEl.setAttribute(attrName, attrValue);
+        });
 
-	if (cssClasses)
-		_attachCssClasses('add', cssClasses, el);
+    if (cssClasses)
+        _attachCssClasses('add', cssClasses, el);
 
-	if (content) {
-		if (template)
-			newEl.innerHTML = doT.template(template)({content: content});
-		else
-			newEl.innerHTML = content;
-	}
+    if (content) {
+        if (template)
+            newEl.innerHTML = doT.template(template)({content: content});
+        else
+            newEl.innerHTML = content;
+    }
 
-	return newEl;
+    return newEl;
 }
 
 
 _.extendProto(Dom, {
-	start: start,
+    start: start,
 
-	show: show,
-	hide: hide,
-	toggle: toggle,
-	detach: detach,
-	remove: remove,
-	append: append,
-	prepend: prepend,
-	appendChildren: appendChildren,
-	prependChildren: prependChildren,
-	insertAfter: insertAfter,
-	insertBefore: insertBefore,
-	children: Dom$children,
-	setStyle: setStyle,
-	setStyles: setStyles,
-	copy: copy,
-	createElement: createElement,
+    show: show,
+    hide: hide,
+    toggle: toggle,
+    detach: detach,
+    remove: remove,
+    append: append,
+    prepend: prepend,
+    appendChildren: appendChildren,
+    prependChildren: prependChildren,
+    insertAfter: insertAfter,
+    insertBefore: insertBefore,
+    children: Dom$children,
+    setStyle: setStyle,
+    setStyles: setStyles,
+    copy: copy,
+    createElement: createElement,
 
-	addCssClasses: _.partial(_manageCssClasses, 'add'),
-	removeCssClasses: _.partial(_manageCssClasses, 'remove'),
-	toggleCssClasses: _.partial(_manageCssClasses, 'toggle'),
+    addCssClasses: _.partial(_manageCssClasses, 'add'),
+    removeCssClasses: _.partial(_manageCssClasses, 'remove'),
+    toggleCssClasses: _.partial(_manageCssClasses, 'toggle'),
 
-	find: find,
-	hasTextBeforeSelection: hasTextBeforeSelection,
-	hasTextAfterSelection: hasTextAfterSelection
-	// _reattach: _reattachEventsOnElementChange
+    find: find,
+    hasTextBeforeSelection: hasTextBeforeSelection,
+    hasTextAfterSelection: hasTextAfterSelection
+    // _reattach: _reattachEventsOnElementChange
 });
 
 facetsRegistry.add(Dom);
@@ -2740,145 +2740,145 @@ module.exports = Dom;
 
 // start Dom facet
 function start() {
-	var cssClasses = this.config.cls;
+    var cssClasses = this.config.cls;
 
-	if (cssClasses)
-		this.addCssClasses(cssClasses);
+    if (cssClasses)
+        this.addCssClasses(cssClasses);
 }
 
 // show HTML element of component
 function show() {
-	this.owner.el.style.display = 'block';
+    this.owner.el.style.display = 'block';
 }
 
 // hide HTML element of component
 function hide() {
-	this.owner.el.style.display = 'none';
+    this.owner.el.style.display = 'none';
 }
 
 // show/hide
 function toggle(doShow) {
-	Dom.prototype[doShow ? 'show' : 'hide'].call(this);
+    Dom.prototype[doShow ? 'show' : 'hide'].call(this);
 }
 
 
 function _manageCssClasses(methodName, cssClasses, enforce) {
-	var el = this.owner.el;
+    var el = this.owner.el;
 
-	_attachCssClasses(methodName, cssClasses, el);
+    _attachCssClasses(methodName, cssClasses, el);
 }
 
 
 function _attachCssClasses(methodName, cssClasses, el) {
-	var classList = el.classList
-		, doToggle = methodName == 'toggle';
+    var classList = el.classList
+        , doToggle = methodName == 'toggle';
 
-	if (Array.isArray(cssClasses))
-		cssClasses.forEach(callMethod);
-	else if (typeof cssClasses == 'string')
-		callMethod(cssClasses);
-	else
-		throw new DomFacetError('unknown type of CSS classes parameter');
+    if (Array.isArray(cssClasses))
+        cssClasses.forEach(callMethod);
+    else if (typeof cssClasses == 'string')
+        callMethod(cssClasses);
+    else
+        throw new DomFacetError('unknown type of CSS classes parameter');
 
-	function callMethod(cssCls) {
-		doToggle
-			? classList[methodName](cssCls, enforce)
-			: classList[methodName](cssCls);
-	}
+    function callMethod(cssCls) {
+        doToggle
+            ? classList[methodName](cssCls, enforce)
+            : classList[methodName](cssCls);
+    }
 }
 
 
 function detach() {
-	if (this.owner.el)	
-		domUtils.detachComponent(this.owner.el);
+    if (this.owner.el)  
+        domUtils.detachComponent(this.owner.el);
 }
 
 
 function setStyle(property, value) {
-	this.owner.el.style[property] = value;
+    this.owner.el.style[property] = value;
 }
 
 function setStyles(properties) {
-	for (var property in properties)
-		this.owner.el.style[property] = properties[property];
+    for (var property in properties)
+        this.owner.el.style[property] = properties[property];
 }
 
 
 // create a copy of DOM element using facet config if set
 // TODO: reconsider deep copy as it wont work with a tagName
 function copy(isDeep) {
-	var tagName = this.config.tagName;
-	if (! this.config.tagName)
-		return this.owner.el.cloneNode(isDeep);
+    var tagName = this.config.tagName;
+    if (! this.config.tagName)
+        return this.owner.el.cloneNode(isDeep);
 
-	var newEl = document.createElement(tagName);
+    var newEl = document.createElement(tagName);
 
-	var configAttributes = this.config.attributes;
-	if (configAttributes)
-		_.eachKey(configAttributes, function(attrValue, attrName) {
-			newEl.setAttribute(attrName, attrValue);
-		});
+    var configAttributes = this.config.attributes;
+    if (configAttributes)
+        _.eachKey(configAttributes, function(attrValue, attrName) {
+            newEl.setAttribute(attrName, attrValue);
+        });
 
-	var attributes = this.owner.el.attributes;
-	if (attributes)
-		for (var i = 0; i<attributes.length; i++) {
-			var attr = attributes[i];
-			if (attr.name == 'id') continue;
-			newEl.setAttribute(attr.name, attr.value);
-		}
+    var attributes = this.owner.el.attributes;
+    if (attributes)
+        for (var i = 0; i<attributes.length; i++) {
+            var attr = attributes[i];
+            if (attr.name == 'id') continue;
+            newEl.setAttribute(attr.name, attr.value);
+        }
 
-	return newEl;
+    return newEl;
 }
 
 
 function createElement() {
-	var newEl = Dom.createElement(this.config);
-	return newEl;
+    var newEl = Dom.createElement(this.config);
+    return newEl;
 }
 
 
 // remove HTML element of component
 function remove() {
-	domUtils.removeElement(this.owner.el);
+    domUtils.removeElement(this.owner.el);
 }
 
 // append inside HTML element of component
 function append(el) {
-	this.owner.el.appendChild(el)
+    this.owner.el.appendChild(el)
 }
 
 // prepend inside HTML element of component
 function prepend(el) {
-	var thisEl = this.owner.el
-		, firstChild = thisEl.firstChild;
-	if (firstChild)
-		thisEl.insertBefore(el, firstChild);
-	else
-		thisEl.appendChild(el);
+    var thisEl = this.owner.el
+        , firstChild = thisEl.firstChild;
+    if (firstChild)
+        thisEl.insertBefore(el, firstChild);
+    else
+        thisEl.appendChild(el);
 }
 
 // appends children of element inside this component's element
 function appendChildren(el) {
-	while(el.childNodes.length)
-		this.append(el.childNodes[0]);
+    while(el.childNodes.length)
+        this.append(el.childNodes[0]);
 }
 
 // prepends children of element inside this component's element
 function prependChildren(el) {
-	while(el.childNodes.length)
-		this.prepend(el.childNodes[el.childNodes.length - 1]);
+    while(el.childNodes.length)
+        this.prepend(el.childNodes[el.childNodes.length - 1]);
 }
 
 function insertAfter(el) {
-	var thisEl = this.owner.el
-		, parent = thisEl.parentNode;
-	parent.insertBefore(el, thisEl.nextSibling);
+    var thisEl = this.owner.el
+        , parent = thisEl.parentNode;
+    parent.insertBefore(el, thisEl.nextSibling);
 }
 
 function insertBefore(el) {
-	var thisEl = this.owner.el
-		, parent = thisEl.parentNode;
-	parent.insertBefore(el, thisEl);
+    var thisEl = this.owner.el
+        , parent = thisEl.parentNode;
+    parent.insertBefore(el, thisEl);
 }
 
 
@@ -2889,13 +2889,13 @@ function insertBefore(el) {
  * @return {Array[Element]}
  */
 function Dom$children() {
-	return domUtils.children(this.owner.el);
+    return domUtils.children(this.owner.el);
 }
 
 
 var findDirections = {
-	'up': 'previousNode',
-	'down': 'nextNode'
+    'up': 'previousNode',
+    'down': 'nextNode'
 };
 
 // Finds component passing optional iterator's test
@@ -2903,64 +2903,64 @@ var findDirections = {
 // by traversing DOM tree upwards (direction = "up")
 // or downwards (direction = "down")
 function find(direction, iterator) {
-	if (! findDirections.hasOwnProperty(direction))
-		throw new DomFacetError('incorrect find direction: ' + direction);
+    if (! findDirections.hasOwnProperty(direction))
+        throw new DomFacetError('incorrect find direction: ' + direction);
 
-	var el = this.owner.el
-		, scope = this.owner.scope
-		, treeWalker = document.createTreeWalker(scope._rootEl, NodeFilter.SHOW_ELEMENT);
+    var el = this.owner.el
+        , scope = this.owner.scope
+        , treeWalker = document.createTreeWalker(scope._rootEl, NodeFilter.SHOW_ELEMENT);
 
-	treeWalker.currentNode = el;
-	var nextNode = treeWalker[findDirections[direction]]()
-		, componentsNames = Object.keys(scope)
-		, found = false;
+    treeWalker.currentNode = el;
+    var nextNode = treeWalker[findDirections[direction]]()
+        , componentsNames = Object.keys(scope)
+        , found = false;
 
-	while (nextNode) {
-		var attr = new BindAttribute(nextNode);
-		if (attr.node) {
-			attr.parse().validate();
-			if (scope.hasOwnProperty(attr.compName)) {
-				var component = scope[attr.compName];
-				if (! iterator || iterator(component)) {
-					found = true;
-					break;
-				}
-			}
-		}
-		treeWalker.currentNode = nextNode;
-		nextNode = treeWalker[findDirections[direction]]();
-	}
+    while (nextNode) {
+        var attr = new BindAttribute(nextNode);
+        if (attr.node) {
+            attr.parse().validate();
+            if (scope.hasOwnProperty(attr.compName)) {
+                var component = scope[attr.compName];
+                if (! iterator || iterator(component)) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        treeWalker.currentNode = nextNode;
+        nextNode = treeWalker[findDirections[direction]]();
+    }
 
-	if (found) return component;
+    if (found) return component;
 }
 
 
 // returns true if the element has text before selection
 function hasTextBeforeSelection() {
-	var selection = window.getSelection();
-	if (! selection.isCollapsed) return true;
-	if (selection.anchorOffset) return true;
+    var selection = window.getSelection();
+    if (! selection.isCollapsed) return true;
+    if (selection.anchorOffset) return true;
 
-	// walk up the DOM tree to check if there are text nodes before cursor
-	var treeWalker = document.createTreeWalker(this.owner.el, NodeFilter.SHOW_TEXT);
-	return treeWalker.previousNode();
+    // walk up the DOM tree to check if there are text nodes before cursor
+    var treeWalker = document.createTreeWalker(this.owner.el, NodeFilter.SHOW_TEXT);
+    return treeWalker.previousNode();
 }
 
 
 function hasTextAfterSelection() {
-	var selection = window.getSelection();
-	if (! selection.isCollapsed) return true;
-	if (selection.anchorOffset < selection.anchorNode.length) return true;
+    var selection = window.getSelection();
+    if (! selection.isCollapsed) return true;
+    if (selection.anchorOffset < selection.anchorNode.length) return true;
 
-	// walk up the DOM tree to check if there are text nodes after cursor
-	var treeWalker = document.createTreeWalker(this.owner.el, NodeFilter.SHOW_TEXT);
-	treeWalker.currentNode = selection.anchorNode;
-	var nextNode = treeWalker.nextNode();
-	
-	//To capture when treewalker gives us an empty text node (unknown reason)
-	var isText = nextNode ? !nextNode.nodeValue == '' : false;
+    // walk up the DOM tree to check if there are text nodes after cursor
+    var treeWalker = document.createTreeWalker(this.owner.el, NodeFilter.SHOW_TEXT);
+    treeWalker.currentNode = selection.anchorNode;
+    var nextNode = treeWalker.nextNode();
+    
+    //To capture when treewalker gives us an empty text node (unknown reason)
+    var isText = nextNode ? !nextNode.nodeValue == '' : false;
 
-	return isText;
+    return isText;
 }
 
 },{"../../attributes/a_bind":5,"../../binder":9,"../../config":53,"../../util/check":77,"../../util/dom":80,"../../util/error":82,"../c_facet":12,"./cf_registry":25,"dot":93,"mol-proto":94}],16:[function(require,module,exports){
@@ -2970,11 +2970,11 @@ function hasTextAfterSelection() {
 // ###drag facet
 
 var ComponentFacet = require('../c_facet')
-	, facetsRegistry = require('./cf_registry')
-	, DOMEventsSource = require('../msg_src/dom_events')
-	, Component = require('../c_class')
-	, _ = require('mol-proto')
-	, logger = require('../../util/logger');
+    , facetsRegistry = require('./cf_registry')
+    , DOMEventsSource = require('../msg_src/dom_events')
+    , Component = require('../c_class')
+    , _ = require('mol-proto')
+    , logger = require('../../util/logger');
 
 
 /**
@@ -2984,11 +2984,11 @@ var ComponentFacet = require('../c_facet')
 var Drag = _.createSubclass(ComponentFacet, 'Drag');
 
 _.extendProto(Drag, {
-	init: Drag$init,
-	start: Drag$start,
+    init: Drag$init,
+    start: Drag$start,
 
-	setHandle: Drag$setHandle,
-	// _reattach: _reattachEventsOnElementChange
+    setHandle: Drag$setHandle,
+    // _reattach: _reattachEventsOnElementChange
 });
 
 facetsRegistry.add(Drag);
@@ -2997,15 +2997,15 @@ module.exports = Drag;
 
 
 function Drag$init() {
-	ComponentFacet.prototype.init.apply(this, arguments);	
+    ComponentFacet.prototype.init.apply(this, arguments);   
 
-	this._createMessageSourceWithAPI(DOMEventsSource);
-	this._dragData = {};
+    this._createMessageSourceWithAPI(DOMEventsSource);
+    this._dragData = {};
 
-	var dataTypeInfo = this.config._dataTypeInfo || '';
-	this._dataTypeInfo = typeof dataTypeInfo == 'function'
-							? dataTypeInfo
-							: function() { return dataTypeInfo; };
+    var dataTypeInfo = this.config._dataTypeInfo || '';
+    this._dataTypeInfo = typeof dataTypeInfo == 'function'
+                            ? dataTypeInfo
+                            : function() { return dataTypeInfo; };
 }
 
 
@@ -3016,33 +3016,33 @@ function Drag$init() {
  * @param {Element} handleEl
  */
 function Drag$setHandle(handleEl) {
-	if (! this.owner.el.contains(handleEl))
-		return logger.warn('drag handle should be inside element to be dragged')
-	this._dragHandle = handleEl;
+    if (! this.owner.el.contains(handleEl))
+        return logger.warn('drag handle should be inside element to be dragged')
+    this._dragHandle = handleEl;
 }
 
 
 function Drag$start() {
-	ComponentFacet.prototype.start.apply(this, arguments);
-	_addDragAttribute.call(this);
+    ComponentFacet.prototype.start.apply(this, arguments);
+    _addDragAttribute.call(this);
 
-	this.onMessages({
-		'mousedown': {
-			context: this, subscriber: onMouseDown },
-		'mouseenter mouseleave mousemove': {
-			context: this, subscriber: onMouseMovement },
-		'dragstart': {
-			context: this, subscriber: onDragStart },
-		'drag': {
-			context: this, subscriber: onDragging }
-	});
+    this.onMessages({
+        'mousedown': {
+            context: this, subscriber: onMouseDown },
+        'mouseenter mouseleave mousemove': {
+            context: this, subscriber: onMouseMovement },
+        'dragstart': {
+            context: this, subscriber: onDragStart },
+        'drag': {
+            context: this, subscriber: onDragging }
+    });
 
-	this.owner.onMessages({
-		'getstatestarted':
-			{ subscriber: _removeDragAttribute, context: this },
-		'getstatecompleted':
-			{ subscriber: _addDragAttribute, context: this }
-	});
+    this.owner.onMessages({
+        'getstatestarted':
+            { subscriber: _removeDragAttribute, context: this },
+        'getstatecompleted':
+            { subscriber: _addDragAttribute, context: this }
+    });
 }
 
 
@@ -3052,69 +3052,69 @@ function Drag$start() {
  * @private
  */
 function _addDragAttribute() {
-	this.owner.el.setAttribute('draggable', true);
+    this.owner.el.setAttribute('draggable', true);
 }
 
 
 function _removeDragAttribute() {
-	this.owner.el.removeAttribute('draggable');
+    this.owner.el.removeAttribute('draggable');
 }
 
 
 function onMouseDown(eventType, event) {
-	this.__mouseDownTarget = event.target;
-	if (targetInDragHandle.call(this)) {
-		window.getSelection().empty();
-		event.stopPropagation();
-	}
+    this.__mouseDownTarget = event.target;
+    if (targetInDragHandle.call(this)) {
+        window.getSelection().empty();
+        event.stopPropagation();
+    }
 }
 
 
 function onMouseMovement(eventType, event) {
-	var shouldBeDraggable = targetInDragHandle.call(this);
-	this.owner.el.setAttribute('draggable', shouldBeDraggable);
-	event.stopPropagation();
+    var shouldBeDraggable = targetInDragHandle.call(this);
+    this.owner.el.setAttribute('draggable', shouldBeDraggable);
+    event.stopPropagation();
 }
 
 
 function onDragStart(eventType, event) {
-	if (this.config.off) {
-		event.preventDefault();
-		return;
-	}
+    if (this.config.off) {
+        event.preventDefault();
+        return;
+    }
 
-	var transferState = this.owner.getTransferState();
-	this.__dragData = JSON.stringify(transferState);
-	this.__dataType = 'x-application/milo-component/' + transferState.compClass + '/'
-						+ this._dataTypeInfo.call(this);
-	setDragData.call(this, event);
+    var transferState = this.owner.getTransferState();
+    this.__dragData = JSON.stringify(transferState);
+    this.__dataType = 'x-application/milo-component/' + transferState.compClass + '/'
+                        + this._dataTypeInfo.call(this);
+    setDragData.call(this, event);
 }
 
 
 function onDragging(eventType, event) {
-	if (this.config.off) {
-		event.preventDefault();
-		return;
-	}
+    if (this.config.off) {
+        event.preventDefault();
+        return;
+    }
 
-	setDragData.call(this, event);
+    setDragData.call(this, event);
 }
 
 
 function setDragData(event) {
-	if (targetInDragHandle.call(this)) {
-		var dt = event.dataTransfer;
-		dt.setData(this.__dataType, this.__dragData);
-		// set html in case it is inserted elsewhere
-		dt.setData('x-application/milo-component', null)
-		dt.setData('text/html', this.owner.el.outerHTML);
-	} else
-		event.preventDefault();
+    if (targetInDragHandle.call(this)) {
+        var dt = event.dataTransfer;
+        dt.setData(this.__dataType, this.__dragData);
+        // set html in case it is inserted elsewhere
+        dt.setData('x-application/milo-component', null)
+        dt.setData('text/html', this.owner.el.outerHTML);
+    } else
+        event.preventDefault();
 }
 
 
 function targetInDragHandle() {
-	return ! this._dragHandle || this._dragHandle.contains(this.__mouseDownTarget);
+    return ! this._dragHandle || this._dragHandle.contains(this.__mouseDownTarget);
 }
 
 },{"../../util/logger":85,"../c_class":11,"../c_facet":12,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":94}],17:[function(require,module,exports){
@@ -3124,19 +3124,19 @@ function targetInDragHandle() {
 // ###drop facet
 
 var ComponentFacet = require('../c_facet')
-	, facetsRegistry = require('./cf_registry')
-	, DOMEventsSource = require('../msg_src/dom_events')
+    , facetsRegistry = require('./cf_registry')
+    , DOMEventsSource = require('../msg_src/dom_events')
 
-	, _ = require('mol-proto');
+    , _ = require('mol-proto');
 
 
 // generic drop handler, should be overridden
 var Drop = _.createSubclass(ComponentFacet, 'Drop');
 
 _.extendProto(Drop, {
-	init: Drop$init,
-	start: Drop$start
-	// _reattach: _reattachEventsOnElementChange
+    init: Drop$init,
+    start: Drop$start
+    // _reattach: _reattachEventsOnElementChange
 });
 
 facetsRegistry.add(Drop);
@@ -3145,42 +3145,42 @@ module.exports = Drop;
 
 
 function Drop$init() {
-	ComponentFacet.prototype.init.apply(this, arguments);
-	this._createMessageSourceWithAPI(DOMEventsSource);
+    ComponentFacet.prototype.init.apply(this, arguments);
+    this._createMessageSourceWithAPI(DOMEventsSource);
 }
 
 
 function Drop$start() {
-	ComponentFacet.prototype.start.apply(this, arguments);
-	this.owner.el.classList.add('cc-module-relative');
-	this.on('dragenter dragover', onDragging);
+    ComponentFacet.prototype.start.apply(this, arguments);
+    this.owner.el.classList.add('cc-module-relative');
+    this.on('dragenter dragover', onDragging);
 
-	var allowDropTest = this.config.allowDropTest;
+    var allowDropTest = this.config.allowDropTest;
 
-	function onDragging(eventType, event) {
-		//TODO: manage not-allowed drops, maybe with config.
-		event.stopPropagation();
-		var dt = event.dataTransfer
-			, dataTypes = dt.types
-			, hasHtml = dataTypes.indexOf('text/html') >= 0
-			, hasMiloData = dataTypes.indexOf('x-application/milo-component') >= 0;
+    function onDragging(eventType, event) {
+        //TODO: manage not-allowed drops, maybe with config.
+        event.stopPropagation();
+        var dt = event.dataTransfer
+            , dataTypes = dt.types
+            , hasHtml = dataTypes.indexOf('text/html') >= 0
+            , hasMiloData = dataTypes.indexOf('x-application/milo-component') >= 0;
 
-		if (dataTypes && (hasHtml || hasMiloData)) {
-			var canDrop = allowDropTest ? allowDropTest(event, hasMiloData) : 'move';
-			event.dataTransfer.dropEffect = canDrop;
-			event.preventDefault();
-		}
-	}
+        if (dataTypes && (hasHtml || hasMiloData)) {
+            var canDrop = allowDropTest ? allowDropTest(event, hasMiloData) : 'move';
+            event.dataTransfer.dropEffect = canDrop;
+            event.preventDefault();
+        }
+    }
 }
 
 },{"../c_facet":12,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":94}],18:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
-	, facetsRegistry = require('./cf_registry')
-	, Messenger = require('../../messenger')
-	, DOMEventsSource = require('../msg_src/dom_events')
-	, _ = require('mol-proto');
+    , facetsRegistry = require('./cf_registry')
+    , Messenger = require('../../messenger')
+    , DOMEventsSource = require('../msg_src/dom_events')
+    , _ = require('mol-proto');
 
 
 /**
@@ -3204,8 +3204,8 @@ var Events = _.createSubclass(ComponentFacet, 'Events');
  * - [init](#Events$init) - called by constructor automatically
  */
 _.extendProto(Events, {
-	init: Events$init,
-	// _reattach: _reattachEventsOnElementChange
+    init: Events$init,
+    // _reattach: _reattachEventsOnElementChange
 });
 
 facetsRegistry.add(Events);
@@ -3218,11 +3218,11 @@ module.exports = Events;
  * Initialzes facet, connects DOMEventsSource to facet's messenger
  */
 function Events$init() {
-	ComponentFacet.prototype.init.apply(this, arguments);
+    ComponentFacet.prototype.init.apply(this, arguments);
 
-	var domEventsSource = new DOMEventsSource(this, { trigger: 'trigger' }, undefined, this.owner);
-	this._setMessageSource(domEventsSource);
-	_.defineProperty(this, '_domEventsSource', domEventsSource);
+    var domEventsSource = new DOMEventsSource(this, { trigger: 'trigger' }, undefined, this.owner);
+    this._setMessageSource(domEventsSource);
+    _.defineProperty(this, '_domEventsSource', domEventsSource);
 }
 
 },{"../../messenger":58,"../c_facet":12,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":94}],19:[function(require,module,exports){
@@ -3230,11 +3230,11 @@ function Events$init() {
 
 
 var ComponentFacet = require('../c_facet')
-	, facetsRegistry = require('./cf_registry')
-	, Messenger = require('../../messenger')
-	, FrameMessageSource = require('../msg_src/frame')
-	, domEventsConstructors = require('../msg_src/de_constrs')
-	, _ = require('mol-proto');
+    , facetsRegistry = require('./cf_registry')
+    , Messenger = require('../../messenger')
+    , FrameMessageSource = require('../msg_src/frame')
+    , domEventsConstructors = require('../msg_src/de_constrs')
+    , _ = require('mol-proto');
 
 
 /**
@@ -3248,7 +3248,7 @@ var ComponentFacet = require('../c_facet')
  * To subscribe to this messages inside frame use (with milo - see [milo.mail](../../mail/index.js.html)):
  * ```
  * milo.mail.on('message:mymessage', function(msgType, msgData) {
- *	   // data is inside of window message data
+ *     // data is inside of window message data
  *     // msgType == 'message:mymessage'
  *     var myData = msgData.data;
  *     // ... app logic here
@@ -3285,14 +3285,14 @@ var Frame$whenMiloReady = _makeWhenReadyFunc(Frame$isMiloReady, 'message:milorea
  * - [init](#Frame$init) - called by constructor automatically
  */
 _.extendProto(Frame, {
-	init: Frame$init,
-	start: Frame$start,
-	getWindow: Frame$getWindow,
-	isReady: Frame$isReady,
-	whenReady: Frame$whenReady,
-	isMiloReady: Frame$isMiloReady,
-	whenMiloReady: Frame$whenMiloReady
-	// _reattach: _reattachEventsOnElementChange
+    init: Frame$init,
+    start: Frame$start,
+    getWindow: Frame$getWindow,
+    isReady: Frame$isReady,
+    whenReady: Frame$whenReady,
+    isMiloReady: Frame$isMiloReady,
+    whenMiloReady: Frame$whenMiloReady
+    // _reattach: _reattachEventsOnElementChange
 });
 
 
@@ -3306,12 +3306,12 @@ module.exports = Frame;
  * Initialzes facet, connects FrameMessageSource to facet's messenger
  */
 function Frame$init() {
-	ComponentFacet.prototype.init.apply(this, arguments);
-	
-	var messageSource = new FrameMessageSource(this, { trigger: 'trigger' }, undefined, this.owner);
-	this._setMessageSource(messageSource);
+    ComponentFacet.prototype.init.apply(this, arguments);
+    
+    var messageSource = new FrameMessageSource(this, { trigger: 'trigger' }, undefined, this.owner);
+    this._setMessageSource(messageSource);
 
-	_.defineProperty(this, '_messageSource', messageSource);
+    _.defineProperty(this, '_messageSource', messageSource);
 }
 
 
@@ -3320,15 +3320,15 @@ function Frame$init() {
  * Emits frameloaded event when ready.
  */
 function Frame$start() {
-	ComponentFacet.prototype.start.apply(this, arguments);
-	var self = this;
-	var doc = this.getWindow().document;
+    ComponentFacet.prototype.start.apply(this, arguments);
+    var self = this;
+    var doc = this.getWindow().document;
 
-	milo(postDomReady);
+    milo(postDomReady);
 
-	function postDomReady(event) {
-		self.postMessage('domready', event);
-	}
+    function postDomReady(event) {
+        self.postMessage('domready', event);
+    }
 }
 
 
@@ -3339,7 +3339,7 @@ function Frame$start() {
  * @param {Window}
  */
 function Frame$getWindow() {
-	return this.owner.el.contentWindow;
+    return this.owner.el.contentWindow;
 }
 
 
@@ -3350,8 +3350,8 @@ function Frame$getWindow() {
  * @return {String|Boolean}
  */
 function Frame$isReady() {
-	var readyState = this.getWindow().document.readyState;
-	return  readyState != 'loading' ? readyState : false;
+    var readyState = this.getWindow().document.readyState;
+    return  readyState != 'loading' ? readyState : false;
 }
 
 
@@ -3362,24 +3362,24 @@ function Frame$isReady() {
  * @return {Boolean}
  */
 function Frame$isMiloReady() {
-	var frameMilo = this.getWindow().milo;
-	return this.isReady() && frameMilo && frameMilo.milo_version;
+    var frameMilo = this.getWindow().milo;
+    return this.isReady() && frameMilo && frameMilo.milo_version;
 }
 
 
 function _makeWhenReadyFunc(isReadyFunc, event) {
-	return function Frame_whenReadyFunc(func) { // , arguments
-		var self = this
-			, args = _.slice(arguments, 1);
-		if (isReadyFunc.call(this))
-			callFunc();
-		else
-			this.on(event, callFunc);
+    return function Frame_whenReadyFunc(func) { // , arguments
+        var self = this
+            , args = _.slice(arguments, 1);
+        if (isReadyFunc.call(this))
+            callFunc();
+        else
+            this.on(event, callFunc);
 
-		function callFunc() {
-			func.apply(self, args);
-		}
-	}
+        function callFunc() {
+            func.apply(self, args);
+        }
+    }
 }
 
 },{"../../messenger":58,"../c_facet":12,"../msg_src/de_constrs":32,"../msg_src/frame":34,"./cf_registry":25,"mol-proto":94}],20:[function(require,module,exports){
@@ -3400,7 +3400,7 @@ var ComponentFacet = require('../c_facet')
 var ItemFacet = _.createSubclass(ComponentFacet, 'Item');
 
 _.extendProto(ItemFacet, {
-	removeItem: ItemFacet$removeItem,
+    removeItem: ItemFacet$removeItem,
     require: ['Container', 'Dom', 'Data']
 });
 
@@ -3414,8 +3414,8 @@ module.exports = ItemFacet;
  * Removes component from the list
  */
 function ItemFacet$removeItem() {
-	// this.list and this.index are set by the list when the item is added
-	this.list.removeItem(this.index, true);
+    // this.list and this.index are set by the list when the item is added
+    this.list.removeItem(this.index, true);
 }
 
 },{"../../mail":55,"../../model":67,"../c_facet":12,"./cf_registry":25,"mol-proto":94}],21:[function(require,module,exports){
@@ -3666,21 +3666,21 @@ function each(callback, thisArg) {
 // ###model facet
 
 var ComponentFacet = require('../c_facet')
-	, facetsRegistry = require('./cf_registry')
-	, Model = require('../../model')
+    , facetsRegistry = require('./cf_registry')
+    , Model = require('../../model')
 
-	, _ = require('mol-proto');
+    , _ = require('mol-proto');
 
 
 // generic drag handler, should be overridden
 var ModelFacet = _.createSubclass(ComponentFacet, 'Model');
 
 _.extendProto(ModelFacet, {
-	init: ModelFacet$init,
-	getState: ModelFacet$getState,
-	setState: ModelFacet$setState,
-	_createMessenger: ModelFacet$_createMessenger
-	// _reattach: _reattachEventsOnElementChange
+    init: ModelFacet$init,
+    getState: ModelFacet$getState,
+    setState: ModelFacet$setState,
+    _createMessenger: ModelFacet$_createMessenger
+    // _reattach: _reattachEventsOnElementChange
 });
 
 facetsRegistry.add(ModelFacet);
@@ -3689,8 +3689,8 @@ module.exports = ModelFacet;
 
 
 function ModelFacet$init() {
-	this.m = new Model(this.config.data, this);
-	ComponentFacet.prototype.init.apply(this, arguments);
+    this.m = new Model(this.config.data, this);
+    ComponentFacet.prototype.init.apply(this, arguments);
 }
 
 
@@ -3702,7 +3702,7 @@ function ModelFacet$init() {
  * @return {Object}
  */
 function ModelFacet$getState() {
-	return { state: this.m.get() };
+    return { state: this.m.get() };
 }
 
 
@@ -3714,13 +3714,13 @@ function ModelFacet$getState() {
  * @param {Object} state data to set on facet's model
  */
 function ModelFacet$setState(state) {
-	return this.m.set(state.state);
+    return this.m.set(state.state);
 }
 
 
 function ModelFacet$_createMessenger() { // Called by inherited init
-	this.m.proxyMessenger(this); // Creates messenger's methods directly on facet
-	this.m.proxyMethods(this); // Creates model's methods directly on facet
+    this.m.proxyMessenger(this); // Creates messenger's methods directly on facet
+    this.m.proxyMethods(this); // Creates model's methods directly on facet
 }
 
 },{"../../model":67,"../c_facet":12,"./cf_registry":25,"mol-proto":94}],23:[function(require,module,exports){
@@ -3739,24 +3739,24 @@ function ModelFacet$_createMessenger() { // Called by inherited init
 //   as global variable `doT`.
 
 var ComponentFacet = require('../c_facet')
-	, facetsRegistry = require('./cf_registry')	
-	, _ = require('mol-proto')
-	, check = require('../../util/check')
-	, Match = check.Match
-	, binder = require('../../binder');
+    , facetsRegistry = require('./cf_registry') 
+    , _ = require('mol-proto')
+    , check = require('../../util/check')
+    , Match = check.Match
+    , binder = require('../../binder');
 
 
 // data model connection facet
 var Template = _.createSubclass(ComponentFacet, 'Template');
 
 _.extendProto(Template, {
-	init: Template$init,
-	set: Template$set,
-	render: Template$render,
-	binder: Template$binder,
-	require: ['Container']
+    init: Template$init,
+    set: Template$set,
+    render: Template$render,
+    binder: Template$binder,
+    require: ['Container']
 
-	// _reattach: _reattachEventsOnElementChange
+    // _reattach: _reattachEventsOnElementChange
 });
 
 facetsRegistry.add(Template);
@@ -3765,55 +3765,55 @@ module.exports = Template;
 
 
 function Template$init() {
-	ComponentFacet.prototype.init.apply(this, arguments);
+    ComponentFacet.prototype.init.apply(this, arguments);
 
-	// templates are interpolated with default (doT) or configured engine (this.config.compile)
-	// unless this.config.interpolate is false
-	var compile = this.config.interpolate === false
-					? undefined
-					: this.config.compile || milo.config.template.compile;
+    // templates are interpolated with default (doT) or configured engine (this.config.compile)
+    // unless this.config.interpolate is false
+    var compile = this.config.interpolate === false
+                    ? undefined
+                    : this.config.compile || milo.config.template.compile;
 
-	this.set(this.config.template || '', compile);
+    this.set(this.config.template || '', compile);
 }
 
 
 function Template$set(templateStr, compile) {
-	check(templateStr, String);
-	check(compile, Match.Optional(Function));
+    check(templateStr, String);
+    check(compile, Match.Optional(Function));
 
-	this._templateStr = templateStr;
-	if (compile)
-		this._compile = compile;
-	else
-		compile = this._compile;
+    this._templateStr = templateStr;
+    if (compile)
+        this._compile = compile;
+    else
+        compile = this._compile;
 
-	if (compile)
-		this._template = compile(templateStr);
+    if (compile)
+        this._template = compile(templateStr);
 
-	return this;
+    return this;
 }
 
 
 function Template$render(data) { // we need data only if use templating engine
-	this.owner.el.innerHTML = this._template
-								? this._template(data)
-								: this._templateStr;
+    this.owner.el.innerHTML = this._template
+                                ? this._template(data)
+                                : this._templateStr;
 
-	return this;
+    return this;
 }
 
 
 function Template$binder() {
-	this.owner.container.binder();
+    this.owner.container.binder();
 }
 
 },{"../../binder":9,"../../util/check":77,"../c_facet":12,"./cf_registry":25,"mol-proto":94}],24:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
-	, facetsRegistry = require('./cf_registry')
+    , facetsRegistry = require('./cf_registry')
 
-	, _ = require('mol-proto');
+    , _ = require('mol-proto');
 
 
 /**
@@ -3824,9 +3824,9 @@ var ComponentFacet = require('../c_facet')
 var Transfer = _.createSubclass(ComponentFacet, 'Transfer');
 
 _.extendProto(Transfer, {
-	init: Transfer$init,
-	getState: Transfer$getState,
-	setState: Transfer$setState
+    init: Transfer$init,
+    getState: Transfer$getState,
+    setState: Transfer$setState
 });
 
 facetsRegistry.add(Transfer);
@@ -3835,8 +3835,8 @@ module.exports = Transfer;
 
 
 function Transfer$init() {
-	ComponentFacet.prototype.init.apply(this, arguments);
-	this._state = undefined;
+    ComponentFacet.prototype.init.apply(this, arguments);
+    this._state = undefined;
 }
 
 
@@ -3847,7 +3847,7 @@ function Transfer$init() {
  * @return {Object}
  */
  function Transfer$getState() {
- 	return this._state;
+    return this._state;
  }
 
 
@@ -3858,14 +3858,14 @@ function Transfer$init() {
  * @param {Object} state
  */
  function Transfer$setState(state) {
- 	this._state = state;
+    this._state = state;
  }
 
 },{"../c_facet":12,"./cf_registry":25,"mol-proto":94}],25:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../abstract/registry')
-	, ComponentFacet = require('../c_facet');
+    , ComponentFacet = require('../c_facet');
 
 
 /**
@@ -3884,11 +3884,11 @@ module.exports = facetsRegistry;
 'use strict';
 
 var componentsRegistry = require('./c_registry')
-	, facetsRegistry = require('./c_facets/cf_registry')
-	, componentName = require('../util/component_name')
-	, BinderError = require('../util/error').Binder
-	, logger = require('../util/logger')
-	, _ = require('mol-proto');
+    , facetsRegistry = require('./c_facets/cf_registry')
+    , componentName = require('../util/component_name')
+    , BinderError = require('../util/error').Binder
+    , logger = require('../util/logger')
+    , _ = require('mol-proto');
 
 
 module.exports = ComponentInfo;
@@ -3905,19 +3905,19 @@ module.exports = ComponentInfo;
  * @return {ComponentInfo}
  */
 function ComponentInfo(scope, el, attr, throwOnErrors) {
-	attr.parse().validate();
+    attr.parse().validate();
 
-	this.scope = scope;
-	this.el = el;
-	this.attr = attr;
-	this.name = attr.compName;
-	this.ComponentClass = getComponentClass(attr, throwOnErrors);
-	this.extraFacetsClasses = getComponentExtraFacets(this.ComponentClass, attr, throwOnErrors);
+    this.scope = scope;
+    this.el = el;
+    this.attr = attr;
+    this.name = attr.compName;
+    this.ComponentClass = getComponentClass(attr, throwOnErrors);
+    this.extraFacetsClasses = getComponentExtraFacets(this.ComponentClass, attr, throwOnErrors);
 
-	if (this.ComponentClass
-			&& hasContainerFacet(this.ComponentClass, this.extraFacetsClasses)) {
-		this.container = {};
-	}
+    if (this.ComponentClass
+            && hasContainerFacet(this.ComponentClass, this.extraFacetsClasses)) {
+        this.container = {};
+    }
 }
 
 
@@ -3928,8 +3928,8 @@ function ComponentInfo(scope, el, attr, throwOnErrors) {
  * - [rename](#ComponentInfo$rename)
  */
 _.extendProto(ComponentInfo, {
-	destroy: ComponentInfo$destroy,
-	rename: ComponentInfo$rename
+    destroy: ComponentInfo$destroy,
+    rename: ComponentInfo$rename
 });
 
 
@@ -3938,8 +3938,8 @@ _.extendProto(ComponentInfo, {
  * Destroys ComponentInfo by removing the references to DOM element
  */
 function ComponentInfo$destroy() {
-	delete this.el;
-	this.attr.destroy();
+    delete this.el;
+    this.attr.destroy();
 }
 
 
@@ -3951,76 +3951,76 @@ function ComponentInfo$destroy() {
  * @param {[Boolean]} renameInScope optional false to not rename ComponentInfo object in its scope, true by default
  */
 function ComponentInfo$rename(name, renameInScope) {
-	name = name || componentName();
-	if (this.scope && renameInScope !== false) {
-		this.scope._remove(this.name);
-		this.scope._add(this, name);
-	} else
-		this.name = name;
+    name = name || componentName();
+    if (this.scope && renameInScope !== false) {
+        this.scope._remove(this.name);
+        this.scope._add(this, name);
+    } else
+        this.name = name;
 
-	this.attr.compName = name;
-	this.attr.decorate();
+    this.attr.compName = name;
+    this.attr.decorate();
 }
 
 
 function getComponentClass(attr, throwOnErrors) {
-	var ComponentClass = componentsRegistry.get(attr.compClass);
-	if (! ComponentClass)
-		reportBinderError(throwOnErrors, 'class ' + attr.compClass + ' is not registered');
-	return ComponentClass;
+    var ComponentClass = componentsRegistry.get(attr.compClass);
+    if (! ComponentClass)
+        reportBinderError(throwOnErrors, 'class ' + attr.compClass + ' is not registered');
+    return ComponentClass;
 }
 
 
 function getComponentExtraFacets(ComponentClass, attr, throwOnErrors) {
-	var facets = attr.compFacets
-		, extraFacetsClasses = {};
+    var facets = attr.compFacets
+        , extraFacetsClasses = {};
 
-	if (Array.isArray(facets))
-		facets.forEach(function(fctName) {
-			fctName = _.firstUpperCase(fctName);
-			if (ComponentClass.hasFacet(fctName))
-				reportBinderError(throwOnErrors, 'class ' + ComponentClass.name
-									  + ' already has facet ' + fctName);
-			if (extraFacetsClasses[fctName])
-				reportBinderError(throwOnErrors, 'component ' + attr.compName
-									  + ' already has facet ' + fctName);
-			var FacetClass = facetsRegistry.get(fctName);
-			extraFacetsClasses[fctName] = FacetClass;
-		});
+    if (Array.isArray(facets))
+        facets.forEach(function(fctName) {
+            fctName = _.firstUpperCase(fctName);
+            if (ComponentClass.hasFacet(fctName))
+                reportBinderError(throwOnErrors, 'class ' + ComponentClass.name
+                                      + ' already has facet ' + fctName);
+            if (extraFacetsClasses[fctName])
+                reportBinderError(throwOnErrors, 'component ' + attr.compName
+                                      + ' already has facet ' + fctName);
+            var FacetClass = facetsRegistry.get(fctName);
+            extraFacetsClasses[fctName] = FacetClass;
+        });
 
-	return extraFacetsClasses;
+    return extraFacetsClasses;
 }
 
 
 function reportBinderError(throwOnErrors, message) {
-	if (throwOnErrors === false)
-		logger.error('ComponentInfo binder error:', message);
-	else
-		throw new BinderError(message);
+    if (throwOnErrors === false)
+        logger.error('ComponentInfo binder error:', message);
+    else
+        throw new BinderError(message);
 };
 
 
 function hasContainerFacet(ComponentClass, extraFacetsClasses) {
-	return (ComponentClass.hasFacet('container')
-		|| 'Container' in extraFacetsClasses
-		|| _.someKey(extraFacetsClasses, facetRequiresContainer)
-		|| classHasFacetThatRequiresContainer());
+    return (ComponentClass.hasFacet('container')
+        || 'Container' in extraFacetsClasses
+        || _.someKey(extraFacetsClasses, facetRequiresContainer)
+        || classHasFacetThatRequiresContainer());
 
-	function classHasFacetThatRequiresContainer() {
-		return (ComponentClass.prototype.facetsClasses
-			&& _.someKey(ComponentClass.prototype.facetsClasses, facetRequiresContainer))
-	}
+    function classHasFacetThatRequiresContainer() {
+        return (ComponentClass.prototype.facetsClasses
+            && _.someKey(ComponentClass.prototype.facetsClasses, facetRequiresContainer))
+    }
 
-	function facetRequiresContainer(FacetClass) {
-		return FacetClass.requiresFacet('container');
-	}
+    function facetRequiresContainer(FacetClass) {
+        return FacetClass.requiresFacet('container');
+    }
 }
 
 },{"../util/component_name":78,"../util/error":82,"../util/logger":85,"./c_facets/cf_registry":25,"./c_registry":27,"mol-proto":94}],27:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
-	, Component = require('./c_class');
+    , Component = require('./c_class');
 
 /**
  * `milo.registry.components`
@@ -4037,15 +4037,15 @@ module.exports = componentsRegistry;
 'use strict';
 
 var config = require('../config')
-	, check = require('../util/check')
-	, Match = check.Match;
+    , check = require('../util/check')
+    , Match = check.Match;
 
 
 var componentUtils = module.exports = {
-	isComponent: isComponent,
-	getComponent: getComponent,
-	getContainingComponent: getContainingComponent,
-	_makeComponentConditionFunc: _makeComponentConditionFunc
+    isComponent: isComponent,
+    getComponent: getComponent,
+    getContainingComponent: getContainingComponent,
+    _makeComponentConditionFunc: _makeComponentConditionFunc
 };
 
 
@@ -4059,7 +4059,7 @@ var componentUtils = module.exports = {
  * @return {Boolean} true, if it has milo component attached to it
  */
 function isComponent(el) {
-	return el.hasOwnProperty(config.componentRef);
+    return el.hasOwnProperty(config.componentRef);
 }
 
 
@@ -4070,7 +4070,7 @@ function isComponent(el) {
  * @return {Component} component attached to element
  */
 function getComponent(el) {
-	return el && el[config.componentRef];
+    return el && el[config.componentRef];
 }
 
 
@@ -4087,48 +4087,48 @@ function getComponent(el) {
  * @return {Component} 
  */
 function getContainingComponent(node, returnCurrent, conditionOrFacet) {
-	// check(node, Node); - can't check tiype here as it is most likely coming from another frame
-	check(returnCurrent, Match.Optional(Boolean));
-	check(conditionOrFacet, Match.Optional(Match.OneOf(Function, String)));
+    // check(node, Node); - can't check tiype here as it is most likely coming from another frame
+    check(returnCurrent, Match.Optional(Boolean));
+    check(conditionOrFacet, Match.Optional(Match.OneOf(Function, String)));
 
-	var conditionFunc = _makeComponentConditionFunc(conditionOrFacet);
+    var conditionFunc = _makeComponentConditionFunc(conditionOrFacet);
 
-	return _getContainingComponent(node, returnCurrent, conditionFunc);
+    return _getContainingComponent(node, returnCurrent, conditionFunc);
 }
 
 
 function _makeComponentConditionFunc(conditionOrFacet) {
-	if (typeof conditionOrFacet == 'function')
-		return conditionOrFacet;
-	else if (typeof conditionOrFacet == 'string') {
-	 	var facetName = _.firstLowerCase(conditionOrFacet);
-		return function (comp) {
-	       return comp.hasFacet(facetName);
-	    };
-	}
+    if (typeof conditionOrFacet == 'function')
+        return conditionOrFacet;
+    else if (typeof conditionOrFacet == 'string') {
+        var facetName = _.firstLowerCase(conditionOrFacet);
+        return function (comp) {
+           return comp.hasFacet(facetName);
+        };
+    }
 }
 
 
 function _getContainingComponent(el, returnCurrent, conditionFunc) {
-	// Where the current element is a component it should be returned
-	// if returnCurrent is true or undefined
-	if (returnCurrent !== false) {
-		var comp = getComponent(el);
-		if (comp && (! conditionFunc || conditionFunc(comp)))
-			return comp;
-	}
+    // Where the current element is a component it should be returned
+    // if returnCurrent is true or undefined
+    if (returnCurrent !== false) {
+        var comp = getComponent(el);
+        if (comp && (! conditionFunc || conditionFunc(comp)))
+            return comp;
+    }
 
-	// Where there is no parent element, this function will return undefined
-	// The parent element is checked recursively
-	if (el.parentNode)
-		return _getContainingComponent(el.parentNode, true, conditionFunc);
+    // Where there is no parent element, this function will return undefined
+    // The parent element is checked recursively
+    if (el.parentNode)
+        return _getContainingComponent(el.parentNode, true, conditionFunc);
 }
 
 },{"../config":53,"../util/check":77}],29:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
-	, componentsRegistry = require('../c_registry');
+    , componentsRegistry = require('../c_registry');
 
 
 var View = Component.createComponentClass('View', ['container']);
@@ -4142,10 +4142,10 @@ module.exports = View;
 
 
 var MessengerAPI = require('../../messenger/m_api')
-	, getElementDataAccess = require('./de_data')
-	, _ = require('mol-proto')
-	, check = require('../../util/check')
-	, Match = check.Match;
+    , getElementDataAccess = require('./de_data')
+    , _ = require('mol-proto')
+    , check = require('../../util/check')
+    , Match = check.Match;
 
 
 // class to handle subscribtions to changes in DOM for UI (maybe also content editable) elements
@@ -4157,37 +4157,37 @@ var DataMsgAPI = _.createSubclass(MessengerAPI, 'DataMsgAPI', true);
 
 
 _.extendProto(DataMsgAPI, {
-	// implementing MessageSource interface
-	init: DataMsgAPI$init,
-	translateToSourceMessage: translateToSourceMessage,
- 	filterSourceMessage: filterSourceMessage,
- 	createInternalData: createInternalData,
+    // implementing MessageSource interface
+    init: DataMsgAPI$init,
+    translateToSourceMessage: translateToSourceMessage,
+    filterSourceMessage: filterSourceMessage,
+    createInternalData: createInternalData,
 
- 	// class specific methods
- 	value: DataMsgAPI$value,
+    // class specific methods
+    value: DataMsgAPI$value,
 });
 
 module.exports = DataMsgAPI;
 
 
 function DataMsgAPI$init(component) {
-	MessengerAPI.prototype.init.apply(this, arguments);
+    MessengerAPI.prototype.init.apply(this, arguments);
 
-	this.component = component;
-	this.elData = getElementDataAccess(component.el);
+    this.component = component;
+    this.elData = getElementDataAccess(component.el);
 }
 
 
 // getDomElementDataValue
 function DataMsgAPI$value() { // value method
-	var componentGetter = this.component.data.config.get;
-	var newValue = typeof componentGetter == 'function'
-					? componentGetter.call(this.component)
-					: this.elData.get(this.component.el);
+    var componentGetter = this.component.data.config.get;
+    var newValue = typeof componentGetter == 'function'
+                    ? componentGetter.call(this.component)
+                    : this.elData.get(this.component.el);
 
-	this.component.data._value = newValue;
+    this.component.data._value = newValue;
 
-	return newValue;
+    return newValue;
 }
 
 
@@ -4195,31 +4195,31 @@ function DataMsgAPI$value() { // value method
 // Can also implement beforedatachanged event to allow preventing the change
 // translateToDomEvent
 function translateToSourceMessage(message) {
-	var componentEvent = this.component.data.config.event;
-	var event = componentEvent || this.elData.event(this.component.el);
+    var componentEvent = this.component.data.config.event;
+    var event = componentEvent || this.elData.event(this.component.el);
 
-	if (message == '' && event)
-		return event;  // this.tagEvent;
+    if (message == '' && event)
+        return event;  // this.tagEvent;
 }
 
 
 // filterDataMessage
 function filterSourceMessage(sourceMessage, message, data) {
-	return data.newValue != data.oldValue;
+    return data.newValue != data.oldValue;
 };
 
 
 function createInternalData(sourceMessage, message, data) {
-	var oldValue = this.component.data._value
-		, newValue = this.value();
+    var oldValue = this.component.data._value
+        , newValue = this.value();
 
-	var internalData = { 
-		path: '',
-		type: 'changed',
-		oldValue: oldValue,
-		newValue: newValue
-	};
-	return internalData;
+    var internalData = { 
+        path: '',
+        type: 'changed',
+        oldValue: oldValue,
+        newValue: newValue
+    };
+    return internalData;
 };
 
 },{"../../messenger/m_api":59,"../../util/check":77,"./de_data":31,"mol-proto":94}],31:[function(require,module,exports){
@@ -4237,9 +4237,9 @@ var _ = require('mol-proto');
  * @return {Object}
  */
 var getElementDataAccess = function(el) {
-	var tagName = el.tagName.toLowerCase()
-		, elData = domElementsDataAccess[tagName];
-	return elData || domElementsDataAccess.byDefault;
+    var tagName = el.tagName.toLowerCase()
+        , elData = domElementsDataAccess[tagName];
+    return elData || domElementsDataAccess.byDefault;
 }
 
 module.exports = getElementDataAccess;
@@ -4249,54 +4249,54 @@ module.exports = getElementDataAccess;
  * Data access methods and events for DOM elements.
  */
 var domElementsDataAccess = {
-	byDefault: {
- 		property: 'innerHTML',
-	},
-	'div': {
- 		property: 'innerHTML', // hack, should be innerHTML? to make work with Editable facet
- 		// event: 'input'
-	},
-	'span': {
- 		property: 'innerHTML',
- 		event: 'input'
-	},
-	'p': {
- 		property: 'innerHTML',
- 		event: 'input'
-	},
- 	'input': {
- 		property: inputDataProperty,
- 		event: inputChangeEvent
- 	},
- 	'textarea': {
- 		property: 'value',
- 		event: 'input'
- 	},
- 	'select': {
- 		property: 'value',
- 		event: 'change'
- 	},
- 	'img': {
- 		property: 'src'
- 	}
+    byDefault: {
+        property: 'innerHTML',
+    },
+    'div': {
+        property: 'innerHTML', // hack, should be innerHTML? to make work with Editable facet
+        // event: 'input'
+    },
+    'span': {
+        property: 'innerHTML',
+        event: 'input'
+    },
+    'p': {
+        property: 'innerHTML',
+        event: 'input'
+    },
+    'input': {
+        property: inputDataProperty,
+        event: inputChangeEvent
+    },
+    'textarea': {
+        property: 'value',
+        event: 'input'
+    },
+    'select': {
+        property: 'value',
+        event: 'change'
+    },
+    'img': {
+        property: 'src'
+    }
 };
 
 
 // convert strings to functions and create getset methods
 _.eachKey(domElementsDataAccess, function(tagInfo) {
-	var property = tagInfo.property
-		, event = tagInfo.event;
-	if (typeof property != 'function')
-		tagInfo.property = function() { return property; };
-	var propFunc = tagInfo.property;
-	if (typeof event != 'function')
-		tagInfo.event = function() { return event; };
-	if (! tagInfo.get)
-		tagInfo.get = function(el) { return el[propFunc(el)]; }
-	if (! tagInfo.set)
-		tagInfo.set = function(el, value) {
-			return (el[propFunc(el)] = typeof value == 'undefined' ? '' : value);
-		}
+    var property = tagInfo.property
+        , event = tagInfo.event;
+    if (typeof property != 'function')
+        tagInfo.property = function() { return property; };
+    var propFunc = tagInfo.property;
+    if (typeof event != 'function')
+        tagInfo.event = function() { return event; };
+    if (! tagInfo.get)
+        tagInfo.get = function(el) { return el[propFunc(el)]; }
+    if (! tagInfo.set)
+        tagInfo.set = function(el, value) {
+            return (el[propFunc(el)] = typeof value == 'undefined' ? '' : value);
+        }
 });
 
 
@@ -4304,22 +4304,22 @@ _.eachKey(domElementsDataAccess, function(tagInfo) {
  * Types of input elements
  */
 var inputElementTypes = {
-	byDefault: {
- 		property: 'value',
- 		event: 'input'
-	},
-	'checkbox': {
-		property: 'checked',
-		event: 'change'
-	},
-	'radio': {
-		property: 'checked',
-		event: 'change'
-	},
-	'text': {
-		property: 'value',
-		event: 'input'
-	}
+    byDefault: {
+        property: 'value',
+        event: 'input'
+    },
+    'checkbox': {
+        property: 'checked',
+        event: 'change'
+    },
+    'radio': {
+        property: 'checked',
+        event: 'change'
+    },
+    'text': {
+        property: 'value',
+        event: 'input'
+    }
 }
 
 
@@ -4330,10 +4330,10 @@ var inputElementTypes = {
  * @return {String}
  */
 function inputDataProperty(el) {
-	var inputType = inputElementTypes[el.type];
-	return inputType
-			? inputType.property
-			: inputElementTypes.byDefault.property;
+    var inputType = inputElementTypes[el.type];
+    return inputType
+            ? inputType.property
+            : inputElementTypes.byDefault.property;
 }
 
 
@@ -4344,10 +4344,10 @@ function inputDataProperty(el) {
  * @return {String}
  */
 function inputChangeEvent(el) {
-	var inputType = inputElementTypes[el.type];
-	return inputType
-			? inputType.event
-			: inputElementTypes.byDefault.event;
+    var inputType = inputElementTypes[el.type];
+    return inputType
+            ? inputType.event
+            : inputElementTypes.byDefault.event;
 }
 
 },{"mol-proto":94}],32:[function(require,module,exports){
@@ -4363,39 +4363,39 @@ var _ = require('mol-proto');
 // https://developer.mozilla.org/en-US/docs/Web/Reference/Events
 
 var eventTypes = {
-	ClipboardEvent: ['copy', 'cut', 'paste', 'beforecopy', 'beforecut', 'beforepaste'],
-	Event: ['input', 'readystatechange'],
-	FocusEvent: ['focus', 'blur', 'focusin', 'focusout'],
-	KeyboardEvent: ['keydown', 'keypress',  'keyup'],
-	MouseEvent: ['click', 'contextmenu', 'dblclick', 'mousedown', 'mouseup',
-				 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover',
-				 'show' /* context menu */],
-	TouchEvent: ['touchstart', 'touchend', 'touchmove', 'touchenter', 'touchleave', 'touchcancel'],
+    ClipboardEvent: ['copy', 'cut', 'paste', 'beforecopy', 'beforecut', 'beforepaste'],
+    Event: ['input', 'readystatechange'],
+    FocusEvent: ['focus', 'blur', 'focusin', 'focusout'],
+    KeyboardEvent: ['keydown', 'keypress',  'keyup'],
+    MouseEvent: ['click', 'contextmenu', 'dblclick', 'mousedown', 'mouseup',
+                 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover',
+                 'show' /* context menu */],
+    TouchEvent: ['touchstart', 'touchend', 'touchmove', 'touchenter', 'touchleave', 'touchcancel'],
 };
 
 
 // mock window and event constructors for testing
 if (typeof window != 'undefined')
-	var global = window;
+    var global = window;
 else {
-	global = {};
-	_.eachKey(eventTypes, function(eTypes, eventConstructorName) {
-		var eventConstructor = _.makeFunction(eventConstructorName, 'type', 'properties',
-			'this.type = type; _.extend(this, properties);');
-		global[eventConstructorName] = eventConstructor;
-	});
+    global = {};
+    _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
+        var eventConstructor = _.makeFunction(eventConstructorName, 'type', 'properties',
+            'this.type = type; _.extend(this, properties);');
+        global[eventConstructorName] = eventConstructor;
+    });
 }
 
 
 var domEventsConstructors = {};
 
 _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
-	eTypes.forEach(function(type) {
-		if (Object.hasOwnProperty(domEventsConstructors, type))
-			throw new Error('duplicate event type ' + type);
+    eTypes.forEach(function(type) {
+        if (Object.hasOwnProperty(domEventsConstructors, type))
+            throw new Error('duplicate event type ' + type);
 
-		domEventsConstructors[type] = global[eventConstructorName];
-	});
+        domEventsConstructors[type] = global[eventConstructorName];
+    });
 });
 
 
@@ -4408,93 +4408,93 @@ module.exports = domEventsConstructors;
 // ###component dom events source
 
 var MessageSource = require('../../messenger/m_source')
-	, Component = require('../c_class')
-	, domEventsConstructors = require('./de_constrs') // TODO merge with DOMEventSource ??
-	, _ = require('mol-proto')
-	, check = require('../../util/check')
-	, Match = check.Match;
+    , Component = require('../c_class')
+    , domEventsConstructors = require('./de_constrs') // TODO merge with DOMEventSource ??
+    , _ = require('mol-proto')
+    , check = require('../../util/check')
+    , Match = check.Match;
 
 var DOMEventsSource = _.createSubclass(MessageSource, 'DOMMessageSource', true);
 
 
 _.extendProto(DOMEventsSource, {
-	// implementing MessageSource interface
-	init: init,
-	destroy: DOMEventsSource$destroy,
- 	addSourceSubscriber: _.partial(sourceSubscriberMethod, 'addEventListener'),
- 	removeSourceSubscriber: _.partial(sourceSubscriberMethod, 'removeEventListener'),
- 	trigger: trigger,
+    // implementing MessageSource interface
+    init: init,
+    destroy: DOMEventsSource$destroy,
+    addSourceSubscriber: _.partial(sourceSubscriberMethod, 'addEventListener'),
+    removeSourceSubscriber: _.partial(sourceSubscriberMethod, 'removeEventListener'),
+    trigger: trigger,
 
- 	// class specific methods
- 	dom: dom,
- 	handleEvent: handleEvent,  // event dispatcher - as defined by Event DOM API
+    // class specific methods
+    dom: dom,
+    handleEvent: handleEvent,  // event dispatcher - as defined by Event DOM API
 });
 
 module.exports = DOMEventsSource;
 
 
 var useCapturePattern = /__capture$/
-	, useCapturePostfix = '__capture';
+    , useCapturePostfix = '__capture';
 
 
 // init DOM event source
 function init(hostObject, proxyMethods, messengerAPIOrClass, component) {
-	check(component, Component);
-	this.component = component;
-	MessageSource.prototype.init.apply(this, arguments);
+    check(component, Component);
+    this.component = component;
+    MessageSource.prototype.init.apply(this, arguments);
 }
 
 
 function DOMEventsSource$destroy() {
-	MessageSource.prototype.destroy.apply(this, arguments);
-	delete this.component;
+    MessageSource.prototype.destroy.apply(this, arguments);
+    delete this.component;
 }
 
 
 // get DOM element of component
 function dom() {
-	return this.component.el;
+    return this.component.el;
 }
 
 
 function sourceSubscriberMethod(method, eventType) {
-	if (! (eventType && typeof eventType == 'string')) return;
-	var capture = useCapturePattern.test(eventType);
-	eventType = eventType.replace(useCapturePattern, '');
-	this.dom()[method](eventType, this, capture);
+    if (! (eventType && typeof eventType == 'string')) return;
+    var capture = useCapturePattern.test(eventType);
+    eventType = eventType.replace(useCapturePattern, '');
+    this.dom()[method](eventType, this, capture);
 }
 
 
 // event dispatcher - as defined by Event DOM API
 function handleEvent(event) {
-	var isCapturePhase;
-	if (typeof window != 'undefined')
-		isCapturePhase = event.eventPhase == window.Event.CAPTURING_PHASE;
+    var isCapturePhase;
+    if (typeof window != 'undefined')
+        isCapturePhase = event.eventPhase == window.Event.CAPTURING_PHASE;
 
-	if (isCapturePhase)
-		event += useCapturePostfix;
+    if (isCapturePhase)
+        event += useCapturePostfix;
 
-	this.dispatchMessage(event.type, event);
+    this.dispatchMessage(event.type, event);
 }
 
 
 function trigger(eventType, properties) {
-	check(eventType, String);
-	check(properties, Match.Optional(Object));
+    check(eventType, String);
+    check(properties, Match.Optional(Object));
 
-	eventType = eventType.replace(useCapturePattern, '');
-	var EventConstructor = domEventsConstructors[eventType];
+    eventType = eventType.replace(useCapturePattern, '');
+    var EventConstructor = domEventsConstructors[eventType];
 
-	if (typeof EventConstructor != 'function')
-		throw new Error('unsupported event type');
+    if (typeof EventConstructor != 'function')
+        throw new Error('unsupported event type');
 
-	// check if it is correct
-	if (typeof properties != 'undefined')
-		properties.type = eventType;
+    // check if it is correct
+    if (typeof properties != 'undefined')
+        properties.type = eventType;
 
-	var domEvent = new EventConstructor(eventType, properties);
-	var notCancelled = this.dom().dispatchEvent(domEvent);
-	return notCancelled;
+    var domEvent = new EventConstructor(eventType, properties);
+    var notCancelled = this.dom().dispatchEvent(domEvent);
+    return notCancelled;
 }
 
 },{"../../messenger/m_source":61,"../../util/check":77,"../c_class":11,"./de_constrs":32,"mol-proto":94}],34:[function(require,module,exports){
@@ -4506,80 +4506,80 @@ function trigger(eventType, properties) {
 // TODO: This message source needs to be completely refactored
 
 var MessageSource = require('../../messenger/m_source')
-	, Component = require('../c_class')
-	, _ = require('mol-proto')
-	, check = require('../../util/check')
-	, Match = check.Match
-	, FrameMessageSourceError = require('../../util/error').FrameMessageSource;
+    , Component = require('../c_class')
+    , _ = require('mol-proto')
+    , check = require('../../util/check')
+    , Match = check.Match
+    , FrameMessageSourceError = require('../../util/error').FrameMessageSource;
 
 var FrameMessageSource = _.createSubclass(MessageSource, 'FrameMessageSource', true);
 
 
 _.extendProto(FrameMessageSource, {
-	// implementing MessageSource interface
-	init: init,
- 	addSourceSubscriber: addSourceSubscriber,
- 	removeSourceSubscriber: removeSourceSubscriber,
- 	trigger: trigger,
+    // implementing MessageSource interface
+    init: init,
+    addSourceSubscriber: addSourceSubscriber,
+    removeSourceSubscriber: removeSourceSubscriber,
+    trigger: trigger,
 
- 	//class specific methods
- 	frameWindow: frameWindow,
- 	handleEvent: handleEvent  // event dispatcher - as defined by Event DOM API
+    //class specific methods
+    frameWindow: frameWindow,
+    handleEvent: handleEvent  // event dispatcher - as defined by Event DOM API
 });
 
 module.exports = FrameMessageSource;
 
 
 function init(hostObject, proxyMethods, messengerAPIOrClass, component) {
-	check(component, Component);
-	this.component = component;
+    check(component, Component);
+    this.component = component;
 
-	if (component.el.tagName.toLowerCase() != 'iframe')
-		throw new FrameMessageSourceError('component for FrameMessageSource can only be attached to iframe element');
+    if (component.el.tagName.toLowerCase() != 'iframe')
+        throw new FrameMessageSourceError('component for FrameMessageSource can only be attached to iframe element');
 
-	MessageSource.prototype.init.apply(this, arguments);
+    MessageSource.prototype.init.apply(this, arguments);
 }
 
 
 function frameWindow() {
-	return this.component.el.contentWindow;
+    return this.component.el.contentWindow;
 }
 
 
 // addIFrameMessageListener
 function addSourceSubscriber(sourceMessage) {
-	this.frameWindow().addEventListener('message', this, false);
+    this.frameWindow().addEventListener('message', this, false);
 }
 
 
 // removeIFrameMessageListener
 function removeSourceSubscriber(sourceMessage) {
-	this.frameWindow().removeEventListener('message', this, false);
+    this.frameWindow().removeEventListener('message', this, false);
 }
 
 
 function trigger(msgType, data) {
-	data = data || {};
-	data.type = msgType;
+    data = data || {};
+    data.type = msgType;
 
-	this.frameWindow().postMessage(data, '*');
+    this.frameWindow().postMessage(data, '*');
 }
 
 
 // TODO maybe refactor to FrameMsgAPI?
 function handleEvent(event) {
-	this.dispatchMessage(event.data.type, event);
+    this.dispatchMessage(event.data.type, event);
 }
 
 },{"../../messenger/m_source":61,"../../util/check":77,"../../util/error":82,"../c_class":11,"mol-proto":94}],35:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
-	, componentName = require('../util/component_name')
-	, check = require('../util/check')
-	, Match = check.Match
-	, ScopeError = require('../util/error').Scope
-	, logger = require('../util/logger');
+    , componentName = require('../util/component_name')
+    , check = require('../util/check')
+    , Match = check.Match
+    , ScopeError = require('../util/error').Scope
+    , logger = require('../util/logger');
 
 
 /**
@@ -4589,24 +4589,24 @@ var _ = require('mol-proto')
  * @return {Scope}
  */
 function Scope(rootEl, hostObject) {
-	_.defineProperties(this, {
-		_rootEl: rootEl,
-		_hostObject: hostObject
-	}, _.WRIT); // writable
+    _.defineProperties(this, {
+        _rootEl: rootEl,
+        _hostObject: hostObject
+    }, _.WRIT); // writable
 };
 
 _.extendProto(Scope, {
-	_add: Scope$_add,
-	_safeAdd: Scope$_safeAdd,
-	_copy: Scope$_copy,
-	_each: Scope$_each,
-	_move: Scope$_move,
-	_merge: Scope$_merge,
-	_length: Scope$_length,
-	_any: Scope$_any,
-	_remove: Scope$_remove,
-	_clean: Scope$_clean,
-	_detachElement: Scope$_detachElement
+    _add: Scope$_add,
+    _safeAdd: Scope$_safeAdd,
+    _copy: Scope$_copy,
+    _each: Scope$_each,
+    _move: Scope$_move,
+    _merge: Scope$_merge,
+    _length: Scope$_length,
+    _any: Scope$_any,
+    _remove: Scope$_remove,
+    _clean: Scope$_clean,
+    _detachElement: Scope$_detachElement
 });
 
 module.exports = Scope;
@@ -4622,16 +4622,16 @@ var allowedNamePattern = /^[A-Za-z][A-Za-z0-9\_\$]*$/;
  * @param {String} name the name of the component to add
  */
 function Scope$_add(object, name) {
-	if (typeof name == 'string')
-		object.name = name;
+    if (typeof name == 'string')
+        object.name = name;
     else
-		name = object.name;
-	
-	if (this.hasOwnProperty(name))
-		throw new ScopeError('duplicate object name: ' + name);
+        name = object.name;
+    
+    if (this.hasOwnProperty(name))
+        throw new ScopeError('duplicate object name: ' + name);
 
-	checkName(name);
-	__add.call(this, object, name);
+    checkName(name);
+    __add.call(this, object, name);
 }
 
 
@@ -4642,35 +4642,35 @@ function Scope$_add(object, name) {
  * @param {String} name the name of the component to add
  */
 function Scope$_safeAdd(object, name) {
-	if (typeof name == 'string')
-		object.name = name;
+    if (typeof name == 'string')
+        object.name = name;
     else
-		name = object.name;
+        name = object.name;
 
-	var shouldRename = this.hasOwnProperty(name);
-	if (shouldRename)
-		logger.error('Scope: duplicate object name: ' + name);
-	else {
-		shouldRename = ! allowedNamePattern.test(name);
-		if (shouldRename)
-			logger.error('Scope: name should start from letter, this name is not allowed: ' + name);
-	}
+    var shouldRename = this.hasOwnProperty(name);
+    if (shouldRename)
+        logger.error('Scope: duplicate object name: ' + name);
+    else {
+        shouldRename = ! allowedNamePattern.test(name);
+        if (shouldRename)
+            logger.error('Scope: name should start from letter, this name is not allowed: ' + name);
+    }
 
-	if (shouldRename) {
-		name = componentName();
-		object.name = name;
-	}
+    if (shouldRename) {
+        name = componentName();
+        object.name = name;
+    }
 
-	__add.call(this, object, name);
+    __add.call(this, object, name);
 }
 
 
 function __add(object, name) {
-	this[name] = object;
-	object.scope = this;
+    this[name] = object;
+    object.scope = this;
 
     if (typeof object.postMessage === 'function')
-        object.postMessage('addedtoscope');	
+        object.postMessage('addedtoscope'); 
 }
 
 
@@ -4681,9 +4681,9 @@ function __add(object, name) {
  * @param {Scope} aScope the scope to copy
  */
 function Scope$_copy(aScope) {
-	check(aScope, Scope);
+    check(aScope, Scope);
 
-	aScope._each(Scope$_add, this);
+    aScope._each(Scope$_add, this);
 }
 
 
@@ -4694,9 +4694,9 @@ function Scope$_copy(aScope) {
  * @param {Scope} otherScope the scope to copy the component to
  */
 function Scope$_move(component, otherScope) {
-	otherScope._add(component);
-	this._remove(component.name);
-	component.scope = otherScope;
+    otherScope._add(component);
+    this._remove(component.name);
+    component.scope = otherScope;
 }
 
 
@@ -4706,10 +4706,10 @@ function Scope$_move(component, otherScope) {
  * @param {Scope} scope the scope to absorb
  */
 function Scope$_merge(scope) {
-	scope._each(function (comp) {
-		this._add(comp, comp.name);
-		scope._remove(comp.name);
-	}, this);
+    scope._each(function (comp) {
+        this._add(comp, comp.name);
+        scope._remove(comp.name);
+    }, this);
 }
 
 
@@ -4720,7 +4720,7 @@ function Scope$_merge(scope) {
  * @param {Object} thisArg the context
  */
 function Scope$_each(callback, thisArg) {
-	_.eachKey(this, callback, thisArg || this, true); // enumerates enumerable properties only
+    _.eachKey(this, callback, thisArg || this, true); // enumerates enumerable properties only
 }
 
 
@@ -4732,7 +4732,7 @@ function Scope$_each(callback, thisArg) {
  * @return {Array}
  */
 function Scope$_filter(callback, thisArg) {
-	return _.filter(this, callback, thisArg || this, true);
+    return _.filter(this, callback, thisArg || this, true);
 }
 
 
@@ -4741,8 +4741,8 @@ function Scope$_filter(callback, thisArg) {
  * @param {Function} callback the function to execute for each component
  */
 function checkName(name) {
-	if (! allowedNamePattern.test(name))
-		throw new ScopeError('name should start from letter, this name is not allowed: ' + name);
+    if (! allowedNamePattern.test(name))
+        throw new ScopeError('name should start from letter, this name is not allowed: ' + name);
 }
 
 
@@ -4752,7 +4752,7 @@ function checkName(name) {
  * @return {Number}
  */
 function Scope$_length() {
-	return Object.keys(this).length;
+    return Object.keys(this).length;
 }
 
 
@@ -4763,7 +4763,7 @@ function Scope$_length() {
  * @return {Component}
  */
 function Scope$_any() {
-	var key = Object.keys(this)[0];
+    var key = Object.keys(this)[0];
     return key && this[key];
 }
 
@@ -4774,14 +4774,14 @@ function Scope$_any() {
  * @param {String} name the name of the component to remove
  */
 function Scope$_remove(name) {
-	if (! (name in this))
-		return logger.warn('removing object that is not in scope');
+    if (! (name in this))
+        return logger.warn('removing object that is not in scope');
 
-	var object = this[name];
+    var object = this[name];
 
-	delete this[name];
+    delete this[name];
 
-	if (typeof object.postMessage === 'function')
+    if (typeof object.postMessage === 'function')
         object.postMessage('removedfromscope');
 }
 
@@ -4791,28 +4791,28 @@ function Scope$_remove(name) {
  * Removes all components from the scope.
  */
 function Scope$_clean() {
-	this._each(function(object, name) {
-		delete this[name].scope;
-		delete this[name];
-	}, this);
+    this._each(function(object, name) {
+        delete this[name].scope;
+        delete this[name];
+    }, this);
 }
 
 function Scope$_detachElement() {
-	this._rootEl = null;
+    this._rootEl = null;
 }
 
 },{"../util/check":77,"../util/component_name":78,"../util/error":82,"../util/logger":85,"mol-proto":94}],36:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
-	, componentsRegistry = require('../c_registry');
+    , componentsRegistry = require('../c_registry');
 
 
 var MLButton = Component.createComponentClass('MLButton', {
-	events: undefined,
-	dom: {
-		cls: 'ml-ui-button'
-	}
+    events: undefined,
+    dom: {
+        cls: 'ml-ui-button'
+    }
 });
 
 componentsRegistry.add(MLButton);
@@ -4823,34 +4823,34 @@ module.exports = MLButton;
 'use strict';
 
 var Component = require('../c_class')
-	, componentsRegistry = require('../c_registry')
-	, _ = require('mol-proto');
+    , componentsRegistry = require('../c_registry')
+    , _ = require('mol-proto');
 
 
 var COMBO_CHANGE_MESSAGE = 'mlcombochange';
 
 var DATALIST_TEMPLATE = '{{~ it.comboOptions :option }} \
-							<option value="{{= option.label }}"></option> \
-					     {{~}}';
+                            <option value="{{= option.label }}"></option> \
+                         {{~}}';
 
 var MLCombo = Component.createComponentClass('MLCombo', {
-	events: undefined,
-	data: {
-		get: MLCombo_get,
-		set: MLCombo_set,
-		del: MLCombo_del,
-		splice: undefined,
-		event: COMBO_CHANGE_MESSAGE
-	},
-	model: {
-		messages: {
-			'***': { subscriber: onOptionsChange, context: 'owner' }
-		}
-	},
-	dom: {
-		cls: 'ml-ui-datalist'
-	},
-	container: undefined
+    events: undefined,
+    data: {
+        get: MLCombo_get,
+        set: MLCombo_set,
+        del: MLCombo_del,
+        splice: undefined,
+        event: COMBO_CHANGE_MESSAGE
+    },
+    model: {
+        messages: {
+            '***': { subscriber: onOptionsChange, context: 'owner' }
+        }
+    },
+    dom: {
+        cls: 'ml-ui-datalist'
+    },
+    container: undefined
 });
 
 componentsRegistry.add(MLCombo);
@@ -4859,94 +4859,94 @@ module.exports = MLCombo;
 
 
 _.extendProto(MLCombo, {
-	init: MLCombo$init
+    init: MLCombo$init
 });
 
 
 function MLCombo$init() {
-	Component.prototype.init.apply(this, arguments);
-	this.on('childrenbound', onChildrenBound);
+    Component.prototype.init.apply(this, arguments);
+    this.on('childrenbound', onChildrenBound);
 }
 
 function onChildrenBound() {
-	_.defineProperties(this, {
-		'_comboInput': this.container.scope.input,
-		'_comboList': this.container.scope.datalist
-	});
+    _.defineProperties(this, {
+        '_comboInput': this.container.scope.input,
+        '_comboList': this.container.scope.datalist
+    });
 
-	this._comboList.template.set(DATALIST_TEMPLATE);
+    this._comboList.template.set(DATALIST_TEMPLATE);
 
-	this._comboInput.data.on('input',
-		{ subscriber: dispatchChangeMessage, context: this });
+    this._comboInput.data.on('input',
+        { subscriber: dispatchChangeMessage, context: this });
 }
 
 function MLCombo_get() {
-	if (! this._comboInput) return;
-	return this._comboInput.data.get();
+    if (! this._comboInput) return;
+    return this._comboInput.data.get();
 }
 
 function MLCombo_set(value) {
-	return changeComboData.call(this, 'set', value);
+    return changeComboData.call(this, 'set', value);
 }
 
 function MLCombo_del() {
-	return changeComboData.call(this, 'del', value);
+    return changeComboData.call(this, 'del', value);
 }
 
 function changeComboData(method, value) {
-	if (! this._comboInput) return;
-	var result = this._comboInput.data[method](value);
-	dispatchChangeMessage.call(this);
-	return result;
+    if (! this._comboInput) return;
+    var result = this._comboInput.data[method](value);
+    dispatchChangeMessage.call(this);
+    return result;
 }
 
 
 // Post the data change
 function dispatchChangeMessage() {
-	this.data.getMessageSource().dispatchMessage(COMBO_CHANGE_MESSAGE);
+    this.data.getMessageSource().dispatchMessage(COMBO_CHANGE_MESSAGE);
 }
 
 function onOptionsChange(msg, data) {
-	this._comboList.template.render({
-		comboOptions: this.model.get()
-	});
+    this._comboList.template.render({
+        comboOptions: this.model.get()
+    });
 }
 
 },{"../c_class":11,"../c_registry":27,"mol-proto":94}],38:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
-	, componentsRegistry = require('../c_registry')
-	, _ = require('mol-proto');
+    , componentsRegistry = require('../c_registry')
+    , _ = require('mol-proto');
 
 var COMBO_LIST_CHANGE_MESSAGE = 'mlcombolistchange';
 
 
 var MLComboList = Component.createComponentClass('MLComboList', {
-	dom: {
-		cls: 'ml-ui-combo-list'
-	},
-	data: {
-		get: MLComboList_get,
-		set: MLComboList_set,
-		del: MLComboList_del,
-		event: COMBO_LIST_CHANGE_MESSAGE
-	},
-	events: undefined,
-	model: {
-		messages: {
-			'***': { subscriber: onItemsChange, context: 'owner'}
-		}
-	},
-	template: {
-		template: '<div ml-bind="MLList:list">\
-			           <div ml-bind="[item]:item" class="list-item">\
-			               <span ml-bind="[data]:label"></span>\
-			               <span ml-bind="[events]:deleteBtn" class="glyphicon glyphicon-remove"></span>\
-			           </div>\
-			       </div>\
-			       <div ml-bind="MLSuperCombo:combo"></div>'
-	}
+    dom: {
+        cls: 'ml-ui-combo-list'
+    },
+    data: {
+        get: MLComboList_get,
+        set: MLComboList_set,
+        del: MLComboList_del,
+        event: COMBO_LIST_CHANGE_MESSAGE
+    },
+    events: undefined,
+    model: {
+        messages: {
+            '***': { subscriber: onItemsChange, context: 'owner'}
+        }
+    },
+    template: {
+        template: '<div ml-bind="MLList:list">\
+                       <div ml-bind="[item]:item" class="list-item">\
+                           <span ml-bind="[data]:label"></span>\
+                           <span ml-bind="[events]:deleteBtn" class="glyphicon glyphicon-remove"></span>\
+                       </div>\
+                   </div>\
+                   <div ml-bind="MLSuperCombo:combo"></div>'
+    }
 });
 
 
@@ -4956,67 +4956,67 @@ module.exports = MLComboList;
 
 
 _.extendProto(MLComboList, {
-	init: MLComboList$init,
-	setOptions: MLComboList$setOptions
+    init: MLComboList$init,
+    setOptions: MLComboList$setOptions
 });
 
 
 function MLComboList$init() {
-	Component.prototype.init.apply(this, arguments);
-	this.model.set([]);
-	this.on('childrenbound', onChildrenBound);
-	
+    Component.prototype.init.apply(this, arguments);
+    this.model.set([]);
+    this.on('childrenbound', onChildrenBound);
+    
 }
 
 
 function MLComboList$setOptions(arr) {
-	this._combo.setOptions(arr);
+    this._combo.setOptions(arr);
 }
 
 
 function onChildrenBound() {
-	this.off('childrenbound', onChildrenBound);
-	this.template.render().binder();
-	componentSetup.call(this);
+    this.off('childrenbound', onChildrenBound);
+    this.template.render().binder();
+    componentSetup.call(this);
 }
 
 function componentSetup() {
-	_.defineProperties(this, {
-		'_combo': this.container.scope.combo,
-		'_list': this.container.scope.list
-	});
+    _.defineProperties(this, {
+        '_combo': this.container.scope.combo,
+        '_list': this.container.scope.list
+    });
 
-	milo.minder(this._list.model, '<<<->>>', this.model);
-	this._combo.data.on('', {subscriber: onComboChange, context: this });   
+    milo.minder(this._list.model, '<<<->>>', this.model);
+    this._combo.data.on('', {subscriber: onComboChange, context: this });   
 }
 
 function onComboChange(msg, data) {
-	// if (data.newValue) {
-	// 	var listArr = this._list.model.get();
-	// 	var newArr = listArr.concat(data.newValue);
-	// 	this._list.model.set(newArr);
-	// }
-	if (data.newValue)
-		this._list.model.push(data.newValue);
-	this._combo.data.del();
+    // if (data.newValue) {
+    //  var listArr = this._list.model.get();
+    //  var newArr = listArr.concat(data.newValue);
+    //  this._list.model.set(newArr);
+    // }
+    if (data.newValue)
+        this._list.model.push(data.newValue);
+    this._combo.data.del();
 }
 
 function onItemsChange(msg, data) {
-	//if (data.type == 'splice')
-		this.data.getMessageSource().dispatchMessage(COMBO_LIST_CHANGE_MESSAGE);
+    //if (data.type == 'splice')
+        this.data.getMessageSource().dispatchMessage(COMBO_LIST_CHANGE_MESSAGE);
 }
 
 function MLComboList_get() {
-	var model = this.model.get();
-	return model ? _.clone(model) : undefined;
+    var model = this.model.get();
+    return model ? _.clone(model) : undefined;
 }
 
 function MLComboList_set(value) {
-	this.model.set(value);
+    this.model.set(value);
 }
 
 function MLComboList_del() {
-	return this.model.set([]);
+    return this.model.set([]);
 }
 
 
@@ -5025,15 +5025,15 @@ function MLComboList_del() {
 'use strict';
 
 var Component = require('../c_class')
-	, componentsRegistry = require('../c_registry');
+    , componentsRegistry = require('../c_registry');
 
 
 var MLDate = Component.createComponentClass('MLDate', {
-	events: undefined,
-	data: undefined,
-	dom: {
-		cls: 'ml-ui-date'
-	}
+    events: undefined,
+    data: undefined,
+    dom: {
+        cls: 'ml-ui-date'
+    }
 });
 
 componentsRegistry.add(MLDate);
@@ -5059,16 +5059,16 @@ module.exports = MLDropTarget;
 'use strict';
 
 var Component = require('../c_class')
-	, componentsRegistry = require('../c_registry');
+    , componentsRegistry = require('../c_registry');
 
 
 var MLGroup = Component.createComponentClass('MLGroup', {
-	container: undefined,
-	data: undefined,
-	events: undefined,
-	dom: {
-		cls: 'ml-ui-group'
-	}
+    container: undefined,
+    data: undefined,
+    events: undefined,
+    dom: {
+        cls: 'ml-ui-group'
+    }
 });
 
 componentsRegistry.add(MLGroup);
@@ -5079,15 +5079,15 @@ module.exports = MLGroup;
 'use strict';
 
 var Component = require('../c_class')
-	, componentsRegistry = require('../c_registry');
+    , componentsRegistry = require('../c_registry');
 
 
 var MLHyperlink = Component.createComponentClass('MLHyperlink', {
-	events: undefined,
-	data: undefined,
-	dom: {
-		cls: 'ml-ui-hyperlink'
-	}
+    events: undefined,
+    data: undefined,
+    dom: {
+        cls: 'ml-ui-hyperlink'
+    }
 });
 
 componentsRegistry.add(MLHyperlink);
@@ -5192,15 +5192,15 @@ function onModelChange(path, data) {
 'use strict';
 
 var Component = require('../c_class')
-	, componentsRegistry = require('../c_registry');
+    , componentsRegistry = require('../c_registry');
 
 
 var MLInput = Component.createComponentClass('MLInput', {
-	data: undefined,
-	events: undefined,
-	dom: {
-		cls: 'ml-ui-input'
-	}
+    data: undefined,
+    events: undefined,
+    dom: {
+        cls: 'ml-ui-input'
+    }
 });
 
 componentsRegistry.add(MLInput);
@@ -5208,12 +5208,12 @@ componentsRegistry.add(MLInput);
 module.exports = MLInput;
 
 _.extendProto(MLInput, {
-	disable: MLInput$disable
+    disable: MLInput$disable
 });
 
 
 function MLInput$disable(disable) {
-	this.el.disabled = disable;
+    this.el.disabled = disable;
 }
 },{"../c_class":11,"../c_registry":27}],45:[function(require,module,exports){
 'use strict';
@@ -5326,30 +5326,30 @@ function MLInputList_del() {
 'use strict';
 
 var Component = require('../c_class')
-	, componentsRegistry = require('../c_registry')
-	, _ = require('mol-proto');
+    , componentsRegistry = require('../c_registry')
+    , _ = require('mol-proto');
 
 var LIST_CHANGE_MESSAGE = 'mllistchange'
-	, DELETE_BUTTON_NAME = 'deleteBtn';
+    , DELETE_BUTTON_NAME = 'deleteBtn';
 
 
 var MLList = Component.createComponentClass('MLList', {
-	dom: {
-		cls: 'ml-ui-list'
-	},
-	data: {
-		get: MLList_get,
-		set: MLList_set,
-		del: MLList_del,
-		event: LIST_CHANGE_MESSAGE,
-	},
-	events: undefined,
-	model: {
-		messages: {
-			'**': { subscriber: onItemsChange, context: 'owner' }
-		}
-	},
-	list: undefined
+    dom: {
+        cls: 'ml-ui-list'
+    },
+    data: {
+        get: MLList_get,
+        set: MLList_set,
+        del: MLList_del,
+        event: LIST_CHANGE_MESSAGE,
+    },
+    events: undefined,
+    model: {
+        messages: {
+            '**': { subscriber: onItemsChange, context: 'owner' }
+        }
+    },
+    list: undefined
 });
 
 
@@ -5359,97 +5359,97 @@ module.exports = MLList;
 
 
 _.extendProto(MLList, {
-	init: MLList$init,
+    init: MLList$init,
 });
 
 
 function MLList$init() {
-	Component.prototype.init.apply(this, arguments);
-	this.on('childrenbound', onChildrenBound);
+    Component.prototype.init.apply(this, arguments);
+    this.on('childrenbound', onChildrenBound);
 }
 
 
 function MLList_get() {
-	return this.model.get();
+    return this.model.get();
 }
 
 function MLList_set(value) {
-	this.model.set(value);
+    this.model.set(value);
 }
 
 function MLList_del() {
-	return this.model.set([]);
+    return this.model.set([]);
 }
 
 function onChildrenBound() {
-	this.model.set([]);
-	milo.minder(this.model, '<<<->>>', this.data);
+    this.model.set([]);
+    milo.minder(this.model, '<<<->>>', this.data);
 }
 
 
 var ITEM_PATH_REGEX = /^\[([0-9]+)\]$/;
 function onItemsChange(msg, data) {
-	var self = this;
-	_.defer(function() {
-		if (data.type == 'added' && ITEM_PATH_REGEX.test(data.path)) {
-			var index = +data.path.match(ITEM_PATH_REGEX)[1];
-			var newItem = self.list.item(index);
-			var btn = newItem.container.scope[DELETE_BUTTON_NAME];
-			btn.events.on('click',
-				{ subscriber: deleteItem, context: newItem });
-		}
+    var self = this;
+    _.defer(function() {
+        if (data.type == 'added' && ITEM_PATH_REGEX.test(data.path)) {
+            var index = +data.path.match(ITEM_PATH_REGEX)[1];
+            var newItem = self.list.item(index);
+            var btn = newItem.container.scope[DELETE_BUTTON_NAME];
+            btn.events.on('click',
+                { subscriber: deleteItem, context: newItem });
+        }
 
-		function deleteItem(msg, data) {
-			btn.events.off('click',
-				{ subscriber: deleteItem, context: this });
-			var index = this.data.getKey();
-			self.model.splice(index, 1);
-			//this.data.getMessageSource().dispatchMessage(LIST_CHANGE_MESSAGE);
-		}
-	});
+        function deleteItem(msg, data) {
+            btn.events.off('click',
+                { subscriber: deleteItem, context: this });
+            var index = this.data.getKey();
+            self.model.splice(index, 1);
+            //this.data.getMessageSource().dispatchMessage(LIST_CHANGE_MESSAGE);
+        }
+    });
 }
 
 },{"../c_class":11,"../c_registry":27,"mol-proto":94}],47:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
-	, componentsRegistry = require('../c_registry')
-	, miloCount = require('../../util/count');
+    , componentsRegistry = require('../c_registry')
+    , miloCount = require('../../util/count');
 
 
 var RADIO_CHANGE_MESSAGE = 'mlradiogroupchange'
-	, ELEMENT_NAME_PROPERTY = '_mlRadioGroupElementID'
-	, ELEMENT_NAME_PREFIX = 'ml-radio-group-'
+    , ELEMENT_NAME_PROPERTY = '_mlRadioGroupElementID'
+    , ELEMENT_NAME_PREFIX = 'ml-radio-group-'
 
 var MLRadioGroup = Component.createComponentClass('MLRadioGroup', {
-	data: {
-		set: MLRadioGroup_set,
-		get: MLRadioGroup_get,
-		del: MLRadioGroup_del,
-		splice: undefined,
-		event: RADIO_CHANGE_MESSAGE
-	},
-	model: {
-		messages: {
-			'***': { subscriber: onOptionsChange, context: 'owner' }
-		}
-	},
-	events: {
-		messages: {
-			'click': { subscriber: onGroupClick, context: 'owner' }
-		}
-	},
-	container: undefined,
-	dom: {
-		cls: 'ml-ui-radio-group'
-	},
-	template: {
-		template: '{{~ it.radioOptions :option }} \
-						{{##def.elID:{{= it.elementName }}-{{= option.value }}#}} \
-						<input id="{{# def.elID }}" type="radio" value="{{= option.value }}" name="{{= it.elementName }}"> \
-						<label for="{{# def.elID }}">{{= option.label }}</label> \
-				   {{~}}'
-	}
+    data: {
+        set: MLRadioGroup_set,
+        get: MLRadioGroup_get,
+        del: MLRadioGroup_del,
+        splice: undefined,
+        event: RADIO_CHANGE_MESSAGE
+    },
+    model: {
+        messages: {
+            '***': { subscriber: onOptionsChange, context: 'owner' }
+        }
+    },
+    events: {
+        messages: {
+            'click': { subscriber: onGroupClick, context: 'owner' }
+        }
+    },
+    container: undefined,
+    dom: {
+        cls: 'ml-ui-radio-group'
+    },
+    template: {
+        template: '{{~ it.radioOptions :option }} \
+                        {{##def.elID:{{= it.elementName }}-{{= option.value }}#}} \
+                        <input id="{{# def.elID }}" type="radio" value="{{= option.value }}" name="{{= it.elementName }}"> \
+                        <label for="{{# def.elID }}">{{= option.label }}</label> \
+                   {{~}}'
+    }
 });
 
 componentsRegistry.add(MLRadioGroup);
@@ -5458,7 +5458,7 @@ module.exports = MLRadioGroup;
 
 
 _.extendProto(MLRadioGroup, {
-	init: MLRadioGroup$init
+    init: MLRadioGroup$init
 });
 
 
@@ -5467,9 +5467,9 @@ _.extendProto(MLRadioGroup, {
  * Initialize radio group and setup 
  */
 function MLRadioGroup$init() {
-	_.defineProperty(this, '_radioList', [], _.CONF);
-	_.defineProperty(this, ELEMENT_NAME_PROPERTY, ELEMENT_NAME_PREFIX + miloCount());
-	Component.prototype.init.apply(this, arguments);
+    _.defineProperty(this, '_radioList', [], _.CONF);
+    _.defineProperty(this, ELEMENT_NAME_PROPERTY, ELEMENT_NAME_PREFIX + miloCount());
+    Component.prototype.init.apply(this, arguments);
 }
 
 
@@ -5480,19 +5480,19 @@ function MLRadioGroup$init() {
  * @param {Mixed} value The value to be set
  */
 function MLRadioGroup_set(value) {
-	var options = this._radioList
-		, setResult;
-	if (options.length) {
-		options.forEach(function(radio) {
-			radio.checked = radio.value == value;
-			if (radio.checked)
-				setResult = value;
-		});
+    var options = this._radioList
+        , setResult;
+    if (options.length) {
+        options.forEach(function(radio) {
+            radio.checked = radio.value == value;
+            if (radio.checked)
+                setResult = value;
+        });
 
-		dispatchChangeMessage.call(this);
+        dispatchChangeMessage.call(this);
 
-		return setResult;
-	}
+        return setResult;
+    }
 }
 
 
@@ -5503,11 +5503,11 @@ function MLRadioGroup_set(value) {
  * @return {String}
  */
 function MLRadioGroup_get() {
-	var checked = _.find(this._radioList, function(radio) {
-		return radio.checked;
-	}); 
+    var checked = _.find(this._radioList, function(radio) {
+        return radio.checked;
+    }); 
 
-	return checked && checked.value || undefined;
+    return checked && checked.value || undefined;
 }
 
 
@@ -5516,14 +5516,14 @@ function MLRadioGroup_get() {
  * Deletes the value of the group, setting it to empty
  */
 function MLRadioGroup_del() {
-	var options = this._radioList;
-	if (options.length)
-		options.forEach(function(radio) {
-			radio.checked = false;
-		});
+    var options = this._radioList;
+    if (options.length)
+        options.forEach(function(radio) {
+            radio.checked = false;
+        });
 
-	dispatchChangeMessage.call(this);
-	return undefined;
+    dispatchChangeMessage.call(this);
+    return undefined;
 }
 
 
@@ -5531,53 +5531,53 @@ function MLRadioGroup_del() {
  * Manage radio children clicks
  */
 function onGroupClick(eventType, event) {
-	if (event.target.type == 'radio')
-		dispatchChangeMessage.call(this);
+    if (event.target.type == 'radio')
+        dispatchChangeMessage.call(this);
 }
 
 // Post the data change
 function dispatchChangeMessage() {
-	this.data.getMessageSource().dispatchMessage(RADIO_CHANGE_MESSAGE);
+    this.data.getMessageSource().dispatchMessage(RADIO_CHANGE_MESSAGE);
 }
 
 
 // Set radio button children on model change
 function onOptionsChange(path, data) {
-	this.template.render({
-		radioOptions: this.model.get(),
-		elementName: this[ELEMENT_NAME_PROPERTY]
-	});
+    this.template.render({
+        radioOptions: this.model.get(),
+        elementName: this[ELEMENT_NAME_PROPERTY]
+    });
 
-	var radioEls = this.el.querySelectorAll('input[type="radio"]')
-		, options = this._radioList;
-	options.length = 0;
-	_.forEach(radioEls, options.push, options);
+    var radioEls = this.el.querySelectorAll('input[type="radio"]')
+        , options = this._radioList;
+    options.length = 0;
+    _.forEach(radioEls, options.push, options);
 }
 
 },{"../../util/count":79,"../c_class":11,"../c_registry":27}],48:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
-	, componentsRegistry = require('../c_registry')
-	, _ = require('mol-proto');
+    , componentsRegistry = require('../c_registry')
+    , _ = require('mol-proto');
 
 
 var MLSelect = Component.createComponentClass('MLSelect', {
-	dom: {
-		cls: 'ml-ui-select'
-	},
-	data: undefined,
-	events: undefined,
-	model: {
-		messages: {
-			'***': { subscriber: onOptionsChange, context: 'owner' }
-		}
-	},
-	template: {
-		template: '{{~ it.selectOptions :option }} \
-						<option value="{{= option.value }}">{{= option.label }}</option> \
-				   {{~}}'
-	}
+    dom: {
+        cls: 'ml-ui-select'
+    },
+    data: undefined,
+    events: undefined,
+    model: {
+        messages: {
+            '***': { subscriber: onOptionsChange, context: 'owner' }
+        }
+    },
+    template: {
+        template: '{{~ it.selectOptions :option }} \
+                        <option value="{{= option.value }}">{{= option.label }}</option> \
+                   {{~}}'
+    }
 });
 
 
@@ -5587,17 +5587,17 @@ module.exports = MLSelect;
 
 
 _.extendProto(MLSelect, {
-	disable: MLSelect$disable
+    disable: MLSelect$disable
 });
 
 
 function MLSelect$disable(disable) {
-	this.el.disabled = disable;
+    this.el.disabled = disable;
 }
 
 
 function onOptionsChange(path, data) {
-	this.template.render({ selectOptions: this.model.get() });
+    this.template.render({ selectOptions: this.model.get() });
 }
 
 },{"../c_class":11,"../c_registry":27,"mol-proto":94}],49:[function(require,module,exports){
@@ -5609,47 +5609,47 @@ function onOptionsChange(path, data) {
  */
 
 var Component = require('../c_class')
-	, componentsRegistry = require('../c_registry')
-	, _ = require('mol-proto')
-	, doT = require('dot');
+    , componentsRegistry = require('../c_registry')
+    , _ = require('mol-proto')
+    , doT = require('dot');
 
 
 var COMBO_CHANGE_MESSAGE = 'mlsupercombochange';
 
 var OPTIONS_TEMPLATE = '{{~ it.comboOptions :option:index }}\
-							<div {{? option.selected}}class="selected" {{?}}data-value="{{= index }}">{{= option.label }}</div>\
-						{{~}}';
+                            <div {{? option.selected}}class="selected" {{?}}data-value="{{= index }}">{{= option.label }}</div>\
+                        {{~}}';
 
 var MAX_RENDERED = 100;
 var BUFFER = 25;
 var DEFAULT_ELEMENT_HEIGHT = 20;
 
 var MLSuperCombo = Component.createComponentClass('MLSuperCombo', {
-	events: {
-		messages: {
-			'mouseleave': {subscriber: onMouseLeave, context: 'owner'}
-		}
-	},
-	data: {
-		get: MLSuperCombo_get,
-		set: MLSuperCombo_set,
-		del: MLSuperCombo_del,
-		splice: undefined,
-		event: COMBO_CHANGE_MESSAGE
-	},
-	dom: {
-		cls: 'ml-ui-supercombo'
-	},
-	template: {
-		template: '<input ml-bind="[data, events]:input" class="form-control ml-ui-input">\
-		           <button ml-bind="[events]:openBtn" class="btn btn-default ml-ui-button">Add</button>\
-		           <div ml-bind="[dom, events]:list" class="ml-ui-supercombo-dropdown">\
-		               <div ml-bind="[dom]:before"></div>\
-		               <div ml-bind="[template, dom, events]:options" class="ml-ui-supercombo-options"></div>\
-		               <div ml-bind="[dom]:after"></div>\
-		           </div>'
-	},
-	container: undefined
+    events: {
+        messages: {
+            'mouseleave': {subscriber: onMouseLeave, context: 'owner'}
+        }
+    },
+    data: {
+        get: MLSuperCombo_get,
+        set: MLSuperCombo_set,
+        del: MLSuperCombo_del,
+        splice: undefined,
+        event: COMBO_CHANGE_MESSAGE
+    },
+    dom: {
+        cls: 'ml-ui-supercombo'
+    },
+    template: {
+        template: '<input ml-bind="[data, events]:input" class="form-control ml-ui-input">\
+                   <button ml-bind="[events]:openBtn" class="btn btn-default ml-ui-button">Add</button>\
+                   <div ml-bind="[dom, events]:list" class="ml-ui-supercombo-dropdown">\
+                       <div ml-bind="[dom]:before"></div>\
+                       <div ml-bind="[template, dom, events]:options" class="ml-ui-supercombo-options"></div>\
+                       <div ml-bind="[dom]:after"></div>\
+                   </div>'
+    },
+    container: undefined
 });
 
 componentsRegistry.add(MLSuperCombo);
@@ -5660,13 +5660,13 @@ module.exports = MLSuperCombo;
  * Public Api
  */
 _.extendProto(MLSuperCombo, {
-	init: MLSuperCombo$init,
-	showOptions: MLSuperCombo$showOptions,
-	hideOptions: MLSuperCombo$hideOptions,
-	toggleOptions: MLSuperCombo$toggleOptions,
-	setOptions: MLSuperCombo$setOptions,
-	setFilteredOptions: MLSuperCombo$setFilteredOptions,
-	update: MLSuperCombo$update
+    init: MLSuperCombo$init,
+    showOptions: MLSuperCombo$showOptions,
+    hideOptions: MLSuperCombo$hideOptions,
+    toggleOptions: MLSuperCombo$toggleOptions,
+    setOptions: MLSuperCombo$setOptions,
+    setFilteredOptions: MLSuperCombo$setFilteredOptions,
+    update: MLSuperCombo$update
 });
 
 
@@ -5675,23 +5675,23 @@ _.extendProto(MLSuperCombo, {
  * Initialise the component, wait for childrenbound, setup empty options arrays.
  */
 function MLSuperCombo$init() {
-	Component.prototype.init.apply(this, arguments);
-	
-	this.on('childrenbound', onChildrenBound);
-	
-	_.defineProperties(this, {
-		_optionsData: [],
-		_filteredOptionsData: []
-	}, _.WRIT);
+    Component.prototype.init.apply(this, arguments);
+    
+    this.on('childrenbound', onChildrenBound);
+    
+    _.defineProperties(this, {
+        _optionsData: [],
+        _filteredOptionsData: []
+    }, _.WRIT);
 }
 
 /**
  * Handler for init childrenbound listener. Renders template.
  */
 function onChildrenBound() {
-	this.off('childrenbound', onChildrenBound);
-	this.template.render().binder();
-	componentSetup.call(this);
+    this.off('childrenbound', onChildrenBound);
+    this.template.render().binder();
+    componentSetup.call(this);
 }
 
 
@@ -5699,35 +5699,35 @@ function onChildrenBound() {
  * Define instance properties, get subcomponents, call setup sub-tasks
  */
 function componentSetup() {
-	_.defineProperties(this, {
-		'_comboInput': this.container.scope.input,
-		'_comboList': this.container.scope.list,
-		'_comboOptions': this.container.scope.options,
-		'_comboBefore': this.container.scope.before,
-		'_comboAfter': this.container.scope.after,
-		'_comboOpenBtn': this.container.scope.openBtn,
-		'_optionTemplate': doT.compile(OPTIONS_TEMPLATE)
-	});
+    _.defineProperties(this, {
+        '_comboInput': this.container.scope.input,
+        '_comboList': this.container.scope.list,
+        '_comboOptions': this.container.scope.options,
+        '_comboBefore': this.container.scope.before,
+        '_comboAfter': this.container.scope.after,
+        '_comboOpenBtn': this.container.scope.openBtn,
+        '_optionTemplate': doT.compile(OPTIONS_TEMPLATE)
+    });
 
-	_.defineProperties(this, {
-		'_startIndex': 0,
-		'_endIndex': MAX_RENDERED,
-		'_hidden': false,
-		'_elementHeight': 0,
-		'_total': 0,
-		'_optionsHeight': 200,
-		'_lastScrollPos': 0,
-		'_currentValue': null,
-		'_selected': null
-	}, _.WRIT);
+    _.defineProperties(this, {
+        '_startIndex': 0,
+        '_endIndex': MAX_RENDERED,
+        '_hidden': false,
+        '_elementHeight': 0,
+        '_total': 0,
+        '_optionsHeight': 200,
+        '_lastScrollPos': 0,
+        '_currentValue': null,
+        '_selected': null
+    }, _.WRIT);
 
-	// Component Setup
-	this.dom.setStyles({ position: 'relative' });
-	setupComboList(this._comboList, this._comboOptions, this);
-	setupComboInput(this._comboInput, this);
-	setupComboBtn(this._comboOpenBtn, this);
+    // Component Setup
+    this.dom.setStyles({ position: 'relative' });
+    setupComboList(this._comboList, this._comboOptions, this);
+    setupComboInput(this._comboInput, this);
+    setupComboBtn(this._comboOpenBtn, this);
 
-	this.events.on('keydown', { subscriber: changeSelected, context: this});
+    this.events.on('keydown', { subscriber: changeSelected, context: this});
 }
 
 /**
@@ -5737,8 +5737,8 @@ function componentSetup() {
  * @param {Boolean} show true to show, false to hide
  */
 function MLSuperCombo$toggleOptions(show) {
-	this._hidden = !show;
-	this._comboList.dom.toggle(show);
+    this._hidden = !show;
+    this._comboList.dom.toggle(show);
 }
 
 /**
@@ -5746,8 +5746,8 @@ function MLSuperCombo$toggleOptions(show) {
  * Shows options list
  */
 function MLSuperCombo$showOptions() {
-	this._hidden = false;
-	this._comboList.dom.toggle(true);
+    this._hidden = false;
+    this._comboList.dom.toggle(true);
 }
 
 /**
@@ -5755,8 +5755,8 @@ function MLSuperCombo$showOptions() {
  * Hides options list
  */
 function MLSuperCombo$hideOptions() {
-	this._hidden = true;
-	this._comboList.dom.toggle(false);
+    this._hidden = true;
+    this._comboList.dom.toggle(false);
 }
 
 /**
@@ -5766,8 +5766,8 @@ function MLSuperCombo$hideOptions() {
  * @param {Array[Object]} arr the options to set with label and value pairs. Value can be an object.
  */
 function MLSuperCombo$setOptions(arr) {
-	this._optionsData = arr;
-	this.setFilteredOptions(arr);
+    this._optionsData = arr;
+    this.setFilteredOptions(arr);
 }
 
 /**
@@ -5777,9 +5777,9 @@ function MLSuperCombo$setOptions(arr) {
  * @param {[type]} arr The options to set
  */
 function MLSuperCombo$setFilteredOptions(arr) {
-	this._filteredOptionsData = arr;
-	this._total = arr.length;
-	this.update();
+    this._filteredOptionsData = arr;
+    this._total = arr.length;
+    this.update();
 }
 
 /**
@@ -5788,52 +5788,52 @@ function MLSuperCombo$setFilteredOptions(arr) {
  * intelligently show a subset of the filtered list at a time.
  */
 function MLSuperCombo$update() {
-	var wasHidden = this._hidden;
-	if (wasHidden)
-		this.showOptions();
+    var wasHidden = this._hidden;
+    if (wasHidden)
+        this.showOptions();
 
-	var arrToShow = this._filteredOptionsData.slice(this._startIndex, this._endIndex);
+    var arrToShow = this._filteredOptionsData.slice(this._startIndex, this._endIndex);
 
-	this._comboOptions.template.render({
-		comboOptions: arrToShow
-	});
+    this._comboOptions.template.render({
+        comboOptions: arrToShow
+    });
 
-	this._elementHeight = this._elementHeight || DEFAULT_ELEMENT_HEIGHT;
+    this._elementHeight = this._elementHeight || DEFAULT_ELEMENT_HEIGHT;
 
-	if (wasHidden)
-		this.hideOptions();
+    if (wasHidden)
+        this.hideOptions();
 
-	var beforeHeight = this._startIndex * this._elementHeight;
-	var afterHeight = (this._total - this._endIndex) * this._elementHeight;
-	this._comboBefore.el.style.height = beforeHeight + 'px';
-	this._comboAfter.el.style.height = afterHeight > 0 ? afterHeight + 'px' : '0px';
+    var beforeHeight = this._startIndex * this._elementHeight;
+    var afterHeight = (this._total - this._endIndex) * this._elementHeight;
+    this._comboBefore.el.style.height = beforeHeight + 'px';
+    this._comboAfter.el.style.height = afterHeight > 0 ? afterHeight + 'px' : '0px';
 }
 
 /**
  * Setup the combo list
- * 				
+ *              
  * @param  {Component} list
  * @param  {Array} options
  * @param  {Component} self
  */
 function setupComboList(list, options, self) {
-	options.template.set(OPTIONS_TEMPLATE);
-	
-	list.dom.setStyles({
-		overflow: 'scroll',
-		height: self._optionsHeight + 'px',
-		width: '100%',
-		position: 'absolute',
-		zIndex: 10
-		// top: yPos + 'px',
-		// left: xPos + 'px',
-	});
+    options.template.set(OPTIONS_TEMPLATE);
+    
+    list.dom.setStyles({
+        overflow: 'scroll',
+        height: self._optionsHeight + 'px',
+        width: '100%',
+        position: 'absolute',
+        zIndex: 10
+        // top: yPos + 'px',
+        // left: xPos + 'px',
+    });
 
-	self.hideOptions();
-	list.events.onMessages({
-		'click': {subscriber: onListClick, context: self},
-		'scroll': {subscriber: onListScroll, context: self}
-	});
+    self.hideOptions();
+    list.events.onMessages({
+        'click': {subscriber: onListClick, context: self},
+        'scroll': {subscriber: onListScroll, context: self}
+    });
 }
 
 /**
@@ -5843,9 +5843,9 @@ function setupComboList(list, options, self) {
  * @param  {Component} self
  */
 function setupComboInput(input, self) {
-	input.data.on('', { subscriber: onDataChange, context: self });
-	input.events.on('click', {subscriber: onInputClick, context: self });
-	input.events.on('keydown', {subscriber: onEnterKey, context: self });
+    input.data.on('', { subscriber: onDataChange, context: self });
+    input.events.on('click', {subscriber: onInputClick, context: self });
+    input.events.on('keydown', {subscriber: onEnterKey, context: self });
 }
 
 /**
@@ -5854,7 +5854,7 @@ function setupComboInput(input, self) {
  * @param  {Component} self
  */
 function setupComboBtn(btn, self) {
-	btn.events.on('click', { subscriber: onAddBtn, context: self });
+    btn.events.on('click', { subscriber: onAddBtn, context: self });
 }
 
 
@@ -5862,7 +5862,7 @@ function setupComboBtn(btn, self) {
  * Custom data facet get method
  */
 function MLSuperCombo_get() {
-	return this._currentValue;
+    return this._currentValue;
 }
 
 /**
@@ -5870,16 +5870,16 @@ function MLSuperCombo_get() {
  * @param {Variable} obj
  */
 function MLSuperCombo_set(obj) {
-	this._currentValue = obj;
-	this._comboInput.data.set(obj.label);
+    this._currentValue = obj;
+    this._comboInput.data.set(obj.label);
 }
 
 /**
  * Custom data facet del method
  */
 function MLSuperCombo_del() {
-	this._currentValue = null;
-	this._comboInput.data.set('');
+    this._currentValue = null;
+    this._comboInput.data.set('');
 }
 
 
@@ -5891,21 +5891,21 @@ function MLSuperCombo_del() {
  * @param  {Objext} data
  */
 function onDataChange(msg, data) {
-	var text = data.newValue;
-	var filteredArr = _.filter(this._optionsData, function(option) {
-		delete option.selected;
-		var label = option.label ? option.label.toLowerCase() : null;
-		text = text.toLowerCase();
-		return label ? label.indexOf(text) != -1 : false;
-	});
-	if (filteredArr.length) {
-		filteredArr[0].selected = true;
-		this._selected = filteredArr[0];
-	}
-	
-	this.showOptions();
-	this.setFilteredOptions(filteredArr);
-	this._comboList.el.scrollTop = 0;
+    var text = data.newValue;
+    var filteredArr = _.filter(this._optionsData, function(option) {
+        delete option.selected;
+        var label = option.label ? option.label.toLowerCase() : null;
+        text = text.toLowerCase();
+        return label ? label.indexOf(text) != -1 : false;
+    });
+    if (filteredArr.length) {
+        filteredArr[0].selected = true;
+        this._selected = filteredArr[0];
+    }
+    
+    this.showOptions();
+    this.setFilteredOptions(filteredArr);
+    this._comboList.el.scrollTop = 0;
 }
 
 /**
@@ -5922,39 +5922,39 @@ var directionMap = { '40': 1, '38': -1 };
  * @param  {Event} event
  */
 function changeSelected(type, event) {
-	// TODO: refactor and tidy up, looks like some code duplication.
-	var direction = directionMap[event.keyCode];
+    // TODO: refactor and tidy up, looks like some code duplication.
+    var direction = directionMap[event.keyCode];
 
-	if (direction) {
-		var selected = this.el.querySelectorAll('.selected')[0]
-			, scrollPos = this._comboList.el.scrollTop
-			, selectedPos = selected ? selected.offsetTop : 0
-			, relativePos = selectedPos - scrollPos;
-		
-		if (selected) {
-			var index = _getDataValueFromElement.call(this, selected)
-				, thisItem = this._filteredOptionsData[index]
-				, adjItem = this._filteredOptionsData[index + direction];
+    if (direction) {
+        var selected = this.el.querySelectorAll('.selected')[0]
+            , scrollPos = this._comboList.el.scrollTop
+            , selectedPos = selected ? selected.offsetTop : 0
+            , relativePos = selectedPos - scrollPos;
+        
+        if (selected) {
+            var index = _getDataValueFromElement.call(this, selected)
+                , thisItem = this._filteredOptionsData[index]
+                , adjItem = this._filteredOptionsData[index + direction];
 
-			if (adjItem) {
-				delete thisItem.selected;
-				adjItem.selected = true;
-				this._selected = adjItem;
-				this.update();
-			}
-		} else {
-			if (this._filteredOptionsData[0]) {
-				this._filteredOptionsData[0].selected = true;
-				this.update();
-			}
-		}
+            if (adjItem) {
+                delete thisItem.selected;
+                adjItem.selected = true;
+                this._selected = adjItem;
+                this.update();
+            }
+        } else {
+            if (this._filteredOptionsData[0]) {
+                this._filteredOptionsData[0].selected = true;
+                this.update();
+            }
+        }
 
-		if (relativePos > this._optionsHeight - this._elementHeight*2 && direction === 1)
-			this._comboList.el.scrollTop += this._elementHeight*direction*5;
+        if (relativePos > this._optionsHeight - this._elementHeight*2 && direction === 1)
+            this._comboList.el.scrollTop += this._elementHeight*direction*5;
 
-		if (relativePos < this._elementHeight && direction === -1)
-			this._comboList.el.scrollTop += this._elementHeight*direction*5;
-	}
+        if (relativePos < this._elementHeight && direction === -1)
+            this._comboList.el.scrollTop += this._elementHeight*direction*5;
+    }
 }
 
 /**
@@ -5964,7 +5964,7 @@ function changeSelected(type, event) {
  * @param  {Event} event
  */
 function onMouseLeave(type, event) {
-	this.hideOptions();
+    this.hideOptions();
 }
 
 
@@ -5975,7 +5975,7 @@ function onMouseLeave(type, event) {
  * @param  {Event} event
  */
 function onInputClick(type, event) {
-	this.showOptions();
+    this.showOptions();
 }
 
 
@@ -5986,10 +5986,10 @@ function onInputClick(type, event) {
  * @param  {Event} event
  */
 function onEnterKey(type, event) {
-	if (event.keyCode == 13) {
-		if (this._selected)
-			_setData.call(this);
-	}
+    if (event.keyCode == 13) {
+        if (this._selected)
+            _setData.call(this);
+    }
 }
 
 /**
@@ -5999,7 +5999,7 @@ function onEnterKey(type, event) {
  * @param  {Event} event
  */
 function onAddBtn (type, event) {
-	
+    
 }
 
 /**
@@ -6009,12 +6009,12 @@ function onAddBtn (type, event) {
  * @param  {Event} event
  */
 function onListClick (type, event) {
-	var index = _getDataValueFromElement.call(this, event.target);
-	var data = this._filteredOptionsData[index];
+    var index = _getDataValueFromElement.call(this, event.target);
+    var data = this._filteredOptionsData[index];
 
-	this._selected = data;
-	_setData.call(this);
-	this.update();
+    this._selected = data;
+    _setData.call(this);
+    this.update();
 }
 
 
@@ -6025,26 +6025,26 @@ function onListClick (type, event) {
  * @param  {Event} event
  */
 function onListScroll (type, event) {
-	var scrollPos = event.target.scrollTop
-		, direction = scrollPos > this._lastScrollPos ? 'down' : 'up'
-		, firstChild = this._comboOptions.el.lastChild
-		, lastChild = this._comboOptions.el.firstChild
-		, lastElPosition = firstChild ? firstChild.offsetTop : 0
-		, firstElPosition = lastChild ? lastChild.offsetTop : 0
-		, distFromLastEl = lastElPosition - scrollPos - this._optionsHeight + this._elementHeight
-		, distFromFirstEl = scrollPos - firstElPosition
-		, elsFromStart = Math.floor(distFromFirstEl / this._elementHeight)
-		, elsToTheEnd = Math.floor(distFromLastEl / this._elementHeight)
-		, totalElementsBefore = Math.floor(scrollPos / this._elementHeight) - BUFFER;
+    var scrollPos = event.target.scrollTop
+        , direction = scrollPos > this._lastScrollPos ? 'down' : 'up'
+        , firstChild = this._comboOptions.el.lastChild
+        , lastChild = this._comboOptions.el.firstChild
+        , lastElPosition = firstChild ? firstChild.offsetTop : 0
+        , firstElPosition = lastChild ? lastChild.offsetTop : 0
+        , distFromLastEl = lastElPosition - scrollPos - this._optionsHeight + this._elementHeight
+        , distFromFirstEl = scrollPos - firstElPosition
+        , elsFromStart = Math.floor(distFromFirstEl / this._elementHeight)
+        , elsToTheEnd = Math.floor(distFromLastEl / this._elementHeight)
+        , totalElementsBefore = Math.floor(scrollPos / this._elementHeight) - BUFFER;
 
-	if ((direction == 'down' && elsToTheEnd < BUFFER) 
-	 	 || (direction == 'up' && elsFromStart < BUFFER)) {
-		this._startIndex = totalElementsBefore > 0 ? totalElementsBefore : 0;
-		this._endIndex = totalElementsBefore + MAX_RENDERED;
-		this._elementHeight = firstChild.style.height;
-		this.update();
-	}
-	this._lastScrollPos = scrollPos;
+    if ((direction == 'down' && elsToTheEnd < BUFFER) 
+         || (direction == 'up' && elsFromStart < BUFFER)) {
+        this._startIndex = totalElementsBefore > 0 ? totalElementsBefore : 0;
+        this._endIndex = totalElementsBefore + MAX_RENDERED;
+        this._elementHeight = firstChild.style.height;
+        this.update();
+    }
+    this._lastScrollPos = scrollPos;
 }
 
 
@@ -6057,7 +6057,7 @@ function onListScroll (type, event) {
  * @return {Number}
  */
 function _getDataValueFromElement(el) {
-	return Number(el.getAttribute('data-value')) + this._startIndex;
+    return Number(el.getAttribute('data-value')) + this._startIndex;
 }
 
 /**
@@ -6066,29 +6066,29 @@ function _getDataValueFromElement(el) {
  * unsubscribe data listeners.
  */
 function _setData() {
-	delete this._selected.selected;
-	this.hideOptions();
-	this._comboInput.data.off('', { subscriber: onDataChange, context: this });
-	this.data.set(this._selected);
-	this.data.getMessageSource().dispatchMessage(COMBO_CHANGE_MESSAGE);
-	this._comboInput.data.on('', { subscriber: onDataChange, context: this });
-	this._selected = null;
-	this.setFilteredOptions(this._optionsData);
+    delete this._selected.selected;
+    this.hideOptions();
+    this._comboInput.data.off('', { subscriber: onDataChange, context: this });
+    this.data.set(this._selected);
+    this.data.getMessageSource().dispatchMessage(COMBO_CHANGE_MESSAGE);
+    this._comboInput.data.on('', { subscriber: onDataChange, context: this });
+    this._selected = null;
+    this.setFilteredOptions(this._optionsData);
 }
 
 },{"../c_class":11,"../c_registry":27,"dot":93,"mol-proto":94}],50:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
-	, componentsRegistry = require('../c_registry');
+    , componentsRegistry = require('../c_registry');
 
 
 var MLTextarea = Component.createComponentClass('MLTextarea', {
-	data: undefined,
-	events: undefined,
-	dom: {
-		cls: 'ml-ui-textarea'
-	}
+    data: undefined,
+    events: undefined,
+    dom: {
+        cls: 'ml-ui-textarea'
+    }
 });
 
 componentsRegistry.add(MLTextarea);
@@ -6099,15 +6099,15 @@ module.exports = MLTextarea;
 'use strict';
 
 var Component = require('../c_class')
-	, componentsRegistry = require('../c_registry');
+    , componentsRegistry = require('../c_registry');
 
 
 var MLTime = Component.createComponentClass('MLTime', {
-	events: undefined,
-	data: undefined,
-	dom: {
-		cls: 'ml-ui-time'
-	}
+    events: undefined,
+    data: undefined,
+    dom: {
+        cls: 'ml-ui-time'
+    }
 });
 
 componentsRegistry.add(MLTime);
@@ -6118,16 +6118,16 @@ module.exports = MLTime;
 'use strict';
 
 var Component = require('../c_class')
-	, componentsRegistry = require('../c_registry');
+    , componentsRegistry = require('../c_registry');
 
 
 var MLWrapper = Component.createComponentClass('MLWrapper', {
-	container: undefined,
-	data: undefined,
-	events: undefined,
-	dom: {
-		cls: 'ml-ui-wrapper'
-	}
+    container: undefined,
+    data: undefined,
+    events: undefined,
+    dom: {
+        cls: 'ml-ui-wrapper'
+    }
 });
 
 componentsRegistry.add(MLWrapper);
@@ -6156,30 +6156,30 @@ module.exports = MLWrapper;
 
 
 var _ = require('mol-proto')
-	, doT = require('dot');
+    , doT = require('dot');
 
 
 module.exports = config;
 
 function config(options) {
-	_.deepExtend(config, options);
+    _.deepExtend(config, options);
 }
 
 config({
-	attrs: {
-		bind: 'ml-bind',
-		load: 'ml-load'
-	},
-	componentRef: '___milo_component',
-	componentPrefix: 'milo_',
-	template: {
-		compile: doT.compile
-	},
-	domStorage: {
-		typeSuffix: ':___milo_data_type',
-		prefixSeparator: '/'
-	},
-	check: true
+    attrs: {
+        bind: 'ml-bind',
+        load: 'ml-load'
+    },
+    componentRef: '___milo_component',
+    componentPrefix: 'milo_',
+    template: {
+        compile: doT.compile
+    },
+    domStorage: {
+        typeSuffix: ':___milo_data_type',
+        prefixSeparator: '/'
+    },
+    check: true
 });
 
 },{"dot":93,"mol-proto":94}],54:[function(require,module,exports){
@@ -6219,80 +6219,80 @@ config({
 
 
 var miloMail = require('./mail')
-	, request = require('./util/request')
-	, logger = require('./util/logger')
-	, utilDom = require('./util/dom')
-	, config = require('./config')
-	, LoadAttribute = require('./attributes/a_load')
-	, LoaderError = require('./util/error').Loader;
+    , request = require('./util/request')
+    , logger = require('./util/logger')
+    , utilDom = require('./util/dom')
+    , config = require('./config')
+    , LoadAttribute = require('./attributes/a_load')
+    , LoaderError = require('./util/error').Loader;
 
 
 module.exports = loader;
 
 
 function loader(rootEl, callback) {
-	milo(function() {
-		_loader(rootEl, callback);
-	});
+    milo(function() {
+        _loader(rootEl, callback);
+    });
 }
 
 
 function _loader(rootEl, callback) {
-	if (typeof rootEl == 'function') {
-		callback = rootEl;
-		rootEl = undefined;
-	}
+    if (typeof rootEl == 'function') {
+        callback = rootEl;
+        rootEl = undefined;
+    }
 
-	rootEl = rootEl || document.body;
+    rootEl = rootEl || document.body;
 
-	miloMail.postMessage('loader', { state: 'started' });
-	_loadViewsInElement(rootEl, function(views) {
-		miloMail.postMessage('loader', { 
-			state: 'finished',
-			views: views
-		});
-		callback(views);
-	});
+    miloMail.postMessage('loader', { state: 'started' });
+    _loadViewsInElement(rootEl, function(views) {
+        miloMail.postMessage('loader', { 
+            state: 'finished',
+            views: views
+        });
+        callback(views);
+    });
 }
 
 
 function _loadViewsInElement(rootEl, callback) {
-	var loadElements = rootEl.querySelectorAll('[' + config.attrs.load + ']');
+    var loadElements = rootEl.querySelectorAll('[' + config.attrs.load + ']');
 
-	var views = {}
-		, totalCount = loadElements.length
-		, loadedCount = 0;
+    var views = {}
+        , totalCount = loadElements.length
+        , loadedCount = 0;
 
-	_.forEach(loadElements, function (el) {
-		loadView(el, function(err) {
-			views[el.id] = err || el;
-			loadedCount++;
-			if (loadedCount == totalCount)
-				callback(views);
-		});
-	});
+    _.forEach(loadElements, function (el) {
+        loadView(el, function(err) {
+            views[el.id] = err || el;
+            loadedCount++;
+            if (loadedCount == totalCount)
+                callback(views);
+        });
+    });
 };
 
 
 function loadView(el, callback) {
-	if (utilDom.children(el).length)
-		throw new LoaderError('can\'t load html into element that is not empty');
+    if (utilDom.children(el).length)
+        throw new LoaderError('can\'t load html into element that is not empty');
 
-	var attr = new LoadAttribute(el);
+    var attr = new LoadAttribute(el);
 
-	attr.parse().validate();
+    attr.parse().validate();
 
-	request.get(attr.loadUrl, function(err, html) {
-		if (err) {
-			err.message = err.message || 'can\'t load file ' + attr.loadUrl;
-			// logger.error(err.message);
-			callback(err);
-			return;
-		}
+    request.get(attr.loadUrl, function(err, html) {
+        if (err) {
+            err.message = err.message || 'can\'t load file ' + attr.loadUrl;
+            // logger.error(err.message);
+            callback(err);
+            return;
+        }
 
-		el.innerHTML = html;
-		callback(null);
-	});
+        el.innerHTML = html;
+        callback(null);
+    });
 }
 
 },{"./attributes/a_load":7,"./config":53,"./mail":55,"./util/dom":80,"./util/error":82,"./util/logger":85,"./util/request":88}],55:[function(require,module,exports){
@@ -6313,9 +6313,9 @@ function loadView(el, callback) {
 
 
 var Messenger = require('../messenger')
-	, MailMsgAPI = require('./mail_api')
-	, MailMessageSource = require('./mail_source')
-	, _ = require('mol-proto');
+    , MailMsgAPI = require('./mail_api')
+    , MailMessageSource = require('./mail_source')
+    , _ = require('mol-proto');
 
 
 var miloMail = new Messenger;
@@ -6331,17 +6331,17 @@ module.exports = miloMail;
 'use strict';
 
 var MessengerAPI = require('../messenger/m_api')
-	, _ = require('mol-proto')
-	, check = require('../util/check')
-	, Match = check.Match;
+    , _ = require('mol-proto')
+    , check = require('../util/check')
+    , Match = check.Match;
 
 
 var MailMsgAPI = _.createSubclass(MessengerAPI, 'MailMsgAPI', true);
 
 
 _.extendProto(MailMsgAPI, {
-	translateToSourceMessage: translateToSourceMessage,
- 	filterSourceMessage: filterSourceMessage
+    translateToSourceMessage: translateToSourceMessage,
+    filterSourceMessage: filterSourceMessage
 });
 
 module.exports = MailMsgAPI;
@@ -6351,50 +6351,50 @@ module.exports = MailMsgAPI;
 // Can also implement beforedatachanged event to allow preventing the change
 // translateToDomEvent
 var windowMessageRegExp = /^message\:/
-	, windowMessagePrefix = 'message:';
+    , windowMessagePrefix = 'message:';
 
 function translateToSourceMessage(message) {
-	if (message == 'domready')
-		return 'readystatechange';
-	else if (windowMessageRegExp.test(message))
-		return 'message';
+    if (message == 'domready')
+        return 'readystatechange';
+    else if (windowMessageRegExp.test(message))
+        return 'message';
 }
 
 
 // filterDataMessage
 function filterSourceMessage(sourceMessage, msgType, msgData) {
-	if (sourceMessage == 'readystatechange') {
-		//return document.readyState == 'interactive';
-		// 	return false;
-		// _.defineProperty(this, '_domReadyFired', true, _.WRIT);
-		return true;
-	} else if (sourceMessage == 'message')
-		return windowMessagePrefix + msgData.data.type == msgType;
+    if (sourceMessage == 'readystatechange') {
+        //return document.readyState == 'interactive';
+        //  return false;
+        // _.defineProperty(this, '_domReadyFired', true, _.WRIT);
+        return true;
+    } else if (sourceMessage == 'message')
+        return windowMessagePrefix + msgData.data.type == msgType;
 };
 
 },{"../messenger/m_api":59,"../util/check":77,"mol-proto":94}],57:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../messenger/m_source')
-	, domEventsConstructors = require('../components/msg_src/de_constrs')
-	, MailMessageSourceError = require('../util/error').MailMessageSource
-	, _ = require('mol-proto')
-	, check = require('../util/check')
-	, Match = check.Match;
+    , domEventsConstructors = require('../components/msg_src/de_constrs')
+    , MailMessageSourceError = require('../util/error').MailMessageSource
+    , _ = require('mol-proto')
+    , check = require('../util/check')
+    , Match = check.Match;
 
 
 var MailMessageSource = _.createSubclass(MessageSource, 'MailMessageSource', true);
 
 
 _.extendProto(MailMessageSource, {
-	// implementing MessageSource interface
- 	addSourceSubscriber: addSourceSubscriber,
- 	removeSourceSubscriber: removeSourceSubscriber,
- 	trigger: trigger,
+    // implementing MessageSource interface
+    addSourceSubscriber: addSourceSubscriber,
+    removeSourceSubscriber: removeSourceSubscriber,
+    trigger: trigger,
 
- 	// class specific methods
- 	_windowSubscriberMethod: _windowSubscriberMethod,
- 	handleEvent: handleEvent,  // event dispatcher - as defined by Event DOM API
+    // class specific methods
+    _windowSubscriberMethod: _windowSubscriberMethod,
+    handleEvent: handleEvent,  // event dispatcher - as defined by Event DOM API
 });
 
 
@@ -6402,65 +6402,65 @@ module.exports = MailMessageSource;
 
 
 function addSourceSubscriber(sourceMessage) {
-	if (isReadyStateChange(sourceMessage)) {
-		if (document.readyState == 'loading')
-			document.addEventListener('readystatechange', this, false);
-		else {
-			var EventConstructor = domEventsConstructors.readystatechange;
-			var domEvent = new EventConstructor('readystatechange', { target: document });
-			this.dispatchMessage('readystatechange', domEvent);
-		}
-	} else
-		this._windowSubscriberMethod('addEventListener', sourceMessage);
+    if (isReadyStateChange(sourceMessage)) {
+        if (document.readyState == 'loading')
+            document.addEventListener('readystatechange', this, false);
+        else {
+            var EventConstructor = domEventsConstructors.readystatechange;
+            var domEvent = new EventConstructor('readystatechange', { target: document });
+            this.dispatchMessage('readystatechange', domEvent);
+        }
+    } else
+        this._windowSubscriberMethod('addEventListener', sourceMessage);
 }
 
 
 function removeSourceSubscriber(sourceMessage) {
-	if (isReadyStateChange(sourceMessage))
-		document.removeEventListener('readystatechange', this, false);
-	else 
-		this._windowSubscriberMethod('removeEventListener', sourceMessage);
+    if (isReadyStateChange(sourceMessage))
+        document.removeEventListener('readystatechange', this, false);
+    else 
+        this._windowSubscriberMethod('removeEventListener', sourceMessage);
 }
 
 
 function isReadyStateChange(sourceMessage) {
-	return sourceMessage == 'readystatechange' && typeof document == 'object';
+    return sourceMessage == 'readystatechange' && typeof document == 'object';
 }
 
 function isWindowMessage(sourceMessage) {
-	return sourceMessage == 'message' && typeof window == 'object';
+    return sourceMessage == 'message' && typeof window == 'object';
 }
 
 function _windowSubscriberMethod(method, sourceMessage) {
-	if (isWindowMessage(sourceMessage))
-		window[method]('message', this, false);
+    if (isWindowMessage(sourceMessage))
+        window[method]('message', this, false);
 }
 
 
 // event dispatcher - as defined by Event DOM API
 function handleEvent(event) {
-	this.dispatchMessage(event.type, event);
+    this.dispatchMessage(event.type, event);
 }
 
 
 function trigger(msgType, data) {
-	data = data || {};
-	data.type = 'message:' + msgType;
-	
-	if (typeof window == 'object')
-		window.postMessage(data, '*')
+    data = data || {};
+    data.type = 'message:' + msgType;
+    
+    if (typeof window == 'object')
+        window.postMessage(data, '*')
 }
 
 },{"../components/msg_src/de_constrs":32,"../messenger/m_source":61,"../util/check":77,"../util/error":82,"mol-proto":94}],58:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
-	// , MessageSource = require('./message_source')
-	, MessageSource = require('./m_source')
-	, _ = require('mol-proto')
-	, check = require('../util/check')
-	, Match = check.Match
-	, MessengerError = require('../util/error').Messenger;
+    // , MessageSource = require('./message_source')
+    , MessageSource = require('./m_source')
+    , _ = require('mol-proto')
+    , check = require('../util/check')
+    , Match = check.Match
+    , MessengerError = require('../util/error').Messenger;
 
 
 /**
@@ -6472,13 +6472,13 @@ var Mixin = require('../abstract/mixin')
  * To initialize your app after DOM is ready use:
  * ```
  * milo.mail.on('domready', function() {
- *     // application starts	
+ *     // application starts    
  * });
  * ```
  * or the following shorter form of the same:
  * ```
  * milo(function() {
- *     // application starts	
+ *     // application starts    
  * });
  * ```
  */
@@ -6511,26 +6511,26 @@ var messagesSplitRegExp = Messenger.messagesSplitRegExp = /\s*(?:\,|\s)\s*/;
  * - [getMessageSource](#getMessageSource)
  */
 _.extendProto(Messenger, {
-	init: init, // called by Mixin (superclass)
-	destroy: Messenger$destroy,
-	on: Messenger$on,
-	once: Messenger$once,
-	onMessage: Messenger$on, // deprecated
-	off: Messenger$off,
-	offMessage: Messenger$off, // deprecated
-	onMessages: onMessages,
-	offMessages: offMessages,
-	offAll: Messenger$offAll,
-	postMessage: postMessage,
-	getSubscribers: getSubscribers,
-	getMessageSource: getMessageSource,
-	_chooseSubscribersHash: _chooseSubscribersHash,
-	_registerSubscriber: _registerSubscriber,
-	_removeSubscriber: _removeSubscriber,
-	_removeAllSubscribers: _removeAllSubscribers,
-	_callPatternSubscribers: _callPatternSubscribers,
-	_callSubscribers: _callSubscribers,
-	_setMessageSource: _setMessageSource
+    init: init, // called by Mixin (superclass)
+    destroy: Messenger$destroy,
+    on: Messenger$on,
+    once: Messenger$once,
+    onMessage: Messenger$on, // deprecated
+    off: Messenger$off,
+    offMessage: Messenger$off, // deprecated
+    onMessages: onMessages,
+    offMessages: offMessages,
+    offAll: Messenger$offAll,
+    postMessage: postMessage,
+    getSubscribers: getSubscribers,
+    getMessageSource: getMessageSource,
+    _chooseSubscribersHash: _chooseSubscribersHash,
+    _registerSubscriber: _registerSubscriber,
+    _removeSubscriber: _removeSubscriber,
+    _removeAllSubscribers: _removeAllSubscribers,
+    _callPatternSubscribers: _callPatternSubscribers,
+    _callSubscribers: _callSubscribers,
+    _setMessageSource: _setMessageSource
 });
 
 
@@ -6539,13 +6539,13 @@ _.extendProto(Messenger, {
  * This map is for convenience only, it is NOT used internally by Messenger, a host class should pass it for methods to be proxied this way.
  */
 Messenger.defaultMethods = {
-	on: 'on',
-	once: 'once',
-	off: 'off',
-	onMessages: 'onMessages',
-	offMessages: 'offMessages',
-	postMessage: 'postMessage',
-	getSubscribers: 'getSubscribers'
+    on: 'on',
+    once: 'once',
+    off: 'off',
+    onMessages: 'onMessages',
+    offMessages: 'offMessages',
+    postMessage: 'postMessage',
+    getSubscribers: 'getSubscribers'
 };
 
 
@@ -6562,19 +6562,19 @@ module.exports = Messenger;
  * @param {MessageSource} messageSource Optional messageSource linked to the messenger. If messageSource is supplied, the reference to the messenger will stored on its 'messenger' property
  */
 function init(hostObject, proxyMethods, messageSource) {
-	// hostObject and proxyMethods are used in Mixin and checked there
-	if (messageSource)
-		this._setMessageSource(messageSource);
+    // hostObject and proxyMethods are used in Mixin and checked there
+    if (messageSource)
+        this._setMessageSource(messageSource);
 
- 	_initializeSubscribers.call(this);
+    _initializeSubscribers.call(this);
 }
 
 
 function _initializeSubscribers() {
- 	_.defineProperties(this, {
- 		_messageSubscribers: {},
- 		_patternMessageSubscribers: {},
- 	}, _.CONF);
+    _.defineProperties(this, {
+        _messageSubscribers: {},
+        _patternMessageSubscribers: {},
+    }, _.CONF);
 }
 
 
@@ -6582,10 +6582,10 @@ function _initializeSubscribers() {
  * Destroys messenger. Maybe needs to unsubscribe all subscribers
  */
 function Messenger$destroy() {
- 	this.offAll();
-	var messageSource = this.getMessageSource();
-	if (messageSource)
-		messageSource.destroy();
+    this.offAll();
+    var messageSource = this.getMessageSource();
+    if (messageSource)
+        messageSource.destroy();
 }
 
 
@@ -6623,58 +6623,58 @@ function Messenger$destroy() {
  * @return {Boolean}
  */
 function Messenger$on(messages, subscriber) {
-	check(messages, Match.OneOf(String, [String], RegExp));
-	check(subscriber, Match.OneOf(Function, {
-		subscriber: Function,
-		context: Match.Any,
-		options: Match.Optional(Object)
-	}));
+    check(messages, Match.OneOf(String, [String], RegExp));
+    check(subscriber, Match.OneOf(Function, {
+        subscriber: Function,
+        context: Match.Any,
+        options: Match.Optional(Object)
+    }));
 
-	return _Messenger_on.call(this, messages, subscriber)
+    return _Messenger_on.call(this, messages, subscriber)
 }
 
 function _Messenger_on(messages, subscriber) {
-	// can be needed for 'once' subscription to unsubscribe from all messages
-	// passed to once
-	// !!! should NOT be moved to 'once' as options property can be used without 'once'
-	if (typeof subscriber == 'object')
-		_.defineProperty(subscriber, '__messages', messages);
+    // can be needed for 'once' subscription to unsubscribe from all messages
+    // passed to once
+    // !!! should NOT be moved to 'once' as options property can be used without 'once'
+    if (typeof subscriber == 'object')
+        _.defineProperty(subscriber, '__messages', messages);
 
-	if (typeof messages == 'string')
-		messages = messages.split(messagesSplitRegExp);
+    if (typeof messages == 'string')
+        messages = messages.split(messagesSplitRegExp);
 
-	var subscribersHash = this._chooseSubscribersHash(messages);
+    var subscribersHash = this._chooseSubscribersHash(messages);
 
-	if (messages instanceof RegExp)
-		return this._registerSubscriber(subscribersHash, messages, subscriber);
+    if (messages instanceof RegExp)
+        return this._registerSubscriber(subscribersHash, messages, subscriber);
 
-	else {
-		var wasRegistered = false;
+    else {
+        var wasRegistered = false;
 
-		messages.forEach(function(message) {
-			var notYetRegistered = this._registerSubscriber(subscribersHash, message, subscriber);			
-			wasRegistered = wasRegistered || notYetRegistered;			
-		}, this);
+        messages.forEach(function(message) {
+            var notYetRegistered = this._registerSubscriber(subscribersHash, message, subscriber);          
+            wasRegistered = wasRegistered || notYetRegistered;          
+        }, this);
 
-		return wasRegistered;
-	}	
+        return wasRegistered;
+    }   
 }
 
 
 function Messenger$once(messages, subscriber) {
-	check(messages, Match.OneOf(String, [String], RegExp));
-	check(subscriber, Match.OneOf(Function, {
-		subscriber: Function,
-		context: Match.Any,
-		options: Match.Optional(Object),
-	}));
+    check(messages, Match.OneOf(String, [String], RegExp));
+    check(subscriber, Match.OneOf(Function, {
+        subscriber: Function,
+        context: Match.Any,
+        options: Match.Optional(Object),
+    }));
 
-	if (typeof subscriber == 'function')
-		subscriber = { context: this._hostObject, subscriber: subscriber };
+    if (typeof subscriber == 'function')
+        subscriber = { context: this._hostObject, subscriber: subscriber };
 
-	subscriber.options = { dispatchTimes: 1 };
+    subscriber.options = { dispatchTimes: 1 };
 
-	return _Messenger_on.call(this, messages, subscriber);
+    return _Messenger_on.call(this, messages, subscriber);
 }
 
 
@@ -6691,22 +6691,22 @@ function Messenger$once(messages, subscriber) {
  * @return {Boolean}
  */
 function _registerSubscriber(subscribersHash, message, subscriber) {
-	if (! (subscribersHash[message] && subscribersHash[message].length)) {
-		subscribersHash[message] = [];
-		if (message instanceof RegExp)
-			subscribersHash[message].pattern = message;
-		if (this._messageSource)
-			this._messageSource.onSubscriberAdded(message);
-		var noSubscribers = true;
-	}
+    if (! (subscribersHash[message] && subscribersHash[message].length)) {
+        subscribersHash[message] = [];
+        if (message instanceof RegExp)
+            subscribersHash[message].pattern = message;
+        if (this._messageSource)
+            this._messageSource.onSubscriberAdded(message);
+        var noSubscribers = true;
+    }
 
-	var msgSubscribers = subscribersHash[message];
-	var notYetRegistered = noSubscribers || _indexOfSubscriber.call(this, msgSubscribers, subscriber) == -1;
+    var msgSubscribers = subscribersHash[message];
+    var notYetRegistered = noSubscribers || _indexOfSubscriber.call(this, msgSubscribers, subscriber) == -1;
 
-	if (notYetRegistered)
-		msgSubscribers.push(subscriber);
+    if (notYetRegistered)
+        msgSubscribers.push(subscriber);
 
-	return notYetRegistered;
+    return notYetRegistered;
 }
 
 
@@ -6717,24 +6717,24 @@ function _registerSubscriber(subscribersHash, message, subscriber) {
  * @param {Function|Object} subscriber subscriber function or object with properties `subscriber` (function) and `context` ("this" object)
  */
 function _indexOfSubscriber(list, subscriber) {
-	var isFunc = typeof subscriber == 'function'
-		, self = this;
-	return _.findIndex(list, function(subscr){
-		var subscrIsFunc = typeof subscr == 'function';
-		return isFunc == subscrIsFunc
-				? ( isFunc
-					? subscriber == subscr
-					: (subscriber.subscriber == subscr.subscriber 
-						&& subscriber.context == subscr.context) )
-				: subscrIsFunc
-					? _subcribersFuncEqObj(subscr, subscriber)
-					: _subcribersFuncEqObj(subscriber, subscr)
-	});
+    var isFunc = typeof subscriber == 'function'
+        , self = this;
+    return _.findIndex(list, function(subscr){
+        var subscrIsFunc = typeof subscr == 'function';
+        return isFunc == subscrIsFunc
+                ? ( isFunc
+                    ? subscriber == subscr
+                    : (subscriber.subscriber == subscr.subscriber 
+                        && subscriber.context == subscr.context) )
+                : subscrIsFunc
+                    ? _subcribersFuncEqObj(subscr, subscriber)
+                    : _subcribersFuncEqObj(subscriber, subscr)
+    });
 
-	function _subcribersFuncEqObj(func, obj) {
-		return func == obj.subscriber
-				&& self._hostObject == obj.context;
-	}
+    function _subcribersFuncEqObj(func, obj) {
+        return func == obj.subscriber
+                && self._hostObject == obj.context;
+    }
 }
 
 
@@ -6757,13 +6757,13 @@ function _indexOfSubscriber(list, subscriber) {
  * @return {Object[Boolean]}
  */
 function onMessages(messageSubscribers) {
-	check(messageSubscribers, Match.ObjectHash(Match.OneOf(Function, { subscriber: Function, context: Match.Any })));
+    check(messageSubscribers, Match.ObjectHash(Match.OneOf(Function, { subscriber: Function, context: Match.Any })));
 
-	var notYetRegisteredMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
-		return this.on(messages, subscriber);
-	}, this);
+    var notYetRegisteredMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
+        return this.on(messages, subscriber);
+    }, this);
 
-	return notYetRegisteredMap;
+    return notYetRegisteredMap;
 }
 
 
@@ -6788,36 +6788,36 @@ function onMessages(messageSubscribers) {
  * @return {Boolean}
  */
 function Messenger$off(messages, subscriber) {
-	check(messages, Match.OneOf(String, [String], RegExp));
-	check(subscriber, Match.Optional(Match.OneOf(Function, {
-		subscriber: Function,
-		context: Match.Any,
-		options: Match.Optional(Object),
-		// __messages: Match.Optional(Match.OneOf(String, [String], RegExp))
-	}))); 
+    check(messages, Match.OneOf(String, [String], RegExp));
+    check(subscriber, Match.Optional(Match.OneOf(Function, {
+        subscriber: Function,
+        context: Match.Any,
+        options: Match.Optional(Object),
+        // __messages: Match.Optional(Match.OneOf(String, [String], RegExp))
+    }))); 
 
-	return _Messenger_off.call(this, messages, subscriber);
+    return _Messenger_off.call(this, messages, subscriber);
 }
 
 function _Messenger_off(messages, subscriber) {
-	if (typeof messages == 'string')
-		messages = messages.split(messagesSplitRegExp);
+    if (typeof messages == 'string')
+        messages = messages.split(messagesSplitRegExp);
 
-	var subscribersHash = this._chooseSubscribersHash(messages);
+    var subscribersHash = this._chooseSubscribersHash(messages);
 
-	if (messages instanceof RegExp)
-		return this._removeSubscriber(subscribersHash, messages, subscriber);
+    if (messages instanceof RegExp)
+        return this._removeSubscriber(subscribersHash, messages, subscriber);
 
-	else {
-		var wasRemoved = false;
+    else {
+        var wasRemoved = false;
 
-		messages.forEach(function(message) {
-			var subscriberRemoved = this._removeSubscriber(subscribersHash, message, subscriber);			
-			wasRemoved = wasRemoved || subscriberRemoved;			
-		}, this);
+        messages.forEach(function(message) {
+            var subscriberRemoved = this._removeSubscriber(subscribersHash, message, subscriber);           
+            wasRemoved = wasRemoved || subscriberRemoved;           
+        }, this);
 
-		return wasRemoved;
-	}
+        return wasRemoved;
+    }
 }
 
 
@@ -6834,22 +6834,22 @@ function _Messenger_off(messages, subscriber) {
  * @return {Boolean}
  */
 function _removeSubscriber(subscribersHash, message, subscriber) {
-	var msgSubscribers = subscribersHash[message];
-	if (! msgSubscribers || ! msgSubscribers.length)
-		return false; // nothing removed
+    var msgSubscribers = subscribersHash[message];
+    if (! msgSubscribers || ! msgSubscribers.length)
+        return false; // nothing removed
 
-	if (subscriber) {
-		var subscriberIndex = _indexOfSubscriber.call(this, msgSubscribers, subscriber);
-		if (subscriberIndex == -1) 
-			return false; // nothing removed
-		msgSubscribers.splice(subscriberIndex, 1);
-		if (! msgSubscribers.length)
-			this._removeAllSubscribers(subscribersHash, message);
+    if (subscriber) {
+        var subscriberIndex = _indexOfSubscriber.call(this, msgSubscribers, subscriber);
+        if (subscriberIndex == -1) 
+            return false; // nothing removed
+        msgSubscribers.splice(subscriberIndex, 1);
+        if (! msgSubscribers.length)
+            this._removeAllSubscribers(subscribersHash, message);
 
-	} else 
-		this._removeAllSubscribers(subscribersHash, message);
+    } else 
+        this._removeAllSubscribers(subscribersHash, message);
 
-	return true; // subscriber(s) removed
+    return true; // subscriber(s) removed
 }
 
 
@@ -6863,9 +6863,9 @@ function _removeSubscriber(subscribersHash, message, subscriber) {
  * @param {String} message Message type
  */
 function _removeAllSubscribers(subscribersHash, message) {
-	delete subscribersHash[message];
-	if (this._messageSource && typeof message == 'string')
-		this._messageSource.onSubscriberRemoved(message);
+    delete subscribersHash[message];
+    if (this._messageSource && typeof message == 'string')
+        this._messageSource.onSubscriberRemoved(message);
 }
 
 
@@ -6888,13 +6888,13 @@ function _removeAllSubscribers(subscribersHash, message) {
  * @return {Object[Boolean]}
  */
 function offMessages(messageSubscribers) {
-	check(messageSubscribers, Match.ObjectHash(Match.Optional(Match.OneOf(Function, { subscriber: Function, context: Match.Any }))));
+    check(messageSubscribers, Match.ObjectHash(Match.Optional(Match.OneOf(Function, { subscriber: Function, context: Match.Any }))));
 
-	var subscriberRemovedMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
-		return this.off(messages, subscriber);
-	}, this);
+    var subscriberRemovedMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
+        return this.off(messages, subscriber);
+    }, this);
 
-	return subscriberRemovedMap;	
+    return subscriberRemovedMap;    
 }
 
 
@@ -6902,15 +6902,15 @@ function offMessages(messageSubscribers) {
  * Unsubscribes all subscribers
  */
 function Messenger$offAll() {
-	_offAllSubscribers.call(this, this._patternMessageSubscribers);
-	_offAllSubscribers.call(this, this._messageSubscribers);
+    _offAllSubscribers.call(this, this._patternMessageSubscribers);
+    _offAllSubscribers.call(this, this._messageSubscribers);
 }
 
 
 function _offAllSubscribers(subscribersHash) {
-	_.eachKey(subscribersHash, function(subscribers, message) {
-		this._removeAllSubscribers(subscribersHash, message);
-	}, this);
+    _.eachKey(subscribersHash, function(subscribers, message) {
+        this._removeAllSubscribers(subscribersHash, message);
+    }, this);
 }
 
 
@@ -6930,16 +6930,16 @@ function _offAllSubscribers(subscribersHash) {
  * @param {Function} callback optional callback to pass to subscriber
  */
 function postMessage(message, data, callback) {
-	check(message, Match.OneOf(String, RegExp));
-	check(callback, Match.Optional(Function));
+    check(message, Match.OneOf(String, RegExp));
+    check(callback, Match.Optional(Function));
 
-	var subscribersHash = this._chooseSubscribersHash(message);
-	var msgSubscribers = subscribersHash[message];
+    var subscribersHash = this._chooseSubscribersHash(message);
+    var msgSubscribers = subscribersHash[message];
 
-	this._callSubscribers(message, data, callback, msgSubscribers);
+    this._callSubscribers(message, data, callback, msgSubscribers);
 
-	if (typeof message == 'string')
-		this._callPatternSubscribers(message, data, callback, msgSubscribers);
+    if (typeof message == 'string')
+        this._callPatternSubscribers(message, data, callback, msgSubscribers);
 }
 
 
@@ -6955,20 +6955,20 @@ function postMessage(message, data, callback) {
  * @param {Array[Function|Object]} calledMsgSubscribers array of subscribers already called, they won't be called again if they are among pattern subscribers.
  */
 function _callPatternSubscribers(message, data, callback, calledMsgSubscribers) {
-	_.eachKey(this._patternMessageSubscribers, 
-		function(patternSubscribers) {
-			var pattern = patternSubscribers.pattern;
-			if (pattern.test(message)) {
-				if (calledMsgSubscribers) {
-					var patternSubscribers = patternSubscribers.filter(function(subscriber) {
-						var index = _indexOfSubscriber.call(this, calledMsgSubscribers, subscriber);
-						return index == -1;
-					});
-				}
-				this._callSubscribers(message, data, callback, patternSubscribers);
-			}
-		}
-	, this);
+    _.eachKey(this._patternMessageSubscribers, 
+        function(patternSubscribers) {
+            var pattern = patternSubscribers.pattern;
+            if (pattern.test(message)) {
+                if (calledMsgSubscribers) {
+                    var patternSubscribers = patternSubscribers.filter(function(subscriber) {
+                        var index = _indexOfSubscriber.call(this, calledMsgSubscribers, subscriber);
+                        return index == -1;
+                    });
+                }
+                this._callSubscribers(message, data, callback, patternSubscribers);
+            }
+        }
+    , this);
 }
 
 
@@ -6984,20 +6984,20 @@ function _callPatternSubscribers(message, data, callback, calledMsgSubscribers) 
  * @param {Function} callback optional callback to pass to subscriber
  */
 function _callSubscribers(message, data, callback, msgSubscribers) {
-	if (msgSubscribers && msgSubscribers.length)
-		msgSubscribers.forEach(function(subscriber) {
-			if (typeof subscriber == 'function')
-				subscriber.call(this._hostObject, message, data, callback);
-			else {
-				subscriber.subscriber.call(subscriber.context, message, data, callback);
-				var dispatchTimes = subscriber.options && subscriber.options.dispatchTimes;
-				if (dispatchTimes <= 1) {
-					var messages = subscriber.__messages;					
-					this.off(messages, subscriber);
-				} else if (dispatchTimes > 1)
-					subscriber.options.dispatchTimes--;
-			}
-		}, this);
+    if (msgSubscribers && msgSubscribers.length)
+        msgSubscribers.forEach(function(subscriber) {
+            if (typeof subscriber == 'function')
+                subscriber.call(this._hostObject, message, data, callback);
+            else {
+                subscriber.subscriber.call(subscriber.context, message, data, callback);
+                var dispatchTimes = subscriber.options && subscriber.options.dispatchTimes;
+                if (dispatchTimes <= 1) {
+                    var messages = subscriber.__messages;                   
+                    this.off(messages, subscriber);
+                } else if (dispatchTimes > 1)
+                    subscriber.options.dispatchTimes--;
+            }
+        }, this);
 }
 
 
@@ -7014,29 +7014,29 @@ function _callSubscribers(message, data, callback, msgSubscribers) {
  * @return {Array|undefined}
  */
 function getSubscribers(message, includePatternSubscribers) {
-	check(message, Match.OneOf(String, RegExp));
+    check(message, Match.OneOf(String, RegExp));
 
-	var subscribersHash = this._chooseSubscribersHash(message);
-	var msgSubscribers = subscribersHash[message]
-							? [].concat(subscribersHash[message])
-							: [];
+    var subscribersHash = this._chooseSubscribersHash(message);
+    var msgSubscribers = subscribersHash[message]
+                            ? [].concat(subscribersHash[message])
+                            : [];
 
-	// pattern subscribers are incuded by default
-	if (includePatternSubscribers !== false && typeof message == 'string') {
-		_.eachKey(this._patternMessageSubscribers, 
-			function(patternSubscribers) {
-				var pattern = patternSubscribers.pattern;
-				if (patternSubscribers && patternSubscribers.length
-						&& pattern.test(message))
-					_.appendArray(msgSubscribers, patternSubscribers);
-			}
-		);
-	}
+    // pattern subscribers are incuded by default
+    if (includePatternSubscribers !== false && typeof message == 'string') {
+        _.eachKey(this._patternMessageSubscribers, 
+            function(patternSubscribers) {
+                var pattern = patternSubscribers.pattern;
+                if (patternSubscribers && patternSubscribers.length
+                        && pattern.test(message))
+                    _.appendArray(msgSubscribers, patternSubscribers);
+            }
+        );
+    }
 
-	// return undefined if there are no subscribers
-	return msgSubscribers.length
-				? msgSubscribers
-				: undefined;
+    // return undefined if there are no subscribers
+    return msgSubscribers.length
+                ? msgSubscribers
+                : undefined;
 }
 
 
@@ -7049,9 +7049,9 @@ function getSubscribers(message, includePatternSubscribers) {
  * @return {Object[Function]} 
  */
 function _chooseSubscribersHash(message) {
-	return message instanceof RegExp
-				? this._patternMessageSubscribers
-				: this._messageSubscribers;
+    return message instanceof RegExp
+                ? this._patternMessageSubscribers
+                : this._messageSubscribers;
 }
 
 
@@ -7064,10 +7064,10 @@ function _chooseSubscribersHash(message) {
  * @param {MessageSource} messageSource an instance of MessageSource class to attach to this messenger (and to have this messenger attached to it too)
  */
 function _setMessageSource(messageSource) {
-	check(messageSource, MessageSource);
+    check(messageSource, MessageSource);
 
- 	_.defineProperty(this, '_messageSource', messageSource);
- 	messageSource.messenger = this;
+    _.defineProperty(this, '_messageSource', messageSource);
+    messageSource.messenger = this;
 }
 
 
@@ -7078,14 +7078,14 @@ function _setMessageSource(messageSource) {
  * @return {MessageSource}
  */
 function getMessageSource() {
-	return this._messageSource
+    return this._messageSource
 }
 
 },{"../abstract/mixin":3,"../util/check":77,"../util/error":82,"./m_source":61,"mol-proto":94}],59:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
-	, logger = require('../util/logger');
+    , logger = require('../util/logger');
 
 
 module.exports = MessengerAPI;
@@ -7106,8 +7106,8 @@ module.exports = MessengerAPI;
  * @return {MessengerAPI}
  */
 function MessengerAPI() {
-	if (this.init)
-		this.init.apply(this, arguments);
+    if (this.init)
+        this.init.apply(this, arguments);
 }
 
 
@@ -7126,16 +7126,16 @@ function MessengerAPI() {
  * - [filterSourceMessage](#filterSourceMessage) - filters source message based on the data of the message and the corresponding internal message that is about to be sent on Messenger
  */
 _.extendProto(MessengerAPI, {
-	init: init,
-	destroy: MessengerAPI$destroy,
-	addInternalMessage: addInternalMessage,
-	removeInternalMessage: removeInternalMessage,
-	getInternalMessages: getInternalMessages,
+    init: init,
+    destroy: MessengerAPI$destroy,
+    addInternalMessage: addInternalMessage,
+    removeInternalMessage: removeInternalMessage,
+    getInternalMessages: getInternalMessages,
 
-	// should be redefined by subclass
-	translateToSourceMessage: translateToSourceMessage,
-	createInternalData: createInternalData,
-	filterSourceMessage: filterSourceMessage
+    // should be redefined by subclass
+    translateToSourceMessage: translateToSourceMessage,
+    createInternalData: createInternalData,
+    filterSourceMessage: filterSourceMessage
 });
 
 
@@ -7144,7 +7144,7 @@ _.extendProto(MessengerAPI, {
  * Called by MessengerAPI constructor. Subclasses that re-implement `init` method should call this method using: `MessengerAPI.prototype.init.apply(this, arguments)`
  */
 function init() {
-	_.defineProperty(this, '_internalMessages', {});
+    _.defineProperty(this, '_internalMessages', {});
 }
 
 
@@ -7165,22 +7165,22 @@ function MessengerAPI$destroy() {
  * @return {String|undefined}
  */
 function addInternalMessage(message) {
-	var internalMsgs
-		, sourceMessage = this.translateToSourceMessage(message);
+    var internalMsgs
+        , sourceMessage = this.translateToSourceMessage(message);
 
-	if (typeof sourceMessage == 'undefined') return;
+    if (typeof sourceMessage == 'undefined') return;
 
-	if (this._internalMessages.hasOwnProperty(sourceMessage)) {
-		internalMsgs = this._internalMessages[sourceMessage];
-		if (internalMsgs.indexOf(message) == -1)
-			internalMsgs.push(message);
-		else
-			logger.warn('Duplicate addInternalMessage call for internal message ' + message);
-	} else {
-		internalMsgs = this._internalMessages[sourceMessage] = [];
-		internalMsgs.push(message);
-		return sourceMessage;
-	}
+    if (this._internalMessages.hasOwnProperty(sourceMessage)) {
+        internalMsgs = this._internalMessages[sourceMessage];
+        if (internalMsgs.indexOf(message) == -1)
+            internalMsgs.push(message);
+        else
+            logger.warn('Duplicate addInternalMessage call for internal message ' + message);
+    } else {
+        internalMsgs = this._internalMessages[sourceMessage] = [];
+        internalMsgs.push(message);
+        return sourceMessage;
+    }
 }
 
 
@@ -7193,30 +7193,30 @@ function addInternalMessage(message) {
  * @return {String|undefined}
  */
 function removeInternalMessage(message) {
-	var sourceMessage = this.translateToSourceMessage(message);
+    var sourceMessage = this.translateToSourceMessage(message);
 
-	if (typeof sourceMessage == 'undefined') return;
+    if (typeof sourceMessage == 'undefined') return;
 
-	var internalMsgs = this._internalMessages[sourceMessage];
+    var internalMsgs = this._internalMessages[sourceMessage];
 
-	if (internalMsgs && internalMsgs.length) {
-		var messageIndex = internalMsgs.indexOf(message);
-		if (messageIndex >= 0) {
-			internalMsgs.splice(messageIndex, 1);
-			if (internalMsgs.length == 0) {
-				delete this._internalMessages[sourceMessage];
-				return sourceMessage;
-			}
-		} else
-			unexpectedNotificationWarning();
-	} else
-		unexpectedNotificationWarning();
+    if (internalMsgs && internalMsgs.length) {
+        var messageIndex = internalMsgs.indexOf(message);
+        if (messageIndex >= 0) {
+            internalMsgs.splice(messageIndex, 1);
+            if (internalMsgs.length == 0) {
+                delete this._internalMessages[sourceMessage];
+                return sourceMessage;
+            }
+        } else
+            unexpectedNotificationWarning();
+    } else
+        unexpectedNotificationWarning();
 
 
-	function unexpectedNotificationWarning() {
-		logger.warn('notification received: un-subscribe from internal message ' + message
-					 + ' without previous subscription notification');
-	}
+    function unexpectedNotificationWarning() {
+        logger.warn('notification received: un-subscribe from internal message ' + message
+                     + ' without previous subscription notification');
+    }
 }
 
 
@@ -7229,7 +7229,7 @@ function removeInternalMessage(message) {
  * @return {Array[String]}
  */
 function getInternalMessages(sourceMessage) {
-	return this._internalMessages[sourceMessage];
+    return this._internalMessages[sourceMessage];
 }
 
 
@@ -7241,7 +7241,7 @@ function getInternalMessages(sourceMessage) {
  * @return {String}
  */
 function translateToSourceMessage(message) {
-	return message
+    return message
 }
 
 
@@ -7256,7 +7256,7 @@ function translateToSourceMessage(message) {
  * @return {Object}
  */
 function createInternalData(sourceMessage, message, sourceData) {
-	return sourceData;
+    return sourceData;
 }
 
 
@@ -7271,14 +7271,14 @@ function createInternalData(sourceMessage, message, sourceData) {
  * @return {Boolean}
  */
 function filterSourceMessage(sourceMessage, message, internalData) {
-	return true;
+    return true;
 }
 
 },{"../util/logger":85,"mol-proto":94}],60:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('./m_api')
-	, _ = require('mol-proto');
+    , _ = require('mol-proto');
 
 
 /**
@@ -7291,9 +7291,9 @@ var MessengerAPI = require('./m_api')
 
 
 _.extendProto(MessengerRegexpAPI, {
-	init: init,
-	addInternalMessage: addInternalMessage,
-	getInternalMessages: getInternalMessages
+    init: init,
+    addInternalMessage: addInternalMessage,
+    getInternalMessages: getInternalMessages
 });
 
 
@@ -7302,11 +7302,11 @@ _.extendProto(MessengerRegexpAPI, {
  * Called by MessengerRegexpAPI constructor.
  */
 function init() {
-	MessengerAPI.prototype.init.apply(this, arguments);
-	_.defineProperties(this, {
-		_patternInternalMessages: {},
-		_catchAllSubscribed: false
-	});
+    MessengerAPI.prototype.init.apply(this, arguments);
+    _.defineProperties(this, {
+        _patternInternalMessages: {},
+        _catchAllSubscribed: false
+    });
 }
 
 
@@ -7319,18 +7319,18 @@ function init() {
  * @return {String|RegExp|undefined}
  */
 function addInternalMessage(message) {
-	var sourceMessage = MessengerAPI.prototype.addInternalMessage.apply(this, arguments);
-	
-	// store regexp itself if sourceMessage is regexp
-	if (sourceMessage && sourceMessage instanceof RegExp) {
-		this._internalMessages[sourceMessage].pattern = sourceMessage;
-		this._patternInternalMessages[sourceMessage] = this._internalMessages[sourceMessage];
-		// if (this._catchAllSubscribed) return;
-		// this._catchAllSubscribed = true;
-		// return /.*/;
-	}
+    var sourceMessage = MessengerAPI.prototype.addInternalMessage.apply(this, arguments);
+    
+    // store regexp itself if sourceMessage is regexp
+    if (sourceMessage && sourceMessage instanceof RegExp) {
+        this._internalMessages[sourceMessage].pattern = sourceMessage;
+        this._patternInternalMessages[sourceMessage] = this._internalMessages[sourceMessage];
+        // if (this._catchAllSubscribed) return;
+        // this._catchAllSubscribed = true;
+        // return /.*/;
+    }
 
-	return sourceMessage;
+    return sourceMessage;
 }
 
 
@@ -7343,38 +7343,38 @@ function addInternalMessage(message) {
  * @return {Array[String]}
  */
 function getInternalMessages(sourceMessage) {
-	var internalMessages = MessengerAPI.prototype.getInternalMessages.apply(this, arguments);
+    var internalMessages = MessengerAPI.prototype.getInternalMessages.apply(this, arguments);
 
-	// add internal messages for regexp source subscriptions
-	if (typeof sourceMessage == 'string') {
-		internalMessages = internalMessages || [];
-		var internalMessagesHash = _.object(internalMessages, true);
+    // add internal messages for regexp source subscriptions
+    if (typeof sourceMessage == 'string') {
+        internalMessages = internalMessages || [];
+        var internalMessagesHash = _.object(internalMessages, true);
 
-		_.eachKey(this._patternInternalMessages, function(patternMessages) {
-			var sourcePattern = patternMessages.pattern;
+        _.eachKey(this._patternInternalMessages, function(patternMessages) {
+            var sourcePattern = patternMessages.pattern;
 
-			if (sourcePattern.test(sourceMessage))
-				patternMessages.forEach(function(message) {
-					if (internalMessagesHash[message]) return;
-					internalMessages.push(message);
-					internalMessagesHash[message] = true;
-				});
-		});
-	} 
+            if (sourcePattern.test(sourceMessage))
+                patternMessages.forEach(function(message) {
+                    if (internalMessagesHash[message]) return;
+                    internalMessages.push(message);
+                    internalMessagesHash[message] = true;
+                });
+        });
+    } 
 
-	return internalMessages;
+    return internalMessages;
 }
 
 },{"./m_api":59,"mol-proto":94}],61:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
-	, MessengerAPI = require('./m_api')
-	, logger = require('../util/logger')
-	, toBeImplemented = require('../util/error').toBeImplemented
-	, _ = require('mol-proto')
-	, check = require('../util/check')
-	, Match = check.Match;
+    , MessengerAPI = require('./m_api')
+    , logger = require('../util/logger')
+    , toBeImplemented = require('../util/error').toBeImplemented
+    , _ = require('mol-proto')
+    , check = require('../util/check')
+    , Match = check.Match;
 
 
 /**
@@ -7403,18 +7403,18 @@ module.exports = MessageSource;
  * - [removeSourceSubscriber](#removeSourceSubscriber) - removes listener/subscriber from external message
  */
 _.extendProto(MessageSource, {
-	init: init,
-	destroy: MessageSource$destroy,
-	setMessenger: setMessenger,
-	onSubscriberAdded: onSubscriberAdded,
- 	onSubscriberRemoved: onSubscriberRemoved, 
- 	dispatchMessage: dispatchMessage,
-	_prepareMessengerAPI: _prepareMessengerAPI,
+    init: init,
+    destroy: MessageSource$destroy,
+    setMessenger: setMessenger,
+    onSubscriberAdded: onSubscriberAdded,
+    onSubscriberRemoved: onSubscriberRemoved, 
+    dispatchMessage: dispatchMessage,
+    _prepareMessengerAPI: _prepareMessengerAPI,
 
- 	// Methods below must be implemented in subclass
- 	trigger: toBeImplemented,
- 	addSourceSubscriber: toBeImplemented,
- 	removeSourceSubscriber: toBeImplemented
+    // Methods below must be implemented in subclass
+    trigger: toBeImplemented,
+    addSourceSubscriber: toBeImplemented,
+    removeSourceSubscriber: toBeImplemented
 });
 
 
@@ -7429,7 +7429,7 @@ _.extendProto(MessageSource, {
  * @param {MessengerAPI} messengerAPI Optional instance of MessengerAPI.
  */
 function init(hostObject, proxyMethods, messengerAPI) {
-	this._prepareMessengerAPI(messengerAPI);
+    this._prepareMessengerAPI(messengerAPI);
 }
 
 
@@ -7437,8 +7437,8 @@ function init(hostObject, proxyMethods, messengerAPI) {
  * Destroys message source
  */
 function MessageSource$destroy() {
-	if (this.messengerAPI)
-		this.messengerAPI.destroy();
+    if (this.messengerAPI)
+        this.messengerAPI.destroy();
 }
 
 
@@ -7449,7 +7449,7 @@ function MessageSource$destroy() {
  * @param {Messenger} messenger reference to Messenger instance linked to this MessageSource
  */
 function setMessenger(messenger) {
-	_.defineProperty(this, 'messenger', messenger);
+    _.defineProperty(this, 'messenger', messenger);
 }
 
 
@@ -7461,12 +7461,12 @@ function setMessenger(messenger) {
  * @param {MessengerAPI} messengerAPI Optional instance of MessengerAPI
  */
 function _prepareMessengerAPI(messengerAPI) {
-	check(messengerAPI, Match.Optional(MessengerAPI));
+    check(messengerAPI, Match.Optional(MessengerAPI));
 
-	if (! messengerAPI)
-		messengerAPI = new MessengerAPI;
+    if (! messengerAPI)
+        messengerAPI = new MessengerAPI;
 
-	_.defineProperty(this, 'messengerAPI', messengerAPI);
+    _.defineProperty(this, 'messengerAPI', messengerAPI);
 }
 
 
@@ -7479,9 +7479,9 @@ function _prepareMessengerAPI(messengerAPI) {
  * @param {String} message internal Messenger message that has to be subscribed to at the external source of messages.
  */
 function onSubscriberAdded(message) {
-	var newSourceMessage = this.messengerAPI.addInternalMessage(message);
-	if (typeof newSourceMessage != 'undefined')
-		this.addSourceSubscriber(newSourceMessage);
+    var newSourceMessage = this.messengerAPI.addInternalMessage(message);
+    if (typeof newSourceMessage != 'undefined')
+        this.addSourceSubscriber(newSourceMessage);
 }
 
 
@@ -7494,9 +7494,9 @@ function onSubscriberAdded(message) {
  * @param {String} message internal Messenger message that has to be unsubscribed from at the external source of messages.
  */
 function onSubscriberRemoved(message) {
-	var removedSourceMessage = this.messengerAPI.removeInternalMessage(message);
-	if (typeof removedSourceMessage != 'undefined')
-		this.removeSourceSubscriber(removedSourceMessage);
+    var removedSourceMessage = this.messengerAPI.removeInternalMessage(message);
+    if (typeof removedSourceMessage != 'undefined')
+        this.removeSourceSubscriber(removedSourceMessage);
 }
 
 
@@ -7511,18 +7511,18 @@ function onSubscriberRemoved(message) {
  * @param {Object} sourceData data received from external source
  */
 function dispatchMessage(sourceMessage, sourceData) {
-	var api = this.messengerAPI
-		, internalMessages = api.getInternalMessages(sourceMessage);
+    var api = this.messengerAPI
+        , internalMessages = api.getInternalMessages(sourceMessage);
 
-	if (internalMessages) 
-		internalMessages.forEach(function (message) {
-			var internalData = api.createInternalData(sourceMessage, message, sourceData);
+    if (internalMessages) 
+        internalMessages.forEach(function (message) {
+            var internalData = api.createInternalData(sourceMessage, message, sourceData);
 
-			var shouldDispatch = api.filterSourceMessage(sourceMessage, message, internalData);
-			if (shouldDispatch) 
-				this.messenger.postMessage(message, internalData);		
-			
-		}, this);
+            var shouldDispatch = api.filterSourceMessage(sourceMessage, message, internalData);
+            if (shouldDispatch) 
+                this.messenger.postMessage(message, internalData);      
+            
+        }, this);
 }
 
 },{"../abstract/mixin":3,"../util/check":77,"../util/error":82,"../util/logger":85,"./m_api":59,"mol-proto":94}],62:[function(require,module,exports){
@@ -7530,8 +7530,8 @@ function dispatchMessage(sourceMessage, sourceData) {
 
 
 var MessageSource = require('./m_source')
-	, _ = require('mol-proto')
-	, check = require('../util/check');
+    , _ = require('mol-proto')
+    , check = require('../util/check');
 
 
 /**
@@ -7546,9 +7546,9 @@ module.exports = MessengerMessageSource;
  * ####MessengerMessageSource instance methods####
  */
 _.extendProto(MessengerMessageSource, {
-	init: init,
-	addSourceSubscriber: addSourceSubscriber,
-	removeSourceSubscriber: removeSourceSubscriber,
+    init: init,
+    addSourceSubscriber: addSourceSubscriber,
+    removeSourceSubscriber: removeSourceSubscriber,
 });
 
 /**
@@ -7558,8 +7558,8 @@ _.extendProto(MessengerMessageSource, {
  * @param {Messenger} sourceMessenger messenger this message source connects to
  */
 function init(hostObject, proxyMethods, messengerAPI, sourceMessenger) {
-	MessageSource.prototype.init.apply(this, arguments);
-	this.sourceMessenger = sourceMessenger;
+    MessageSource.prototype.init.apply(this, arguments);
+    this.sourceMessenger = sourceMessenger;
 }
 
 
@@ -7569,7 +7569,7 @@ function init(hostObject, proxyMethods, messengerAPI, sourceMessenger) {
  * @param {String|Regex} sourceMessage source message to subscribe to
  */
 function addSourceSubscriber(sourceMessage) {
-	this.sourceMessenger.on(sourceMessage, { context: this, subscriber: this.dispatchMessage });
+    this.sourceMessenger.on(sourceMessage, { context: this, subscriber: this.dispatchMessage });
 }
 
 
@@ -7579,7 +7579,7 @@ function addSourceSubscriber(sourceMessage) {
  * @param {String|Regex} sourceMessage source message to unsubscribe from
  */
 function removeSourceSubscriber(sourceMessage) {
-	this.sourceMessenger.off(sourceMessage, { context: this, subscriber: this.dispatchMessage });
+    this.sourceMessenger.off(sourceMessage, { context: this, subscriber: this.dispatchMessage });
 }
 
 },{"../util/check":77,"./m_source":61,"mol-proto":94}],63:[function(require,module,exports){
@@ -7602,7 +7602,7 @@ var _ = require('mol-proto');
  * `milo` itself is a function that in the browser can be used to delay execution until DOM is ready.
  */
 function milo(func) {
-	milo.util.domReady(func);
+    milo.util.domReady(func);
 }
 
 
@@ -7624,20 +7624,20 @@ function milo(func) {
  * - [registry](./registry.js.html) - registries of fasets and components classes
  */
 _.extend(milo, {
-	loader: require('./loader'),
-	binder: require('./binder'),
-	minder: require('./minder'),
-	mail: require('./mail'),
-	config: require('./config'),
-	util: require('./util'),
-	classes: require('./classes'),
-	attributes: require('./attributes'),
-	ComponentFacet: require('./components/c_facet'),
-	Component: require('./components/c_class'),
-	Messenger: require('./messenger'),
-	Model: require('./model'),
-	registry: require('./registry'),
-	milo_version: '0.1'
+    loader: require('./loader'),
+    binder: require('./binder'),
+    minder: require('./minder'),
+    mail: require('./mail'),
+    config: require('./config'),
+    util: require('./util'),
+    classes: require('./classes'),
+    attributes: require('./attributes'),
+    ComponentFacet: require('./components/c_facet'),
+    Component: require('./components/c_class'),
+    Messenger: require('./messenger'),
+    Model: require('./model'),
+    registry: require('./registry'),
+    milo_version: '0.1'
 });
 
 
@@ -7649,22 +7649,22 @@ require('./use_components');
 
 
 // export for node/browserify
-if (typeof module == 'object' && module.exports)	
-	module.exports = milo;
+if (typeof module == 'object' && module.exports)    
+    module.exports = milo;
 
 // global milo for browser
 if (typeof window == 'object') {
-	window.milo = milo;
-	milo.mail.trigger('miloready');
+    window.milo = milo;
+    milo.mail.trigger('miloready');
 }
 
 },{"./attributes":8,"./binder":9,"./classes":10,"./components/c_class":11,"./components/c_facet":12,"./config":53,"./loader":54,"./mail":55,"./messenger":58,"./minder":64,"./model":67,"./registry":74,"./use_components":75,"./use_facets":76,"./util":83,"mol-proto":94}],64:[function(require,module,exports){
 'use strict';
 
 var Connector = require('./model/connector')
-	, Messenger = require('./messenger')
-	, _ = require('mol-proto')
-	, logger = require('./util/logger');
+    , Messenger = require('./messenger')
+    , _ = require('mol-proto')
+    , logger = require('./util/logger');
 
 
 module.exports = minder;
@@ -7687,18 +7687,18 @@ module.exports = minder;
  * @param {Object} options not implemented yet
  */
 function minder(ds1, mode, ds2, options) {
-	if (Array.isArray(ds1)) {
-		var connDescriptions = ds1;
-		var connectors = connDescriptions.map(function(descr) {
-			return new Connector(descr[0], descr[1], descr[2], descr[3]);
-		});
-		connectors.forEach(_addConnector);
-		return connectors;
-	} else {
-		var cnct = new Connector(ds1, mode, ds2, options);
-		_addConnector(cnct);
-		return cnct;
-	}
+    if (Array.isArray(ds1)) {
+        var connDescriptions = ds1;
+        var connectors = connDescriptions.map(function(descr) {
+            return new Connector(descr[0], descr[1], descr[2], descr[3]);
+        });
+        connectors.forEach(_addConnector);
+        return connectors;
+    } else {
+        var cnct = new Connector(ds1, mode, ds2, options);
+        _addConnector(cnct);
+        return cnct;
+    }
 }
 
 
@@ -7710,64 +7710,64 @@ var _messenger = new Messenger(minder, Messenger.defaultMethods);
 
 
 var _connectors = []
-	, _receivedMessages = []
-	, _idleCheckDeferred = false;
+    , _receivedMessages = []
+    , _idleCheckDeferred = false;
 
 
 _.extend(minder, {
-	getConnectors: minder_getConnectors,
-	destroyConnector: minder_destroyConnector
+    getConnectors: minder_getConnectors,
+    destroyConnector: minder_destroyConnector
 });
 
 
 function _addConnector(cnct) {
-	cnct.___minder_id = _connectors.push(cnct) - 1;
-	cnct.on(/.*/, onConnectorMessage);
-	minder.postMessage('added', { connector: cnct });
-	minder.postMessage('turnedon', { connector: cnct });
+    cnct.___minder_id = _connectors.push(cnct) - 1;
+    cnct.on(/.*/, onConnectorMessage);
+    minder.postMessage('added', { connector: cnct });
+    minder.postMessage('turnedon', { connector: cnct });
 }
 
 
 function onConnectorMessage(msg, data) {
-	var data = data ? _.clone(data) : {};
-	_.extend(data, {
-		id: this.___minder_id,
-		connector: this
-	});
-	minder.postMessage(msg, data);
-	if (! _receivedMessages.length && ! _idleCheckDeferred) {
-		_.defer(_idleCheck);
-		_idleCheckDeferred = true;
-	}
+    var data = data ? _.clone(data) : {};
+    _.extend(data, {
+        id: this.___minder_id,
+        connector: this
+    });
+    minder.postMessage(msg, data);
+    if (! _receivedMessages.length && ! _idleCheckDeferred) {
+        _.defer(_idleCheck);
+        _idleCheckDeferred = true;
+    }
 
-	_receivedMessages.push({ msg: msg, data: data });
+    _receivedMessages.push({ msg: msg, data: data });
 }
 
 
 function _idleCheck() {
-	if (_receivedMessages.length) {
-		_receivedMessages.length = 0;
-		_.defer(_idleCheck);
-		minder.postMessage('propagationticked');
-	} else {
-		_idleCheckDeferred = false;
-		minder.postMessage('propagationcompleted');
-	}
+    if (_receivedMessages.length) {
+        _receivedMessages.length = 0;
+        _.defer(_idleCheck);
+        minder.postMessage('propagationticked');
+    } else {
+        _idleCheckDeferred = false;
+        minder.postMessage('propagationcompleted');
+    }
 }
 
 
 function minder_getConnectors() {
-	return _connectors;
+    return _connectors;
 }
 
 
 function minder_destroyConnector(cnct) {
-	cnct.destroy();
-	var index = _connectors.indexOf(cnct);
-	if (index >= 0)
-		delete _connectors[index];
-	else
-		logger.warn('minder: connector destroyed that is not registered in minder');
+    cnct.destroy();
+    var index = _connectors.indexOf(cnct);
+    if (index >= 0)
+        delete _connectors[index];
+    else
+        logger.warn('minder: connector destroyed that is not registered in minder');
 }
 
 },{"./messenger":58,"./model/connector":66,"./util/logger":85,"mol-proto":94}],65:[function(require,module,exports){
@@ -7793,11 +7793,11 @@ module.exports = changeDataHandler;
  * @param {Function} callback callback to call when the data is processed
  */
 function changeDataHandler(message, data, callback) {
-	if (! this._changesQueue.length)
-		_.defer(processChangesFunc, this, callback);
+    if (! this._changesQueue.length)
+        _.defer(processChangesFunc, this, callback);
 
-	this._changesQueue.push(data);
-	// _processChanges.call(this, callback);
+    this._changesQueue.push(data);
+    // _processChanges.call(this, callback);
 }
 
 
@@ -7805,7 +7805,7 @@ function changeDataHandler(message, data, callback) {
  * Initializes messages queue used by changeDataHandler
  */
 changeDataHandler.initialize = function() {
-	_.defineProperty(this, '_changesQueue', []);
+    _.defineProperty(this, '_changesQueue', []);
 }
 
 
@@ -7814,10 +7814,10 @@ var processChangesFunc = Function.prototype.call.bind(_processChanges);
 
 // map of message types to methods
 var CHANGE_TYPE_TO_METHOD_MAP = {
-	'added': 'set',
-	'changed': 'set',
-	'deleted': 'del',
-	'removed': 'del'
+    'added': 'set',
+    'changed': 'set',
+    'deleted': 'del',
+    'removed': 'del'
 };
 
 /**
@@ -7827,58 +7827,58 @@ var CHANGE_TYPE_TO_METHOD_MAP = {
  * @param {[Function]} callback optional callback that is called with `(null, false)` parameters before change processing starts and `(null, true)` after it's finished.
  */
 function _processChanges(callback) {
-	callback && callback(null, false);
-	this.postMessage('changestarted');
+    callback && callback(null, false);
+    this.postMessage('changestarted');
 
-	var splicedPaths = [];
+    var splicedPaths = [];
 
-	this._changesQueue.forEach(function(data) {
-		// set the new data
-		if (data.type == 'splice') {
-			var modelPath = this.path(data.path);
-			if (! modelPath) return;
+    this._changesQueue.forEach(function(data) {
+        // set the new data
+        if (data.type == 'splice') {
+            var modelPath = this.path(data.path);
+            if (! modelPath) return;
 
-			splicedPaths.push(data.path)
+            splicedPaths.push(data.path)
 
-			var index = data.index
-				, howMany = data.removed.length
-				, spliceArgs = [index, howMany];
+            var index = data.index
+                , howMany = data.removed.length
+                , spliceArgs = [index, howMany];
 
-			spliceArgs = spliceArgs.concat(data.newValue.slice(index, index + data.addedCount));
+            spliceArgs = spliceArgs.concat(data.newValue.slice(index, index + data.addedCount));
 
-			modelPath.splice.apply(modelPath, spliceArgs);
-		} else {
-			var parentPathSpliced = splicedPaths.some(function(parentPath) {
-				var pos = data.path.indexOf(parentPath)
-				return pos == 0 && data.path[parentPath.length] == '[';
-			});
+            modelPath.splice.apply(modelPath, spliceArgs);
+        } else {
+            var parentPathSpliced = splicedPaths.some(function(parentPath) {
+                var pos = data.path.indexOf(parentPath)
+                return pos == 0 && data.path[parentPath.length] == '[';
+            });
 
-			if (parentPathSpliced) return;
+            if (parentPathSpliced) return;
 
-			var modelPath = this.path(data.path);
-			if (! modelPath) return;
+            var modelPath = this.path(data.path);
+            if (! modelPath) return;
 
-			var methodName = CHANGE_TYPE_TO_METHOD_MAP[data.type];
-			if (methodName)
-				modelPath[methodName](data.newValue);
-			else
-				logger.error('unknown data change type');
-		}
-	}, this);
+            var methodName = CHANGE_TYPE_TO_METHOD_MAP[data.type];
+            if (methodName)
+                modelPath[methodName](data.newValue);
+            else
+                logger.error('unknown data change type');
+        }
+    }, this);
 
-	this._changesQueue.length = 0;
+    this._changesQueue.length = 0;
 
-	callback && callback(null, true);
-	this.postMessage('changecompleted');
+    callback && callback(null, true);
+    this.postMessage('changecompleted');
 }
 
 },{"mol-proto":94}],66:[function(require,module,exports){
 'use strict';
 
 var ConnectorError = require('../util/error').Connector
-	, Messenger = require('../messenger')
-	, _ = require('mol-proto')
-	, logger = require('../util/logger');
+    , Messenger = require('../messenger')
+    , _ = require('mol-proto')
+    , logger = require('../util/logger');
 
 
 module.exports = Connector;
@@ -7911,63 +7911,63 @@ var modePattern = /^(\<*)\-+(\>*)$/;
  * @return {Connector} when called with `new`, creates a Connector object.
  */
 function Connector(ds1, mode, ds2, options) {
-	var parsedMode = mode.match(modePattern);
+    var parsedMode = mode.match(modePattern);
 
-	if (! parsedMode)
-		modeParseError();
+    if (! parsedMode)
+        modeParseError();
 
-	var depth1 = parsedMode[1].length
-		, depth2 = parsedMode[2].length;
+    var depth1 = parsedMode[1].length
+        , depth2 = parsedMode[2].length;
 
-	if (depth1 && depth2 && depth1 != depth2)
-		modeParseError();
+    if (depth1 && depth2 && depth1 != depth2)
+        modeParseError();
 
-	if (! depth1 && ! depth2)
-		modeParseError();
+    if (! depth1 && ! depth2)
+        modeParseError();
 
-	_.extend(this, {
-		ds1: ds1,
-		ds2: ds2,
-		mode: mode,
-		depth1: depth1,
-		depth2: depth2,
-		isOn: false,
-		_messenger: new Messenger(this, Messenger.defaultMethods)
-	});
+    _.extend(this, {
+        ds1: ds1,
+        ds2: ds2,
+        mode: mode,
+        depth1: depth1,
+        depth2: depth2,
+        isOn: false,
+        _messenger: new Messenger(this, Messenger.defaultMethods)
+    });
 
-	var pathTranslation = options && options.pathTranslation;
-	if (pathTranslation)
-		_.extend(this, {
-			pathTranslation1: reverseTranslationRules(pathTranslation),
-			pathTranslation2: pathTranslation
-		});
+    var pathTranslation = options && options.pathTranslation;
+    if (pathTranslation)
+        _.extend(this, {
+            pathTranslation1: reverseTranslationRules(pathTranslation),
+            pathTranslation2: pathTranslation
+        });
 
-	var dataTranslation = options && options.dataTranslation;
-	if (dataTranslation)
-		_.extend(this, {
-			dataTranslation1: dataTranslation['<-'],
-			dataTranslation2: dataTranslation['->']
-		});
+    var dataTranslation = options && options.dataTranslation;
+    if (dataTranslation)
+        _.extend(this, {
+            dataTranslation1: dataTranslation['<-'],
+            dataTranslation2: dataTranslation['->']
+        });
 
-	var dataValidation = options && options.dataValidation;
-	if (dataValidation)
-		_.extend(this, {
-			dataValidation1: dataValidation['<-'],
-			dataValidation2: dataValidation['->']
-		});
+    var dataValidation = options && options.dataValidation;
+    if (dataValidation)
+        _.extend(this, {
+            dataValidation1: dataValidation['<-'],
+            dataValidation2: dataValidation['->']
+        });
 
-	this.turnOn();
+    this.turnOn();
 
-	function modeParseError() {
-		throw new ConnectorError('invalid Connector mode: ' + mode);
-	}
+    function modeParseError() {
+        throw new ConnectorError('invalid Connector mode: ' + mode);
+    }
 }
 
 
 _.extendProto(Connector, {
-	turnOn: Connector$turnOn,
-	turnOff: Connector$turnOff,
-	destroy: Connector$destroy
+    turnOn: Connector$turnOn,
+    turnOff: Connector$turnOff,
+    destroy: Connector$destroy
 });
 
 
@@ -7978,11 +7978,11 @@ _.extendProto(Connector, {
  * @return {Object[String]}
  */
 function reverseTranslationRules(rules) {
-	var reverseRules = {};
-	_.eachKey(rules, function(path2_value, path1_key) {
-		reverseRules[path2_value] = path1_key;
-	});
-	return reverseRules;
+    var reverseRules = {};
+    _.eachKey(rules, function(path2_value, path1_key) {
+        reverseRules[path2_value] = path1_key;
+    });
+    return reverseRules;
 }
 
 
@@ -7991,103 +7991,103 @@ function reverseTranslationRules(rules) {
  * Method of Connector that enables connection (if it was previously disabled)
  */
 function Connector$turnOn() {
-	if (this.isOn)
-		return logger.warn('data sources are already connected');
+    if (this.isOn)
+        return logger.warn('data sources are already connected');
 
-	var subscriptionPath = this._subscriptionPath =
-		new Array(this.depth1 || this.depth2).join('*');
+    var subscriptionPath = this._subscriptionPath =
+        new Array(this.depth1 || this.depth2).join('*');
 
-	var self = this;
-	if (this.depth1)
-		this._link1 = linkDataSource('_link2', this.ds1, this.ds2, subscriptionPath, this.pathTranslation1, this.pathTranslation2, this.dataTranslation1, this.dataValidation1);
-	if (this.depth2)
-		this._link2 = linkDataSource('_link1', this.ds2, this.ds1, subscriptionPath, this.pathTranslation2, this.pathTranslation1, this.dataTranslation2, this.dataValidation2);
+    var self = this;
+    if (this.depth1)
+        this._link1 = linkDataSource('_link2', this.ds1, this.ds2, subscriptionPath, this.pathTranslation1, this.pathTranslation2, this.dataTranslation1, this.dataValidation1);
+    if (this.depth2)
+        this._link2 = linkDataSource('_link1', this.ds2, this.ds1, subscriptionPath, this.pathTranslation2, this.pathTranslation1, this.dataTranslation2, this.dataValidation2);
 
-	this.isOn = true;
-	this.postMessage('turnedon');
-
-
-	function linkDataSource(reverseLink, linkToDS, linkedDS, subscriptionPath, pathTranslation, reversePathTranslation, dataTranslation, dataValidation) {
-		var onData = function onData(message, data) {
-			// store untranslated path
-			var sourcePath = data.path
-				, cloned = false;
-
-			// translate path
-			if (pathTranslation) {
-				cloned = true;
-				data = _.clone(data);
-				var translatedPath = pathTranslation[data.path];
-				if (translatedPath)
-					data.path = translatedPath;
-				else {
-					logger.warn('Connector: data message received that should not have been subscribed to')
-					return; // no translation -> no dispatch
-				}
-			}
-
-			// translate data
-			if (dataTranslation) {
-				var translate = dataTranslation[sourcePath];
-				if (translate && typeof translate == 'function') {
-					if (! cloned)
-						data = _.clone(data);
-					data.oldValue = translate(data.oldValue);
-					data.newValue = translate(data.newValue);
-				}
-			}
-
-			// translate data
-			if (dataValidation) {
-				var validators = dataValidation[sourcePath]
-					, passedCount = 0
-					, alreadyFailed = false;
-
-				if (validators)
-					validators.forEach(callValidator);
-				else
-					propagateData();
-			} else
-				propagateData();
+    this.isOn = true;
+    this.postMessage('turnedon');
 
 
-			function callValidator(validator) {
-				validator(data.newValue, function(err, response) {
-					response.path = sourcePath;
-					if (! alreadyFailed && (err || response.valid) && ++passedCount == validators.length) {
-						propagateData();
-						linkedDS.postMessage('validated', response);
-					} else if (! response.valid) {
-						alreadyFailed = true;
-						linkedDS.postMessage('validated', response);
-					}
-				});
-			}
+    function linkDataSource(reverseLink, linkToDS, linkedDS, subscriptionPath, pathTranslation, reversePathTranslation, dataTranslation, dataValidation) {
+        var onData = function onData(message, data) {
+            // store untranslated path
+            var sourcePath = data.path
+                , cloned = false;
 
-			function propagateData() {
-				// prevent endless loop of updates for 2-way connection
-				if (self[reverseLink])
-					var callback = subscriptionSwitch;
+            // translate path
+            if (pathTranslation) {
+                cloned = true;
+                data = _.clone(data);
+                var translatedPath = pathTranslation[data.path];
+                if (translatedPath)
+                    data.path = translatedPath;
+                else {
+                    logger.warn('Connector: data message received that should not have been subscribed to')
+                    return; // no translation -> no dispatch
+                }
+            }
 
-				// send data change instruction as message
-				linkToDS.postMessage('changedata', data, callback);
-			}
+            // translate data
+            if (dataTranslation) {
+                var translate = dataTranslation[sourcePath];
+                if (translate && typeof translate == 'function') {
+                    if (! cloned)
+                        data = _.clone(data);
+                    data.oldValue = translate(data.oldValue);
+                    data.newValue = translate(data.newValue);
+                }
+            }
 
-			function subscriptionSwitch(err, changeFinished) {
-				if (err) return;
-				var onOff = changeFinished ? 'on' : 'off';
-				subscribeToDS(linkToDS, onOff, self[reverseLink], subscriptionPath, reversePathTranslation);
+            // translate data
+            if (dataValidation) {
+                var validators = dataValidation[sourcePath]
+                    , passedCount = 0
+                    , alreadyFailed = false;
 
-				var message = changeFinished ? 'changecompleted' : 'changestarted';
-				self.postMessage(message, { source: linkedDS, target: linkToDS });
-			}
-		};
+                if (validators)
+                    validators.forEach(callValidator);
+                else
+                    propagateData();
+            } else
+                propagateData();
 
-		// linkedDS.on(subscriptionPath, onData);
-		subscribeToDS(linkedDS, 'on', onData, subscriptionPath, pathTranslation);
 
-		return onData;
-	}
+            function callValidator(validator) {
+                validator(data.newValue, function(err, response) {
+                    response.path = sourcePath;
+                    if (! alreadyFailed && (err || response.valid) && ++passedCount == validators.length) {
+                        propagateData();
+                        linkedDS.postMessage('validated', response);
+                    } else if (! response.valid) {
+                        alreadyFailed = true;
+                        linkedDS.postMessage('validated', response);
+                    }
+                });
+            }
+
+            function propagateData() {
+                // prevent endless loop of updates for 2-way connection
+                if (self[reverseLink])
+                    var callback = subscriptionSwitch;
+
+                // send data change instruction as message
+                linkToDS.postMessage('changedata', data, callback);
+            }
+
+            function subscriptionSwitch(err, changeFinished) {
+                if (err) return;
+                var onOff = changeFinished ? 'on' : 'off';
+                subscribeToDS(linkToDS, onOff, self[reverseLink], subscriptionPath, reversePathTranslation);
+
+                var message = changeFinished ? 'changecompleted' : 'changestarted';
+                self.postMessage(message, { source: linkedDS, target: linkToDS });
+            }
+        };
+
+        // linkedDS.on(subscriptionPath, onData);
+        subscribeToDS(linkedDS, 'on', onData, subscriptionPath, pathTranslation);
+
+        return onData;
+    }
 }
 
 
@@ -8102,12 +8102,12 @@ function Connector$turnOn() {
  * @param {Object[String]} pathTranslation paths translation map
  */
 function subscribeToDS(dataSource, onOff, subscriber, subscriptionPath, pathTranslation) {
-	if (pathTranslation)
-		_.eachKey(pathTranslation, function(translatedPath, path) {
-			dataSource[onOff](path, subscriber);
-		});
-	else
-		dataSource[onOff](subscriptionPath, subscriber);
+    if (pathTranslation)
+        _.eachKey(pathTranslation, function(translatedPath, path) {
+            dataSource[onOff](path, subscriber);
+        });
+    else
+        dataSource[onOff](subscriptionPath, subscriber);
 }
 
 
@@ -8116,24 +8116,24 @@ function subscribeToDS(dataSource, onOff, subscriber, subscriptionPath, pathTran
  * Method of Connector that disables connection (if it was previously enabled)
  */
 function Connector$turnOff() {
-	if (! this.isOn)
-		return logger.warn('data sources are already disconnected');
+    if (! this.isOn)
+        return logger.warn('data sources are already disconnected');
 
-	var self = this;
-	unlinkDataSource(this.ds1, '_link2', this.pathTranslation2);
-	unlinkDataSource(this.ds2, '_link1', this.pathTranslation1);
+    var self = this;
+    unlinkDataSource(this.ds1, '_link2', this.pathTranslation2);
+    unlinkDataSource(this.ds2, '_link1', this.pathTranslation1);
 
-	this.isOn = false;
-	this.postMessage('turnedoff');
+    this.isOn = false;
+    this.postMessage('turnedoff');
 
 
-	function unlinkDataSource(linkedDS, linkName, pathTranslation) {
-		if (self[linkName]) {
-			subscribeToDS(linkedDS, 'off', self[linkName], self._subscriptionPath, pathTranslation)
-			// linkedDS.off(self._subscriptionPath, self[linkName]);
-			delete self[linkName];
-		}
-	}
+    function unlinkDataSource(linkedDS, linkName, pathTranslation) {
+        if (self[linkName]) {
+            subscribeToDS(linkedDS, 'off', self[linkName], self._subscriptionPath, pathTranslation)
+            // linkedDS.off(self._subscriptionPath, self[linkName]);
+            delete self[linkName];
+        }
+    }
 }
 
 
@@ -8141,31 +8141,31 @@ function Connector$turnOff() {
  * Destroys connector object by turning it off and removing references to connected sources
  */
 function Connector$destroy() {
-	this.turnOff();
-	this.postMessage('destroyed');
-	this._messenger.destroy();
-	_.eachKey(this, function(value, key) {
-		delete this[key];
-	}, this);
+    this.turnOff();
+    this.postMessage('destroyed');
+    this._messenger.destroy();
+    _.eachKey(this, function(value, key) {
+        delete this[key];
+    }, this);
 }
 
 },{"../messenger":58,"../util/error":82,"../util/logger":85,"mol-proto":94}],67:[function(require,module,exports){
 'use strict';
 
 var ModelPath = require('./m_path')
-	, synthesize = require('./synthesize')
-	, pathUtils = require('./path_utils')
-	, changeDataHandler = require('./change_data')
-	, Messenger = require('../messenger')
-	, MessengerMessageSource = require('../messenger/msngr_source')
-	, ModelMsgAPI = require('./m_msg_api')
-	, ModelError = require('../util/error').Model
-	, Mixin = require('../abstract/mixin')
-	, _ = require('mol-proto')
-	, check = require('../util/check')
-	, Match = check.Match
-	, logger = require('../util/logger')
-	, jsonParse = require('../util/json_parse');
+    , synthesize = require('./synthesize')
+    , pathUtils = require('./path_utils')
+    , changeDataHandler = require('./change_data')
+    , Messenger = require('../messenger')
+    , MessengerMessageSource = require('../messenger/msngr_source')
+    , ModelMsgAPI = require('./m_msg_api')
+    , ModelError = require('../util/error').Model
+    , Mixin = require('../abstract/mixin')
+    , _ = require('mol-proto')
+    , check = require('../util/check')
+    , Match = check.Match
+    , logger = require('../util/logger')
+    , jsonParse = require('../util/json_parse');
 
 
 module.exports = Model;
@@ -8185,29 +8185,29 @@ module.exports = Model;
  * @return {Model}
  */
 function Model(data, hostObject) {
-	// `model` will be returned by constructor instead of `this`. `model`
-	// (`modelPath` function) should return a ModelPath object with "synthesized" methods
-	// to get/set model properties, to subscribe to property changes, etc.
-	// Additional arguments of modelPath can be used in the path using interpolation - see ModelPath below.
-	var model = function modelPath(accessPath) { // , ... arguments that will be interpolated
-		return Model$path.apply(model, arguments);
-	};
-	model.__proto__ = Model.prototype;
+    // `model` will be returned by constructor instead of `this`. `model`
+    // (`modelPath` function) should return a ModelPath object with "synthesized" methods
+    // to get/set model properties, to subscribe to property changes, etc.
+    // Additional arguments of modelPath can be used in the path using interpolation - see ModelPath below.
+    var model = function modelPath(accessPath) { // , ... arguments that will be interpolated
+        return Model$path.apply(model, arguments);
+    };
+    model.__proto__ = Model.prototype;
 
-	_.defineProperties(model, {
-		_hostObject: hostObject,
-		// _changesQueue: []
-	});
+    _.defineProperties(model, {
+        _hostObject: hostObject,
+        // _changesQueue: []
+    });
 
-	model._prepareMessengers();
+    model._prepareMessengers();
 
-	if (data) model._data = data;
+    if (data) model._data = data;
 
-	// subscribe to "changedata" message to enable reactive connections
-	changeDataHandler.initialize.call(model);
-	model.on('changedata', changeDataHandler);
+    // subscribe to "changedata" message to enable reactive connections
+    changeDataHandler.initialize.call(model);
+    model.on('changedata', changeDataHandler);
 
-	return model;
+    return model;
 }
 
 Model.prototype.__proto__ = Model.__proto__;
@@ -8229,13 +8229,13 @@ Model.prototype.__proto__ = Model.__proto__;
  * - [proxyMethods](#proxyMethods) - proxy model methods to host object
  */
 _.extendProto(Model, {
-	path: Model$path,
-	get: Model$get,
-	set: synthesize.modelSet,
-	splice: synthesize.modelSplice,
-	proxyMessenger: proxyMessenger,
-	proxyMethods: proxyMethods,
-	_prepareMessengers: _prepareMessengers
+    path: Model$path,
+    get: Model$get,
+    set: synthesize.modelSet,
+    splice: synthesize.modelSplice,
+    proxyMessenger: proxyMessenger,
+    proxyMethods: proxyMethods,
+    _prepareMessengers: _prepareMessengers
 });
 
 
@@ -8244,8 +8244,8 @@ _.extendProto(Model, {
  * - [registerWithDOMStorage](Model$$registerWithDOMStorage)
  */
 _.extend(Model, {
-	Path: ModelPath,
-	registerWithDOMStorage: Model$$registerWithDOMStorage
+    Path: ModelPath,
+    registerWithDOMStorage: Model$$registerWithDOMStorage
 });
 
 
@@ -8253,11 +8253,11 @@ _.extend(Model, {
  * ModelPath methods added to Model prototype
  */
 var modelPathMethods = _.mapToObject([
-			'len', 'push', 'pop', 'unshift', 'shift'
-		], function(methodName) {
-			return ModelPath.prototype[methodName];
-		}
-	);
+            'len', 'push', 'pop', 'unshift', 'shift'
+        ], function(methodName) {
+            return ModelPath.prototype[methodName];
+        }
+    );
 
 _.extendProto(Model, modelPathMethods);
 
@@ -8269,7 +8269,7 @@ _.extendProto(Model, modelPathMethods);
  * @return {Any}
  */
 function Model$get() {
-	return this._data;
+    return this._data;
 }
 
 
@@ -8286,14 +8286,14 @@ function Model$get() {
  * @return {ModelPath}
  */
 function Model$path(accessPath) {  // , ... arguments that will be interpolated
-	if (! accessPath) return this;
+    if (! accessPath) return this;
 
-	// "null" is context to pass to ModelPath, first parameter of bind
-	// "this" (model) is added in front of all arguments
-	_.splice(arguments, 0, 0, null, this);
+    // "null" is context to pass to ModelPath, first parameter of bind
+    // "this" (model) is added in front of all arguments
+    _.splice(arguments, 0, 0, null, this);
 
-	// calling ModelPath constructor with new and the list of arguments: this (model), accessPath, ...
-	return new (Function.prototype.bind.apply(ModelPath, arguments));
+    // calling ModelPath constructor with new and the list of arguments: this (model), accessPath, ...
+    return new (Function.prototype.bind.apply(ModelPath, arguments));
 }
 
 
@@ -8304,8 +8304,8 @@ function Model$path(accessPath) {  // , ... arguments that will be interpolated
  * @param {Object} modelHostObject optional host object. If not passed, hostObject passed to Model constructor will be used.
  */
 function proxyMessenger(modelHostObject) {
-	modelHostObject = modelHostObject || this._hostObject;
-	Mixin.prototype._createProxyMethods.call(this._messenger, messengerMethodsToProxy, modelHostObject);
+    modelHostObject = modelHostObject || this._hostObject;
+    Mixin.prototype._createProxyMethods.call(this._messenger, messengerMethodsToProxy, modelHostObject);
 }
 var messengerMethodsToProxy = ['on', 'off', 'postMessage', 'onMessages', 'offMessages', 'getSubscribers'];
 
@@ -8317,8 +8317,8 @@ var messengerMethodsToProxy = ['on', 'off', 'postMessage', 'onMessages', 'offMes
  * @param {Object} modelHostObject optional host object. If not passed, hostObject passed to Model constructor will be used.
  */
 function proxyMethods(modelHostObject) {
-	modelHostObject = modelHostObject || this._hostObject;
-	Mixin.prototype._createProxyMethods.call(this, modelMethodsToProxy, modelHostObject);
+    modelHostObject = modelHostObject || this._hostObject;
+    Mixin.prototype._createProxyMethods.call(this, modelMethodsToProxy, modelHostObject);
 }
 var modelMethodsToProxy = ['path', 'get', 'set', 'splice', 'len', 'push', 'pop', 'unshift', 'shift'];
 
@@ -8329,47 +8329,47 @@ var modelMethodsToProxy = ['path', 'get', 'set', 'splice', 'len', 'push', 'pop',
  * External messenger's methods are proxied on the model and they allows "*" subscriptions.
  */
 function _prepareMessengers() {
-	// model will post all its changes on internal messenger
-	var internalMessenger = new Messenger(this, undefined, undefined);
+    // model will post all its changes on internal messenger
+    var internalMessenger = new Messenger(this, undefined, undefined);
 
-	// message source to connect internal messenger to external
-	var internalMessengerSource = new MessengerMessageSource(this, undefined, new ModelMsgAPI, internalMessenger);
+    // message source to connect internal messenger to external
+    var internalMessengerSource = new MessengerMessageSource(this, undefined, new ModelMsgAPI, internalMessenger);
 
-	// external messenger to which all model users will subscribe,
-	// that will allow "*" subscriptions and support "changedata" message api.
-	var externalMessenger = new Messenger(this, Messenger.defaultMethods, internalMessengerSource);
+    // external messenger to which all model users will subscribe,
+    // that will allow "*" subscriptions and support "changedata" message api.
+    var externalMessenger = new Messenger(this, Messenger.defaultMethods, internalMessengerSource);
 
-	_.defineProperties(this, {
-		_messenger: externalMessenger,
-		_internalMessenger: internalMessenger
-	});
+    _.defineProperties(this, {
+        _messenger: externalMessenger,
+        _internalMessenger: internalMessenger
+    });
 }
 
 
 function Model$$registerWithDOMStorage() {
-	var DOMStorage = require('../util/storage');
-	DOMStorage.registerDataType('Model', Model_domStorageSerializer, Model_domStorageParser);
-	DOMStorage.registerDataType('ModelPath', Model_domStorageSerializer, Model_domStorageParser, 'Model');
+    var DOMStorage = require('../util/storage');
+    DOMStorage.registerDataType('Model', Model_domStorageSerializer, Model_domStorageParser);
+    DOMStorage.registerDataType('ModelPath', Model_domStorageSerializer, Model_domStorageParser, 'Model');
 }
 
 
 function Model_domStorageSerializer(value) {
-	var data = value.get();
-	return JSON.stringify(data);
+    var data = value.get();
+    return JSON.stringify(data);
 }
 
 
 function Model_domStorageParser(valueStr) {
-	var data = jsonParse(valueStr);
-	return new Model(data);
+    var data = jsonParse(valueStr);
+    return new Model(data);
 }
 
 },{"../abstract/mixin":3,"../messenger":58,"../messenger/msngr_source":62,"../util/check":77,"../util/error":82,"../util/json_parse":84,"../util/logger":85,"../util/storage":90,"./change_data":65,"./m_msg_api":68,"./m_path":69,"./path_utils":72,"./synthesize":73,"mol-proto":94}],68:[function(require,module,exports){
 'use strict';
 
 var MessengerRegexpAPI = require('../messenger/m_api_rx')
-	, pathUtils = require('./path_utils')
-	, _ = require('mol-proto');
+    , pathUtils = require('./path_utils')
+    , _ = require('mol-proto');
 
 
 /**
@@ -8386,7 +8386,7 @@ module.exports = ModelMsgAPI;
  * - [translateToSourceMessage](#translateToSourceMessage) - translates subscription paths with "*"s to regex, leaving other strings untouched
  */
 _.extendProto(ModelMsgAPI, {
-	translateToSourceMessage: translateToSourceMessage,
+    translateToSourceMessage: translateToSourceMessage,
 });
 
 
@@ -8398,23 +8398,23 @@ _.extendProto(ModelMsgAPI, {
  * @return {RegExp|String}
  */
 function translateToSourceMessage(accessPath) {
-	if (accessPath instanceof RegExp) return accessPath;
+    if (accessPath instanceof RegExp) return accessPath;
 
-	return pathUtils.createRegexPath(accessPath);
+    return pathUtils.createRegexPath(accessPath);
 }
 
 },{"../messenger/m_api_rx":60,"./path_utils":72,"mol-proto":94}],69:[function(require,module,exports){
 'use strict';
 
 var synthesize = require('./synthesize')
-	, pathUtils = require('./path_utils')
-	, changeDataHandler = require('./change_data')
-	, Messenger = require('../messenger')
-	, ModelPathMsgAPI = require('./path_msg_api')
-	, MessengerMessageSource = require('../messenger/msngr_source')
-	, _ = require('mol-proto')
-	, check = require('../util/check')
-	, Match = check.Match;
+    , pathUtils = require('./path_utils')
+    , changeDataHandler = require('./change_data')
+    , Messenger = require('../messenger')
+    , ModelPathMsgAPI = require('./path_msg_api')
+    , MessengerMessageSource = require('../messenger/msngr_source')
+    , _ = require('mol-proto')
+    , check = require('../util/check')
+    , Match = check.Match;
 
 
 module.exports = ModelPath;
@@ -8434,48 +8434,48 @@ module.exports = ModelPath;
  * @return {ModelPath}
  */
 function ModelPath(model, path) { // ,... - additional arguments for interpolation
-	// check(model, Model);
-	check(path, String);
+    // check(model, Model);
+    check(path, String);
 
-	// `modelPath` will be returned by constructor instead of `this`. `modelPath`
-	// (`modelPath_path` function) should also return a ModelPath object with "synthesized" methods
-	// to get/set model properties, to subscribe to property changes, etc.
-	// Additional arguments of modelPath can be used in the path using interpolation - see ModelPath below.
-	var modelPath = function modelPath_path(accessPath) { // , ... arguments that will be interpolated
-		return ModelPath$path.apply(modelPath, arguments);
-	};
-	modelPath.__proto__ = ModelPath.prototype;
+    // `modelPath` will be returned by constructor instead of `this`. `modelPath`
+    // (`modelPath_path` function) should also return a ModelPath object with "synthesized" methods
+    // to get/set model properties, to subscribe to property changes, etc.
+    // Additional arguments of modelPath can be used in the path using interpolation - see ModelPath below.
+    var modelPath = function modelPath_path(accessPath) { // , ... arguments that will be interpolated
+        return ModelPath$path.apply(modelPath, arguments);
+    };
+    modelPath.__proto__ = ModelPath.prototype;
 
 
-	_.defineProperties(modelPath, {
-		_model: model,
-		_path: path,
-		_args: _.slice(arguments, 1), // path will be the first element of this array
-		// _changesQueue: []
-	});
+    _.defineProperties(modelPath, {
+        _model: model,
+        _path: path,
+        _args: _.slice(arguments, 1), // path will be the first element of this array
+        // _changesQueue: []
+    });
 
-	// parse access path
-	var parsedPath = pathUtils.parseAccessPath(path);
+    // parse access path
+    var parsedPath = pathUtils.parseAccessPath(path);
 
-	// compute access path string
-	_.defineProperty(modelPath, '_accessPath', interpolateAccessPath(parsedPath, modelPath._args));
+    // compute access path string
+    _.defineProperty(modelPath, '_accessPath', interpolateAccessPath(parsedPath, modelPath._args));
 
-	// messenger fails on "*" subscriptions
-	modelPath._prepareMessenger();
+    // messenger fails on "*" subscriptions
+    modelPath._prepareMessenger();
 
-	// compiling getter and setter
-	var methods = synthesize(path, parsedPath);
+    // compiling getter and setter
+    var methods = synthesize(path, parsedPath);
 
-	// adding methods to model path
-	_.defineProperties(modelPath, methods);
+    // adding methods to model path
+    _.defineProperties(modelPath, methods);
 
-	// subscribe to "changedata" message to enable reactive connections
-	changeDataHandler.initialize.call(modelPath);
-	modelPath.on('changedata', changeDataHandler);
+    // subscribe to "changedata" message to enable reactive connections
+    changeDataHandler.initialize.call(modelPath);
+    modelPath.on('changedata', changeDataHandler);
 
-	Object.freeze(modelPath);
+    Object.freeze(modelPath);
 
-	return modelPath;
+    return modelPath;
 }
 
 ModelPath.prototype.__proto__ = ModelPath.__proto__;
@@ -8489,15 +8489,15 @@ ModelPath.prototype.__proto__ = ModelPath.__proto__;
  * @return {String}
  */
 function interpolateAccessPath(parsedPath, args) {
-	return parsedPath.reduce(function(accessPathStr, currNode, index) {
-		var interpolate = currNode.interpolate;
-		return accessPathStr + 
-				(interpolate
-					? (currNode.syntax == 'array'
-						? '[' + args[interpolate] + ']'
-						: '.' + args[interpolate])
-					: currNode.property);
-	}, '');
+    return parsedPath.reduce(function(accessPathStr, currNode, index) {
+        var interpolate = currNode.interpolate;
+        return accessPathStr + 
+                (interpolate
+                    ? (currNode.syntax == 'array'
+                        ? '[' + args[interpolate] + ']'
+                        : '.' + args[interpolate])
+                    : currNode.property);
+    }, '');
 }
 
 
@@ -8515,13 +8515,13 @@ function interpolateAccessPath(parsedPath, args) {
  * - [shift](#ModelPath$shift) - remove item from the beginning of array (or pseudo-array) in ModelPath
  */
 _.extendProto(ModelPath, {
-	path: ModelPath$path,
-	len: ModelPath$len,
-	push: ModelPath$push,
-	pop: ModelPath$pop,
-	unshift: ModelPath$unshift,
-	shift: ModelPath$shift,
-	_prepareMessenger: _prepareMessenger
+    path: ModelPath$path,
+    len: ModelPath$len,
+    push: ModelPath$push,
+    pop: ModelPath$pop,
+    unshift: ModelPath$unshift,
+    shift: ModelPath$shift,
+    _prepareMessenger: _prepareMessenger
 })
 
 
@@ -8537,27 +8537,27 @@ _.extendProto(ModelPath, {
  * @return {ModelPath}
  */
 function ModelPath$path(accessPath) {  // , ... arguments that will be interpolated
-	if (! accessPath) return this;
+    if (! accessPath) return this;
 
-	var thisPathArgsCount = this._args.length - 1;
+    var thisPathArgsCount = this._args.length - 1;
 
-	if (thisPathArgsCount > 0) {// this path has interpolated arguments too
-		accessPath = accessPath.replace(/\$[1-9][0-9]*/g, function(str){
-			return '$' + (+str.slice(1) + thisPathArgsCount);
-		});
-	}
+    if (thisPathArgsCount > 0) {// this path has interpolated arguments too
+        accessPath = accessPath.replace(/\$[1-9][0-9]*/g, function(str){
+            return '$' + (+str.slice(1) + thisPathArgsCount);
+        });
+    }
 
-	var newPath = this._path + accessPath;
+    var newPath = this._path + accessPath;
 
-	// "null" is context to pass to ModelPath, first parameter of bind
-	// this._model is added in front of all arguments as the first parameter
-	// of ModelPath constructor
-	var bindArgs = [null, this._model, newPath]
-						.concat(this._args.slice(1)) // remove old path from _args, as it is 1 based
-						.concat(_.slice(arguments, 1)); // add new interpolation arguments
+    // "null" is context to pass to ModelPath, first parameter of bind
+    // this._model is added in front of all arguments as the first parameter
+    // of ModelPath constructor
+    var bindArgs = [null, this._model, newPath]
+                        .concat(this._args.slice(1)) // remove old path from _args, as it is 1 based
+                        .concat(_.slice(arguments, 1)); // add new interpolation arguments
 
-	// calling ModelPath constructor with new and the list of arguments: this (model), accessPath, ...
-	return new (Function.prototype.bind.apply(ModelPath, bindArgs));
+    // calling ModelPath constructor with new and the list of arguments: this (model), accessPath, ...
+    return new (Function.prototype.bind.apply(ModelPath, bindArgs));
 }
 
 
@@ -8568,7 +8568,7 @@ function ModelPath$path(accessPath) {  // , ... arguments that will be interpola
  * @return {Any}
  */
 function ModelPath$len() {
-	return this.path('.length').get() || 0;
+    return this.path('.length').get() || 0;
 }
 
 
@@ -8580,13 +8580,13 @@ function ModelPath$len() {
  * @return {Integer}
  */
 function ModelPath$push() { // arguments
-	var length = this.len();
-	var newLength = length + arguments.length;
+    var length = this.len();
+    var newLength = length + arguments.length;
 
-	_.splice(arguments, 0, 0, length, 0);
-	this.splice.apply(this, arguments);
+    _.splice(arguments, 0, 0, length, 0);
+    this.splice.apply(this, arguments);
 
-	return newLength;
+    return newLength;
 }
 
 
@@ -8597,7 +8597,7 @@ function ModelPath$push() { // arguments
  * @return {Any}
  */
 function ModelPath$pop() {
-	return this.splice(this.len() - 1, 1)[0];
+    return this.splice(this.len() - 1, 1)[0];
 }
 
 
@@ -8609,13 +8609,13 @@ function ModelPath$pop() {
  * @return {Integer}
  */
 function ModelPath$unshift() { // arguments
-	var length = this.len();
-	length += arguments.length;
+    var length = this.len();
+    length += arguments.length;
 
-	_.splice(arguments, 0, 0, 0, 0);
-	this.splice.apply(this, arguments);
+    _.splice(arguments, 0, 0, 0, 0);
+    this.splice.apply(this, arguments);
 
-	return length;
+    return length;
 }
 
 
@@ -8626,7 +8626,7 @@ function ModelPath$unshift() { // arguments
  * @return {Any}
  */
 function ModelPath$shift() { // arguments
-	return this.splice(0, 1)[0];
+    return this.splice(0, 1)[0];
 }
 
 
@@ -8635,17 +8635,17 @@ function ModelPath$shift() { // arguments
  * Initializes ModelPath mesenger with Model's messenger as its source ([MessengerMessageSource](../messenger/msngr_source.js.html)) and [ModelPathMsgAPI](./path_msg_api.js.html) as [MessengerAPI](../messenger/m_api.js.html)
  */
 function _prepareMessenger() {
-	var mPathAPI = new ModelPathMsgAPI(this._accessPath);
+    var mPathAPI = new ModelPathMsgAPI(this._accessPath);
 
-	// create MessengerMessageSource connected to Model's messenger
-	var modelMessageSource = new MessengerMessageSource(this, undefined, mPathAPI, this._model);
+    // create MessengerMessageSource connected to Model's messenger
+    var modelMessageSource = new MessengerMessageSource(this, undefined, mPathAPI, this._model);
 
-	// create messenger with model passed as hostObject (default message dispatch context)
-	// and without proxying methods (we don't want to proxy them to Model)
-	var mPathMessenger = new Messenger(this, Messenger.defaultMethods, modelMessageSource);
+    // create messenger with model passed as hostObject (default message dispatch context)
+    // and without proxying methods (we don't want to proxy them to Model)
+    var mPathMessenger = new Messenger(this, Messenger.defaultMethods, modelMessageSource);
 
-	// store messenger on ModelPath instance
-	_.defineProperty(this, '_messenger', mPathMessenger);
+    // store messenger on ModelPath instance
+    _.defineProperty(this, '_messenger', mPathMessenger);
 }
 
 },{"../messenger":58,"../messenger/msngr_source":62,"../util/check":77,"./change_data":65,"./path_msg_api":71,"./path_utils":72,"./synthesize":73,"mol-proto":94}],70:[function(require,module,exports){
@@ -8653,29 +8653,29 @@ function _prepareMessenger() {
 
 
 var modelUtils = {
-	normalizeSpliceIndex: normalizeSpliceIndex
+    normalizeSpliceIndex: normalizeSpliceIndex
 };
 
 module.exports = modelUtils;
 
 
 function normalizeSpliceIndex(spliceIndex, length) {
-	return spliceIndex > length
-			? length
-			: spliceIndex >= 0
-				? spliceIndex
-				: spliceIndex + length > 0
-					? spliceIndex + length
-					: 0;
+    return spliceIndex > length
+            ? length
+            : spliceIndex >= 0
+                ? spliceIndex
+                : spliceIndex + length > 0
+                    ? spliceIndex + length
+                    : 0;
 }
 
 },{}],71:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('../messenger/m_api')
-	, pathUtils = require('./path_utils')
-	, logger = require('../util/logger')
-	, _ = require('mol-proto');
+    , pathUtils = require('./path_utils')
+    , logger = require('../util/logger')
+    , _ = require('mol-proto');
 
 
 /**
@@ -8694,9 +8694,9 @@ module.exports = ModelPathMsgAPI;
  * - [createInternalData](#createInternalData) - changes path in message on model to relative path and adds `fullPath` property to message data
  */
 _.extendProto(ModelPathMsgAPI, {
-	init: init,
-	translateToSourceMessage: translateToSourceMessage,
-	createInternalData: createInternalData,
+    init: init,
+    translateToSourceMessage: translateToSourceMessage,
+    createInternalData: createInternalData,
 });
 
 
@@ -8707,8 +8707,8 @@ _.extendProto(ModelPathMsgAPI, {
  * @param {String} rootPath root path of model path
  */
 function init(rootPath) {
-	MessengerAPI.prototype.init.apply(this, arguments);
-	this.rootPath = rootPath;
+    MessengerAPI.prototype.init.apply(this, arguments);
+    this.rootPath = rootPath;
 }
 
 /**
@@ -8719,11 +8719,11 @@ function init(rootPath) {
  * @return {String}
  */
 function translateToSourceMessage(message) {
-	// TODO should prepend RegExes
-	// TODO should not prepend something that is not a path???
-	if (message instanceof RegExp)
-		return message;
-	return this.rootPath + message;
+    // TODO should prepend RegExes
+    // TODO should not prepend something that is not a path???
+    if (message instanceof RegExp)
+        return message;
+    return this.rootPath + message;
 }
 
 
@@ -8737,15 +8737,15 @@ function translateToSourceMessage(message) {
  * @return {Object}
  */
 function createInternalData(fullSourceAccessPath, accessPath, sourceData) {
-	var internalData = _.clone(sourceData);
-	var fullPath = internalData.path;
-	internalData.fullPath = fullPath;
-	if (fullPath.indexOf(this.rootPath) == 0)
-		internalData.path = fullPath.replace(this.rootPath, '');
-	else
-		logger.warn('ModelPath message dispatched with wrong root path');
+    var internalData = _.clone(sourceData);
+    var fullPath = internalData.path;
+    internalData.fullPath = fullPath;
+    if (fullPath.indexOf(this.rootPath) == 0)
+        internalData.path = fullPath.replace(this.rootPath, '');
+    else
+        logger.warn('ModelPath message dispatched with wrong root path');
 
-	return internalData;
+    return internalData;
 }
 
 },{"../messenger/m_api":59,"../util/logger":85,"./path_utils":72,"mol-proto":94}],72:[function(require,module,exports){
@@ -8755,180 +8755,180 @@ function createInternalData(fullSourceAccessPath, accessPath, sourceData) {
 // ### model path utils
 
 var check = require('../util/check')
-	, Match = check.Match
-	, _ = require('mol-proto')
-	, ModelError = require('../util/error').Model;
+    , Match = check.Match
+    , _ = require('mol-proto')
+    , ModelError = require('../util/error').Model;
 
 var pathUtils = {
-	parseAccessPath: parseAccessPath,
-	createRegexPath: createRegexPath,
-	getPathNodeKey: getPathNodeKey,
-	wrapMessengerMethods: wrapMessengerMethods
+    parseAccessPath: parseAccessPath,
+    createRegexPath: createRegexPath,
+    getPathNodeKey: getPathNodeKey,
+    wrapMessengerMethods: wrapMessengerMethods
 };
 
 module.exports = pathUtils;
 
 
 var propertyPathSyntax = '\\.[A-Za-z][A-Za-z0-9_]*'
-	, arrayPathSyntax = '\\[[0-9]+\\]'
-	, interpolationSyntax = '\\$[1-9][0-9]*'
-	, propertyInterpolateSyntax = '\\.' + interpolationSyntax
-	, arrayInterpolateSyntax = '\\[' + interpolationSyntax + '\\]'
+    , arrayPathSyntax = '\\[[0-9]+\\]'
+    , interpolationSyntax = '\\$[1-9][0-9]*'
+    , propertyInterpolateSyntax = '\\.' + interpolationSyntax
+    , arrayInterpolateSyntax = '\\[' + interpolationSyntax + '\\]'
 
-	, propertyStarSyntax = '\\.\\*'
-	, arrayStarSyntax = '\\[\\*\\]'
-	, starSyntax = '\\*'
+    , propertyStarSyntax = '\\.\\*'
+    , arrayStarSyntax = '\\[\\*\\]'
+    , starSyntax = '\\*'
 
-	, pathParseSyntax = [
-							propertyPathSyntax,
-							arrayPathSyntax,
-							propertyInterpolateSyntax,
-							arrayInterpolateSyntax
-						].join('|')
-	, pathParsePattern = new RegExp(pathParseSyntax, 'g')
+    , pathParseSyntax = [
+                            propertyPathSyntax,
+                            arrayPathSyntax,
+                            propertyInterpolateSyntax,
+                            arrayInterpolateSyntax
+                        ].join('|')
+    , pathParsePattern = new RegExp(pathParseSyntax, 'g')
 
-	, patternPathParseSyntax =  [
-									pathParseSyntax,
-									propertyStarSyntax,
-									arrayStarSyntax,
-									starSyntax
-								].join('|')
-	, patternPathParsePattern = new RegExp(patternPathParseSyntax, 'g')
+    , patternPathParseSyntax =  [
+                                    pathParseSyntax,
+                                    propertyStarSyntax,
+                                    arrayStarSyntax,
+                                    starSyntax
+                                ].join('|')
+    , patternPathParsePattern = new RegExp(patternPathParseSyntax, 'g')
 
-	//, targetPathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]|\.\$[1-9][0-9]*|\[\$[1-9][0-9]*\]|\$[1-9][0-9]/g
-	, pathNodeTypes = {
-		'.': { syntax: 'object', empty: '{}' },
-		'[': { syntax: 'array', empty: '[]'},
-		'*': { syntax: 'match', empty: '{}'},
-	};
+    //, targetPathParsePattern = /\.[A-Za-z][A-Za-z0-9_]*|\[[0-9]+\]|\.\$[1-9][0-9]*|\[\$[1-9][0-9]*\]|\$[1-9][0-9]/g
+    , pathNodeTypes = {
+        '.': { syntax: 'object', empty: '{}' },
+        '[': { syntax: 'array', empty: '[]'},
+        '*': { syntax: 'match', empty: '{}'},
+    };
 
 function parseAccessPath(path, nodeParsePattern) {
-	nodeParsePattern = nodeParsePattern || pathParsePattern;
+    nodeParsePattern = nodeParsePattern || pathParsePattern;
 
-	var parsedPath = [];
+    var parsedPath = [];
 
-	if (! path)
-		return parsedPath;
+    if (! path)
+        return parsedPath;
 
-	var unparsed = path.replace(nodeParsePattern, function(nodeStr) {
-		var pathNode = { property: nodeStr };
-		_.extend(pathNode, pathNodeTypes[nodeStr[0]]);
-		if (nodeStr[1] == '$')
-			pathNode.interpolate = getPathNodeKey(pathNode, true);
+    var unparsed = path.replace(nodeParsePattern, function(nodeStr) {
+        var pathNode = { property: nodeStr };
+        _.extend(pathNode, pathNodeTypes[nodeStr[0]]);
+        if (nodeStr[1] == '$')
+            pathNode.interpolate = getPathNodeKey(pathNode, true);
 
-		parsedPath.push(pathNode);
-		return '';
-	});
-	if (unparsed)
-		throw new ModelError('incorrect model path: ' + path);
+        parsedPath.push(pathNode);
+        return '';
+    });
+    if (unparsed)
+        throw new ModelError('incorrect model path: ' + path);
 
-	return parsedPath;
+    return parsedPath;
 }
 
 
 var nodeRegex = {
-	'.*': propertyPathSyntax,
-	'[*]': arrayPathSyntax
+    '.*': propertyPathSyntax,
+    '[*]': arrayPathSyntax
 };
 nodeRegex['*'] = nodeRegex['.*'] + '|' + nodeRegex['[*]'];
 
 function createRegexPath(path) {
-	check(path, Match.OneOf(String, RegExp));
+    check(path, Match.OneOf(String, RegExp));
 
-	if (path instanceof RegExp || path.indexOf('*') == -1)
-		return path;
+    if (path instanceof RegExp || path.indexOf('*') == -1)
+        return path;
 
-	var parsedPath = pathUtils.parseAccessPath(path, patternPathParsePattern)
-		, regexStr = '^'
-		, regexStrEnd = ''
-		, patternsStarted = false;
+    var parsedPath = pathUtils.parseAccessPath(path, patternPathParsePattern)
+        , regexStr = '^'
+        , regexStrEnd = ''
+        , patternsStarted = false;
 
-	parsedPath.forEach(function(pathNode) {
-		var prop = pathNode.property
-			, regex = nodeRegex[prop];
-		
-		if (regex) {
-			// regexStr += '(' + regex;
-			// regexStrEnd += '|)';
-			regexStr += '(' + regex + '|)';
-			// regexStrEnd += '|)';
-			patternsStarted = true;
-		} else {
-			// if (patternsStarted)
-			// 	throw new ModelError('"*" path segment cannot be in the middle of the path: ' + path);
-			regexStr += prop.replace(/(\.|\[|\])/g, '\\$1');
-		}
-	});
+    parsedPath.forEach(function(pathNode) {
+        var prop = pathNode.property
+            , regex = nodeRegex[prop];
+        
+        if (regex) {
+            // regexStr += '(' + regex;
+            // regexStrEnd += '|)';
+            regexStr += '(' + regex + '|)';
+            // regexStrEnd += '|)';
+            patternsStarted = true;
+        } else {
+            // if (patternsStarted)
+            //  throw new ModelError('"*" path segment cannot be in the middle of the path: ' + path);
+            regexStr += prop.replace(/(\.|\[|\])/g, '\\$1');
+        }
+    });
 
-	regexStr += /* regexStrEnd + */ '$';
+    regexStr += /* regexStrEnd + */ '$';
 
-	try {
-		return new RegExp(regexStr);
-	} catch (e) {
-		throw new ModelError('can\'t construct regex for path pattern: ' + path);
-	}
+    try {
+        return new RegExp(regexStr);
+    } catch (e) {
+        throw new ModelError('can\'t construct regex for path pattern: ' + path);
+    }
 }
 
 
 function getPathNodeKey(pathNode, interpolated) {
-	var prop = pathNode.property
-		, startIndex = interpolated ? 2 : 1;
-	return pathNode.syntax == 'array'
-		? prop.slice(startIndex, prop.length - 1)
-		: prop.slice(startIndex);
+    var prop = pathNode.property
+        , startIndex = interpolated ? 2 : 1;
+    return pathNode.syntax == 'array'
+        ? prop.slice(startIndex, prop.length - 1)
+        : prop.slice(startIndex);
 }
 
 
 // TODO allow for multiple messages in a string
 function wrapMessengerMethods(methodsNames) {
-	methodsNames = methodsNames || ['on', 'off'];
-	var wrappedMethods = _.mapToObject(methodsNames, function(methodName) {
-		var origMethod = this[methodName];
-		// replacing message subsribe/unsubscribe/etc. to convert "*" message patterns to regexps
-		return function(path, subscriber) {
-			var regexPath = createRegexPath(path);
-			origMethod.call(this, regexPath, subscriber);
-		};
-	}, this);
-	_.defineProperties(this, wrappedMethods);
+    methodsNames = methodsNames || ['on', 'off'];
+    var wrappedMethods = _.mapToObject(methodsNames, function(methodName) {
+        var origMethod = this[methodName];
+        // replacing message subsribe/unsubscribe/etc. to convert "*" message patterns to regexps
+        return function(path, subscriber) {
+            var regexPath = createRegexPath(path);
+            origMethod.call(this, regexPath, subscriber);
+        };
+    }, this);
+    _.defineProperties(this, wrappedMethods);
 }
 
 },{"../util/check":77,"../util/error":82,"mol-proto":94}],73:[function(require,module,exports){
 'use strict';
 
 var pathUtils = require('../path_utils')
-	, modelUtils = require('../model_utils')
-	, fs = require('fs')
-	, doT = require('dot')
-	, _ = require('mol-proto');
+    , modelUtils = require('../model_utils')
+    , fs = require('fs')
+    , doT = require('dot')
+    , _ = require('mol-proto');
 
 
 /**
  * Templates to synthesize model getters and setters
  */
 var templates = {
-	get: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\nmethod = function get() {\n\tvar m = {{# def.modelAccessPrefix }};\n\treturn m {{~ it.parsedPath :pathNode }}\n\t\t{{? pathNode.interpolate}}\n\t\t\t&& (m = m[this._args[ {{= pathNode.interpolate }} ]])\n\t\t{{??}}\n\t\t\t&& (m = m{{= pathNode.property }})\n\t\t{{?}} {{~}};\n};\n",
-	set: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n\n\n/**\n * Template that synthesizes setter for Model and for ModelPath\n */\nmethod = function set(value) {\n\t{{# def.initVars }}\n\n\t{{# def.createTree:'set' }}\n\n\t{{\n\t\tcurrNode = nextNode;\n\t\tcurrProp = currNode && currNode.property;\n\t}}\n\n\t{{ /* assign value to the last property */ }}\n\t{{? currProp }}\n\t\twasDef = {{# def.wasDefined}};\n\t\t{{# def.changeAccessPath }}\n\n\t\tvar old = m{{# def.currProp }};\n\n\t\t{{ /* clone value to prevent same reference in linked models */ }}\n\t\tm{{# def.currProp }} = cloneTree(value);\n\t{{?}}\n\n\t{{ /* add message related to the last property change */ }}\n\tif (! wasDef)\n\t\t{{# def.addMsg }} accessPath, type: 'added',\n\t\t\t\tnewValue: value });\n\telse if (old != value)\n\t\t{{# def.addMsg }} accessPath, type: 'changed',\n\t\t\t\toldValue: old, newValue: value });\n\n\t{{ /* add message related to changes in (sub)properties inside removed and assigned value */ }}\n\tif (! wasDef || old != value)\n\t\taddTreeChangesMessages(messages, messagesHash,\n\t\t\taccessPath, old, value); /* defined in the function that synthesizes ModelPath setter */\n\n\t{{ /* post all stored messages */ }}\n\t{{# def.postMessages }}\n};\n",
-	del: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_traverse_tree }}\n\nmethod = function del() {\n\t{{# def.initVars }}\n\n\t{{# def.traverseTree }}\n\n\t{{\n\t\tvar currNode = it.parsedPath[count];\n\t\tvar currProp = currNode.property;\t\t\n\t}}\n\n\tif (! treeDoesNotExist && m && m.hasOwnProperty && {{# def.wasDefined}}) {\n\t\tvar old = m{{# def.currProp }};\n\t\tdelete m{{# def.currProp }};\n\t\t{{# def.changeAccessPath }}\n\t\tvar msg = { path: accessPath, type: 'deleted', oldValue: old };\n\t\t{{# def.modelPostMessageCode }}(accessPath, msg);\n\n\t\taddTreeChangesMessages(messages, messagesHash,\n\t\t\taccessPath, old, undefined); /* defined in the function that synthesizes ModelPath setter */\n\n\t\t{{ /* post all stored messages */ }}\n\t\t{{# def.postMessages }}\n\t}\n};\n",
-	splice: "'use strict';/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n{{# def.include_traverse_tree }}\n\nmethod = function splice(spliceIndex, spliceHowMany) { /* ,... - extra arguments to splice into array */\n\t{{# def.initVars }}\n\n\tvar argsLen = arguments.length;\n\tvar addItems = argsLen > 2;\n\n\tif (addItems) {\n\t\t{{ /* only create model tree if items are inserted in array */ }}\n\n\t\t{{ /* if model is undefined it will be set to an empty array */ }}\t\n\t\tvar value = [];\n\t\t{{# def.createTree:'splice' }}\n\n\t\t{{? nextNode }}\n\t\t\t{{\n\t\t\t\tvar currNode = nextNode;\n\t\t\t\tvar currProp = currNode.property;\n\t\t\t\tvar emptyProp = '[]';\n\t\t\t}}\n\n\t\t\t{{# def.createTreeStep }}\n\t\t{{?}}\n\n\t} else if (spliceHowMany > 0) {\n\t\t{{ /* if items are not inserted, only traverse model tree if items are deleted from array */ }}\n\t\t{{? it.parsedPath.length }}\n\t\t\t{{# def.traverseTree }}\n\n\t\t\t{{\n\t\t\t\tvar currNode = it.parsedPath[count];\n\t\t\t\tvar currProp = currNode.property;\t\t\n\t\t\t}}\n\n\t\t\t{{ /* extra brace closes 'else' in def.traverseTreeStep */ }}\n\t\t\t{{# def.traverseTreeStep }} }\n\t\t{{?}}\n\t}\n\n\t{{ /* splice items */ }}\n\tif (addItems || (! treeDoesNotExist && m\n\t\t\t&& m.length > spliceIndex ) ) {\n\t\tvar oldLength = m.length = m.length || 0;\n\n\t\targuments[0] = spliceIndex = normalizeSpliceIndex(spliceIndex, m.length);\n\n\t\t{{ /* clone added arguments to prevent same references in linked models */ }}\n\t\tif (addItems)\n\t\t\tfor (var i = 2; i < argsLen; i++)\n\t\t\t\targuments[i] = cloneTree(arguments[i]);\n\n\t\t{{ /* actual aplice call */ }}\n\t\tvar removed = Array.prototype.splice.apply(m, arguments);\n\n\t\t{{# def.addMsg }} accessPath, type: 'splice',\n\t\t\t\tindex: spliceIndex, removed: removed, addedCount: addItems ? argsLen - 2 : 0,\n\t\t\t\tnewValue: m });\n\n\t\tif (removed && removed.length)\n\t\t\tremoved.forEach(function(item, index) {\n\t\t\t\tvar itemPath = accessPath + '[' + (spliceIndex + index) + ']';\n\t\t\t\t{{# def.addMsg }} itemPath, type: 'removed', oldValue: item });\n\n\t\t\t\tif (valueIsTree(item))\n\t\t\t\t\taddMessages(messages, messagesHash, itemPath, item, 'removed', 'oldValue');\n\t\t\t});\n\n\t\tif (addItems)\n\t\t\tfor (var i = 2; i < argsLen; i++) {\n\t\t\t\tvar item = arguments[i];\n\t\t\t\tvar itemPath = accessPath + '[' + (spliceIndex + i - 2) + ']';\n\t\t\t\t{{# def.addMsg }} itemPath, type: 'added', newValue: item });\n\n\t\t\t\tif (valueIsTree(item))\n\t\t\t\t\taddMessages(messages, messagesHash, itemPath, item, 'added', 'newValue');\n\t\t\t}\n\n\t\t{{ /* post all stored messages */ }}\n\t\t{{# def.postMessages }}\n\t}\n\n\treturn removed || [];\n}\n"
+    get: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\nmethod = function get() {\n    var m = {{# def.modelAccessPrefix }};\n    return m {{~ it.parsedPath :pathNode }}\n        {{? pathNode.interpolate}}\n            && (m = m[this._args[ {{= pathNode.interpolate }} ]])\n        {{??}}\n            && (m = m{{= pathNode.property }})\n        {{?}} {{~}};\n};\n",
+    set: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n\n\n/**\n * Template that synthesizes setter for Model and for ModelPath\n */\nmethod = function set(value) {\n    {{# def.initVars }}\n\n    {{# def.createTree:'set' }}\n\n    {{\n        currNode = nextNode;\n        currProp = currNode && currNode.property;\n    }}\n\n    {{ /* assign value to the last property */ }}\n    {{? currProp }}\n        wasDef = {{# def.wasDefined}};\n        {{# def.changeAccessPath }}\n\n        var old = m{{# def.currProp }};\n\n        {{ /* clone value to prevent same reference in linked models */ }}\n        m{{# def.currProp }} = cloneTree(value);\n    {{?}}\n\n    {{ /* add message related to the last property change */ }}\n    if (! wasDef)\n        {{# def.addMsg }} accessPath, type: 'added',\n                newValue: value });\n    else if (old != value)\n        {{# def.addMsg }} accessPath, type: 'changed',\n                oldValue: old, newValue: value });\n\n    {{ /* add message related to changes in (sub)properties inside removed and assigned value */ }}\n    if (! wasDef || old != value)\n        addTreeChangesMessages(messages, messagesHash,\n            accessPath, old, value); /* defined in the function that synthesizes ModelPath setter */\n\n    {{ /* post all stored messages */ }}\n    {{# def.postMessages }}\n};\n",
+    del: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_traverse_tree }}\n\nmethod = function del() {\n    {{# def.initVars }}\n\n    {{# def.traverseTree }}\n\n    {{\n        var currNode = it.parsedPath[count];\n        var currProp = currNode.property;       \n    }}\n\n    if (! treeDoesNotExist && m && m.hasOwnProperty && {{# def.wasDefined}}) {\n        var old = m{{# def.currProp }};\n        delete m{{# def.currProp }};\n        {{# def.changeAccessPath }}\n        var msg = { path: accessPath, type: 'deleted', oldValue: old };\n        {{# def.modelPostMessageCode }}(accessPath, msg);\n\n        addTreeChangesMessages(messages, messagesHash,\n            accessPath, old, undefined); /* defined in the function that synthesizes ModelPath setter */\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n};\n",
+    splice: "'use strict';/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n{{# def.include_traverse_tree }}\n\nmethod = function splice(spliceIndex, spliceHowMany) { /* ,... - extra arguments to splice into array */\n    {{# def.initVars }}\n\n    var argsLen = arguments.length;\n    var addItems = argsLen > 2;\n\n    if (addItems) {\n        {{ /* only create model tree if items are inserted in array */ }}\n\n        {{ /* if model is undefined it will be set to an empty array */ }}  \n        var value = [];\n        {{# def.createTree:'splice' }}\n\n        {{? nextNode }}\n            {{\n                var currNode = nextNode;\n                var currProp = currNode.property;\n                var emptyProp = '[]';\n            }}\n\n            {{# def.createTreeStep }}\n        {{?}}\n\n    } else if (spliceHowMany > 0) {\n        {{ /* if items are not inserted, only traverse model tree if items are deleted from array */ }}\n        {{? it.parsedPath.length }}\n            {{# def.traverseTree }}\n\n            {{\n                var currNode = it.parsedPath[count];\n                var currProp = currNode.property;       \n            }}\n\n            {{ /* extra brace closes 'else' in def.traverseTreeStep */ }}\n            {{# def.traverseTreeStep }} }\n        {{?}}\n    }\n\n    {{ /* splice items */ }}\n    if (addItems || (! treeDoesNotExist && m\n            && m.length > spliceIndex ) ) {\n        var oldLength = m.length = m.length || 0;\n\n        arguments[0] = spliceIndex = normalizeSpliceIndex(spliceIndex, m.length);\n\n        {{ /* clone added arguments to prevent same references in linked models */ }}\n        if (addItems)\n            for (var i = 2; i < argsLen; i++)\n                arguments[i] = cloneTree(arguments[i]);\n\n        {{ /* actual aplice call */ }}\n        var removed = Array.prototype.splice.apply(m, arguments);\n\n        {{# def.addMsg }} accessPath, type: 'splice',\n                index: spliceIndex, removed: removed, addedCount: addItems ? argsLen - 2 : 0,\n                newValue: m });\n\n        if (removed && removed.length)\n            removed.forEach(function(item, index) {\n                var itemPath = accessPath + '[' + (spliceIndex + index) + ']';\n                {{# def.addMsg }} itemPath, type: 'removed', oldValue: item });\n\n                if (valueIsTree(item))\n                    addMessages(messages, messagesHash, itemPath, item, 'removed', 'oldValue');\n            });\n\n        if (addItems)\n            for (var i = 2; i < argsLen; i++) {\n                var item = arguments[i];\n                var itemPath = accessPath + '[' + (spliceIndex + i - 2) + ']';\n                {{# def.addMsg }} itemPath, type: 'added', newValue: item });\n\n                if (valueIsTree(item))\n                    addMessages(messages, messagesHash, itemPath, item, 'added', 'newValue');\n            }\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n\n    return removed || [];\n}\n"
 };
 
-var include_defines = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts initialization code\n */\n {{## def.initVars:\n \tvar m = {{# def.modelAccessPrefix }};\n\tvar messages = [], messagesHash = {};\n\tvar accessPath = '';\n\tvar treeDoesNotExist;\n #}}\n\n/**\n * Inserts the beginning of function call to add message to list\n */\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n/**\n * Inserts current property/index for both normal and interpolated properties/indexes \n */\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n/**\n * Inserts condition to test whether normal/interpolated property/index exists \n */\n{{## def.wasDefined: m.hasOwnProperty(\n\t{{? currNode.interpolate }}\n\t\tthis._args[ {{= currNode.interpolate }} ]\n\t{{??}}\n\t\t'{{= it.getPathNodeKey(currNode) }}'\n\t{{?}}\n) #}}\n\n\n/**\n * Inserts code to update access path for current property\n * Because of the possibility of interpolated properties, it can't be calculated in template, it can only be calculated during accessor call. \n */\n{{## def.changeAccessPath:\n\taccessPath += {{? currNode.interpolate }}\n\t\t{{? currNode.syntax == 'array' }}\n\t\t\t'[' + this._args[ {{= currNode.interpolate }} ] + ']';\n\t\t{{??}}\n\t\t\t'.' + this._args[ {{= currNode.interpolate }} ];\n\t\t{{?}}\n\t{{??}}\n\t\t'{{= currProp }}';\n\t{{?}}\n#}}\n\n\n/**\n * Inserts code to post stored messages\n */\n{{## def.postMessages:\n\tmessages.forEach(function(msg) {\n\t\t{{# def.modelPostMessageCode }}(msg.path, msg);\n\t}, this);\n#}}\n"
-	, include_create_tree = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts code to create model tree as neccessary for `set` and `splice` accessors and to add messages to send list if the tree changes.\n */\n{{## def.createTree:method:\n\tvar wasDef = true;\n\tvar old = m;\n\n\t{{ var emptyProp = it.parsedPath[0] && it.parsedPath[0].empty; }}\n\t{{? emptyProp }}\n\t\t{{ /* create top level model if it was not previously defined */ }}\n\t\tif (! m) {\n\t\t\tm = {{# def.modelAccessPrefix }} = {{= emptyProp }};\n\t\t\twasDef = false;\n\n\t\t\t{{# def.addMsg }} '', type: 'added',\n\t\t\t\t  newValue: m });\n\t\t}\n\t{{??}}\n\t\t{{? method == 'splice' }}\n\t\t\tif (! m) {\n\t\t{{?}}\n\t\t\t\tm = {{# def.modelAccessPrefix }} = cloneTree(value);\n\t\t\t\twasDef = typeof old != 'undefined';\n\t\t{{? method == 'splice' }}\n\t\t\t}\n\t\t{{?}}\t\t\n\t{{?}}\n\n\n\t{{ /* create model tree if it doesn't exist */ }}\n\t{{  var modelDataProperty = '';\n\t\tvar nextNode = it.parsedPath[0];\n\t\tvar count = it.parsedPath.length - 1;\n\n\t\tfor (var i = 0; i < count; i++) {\n\t\t\tvar currNode = nextNode;\n\t\t\tvar currProp = currNode.property;\n\t\t\tnextNode = it.parsedPath[i + 1];\n\t\t\tvar emptyProp = nextNode && nextNode.empty;\n\t}}\n\n\t\t{{# def.createTreeStep }}\n\n\t{{  } /* for loop */ }}\n#}}\n\n\n/**\n * Inserts code to create one step in the model tree\n */\n{{## def.createTreeStep:\n\t{{# def.changeAccessPath }}\n\n\tif (! {{# def.wasDefined }}) { \n\t\t{{ /* property does not exist */ }}\n\t\tm = m{{# def.currProp }} = {{= emptyProp }};\n\n\t\t{{# def.addMsg }} accessPath, type: 'added', \n\t\t\t  newValue: m });\n\n\t} else if (typeof m{{# def.currProp }} != 'object') {\n\t\t{{ /* property is not object */ }}\n\t\tvar old = m{{# def.currProp }};\n\t\tm = m{{# def.currProp }} = {{= emptyProp }};\n\n\t\t{{# def.addMsg }} accessPath, type: 'changed', \n\t\t\t  oldValue: old, newValue: m });\n\n\t} else {\n\t\t{{ /* property exists, just traverse down the model tree */ }}\n\t\tm = m{{# def.currProp }};\n\t}\n#}}\n"
-	, include_traverse_tree = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts code to traverse model tree for `delete` and `splice` accessors.\n */\n{{## def.traverseTree:\n\t{{ \n\t\tvar count = it.parsedPath.length-1;\n\n\t\tfor (var i = 0; i < count; i++) { \n\t\t\tvar currNode = it.parsedPath[i];\n\t\t\tvar currProp = currNode.property;\n\t}}\n\t\t\t{{# def.traverseTreeStep }}\n\n\t{{ } /* for loop */\n\n\t\tvar i = count;\n\t\twhile (i--) { /* closing braces for else's above */\n\t}}\n\t\t\t}\n\t{{ } /* while loop */ }}\n#}}\n\n\n/**\n * Inserts code to traverse one step in the model tree\n */\n{{## def.traverseTreeStep:\n\tif (! (m && m.hasOwnProperty && {{# def.wasDefined}} ) )\n\t\ttreeDoesNotExist = true;\n\telse {\n\t\tm = m{{# def.currProp }};\n\t\t{{# def.changeAccessPath }}\n\t{{ /* brace from else is not closed on purpose - all braces are closed in while loop */ }}\n#}}\n";
+var include_defines = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts initialization code\n */\n {{## def.initVars:\n    var m = {{# def.modelAccessPrefix }};\n    var messages = [], messagesHash = {};\n    var accessPath = '';\n    var treeDoesNotExist;\n #}}\n\n/**\n * Inserts the beginning of function call to add message to list\n */\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n/**\n * Inserts current property/index for both normal and interpolated properties/indexes \n */\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n/**\n * Inserts condition to test whether normal/interpolated property/index exists \n */\n{{## def.wasDefined: m.hasOwnProperty(\n    {{? currNode.interpolate }}\n        this._args[ {{= currNode.interpolate }} ]\n    {{??}}\n        '{{= it.getPathNodeKey(currNode) }}'\n    {{?}}\n) #}}\n\n\n/**\n * Inserts code to update access path for current property\n * Because of the possibility of interpolated properties, it can't be calculated in template, it can only be calculated during accessor call. \n */\n{{## def.changeAccessPath:\n    accessPath += {{? currNode.interpolate }}\n        {{? currNode.syntax == 'array' }}\n            '[' + this._args[ {{= currNode.interpolate }} ] + ']';\n        {{??}}\n            '.' + this._args[ {{= currNode.interpolate }} ];\n        {{?}}\n    {{??}}\n        '{{= currProp }}';\n    {{?}}\n#}}\n\n\n/**\n * Inserts code to post stored messages\n */\n{{## def.postMessages:\n    messages.forEach(function(msg) {\n        {{# def.modelPostMessageCode }}(msg.path, msg);\n    }, this);\n#}}\n"
+    , include_create_tree = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts code to create model tree as neccessary for `set` and `splice` accessors and to add messages to send list if the tree changes.\n */\n{{## def.createTree:method:\n    var wasDef = true;\n    var old = m;\n\n    {{ var emptyProp = it.parsedPath[0] && it.parsedPath[0].empty; }}\n    {{? emptyProp }}\n        {{ /* create top level model if it was not previously defined */ }}\n        if (! m) {\n            m = {{# def.modelAccessPrefix }} = {{= emptyProp }};\n            wasDef = false;\n\n            {{# def.addMsg }} '', type: 'added',\n                  newValue: m });\n        }\n    {{??}}\n        {{? method == 'splice' }}\n            if (! m) {\n        {{?}}\n                m = {{# def.modelAccessPrefix }} = cloneTree(value);\n                wasDef = typeof old != 'undefined';\n        {{? method == 'splice' }}\n            }\n        {{?}}       \n    {{?}}\n\n\n    {{ /* create model tree if it doesn't exist */ }}\n    {{  var modelDataProperty = '';\n        var nextNode = it.parsedPath[0];\n        var count = it.parsedPath.length - 1;\n\n        for (var i = 0; i < count; i++) {\n            var currNode = nextNode;\n            var currProp = currNode.property;\n            nextNode = it.parsedPath[i + 1];\n            var emptyProp = nextNode && nextNode.empty;\n    }}\n\n        {{# def.createTreeStep }}\n\n    {{  } /* for loop */ }}\n#}}\n\n\n/**\n * Inserts code to create one step in the model tree\n */\n{{## def.createTreeStep:\n    {{# def.changeAccessPath }}\n\n    if (! {{# def.wasDefined }}) { \n        {{ /* property does not exist */ }}\n        m = m{{# def.currProp }} = {{= emptyProp }};\n\n        {{# def.addMsg }} accessPath, type: 'added', \n              newValue: m });\n\n    } else if (typeof m{{# def.currProp }} != 'object') {\n        {{ /* property is not object */ }}\n        var old = m{{# def.currProp }};\n        m = m{{# def.currProp }} = {{= emptyProp }};\n\n        {{# def.addMsg }} accessPath, type: 'changed', \n              oldValue: old, newValue: m });\n\n    } else {\n        {{ /* property exists, just traverse down the model tree */ }}\n        m = m{{# def.currProp }};\n    }\n#}}\n"
+    , include_traverse_tree = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts code to traverse model tree for `delete` and `splice` accessors.\n */\n{{## def.traverseTree:\n    {{ \n        var count = it.parsedPath.length-1;\n\n        for (var i = 0; i < count; i++) { \n            var currNode = it.parsedPath[i];\n            var currProp = currNode.property;\n    }}\n            {{# def.traverseTreeStep }}\n\n    {{ } /* for loop */\n\n        var i = count;\n        while (i--) { /* closing braces for else's above */\n    }}\n            }\n    {{ } /* while loop */ }}\n#}}\n\n\n/**\n * Inserts code to traverse one step in the model tree\n */\n{{## def.traverseTreeStep:\n    if (! (m && m.hasOwnProperty && {{# def.wasDefined}} ) )\n        treeDoesNotExist = true;\n    else {\n        m = m{{# def.currProp }};\n        {{# def.changeAccessPath }}\n    {{ /* brace from else is not closed on purpose - all braces are closed in while loop */ }}\n#}}\n";
 
 var dotDef = {
-	include_defines: include_defines,
-	include_create_tree: include_create_tree,
-	include_traverse_tree: include_traverse_tree,
-	getPathNodeKey: pathUtils.getPathNodeKey,
-	modelAccessPrefix: 'this._model._data',
-	modelPostMessageCode: 'this._model._internalMessenger.postMessage'
+    include_defines: include_defines,
+    include_create_tree: include_create_tree,
+    include_traverse_tree: include_traverse_tree,
+    getPathNodeKey: pathUtils.getPathNodeKey,
+    modelAccessPrefix: 'this._model._data',
+    modelPostMessageCode: 'this._model._internalMessenger.postMessage'
 };
 
 var modelDotDef = _(dotDef).clone().extend({
-	modelAccessPrefix: 'this._data',
-	modelPostMessageCode: 'this._internalMessenger.postMessage',
+    modelAccessPrefix: 'this._data',
+    modelPostMessageCode: 'this._internalMessenger.postMessage',
 })._();
 
 
@@ -8936,11 +8936,11 @@ var dotSettings = _.clone(doT.templateSettings)
 dotSettings.strip = false;
 
 var synthesizers = _.mapKeys(templates, function(tmpl) {
-	return doT.template(tmpl, dotSettings, dotDef); 
+    return doT.template(tmpl, dotSettings, dotDef); 
 });
 
 var modelSetSynthesizer = doT.template(templates.set, dotSettings, modelDotDef)
-	, modelSpliceSynthesizer = doT.template(templates.splice, dotSettings, modelDotDef);
+    , modelSpliceSynthesizer = doT.template(templates.splice, dotSettings, modelDotDef);
 
 
 /**
@@ -8954,99 +8954,99 @@ var modelSetSynthesizer = doT.template(templates.set, dotSettings, modelDotDef)
 var synthesizePathMethods = _.memoize(_synthesizePathMethods, undefined, 1000);
 
 function _synthesizePathMethods(path, parsedPath) {
-	var methods = _.mapKeys(synthesizers, function(synthszr) {
-		return _synthesize(synthszr, path, parsedPath)
-	});
-	return methods;
+    var methods = _.mapKeys(synthesizers, function(synthszr) {
+        return _synthesize(synthszr, path, parsedPath)
+    });
+    return methods;
 }
 
 
 var normalizeSpliceIndex = modelUtils.normalizeSpliceIndex; // used in splice.dot.js
 
 function _synthesize(synthesizer, path, parsedPath) {
-	var method
-		, methodCode = synthesizer({
-			parsedPath: parsedPath,
-			getPathNodeKey: pathUtils.getPathNodeKey
-		});
+    var method
+        , methodCode = synthesizer({
+            parsedPath: parsedPath,
+            getPathNodeKey: pathUtils.getPathNodeKey
+        });
 
-	try {
-		eval(methodCode);
-	} catch (e) {
-		throw ModelError('ModelPath method compilation error; path: ' + path + ', code: ' + methodCode);
-	}
+    try {
+        eval(methodCode);
+    } catch (e) {
+        throw ModelError('ModelPath method compilation error; path: ' + path + ', code: ' + methodCode);
+    }
 
-	return method;
-
-
-	// functions used by methods `set`, `delete` and `splice` (synthesized by template)
-	function addChangeMessage(messages, messagesHash, msg) {
-		messages.push(msg);
-		messagesHash[msg.path] = msg;
-	}
-
-	function addTreeChangesMessages(messages, messagesHash, rootPath, oldValue, newValue) {
-		var oldIsTree = valueIsTree(oldValue)
-			, newIsTree = valueIsTree(newValue);
-
-		if (newIsTree)
-			addMessages(messages, messagesHash, rootPath, newValue, 'added', 'newValue');
-		
-		if (oldIsTree)
-			addMessages(messages, messagesHash, rootPath, oldValue, 'removed', 'oldValue');
-	}
-
-	function addMessages(messages, messagesHash, rootPath, obj, msgType, valueProp) {
-		_addMessages(rootPath, obj);
+    return method;
 
 
-		function _addMessages(rootPath, obj) {
-			if (Array.isArray(obj)) {
-				var pathSyntax = rootPath + '[$$]';
-				obj.forEach(function(value, index) {
-					addMessage(value, index, pathSyntax);
-				});
-			} else {
-				var pathSyntax = rootPath + '.$$';
-				_.eachKey(obj, function(value, key) {
-					addMessage(value, key, pathSyntax);
-				});
-			}
-		}
+    // functions used by methods `set`, `delete` and `splice` (synthesized by template)
+    function addChangeMessage(messages, messagesHash, msg) {
+        messages.push(msg);
+        messagesHash[msg.path] = msg;
+    }
 
-		function addMessage(value, key, pathSyntax) {
-			var path = pathSyntax.replace('$$', key)
-				, existingMsg = messagesHash[path];
+    function addTreeChangesMessages(messages, messagesHash, rootPath, oldValue, newValue) {
+        var oldIsTree = valueIsTree(oldValue)
+            , newIsTree = valueIsTree(newValue);
 
-			if (existingMsg) {
-				if (existingMsg.type == msgType)
-					logger.error('setter error: same message type posted on the same path')
-				else {
-					existingMsg.type = 'changed';
-					existingMsg[valueProp] = value;
-				}
-			} else {
-				var msg = { path: path, type: msgType };
-				msg[valueProp] = value;
-				addChangeMessage(messages, messagesHash, msg)
-			}
+        if (newIsTree)
+            addMessages(messages, messagesHash, rootPath, newValue, 'added', 'newValue');
+        
+        if (oldIsTree)
+            addMessages(messages, messagesHash, rootPath, oldValue, 'removed', 'oldValue');
+    }
 
-			if (valueIsTree(value))
-				_addMessages(path, value);
-		}
-	}
+    function addMessages(messages, messagesHash, rootPath, obj, msgType, valueProp) {
+        _addMessages(rootPath, obj);
 
-	function cloneTree(value) {
-		return value == null || typeof value != "object"
-				? value
-				: Array.isArray(value)
-					? value.slice()
-					: _.clone(value);
-	}
 
-	function valueIsTree(value) {
-		return value != null && typeof value == "object" && Object.keys(value).length;
-	}
+        function _addMessages(rootPath, obj) {
+            if (Array.isArray(obj)) {
+                var pathSyntax = rootPath + '[$$]';
+                obj.forEach(function(value, index) {
+                    addMessage(value, index, pathSyntax);
+                });
+            } else {
+                var pathSyntax = rootPath + '.$$';
+                _.eachKey(obj, function(value, key) {
+                    addMessage(value, key, pathSyntax);
+                });
+            }
+        }
+
+        function addMessage(value, key, pathSyntax) {
+            var path = pathSyntax.replace('$$', key)
+                , existingMsg = messagesHash[path];
+
+            if (existingMsg) {
+                if (existingMsg.type == msgType)
+                    logger.error('setter error: same message type posted on the same path')
+                else {
+                    existingMsg.type = 'changed';
+                    existingMsg[valueProp] = value;
+                }
+            } else {
+                var msg = { path: path, type: msgType };
+                msg[valueProp] = value;
+                addChangeMessage(messages, messagesHash, msg)
+            }
+
+            if (valueIsTree(value))
+                _addMessages(path, value);
+        }
+    }
+
+    function cloneTree(value) {
+        return value == null || typeof value != "object"
+                ? value
+                : Array.isArray(value)
+                    ? value.slice()
+                    : _.clone(value);
+    }
+
+    function valueIsTree(value) {
+        return value != null && typeof value == "object" && Object.keys(value).length;
+    }
 }
 
 
@@ -9059,8 +9059,8 @@ function _synthesize(synthesizer, path, parsedPath) {
 module.exports = synthesizePathMethods;
 
 _.extend(synthesizePathMethods, {
-	modelSet: _synthesize(modelSetSynthesizer, '', []),
-	modelSplice: _synthesize(modelSpliceSynthesizer, '', [])
+    modelSet: _synthesize(modelSetSynthesizer, '', []),
+    modelSplice: _synthesize(modelSpliceSynthesizer, '', [])
 });
 
 },{"../model_utils":70,"../path_utils":72,"dot":93,"fs":91,"mol-proto":94}],74:[function(require,module,exports){
@@ -9073,8 +9073,8 @@ _.extend(synthesizePathMethods, {
  * - [components](./components/c_registry.js.html)
  */
 var registry = module.exports = {
-	facets: require('./components/c_facets/cf_registry'),
-	components: require('./components/c_registry')
+    facets: require('./components/c_facets/cf_registry'),
+    components: require('./components/c_registry')
 };
 
 },{"./components/c_facets/cf_registry":25,"./components/c_registry":27}],75:[function(require,module,exports){
@@ -9494,14 +9494,14 @@ function _prependPath(key, base) {
 'use strict';
 
 var count = require('./count')
-	, config = require('../config')
-	, prefix = config.componentPrefix;
+    , config = require('../config')
+    , prefix = config.componentPrefix;
 
 
 module.exports = componentName;
 
 function componentName() {
-	return prefix + count();
+    return prefix + count();
 }
 
 },{"../config":53,"./count":79}],79:[function(require,module,exports){
@@ -9512,25 +9512,25 @@ function componentName() {
 'use strict';
 
 var timestamp = Date.now()
-	, count = ''
-	, componentID = '' + timestamp;
+    , count = ''
+    , componentID = '' + timestamp;
 
 function componentCount() {
-	var newTimestamp = Date.now();
-	componentID = '' + newTimestamp;
-	if (timestamp == newTimestamp) {
-		count = count === '' ? 0 : count + 1;
-		componentID += '_' + count;
-	} else {
-		timestamp = newTimestamp;
-		count = '';
-	}
+    var newTimestamp = Date.now();
+    componentID = '' + newTimestamp;
+    if (timestamp == newTimestamp) {
+        count = count === '' ? 0 : count + 1;
+        componentID += '_' + count;
+    } else {
+        timestamp = newTimestamp;
+        count = '';
+    }
 
-	return componentID;
+    return componentID;
 }
 
 componentCount.get = function() {
-	return componentID;
+    return componentID;
 }
 
 module.exports = componentCount;
@@ -9544,10 +9544,10 @@ var config = require('../config');
 
 var domUtils = {
     children: children,
-	filterNodeListByType: filterNodeListByType,
+    filterNodeListByType: filterNodeListByType,
     containingElement: containingElement,
-	selectElementContents: selectElementContents,
-	getElementOffset: getElementOffset,
+    selectElementContents: selectElementContents,
+    getElementOffset: getElementOffset,
     setCaretPosition: setCaretPosition,
     setSelection: setSelection,
     removeElement: removeElement,
@@ -9582,9 +9582,9 @@ module.exports = domUtils;
  * @return {Array[Node]}
  */
 function filterNodeListByType(nodeList, nodeType) {
-	return _.filter(nodeList, function (node) {
-		return node.nodeType == nodeType;
-	});
+    return _.filter(nodeList, function (node) {
+        return node.nodeType == nodeType;
+    });
 }
 
 
@@ -9659,15 +9659,15 @@ function setSelection(fromNode, startOffset, toNode, endOffset) {
  * @return {Object} vector object with properties topOffset and leftOffset
  */
 function getElementOffset(el) {
-	var yPos, xPos;		
+    var yPos, xPos;     
 
     yPos = el.offsetTop;
     xPos = el.offsetLeft;
     el = el.offsetParent;
 
     while (el != null) {
-    	yPos += el.offsetTop;
-    	xPos += el.offsetLeft;
+        yPos += el.offsetTop;
+        xPos += el.offsetLeft;
         el = el.offsetParent;
     }  
 
@@ -9796,24 +9796,24 @@ var _ = require('mol-proto');
 module.exports = domReady;
 
 function domReady(func) { // , arguments
-	var self = this
-		, args = _.slice(arguments, 1);
-	if (isReady.call(this))
-		callFunc();
-	else
-		document.addEventListener('readystatechange', _.once(callFunc));
+    var self = this
+        , args = _.slice(arguments, 1);
+    if (isReady.call(this))
+        callFunc();
+    else
+        document.addEventListener('readystatechange', _.once(callFunc));
 
-	function callFunc() {
-		func.apply(self, args);
-	}
+    function callFunc() {
+        func.apply(self, args);
+    }
 }
 
 domReady.isReady = isReady;
 
 
 function isReady() {
-	var readyState = document.readyState;
-	return readyState == 'loading' ? false : readyState;
+    var readyState = document.readyState;
+    return readyState == 'loading' ? false : readyState;
 }
 
 },{"mol-proto":94}],82:[function(require,module,exports){
@@ -9828,35 +9828,35 @@ var _ = require('mol-proto');
 
 // module exports error classes for all names defined in this array
 var errorClassNames = ['AbstractClass', 'Mixin', 'Messenger', 'Component',
-					   'Attribute', 'Binder', 'Loader', 'MailMessageSource', 'Facet',
-					   'Scope', 'Model', 'DomFacet', 'EditableFacet',
-					   'List', 'Connector', 'Registry', 'FrameMessageSource',
-					   'Angular'];
+                       'Attribute', 'Binder', 'Loader', 'MailMessageSource', 'Facet',
+                       'Scope', 'Model', 'DomFacet', 'EditableFacet',
+                       'List', 'Connector', 'Registry', 'FrameMessageSource',
+                       'Angular'];
 
 var error = {
-	toBeImplemented: error$toBeImplemented,
-	createClass: error$createClass
+    toBeImplemented: error$toBeImplemented,
+    createClass: error$createClass
 };
 
 errorClassNames.forEach(function(name) {
-	error[name] = error$createClass(name + 'Error');
+    error[name] = error$createClass(name + 'Error');
 });
 
 module.exports = error;
 
 
 function error$createClass(errorClassName) {
-	var ErrorClass = _.makeFunction(errorClassName, 'message',
-			'this.name = "' + errorClassName + '"; \
-			this.message = message || "There was an  error";');
-	_.makeSubclass(ErrorClass, Error);
+    var ErrorClass = _.makeFunction(errorClassName, 'message',
+            'this.name = "' + errorClassName + '"; \
+            this.message = message || "There was an  error";');
+    _.makeSubclass(ErrorClass, Error);
 
-	return ErrorClass;
+    return ErrorClass;
 }
 
 
 function error$toBeImplemented() {
-	throw new error.AbstractClass('calling the method of an absctract class');
+    throw new error.AbstractClass('calling the method of an absctract class');
 }
 
 },{"mol-proto":94}],83:[function(require,module,exports){
@@ -9866,18 +9866,18 @@ function error$toBeImplemented() {
  * `milo.util`
  */
 var util = {
-	logger: require('./logger'),
-	request: require('./request'),
-	promise: require('./promise'),
-	check: require('./check'),
-	error: require('./error'),
-	count: require('./count'),
-	componentName: require('./component_name'),
-	dom: require('./dom'),
-	selection: require('./selection'),
-	jsonParse: require('./json_parse'),
-	storage: require('./storage'),
-	domReady: require('./domready')
+    logger: require('./logger'),
+    request: require('./request'),
+    promise: require('./promise'),
+    check: require('./check'),
+    error: require('./error'),
+    count: require('./count'),
+    componentName: require('./component_name'),
+    dom: require('./dom'),
+    selection: require('./selection'),
+    jsonParse: require('./json_parse'),
+    storage: require('./storage'),
+    domReady: require('./domready')
 };
 
 module.exports = util;
@@ -9897,9 +9897,9 @@ module.exports = jsonParse;
  * @param {Object|undefined}
  */
 function jsonParse(str) {
-	try {
-		return JSON.parse(str);
-	} catch (e) {}
+    try {
+        return JSON.parse(str);
+    } catch (e) {}
 }
 
 },{}],85:[function(require,module,exports){
@@ -10063,11 +10063,11 @@ module.exports = Promise;
  * @return {Promise}
  */
 function Promise(dataSource) {
-	this.data = undefined;
-	this.dataError = undefined;
-	this.dataSource = dataSource;
-	this._thenQueue = [];
-	this._errorQueue = [];
+    this.data = undefined;
+    this.dataError = undefined;
+    this.dataSource = dataSource;
+    this._thenQueue = [];
+    this._errorQueue = [];
 }
 
 
@@ -10077,8 +10077,8 @@ function Promise(dataSource) {
  * - [processData](#processData)
  */
 _.extend(Promise, {
-	transformData: Promise$$transformData,
-	thenData: Promise$$thenData
+    transformData: Promise$$transformData,
+    thenData: Promise$$thenData
 });
 
 
@@ -10091,10 +10091,10 @@ _.extend(Promise, {
  * - [transform](#Promise$transform) - create a new promise with data transformation
  */
 _.extendProto(Promise, {
-	then: Promise$then,
-	error: Promise$error,
-	setData: Promise$setData,
-	transform: Promise$transform
+    then: Promise$then,
+    error: Promise$error,
+    setData: Promise$setData,
+    transform: Promise$transform
 });
 
 
@@ -10107,10 +10107,10 @@ _.extendProto(Promise, {
  * @return {Promise|Any}
  */
 function Promise$$transformData(data, transformFunc) {
-	if (data instanceof Promise)
-		return data.transform(transformFunc);
-	else
-		return transformFunc(data);
+    if (data instanceof Promise)
+        return data.transform(transformFunc);
+    else
+        return transformFunc(data);
 }
 
 
@@ -10122,10 +10122,10 @@ function Promise$$transformData(data, transformFunc) {
  * @return {Promise|Any}
  */
 function Promise$$thenData(data, thenFunc) {
-	if (data instanceof Promise)
-		return data.then(thenFunc);
-	else
-		return thenFunc(null, data);
+    if (data instanceof Promise)
+        return data.then(thenFunc);
+    else
+        return thenFunc(null, data);
 }
 
 
@@ -10136,14 +10136,14 @@ function Promise$$thenData(data, thenFunc) {
  * @param {Function} callback
  */
 function Promise$then(callback) {
-	if (! this.dataError) {
-		if (this.data)
-			_.defer(callback, null, this.data, this.dataSource);
-		else
-			this._thenQueue.push(callback);
-	}
+    if (! this.dataError) {
+        if (this.data)
+            _.defer(callback, null, this.data, this.dataSource);
+        else
+            this._thenQueue.push(callback);
+    }
 
-	return this;
+    return this;
 }
 
 
@@ -10154,12 +10154,12 @@ function Promise$then(callback) {
  * @param {Function} callback
  */
 function Promise$error(callback) {
-	if (this.dataError)
-		_.defer(callback, this.dataError, this.data, this.dataSource);
-	else if (! this.data)
-		this._errorQueue.push(callback);
+    if (this.dataError)
+        _.defer(callback, this.dataError, this.data, this.dataSource);
+    else if (! this.data)
+        this._errorQueue.push(callback);
 
-	return this;
+    return this;
 }
 
 
@@ -10170,19 +10170,19 @@ function Promise$error(callback) {
  * @param {Any} data data
  */
 function Promise$setData(error, data) {
-	this.dataError = error;
-	this.data = data;
+    this.dataError = error;
+    this.data = data;
 
-	var queue = error ? this._errorQueue : this._thenQueue;
+    var queue = error ? this._errorQueue : this._thenQueue;
 
-	var self = this;
-	_.defer(function() {
-		queue.forEach(function(callback) {
-			callback(error, data, self.request);
-		});
-		self._errorQueue.length = 0;
-		self._thenQueue.length = 0;
-	});
+    var self = this;
+    _.defer(function() {
+        queue.forEach(function(callback) {
+            callback(error, data, self.request);
+        });
+        self._errorQueue.length = 0;
+        self._thenQueue.length = 0;
+    });
 }
 
 
@@ -10193,20 +10193,20 @@ function Promise$setData(error, data) {
  * @return {Promise}
  */
 function Promise$transform(transformDataFunc) {
-	var promise = new Promise(this);
-	this
-	.then(function(error, data) {
-		try {
-			var transformedData = transformDataFunc(data);
-			promise.setData(error, transformedData);
-		} catch (e) {
-			promise.setData(e);
-		}
-	})
-	.error(function(error, data) {
-		promise.setData(error, data);
-	});
-	return promise;
+    var promise = new Promise(this);
+    this
+    .then(function(error, data) {
+        try {
+            var transformedData = transformDataFunc(data);
+            promise.setData(error, transformedData);
+        } catch (e) {
+            promise.setData(e);
+        }
+    })
+    .error(function(error, data) {
+        promise.setData(error, data);
+    });
+    return promise;
 }
 
 },{"mol-proto":94}],88:[function(require,module,exports){
@@ -10234,7 +10234,7 @@ function Promise$transform(transformDataFunc) {
 
 
 var _ = require('mol-proto')
-	, Promise = require('./promise');
+    , Promise = require('./promise');
 
 module.exports = request;
 
@@ -10244,14 +10244,14 @@ var okStatuses = ['200', '304'];
 
 
 function request(url, opts, callback) {
-	var req = new XMLHttpRequest();
-	req.open(opts.method, url, true); // what true means?
-	req.setRequestHeader('Content-Type', opts.contentType || 'application/json;charset=UTF-8');
+    var req = new XMLHttpRequest();
+    req.open(opts.method, url, true); // what true means?
+    req.setRequestHeader('Content-Type', opts.contentType || 'application/json;charset=UTF-8');
 
-	var promise = new Promise(req);
+    var promise = new Promise(req);
 
-	req.onreadystatechange = function () {
-		if (req.readyState == 4) {
+    req.onreadystatechange = function () {
+        if (req.readyState == 4) {
             if (req.statusText.toUpperCase() == 'OK' ) {
                 callback && callback(null, req.responseText, req);
                 promise.setData(null, req.responseText);
@@ -10259,37 +10259,37 @@ function request(url, opts, callback) {
                 callback && callback(req.status, req.responseText, req);
                 promise.setData(req.status, req.responseText);
             }
-		}
-	};
-	req.send(JSON.stringify(opts.data));
+        }
+    };
+    req.send(JSON.stringify(opts.data));
 
-	return promise;
+    return promise;
 }
 
 _.extend(request, {
-	get: request$get,
-	post: request$post,
-	json: request$json
+    get: request$get,
+    post: request$post,
+    json: request$json
 });
 
 
 function request$get(url, callback) {
-	return request(url, { method: 'GET' }, callback);
+    return request(url, { method: 'GET' }, callback);
 }
 
 function request$post(url, data, callback) {
-	return request(url, { method: 'POST', data: data }, callback);
+    return request(url, { method: 'POST', data: data }, callback);
 }
 
 function request$json(url, callback) {
-	var promise = request(url, { method: 'GET' });
+    var promise = request(url, { method: 'GET' });
 
-	var jsonPromise = promise.transform(JSON.parse.bind(JSON));
+    var jsonPromise = promise.transform(JSON.parse.bind(JSON));
 
-	if (callback)
-		jsonPromise.then(callback).error(callback);
+    if (callback)
+        jsonPromise.then(callback).error(callback);
 
-	return jsonPromise;
+    return jsonPromise;
 }
 
 },{"./promise":87,"mol-proto":94}],89:[function(require,module,exports){
@@ -10297,10 +10297,10 @@ function request$json(url, callback) {
 
 
 var domUtil = require('./dom')
-	, containingElement = domUtil.containingElement
-	, setCaretPosition = domUtil.setCaretPosition
-	, Component = require('../components/c_class')
-	, _ = require('mol-proto');
+    , containingElement = domUtil.containingElement
+    , setCaretPosition = domUtil.setCaretPosition
+    , Component = require('../components/c_class')
+    , _ = require('mol-proto');
 
 module.exports = TextSelection;
 
@@ -10313,10 +10313,10 @@ module.exports = TextSelection;
  * @param {Window} win window in which text selection is processed
  */
 function TextSelection(win) {
-	if (! this instanceof TextSelection)
-		return new TextSelection(win);
-	this.window = win || window;
-	this.init();
+    if (! this instanceof TextSelection)
+        return new TextSelection(win);
+    this.window = win || window;
+    this.init();
 }
 
 
@@ -10327,7 +10327,7 @@ function TextSelection(win) {
  * @return {Element|null}
  */
 var TextSelection$startElement = 
-	_.partial(_getElement, '_startElement', 'startContainer');
+    _.partial(_getElement, '_startElement', 'startContainer');
 
 
 /**
@@ -10337,7 +10337,7 @@ var TextSelection$startElement =
  * @return {Element|null}
  */
 var TextSelection$endElement = 
-	_.partial(_getElement, '_endElement', 'endContainer');
+    _.partial(_getElement, '_endElement', 'endContainer');
 
 
 /**
@@ -10347,7 +10347,7 @@ var TextSelection$endElement =
  * @return {Element|null}
  */
 var TextSelection$containingElement = 
-	_.partial(_getElement, '_containingElement', 'commonAncestorContainer');
+    _.partial(_getElement, '_containingElement', 'commonAncestorContainer');
 
 
 /**
@@ -10357,7 +10357,7 @@ var TextSelection$containingElement =
  * @return {Component}
  */
 var TextSelection$startComponent = 
-	_.partial(_getComponent, '_startComponent', 'startElement');
+    _.partial(_getComponent, '_startComponent', 'startElement');
 
 
 /**
@@ -10367,7 +10367,7 @@ var TextSelection$startComponent =
  * @return {Component}
  */
 var TextSelection$endComponent = 
-	_.partial(_getComponent, '_endComponent', 'endElement');
+    _.partial(_getComponent, '_endComponent', 'endElement');
 
 
 /**
@@ -10377,25 +10377,25 @@ var TextSelection$endComponent =
  * @return {Component}
  */
 var TextSelection$containingComponent = 
-	_.partial(_getComponent, '_containingComponent', 'containingElement');
+    _.partial(_getComponent, '_containingComponent', 'containingElement');
 
 
 _.extendProto(TextSelection, {
-	init: TextSelection$init,
-	text: TextSelection$text,
-	textNodes: TextSelection$textNodes,
+    init: TextSelection$init,
+    text: TextSelection$text,
+    textNodes: TextSelection$textNodes,
 
-	startElement: TextSelection$startElement,
-	endElement: TextSelection$endElement,
-	containingElement: TextSelection$containingElement,
+    startElement: TextSelection$startElement,
+    endElement: TextSelection$endElement,
+    containingElement: TextSelection$containingElement,
 
-	startComponent: TextSelection$startComponent,
-	endComponent: TextSelection$endComponent,
-	containingComponent: TextSelection$containingComponent,
+    startComponent: TextSelection$startComponent,
+    endComponent: TextSelection$endComponent,
+    containingComponent: TextSelection$containingComponent,
 
-	containedComponents: TextSelection$containedComponents,
-	eachContainedComponent: TextSelection$eachContainedComponent,
-	del: TextSelection$del
+    containedComponents: TextSelection$containedComponents,
+    eachContainedComponent: TextSelection$eachContainedComponent,
+    del: TextSelection$del
 });
 
 
@@ -10404,10 +10404,10 @@ _.extendProto(TextSelection, {
  * Initializes TextSelection from the current selection
  */
 function TextSelection$init() {
-	this.selection = this.window.getSelection();
-	if (this.selection.rangeCount)
-		this.range = this.selection.getRangeAt(0);
-	this.isCollapsed = this.selection.isCollapsed;
+    this.selection = this.window.getSelection();
+    if (this.selection.rangeCount)
+        this.range = this.selection.getRangeAt(0);
+    this.isCollapsed = this.selection.isCollapsed;
 }
 
 
@@ -10418,12 +10418,12 @@ function TextSelection$init() {
  * @return {String}
  */
 function TextSelection$text() {
-	if (! this.range) return undefined;
+    if (! this.range) return undefined;
 
-	if (! this._text)
-		this._text = this.range.toString();
+    if (! this._text)
+        this._text = this.range.toString();
 
-	return this._text;
+    return this._text;
 }
 
 
@@ -10434,11 +10434,11 @@ function TextSelection$text() {
  * @return {Array[Node]}
  */
 function TextSelection$textNodes() {
-	if (! this.range) return undefined;
+    if (! this.range) return undefined;
 
-	if (! this._textNodes)
-		this._textNodes = _getTextNodes.call(this);
-	return this._textNodes;
+    if (! this._textNodes)
+        this._textNodes = _getTextNodes.call(this);
+    return this._textNodes;
 }
 
 
@@ -10449,27 +10449,27 @@ function TextSelection$textNodes() {
  * @param {TextSelection} this
  */
 function _getTextNodes() {
-	// list of selected text nodes
-	var textNodes = [];
+    // list of selected text nodes
+    var textNodes = [];
 
-	if (this.isCollapsed)
-		return textNodes;
+    if (this.isCollapsed)
+        return textNodes;
 
-	// create TreeWalker to traverse the tree to select all text nodes
-	var selStart = this.range.startContainer
-		, selEnd = this.range.endContainer
-		, rangeContainer = this.range.commonAncestorContainer;
+    // create TreeWalker to traverse the tree to select all text nodes
+    var selStart = this.range.startContainer
+        , selEnd = this.range.endContainer
+        , rangeContainer = this.range.commonAncestorContainer;
 
-	var treeWalker = this.window.document.createTreeWalker(rangeContainer, NodeFilter.SHOW_TEXT);
-	var node = treeWalker.currentNode = selStart;
+    var treeWalker = this.window.document.createTreeWalker(rangeContainer, NodeFilter.SHOW_TEXT);
+    var node = treeWalker.currentNode = selStart;
 
-	// traverse DOM tree to collect all selected text nodes
-	while (node && (! inEnd || selEnd.contains(node))) {
-		textNodes.push(node);
-		var inEnd = inEnd || selEnd.contains(node);
-		node = treeWalker.nextNode();
-	}
-	return textNodes;
+    // traverse DOM tree to collect all selected text nodes
+    while (node && (! inEnd || selEnd.contains(node))) {
+        textNodes.push(node);
+        var inEnd = inEnd || selEnd.contains(node);
+        node = treeWalker.nextNode();
+    }
+    return textNodes;
 }
 
 
@@ -10481,11 +10481,11 @@ function _getTextNodes() {
  * @return {Element|null}
  */
 function _getElement(thisPropName, rangePropName) {
-	if (! this.range) return undefined;
+    if (! this.range) return undefined;
 
-	if (typeof this[thisPropName] == 'undefined')
-		this[thisPropName] = containingElement(this.range[rangePropName]);
-	return this[thisPropName];
+    if (typeof this[thisPropName] == 'undefined')
+        this[thisPropName] = containingElement(this.range[rangePropName]);
+    return this[thisPropName];
 }
 
 
@@ -10497,52 +10497,52 @@ function _getElement(thisPropName, rangePropName) {
  * @return {Component}
  */
 function _getComponent(thisPropName, elMethodName) {
-	if (! this.range) return undefined;
+    if (! this.range) return undefined;
 
-	if (typeof this[thisPropName] == 'undefined')
-		this[thisPropName] = Component.getContainingComponent(this[elMethodName]());
-	return this[thisPropName];
+    if (typeof this[thisPropName] == 'undefined')
+        this[thisPropName] = Component.getContainingComponent(this[elMethodName]());
+    return this[thisPropName];
 }
 
 
 function TextSelection$containedComponents() {
-	if (this._containedComponents)
-		return this._containedComponents;
+    if (this._containedComponents)
+        return this._containedComponents;
 
-	var components = this._containedComponents = [];
+    var components = this._containedComponents = [];
 
-	if (this.isCollapsed || ! this.range) return components;
+    if (this.isCollapsed || ! this.range) return components;
 
-	var selStart = this.range.startContainer
-		, selEnd = this.range.endContainer
-		, rangeContainer = this.range.commonAncestorContainer;
+    var selStart = this.range.startContainer
+        , selEnd = this.range.endContainer
+        , rangeContainer = this.range.commonAncestorContainer;
 
-	if (selStart != selEnd) {
-		var treeWalker = this.window.document.createTreeWalker(rangeContainer,
-				NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
+    if (selStart != selEnd) {
+        var treeWalker = this.window.document.createTreeWalker(rangeContainer,
+                NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
 
-		treeWalker.currentNode = selStart;
-		var node = treeWalker.nextNode(); // first node after selected text node
+        treeWalker.currentNode = selStart;
+        var node = treeWalker.nextNode(); // first node after selected text node
 
-		while (node && node != selEnd) {
-			if (node.nodeType != Node.TEXT_NODE) {
-				var comp = Component.getComponent(node);
-				if (comp && !comp.el.contains(selEnd))
-					components.push(comp);
-			}
-			node = treeWalker.nextNode();
-		}
-	}
-	return components;
+        while (node && node != selEnd) {
+            if (node.nodeType != Node.TEXT_NODE) {
+                var comp = Component.getComponent(node);
+                if (comp && !comp.el.contains(selEnd))
+                    components.push(comp);
+            }
+            node = treeWalker.nextNode();
+        }
+    }
+    return components;
 }
 
 
 function TextSelection$eachContainedComponent(callback, thisArg) {
-	if (this.isCollapsed || ! this.range) return;
+    if (this.isCollapsed || ! this.range) return;
 
-	var components = this.containedComponents();
+    var components = this.containedComponents();
 
-	components.forEach(callback, thisArg);
+    components.forEach(callback, thisArg);
 }
 
 
@@ -10553,28 +10553,28 @@ function TextSelection$eachContainedComponent(callback, thisArg) {
  * @param {Boolean} selectEndContainer set to true if the end container should be selected after deletion
  */
 function TextSelection$del(selectEndContainer) {
-	if (this.isCollapsed || ! this.range) return;
+    if (this.isCollapsed || ! this.range) return;
 
-	this.eachContainedComponent(function(comp) {
-		comp.destroy();
-	});
+    this.eachContainedComponent(function(comp) {
+        comp.destroy();
+    });
 
-	var selStart = this.range.startContainer;
-	var startOffset = this.range.startOffset;
-	if (selectEndContainer && this.range.startContainer != this.range.endContainer) {
-		selStart = this.range.endContainer;
-		startOffset = 0;
-	}
+    var selStart = this.range.startContainer;
+    var startOffset = this.range.startOffset;
+    if (selectEndContainer && this.range.startContainer != this.range.endContainer) {
+        selStart = this.range.endContainer;
+        startOffset = 0;
+    }
 
-	this.range.deleteContents();
+    this.range.deleteContents();
 
-	selStart.textContent = selStart.textContent.trimRight();
-	if (selStart && !selStart.nodeValue)
-		selStart.nodeValue = '\u00A0'; //non-breaking space, \u200B for zero width space;
-	
-	var position = startOffset > selStart.length ? selStart.length : startOffset;
-	setCaretPosition(selStart, position);
-	selStart.parentNode.normalize();
+    selStart.textContent = selStart.textContent.trimRight();
+    if (selStart && !selStart.nodeValue)
+        selStart.nodeValue = '\u00A0'; //non-breaking space, \u200B for zero width space;
+    
+    var position = startOffset > selStart.length ? selStart.length : startOffset;
+    setCaretPosition(selStart, position);
+    selStart.parentNode.normalize();
 }
 
 
@@ -10589,11 +10589,11 @@ function TextSelection$del(selectEndContainer) {
 
 
 var DOMStorageError = require('./error').createClass('DomStorageError')
-	, config = require('../config')
-	, jsonParse = require('./json_parse')
-	, _ = require('mol-proto')
-	, check = require('./check')
-	, Match = check.Match;
+    , config = require('../config')
+    , jsonParse = require('./json_parse')
+    , _ = require('mol-proto')
+    , check = require('./check')
+    , Match = check.Match;
 
 
 module.exports = DOMStorage;
@@ -10607,30 +10607,30 @@ module.exports = DOMStorage;
  * @param {Boolean} sessionOnly true to use sessionStorage. localStorage will be used by default.
  */
 function DOMStorage(keyPrefix, sessionOnly) {
-	if (typeof window == 'undefined') return;
+    if (typeof window == 'undefined') return;
 
-	_.defineProperties(this, {
-		keyPrefix: keyPrefix + config.domStorage.prefixSeparator,
-		_storage: sessionOnly ? window.sessionStorage : window.localStorage,
-		_typeSuffix: config.domStorage.typeSuffix
-	});
+    _.defineProperties(this, {
+        keyPrefix: keyPrefix + config.domStorage.prefixSeparator,
+        _storage: sessionOnly ? window.sessionStorage : window.localStorage,
+        _typeSuffix: config.domStorage.typeSuffix
+    });
 }
 
 
 _.extendProto(DOMStorage, {
-	get: DOMStorage$get,
-	set: DOMStorage$set,
-	remove: DOMStorage$remove,
-	hasItem: DOMStorage$hasItem,
-	getItem: DOMStorage$getItem,
-	setItem: DOMStorage$setItem,
-	removeItem: DOMStorage$removeItem,
-	_storageKey: DOMStorage$_storageKey
+    get: DOMStorage$get,
+    set: DOMStorage$set,
+    remove: DOMStorage$remove,
+    hasItem: DOMStorage$hasItem,
+    getItem: DOMStorage$getItem,
+    setItem: DOMStorage$setItem,
+    removeItem: DOMStorage$removeItem,
+    _storageKey: DOMStorage$_storageKey
 });
 
 
 _.extend(DOMStorage, {
-	registerDataType: DOMStorage$$registerDataType
+    registerDataType: DOMStorage$$registerDataType
 });
 
 
@@ -10641,22 +10641,22 @@ _.extend(DOMStorage, {
  * @param {List} arguments alternatively just the list of arguments can be passed where arguments can be sequentially used as keys and values.
  */
 function DOMStorage$set(data) { // or arguments
-	if (typeof data == 'object')
-		_.eachKey(data, function(value, key) {			
-			this.setItem(key, value);
-		}, this);
-	else {
-		var argsLen = arguments.length;
-		if (argsLen % 2)
-			throw new DomStorageError('DOMStorage: set should have even number of arguments or object');
+    if (typeof data == 'object')
+        _.eachKey(data, function(value, key) {          
+            this.setItem(key, value);
+        }, this);
+    else {
+        var argsLen = arguments.length;
+        if (argsLen % 2)
+            throw new DomStorageError('DOMStorage: set should have even number of arguments or object');
 
-		for (var i = 0; i < argsLen; i++) {
-			var key = arguments[i]
-				, value = arguments[++i];
+        for (var i = 0; i < argsLen; i++) {
+            var key = arguments[i]
+                , value = arguments[++i];
 
-			this.setItem(key, value);
-		}
-	}
+            this.setItem(key, value);
+        }
+    }
 }
 
 
@@ -10667,11 +10667,11 @@ function DOMStorage$set(data) { // or arguments
  * @returns {Object}
  */
 function DOMStorage$get() { // , ... arguments
-	var data = {};
-	_.deepForEach(arguments, function(key) {
-		data[key] = this.getItem(key);
-	}, this);
-	return data;
+    var data = {};
+    _.deepForEach(arguments, function(key) {
+        data[key] = this.getItem(key);
+    }, this);
+    return data;
 }
 
 
@@ -10681,9 +10681,9 @@ function DOMStorage$get() { // , ... arguments
  * @param {List} arguments keys can be passed as strings or arrays of strings
  */
 function DOMStorage$remove() { //, ... arguments
-	_.deepForEach(arguments, function(key) {
-		this.removeItem(key);
-	}, this);
+    _.deepForEach(arguments, function(key) {
+        this.removeItem(key);
+    }, this);
 }
 
 
@@ -10694,8 +10694,8 @@ function DOMStorage$remove() { //, ... arguments
  * @return {Boolean}
  */
 function DOMStorage$hasItem(key) {
-	var pKey = this._storageKey(key);
-	return this._storage.getItem(pKey) != null;
+    var pKey = this._storageKey(key);
+    return this._storage.getItem(pKey) != null;
 }
 
 
@@ -10707,11 +10707,11 @@ function DOMStorage$hasItem(key) {
  * @return {Any}
  */
 function DOMStorage$getItem(key) {
-	var pKey = this._storageKey(key);
-	var dataType = _getKeyDataType.call(this, pKey);
-	var valueStr = this._storage.getItem(pKey);
-	var value = _parseData(valueStr, dataType);
-	return value;
+    var pKey = this._storageKey(key);
+    var dataType = _getKeyDataType.call(this, pKey);
+    var valueStr = this._storage.getItem(pKey);
+    var value = _parseData(valueStr, dataType);
+    return value;
 }
 
 
@@ -10723,10 +10723,10 @@ function DOMStorage$getItem(key) {
  * @return {Any}
  */
 function DOMStorage$setItem(key, value) {
-	var pKey = this._storageKey(key);
-	var dataType = _setKeyDataType.call(this, pKey, value);
-	var valueStr = _serializeData(value, dataType);
-	this._storage.setItem(pKey, valueStr);
+    var pKey = this._storageKey(key);
+    var dataType = _setKeyDataType.call(this, pKey, value);
+    var valueStr = _serializeData(value, dataType);
+    this._storage.setItem(pKey, valueStr);
 }
 
 
@@ -10738,9 +10738,9 @@ function DOMStorage$setItem(key, value) {
  * @return {Any}
  */
 function DOMStorage$removeItem(key) {
-	var pKey = this._storageKey(key);
-	this._storage.removeItem(pKey);
-	_removeKeyDataType.call(this, pKey)
+    var pKey = this._storageKey(key);
+    this._storage.removeItem(pKey);
+    _removeKeyDataType.call(this, pKey)
 }
 
 
@@ -10751,7 +10751,7 @@ function DOMStorage$removeItem(key) {
  * @return {String}
  */
 function DOMStorage$_storageKey(key) {
-	return this.keyPrefix + key;
+    return this.keyPrefix + key;
 }
 
 
@@ -10762,8 +10762,8 @@ function DOMStorage$_storageKey(key) {
  * @return {String}
  */
 function _getKeyDataType(pKey) {
-	pKey = _dataTypeKey.call(this, pKey);
-	return this._storage.getItem(pKey);
+    pKey = _dataTypeKey.call(this, pKey);
+    return this._storage.getItem(pKey);
 }
 
 
@@ -10776,10 +10776,10 @@ function _getKeyDataType(pKey) {
  * @return {String}
  */
 function _setKeyDataType(pKey, value) {
-	var dataType = _getValueType(value);
-	pKey = _dataTypeKey.call(this, pKey);
-	this._storage.setItem(pKey, dataType);
-	return dataType;
+    var dataType = _getValueType(value);
+    pKey = _dataTypeKey.call(this, pKey);
+    this._storage.setItem(pKey, dataType);
+    return dataType;
 }
 
 
@@ -10789,8 +10789,8 @@ function _setKeyDataType(pKey, value) {
  * @param  {String} pKey prefixed key of stored value
  */
 function _removeKeyDataType(pKey) {
-	pKey = _dataTypeKey.call(this, pKey);
-	this._storage.removeItem(pKey);
+    pKey = _dataTypeKey.call(this, pKey);
+    this._storage.removeItem(pKey);
 }
 
 
@@ -10801,7 +10801,7 @@ function _removeKeyDataType(pKey) {
  * @return {String}
  */
 function _dataTypeKey(pKey) {
-	return pKey + this._typeSuffix;
+    return pKey + this._typeSuffix;
 }
 
 
@@ -10811,18 +10811,18 @@ function _dataTypeKey(pKey) {
  * @return {String}
  */
 function _getValueType(value) {
-	var valueType = typeof value
-		, className = value && value.constructor.name
-		, dataType = valuesDataTypes[className];
-	return dataType || (
-			valueType != 'object'
-				? valueType
-				: value == null
-					? 'null'
-					: value.constructor.name);
+    var valueType = typeof value
+        , className = value && value.constructor.name
+        , dataType = valuesDataTypes[className];
+    return dataType || (
+            valueType != 'object'
+                ? valueType
+                : value == null
+                    ? 'null'
+                    : value.constructor.name);
 }
 var valuesDataTypes = {
-	// can be registered with `registerDataType`
+    // can be registered with `registerDataType`
 }
 
 
@@ -10834,16 +10834,16 @@ var valuesDataTypes = {
  * @return {String}
  */
 function _serializeData(value, valueType) {
-	valueType = valueType || _getValueType(value);
-	var serializer = dataSerializers[valueType];
-	return serializer
-			? serializer(value, valueType)
-			: value && value.toString == Object.prototype.toString
-				? JSON.stringify(value)
-				: '' + value;
+    valueType = valueType || _getValueType(value);
+    var serializer = dataSerializers[valueType];
+    return serializer
+            ? serializer(value, valueType)
+            : value && value.toString == Object.prototype.toString
+                ? JSON.stringify(value)
+                : '' + value;
 }
 var dataSerializers = {
-	'Array': JSON.stringify
+    'Array': JSON.stringify
 }
 
 
@@ -10855,19 +10855,19 @@ var dataSerializers = {
  * @return {Any}
  */
 function _parseData(valueStr, valueType) {
-	var parser = dataParsers[valueType];
-	return parser
-			? parser(valueStr, valueType)
-			: valueStr;
+    var parser = dataParsers[valueType];
+    return parser
+            ? parser(valueStr, valueType)
+            : valueStr;
 }
 var dataParsers = {
-	Object: jsonParse,
-	Array: jsonParse,
-	Date: function(valStr) { return new Date(valStr); },
-	boolean: function(valStr) { return valStr == 'true'; },
-	number: function(valStr) { return Number(valStr); },
-	function: function(valStr) { return _.toFunction(valStr); },
-	RegExp: function(valStr) { return _.toRegExp(valStr); }
+    Object: jsonParse,
+    Array: jsonParse,
+    Date: function(valStr) { return new Date(valStr); },
+    boolean: function(valStr) { return valStr == 'true'; },
+    number: function(valStr) { return Number(valStr); },
+    function: function(valStr) { return _.toFunction(valStr); },
+    RegExp: function(valStr) { return _.toRegExp(valStr); }
 };
 
 
@@ -10880,9 +10880,9 @@ var dataParsers = {
  * @param {[String]} storeAsDataType optional name of stored data type if different from valueType
  */
 function DOMStorage$$registerDataType(valueType, serializer, parser, storeAsDataType) {
-	if (serializer) dataSerializers[valueType] = serializer;
-	if (parser) dataParsers[valueType] = parser;
-	valuesDataTypes[valueType] = storeAsDataType || valueType;
+    if (serializer) dataSerializers[valueType] = serializer;
+    if (parser) dataParsers[valueType] = parser;
+    valuesDataTypes[valueType] = storeAsDataType || valueType;
 }
 
 },{"../config":53,"./check":77,"./error":82,"./json_parse":84,"mol-proto":94}],91:[function(require,module,exports){
@@ -11186,7 +11186,7 @@ var utils = require('./utils');
  * - [createSubclass](proto_prototype.js.html#createSubclass)
  * - [makeSubclass](proto_prototype.js.html#makeSubclass)
  */
-var	prototypeMethods = require('./proto_prototype');
+var prototypeMethods = require('./proto_prototype');
 
 
 /**
@@ -11212,7 +11212,7 @@ var	prototypeMethods = require('./proto_prototype');
  * - [pickKeys](proto_object.js.html#pickKeys)
  * - [omitKeys](proto_object.js.html#omitKeys)
  */
-var	objectMethods = require('./proto_object');
+var objectMethods = require('./proto_object');
 
 
 /**
@@ -11230,7 +11230,7 @@ var	objectMethods = require('./proto_object');
  *
  * Functions that Array [implements natively](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/prototype#Methods) are also added - they can be used with array-like objects and for chaining (native functions are always called).
  */
-var	arrayMethods = require('./proto_array');
+var arrayMethods = require('./proto_array');
 
 
 /**
@@ -11249,7 +11249,7 @@ var	arrayMethods = require('./proto_array');
  * - [throttle](proto_function.js.html#throttle) 
  * - [once](proto_function.js.html#once)
  */
-var	functionMethods = require('./proto_function');
+var functionMethods = require('./proto_function');
 
 
 /**
@@ -11260,7 +11260,7 @@ var	functionMethods = require('./proto_function');
  * - [toRegExp](proto_string.js.html#toRegExp)
  * - [toFunction](proto_string.js.html#toFunction)
  */
-var	stringMethods = require('./proto_string');
+var stringMethods = require('./proto_string');
 
 
 /**
@@ -11290,10 +11290,10 @@ var utilMethods = require('./proto_util');
  * Usage:
  * ```
  * var arr = _({ 0: 3, 1: 4, 2: 5, length: 3})
- *				.toArray()
- *				.prependArray([1, 2])
- *				.appendArray([6, 7, 8])
- *				._();
+ *              .toArray()
+ *              .prependArray([1, 2])
+ *              .appendArray([6, 7, 8])
+ *              ._();
  * ```
  * A wrapped object is an instance of `_` (`Proto` class).
  *
@@ -11305,10 +11305,10 @@ var utilMethods = require('./proto_util');
  * @return {Proto}
  */
 function Proto(self) {
-	// wrap passed parameter in _ object
-	var wrapped = Object.create(Proto.prototype);
-	wrapped.self = self;
-	return wrapped;
+    // wrap passed parameter in _ object
+    var wrapped = Object.create(Proto.prototype);
+    wrapped.self = self;
+    return wrapped;
 };
 
 var _ = Proto;
@@ -11350,23 +11350,23 @@ __.extendProto.call(Proto, protoInstanceMethods);
  * In windows environment, a global `_` value is preserved in `_.underscore`
  */
 if (typeof window == 'object') {
-	// preserve existing _ object
-	if (window._)
-		Proto.underscore = window._
+    // preserve existing _ object
+    if (window._)
+        Proto.underscore = window._
 
-	// expose global _
-	window._ = Proto;
+    // expose global _
+    window._ = Proto;
 }
 
 if (typeof module == 'object' && module.exports)
-	// export for node/browserify
-	module.exports = Proto;
+    // export for node/browserify
+    module.exports = Proto;
 
 },{"./proto_array":95,"./proto_function":96,"./proto_number":97,"./proto_object":98,"./proto_prototype":99,"./proto_string":100,"./proto_util":101,"./utils":102}],95:[function(require,module,exports){
 'use strict';
 
 var __ = require('./proto_object')
-	, utils = require('./utils');
+    , utils = require('./utils');
 
 
 /**
@@ -11383,15 +11383,15 @@ var __ = require('./proto_object')
  * These methods can be [chained](proto.js.html#Proto).
  */
 var arrayMethods = module.exports = {
-	// find: see below
-	// findIndex: see below
-	appendArray: appendArray,
-	prependArray: prependArray,
-	toArray: toArray,
-	object: object,
-	mapToObject: mapToObject,
-	unique: unique,
-	deepForEach: deepForEach
+    // find: see below
+    // findIndex: see below
+    appendArray: appendArray,
+    prependArray: prependArray,
+    toArray: toArray,
+    object: object,
+    mapToObject: mapToObject,
+    unique: unique,
+    deepForEach: deepForEach
 };
 
 
@@ -11400,14 +11400,14 @@ var arrayMethods = module.exports = {
  * These methods can be [chained](proto.js.html#Proto) too.
  */
 var nativeArrayMethodsNames = [ 'join', 'pop', 'push', 'concat',
-	'reverse', 'shift', 'unshift', 'slice', 'splice',
-	'sort', 'filter', 'forEach', 'some', 'every',
-	'map', 'indexOf', 'lastIndexOf', 'reduce', 'reduceRight'];
+    'reverse', 'shift', 'unshift', 'slice', 'splice',
+    'sort', 'filter', 'forEach', 'some', 'every',
+    'map', 'indexOf', 'lastIndexOf', 'reduce', 'reduceRight'];
 
 var nativeArrayMethods = mapToObject.call(nativeArrayMethodsNames,
-		function(methodName) {
-			return Array.prototype[methodName];
-		});
+        function(methodName) {
+            return Array.prototype[methodName];
+        });
 
 __.extend.call(arrayMethods, nativeArrayMethods);
 
@@ -11422,7 +11422,7 @@ __.extend.call(arrayMethods, nativeArrayMethods);
  * @return {Any}
  */
 arrayMethods.find = Array.prototype.find
-	|| utils.makeFindMethod(arrayMethods.forEach, 'value');
+    || utils.makeFindMethod(arrayMethods.forEach, 'value');
 
 
 /**
@@ -11435,7 +11435,7 @@ arrayMethods.find = Array.prototype.find
  * @return {Integer}
  */
 arrayMethods.findIndex = Array.prototype.findIndex
-	|| utils.makeFindMethod(arrayMethods.forEach, 'index');
+    || utils.makeFindMethod(arrayMethods.forEach, 'index');
 
 
 /**
@@ -11447,7 +11447,7 @@ arrayMethods.findIndex = Array.prototype.findIndex
  * @return {Array}
  */
 function appendArray(arrayToAppend) {
-	if (! arrayToAppend.length) return this;
+    if (! arrayToAppend.length) return this;
 
     var args = [this.length, 0].concat(arrayToAppend);
     arrayMethods.splice.apply(this, args);
@@ -11465,7 +11465,7 @@ function appendArray(arrayToAppend) {
  * @return {Array}
  */
 function prependArray(arrayToPrepend) {
-	if (! arrayToPrepend.length) return this;
+    if (! arrayToPrepend.length) return this;
 
     var args = [0, 0].concat(arrayToPrepend);
     arrayMethods.splice.apply(this, args);
@@ -11481,7 +11481,7 @@ function prependArray(arrayToPrepend) {
  * @return {Array}
  */
 function toArray() {
-	return arrayMethods.slice.call(this);
+    return arrayMethods.slice.call(this);
 }
 
 
@@ -11493,13 +11493,13 @@ function toArray() {
  * @return {Object}
  */
 function object(values) {
-	var obj = {}
-		, valuesIsArray = Array.isArray(values);
-	arrayMethods.forEach.call(this, function(key, index) {
-		obj[key] = valuesIsArray ? values[index] : values;
-	});
+    var obj = {}
+        , valuesIsArray = Array.isArray(values);
+    arrayMethods.forEach.call(this, function(key, index) {
+        obj[key] = valuesIsArray ? values[index] : values;
+    });
 
-	return obj;
+    return obj;
 }
 
 
@@ -11513,11 +11513,11 @@ function object(values) {
  * @return {Object}
  */
 function mapToObject(callback, thisArg) {
-	var result = {};
-	Array.prototype.forEach.call(this, function(value, index) {
-		result[value] = callback.call(thisArg, value, index, this);
-	}, this);
-	return result;
+    var result = {};
+    Array.prototype.forEach.call(this, function(value, index) {
+        result[value] = callback.call(thisArg, value, index, this);
+    }, this);
+    return result;
 }
 
 
@@ -11529,28 +11529,28 @@ function mapToObject(callback, thisArg) {
  * @return {Array}
  */
 function unique(callback) {
-	var filtered = [];
-	if (! callback)
-		itemIndex = itemIndexOf;
+    var filtered = [];
+    if (! callback)
+        itemIndex = itemIndexOf;
 
-	this.forEach(function(item) {
-		var index = itemIndex(item);
-		if (index == -1)
-			filtered.push(item);
-	});
+    this.forEach(function(item) {
+        var index = itemIndex(item);
+        if (index == -1)
+            filtered.push(item);
+    });
 
-	return filtered;
+    return filtered;
 
 
-	function itemIndex(item) {
-		return arrayMethods.findIndex.call(filtered, function(it) {
-			return callback(item, it);
-		});
-	}
+    function itemIndex(item) {
+        return arrayMethods.findIndex.call(filtered, function(it) {
+            return callback(item, it);
+        });
+    }
 
-	function itemIndexOf(item) {
-		return filtered.indexOf(item);
-	}
+    function itemIndexOf(item) {
+        return filtered.indexOf(item);
+    }
 }
 
 
@@ -11562,17 +11562,17 @@ function unique(callback) {
  * @param {Any} thisArg optional callback envocation context
  */
 function deepForEach(callback, thisArg) {
-	var index = 0, arr = this;
-	_deepForEach.call(this);
+    var index = 0, arr = this;
+    _deepForEach.call(this);
 
-	function _deepForEach() {
-		arrayMethods.forEach.call(this, function(value) {
-			if (Array.isArray(value))
-				_deepForEach.call(value);
-			else
-				callback.call(thisArg, value, index++, arr);
-		});
-	}
+    function _deepForEach() {
+        arrayMethods.forEach.call(this, function(value) {
+            if (Array.isArray(value))
+                _deepForEach.call(value);
+            else
+                callback.call(thisArg, value, index++, arr);
+        });
+    }
 }
 
 },{"./proto_object":98,"./utils":102}],96:[function(require,module,exports){
@@ -11580,7 +11580,7 @@ function deepForEach(callback, thisArg) {
 
 
 var makeProtoFunction = require('./utils').makeProtoFunction
-	, repeat = require('./proto_util').repeat;
+    , repeat = require('./proto_util').repeat;
 
 
 /**
@@ -11600,18 +11600,18 @@ var makeProtoFunction = require('./utils').makeProtoFunction
  * These methods can be [chained](proto.js.html#Proto)
  */
 var functionMethods = module.exports = {
-	makeFunction: makeFunction,
-	partial: partial,
-	partialRight: partialRight,
-	memoize: memoize,
-	delay: delay,
-	defer: defer,
-	deferTicks: deferTicks,
-	delayMethod: delayMethod,
-	deferMethod: deferMethod,
-	debounce: debounce,
-	throttle: throttle,
-	once: once
+    makeFunction: makeFunction,
+    partial: partial,
+    partialRight: partialRight,
+    memoize: memoize,
+    delay: delay,
+    defer: defer,
+    deferTicks: deferTicks,
+    delayMethod: delayMethod,
+    deferMethod: deferMethod,
+    debounce: debounce,
+    throttle: throttle,
+    once: once
 };
 
 
@@ -11628,17 +11628,17 @@ var slice = Array.prototype.slice;
  * @return {Function}
  */
 function makeFunction(arg1, arg2, funcBody) {
-	var name = this
-		, count = arguments.length - 1
-		, funcBody = arguments[count]
-		, func
-		, code = '';
-	for (var i = 0; i < count; i++)
-		code += ', ' + arguments[i];
-	code = ['func = function ', name, '(', code.slice(2), ') {\n'
-				, funcBody, '\n}'].join('');
-	eval(code);
-	return func;
+    var name = this
+        , count = arguments.length - 1
+        , funcBody = arguments[count]
+        , func
+        , code = '';
+    for (var i = 0; i < count; i++)
+        code += ', ' + arguments[i];
+    code = ['func = function ', name, '(', code.slice(2), ') {\n'
+                , funcBody, '\n}'].join('');
+    eval(code);
+    return func;
 }
 
 
@@ -11650,11 +11650,11 @@ function makeFunction(arg1, arg2, funcBody) {
  * @return {Function}
  */
 function partial() { // , ... arguments
-	var func = this;
-	var args = slice.call(arguments);
-	return function() {
-		return func.apply(this, args.concat(slice.call(arguments)));
-	}
+    var func = this;
+    var args = slice.call(arguments);
+    return function() {
+        return func.apply(this, args.concat(slice.call(arguments)));
+    }
 }
 
 
@@ -11666,11 +11666,11 @@ function partial() { // , ... arguments
  * @return {Function}
  */
 function partialRight() { // , ... arguments
-	var func = this;
-	var args = slice.call(arguments);
-	return function() {
-		return func.apply(this, slice.call(arguments).concat(args));
-	}
+    var func = this;
+    var args = slice.call(arguments);
+    return function() {
+        return func.apply(this, slice.call(arguments).concat(args));
+    }
 }
 
 
@@ -11683,23 +11683,23 @@ function partialRight() { // , ... arguments
  * @return {Function} memoized function
  */
 function memoize(hashFunc, limit) {
-	var func = this;
-	var cache = {}, keysList = [];
-	limit = limit || 1000;
+    var func = this;
+    var cache = {}, keysList = [];
+    limit = limit || 1000;
 
-	return function() {
-		var key = hashFunc ? hashFunc.apply(this, arguments) : arguments[0];
-		if (cache.hasOwnProperty(key))
-			return cache[key];
+    return function() {
+        var key = hashFunc ? hashFunc.apply(this, arguments) : arguments[0];
+        if (cache.hasOwnProperty(key))
+            return cache[key];
 
-		var result = cache[key] = func.apply(this, arguments);
-		keysList.push(key);
+        var result = cache[key] = func.apply(this, arguments);
+        keysList.push(key);
 
-		if (keysList.length > limit)
-			delete cache[keysList.shift()];
+        if (keysList.length > limit)
+            delete cache[keysList.shift()];
 
-		return result;
-	};
+        return result;
+    };
 }
 
 
@@ -11713,7 +11713,7 @@ function memoize(hashFunc, limit) {
  */
 function delay(wait) { // , arguments
     var args = slice.call(arguments, 1);
-	return _delay(this, wait, args);
+    return _delay(this, wait, args);
 }
  
 
@@ -11725,11 +11725,11 @@ function delay(wait) { // , arguments
  * @param {List} arguments optional arguments that will be passed to the function
  */
 function defer() { // , arguments
-	return _delay(this, 1, arguments);
+    return _delay(this, 1, arguments);
 }
 
 function _delay(func, wait, args) {
-	return setTimeout(func.apply.bind(func, null, args), wait);
+    return setTimeout(func.apply.bind(func, null, args), wait);
 }
 
 /**
@@ -11746,10 +11746,10 @@ var deferFunc = makeProtoFunction(defer);
  * @param {List} arguments optional arguments that will be passed to the function
  */
 function deferTicks(ticks) { // , arguments
-	if (ticks < 2) return defer.apply(this, arguments);
-	var args = repeat.call(deferFunc, ticks - 1);
-	args = args.concat(this, slice.call(arguments, 1));	
-	deferFunc.apply(null, args);
+    if (ticks < 2) return defer.apply(this, arguments);
+    var args = repeat.call(deferFunc, ticks - 1);
+    args = args.concat(this, slice.call(arguments, 1)); 
+    deferFunc.apply(null, args);
 }
 
 
@@ -11762,8 +11762,8 @@ function deferTicks(ticks) { // , arguments
  * @param {List} arguments arguments to pass to method
  */
 function delayMethod(methodName, wait) { // , ... arguments
-	var args = slice.call(arguments, 2);
-	_delayMethod(this, methodName, wait, args);
+    var args = slice.call(arguments, 2);
+    _delayMethod(this, methodName, wait, args);
 }
 
 
@@ -11775,14 +11775,14 @@ function delayMethod(methodName, wait) { // , ... arguments
  * @param {List} arguments arguments to pass to method
  */
 function deferMethod(methodName) { // , ... arguments
-	var args = slice.call(arguments, 1);
-	_delayMethod(this, methodName, 1, args);
+    var args = slice.call(arguments, 1);
+    _delayMethod(this, methodName, 1, args);
 }
 
 function _delayMethod(object, methodName, wait, args) {
-	return setTimeout(function() {
-		object[methodName].apply(object, args);
-	}, wait);
+    return setTimeout(function() {
+        object[methodName].apply(object, args);
+    }, wait);
 }
 
 
@@ -11795,29 +11795,29 @@ function _delayMethod(object, methodName, wait, args) {
  * @return {Function}
  */
 function debounce(wait, immediate) {
-	var func = this; // first parameter of _.debounce
+    var func = this; // first parameter of _.debounce
     var timeout, args, context, timestamp, result;
     return function() {
-		context = this; // store original context
-		args = arguments;
-		timestamp = Date.now();
-		var callNow = immediate && ! timeout;
-		if (! timeout)
-			timeout = setTimeout(later, wait);
-		if (callNow)
-			result = func.apply(context, args);
-		return result;
+        context = this; // store original context
+        args = arguments;
+        timestamp = Date.now();
+        var callNow = immediate && ! timeout;
+        if (! timeout)
+            timeout = setTimeout(later, wait);
+        if (callNow)
+            result = func.apply(context, args);
+        return result;
 
-		function later() {
-	        var last = Date.now() - timestamp;
-	        if (last < wait)
-	        	timeout = setTimeout(later, wait - last);
-	        else {
-	        	timeout = null;
-	        	if (! immediate)
-	        		result = func.apply(context, args);
-	        }
-		}
+        function later() {
+            var last = Date.now() - timestamp;
+            if (last < wait)
+                timeout = setTimeout(later, wait - last);
+            else {
+                timeout = null;
+                if (! immediate)
+                    result = func.apply(context, args);
+            }
+        }
     };
 }
 
@@ -11831,34 +11831,34 @@ function debounce(wait, immediate) {
  * @return {Function}
  */
 function throttle(wait, options) {
-	var func = this; // first parameter of _.throttle
-	var context, args, result;
-	var timeout = null;
-	var previous = 0;
-	options || (options = {});
+    var func = this; // first parameter of _.throttle
+    var context, args, result;
+    var timeout = null;
+    var previous = 0;
+    options || (options = {});
 
-	return function() {
-	    var now = Date.now();
-	    if (!previous && options.leading === false) previous = now;
-	    var remaining = wait - (now - previous);
-	    context = this;
-	    args = arguments;
-	    if (remaining <= 0) {
-	        clearTimeout(timeout);
-	        timeout = null;
-	        previous = now;
-	        result = func.apply(context, args);
-	    } else if (!timeout && options.trailing !== false)
-	        timeout = setTimeout(later, remaining);
+    return function() {
+        var now = Date.now();
+        if (!previous && options.leading === false) previous = now;
+        var remaining = wait - (now - previous);
+        context = this;
+        args = arguments;
+        if (remaining <= 0) {
+            clearTimeout(timeout);
+            timeout = null;
+            previous = now;
+            result = func.apply(context, args);
+        } else if (!timeout && options.trailing !== false)
+            timeout = setTimeout(later, remaining);
 
-	    return result;
-	};
+        return result;
+    };
 
-	function later() {
-	    previous = options.leading === false ? 0 : Date.now();
-	    timeout = null;
-	    result = func.apply(context, args);
-	}
+    function later() {
+        previous = options.leading === false ? 0 : Date.now();
+        timeout = null;
+        result = func.apply(context, args);
+    }
 }
 
 
@@ -11867,15 +11867,15 @@ function throttle(wait, options) {
  * @return {Function} self
  */
 function once() {
-	var func = this
-		, ran = false
-		, memo;
+    var func = this
+        , ran = false
+        , memo;
     return function() {
-		if (ran) return memo;
-		ran = true;
-		memo = func.apply(this, arguments);
-		func = null;
-		return memo;
+        if (ran) return memo;
+        ran = true;
+        memo = func.apply(this, arguments);
+        func = null;
+        return memo;
     };
 }
 },{"./proto_util":101,"./utils":102}],97:[function(require,module,exports){
@@ -11885,7 +11885,7 @@ function once() {
  * - [isNumeric](#isNumeric)
  */
 var numberMethods = module.exports = {
-	isNumeric: isNumeric
+    isNumeric: isNumeric
 };
 
 
@@ -11896,7 +11896,7 @@ var numberMethods = module.exports = {
  * @return {Boolean} true if it is a numeric value
  */
 function isNumeric() {
-	return !isNaN(parseFloat(this)) && isFinite(this);
+    return !isNaN(parseFloat(this)) && isFinite(this);
 };
 
 },{}],98:[function(require,module,exports){
@@ -11930,23 +11930,23 @@ var utils = require('./utils');
  * All these methods can be [chained](proto.js.html#Proto)
  */
 var objectMethods = module.exports = {
-	extend: extend,
-	clone: clone,
-	defineProperty: defineProperty,
-	defineProperties: defineProperties,
-	deepExtend: deepExtend,
-	deepClone: deepClone,
-	allKeys: allKeys,
-	keyOf: keyOf,
-	allKeysOf: allKeysOf,
-	eachKey: eachKey,
-	mapKeys: mapKeys,
-	reduceKeys: reduceKeys,
-	filterKeys: filterKeys,
-	someKey: someKey,
-	everyKey: everyKey,
-	pickKeys: pickKeys,
-	omitKeys: omitKeys
+    extend: extend,
+    clone: clone,
+    defineProperty: defineProperty,
+    defineProperties: defineProperties,
+    deepExtend: deepExtend,
+    deepClone: deepClone,
+    allKeys: allKeys,
+    keyOf: keyOf,
+    allKeysOf: allKeysOf,
+    eachKey: eachKey,
+    mapKeys: mapKeys,
+    reduceKeys: reduceKeys,
+    filterKeys: filterKeys,
+    someKey: someKey,
+    everyKey: everyKey,
+    pickKeys: pickKeys,
+    omitKeys: omitKeys
 };
 
 
@@ -11955,12 +11955,12 @@ var objectMethods = module.exports = {
  * The sum of these constants can be used as last parameter of defineProperty and defineProperties to determine types of properties.
  */
 var constants = {
-	ENUMERABLE: 1,
-	ENUM: 1,
-	CONFIGURABLE: 2,
-	CONF: 2,
-	WRITABLE: 4,
-	WRIT: 4
+    ENUMERABLE: 1,
+    ENUM: 1,
+    CONFIGURABLE: 2,
+    CONF: 2,
+    WRITABLE: 4,
+    WRIT: 4
 };
 
 defineProperty.call(objectMethods, '_constants', constants);
@@ -12002,15 +12002,15 @@ objectMethods.findKey = utils.makeFindMethod(eachKey, 'key');
  * @return {Object}
  */
 function extend(obj, onlyEnumerable) {
-	var descriptors = {};
+    var descriptors = {};
 
-	eachKey.call(obj, function(value, prop) {
-		descriptors[prop] = Object.getOwnPropertyDescriptor(obj, prop);
-	}, this, onlyEnumerable);
+    eachKey.call(obj, function(value, prop) {
+        descriptors[prop] = Object.getOwnPropertyDescriptor(obj, prop);
+    }, this, onlyEnumerable);
 
-	Object.defineProperties(this, descriptors);
+    Object.defineProperties(this, descriptors);
 
-	return this;
+    return this;
 }
 
 
@@ -12026,9 +12026,9 @@ function extend(obj, onlyEnumerable) {
  * @return {Object}
  */
 function clone() {
-	var clonedObject = Object.create(this.constructor.prototype);
-	extend.call(clonedObject, this);
-	return clonedObject;
+    var clonedObject = Object.create(this.constructor.prototype);
+    extend.call(clonedObject, this);
+    return clonedObject;
 }
 
 
@@ -12052,22 +12052,22 @@ function clone() {
  * @return {Object}
  */
 function defineProperty(propertyName, value, decriptorFlags) {
-	Object.defineProperty(this, propertyName,
-		_getDescriptor(value, decriptorFlags));
-	return this;
+    Object.defineProperty(this, propertyName,
+        _getDescriptor(value, decriptorFlags));
+    return this;
 }
 
 
 function _getDescriptor(value, decriptorFlags) {
-	var descriptor = { value: value };
-	if (decriptorFlags)
-		extend.call(descriptor, {
-			enumerable: !! (decriptorFlags & constants.ENUMERABLE),
-			configurable: !! (decriptorFlags & constants.CONFIGURABLE),
-			writable: !! (decriptorFlags & constants.WRITABLE)
-		});
+    var descriptor = { value: value };
+    if (decriptorFlags)
+        extend.call(descriptor, {
+            enumerable: !! (decriptorFlags & constants.ENUMERABLE),
+            configurable: !! (decriptorFlags & constants.CONFIGURABLE),
+            writable: !! (decriptorFlags & constants.WRITABLE)
+        });
 
-	return descriptor;
+    return descriptor;
 }
 
 
@@ -12077,14 +12077,14 @@ function _getDescriptor(value, decriptorFlags) {
  * ```
  * _.defineProperties(obj, {
  *     key1: value1,
- *     key2: value2	
+ *     key2: value2 
  * });
  * ```
  * To define some other properties use sum of the flags `_.ENUMERABLE` (or `_.ENUM`), `_.CONFIGURABLE` (or `_.CONF`) and `_.WRITABLE` (or `_.WRIT`):
  * ```
  * _.defineProperties(obj, {
  *     key1: value1,
- *     key2: value2	
+ *     key2: value2 
  * }, _.ENUM + _.WRIT);
  * ```
  * Returns `self`.
@@ -12095,11 +12095,11 @@ function _getDescriptor(value, decriptorFlags) {
  * @return {Object}
  */
 function defineProperties(propertyValues, decriptorFlags) {
-	var descriptors = mapKeys.call(propertyValues, function(value) {
-		return _getDescriptor(value, decriptorFlags);		
-	}, true);
-	Object.defineProperties(this, descriptors);
-	return this;
+    var descriptors = mapKeys.call(propertyValues, function(value) {
+        return _getDescriptor(value, decriptorFlags);       
+    }, true);
+    Object.defineProperties(this, descriptors);
+    return this;
 }
 
 
@@ -12136,28 +12136,28 @@ function defineProperties(propertyValues, decriptorFlags) {
  * @return {Object}
  */
 function deepExtend(obj, onlyEnumerable) {
-	return _extendTree(this, obj, onlyEnumerable, []);
+    return _extendTree(this, obj, onlyEnumerable, []);
 }
 
 
 function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
-	if (objTraversed.indexOf(objNode) >= 0) return; // node already traversed, obj has recursion
+    if (objTraversed.indexOf(objNode) >= 0) return; // node already traversed, obj has recursion
 
-	// store node to recognise recursion
-	objTraversed.push(objNode);
+    // store node to recognise recursion
+    objTraversed.push(objNode);
 
-	eachKey.call(objNode, function(value, prop) {
-		var descriptor = Object.getOwnPropertyDescriptor(objNode, prop);
-		if (typeof value == 'object' && value != null) {
-			if (! (selfNode.hasOwnProperty(prop)
-					&& typeof selfNode[prop] == 'object' && selfNode[prop] != null))
-				selfNode[prop] = {};
-			_extendTree(selfNode[prop], value, onlyEnumerable, objTraversed);
-		} else
-			Object.defineProperty(selfNode, prop, descriptor);
-	}, this, onlyEnumerable);
+    eachKey.call(objNode, function(value, prop) {
+        var descriptor = Object.getOwnPropertyDescriptor(objNode, prop);
+        if (typeof value == 'object' && value != null) {
+            if (! (selfNode.hasOwnProperty(prop)
+                    && typeof selfNode[prop] == 'object' && selfNode[prop] != null))
+                selfNode[prop] = {};
+            _extendTree(selfNode[prop], value, onlyEnumerable, objTraversed);
+        } else
+            Object.defineProperty(selfNode, prop, descriptor);
+    }, this, onlyEnumerable);
 
-	return selfNode;
+    return selfNode;
 }
 
 
@@ -12169,9 +12169,9 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
  * @return {Object}
  */
 function deepClone(onlyEnumerable) {
-	var clonedObject = {};
-	deepExtend.call(clonedObject, this, onlyEnumerable);
-	return clonedObject;
+    var clonedObject = {};
+    deepExtend.call(clonedObject, this, onlyEnumerable);
+    return clonedObject;
 }
 
 
@@ -12183,7 +12183,7 @@ function deepClone(onlyEnumerable) {
  * @return {Array}
  */
  function allKeys() {
- 	return Object.getOwnPropertyNames(this);
+    return Object.getOwnPropertyNames(this);
  }
 
 
@@ -12199,15 +12199,15 @@ function deepClone(onlyEnumerable) {
  * @return {String} 
  */
 function keyOf(searchElement, onlyEnumerable) {
-	var properties = onlyEnumerable 
-						? Object.keys(this)
-						: allKeys.call(this);
+    var properties = onlyEnumerable 
+                        ? Object.keys(this)
+                        : allKeys.call(this);
 
-	for (var i = 0; i < properties.length; i++)
-		if (searchElement === this[properties[i]])
-			return properties[i];
-	
-	return undefined;
+    for (var i = 0; i < properties.length; i++)
+        if (searchElement === this[properties[i]])
+            return properties[i];
+    
+    return undefined;
 }
 
 
@@ -12220,15 +12220,15 @@ function keyOf(searchElement, onlyEnumerable) {
  * @return {Array[String]} 
  */
 function allKeysOf(searchElement, onlyEnumerable) {
-	var properties = onlyEnumerable 
-						? Object.keys(this)
-						: allKeys.call(this);
+    var properties = onlyEnumerable 
+                        ? Object.keys(this)
+                        : allKeys.call(this);
 
-	var keys = properties.filter(function(prop) {
-		return searchElement === this[prop];
-	}, this);
+    var keys = properties.filter(function(prop) {
+        return searchElement === this[prop];
+    }, this);
 
-	return keys;
+    return keys;
 }
 
 
@@ -12248,15 +12248,15 @@ function allKeysOf(searchElement, onlyEnumerable) {
  * @param {Boolean} onlyEnumerable An optional `true` to iterate enumerable properties only.
  */
 function eachKey(callback, thisArg, onlyEnumerable) {
-	var properties = onlyEnumerable 
-						? Object.keys(this)
-						: allKeys.call(this);
+    var properties = onlyEnumerable 
+                        ? Object.keys(this)
+                        : allKeys.call(this);
 
-	properties.forEach(function(prop) {
-		callback.call(thisArg, this[prop], prop, this);
-	}, this);
+    properties.forEach(function(prop) {
+        callback.call(thisArg, this[prop], prop, this);
+    }, this);
 
-	return this;
+    return this;
 }
 
 
@@ -12278,14 +12278,14 @@ function eachKey(callback, thisArg, onlyEnumerable) {
  * @return {Object}
  */
 function mapKeys(callback, thisArg, onlyEnumerable) {
-	var descriptors = {};
-	eachKey.call(this, mapProperty, thisArg, onlyEnumerable);
-	return Object.create(this.constructor.prototype, descriptors);
+    var descriptors = {};
+    eachKey.call(this, mapProperty, thisArg, onlyEnumerable);
+    return Object.create(this.constructor.prototype, descriptors);
 
-	function mapProperty(value, key, self) {
-		descriptors[key] = Object.getOwnPropertyDescriptor(self, key);
-		descriptors[key].value = callback.call(this, value, key, self);
-	}
+    function mapProperty(value, key, self) {
+        descriptors[key] = Object.getOwnPropertyDescriptor(self, key);
+        descriptors[key].value = callback.call(this, value, key, self);
+    }
 }
 
 
@@ -12306,17 +12306,17 @@ function mapKeys(callback, thisArg, onlyEnumerable) {
  * @return {Any}
  */
 function reduceKeys(callback, initialValue, thisArg, onlyEnumerable) {
-	var properties = onlyEnumerable 
-						? Object.keys(this)
-						: allKeys.call(this);
+    var properties = onlyEnumerable 
+                        ? Object.keys(this)
+                        : allKeys.call(this);
 
-	var memo = initialValue;
+    var memo = initialValue;
 
-	properties.forEach(function(prop) {
-		memo = callback.call(thisArg, memo, this[prop], prop, this);
-	}, this);
+    properties.forEach(function(prop) {
+        memo = callback.call(thisArg, memo, this[prop], prop, this);
+    }, this);
 
-	return memo;
+    return memo;
 }
 
 
@@ -12336,19 +12336,19 @@ function reduceKeys(callback, initialValue, thisArg, onlyEnumerable) {
  * @return {Object}
  */
 function filterKeys(callback, thisArg, onlyEnumerable) {
-	var descriptors = {};
-	eachKey.call(this, filterProperty, thisArg, onlyEnumerable);
-	return Object.create(this.constructor.prototype, descriptors);;
+    var descriptors = {};
+    eachKey.call(this, filterProperty, thisArg, onlyEnumerable);
+    return Object.create(this.constructor.prototype, descriptors);;
 
-	function filterProperty(value, key, self) {
-		if (callback.call(this, value, key, self))
-			descriptors[key] = Object.getOwnPropertyDescriptor(self, key);
-	}
+    function filterProperty(value, key, self) {
+        if (callback.call(this, value, key, self))
+            descriptors[key] = Object.getOwnPropertyDescriptor(self, key);
+    }
 }
 
 
 var _passed = {}
-	, _didNotPass = {};
+    , _didNotPass = {};
 
 /**
  * An analogue of [some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some) method of Array prototype.
@@ -12360,18 +12360,18 @@ var _passed = {}
  * @return {Boolean}
  */
 function someKey(callback, thisArg, onlyEnumerable) {
-	try {
-		eachKey.call(this, testProperty, thisArg, onlyEnumerable);
-	} catch (test) {
-		if (test === _passed) return true;
-		else throw test;
-	}
-	return false;
+    try {
+        eachKey.call(this, testProperty, thisArg, onlyEnumerable);
+    } catch (test) {
+        if (test === _passed) return true;
+        else throw test;
+    }
+    return false;
 
-	function testProperty(value, key, self) {
-		if (callback.call(this, value, key, self))
-			throw _passed;
-	}
+    function testProperty(value, key, self) {
+        if (callback.call(this, value, key, self))
+            throw _passed;
+    }
 }
 
 
@@ -12385,23 +12385,23 @@ function someKey(callback, thisArg, onlyEnumerable) {
  * @return {Boolean}
  */
 function everyKey(callback, thisArg, onlyEnumerable) {
-	try {
-		eachKey.call(this, testProperty, thisArg, onlyEnumerable);
-	} catch (test) {
-		if (test === _didNotPass) return false;
-		else throw test;
-	}
-	return true;
+    try {
+        eachKey.call(this, testProperty, thisArg, onlyEnumerable);
+    } catch (test) {
+        if (test === _didNotPass) return false;
+        else throw test;
+    }
+    return true;
 
-	function testProperty(value, key, self) {
-		if (! callback.call(this, value, key, self))
-			throw _didNotPass;
-	}
+    function testProperty(value, key, self) {
+        if (! callback.call(this, value, key, self))
+            throw _didNotPass;
+    }
 }
 
 
 var ArrayProto = Array.prototype
-	, concat = ArrayProto.concat;
+    , concat = ArrayProto.concat;
 /**
  * Returns object of the same class with only specified keys, that are passed as string parameters or array(s) of keys.
  *
@@ -12410,13 +12410,13 @@ var ArrayProto = Array.prototype
  * @return {Object} 
  */
 function pickKeys() { // , ... keys
-	var keys = concat.apply(ArrayProto, arguments)
-		, obj = Object.create(this.constructor.prototype);
-	keys.forEach(function(key){
-		if (this.hasOwnProperty(key))
-			obj[key] = this[key];
-	}, this);
-	return obj;
+    var keys = concat.apply(ArrayProto, arguments)
+        , obj = Object.create(this.constructor.prototype);
+    keys.forEach(function(key){
+        if (this.hasOwnProperty(key))
+            obj[key] = this[key];
+    }, this);
+    return obj;
 }
 
 
@@ -12428,12 +12428,12 @@ function pickKeys() { // , ... keys
  * @return {Object} 
  */
 function omitKeys() { // , ... keys
-	var keys = concat.apply(ArrayProto, arguments)
-		, obj = clone.call(this);
-	keys.forEach(function(key){
-		delete obj[key];
-	}, this);
-	return obj;
+    var keys = concat.apply(ArrayProto, arguments)
+        , obj = clone.call(this);
+    keys.forEach(function(key){
+        delete obj[key];
+    }, this);
+    return obj;
 }
 
 },{"./utils":102}],99:[function(require,module,exports){
@@ -12447,9 +12447,9 @@ function omitKeys() { // , ... keys
  * These methods can be [chained](proto.js.html#Proto)
  */
 var prototypeMethods = module.exports = {
-	extendProto: extendProto,
-	createSubclass: createSubclass,
-	makeSubclass: makeSubclass
+    extendProto: extendProto,
+    createSubclass: createSubclass,
+    makeSubclass: makeSubclass
 };
 
 
@@ -12479,19 +12479,19 @@ __.extend.call(__, require('./proto_function'));
  * @return {Function}
  */
 function extendProto(methods) {
-	var propDescriptors = {};
+    var propDescriptors = {};
 
-	__.eachKey.call(methods, function(method, name) {
-		propDescriptors[name] = {
-			enumerable: false,
-			configurable: false,
-			writable: false,
-			value: method
-		};
-	});
+    __.eachKey.call(methods, function(method, name) {
+        propDescriptors[name] = {
+            enumerable: false,
+            configurable: false,
+            writable: false,
+            value: method
+        };
+    });
 
-	Object.defineProperties(this.prototype, propDescriptors);
-	return this;
+    Object.defineProperties(this.prototype, propDescriptors);
+    return this;
 }
 
 
@@ -12507,27 +12507,27 @@ function extendProto(methods) {
  * @return {Function}
  */
 function createSubclass(name, applyConstructor) {
-	var thisClass = this;
-	var subclass;
+    var thisClass = this;
+    var subclass;
 
-	// name is optional
-	name = name || '';
+    // name is optional
+    name = name || '';
 
-	// apply superclass constructor
-	var constructorCode = applyConstructor === false
-			? ''
-			: 'thisClass.apply(this, arguments);';
+    // apply superclass constructor
+    var constructorCode = applyConstructor === false
+            ? ''
+            : 'thisClass.apply(this, arguments);';
 
-	eval('subclass = function ' + name + '(){ ' + constructorCode + ' }');
+    eval('subclass = function ' + name + '(){ ' + constructorCode + ' }');
 
-	makeSubclass.call(subclass, thisClass);
+    makeSubclass.call(subclass, thisClass);
 
-	// copy class methods
-	// - for them to work correctly they should not explictly use superclass name
-	// and use "this" instead
-	__.extend.call(subclass, thisClass, true);
+    // copy class methods
+    // - for them to work correctly they should not explictly use superclass name
+    // and use "this" instead
+    __.extend.call(subclass, thisClass, true);
 
-	return subclass;
+    return subclass;
 }
 
 
@@ -12540,14 +12540,14 @@ function createSubclass(name, applyConstructor) {
  * @return {Function}
  */
 function makeSubclass(Superclass) {
-	// prototype chain
-	this.prototype = Object.create(Superclass.prototype);
-	
-	// subclass identity
-	extendProto.call(this, {
-		constructor: this
-	});
-	return this;
+    // prototype chain
+    this.prototype = Object.create(Superclass.prototype);
+    
+    // subclass identity
+    extendProto.call(this, {
+        constructor: this
+    });
+    return this;
 }
 
 },{"./proto_function":96,"./proto_object":98}],100:[function(require,module,exports){
@@ -12560,10 +12560,10 @@ function makeSubclass(Superclass) {
  * - [toFunction](#toFunction)
  */
  var stringMethods = module.exports = {
-	firstUpperCase: firstUpperCase,
-	firstLowerCase: firstLowerCase,
-	toRegExp: toRegExp,
-	toFunction: toFunction
+    firstUpperCase: firstUpperCase,
+    firstLowerCase: firstLowerCase,
+    toRegExp: toRegExp,
+    toFunction: toFunction
 };
 
 
@@ -12573,7 +12573,7 @@ function makeSubclass(Superclass) {
  * @param {String} self A string that will have its first character replaced
  */
 function firstUpperCase() {
-	return this[0].toUpperCase() + this.slice(1);
+    return this[0].toUpperCase() + this.slice(1);
 }
 
 
@@ -12583,7 +12583,7 @@ function firstUpperCase() {
  * @param {String} self A string that will have its first character replaced
  */
 function firstLowerCase() {
-	return this[0].toLowerCase() + this.slice(1);
+    return this[0].toLowerCase() + this.slice(1);
 }
 
 
@@ -12594,8 +12594,8 @@ function firstLowerCase() {
  * @return {RegExp}
  */
 function toRegExp() {
-	var rx = this.match(regexpStringPattern);
-	if (rx) return new RegExp(rx[1], rx[2]);
+    var rx = this.match(regexpStringPattern);
+    if (rx) return new RegExp(rx[1], rx[2]);
 }
 var regexpStringPattern = /^\/(.*)\/([gimy]*)$/;
 
@@ -12607,14 +12607,14 @@ var regexpStringPattern = /^\/(.*)\/([gimy]*)$/;
  * @return {Function}
  */
 function toFunction() {
-	var func;
-	var code = 'func = ' + this + ';';
-	try {
-		eval(code);
-		return func;
-	} catch(e) {
-		return;
-	}
+    var func;
+    var code = 'func = ' + this + ';';
+    try {
+        eval(code);
+        return func;
+    } catch(e) {
+        return;
+    }
 }
 
 },{}],101:[function(require,module,exports){
@@ -12626,9 +12626,9 @@ function toFunction() {
  * - [tap](#tap)
  */
 var utilMethods = module.exports = {
-	times: times,
-	repeat: repeat,
-	tap: tap
+    times: times,
+    repeat: repeat,
+    tap: tap
 };
 
 
@@ -12641,9 +12641,9 @@ var utilMethods = module.exports = {
  * @return {Array}
  */
 function times(callback, thisArg) {
-	var arr = Array(Math.max(0, this));
-	for (var i = 0; i < this; i++)
-		arr[i] = callback.call(thisArg, i);
+    var arr = Array(Math.max(0, this));
+    for (var i = 0; i < this; i++)
+        arr[i] = callback.call(thisArg, i);
     return arr;
 }
 
@@ -12655,10 +12655,10 @@ function times(callback, thisArg) {
  * @return {Array[Any]}
  */
 function repeat(times) {
-	var arr = Array(Math.max(0, times));;
-	for (var i = 0; i < times; i++)
-		arr[i] = this;
-	return arr;
+    var arr = Array(Math.max(0, times));;
+    for (var i = 0; i < times; i++)
+        arr[i] = this;
+    return arr;
 }
 
 
@@ -12670,34 +12670,34 @@ function repeat(times) {
  * @return {Any}
  */
 function tap(func) {
-	func(this);
-	return this;
+    func(this);
+    return this;
 };
 
 },{}],102:[function(require,module,exports){
 'use strict';
 
 var utils = module.exports = {
-	makeProtoInstanceMethod: makeProtoInstanceMethod,
-	makeProtoFunction: makeProtoFunction,
-	makeFindMethod: makeFindMethod
+    makeProtoInstanceMethod: makeProtoInstanceMethod,
+    makeProtoFunction: makeProtoFunction,
+    makeFindMethod: makeFindMethod
 }
 
 
 function makeProtoInstanceMethod(method) {
-	return function() {
-		this.self = method.apply(this.self, arguments);
-		return this;
-	};
+    return function() {
+        this.self = method.apply(this.self, arguments);
+        return this;
+    };
 }
 
 
 function makeProtoFunction(method) {
-	return function() {
-		// when the method is executed, the value of "this" will be arguments[0],
-		// other arguments starting from #1 will passed to method as parameters.
-		return method.call.apply(method, arguments);
-	};
+    return function() {
+        // when the method is executed, the value of "this" will be arguments[0],
+        // other arguments starting from #1 will passed to method as parameters.
+        return method.call.apply(method, arguments);
+    };
 }
 
 
@@ -12711,32 +12711,32 @@ var _error = new Error;
  * @return {Function}
  */
 function makeFindMethod(eachMethod, findWhat) {
-	var argIndex = findWhat == 'value' ? 0 : 1;
+    var argIndex = findWhat == 'value' ? 0 : 1;
 
-	return function findValueOrIndex(callback, thisArg) {
-		var caughtError;
-		try {
-			eachMethod.call(this, testItem, thisArg);
-		} catch (found) {
-			if (found === _error) throw caughtError;
-			else return found;
-		}
-		// if looking for index and not found, return -1
-		if (argIndex && eachMethod == Array.prototype.forEach)
-			return -1; 
+    return function findValueOrIndex(callback, thisArg) {
+        var caughtError;
+        try {
+            eachMethod.call(this, testItem, thisArg);
+        } catch (found) {
+            if (found === _error) throw caughtError;
+            else return found;
+        }
+        // if looking for index and not found, return -1
+        if (argIndex && eachMethod == Array.prototype.forEach)
+            return -1; 
 
-		function testItem(value, index, self) {
-			var test;
-			try {
-				test = callback.call(this, value, index, self);
-			} catch(err) {
-				caughtError = err;
-				throw _error;
-			}
-			if (test)
-				throw arguments[argIndex];
-		}
-	}
+        function testItem(value, index, self) {
+            var test;
+            try {
+                test = callback.call(this, value, index, self);
+            } catch(err) {
+                caughtError = err;
+                throw _error;
+            }
+            if (test)
+                throw arguments[argIndex];
+        }
+    }
 }
 
 },{}]},{},[63])

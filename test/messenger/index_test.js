@@ -1,10 +1,10 @@
 'use strict';
 
 var Messenger = require('../../lib/messenger')
-	, _ = require('mol-proto')
-	, check = require('../../lib/util/check')
-	, Match = check.Match
-	, assert = require('assert');
+    , _ = require('mol-proto')
+    , check = require('../../lib/util/check')
+    , Match = check.Match
+    , assert = require('assert');
 
 describe('Messenger class', function() {
     function getHostWithMessenger() {
@@ -32,10 +32,10 @@ describe('Messenger class', function() {
     var handler1 = function(){ }
     , handler2 = function(){ }
     , handler3 = function(){ };
-	
-	beforeEach(function() {
-		
-	});
+    
+    beforeEach(function() {
+        
+    });
 
     it('should create a new Messenger object on host object', function() {
         assert.doesNotThrow(function() {
@@ -68,7 +68,7 @@ describe('Messenger class', function() {
     });
 
     it('should define onMessage method (proxied as on)', function() {
-    	var result = getHostWithMessenger()
+        var result = getHostWithMessenger()
             , host = result.host
             , messenger = result.messenger
             , handler1 = function(){}
@@ -141,7 +141,7 @@ describe('Messenger class', function() {
     });
 
     it('should define onMessages method (proxied as onEvents)', function() {
-    	var result = getHostWithMessenger()
+        var result = getHostWithMessenger()
             , host = result.host
             , messenger = result.messenger
             , events = {
