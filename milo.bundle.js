@@ -6188,6 +6188,13 @@ config({
         typeSuffix: ':___milo_data_type',
         prefixSeparator: '/'
     },
+    dragDrop: {
+        dataTypes: {
+            component: 'x-application/milo/component',
+            componentMetaTemplate: 'x-application/milo/component-meta/%class/%name/%params',
+            componentMetaRegex: /^x\-application\/milo\/component\-meta\/([a-z][a-z0-9_]*)\/([a-z][a-z0-9_]*)\/(.*)$/i
+        }
+    },
     check: true
 });
 
@@ -11195,7 +11202,7 @@ var utils = require('./utils');
  * - [createSubclass](proto_prototype.js.html#createSubclass)
  * - [makeSubclass](proto_prototype.js.html#makeSubclass)
  */
-var	prototypeMethods = require('./proto_prototype');
+var prototypeMethods = require('./proto_prototype');
 
 
 /**
@@ -11221,7 +11228,7 @@ var	prototypeMethods = require('./proto_prototype');
  * - [pickKeys](proto_object.js.html#pickKeys)
  * - [omitKeys](proto_object.js.html#omitKeys)
  */
-var	objectMethods = require('./proto_object');
+var objectMethods = require('./proto_object');
 
 
 /**
@@ -11239,7 +11246,7 @@ var	objectMethods = require('./proto_object');
  *
  * Functions that Array [implements natively](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/prototype#Methods) are also added - they can be used with array-like objects and for chaining (native functions are always called).
  */
-var	arrayMethods = require('./proto_array');
+var arrayMethods = require('./proto_array');
 
 
 /**
@@ -11258,7 +11265,7 @@ var	arrayMethods = require('./proto_array');
  * - [throttle](proto_function.js.html#throttle) 
  * - [once](proto_function.js.html#once)
  */
-var	functionMethods = require('./proto_function');
+var functionMethods = require('./proto_function');
 
 
 /**
@@ -11268,8 +11275,10 @@ var	functionMethods = require('./proto_function');
  * - [firstLowerCase](proto_string.js.html#firstLowerCase)
  * - [toRegExp](proto_string.js.html#toRegExp)
  * - [toFunction](proto_string.js.html#toFunction)
+ * - [toQueryString](proto_string.js.html#toQueryString)
+ * - [fromQueryString](proto_string.js.html#fromQueryString)
  */
-var	stringMethods = require('./proto_string');
+var stringMethods = require('./proto_string');
 
 
 /**
@@ -11299,10 +11308,10 @@ var utilMethods = require('./proto_util');
  * Usage:
  * ```
  * var arr = _({ 0: 3, 1: 4, 2: 5, length: 3})
- *				.toArray()
- *				.prependArray([1, 2])
- *				.appendArray([6, 7, 8])
- *				._();
+ *              .toArray()
+ *              .prependArray([1, 2])
+ *              .appendArray([6, 7, 8])
+ *              ._();
  * ```
  * A wrapped object is an instance of `_` (`Proto` class).
  *
@@ -11314,10 +11323,10 @@ var utilMethods = require('./proto_util');
  * @return {Proto}
  */
 function Proto(self) {
-	// wrap passed parameter in _ object
-	var wrapped = Object.create(Proto.prototype);
-	wrapped.self = self;
-	return wrapped;
+    // wrap passed parameter in _ object
+    var wrapped = Object.create(Proto.prototype);
+    wrapped.self = self;
+    return wrapped;
 };
 
 var _ = Proto;
@@ -11359,23 +11368,23 @@ __.extendProto.call(Proto, protoInstanceMethods);
  * In windows environment, a global `_` value is preserved in `_.underscore`
  */
 if (typeof window == 'object') {
-	// preserve existing _ object
-	if (window._)
-		Proto.underscore = window._
+    // preserve existing _ object
+    if (window._)
+        Proto.underscore = window._
 
-	// expose global _
-	window._ = Proto;
+    // expose global _
+    window._ = Proto;
 }
 
 if (typeof module == 'object' && module.exports)
-	// export for node/browserify
-	module.exports = Proto;
+    // export for node/browserify
+    module.exports = Proto;
 
 },{"./proto_array":95,"./proto_function":96,"./proto_number":97,"./proto_object":98,"./proto_prototype":99,"./proto_string":100,"./proto_util":101,"./utils":102}],95:[function(require,module,exports){
 'use strict';
 
 var __ = require('./proto_object')
-	, utils = require('./utils');
+    , utils = require('./utils');
 
 
 /**
@@ -11392,15 +11401,15 @@ var __ = require('./proto_object')
  * These methods can be [chained](proto.js.html#Proto).
  */
 var arrayMethods = module.exports = {
-	// find: see below
-	// findIndex: see below
-	appendArray: appendArray,
-	prependArray: prependArray,
-	toArray: toArray,
-	object: object,
-	mapToObject: mapToObject,
-	unique: unique,
-	deepForEach: deepForEach
+    // find: see below
+    // findIndex: see below
+    appendArray: appendArray,
+    prependArray: prependArray,
+    toArray: toArray,
+    object: object,
+    mapToObject: mapToObject,
+    unique: unique,
+    deepForEach: deepForEach
 };
 
 
@@ -11409,14 +11418,14 @@ var arrayMethods = module.exports = {
  * These methods can be [chained](proto.js.html#Proto) too.
  */
 var nativeArrayMethodsNames = [ 'join', 'pop', 'push', 'concat',
-	'reverse', 'shift', 'unshift', 'slice', 'splice',
-	'sort', 'filter', 'forEach', 'some', 'every',
-	'map', 'indexOf', 'lastIndexOf', 'reduce', 'reduceRight'];
+    'reverse', 'shift', 'unshift', 'slice', 'splice',
+    'sort', 'filter', 'forEach', 'some', 'every',
+    'map', 'indexOf', 'lastIndexOf', 'reduce', 'reduceRight'];
 
 var nativeArrayMethods = mapToObject.call(nativeArrayMethodsNames,
-		function(methodName) {
-			return Array.prototype[methodName];
-		});
+        function(methodName) {
+            return Array.prototype[methodName];
+        });
 
 __.extend.call(arrayMethods, nativeArrayMethods);
 
@@ -11431,7 +11440,7 @@ __.extend.call(arrayMethods, nativeArrayMethods);
  * @return {Any}
  */
 arrayMethods.find = Array.prototype.find
-	|| utils.makeFindMethod(arrayMethods.forEach, 'value');
+    || utils.makeFindMethod(arrayMethods.forEach, 'value');
 
 
 /**
@@ -11444,7 +11453,7 @@ arrayMethods.find = Array.prototype.find
  * @return {Integer}
  */
 arrayMethods.findIndex = Array.prototype.findIndex
-	|| utils.makeFindMethod(arrayMethods.forEach, 'index');
+    || utils.makeFindMethod(arrayMethods.forEach, 'index');
 
 
 /**
@@ -11456,7 +11465,7 @@ arrayMethods.findIndex = Array.prototype.findIndex
  * @return {Array}
  */
 function appendArray(arrayToAppend) {
-	if (! arrayToAppend.length) return this;
+    if (! arrayToAppend.length) return this;
 
     var args = [this.length, 0].concat(arrayToAppend);
     arrayMethods.splice.apply(this, args);
@@ -11474,7 +11483,7 @@ function appendArray(arrayToAppend) {
  * @return {Array}
  */
 function prependArray(arrayToPrepend) {
-	if (! arrayToPrepend.length) return this;
+    if (! arrayToPrepend.length) return this;
 
     var args = [0, 0].concat(arrayToPrepend);
     arrayMethods.splice.apply(this, args);
@@ -11490,7 +11499,7 @@ function prependArray(arrayToPrepend) {
  * @return {Array}
  */
 function toArray() {
-	return arrayMethods.slice.call(this);
+    return arrayMethods.slice.call(this);
 }
 
 
@@ -11502,13 +11511,13 @@ function toArray() {
  * @return {Object}
  */
 function object(values) {
-	var obj = {}
-		, valuesIsArray = Array.isArray(values);
-	arrayMethods.forEach.call(this, function(key, index) {
-		obj[key] = valuesIsArray ? values[index] : values;
-	});
+    var obj = {}
+        , valuesIsArray = Array.isArray(values);
+    arrayMethods.forEach.call(this, function(key, index) {
+        obj[key] = valuesIsArray ? values[index] : values;
+    });
 
-	return obj;
+    return obj;
 }
 
 
@@ -11522,11 +11531,11 @@ function object(values) {
  * @return {Object}
  */
 function mapToObject(callback, thisArg) {
-	var result = {};
-	Array.prototype.forEach.call(this, function(value, index) {
-		result[value] = callback.call(thisArg, value, index, this);
-	}, this);
-	return result;
+    var result = {};
+    Array.prototype.forEach.call(this, function(value, index) {
+        result[value] = callback.call(thisArg, value, index, this);
+    }, this);
+    return result;
 }
 
 
@@ -11538,28 +11547,28 @@ function mapToObject(callback, thisArg) {
  * @return {Array}
  */
 function unique(callback) {
-	var filtered = [];
-	if (! callback)
-		itemIndex = itemIndexOf;
+    var filtered = [];
+    if (! callback)
+        itemIndex = itemIndexOf;
 
-	this.forEach(function(item) {
-		var index = itemIndex(item);
-		if (index == -1)
-			filtered.push(item);
-	});
+    this.forEach(function(item) {
+        var index = itemIndex(item);
+        if (index == -1)
+            filtered.push(item);
+    });
 
-	return filtered;
+    return filtered;
 
 
-	function itemIndex(item) {
-		return arrayMethods.findIndex.call(filtered, function(it) {
-			return callback(item, it);
-		});
-	}
+    function itemIndex(item) {
+        return arrayMethods.findIndex.call(filtered, function(it) {
+            return callback(item, it);
+        });
+    }
 
-	function itemIndexOf(item) {
-		return filtered.indexOf(item);
-	}
+    function itemIndexOf(item) {
+        return filtered.indexOf(item);
+    }
 }
 
 
@@ -11571,17 +11580,17 @@ function unique(callback) {
  * @param {Any} thisArg optional callback envocation context
  */
 function deepForEach(callback, thisArg) {
-	var index = 0, arr = this;
-	_deepForEach.call(this);
+    var index = 0, arr = this;
+    _deepForEach.call(this);
 
-	function _deepForEach() {
-		arrayMethods.forEach.call(this, function(value) {
-			if (Array.isArray(value))
-				_deepForEach.call(value);
-			else
-				callback.call(thisArg, value, index++, arr);
-		});
-	}
+    function _deepForEach() {
+        arrayMethods.forEach.call(this, function(value) {
+            if (Array.isArray(value))
+                _deepForEach.call(value);
+            else
+                callback.call(thisArg, value, index++, arr);
+        });
+    }
 }
 
 },{"./proto_object":98,"./utils":102}],96:[function(require,module,exports){
@@ -11589,7 +11598,7 @@ function deepForEach(callback, thisArg) {
 
 
 var makeProtoFunction = require('./utils').makeProtoFunction
-	, repeat = require('./proto_util').repeat;
+    , repeat = require('./proto_util').repeat;
 
 
 /**
@@ -11609,18 +11618,18 @@ var makeProtoFunction = require('./utils').makeProtoFunction
  * These methods can be [chained](proto.js.html#Proto)
  */
 var functionMethods = module.exports = {
-	makeFunction: makeFunction,
-	partial: partial,
-	partialRight: partialRight,
-	memoize: memoize,
-	delay: delay,
-	defer: defer,
-	deferTicks: deferTicks,
-	delayMethod: delayMethod,
-	deferMethod: deferMethod,
-	debounce: debounce,
-	throttle: throttle,
-	once: once
+    makeFunction: makeFunction,
+    partial: partial,
+    partialRight: partialRight,
+    memoize: memoize,
+    delay: delay,
+    defer: defer,
+    deferTicks: deferTicks,
+    delayMethod: delayMethod,
+    deferMethod: deferMethod,
+    debounce: debounce,
+    throttle: throttle,
+    once: once
 };
 
 
@@ -11637,17 +11646,17 @@ var slice = Array.prototype.slice;
  * @return {Function}
  */
 function makeFunction(arg1, arg2, funcBody) {
-	var name = this
-		, count = arguments.length - 1
-		, funcBody = arguments[count]
-		, func
-		, code = '';
-	for (var i = 0; i < count; i++)
-		code += ', ' + arguments[i];
-	code = ['func = function ', name, '(', code.slice(2), ') {\n'
-				, funcBody, '\n}'].join('');
-	eval(code);
-	return func;
+    var name = this
+        , count = arguments.length - 1
+        , funcBody = arguments[count]
+        , func
+        , code = '';
+    for (var i = 0; i < count; i++)
+        code += ', ' + arguments[i];
+    code = ['func = function ', name, '(', code.slice(2), ') {\n'
+                , funcBody, '\n}'].join('');
+    eval(code);
+    return func;
 }
 
 
@@ -11659,11 +11668,11 @@ function makeFunction(arg1, arg2, funcBody) {
  * @return {Function}
  */
 function partial() { // , ... arguments
-	var func = this;
-	var args = slice.call(arguments);
-	return function() {
-		return func.apply(this, args.concat(slice.call(arguments)));
-	}
+    var func = this;
+    var args = slice.call(arguments);
+    return function() {
+        return func.apply(this, args.concat(slice.call(arguments)));
+    }
 }
 
 
@@ -11675,11 +11684,11 @@ function partial() { // , ... arguments
  * @return {Function}
  */
 function partialRight() { // , ... arguments
-	var func = this;
-	var args = slice.call(arguments);
-	return function() {
-		return func.apply(this, slice.call(arguments).concat(args));
-	}
+    var func = this;
+    var args = slice.call(arguments);
+    return function() {
+        return func.apply(this, slice.call(arguments).concat(args));
+    }
 }
 
 
@@ -11692,23 +11701,23 @@ function partialRight() { // , ... arguments
  * @return {Function} memoized function
  */
 function memoize(hashFunc, limit) {
-	var func = this;
-	var cache = {}, keysList = [];
-	limit = limit || 1000;
+    var func = this;
+    var cache = {}, keysList = [];
+    limit = limit || 1000;
 
-	return function() {
-		var key = hashFunc ? hashFunc.apply(this, arguments) : arguments[0];
-		if (cache.hasOwnProperty(key))
-			return cache[key];
+    return function() {
+        var key = hashFunc ? hashFunc.apply(this, arguments) : arguments[0];
+        if (cache.hasOwnProperty(key))
+            return cache[key];
 
-		var result = cache[key] = func.apply(this, arguments);
-		keysList.push(key);
+        var result = cache[key] = func.apply(this, arguments);
+        keysList.push(key);
 
-		if (keysList.length > limit)
-			delete cache[keysList.shift()];
+        if (keysList.length > limit)
+            delete cache[keysList.shift()];
 
-		return result;
-	};
+        return result;
+    };
 }
 
 
@@ -11722,7 +11731,7 @@ function memoize(hashFunc, limit) {
  */
 function delay(wait) { // , arguments
     var args = slice.call(arguments, 1);
-	return _delay(this, wait, args);
+    return _delay(this, wait, args);
 }
  
 
@@ -11734,11 +11743,11 @@ function delay(wait) { // , arguments
  * @param {List} arguments optional arguments that will be passed to the function
  */
 function defer() { // , arguments
-	return _delay(this, 1, arguments);
+    return _delay(this, 1, arguments);
 }
 
 function _delay(func, wait, args) {
-	return setTimeout(func.apply.bind(func, null, args), wait);
+    return setTimeout(func.apply.bind(func, null, args), wait);
 }
 
 /**
@@ -11755,10 +11764,10 @@ var deferFunc = makeProtoFunction(defer);
  * @param {List} arguments optional arguments that will be passed to the function
  */
 function deferTicks(ticks) { // , arguments
-	if (ticks < 2) return defer.apply(this, arguments);
-	var args = repeat.call(deferFunc, ticks - 1);
-	args = args.concat(this, slice.call(arguments, 1));	
-	deferFunc.apply(null, args);
+    if (ticks < 2) return defer.apply(this, arguments);
+    var args = repeat.call(deferFunc, ticks - 1);
+    args = args.concat(this, slice.call(arguments, 1)); 
+    deferFunc.apply(null, args);
 }
 
 
@@ -11771,8 +11780,8 @@ function deferTicks(ticks) { // , arguments
  * @param {List} arguments arguments to pass to method
  */
 function delayMethod(methodName, wait) { // , ... arguments
-	var args = slice.call(arguments, 2);
-	_delayMethod(this, methodName, wait, args);
+    var args = slice.call(arguments, 2);
+    _delayMethod(this, methodName, wait, args);
 }
 
 
@@ -11784,14 +11793,14 @@ function delayMethod(methodName, wait) { // , ... arguments
  * @param {List} arguments arguments to pass to method
  */
 function deferMethod(methodName) { // , ... arguments
-	var args = slice.call(arguments, 1);
-	_delayMethod(this, methodName, 1, args);
+    var args = slice.call(arguments, 1);
+    _delayMethod(this, methodName, 1, args);
 }
 
 function _delayMethod(object, methodName, wait, args) {
-	return setTimeout(function() {
-		object[methodName].apply(object, args);
-	}, wait);
+    return setTimeout(function() {
+        object[methodName].apply(object, args);
+    }, wait);
 }
 
 
@@ -11804,29 +11813,29 @@ function _delayMethod(object, methodName, wait, args) {
  * @return {Function}
  */
 function debounce(wait, immediate) {
-	var func = this; // first parameter of _.debounce
+    var func = this; // first parameter of _.debounce
     var timeout, args, context, timestamp, result;
     return function() {
-		context = this; // store original context
-		args = arguments;
-		timestamp = Date.now();
-		var callNow = immediate && ! timeout;
-		if (! timeout)
-			timeout = setTimeout(later, wait);
-		if (callNow)
-			result = func.apply(context, args);
-		return result;
+        context = this; // store original context
+        args = arguments;
+        timestamp = Date.now();
+        var callNow = immediate && ! timeout;
+        if (! timeout)
+            timeout = setTimeout(later, wait);
+        if (callNow)
+            result = func.apply(context, args);
+        return result;
 
-		function later() {
-	        var last = Date.now() - timestamp;
-	        if (last < wait)
-	        	timeout = setTimeout(later, wait - last);
-	        else {
-	        	timeout = null;
-	        	if (! immediate)
-	        		result = func.apply(context, args);
-	        }
-		}
+        function later() {
+            var last = Date.now() - timestamp;
+            if (last < wait)
+                timeout = setTimeout(later, wait - last);
+            else {
+                timeout = null;
+                if (! immediate)
+                    result = func.apply(context, args);
+            }
+        }
     };
 }
 
@@ -11840,34 +11849,34 @@ function debounce(wait, immediate) {
  * @return {Function}
  */
 function throttle(wait, options) {
-	var func = this; // first parameter of _.throttle
-	var context, args, result;
-	var timeout = null;
-	var previous = 0;
-	options || (options = {});
+    var func = this; // first parameter of _.throttle
+    var context, args, result;
+    var timeout = null;
+    var previous = 0;
+    options || (options = {});
 
-	return function() {
-	    var now = Date.now();
-	    if (!previous && options.leading === false) previous = now;
-	    var remaining = wait - (now - previous);
-	    context = this;
-	    args = arguments;
-	    if (remaining <= 0) {
-	        clearTimeout(timeout);
-	        timeout = null;
-	        previous = now;
-	        result = func.apply(context, args);
-	    } else if (!timeout && options.trailing !== false)
-	        timeout = setTimeout(later, remaining);
+    return function() {
+        var now = Date.now();
+        if (!previous && options.leading === false) previous = now;
+        var remaining = wait - (now - previous);
+        context = this;
+        args = arguments;
+        if (remaining <= 0) {
+            clearTimeout(timeout);
+            timeout = null;
+            previous = now;
+            result = func.apply(context, args);
+        } else if (!timeout && options.trailing !== false)
+            timeout = setTimeout(later, remaining);
 
-	    return result;
-	};
+        return result;
+    };
 
-	function later() {
-	    previous = options.leading === false ? 0 : Date.now();
-	    timeout = null;
-	    result = func.apply(context, args);
-	}
+    function later() {
+        previous = options.leading === false ? 0 : Date.now();
+        timeout = null;
+        result = func.apply(context, args);
+    }
 }
 
 
@@ -11876,15 +11885,15 @@ function throttle(wait, options) {
  * @return {Function} self
  */
 function once() {
-	var func = this
-		, ran = false
-		, memo;
+    var func = this
+        , ran = false
+        , memo;
     return function() {
-		if (ran) return memo;
-		ran = true;
-		memo = func.apply(this, arguments);
-		func = null;
-		return memo;
+        if (ran) return memo;
+        ran = true;
+        memo = func.apply(this, arguments);
+        func = null;
+        return memo;
     };
 }
 },{"./proto_util":101,"./utils":102}],97:[function(require,module,exports){
@@ -11894,7 +11903,7 @@ function once() {
  * - [isNumeric](#isNumeric)
  */
 var numberMethods = module.exports = {
-	isNumeric: isNumeric
+    isNumeric: isNumeric
 };
 
 
@@ -11905,7 +11914,7 @@ var numberMethods = module.exports = {
  * @return {Boolean} true if it is a numeric value
  */
 function isNumeric() {
-	return !isNaN(parseFloat(this)) && isFinite(this);
+    return !isNaN(parseFloat(this)) && isFinite(this);
 };
 
 },{}],98:[function(require,module,exports){
@@ -11939,23 +11948,23 @@ var utils = require('./utils');
  * All these methods can be [chained](proto.js.html#Proto)
  */
 var objectMethods = module.exports = {
-	extend: extend,
-	clone: clone,
-	defineProperty: defineProperty,
-	defineProperties: defineProperties,
-	deepExtend: deepExtend,
-	deepClone: deepClone,
-	allKeys: allKeys,
-	keyOf: keyOf,
-	allKeysOf: allKeysOf,
-	eachKey: eachKey,
-	mapKeys: mapKeys,
-	reduceKeys: reduceKeys,
-	filterKeys: filterKeys,
-	someKey: someKey,
-	everyKey: everyKey,
-	pickKeys: pickKeys,
-	omitKeys: omitKeys
+    extend: extend,
+    clone: clone,
+    defineProperty: defineProperty,
+    defineProperties: defineProperties,
+    deepExtend: deepExtend,
+    deepClone: deepClone,
+    allKeys: allKeys,
+    keyOf: keyOf,
+    allKeysOf: allKeysOf,
+    eachKey: eachKey,
+    mapKeys: mapKeys,
+    reduceKeys: reduceKeys,
+    filterKeys: filterKeys,
+    someKey: someKey,
+    everyKey: everyKey,
+    pickKeys: pickKeys,
+    omitKeys: omitKeys
 };
 
 
@@ -11964,12 +11973,12 @@ var objectMethods = module.exports = {
  * The sum of these constants can be used as last parameter of defineProperty and defineProperties to determine types of properties.
  */
 var constants = {
-	ENUMERABLE: 1,
-	ENUM: 1,
-	CONFIGURABLE: 2,
-	CONF: 2,
-	WRITABLE: 4,
-	WRIT: 4
+    ENUMERABLE: 1,
+    ENUM: 1,
+    CONFIGURABLE: 2,
+    CONF: 2,
+    WRITABLE: 4,
+    WRIT: 4
 };
 
 defineProperty.call(objectMethods, '_constants', constants);
@@ -12011,15 +12020,15 @@ objectMethods.findKey = utils.makeFindMethod(eachKey, 'key');
  * @return {Object}
  */
 function extend(obj, onlyEnumerable) {
-	var descriptors = {};
+    var descriptors = {};
 
-	eachKey.call(obj, function(value, prop) {
-		descriptors[prop] = Object.getOwnPropertyDescriptor(obj, prop);
-	}, this, onlyEnumerable);
+    eachKey.call(obj, function(value, prop) {
+        descriptors[prop] = Object.getOwnPropertyDescriptor(obj, prop);
+    }, this, onlyEnumerable);
 
-	Object.defineProperties(this, descriptors);
+    Object.defineProperties(this, descriptors);
 
-	return this;
+    return this;
 }
 
 
@@ -12035,9 +12044,9 @@ function extend(obj, onlyEnumerable) {
  * @return {Object}
  */
 function clone() {
-	var clonedObject = Object.create(this.constructor.prototype);
-	extend.call(clonedObject, this);
-	return clonedObject;
+    var clonedObject = Object.create(this.constructor.prototype);
+    extend.call(clonedObject, this);
+    return clonedObject;
 }
 
 
@@ -12061,22 +12070,22 @@ function clone() {
  * @return {Object}
  */
 function defineProperty(propertyName, value, decriptorFlags) {
-	Object.defineProperty(this, propertyName,
-		_getDescriptor(value, decriptorFlags));
-	return this;
+    Object.defineProperty(this, propertyName,
+        _getDescriptor(value, decriptorFlags));
+    return this;
 }
 
 
 function _getDescriptor(value, decriptorFlags) {
-	var descriptor = { value: value };
-	if (decriptorFlags)
-		extend.call(descriptor, {
-			enumerable: !! (decriptorFlags & constants.ENUMERABLE),
-			configurable: !! (decriptorFlags & constants.CONFIGURABLE),
-			writable: !! (decriptorFlags & constants.WRITABLE)
-		});
+    var descriptor = { value: value };
+    if (decriptorFlags)
+        extend.call(descriptor, {
+            enumerable: !! (decriptorFlags & constants.ENUMERABLE),
+            configurable: !! (decriptorFlags & constants.CONFIGURABLE),
+            writable: !! (decriptorFlags & constants.WRITABLE)
+        });
 
-	return descriptor;
+    return descriptor;
 }
 
 
@@ -12086,14 +12095,14 @@ function _getDescriptor(value, decriptorFlags) {
  * ```
  * _.defineProperties(obj, {
  *     key1: value1,
- *     key2: value2	
+ *     key2: value2 
  * });
  * ```
  * To define some other properties use sum of the flags `_.ENUMERABLE` (or `_.ENUM`), `_.CONFIGURABLE` (or `_.CONF`) and `_.WRITABLE` (or `_.WRIT`):
  * ```
  * _.defineProperties(obj, {
  *     key1: value1,
- *     key2: value2	
+ *     key2: value2 
  * }, _.ENUM + _.WRIT);
  * ```
  * Returns `self`.
@@ -12104,11 +12113,11 @@ function _getDescriptor(value, decriptorFlags) {
  * @return {Object}
  */
 function defineProperties(propertyValues, decriptorFlags) {
-	var descriptors = mapKeys.call(propertyValues, function(value) {
-		return _getDescriptor(value, decriptorFlags);		
-	}, true);
-	Object.defineProperties(this, descriptors);
-	return this;
+    var descriptors = mapKeys.call(propertyValues, function(value) {
+        return _getDescriptor(value, decriptorFlags);       
+    }, true);
+    Object.defineProperties(this, descriptors);
+    return this;
 }
 
 
@@ -12145,28 +12154,28 @@ function defineProperties(propertyValues, decriptorFlags) {
  * @return {Object}
  */
 function deepExtend(obj, onlyEnumerable) {
-	return _extendTree(this, obj, onlyEnumerable, []);
+    return _extendTree(this, obj, onlyEnumerable, []);
 }
 
 
 function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
-	if (objTraversed.indexOf(objNode) >= 0) return; // node already traversed, obj has recursion
+    if (objTraversed.indexOf(objNode) >= 0) return; // node already traversed, obj has recursion
 
-	// store node to recognise recursion
-	objTraversed.push(objNode);
+    // store node to recognise recursion
+    objTraversed.push(objNode);
 
-	eachKey.call(objNode, function(value, prop) {
-		var descriptor = Object.getOwnPropertyDescriptor(objNode, prop);
-		if (typeof value == 'object' && value != null) {
-			if (! (selfNode.hasOwnProperty(prop)
-					&& typeof selfNode[prop] == 'object' && selfNode[prop] != null))
-				selfNode[prop] = {};
-			_extendTree(selfNode[prop], value, onlyEnumerable, objTraversed);
-		} else
-			Object.defineProperty(selfNode, prop, descriptor);
-	}, this, onlyEnumerable);
+    eachKey.call(objNode, function(value, prop) {
+        var descriptor = Object.getOwnPropertyDescriptor(objNode, prop);
+        if (typeof value == 'object' && value != null) {
+            if (! (selfNode.hasOwnProperty(prop)
+                    && typeof selfNode[prop] == 'object' && selfNode[prop] != null))
+                selfNode[prop] = {};
+            _extendTree(selfNode[prop], value, onlyEnumerable, objTraversed);
+        } else
+            Object.defineProperty(selfNode, prop, descriptor);
+    }, this, onlyEnumerable);
 
-	return selfNode;
+    return selfNode;
 }
 
 
@@ -12178,9 +12187,9 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
  * @return {Object}
  */
 function deepClone(onlyEnumerable) {
-	var clonedObject = {};
-	deepExtend.call(clonedObject, this, onlyEnumerable);
-	return clonedObject;
+    var clonedObject = {};
+    deepExtend.call(clonedObject, this, onlyEnumerable);
+    return clonedObject;
 }
 
 
@@ -12192,7 +12201,7 @@ function deepClone(onlyEnumerable) {
  * @return {Array}
  */
  function allKeys() {
- 	return Object.getOwnPropertyNames(this);
+    return Object.getOwnPropertyNames(this);
  }
 
 
@@ -12208,15 +12217,15 @@ function deepClone(onlyEnumerable) {
  * @return {String} 
  */
 function keyOf(searchElement, onlyEnumerable) {
-	var properties = onlyEnumerable 
-						? Object.keys(this)
-						: allKeys.call(this);
+    var properties = onlyEnumerable 
+                        ? Object.keys(this)
+                        : allKeys.call(this);
 
-	for (var i = 0; i < properties.length; i++)
-		if (searchElement === this[properties[i]])
-			return properties[i];
-	
-	return undefined;
+    for (var i = 0; i < properties.length; i++)
+        if (searchElement === this[properties[i]])
+            return properties[i];
+    
+    return undefined;
 }
 
 
@@ -12229,15 +12238,15 @@ function keyOf(searchElement, onlyEnumerable) {
  * @return {Array[String]} 
  */
 function allKeysOf(searchElement, onlyEnumerable) {
-	var properties = onlyEnumerable 
-						? Object.keys(this)
-						: allKeys.call(this);
+    var properties = onlyEnumerable 
+                        ? Object.keys(this)
+                        : allKeys.call(this);
 
-	var keys = properties.filter(function(prop) {
-		return searchElement === this[prop];
-	}, this);
+    var keys = properties.filter(function(prop) {
+        return searchElement === this[prop];
+    }, this);
 
-	return keys;
+    return keys;
 }
 
 
@@ -12257,15 +12266,15 @@ function allKeysOf(searchElement, onlyEnumerable) {
  * @param {Boolean} onlyEnumerable An optional `true` to iterate enumerable properties only.
  */
 function eachKey(callback, thisArg, onlyEnumerable) {
-	var properties = onlyEnumerable 
-						? Object.keys(this)
-						: allKeys.call(this);
+    var properties = onlyEnumerable 
+                        ? Object.keys(this)
+                        : allKeys.call(this);
 
-	properties.forEach(function(prop) {
-		callback.call(thisArg, this[prop], prop, this);
-	}, this);
+    properties.forEach(function(prop) {
+        callback.call(thisArg, this[prop], prop, this);
+    }, this);
 
-	return this;
+    return this;
 }
 
 
@@ -12287,14 +12296,14 @@ function eachKey(callback, thisArg, onlyEnumerable) {
  * @return {Object}
  */
 function mapKeys(callback, thisArg, onlyEnumerable) {
-	var descriptors = {};
-	eachKey.call(this, mapProperty, thisArg, onlyEnumerable);
-	return Object.create(this.constructor.prototype, descriptors);
+    var descriptors = {};
+    eachKey.call(this, mapProperty, thisArg, onlyEnumerable);
+    return Object.create(this.constructor.prototype, descriptors);
 
-	function mapProperty(value, key, self) {
-		descriptors[key] = Object.getOwnPropertyDescriptor(self, key);
-		descriptors[key].value = callback.call(this, value, key, self);
-	}
+    function mapProperty(value, key, self) {
+        descriptors[key] = Object.getOwnPropertyDescriptor(self, key);
+        descriptors[key].value = callback.call(this, value, key, self);
+    }
 }
 
 
@@ -12315,17 +12324,17 @@ function mapKeys(callback, thisArg, onlyEnumerable) {
  * @return {Any}
  */
 function reduceKeys(callback, initialValue, thisArg, onlyEnumerable) {
-	var properties = onlyEnumerable 
-						? Object.keys(this)
-						: allKeys.call(this);
+    var properties = onlyEnumerable 
+                        ? Object.keys(this)
+                        : allKeys.call(this);
 
-	var memo = initialValue;
+    var memo = initialValue;
 
-	properties.forEach(function(prop) {
-		memo = callback.call(thisArg, memo, this[prop], prop, this);
-	}, this);
+    properties.forEach(function(prop) {
+        memo = callback.call(thisArg, memo, this[prop], prop, this);
+    }, this);
 
-	return memo;
+    return memo;
 }
 
 
@@ -12345,19 +12354,19 @@ function reduceKeys(callback, initialValue, thisArg, onlyEnumerable) {
  * @return {Object}
  */
 function filterKeys(callback, thisArg, onlyEnumerable) {
-	var descriptors = {};
-	eachKey.call(this, filterProperty, thisArg, onlyEnumerable);
-	return Object.create(this.constructor.prototype, descriptors);;
+    var descriptors = {};
+    eachKey.call(this, filterProperty, thisArg, onlyEnumerable);
+    return Object.create(this.constructor.prototype, descriptors);;
 
-	function filterProperty(value, key, self) {
-		if (callback.call(this, value, key, self))
-			descriptors[key] = Object.getOwnPropertyDescriptor(self, key);
-	}
+    function filterProperty(value, key, self) {
+        if (callback.call(this, value, key, self))
+            descriptors[key] = Object.getOwnPropertyDescriptor(self, key);
+    }
 }
 
 
 var _passed = {}
-	, _didNotPass = {};
+    , _didNotPass = {};
 
 /**
  * An analogue of [some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some) method of Array prototype.
@@ -12369,18 +12378,18 @@ var _passed = {}
  * @return {Boolean}
  */
 function someKey(callback, thisArg, onlyEnumerable) {
-	try {
-		eachKey.call(this, testProperty, thisArg, onlyEnumerable);
-	} catch (test) {
-		if (test === _passed) return true;
-		else throw test;
-	}
-	return false;
+    try {
+        eachKey.call(this, testProperty, thisArg, onlyEnumerable);
+    } catch (test) {
+        if (test === _passed) return true;
+        else throw test;
+    }
+    return false;
 
-	function testProperty(value, key, self) {
-		if (callback.call(this, value, key, self))
-			throw _passed;
-	}
+    function testProperty(value, key, self) {
+        if (callback.call(this, value, key, self))
+            throw _passed;
+    }
 }
 
 
@@ -12394,23 +12403,23 @@ function someKey(callback, thisArg, onlyEnumerable) {
  * @return {Boolean}
  */
 function everyKey(callback, thisArg, onlyEnumerable) {
-	try {
-		eachKey.call(this, testProperty, thisArg, onlyEnumerable);
-	} catch (test) {
-		if (test === _didNotPass) return false;
-		else throw test;
-	}
-	return true;
+    try {
+        eachKey.call(this, testProperty, thisArg, onlyEnumerable);
+    } catch (test) {
+        if (test === _didNotPass) return false;
+        else throw test;
+    }
+    return true;
 
-	function testProperty(value, key, self) {
-		if (! callback.call(this, value, key, self))
-			throw _didNotPass;
-	}
+    function testProperty(value, key, self) {
+        if (! callback.call(this, value, key, self))
+            throw _didNotPass;
+    }
 }
 
 
 var ArrayProto = Array.prototype
-	, concat = ArrayProto.concat;
+    , concat = ArrayProto.concat;
 /**
  * Returns object of the same class with only specified keys, that are passed as string parameters or array(s) of keys.
  *
@@ -12419,13 +12428,13 @@ var ArrayProto = Array.prototype
  * @return {Object} 
  */
 function pickKeys() { // , ... keys
-	var keys = concat.apply(ArrayProto, arguments)
-		, obj = Object.create(this.constructor.prototype);
-	keys.forEach(function(key){
-		if (this.hasOwnProperty(key))
-			obj[key] = this[key];
-	}, this);
-	return obj;
+    var keys = concat.apply(ArrayProto, arguments)
+        , obj = Object.create(this.constructor.prototype);
+    keys.forEach(function(key){
+        if (this.hasOwnProperty(key))
+            obj[key] = this[key];
+    }, this);
+    return obj;
 }
 
 
@@ -12437,12 +12446,12 @@ function pickKeys() { // , ... keys
  * @return {Object} 
  */
 function omitKeys() { // , ... keys
-	var keys = concat.apply(ArrayProto, arguments)
-		, obj = clone.call(this);
-	keys.forEach(function(key){
-		delete obj[key];
-	}, this);
-	return obj;
+    var keys = concat.apply(ArrayProto, arguments)
+        , obj = clone.call(this);
+    keys.forEach(function(key){
+        delete obj[key];
+    }, this);
+    return obj;
 }
 
 },{"./utils":102}],99:[function(require,module,exports){
@@ -12456,9 +12465,9 @@ function omitKeys() { // , ... keys
  * These methods can be [chained](proto.js.html#Proto)
  */
 var prototypeMethods = module.exports = {
-	extendProto: extendProto,
-	createSubclass: createSubclass,
-	makeSubclass: makeSubclass
+    extendProto: extendProto,
+    createSubclass: createSubclass,
+    makeSubclass: makeSubclass
 };
 
 
@@ -12488,19 +12497,19 @@ __.extend.call(__, require('./proto_function'));
  * @return {Function}
  */
 function extendProto(methods) {
-	var propDescriptors = {};
+    var propDescriptors = {};
 
-	__.eachKey.call(methods, function(method, name) {
-		propDescriptors[name] = {
-			enumerable: false,
-			configurable: false,
-			writable: false,
-			value: method
-		};
-	});
+    __.eachKey.call(methods, function(method, name) {
+        propDescriptors[name] = {
+            enumerable: false,
+            configurable: false,
+            writable: false,
+            value: method
+        };
+    });
 
-	Object.defineProperties(this.prototype, propDescriptors);
-	return this;
+    Object.defineProperties(this.prototype, propDescriptors);
+    return this;
 }
 
 
@@ -12516,27 +12525,27 @@ function extendProto(methods) {
  * @return {Function}
  */
 function createSubclass(name, applyConstructor) {
-	var thisClass = this;
-	var subclass;
+    var thisClass = this;
+    var subclass;
 
-	// name is optional
-	name = name || '';
+    // name is optional
+    name = name || '';
 
-	// apply superclass constructor
-	var constructorCode = applyConstructor === false
-			? ''
-			: 'thisClass.apply(this, arguments);';
+    // apply superclass constructor
+    var constructorCode = applyConstructor === false
+            ? ''
+            : 'thisClass.apply(this, arguments);';
 
-	eval('subclass = function ' + name + '(){ ' + constructorCode + ' }');
+    eval('subclass = function ' + name + '(){ ' + constructorCode + ' }');
 
-	makeSubclass.call(subclass, thisClass);
+    makeSubclass.call(subclass, thisClass);
 
-	// copy class methods
-	// - for them to work correctly they should not explictly use superclass name
-	// and use "this" instead
-	__.extend.call(subclass, thisClass, true);
+    // copy class methods
+    // - for them to work correctly they should not explictly use superclass name
+    // and use "this" instead
+    __.extend.call(subclass, thisClass, true);
 
-	return subclass;
+    return subclass;
 }
 
 
@@ -12549,14 +12558,14 @@ function createSubclass(name, applyConstructor) {
  * @return {Function}
  */
 function makeSubclass(Superclass) {
-	// prototype chain
-	this.prototype = Object.create(Superclass.prototype);
-	
-	// subclass identity
-	extendProto.call(this, {
-		constructor: this
-	});
-	return this;
+    // prototype chain
+    this.prototype = Object.create(Superclass.prototype);
+    
+    // subclass identity
+    extendProto.call(this, {
+        constructor: this
+    });
+    return this;
 }
 
 },{"./proto_function":96,"./proto_object":98}],100:[function(require,module,exports){
@@ -12569,10 +12578,12 @@ function makeSubclass(Superclass) {
  * - [toFunction](#toFunction)
  */
  var stringMethods = module.exports = {
-	firstUpperCase: firstUpperCase,
-	firstLowerCase: firstLowerCase,
-	toRegExp: toRegExp,
-	toFunction: toFunction
+    firstUpperCase: firstUpperCase,
+    firstLowerCase: firstLowerCase,
+    toRegExp: toRegExp,
+    toFunction: toFunction,
+    toQueryString: toQueryString,
+    fromQueryString: fromQueryString
 };
 
 
@@ -12582,7 +12593,7 @@ function makeSubclass(Superclass) {
  * @param {String} self A string that will have its first character replaced
  */
 function firstUpperCase() {
-	return this[0].toUpperCase() + this.slice(1);
+    return this[0].toUpperCase() + this.slice(1);
 }
 
 
@@ -12592,7 +12603,7 @@ function firstUpperCase() {
  * @param {String} self A string that will have its first character replaced
  */
 function firstLowerCase() {
-	return this[0].toLowerCase() + this.slice(1);
+    return this[0].toLowerCase() + this.slice(1);
 }
 
 
@@ -12603,8 +12614,8 @@ function firstLowerCase() {
  * @return {RegExp}
  */
 function toRegExp() {
-	var rx = this.match(regexpStringPattern);
-	if (rx) return new RegExp(rx[1], rx[2]);
+    var rx = this.match(regexpStringPattern);
+    if (rx) return new RegExp(rx[1], rx[2]);
 }
 var regexpStringPattern = /^\/(.*)\/([gimy]*)$/;
 
@@ -12616,14 +12627,50 @@ var regexpStringPattern = /^\/(.*)\/([gimy]*)$/;
  * @return {Function}
  */
 function toFunction() {
-	var func;
-	var code = 'func = ' + this + ';';
-	try {
-		eval(code);
-		return func;
-	} catch(e) {
-		return;
-	}
+    var func;
+    var code = 'func = ' + this + ';';
+    try {
+        eval(code);
+        return func;
+    } catch(e) {
+        return;
+    }
+}
+
+
+/**
+ * Convert params object to a url style query string
+ * @param  {Object} self The object hash to be converted
+ * @return {String} the resulting query string
+ */
+function toQueryString() {
+    var qs = ''
+        , params = this;
+
+    for (var key in params) {
+        var val = params[key];
+        qs += key + '=' + encodeURIComponent(val) + '&';
+    }
+    return '?' + qs.substring(0, qs.length-1);
+}
+
+
+/**
+ * Convert url style query string into object hash
+ * @param  {String} self The string to be converted
+ * @return {Object} The resulting object hash
+ */
+function fromQueryString() {
+    var pairs = this.slice(1).split('&')
+        , results = {};
+    pairs.forEach(function(pair) {
+        var splitPair = pair.split('=')
+            , key = splitPair[0]
+            , val = decodeURIComponent(splitPair[1] || '');
+        results[key] = val;
+    });
+
+    return results;
 }
 
 },{}],101:[function(require,module,exports){
@@ -12635,9 +12682,9 @@ function toFunction() {
  * - [tap](#tap)
  */
 var utilMethods = module.exports = {
-	times: times,
-	repeat: repeat,
-	tap: tap
+    times: times,
+    repeat: repeat,
+    tap: tap
 };
 
 
@@ -12650,9 +12697,9 @@ var utilMethods = module.exports = {
  * @return {Array}
  */
 function times(callback, thisArg) {
-	var arr = Array(Math.max(0, this));
-	for (var i = 0; i < this; i++)
-		arr[i] = callback.call(thisArg, i);
+    var arr = Array(Math.max(0, this));
+    for (var i = 0; i < this; i++)
+        arr[i] = callback.call(thisArg, i);
     return arr;
 }
 
@@ -12664,10 +12711,10 @@ function times(callback, thisArg) {
  * @return {Array[Any]}
  */
 function repeat(times) {
-	var arr = Array(Math.max(0, times));;
-	for (var i = 0; i < times; i++)
-		arr[i] = this;
-	return arr;
+    var arr = Array(Math.max(0, times));;
+    for (var i = 0; i < times; i++)
+        arr[i] = this;
+    return arr;
 }
 
 
@@ -12679,34 +12726,34 @@ function repeat(times) {
  * @return {Any}
  */
 function tap(func) {
-	func(this);
-	return this;
+    func(this);
+    return this;
 };
 
 },{}],102:[function(require,module,exports){
 'use strict';
 
 var utils = module.exports = {
-	makeProtoInstanceMethod: makeProtoInstanceMethod,
-	makeProtoFunction: makeProtoFunction,
-	makeFindMethod: makeFindMethod
+    makeProtoInstanceMethod: makeProtoInstanceMethod,
+    makeProtoFunction: makeProtoFunction,
+    makeFindMethod: makeFindMethod
 }
 
 
 function makeProtoInstanceMethod(method) {
-	return function() {
-		this.self = method.apply(this.self, arguments);
-		return this;
-	};
+    return function() {
+        this.self = method.apply(this.self, arguments);
+        return this;
+    };
 }
 
 
 function makeProtoFunction(method) {
-	return function() {
-		// when the method is executed, the value of "this" will be arguments[0],
-		// other arguments starting from #1 will passed to method as parameters.
-		return method.call.apply(method, arguments);
-	};
+    return function() {
+        // when the method is executed, the value of "this" will be arguments[0],
+        // other arguments starting from #1 will passed to method as parameters.
+        return method.call.apply(method, arguments);
+    };
 }
 
 
@@ -12720,32 +12767,32 @@ var _error = new Error;
  * @return {Function}
  */
 function makeFindMethod(eachMethod, findWhat) {
-	var argIndex = findWhat == 'value' ? 0 : 1;
+    var argIndex = findWhat == 'value' ? 0 : 1;
 
-	return function findValueOrIndex(callback, thisArg) {
-		var caughtError;
-		try {
-			eachMethod.call(this, testItem, thisArg);
-		} catch (found) {
-			if (found === _error) throw caughtError;
-			else return found;
-		}
-		// if looking for index and not found, return -1
-		if (argIndex && eachMethod == Array.prototype.forEach)
-			return -1; 
+    return function findValueOrIndex(callback, thisArg) {
+        var caughtError;
+        try {
+            eachMethod.call(this, testItem, thisArg);
+        } catch (found) {
+            if (found === _error) throw caughtError;
+            else return found;
+        }
+        // if looking for index and not found, return -1
+        if (argIndex && eachMethod == Array.prototype.forEach)
+            return -1; 
 
-		function testItem(value, index, self) {
-			var test;
-			try {
-				test = callback.call(this, value, index, self);
-			} catch(err) {
-				caughtError = err;
-				throw _error;
-			}
-			if (test)
-				throw arguments[argIndex];
-		}
-	}
+        function testItem(value, index, self) {
+            var test;
+            try {
+                test = callback.call(this, value, index, self);
+            } catch(err) {
+                caughtError = err;
+                throw _error;
+            }
+            if (test)
+                throw arguments[argIndex];
+        }
+    }
 }
 
 },{}]},{},[63])
