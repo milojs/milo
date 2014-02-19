@@ -2692,13 +2692,12 @@ function Dom$$createElement(config) {
     if (cssClasses)
         _attachCssClasses('add', cssClasses, el);
 
-    if (content) {
+    if (typeof content == 'string') {
         if (template)
             newEl.innerHTML = doT.template(template)({content: content});
         else
             newEl.innerHTML = content;
     }
-
     return newEl;
 }
 
