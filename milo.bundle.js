@@ -29,7 +29,7 @@ _.extendProto(Facet, {
     init: function() {}
 });
 
-},{"mol-proto":94}],2:[function(require,module,exports){
+},{"mol-proto":95}],2:[function(require,module,exports){
 'use strict';
 
 
@@ -238,7 +238,7 @@ function FacetedObject$$createFacetedClass(name, facetsClasses, facetsConfig) {
     }
 };
 
-},{"../util/check":77,"../util/error":82,"./facet":1,"mol-proto":94}],3:[function(require,module,exports){
+},{"../util/check":77,"../util/error":83,"./facet":1,"mol-proto":95}],3:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -340,7 +340,7 @@ function _createProxyMethods(proxyMethods, hostObject) {
         }, this);
 }
 
-},{"../util/check":77,"../util/error":82,"mol-proto":94}],4:[function(require,module,exports){
+},{"../util/check":77,"../util/error":83,"mol-proto":95}],4:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -460,7 +460,7 @@ function setClass(FoundationClass) {
     _.defineProperty(this, 'FoundationClass', FoundationClass, _.ENUM);
 }
 
-},{"../util/check":77,"../util/error":82,"mol-proto":94}],5:[function(require,module,exports){
+},{"../util/check":77,"../util/error":83,"mol-proto":95}],5:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -582,7 +582,7 @@ function render() {
                 .replace('%compName', this.compName);
 }
 
-},{"../config":53,"../util/check":77,"../util/error":82,"./a_class":6,"mol-proto":94}],6:[function(require,module,exports){
+},{"../config":53,"../util/check":77,"../util/error":83,"./a_class":6,"mol-proto":95}],6:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -697,7 +697,7 @@ function Attribute$decorate() {
     this.set(this.render());
 }
 
-},{"../util/check":77,"../util/error":82,"mol-proto":94}],7:[function(require,module,exports){
+},{"../util/check":77,"../util/error":83,"mol-proto":95}],7:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -784,7 +784,7 @@ function render() {
     return this.loadUrl;
 }
 
-},{"../config":53,"../util/error":82,"./a_class":6,"mol-proto":94}],8:[function(require,module,exports){
+},{"../config":53,"../util/error":83,"./a_class":6,"mol-proto":95}],8:[function(require,module,exports){
 'use strict';
 
 /**
@@ -956,7 +956,7 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
     }
 }
 
-},{"./attributes/a_bind":5,"./components/c_facets/cf_registry":25,"./components/c_info":26,"./components/c_registry":27,"./components/scope":35,"./mail":55,"./util/check":77,"./util/dom":80,"./util/error":82,"mol-proto":94}],10:[function(require,module,exports){
+},{"./attributes/a_bind":5,"./components/c_facets/cf_registry":25,"./components/c_info":26,"./components/c_registry":27,"./components/scope":35,"./mail":55,"./util/check":77,"./util/dom":80,"./util/error":83,"mol-proto":95}],10:[function(require,module,exports){
 'use strict';
 
 // <a name="classes"></a>
@@ -1811,7 +1811,7 @@ function Component$isDestroyed() {
     return this._destroyed;
 }
 
-},{"../abstract/faceted_object":2,"../attributes/a_bind":5,"../binder":9,"../config":53,"../messenger":58,"../util/check":77,"../util/component_name":78,"../util/dom":80,"../util/error":82,"../util/json_parse":84,"../util/logger":85,"../util/storage":90,"./c_facets/cf_registry":25,"./c_utils":28,"./scope":35,"mol-proto":94}],12:[function(require,module,exports){
+},{"../abstract/faceted_object":2,"../attributes/a_bind":5,"../binder":9,"../config":53,"../messenger":58,"../util/check":77,"../util/component_name":78,"../util/dom":80,"../util/error":83,"../util/json_parse":85,"../util/logger":86,"../util/storage":91,"./c_facets/cf_registry":25,"./c_utils":28,"./scope":35,"mol-proto":95}],12:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facet"></a>
@@ -2022,7 +2022,7 @@ function requiresFacet(facetName) {
                         || facetRequire.indexOf(_.firstLowerCase(facetName)) >= 0);
 }
 
-},{"../abstract/facet":1,"../messenger":58,"../util/error":82,"./c_utils":28,"mol-proto":94}],13:[function(require,module,exports){
+},{"../abstract/facet":1,"../messenger":58,"../util/error":83,"./c_utils":28,"mol-proto":95}],13:[function(require,module,exports){
 'use strict';
 
 
@@ -2124,7 +2124,7 @@ function Container$destroy() {
     ComponentFacet.prototype.destroy.apply(this, arguments);
     this.scope._detachElement();
 }
-},{"../../binder":9,"../../util/logger":85,"../c_facet":12,"../scope":35,"./cf_registry":25,"mol-proto":94}],14:[function(require,module,exports){
+},{"../../binder":9,"../../util/logger":86,"../c_facet":12,"../scope":35,"./cf_registry":25,"mol-proto":95}],14:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../../abstract/mixin')
@@ -2642,7 +2642,7 @@ function Data$setState(state) {
     return this.set(state.state);
 }
 
-},{"../../abstract/mixin":3,"../../messenger":58,"../../model/change_data":65,"../../model/model_utils":70,"../../model/path_utils":72,"../../util/logger":85,"../c_facet":12,"../msg_api/data":30,"../msg_api/de_data":31,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":94}],15:[function(require,module,exports){
+},{"../../abstract/mixin":3,"../../messenger":58,"../../model/change_data":65,"../../model/model_utils":70,"../../model/path_utils":72,"../../util/logger":86,"../c_facet":12,"../msg_api/data":30,"../msg_api/de_data":31,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":95}],15:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-dom"></a>
@@ -2962,7 +2962,7 @@ function hasTextAfterSelection() {
     return isText;
 }
 
-},{"../../attributes/a_bind":5,"../../binder":9,"../../config":53,"../../util/check":77,"../../util/dom":80,"../../util/error":82,"../c_facet":12,"./cf_registry":25,"dot":93,"mol-proto":94}],16:[function(require,module,exports){
+},{"../../attributes/a_bind":5,"../../binder":9,"../../config":53,"../../util/check":77,"../../util/dom":80,"../../util/error":83,"../c_facet":12,"./cf_registry":25,"dot":94,"mol-proto":95}],16:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drag"></a>
@@ -2972,6 +2972,7 @@ var ComponentFacet = require('../c_facet')
     , facetsRegistry = require('./cf_registry')
     , DOMEventsSource = require('../msg_src/dom_events')
     , Component = require('../c_class')
+    , DragDropDataTransfer = require('../../util/dragdrop')
     , _ = require('mol-proto')
     , logger = require('../../util/logger');
 
@@ -2979,6 +2980,13 @@ var ComponentFacet = require('../c_facet')
 /**
  * `milo.registry.facets.get('Drag')`
  * Facet for components that can be dragged
+ * Drag facet supports the following configuration parameters:
+ *
+ *  - metaParams: object of key-value pairs that will be converted in url-like query string in the end of data type for metadata data type (or function that returns this object). See config.dragDrop.dataTypes.componentMetaTemplate
+ *  - metaData: data that will be stored in the above meta data type (or function)
+ *  - allowedEffects: string (or function) as specified here: https://developer.mozilla.org/en-US/docs/DragDrop/Drag_Operations#dragstart
+ *
+ * If function is specified in any parameter it will be called with the component as the context
  */
 var Drag = _.createSubclass(ComponentFacet, 'Drag');
 
@@ -3077,16 +3085,22 @@ function onMouseMovement(eventType, event) {
 
 
 function onDragStart(eventType, event) {
-    if (this.config.off) {
+    if (this.config.off || ! targetInDragHandle.call(this)) {
         event.preventDefault();
         return;
     }
 
-    var transferState = this.owner.getTransferState();
-    this.__dragData = JSON.stringify(transferState);
-    this.__dataType = 'x-application/milo-component/' + transferState.compClass + '/'
-                        + this._dataTypeInfo.call(this);
-    setDragData.call(this, event);
+    var owner = this.owner;
+    var dt = new DragDropDataTransfer(event.dataTransfer);
+    this._dragData = dt.setComponentState(owner);
+
+    var params = _.result(this.config.metaParams, owner)
+        , data = _.result(this.config.metaData, owner);
+
+    this._dragMetaDataType = dt.setComponentMeta(owner, params, data);
+    this._dragMetaData = data;
+
+    _setAllowedEffects.call(this, dt);
 }
 
 
@@ -3096,19 +3110,16 @@ function onDragging(eventType, event) {
         return;
     }
 
-    setDragData.call(this, event);
+    var dt = new DragDropDataTransfer(event.dataTransfer);
+    dt.setComponentState(this.owner, this._dragData);
+    dt.setData(this._dragMetaDataType, this._dragMetaData);
+    _setAllowedEffects.call(this, dt);
 }
 
 
-function setDragData(event) {
-    if (targetInDragHandle.call(this)) {
-        var dt = event.dataTransfer;
-        dt.setData(this.__dataType, this.__dragData);
-        // set html in case it is inserted elsewhere
-        dt.setData('x-application/milo-component', null)
-        dt.setData('text/html', this.owner.el.outerHTML);
-    } else
-        event.preventDefault();
+function _setAllowedEffects(dragDropDataTransfer) {
+    var effects = _.result(this.config.allowedEffects, this.owner);
+    dragDropDataTransfer.setAllowedEffects(effects);
 }
 
 
@@ -3116,7 +3127,7 @@ function targetInDragHandle() {
     return ! this._dragHandle || this._dragHandle.contains(this.__mouseDownTarget);
 }
 
-},{"../../util/logger":85,"../c_class":11,"../c_facet":12,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":94}],17:[function(require,module,exports){
+},{"../../util/dragdrop":82,"../../util/logger":86,"../c_class":11,"../c_facet":12,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":95}],17:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drop"></a>
@@ -3129,8 +3140,20 @@ var ComponentFacet = require('../c_facet')
     , _ = require('mol-proto');
 
 
-// generic drop handler, should be overridden
+/**
+ * `milo.registry.facets.get('Drop')`
+ * Facet for components that can accept drops
+ * Drop facet supports the following configuration parameters:
+ *
+ *  - components: true by default OR list of allowed components classes OR false to NOT accept components
+ *  - metaParams: object of key-value pairs that will be converted in url-like query string in the end of data type for metadata data type (or function that returns this object). See config.dragDrop.dataTypes.componentMetaTemplate
+ *  - metaData: data that will be stored in the above meta data type (or function)
+ *  - allowedEffects: string (or function) as specified here: https://developer.mozilla.org/en-US/docs/DragDrop/Drag_Operations#dragstart
+ *
+ * If function is specified in any parameter it will be called with the component as the context
+ */
 var Drop = _.createSubclass(ComponentFacet, 'Drop');
+
 
 _.extendProto(Drop, {
     init: Drop$init,
@@ -3153,26 +3176,26 @@ function Drop$start() {
     ComponentFacet.prototype.start.apply(this, arguments);
     this.owner.el.classList.add('cc-module-relative');
     this.on('dragenter dragover', onDragging);
+}
 
+
+function onDragging(eventType, event) {
+    //TODO: manage not-allowed drops, maybe with config.
     var allowDropTest = this.config.allowDropTest;
+    event.stopPropagation();
+    var dt = event.dataTransfer
+        , dataTypes = dt.types
+        , hasHtml = dataTypes.indexOf('text/html') >= 0
+        , hasMiloData = dataTypes.indexOf('x-application/milo-component') >= 0;
 
-    function onDragging(eventType, event) {
-        //TODO: manage not-allowed drops, maybe with config.
-        event.stopPropagation();
-        var dt = event.dataTransfer
-            , dataTypes = dt.types
-            , hasHtml = dataTypes.indexOf('text/html') >= 0
-            , hasMiloData = dataTypes.indexOf('x-application/milo-component') >= 0;
-
-        if (dataTypes && (hasHtml || hasMiloData)) {
-            var canDrop = allowDropTest ? allowDropTest(event, hasMiloData) : 'move';
-            event.dataTransfer.dropEffect = canDrop;
-            event.preventDefault();
-        }
+    if (dataTypes && (hasHtml || hasMiloData)) {
+        var canDrop = allowDropTest ? allowDropTest(event, hasMiloData) : 'move';
+        event.dataTransfer.dropEffect = canDrop;
+        event.preventDefault();
     }
 }
 
-},{"../c_facet":12,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":94}],18:[function(require,module,exports){
+},{"../c_facet":12,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":95}],18:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -3224,7 +3247,7 @@ function Events$init() {
     _.defineProperty(this, '_domEventsSource', domEventsSource);
 }
 
-},{"../../messenger":58,"../c_facet":12,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":94}],19:[function(require,module,exports){
+},{"../../messenger":58,"../c_facet":12,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":95}],19:[function(require,module,exports){
 'use strict';
 
 
@@ -3381,7 +3404,7 @@ function _makeWhenReadyFunc(isReadyFunc, event) {
     }
 }
 
-},{"../../messenger":58,"../c_facet":12,"../msg_src/de_constrs":32,"../msg_src/frame":34,"./cf_registry":25,"mol-proto":94}],20:[function(require,module,exports){
+},{"../../messenger":58,"../c_facet":12,"../msg_src/de_constrs":32,"../msg_src/frame":34,"./cf_registry":25,"mol-proto":95}],20:[function(require,module,exports){
 'use strict';
 
 
@@ -3417,7 +3440,7 @@ function ItemFacet$removeItem() {
     this.list.removeItem(this.index, true);
 }
 
-},{"../../mail":55,"../../model":67,"../c_facet":12,"./cf_registry":25,"mol-proto":94}],21:[function(require,module,exports){
+},{"../../mail":55,"../../model":67,"../c_facet":12,"./cf_registry":25,"mol-proto":95}],21:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -3658,7 +3681,7 @@ function each(callback, thisArg) {
     }, thisArg || this);
 }
 
-},{"../../binder":9,"../../config":53,"../../mail":55,"../../model":67,"../../util":83,"../c_class":11,"../c_facet":12,"./cf_registry":25,"dot":93,"mol-proto":94}],22:[function(require,module,exports){
+},{"../../binder":9,"../../config":53,"../../mail":55,"../../model":67,"../../util":84,"../c_class":11,"../c_facet":12,"./cf_registry":25,"dot":94,"mol-proto":95}],22:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-model"></a>
@@ -3722,7 +3745,7 @@ function ModelFacet$_createMessenger() { // Called by inherited init
     this.m.proxyMethods(this); // Creates model's methods directly on facet
 }
 
-},{"../../model":67,"../c_facet":12,"./cf_registry":25,"mol-proto":94}],23:[function(require,module,exports){
+},{"../../model":67,"../c_facet":12,"./cf_registry":25,"mol-proto":95}],23:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-template"></a>
@@ -3806,7 +3829,7 @@ function Template$binder() {
     this.owner.container.binder();
 }
 
-},{"../../binder":9,"../../util/check":77,"../c_facet":12,"./cf_registry":25,"mol-proto":94}],24:[function(require,module,exports){
+},{"../../binder":9,"../../util/check":77,"../c_facet":12,"./cf_registry":25,"mol-proto":95}],24:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -3860,7 +3883,7 @@ function Transfer$init() {
     this._state = state;
  }
 
-},{"../c_facet":12,"./cf_registry":25,"mol-proto":94}],25:[function(require,module,exports){
+},{"../c_facet":12,"./cf_registry":25,"mol-proto":95}],25:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../abstract/registry')
@@ -4015,7 +4038,7 @@ function hasContainerFacet(ComponentClass, extraFacetsClasses) {
     }
 }
 
-},{"../util/component_name":78,"../util/error":82,"../util/logger":85,"./c_facets/cf_registry":25,"./c_registry":27,"mol-proto":94}],27:[function(require,module,exports){
+},{"../util/component_name":78,"../util/error":83,"../util/logger":86,"./c_facets/cf_registry":25,"./c_registry":27,"mol-proto":95}],27:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -4221,7 +4244,7 @@ function createInternalData(sourceMessage, message, data) {
     return internalData;
 };
 
-},{"../../messenger/m_api":59,"../../util/check":77,"./de_data":31,"mol-proto":94}],31:[function(require,module,exports){
+},{"../../messenger/m_api":59,"../../util/check":77,"./de_data":31,"mol-proto":95}],31:[function(require,module,exports){
 'use strict';
 
 
@@ -4349,7 +4372,7 @@ function inputChangeEvent(el) {
             : inputElementTypes.byDefault.event;
 }
 
-},{"mol-proto":94}],32:[function(require,module,exports){
+},{"mol-proto":95}],32:[function(require,module,exports){
 'use strict';
 
 // <a name="components-dom-constructors"></a>
@@ -4400,7 +4423,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"mol-proto":94}],33:[function(require,module,exports){
+},{"mol-proto":95}],33:[function(require,module,exports){
 'use strict';
 
 // <a name="components-source-dom"></a>
@@ -4496,7 +4519,7 @@ function trigger(eventType, properties) {
     return notCancelled;
 }
 
-},{"../../messenger/m_source":61,"../../util/check":77,"../c_class":11,"./de_constrs":32,"mol-proto":94}],34:[function(require,module,exports){
+},{"../../messenger/m_source":61,"../../util/check":77,"../c_class":11,"./de_constrs":32,"mol-proto":95}],34:[function(require,module,exports){
 'use strict';
 
 // <a name="components-source-iframe"></a>
@@ -4570,7 +4593,7 @@ function handleEvent(event) {
     this.dispatchMessage(event.data.type, event);
 }
 
-},{"../../messenger/m_source":61,"../../util/check":77,"../../util/error":82,"../c_class":11,"mol-proto":94}],35:[function(require,module,exports){
+},{"../../messenger/m_source":61,"../../util/check":77,"../../util/error":83,"../c_class":11,"mol-proto":95}],35:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -4811,7 +4834,7 @@ function Scope$_has(object) {
     return this.hasOwnProperty(object.name);
 }
 
-},{"../util/check":77,"../util/component_name":78,"../util/error":82,"../util/logger":85,"mol-proto":94}],36:[function(require,module,exports){
+},{"../util/check":77,"../util/component_name":78,"../util/error":83,"../util/logger":86,"mol-proto":95}],36:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -4922,7 +4945,7 @@ function onOptionsChange(msg, data) {
     });
 }
 
-},{"../c_class":11,"../c_registry":27,"mol-proto":94}],38:[function(require,module,exports){
+},{"../c_class":11,"../c_registry":27,"mol-proto":95}],38:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -5031,7 +5054,7 @@ function MLComboList_del() {
 
 
 
-},{"../c_class":11,"../c_registry":27,"mol-proto":94}],39:[function(require,module,exports){
+},{"../c_class":11,"../c_registry":27,"mol-proto":95}],39:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -5331,7 +5354,7 @@ function MLInputList_del() {
 }
 
 })();
-},{"../c_class":11,"../c_registry":27,"mol-proto":94}],46:[function(require,module,exports){
+},{"../c_class":11,"../c_registry":27,"mol-proto":95}],46:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -5418,7 +5441,7 @@ function onItemsChange(msg, data) {
     });
 }
 
-},{"../c_class":11,"../c_registry":27,"mol-proto":94}],47:[function(require,module,exports){
+},{"../c_class":11,"../c_registry":27,"mol-proto":95}],47:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -5609,7 +5632,7 @@ function onOptionsChange(path, data) {
     this.template.render({ selectOptions: this.model.get() });
 }
 
-},{"../c_class":11,"../c_registry":27,"mol-proto":94}],49:[function(require,module,exports){
+},{"../c_class":11,"../c_registry":27,"mol-proto":95}],49:[function(require,module,exports){
 'use strict';
 
 /**
@@ -6085,7 +6108,7 @@ function _setData() {
     this.setFilteredOptions(this._optionsData);
 }
 
-},{"../c_class":11,"../c_registry":27,"dot":93,"mol-proto":94}],50:[function(require,module,exports){
+},{"../c_class":11,"../c_registry":27,"dot":94,"mol-proto":95}],50:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -6192,13 +6215,14 @@ config({
         dataTypes: {
             component: 'x-application/milo/component',
             componentMetaTemplate: 'x-application/milo/component-meta/%class/%name/%params',
-            componentMetaRegex: /^x\-application\/milo\/component\-meta\/([a-z][a-z0-9_]*)\/([a-z][a-z0-9_]*)\/(.*)$/i
+            componentMetaRegexString: '^x\-application\/milo\/component\-meta\/([a-z][a-z0-9_]*)\/([a-z][a-z0-9_]*)\/(.*)$',
+            componentMetaRegexModifier: 'i'
         }
     },
     check: true
 });
 
-},{"dot":93,"mol-proto":94}],54:[function(require,module,exports){
+},{"dot":94,"mol-proto":95}],54:[function(require,module,exports){
 'use strict';
 
 // <a name="loader"></a>
@@ -6311,7 +6335,7 @@ function loadView(el, callback) {
     });
 }
 
-},{"./attributes/a_load":7,"./config":53,"./mail":55,"./util/dom":80,"./util/error":82,"./util/logger":85,"./util/request":88}],55:[function(require,module,exports){
+},{"./attributes/a_load":7,"./config":53,"./mail":55,"./util/dom":80,"./util/error":83,"./util/logger":86,"./util/request":89}],55:[function(require,module,exports){
 'use strict';
 
 // <a name="mail"></a>
@@ -6343,7 +6367,7 @@ miloMail._setMessageSource(mailMsgSource);
 
 module.exports = miloMail;
 
-},{"../messenger":58,"./mail_api":56,"./mail_source":57,"mol-proto":94}],56:[function(require,module,exports){
+},{"../messenger":58,"./mail_api":56,"./mail_source":57,"mol-proto":95}],56:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('../messenger/m_api')
@@ -6388,7 +6412,7 @@ function filterSourceMessage(sourceMessage, msgType, msgData) {
         return windowMessagePrefix + msgData.data.type == msgType;
 };
 
-},{"../messenger/m_api":59,"../util/check":77,"mol-proto":94}],57:[function(require,module,exports){
+},{"../messenger/m_api":59,"../util/check":77,"mol-proto":95}],57:[function(require,module,exports){
 'use strict';
 
 var MessageSource = require('../messenger/m_source')
@@ -6467,7 +6491,7 @@ function trigger(msgType, data) {
         window.postMessage(data, '*')
 }
 
-},{"../components/msg_src/de_constrs":32,"../messenger/m_source":61,"../util/check":77,"../util/error":82,"mol-proto":94}],58:[function(require,module,exports){
+},{"../components/msg_src/de_constrs":32,"../messenger/m_source":61,"../util/check":77,"../util/error":83,"mol-proto":95}],58:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -7097,7 +7121,7 @@ function getMessageSource() {
     return this._messageSource
 }
 
-},{"../abstract/mixin":3,"../util/check":77,"../util/error":82,"./m_source":61,"mol-proto":94}],59:[function(require,module,exports){
+},{"../abstract/mixin":3,"../util/check":77,"../util/error":83,"./m_source":61,"mol-proto":95}],59:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -7290,7 +7314,7 @@ function filterSourceMessage(sourceMessage, message, internalData) {
     return true;
 }
 
-},{"../util/logger":85,"mol-proto":94}],60:[function(require,module,exports){
+},{"../util/logger":86,"mol-proto":95}],60:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('./m_api')
@@ -7381,7 +7405,7 @@ function getInternalMessages(sourceMessage) {
     return internalMessages;
 }
 
-},{"./m_api":59,"mol-proto":94}],61:[function(require,module,exports){
+},{"./m_api":59,"mol-proto":95}],61:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -7541,7 +7565,7 @@ function dispatchMessage(sourceMessage, sourceData) {
         }, this);
 }
 
-},{"../abstract/mixin":3,"../util/check":77,"../util/error":82,"../util/logger":85,"./m_api":59,"mol-proto":94}],62:[function(require,module,exports){
+},{"../abstract/mixin":3,"../util/check":77,"../util/error":83,"../util/logger":86,"./m_api":59,"mol-proto":95}],62:[function(require,module,exports){
 'use strict';
 
 
@@ -7598,7 +7622,7 @@ function removeSourceSubscriber(sourceMessage) {
     this.sourceMessenger.off(sourceMessage, { context: this, subscriber: this.dispatchMessage });
 }
 
-},{"../util/check":77,"./m_source":61,"mol-proto":94}],63:[function(require,module,exports){
+},{"../util/check":77,"./m_source":61,"mol-proto":95}],63:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -7674,7 +7698,7 @@ if (typeof window == 'object') {
     milo.mail.trigger('miloready');
 }
 
-},{"./attributes":8,"./binder":9,"./classes":10,"./components/c_class":11,"./components/c_facet":12,"./config":53,"./loader":54,"./mail":55,"./messenger":58,"./minder":64,"./model":67,"./registry":74,"./use_components":75,"./use_facets":76,"./util":83,"mol-proto":94}],64:[function(require,module,exports){
+},{"./attributes":8,"./binder":9,"./classes":10,"./components/c_class":11,"./components/c_facet":12,"./config":53,"./loader":54,"./mail":55,"./messenger":58,"./minder":64,"./model":67,"./registry":74,"./use_components":75,"./use_facets":76,"./util":84,"mol-proto":95}],64:[function(require,module,exports){
 'use strict';
 
 var Connector = require('./model/connector')
@@ -7786,7 +7810,7 @@ function minder_destroyConnector(cnct) {
         logger.warn('minder: connector destroyed that is not registered in minder');
 }
 
-},{"./messenger":58,"./model/connector":66,"./util/logger":85,"mol-proto":94}],65:[function(require,module,exports){
+},{"./messenger":58,"./model/connector":66,"./util/logger":86,"mol-proto":95}],65:[function(require,module,exports){
 'use strict';
 
 
@@ -7888,7 +7912,7 @@ function _processChanges(callback) {
     this.postMessage('changecompleted');
 }
 
-},{"mol-proto":94}],66:[function(require,module,exports){
+},{"mol-proto":95}],66:[function(require,module,exports){
 'use strict';
 
 var ConnectorError = require('../util/error').Connector
@@ -8165,7 +8189,7 @@ function Connector$destroy() {
     }, this);
 }
 
-},{"../messenger":58,"../util/error":82,"../util/logger":85,"mol-proto":94}],67:[function(require,module,exports){
+},{"../messenger":58,"../util/error":83,"../util/logger":86,"mol-proto":95}],67:[function(require,module,exports){
 'use strict';
 
 var ModelPath = require('./m_path')
@@ -8380,7 +8404,7 @@ function Model_domStorageParser(valueStr) {
     return new Model(data);
 }
 
-},{"../abstract/mixin":3,"../messenger":58,"../messenger/msngr_source":62,"../util/check":77,"../util/error":82,"../util/json_parse":84,"../util/logger":85,"../util/storage":90,"./change_data":65,"./m_msg_api":68,"./m_path":69,"./path_utils":72,"./synthesize":73,"mol-proto":94}],68:[function(require,module,exports){
+},{"../abstract/mixin":3,"../messenger":58,"../messenger/msngr_source":62,"../util/check":77,"../util/error":83,"../util/json_parse":85,"../util/logger":86,"../util/storage":91,"./change_data":65,"./m_msg_api":68,"./m_path":69,"./path_utils":72,"./synthesize":73,"mol-proto":95}],68:[function(require,module,exports){
 'use strict';
 
 var MessengerRegexpAPI = require('../messenger/m_api_rx')
@@ -8419,7 +8443,7 @@ function translateToSourceMessage(accessPath) {
     return pathUtils.createRegexPath(accessPath);
 }
 
-},{"../messenger/m_api_rx":60,"./path_utils":72,"mol-proto":94}],69:[function(require,module,exports){
+},{"../messenger/m_api_rx":60,"./path_utils":72,"mol-proto":95}],69:[function(require,module,exports){
 'use strict';
 
 var synthesize = require('./synthesize')
@@ -8664,7 +8688,7 @@ function _prepareMessenger() {
     _.defineProperty(this, '_messenger', mPathMessenger);
 }
 
-},{"../messenger":58,"../messenger/msngr_source":62,"../util/check":77,"./change_data":65,"./path_msg_api":71,"./path_utils":72,"./synthesize":73,"mol-proto":94}],70:[function(require,module,exports){
+},{"../messenger":58,"../messenger/msngr_source":62,"../util/check":77,"./change_data":65,"./path_msg_api":71,"./path_utils":72,"./synthesize":73,"mol-proto":95}],70:[function(require,module,exports){
 'use strict';
 
 
@@ -8764,7 +8788,7 @@ function createInternalData(fullSourceAccessPath, accessPath, sourceData) {
     return internalData;
 }
 
-},{"../messenger/m_api":59,"../util/logger":85,"./path_utils":72,"mol-proto":94}],72:[function(require,module,exports){
+},{"../messenger/m_api":59,"../util/logger":86,"./path_utils":72,"mol-proto":95}],72:[function(require,module,exports){
 'use strict';
 
 // <a name="model-path"></a>
@@ -8909,7 +8933,7 @@ function wrapMessengerMethods(methodsNames) {
     _.defineProperties(this, wrappedMethods);
 }
 
-},{"../util/check":77,"../util/error":82,"mol-proto":94}],73:[function(require,module,exports){
+},{"../util/check":77,"../util/error":83,"mol-proto":95}],73:[function(require,module,exports){
 'use strict';
 
 var pathUtils = require('../path_utils')
@@ -9079,7 +9103,7 @@ _.extend(synthesizePathMethods, {
     modelSplice: _synthesize(modelSpliceSynthesizer, '', [])
 });
 
-},{"../model_utils":70,"../path_utils":72,"dot":93,"fs":91,"mol-proto":94}],74:[function(require,module,exports){
+},{"../model_utils":70,"../path_utils":72,"dot":94,"fs":92,"mol-proto":95}],74:[function(require,module,exports){
 'use strict';
 
 /**
@@ -9506,7 +9530,7 @@ function _prependPath(key, base) {
 };
 
 
-},{"../config":53,"mol-proto":94}],78:[function(require,module,exports){
+},{"../config":53,"mol-proto":95}],78:[function(require,module,exports){
 'use strict';
 
 var count = require('./count')
@@ -9832,7 +9856,144 @@ function isReady() {
     return readyState == 'loading' ? false : readyState;
 }
 
-},{"mol-proto":94}],82:[function(require,module,exports){
+},{"mol-proto":95}],82:[function(require,module,exports){
+'use strict';
+
+var Component = require('../components/c_class')
+    , dragDropConfig = require('../config').dragDrop
+    , componentMetaRegexString = dragDropConfig.dataTypes.componentMetaRegexString
+    , componentMetaRegexModifier = dragDropConfig.dataTypes.componentMetaRegexModifier
+    , componentMetaRegex = RegExp(componentMetaRegexString, componentMetaRegexModifier)
+    , jsonParse = require('./json_parse')
+    , _ = require('mol-proto');
+
+module.exports = DragDropDataTransfer;
+
+/**
+ * Wrapper for event.dataTransfer of drag-drop HTML API
+ *
+ * @constructor
+ * @param {DataTransfer} dataTransfer
+ * @return {DragDropDataTransfer}
+ */
+function DragDropDataTransfer(dataTransfer) {
+    this.dataTransfer = dataTransfer;
+    this.types = dataTransfer.types;
+}
+
+/**
+ * Usage:
+ * var testDT = new DragDropDataTransfer(event.dataTransfer);
+ * testDT.setComponentMeta(newComponent, {test: 'test', test2: 'test2'});
+ * testDT.getComponentMeta();
+ */
+
+_.extend(DragDropDataTransfer, {
+    componentDataType: DragDropDataTransfer$$componentDataType
+});
+
+_.extendProto(DragDropDataTransfer, {
+    isComponent: DragDropDataTransfer$isComponent,
+    getComponentState: DragDropDataTransfer$getComponentState,
+    setComponentState: DragDropDataTransfer$setComponentState,
+    getComponentMeta: DragDropDataTransfer$getComponentMeta,
+    setComponentMeta: DragDropDataTransfer$setComponentMeta,
+    setAllowedEffects: DragDropDataTransfer$setAllowedEffects,
+    getData: DragDropDataTransfer$getData,
+    setData: DragDropDataTransfer$setData,
+    clearData: DragDropDataTransfer$clearData
+});
+
+
+function DragDropDataTransfer$$componentDataType() {
+    return dragDropConfig.dataTypes.component;
+}
+
+
+function DragDropDataTransfer$isComponent() {
+    return _.indexOf(this.types, DragDropDataTransfer.componentDataType()) >= 0;
+}
+
+
+function DragDropDataTransfer$getComponentState() {
+    var dataType = DragDropDataTransfer.componentDataType()
+        , stateStr = this.dataTransfer.getData(dataType)
+        , state = jsonParse(stateStr);
+
+    return state;
+}
+
+
+function DragDropDataTransfer$setComponentState(component, stateStr){
+    if (! stateStr) {
+        var state = component.getTransferState()
+        stateStr = JSON.stringify(state)
+    }
+    var dataType = DragDropDataTransfer.componentDataType();
+
+    stateStr && this.dataTransfer.setData(dataType, stateStr);
+    this.dataTransfer.setData('text/html', component.el.outerHTML);
+    return stateStr;
+}
+
+
+function DragDropDataTransfer$setComponentMeta(component, params, data) {
+    // HTML drag-drop API converts to lowercase anyway,
+    // we do it to be consistent in case some browsers don't
+    var compClass = component.constructor.name.toLowerCase()
+        , compName = component.name.toLowerCase();
+
+    var paramsStr = _.toQueryString(params);
+    var dataType = dragDropConfig.dataTypes.componentMetaTemplate
+                    .replace('%class', compClass)
+                    .replace('%name', compName)
+                    .replace('%params', paramsStr);
+
+    this.dataTransfer.setData(dataType, data || '');
+
+    return dataType;
+}
+
+
+function DragDropDataTransfer$getComponentMeta() {
+    var dataType = _.find(this.types, function (dType) {
+        return componentMetaRegex.test(dType);
+    });
+    if (!dataType) return;
+
+    var match = dataType.match(componentMetaRegex);
+
+    return {
+        compClass: match[1],
+        compName: match[2],
+        params: _.fromQueryString(match[3]),
+        dataType: dataType,
+        data: this.dataTransfer.getData(dataType)
+    };
+}
+
+
+// as defined here: https://developer.mozilla.org/en-US/docs/DragDrop/Drag_Operations#dragstart
+function DragDropDataTransfer$setAllowedEffects(effects) {
+    this.dataTransfer.effectAllowed = effects;
+}
+
+
+function DragDropDataTransfer$getData(dataType) {
+    this.dataTransfer.getData(dataType);
+}
+
+
+function DragDropDataTransfer$setData(dataType, dataStr) {
+    this.dataTransfer.setData(dataType, dataStr);
+}
+
+
+function DragDropDataTransfer$clearData(dataType) {
+    this.dataTransfer.clearData(dataType);
+}
+
+},{"../components/c_class":11,"../config":53,"./json_parse":85,"mol-proto":95}],83:[function(require,module,exports){
 // <a name="utils-error"></a>
 // milo.utils.error
 // -----------
@@ -9875,7 +10036,7 @@ function error$toBeImplemented() {
     throw new error.AbstractClass('calling the method of an absctract class');
 }
 
-},{"mol-proto":94}],83:[function(require,module,exports){
+},{"mol-proto":95}],84:[function(require,module,exports){
 'use strict';
 
 /**
@@ -9893,12 +10054,13 @@ var util = {
     selection: require('./selection'),
     jsonParse: require('./json_parse'),
     storage: require('./storage'),
-    domReady: require('./domready')
+    domReady: require('./domready'),
+    dragDrop: require('./dragdrop')
 };
 
 module.exports = util;
 
-},{"./check":77,"./component_name":78,"./count":79,"./dom":80,"./domready":81,"./error":82,"./json_parse":84,"./logger":85,"./promise":87,"./request":88,"./selection":89,"./storage":90}],84:[function(require,module,exports){
+},{"./check":77,"./component_name":78,"./count":79,"./dom":80,"./domready":81,"./dragdrop":82,"./error":83,"./json_parse":85,"./logger":86,"./promise":88,"./request":89,"./selection":90,"./storage":91}],85:[function(require,module,exports){
 'use strict';
 
 
@@ -9918,7 +10080,7 @@ function jsonParse(str) {
     } catch (e) {}
 }
 
-},{}],85:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 'use strict';
 
 // <a name="utils-logger"></a>
@@ -9948,7 +10110,7 @@ var logger = new Logger({ level: 3 });
 
 module.exports = logger;
 
-},{"./logger_class":86}],86:[function(require,module,exports){
+},{"./logger_class":87}],87:[function(require,module,exports){
 'use strict';
 
 // ### Logger Class
@@ -10060,7 +10222,7 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"mol-proto":94}],87:[function(require,module,exports){
+},{"mol-proto":95}],88:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -10225,7 +10387,7 @@ function Promise$transform(transformDataFunc) {
     return promise;
 }
 
-},{"mol-proto":94}],88:[function(require,module,exports){
+},{"mol-proto":95}],89:[function(require,module,exports){
 'use strict';
 
 // milo.utils.request
@@ -10308,7 +10470,7 @@ function request$json(url, callback) {
     return jsonPromise;
 }
 
-},{"./promise":87,"mol-proto":94}],89:[function(require,module,exports){
+},{"./promise":88,"mol-proto":95}],90:[function(require,module,exports){
 'use strict';
 
 
@@ -10600,7 +10762,7 @@ function TextSelection$del(selectEndContainer) {
 
 
 
-},{"../components/c_class":11,"./dom":80,"mol-proto":94}],90:[function(require,module,exports){
+},{"../components/c_class":11,"./dom":80,"mol-proto":95}],91:[function(require,module,exports){
 'use strict';
 
 
@@ -10901,13 +11063,13 @@ function DOMStorage$$registerDataType(valueType, serializer, parser, storeAsData
     valuesDataTypes[valueType] = storeAsDataType || valueType;
 }
 
-},{"../config":53,"./check":77,"./error":82,"./json_parse":84,"mol-proto":94}],91:[function(require,module,exports){
+},{"../config":53,"./check":77,"./error":83,"./json_parse":85,"mol-proto":95}],92:[function(require,module,exports){
 
 // not implemented
 // The reason for having an empty file and not throwing is to allow
 // untraditional implementation of this module.
 
-},{}],92:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 // doT.js
 // 2011, Laura Doktorova, https://github.com/olado/doT
 // Licensed under the MIT license.
@@ -11044,7 +11206,7 @@ function DOMStorage$$registerDataType(valueType, serializer, parser, storeAsData
 	};
 }());
 
-},{}],93:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 /* doT + auto-compilation of doT templates
  *
  * 2012, Laura Doktorova, https://github.com/olado/doT
@@ -11189,7 +11351,7 @@ InstallDots.prototype.compileAll = function() {
 	return this.__rendermodule;
 };
 
-},{"./doT":92,"fs":91}],94:[function(require,module,exports){
+},{"./doT":93,"fs":92}],95:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -11295,6 +11457,7 @@ var numberMethods = require('./proto_number');
  * - [times](proto_util.js.html#times)
  * - [repeat](proto_util.js.html#repeat)
  * - [tap](proto_util.js.html#tap)
+ * - [result](proto_util.js.html#result)
  */
 var utilMethods = require('./proto_util');
 
@@ -11380,7 +11543,7 @@ if (typeof module == 'object' && module.exports)
     // export for node/browserify
     module.exports = Proto;
 
-},{"./proto_array":95,"./proto_function":96,"./proto_number":97,"./proto_object":98,"./proto_prototype":99,"./proto_string":100,"./proto_util":101,"./utils":102}],95:[function(require,module,exports){
+},{"./proto_array":96,"./proto_function":97,"./proto_number":98,"./proto_object":99,"./proto_prototype":100,"./proto_string":101,"./proto_util":102,"./utils":103}],96:[function(require,module,exports){
 'use strict';
 
 var __ = require('./proto_object')
@@ -11593,7 +11756,7 @@ function deepForEach(callback, thisArg) {
     }
 }
 
-},{"./proto_object":98,"./utils":102}],96:[function(require,module,exports){
+},{"./proto_object":99,"./utils":103}],97:[function(require,module,exports){
 'use strict';
 
 
@@ -11896,7 +12059,7 @@ function once() {
         return memo;
     };
 }
-},{"./proto_util":101,"./utils":102}],97:[function(require,module,exports){
+},{"./proto_util":102,"./utils":103}],98:[function(require,module,exports){
 'use strict';
 
 /**
@@ -11917,7 +12080,7 @@ function isNumeric() {
     return !isNaN(parseFloat(this)) && isFinite(this);
 };
 
-},{}],98:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 'use strict';
 
 
@@ -12454,7 +12617,7 @@ function omitKeys() { // , ... keys
     return obj;
 }
 
-},{"./utils":102}],99:[function(require,module,exports){
+},{"./utils":103}],100:[function(require,module,exports){
 'use strict';
 
 /**
@@ -12568,7 +12731,7 @@ function makeSubclass(Superclass) {
     return this;
 }
 
-},{"./proto_function":96,"./proto_object":98}],100:[function(require,module,exports){
+},{"./proto_function":97,"./proto_object":99}],101:[function(require,module,exports){
 'use strict';
 
 /**
@@ -12673,18 +12836,20 @@ function fromQueryString() {
     return results;
 }
 
-},{}],101:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
 'use strict';
 
 /**
  * - [times](#times)
  * - [repeat](#repeat)
  * - [tap](#tap)
+ * - [result](#result)
  */
 var utilMethods = module.exports = {
     times: times,
     repeat: repeat,
-    tap: tap
+    tap: tap,
+    result: result
 };
 
 
@@ -12730,7 +12895,23 @@ function tap(func) {
     return this;
 };
 
-},{}],102:[function(require,module,exports){
+
+/**
+ * Calls function `self` (first parameter of _.result) with given context and arguments
+ * 
+ * @param {Function|Any} self
+ * @param {Any} thisArg context
+ * @param {List} arguments extra arguments
+ * @return {Any}
+ */
+function result(thisArg) { //, arguments
+    var args = Array.prototype.slice.call(arguments, 1);
+    return typeof this == 'function'
+            ? this.apply(thisArg, args)
+            : this;
+}
+
+},{}],103:[function(require,module,exports){
 'use strict';
 
 var utils = module.exports = {
