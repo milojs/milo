@@ -3145,10 +3145,12 @@ var ComponentFacet = require('../c_facet')
  * Facet for components that can accept drops
  * Drop facet supports the following configuration parameters:
  *
- *  - components: true by default OR list of allowed components classes OR false to NOT accept components
+ *  - components: true by default OR list of allowed components classes (strings) OR false to NOT accept components
+ *  - dataTypes: list of data types that a drop target would accept in addition to components
+ *  
  *  - metaParams: object of key-value pairs that will be converted in url-like query string in the end of data type for metadata data type (or function that returns this object). See config.dragDrop.dataTypes.componentMetaTemplate
  *  - metaData: data that will be stored in the above meta data type (or function)
- *  - allowedEffects: string (or function) as specified here: https://developer.mozilla.org/en-US/docs/DragDrop/Drag_Operations#dragstart
+ *  - dropEffect: string (or function) as specified here: https://developer.mozilla.org/en-US/docs/DragDrop/Drag_Operations#dragstart
  *
  * If function is specified in any parameter it will be called with the component as the context
  */
@@ -3182,7 +3184,9 @@ function Drop$start() {
 function onDragging(eventType, event) {
     //TODO: manage not-allowed drops, maybe with config.
     var allowDropTest = this.config.allowDropTest;
+
     event.stopPropagation();
+    event.preventDefault();
     var dt = event.dataTransfer
         , dataTypes = dt.types
         , hasHtml = dataTypes.indexOf('text/html') >= 0
@@ -9898,7 +9902,9 @@ _.extendProto(DragDropDataTransfer, {
     setComponentState: DragDropDataTransfer$setComponentState,
     getComponentMeta: DragDropDataTransfer$getComponentMeta,
     setComponentMeta: DragDropDataTransfer$setComponentMeta,
+    getAllowedEffects: DragDropDataTransfer$getAllowedEffects,
     setAllowedEffects: DragDropDataTransfer$setAllowedEffects,
+    setDropEffect: DragDropDataTransfer$setDropEffect,
     getData: DragDropDataTransfer$getData,
     setData: DragDropDataTransfer$setData,
     clearData: DragDropDataTransfer$clearData
@@ -9974,8 +9980,19 @@ function DragDropDataTransfer$getComponentMeta() {
 
 
 // as defined here: https://developer.mozilla.org/en-US/docs/DragDrop/Drag_Operations#dragstart
+function DragDropDataTransfer$getAllowedEffects() {
+    return this.dataTransfer.effectAllowed;
+}
+
+
 function DragDropDataTransfer$setAllowedEffects(effects) {
     this.dataTransfer.effectAllowed = effects;
+}
+
+
+// TODO figure out and return allowed effect if effect was not passed
+function DragDropDataTransfer$setDropEffect(effect) {
+    this.dataTransfer.dropEffect = effect;
 }
 
 
