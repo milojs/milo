@@ -3237,10 +3237,10 @@ function onDragging(eventType, event) {
     var dt = new DragDrop(event);
 
     event.stopPropagation();
-    if (_isDropAllowed.call(this, dt))
-        event.preventDefault();
-    else
-        dt.setDropEffect('none')
+    event.preventDefault();
+    
+    if (! _isDropAllowed.call(this, dt))
+        dt.setDropEffect('none');
 }
 
 
@@ -3275,17 +3275,17 @@ function _isDropAllowed(dt) {
                 return allowComps;
             // component class
             case 'string':
-                return meta.compClass == allowComps;
+                return meta && meta.compClass == allowComps;
             // test function
             case 'function':
                 return allowComps.call(this.owner, meta, dt);
             case 'object':
                 if (Array.isArray(allowComps))
                     // list of allowed classes
-                    return allowComps.indexOf(meta.compClass) >= 0;
+                    return allowComps.indexOf(meta && meta.compClass) >= 0;
                 else {
                     // map of class: boolean|test function
-                    var test = allowComps[meta.compClass];
+                    var test = allowComps[meta && meta.compClass];
                     return !! _.result(test, this.owner, meta, dt);
                 }
             default:
@@ -10205,7 +10205,7 @@ function onDragDropStarted(msg, data) {
 
 
 function onDragDropCompleted(msg, data) {
-    _currentDragFacet.postMessage('dragdropcompleted', data);
+    _currentDragFacet && _currentDragFacet.postMessage('dragdropcompleted', data);
     _currentDragDrop = undefined;
     _currentDragFacet = undefined;
 }
