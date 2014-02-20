@@ -2982,9 +2982,10 @@ var ComponentFacet = require('../c_facet')
  * Facet for components that can be dragged
  * Drag facet supports the following configuration parameters:
  *
- *  - metaParams: object of key-value pairs that will be converted in url-like query string in the end of data type for metadata data type (or function that returns this object). See config.dragDrop.dataTypes.componentMetaTemplate
- *      all values will converted to lowercase as datatype cannot store uppercase letters.
- *  - metaData: data that will be stored in the above meta data type (or function)
+ *  - meta: object with properties
+ *      - params: object of key-value pairs that will be converted in url-like query string in the end of data type for metadata data type (or function that returns this object). See config.dragDrop.dataTypes.componentMetaTemplate
+ *          all values will converted to lowercase as datatype cannot store uppercase letters.
+ *      - data: data that will be stored in the above meta data type (or function)
  *  - allowedEffects: string (or function) as specified here: https://developer.mozilla.org/en-US/docs/DragDrop/Drag_Operations#dragstart
  *
  * If function is specified in any parameter it will be called with the component as the context
@@ -3095,13 +3096,15 @@ function onDragStart(eventType, event) {
     var dt = new DragDropDataTransfer(event);
     this._dragData = dt.setComponentState(owner);
 
-    var params = _.result(this.config.metaParams, owner)
-        , data = _.result(this.config.metaData, owner);
+    var metaConfig = this.config.meta
+        , paramsConfig = metaConfig && metaConfig.params
+        , metaDataConfig = metaConfig && metaConfig.data;
+
+    var params = _.result(paramsConfig, owner)
+        , data = _.result(metaDataConfig, owner);
 
     this._dragMetaDataType = dt.setComponentMeta(owner, params, data);
     this._dragMetaData = data;
-
-    console.log('onDragStart', this._dragMetaDataType);
 
     _setAllowedEffects.call(this, dt);
 }
@@ -3149,7 +3152,7 @@ var ComponentFacet = require('../c_facet')
  * Facet for components that can accept drops
  * Drop facet supports the following configuration parameters:
  *
- *  - allowed - an object that will define allowed data types during drag (`dragenter` and `dragover` events) with these properties:
+ *  - allow - an object that will define allowed data types during drag (`dragenter` and `dragover` events) with these properties:
  *      - components: `true` by default (all components will be accepted)
  *                        OR string with allowed component class
  *                        OR list of allowed components classes (strings)
@@ -3209,31 +3212,11 @@ function Drop$start() {
 function onDragging(eventType, event) {
     var dt = new DragDropDataTransfer(event);
 
-    // var allowedComps = this.config.allowed.components;
-    // if (allowedComps !== false && dt.isComponent()) {
-
-        var meta = dt.getComponentMeta();
-
-        console.log('Drop onDraggin', meta);
-    // };
-
-
-
-    //TODO: manage not-allowed drops, maybe with config.
-    var allowDropTest = this.config.allowDropTest;
-
     event.stopPropagation();
-    event.preventDefault();
-    var dt = event.dataTransfer
-        , dataTypes = dt.types
-        , hasHtml = dataTypes.indexOf('text/html') >= 0
-        , hasMiloData = dataTypes.indexOf('x-application/milo-component') >= 0;
-
-    if (dataTypes && (hasHtml || hasMiloData)) {
-        var canDrop = allowDropTest ? allowDropTest(event, hasMiloData) : 'move';
-        event.dataTransfer.dropEffect = canDrop;
+    if (_isDropAllowed.call(this, dt))
         event.preventDefault();
-    }
+    else
+        dt.setDropEffect('none')
 }
 
 
@@ -3244,30 +3227,30 @@ function onDragging(eventType, event) {
  * @return {Boolean}
  */
 function _isDropAllowed(dt) {
-    var allowed = this.config.allowed;
+    var allow = this.config.allow;
 
     if (dt.isComponent()) {
-        var allowedComps = allowed && allowed.components
+        var allowComps = allow && allow.components
             , meta = dt.getComponentMeta();
 
-        switch (typeof allowedComps) {
+        switch (typeof allowComps) {
             case 'undefined':
                 return true;
             case 'boolean':
-                return allowedComps;
+                return allowComps;
             // component class
             case 'string':
-                return meta.compClass == allowedComps;
+                return meta.compClass == allowComps;
             // test function
             case 'function':
-                return allowedComps.call(this.owner, meta, dt);
+                return allowComps.call(this.owner, meta, dt);
             case 'object':
-                if (Array.isArray(allowedComps))
+                if (Array.isArray(allowComps))
                     // list of allowed classes
-                    return allowedComps.indexOf(meta.compClass) >= 0;
+                    return allowComps.indexOf(meta.compClass) >= 0;
                 else {
                     // map of class: boolean|test function
-                    var test = allowedComps[meta.compClass];
+                    var test = allowComps[meta.compClass];
                     return !! _.result(test, this.owner, meta, dt);
                 }
             default:
@@ -3931,7 +3914,8 @@ var Transfer = _.createSubclass(ComponentFacet, 'Transfer');
 _.extendProto(Transfer, {
     init: Transfer$init,
     getState: Transfer$getState,
-    setState: Transfer$setState
+    setState: Transfer$setState,
+    getComponentMeta: Transfer$getComponentMeta
 });
 
 facetsRegistry.add(Transfer);
@@ -3965,6 +3949,15 @@ function Transfer$init() {
  function Transfer$setState(state) {
     this._state = state;
  }
+
+
+function Transfer$getComponentMeta() {
+    var state = this._state;
+    return {
+        compName: state && state.compName,
+        compClass: state && state.compClass
+    };
+}
 
 },{"../c_facet":12,"./cf_registry":25,"mol-proto":110}],25:[function(require,module,exports){
 'use strict';
@@ -9984,7 +9977,9 @@ _.extendProto(DragDropDataTransfer, {
     setComponentMeta: DragDropDataTransfer$setComponentMeta,
     getAllowedEffects: DragDropDataTransfer$getAllowedEffects,
     setAllowedEffects: DragDropDataTransfer$setAllowedEffects,
+    getDropEffect: DragDropDataTransfer$getDropEffect,
     setDropEffect: DragDropDataTransfer$setDropEffect,
+    isEffectAllowed: DragDropDataTransfer$isEffectAllowed,
     getData: DragDropDataTransfer$getData,
     setData: DragDropDataTransfer$setData,
     clearData: DragDropDataTransfer$clearData
@@ -10024,14 +10019,13 @@ function DragDropDataTransfer$setComponentState(component, stateStr){
 
 
 function DragDropDataTransfer$setComponentMeta(component, params, data) {
-    var compClass = component.constructor.name
-        , compName = component.name
+    var meta = _componentMeta(component);
 
     var paramsStr = _.toQueryString(params);
     var dataType = dragDropConfig.dataTypes.componentMetaTemplate
-                    .replace('%class', _encode(compClass))
-                    .replace('%name', _encode(compName))
-                    .replace('%params', _encode(paramsStr));
+                    .replace('%class', _encode(meta.compClass || ''))
+                    .replace('%name', _encode(meta.compName || ''))
+                    .replace('%params', _encode(paramsStr || ''));
 
     this.dataTransfer.setData(dataType, data || '');
 
@@ -10041,6 +10035,16 @@ function DragDropDataTransfer$setComponentMeta(component, params, data) {
 
 function _encode(str) {
     return base32.encode(str).toLowerCase();
+}
+
+
+function _componentMeta(component) {
+    return component.transfer
+            ? component.transfer.getComponentMeta()
+            : { 
+                compClass: component.constructor.name,
+                compName: component.name
+            };
 }
 
 
@@ -10076,9 +10080,40 @@ function DragDropDataTransfer$setAllowedEffects(effects) {
 }
 
 
-// TODO figure out and return allowed effect if effect was not passed
+function DragDropDataTransfer$getDropEffect() {
+    return this.dataTransfer.dropEffect;
+}
+
+
 function DragDropDataTransfer$setDropEffect(effect) {
     this.dataTransfer.dropEffect = effect;
+}
+
+
+function DragDropDataTransfer$isEffectAllowed(effect) {
+    var allowedEffects = this.getAllowedEffects()
+        , isCopy = effect == 'copy'
+        , isMove = effect == 'move'
+        , isLink = effect == 'link'
+        , isAllowed = isCopy || isLink || isMove;
+
+    switch (allowedEffects) {
+        case 'copy':
+        case 'move':
+        case 'link':
+            return allowedEffects == effect;
+        case 'copyLink':
+            return isCopy || isLink;
+        case 'copyMove':
+            return isCopy || isMove;
+        case 'linkMove':
+            return isLink || isMove;
+        case 'all':
+        case 'uninitialized':
+            return isAllowed;
+        case 'none':
+            return false;
+    }
 }
 
 
