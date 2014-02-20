@@ -5171,12 +5171,17 @@ function MLComboList_del() {
 'use strict';
 
 var Component = require('../c_class')
-    , componentsRegistry = require('../c_registry');
+    , componentsRegistry = require('../c_registry')
+    , _ = require('mol-proto');
 
 
 var MLDate = Component.createComponentClass('MLDate', {
     events: undefined,
-    data: undefined,
+    data: {
+        get: MLDate_get,
+        set: MLDate_set,
+        del: MLDate_del,
+    },
     dom: {
         cls: 'ml-ui-date'
     }
@@ -5186,7 +5191,39 @@ componentsRegistry.add(MLDate);
 
 module.exports = MLDate;
 
-},{"../c_class":11,"../c_registry":27}],40:[function(require,module,exports){
+
+function MLDate_get() {
+    var dateStr = this.el.value;
+
+    return _.toDate(dateStr);
+}
+
+
+function MLDate_set(value) {   
+    var date = _.toDate(value);
+    if (! date) {
+        this.el.value = '';
+        return;
+    }
+
+    var dateArr = [
+        date.getFullYear(),
+        pad(date.getMonth() + 1),
+        pad(date.getDate())
+    ];
+    var dateStr = dateArr.join('-');
+    this.el.value = dateStr;
+    return dateStr;
+                        
+    function pad(n) {return n < 10 ? '0' + n : n; }
+}
+
+
+function MLDate_del() {
+    this.el.value = '';
+}
+
+},{"../c_class":11,"../c_registry":27,"mol-proto":110}],40:[function(require,module,exports){
 'use strict';
 
 
@@ -9189,7 +9226,7 @@ function _synthesize(synthesizer, path, parsedPath) {
     }
 
     function cloneTree(value) {
-        return value == null || typeof value != "object"
+        return ! valueIsNormalObject(value)
                 ? value
                 : Array.isArray(value)
                     ? value.slice()
@@ -9197,7 +9234,15 @@ function _synthesize(synthesizer, path, parsedPath) {
     }
 
     function valueIsTree(value) {
-        return value != null && typeof value == "object" && Object.keys(value).length;
+        return valueIsNormalObject(value)
+                && Object.keys(value).length;
+    }
+
+    function valueIsNormalObject(value) {
+        return value != null
+                && typeof value == "object"
+                && ! (value instanceof Date)
+                && ! (value instanceof RegExp);
     }
 }
 
@@ -17250,6 +17295,7 @@ var functionMethods = require('./proto_function');
  * - [firstLowerCase](proto_string.js.html#firstLowerCase)
  * - [toRegExp](proto_string.js.html#toRegExp)
  * - [toFunction](proto_string.js.html#toFunction)
+ * - [toDate](proto_string.js.html#toDate)
  * - [toQueryString](proto_string.js.html#toQueryString)
  * - [fromQueryString](proto_string.js.html#fromQueryString)
  */
@@ -18557,12 +18603,14 @@ var __ = require('./proto_object');
  * - [firstLowerCase](#firstLowerCase)
  * - [toRegExp](#toRegExp)
  * - [toFunction](#toFunction)
+ * - [toDate](#toDate)
  */
  var stringMethods = module.exports = {
     firstUpperCase: firstUpperCase,
     firstLowerCase: firstLowerCase,
     toRegExp: toRegExp,
     toFunction: toFunction,
+    toDate: toDate,
     toQueryString: toQueryString,
     fromQueryString: fromQueryString
 };
@@ -18616,6 +18664,22 @@ function toFunction() {
     } catch(e) {
         return;
     }
+}
+
+
+/**
+ * Converts string to date in a safe way so that the resiult is undefined if date is invalid
+ *
+ * @param {String|Date} self string or date object to convert to VALID date
+ * @return {[type]} [description]
+ */
+function toDate() {
+    if (! this) return;
+    try {
+        var date = new Date(this);
+    } catch (e) {}
+    if (date && date.getTime && !isNaN(date.getTime()))
+        return date;
 }
 
 
