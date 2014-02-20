@@ -2972,7 +2972,7 @@ var ComponentFacet = require('../c_facet')
     , facetsRegistry = require('./cf_registry')
     , DOMEventsSource = require('../msg_src/dom_events')
     , Component = require('../c_class')
-    , DragDropDataTransfer = require('../../util/dragdrop')
+    , DragDrop = require('../../util/dragdrop')
     , _ = require('mol-proto')
     , logger = require('../../util/logger');
 
@@ -3036,14 +3036,11 @@ function Drag$start() {
     _addDragAttribute.call(this);
 
     this.onMessages({
-        'mousedown': {
-            context: this, subscriber: onMouseDown },
-        'mouseenter mouseleave mousemove': {
-            context: this, subscriber: onMouseMovement },
-        'dragstart': {
-            context: this, subscriber: onDragStart },
-        'drag': {
-            context: this, subscriber: onDragging }
+        'mousedown': onMouseDown,
+        'mouseenter mouseleave mousemove': onMouseMovement,
+        'dragstart': onDragStart,
+        'drag': onDragging,
+        'dragend': onDragEnd
     });
 
     this.owner.onMessages({
@@ -3093,7 +3090,7 @@ function onDragStart(eventType, event) {
     }
 
     var owner = this.owner;
-    var dt = new DragDropDataTransfer(event);
+    var dt = new DragDrop(event);
     this._dragData = dt.setComponentState(owner);
 
     var metaConfig = this.config.meta
@@ -3107,30 +3104,54 @@ function onDragStart(eventType, event) {
     this._dragMetaData = data;
 
     _setAllowedEffects.call(this, dt);
+
+    DragDrop.service.postMessage('dragdropstarted', {
+        eventType: 'dragstart',
+        dragDrop: dt,
+        dragFacet: this
+    });
 }
 
 
 function onDragging(eventType, event) {
-    if (this.config.off) {
-        event.preventDefault();
-        return;
-    }
+    if (_dragIsDisabled.call(this)) return;
 
-    var dt = new DragDropDataTransfer(event);
+    var dt = new DragDrop(event);
     dt.setComponentState(this.owner, this._dragData);
     dt.setData(this._dragMetaDataType, this._dragMetaData);
     _setAllowedEffects.call(this, dt);
 }
 
 
-function _setAllowedEffects(dragDropDataTransfer) {
+function onDragEnd() {
+    if (_dragIsDisabled.call(this)) return;
+
+    event.stopPropagation();
+    var dt = new DragDrop(event);
+    DragDrop.service.postMessage('completedragdrop', {
+        eventType: 'dragend',
+        dragDrop: dt,
+        dragFacet: this
+    });
+}
+
+
+function _setAllowedEffects(DragDrop) {
     var effects = _.result(this.config.allowedEffects, this.owner);
-    dragDropDataTransfer.setAllowedEffects(effects);
+    DragDrop.setAllowedEffects(effects);
 }
 
 
 function targetInDragHandle() {
     return ! this._dragHandle || this._dragHandle.contains(this.__mouseDownTarget);
+}
+
+
+function _dragIsDisabled() {
+    if (this.config.off) {
+        event.preventDefault();
+        return true;
+    }
 }
 
 },{"../../util/dragdrop":82,"../../util/logger":86,"../c_class":11,"../c_facet":12,"../msg_src/dom_events":33,"./cf_registry":25,"mol-proto":110}],17:[function(require,module,exports){
@@ -3142,7 +3163,7 @@ function targetInDragHandle() {
 var ComponentFacet = require('../c_facet')
     , facetsRegistry = require('./cf_registry')
     , DOMEventsSource = require('../msg_src/dom_events')
-    , DragDropDataTransfer = require('../../util/dragdrop')
+    , DragDrop = require('../../util/dragdrop')
     , DropError = require('../../util/error').Drop
     , _ = require('mol-proto');
 
@@ -3162,7 +3183,7 @@ var ComponentFacet = require('../c_facet')
  *      - dataTypes:  `false` by default (no other data types will be accepted)
  *                        OR string with allowed data type
  *                        OR list of additional data types that a drop target would accept
- *                        OR test function that will be passed DragDropDataTransfer object
+ *                        OR test function that will be passed DragDrop object
  *                        OR `true` to accept all data types
  *      If test functions are used, they should return boolean. Each test function can also set drop effect as defined here:
  *      https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer#dropEffect.28.29
@@ -3173,9 +3194,9 @@ var ComponentFacet = require('../c_facet')
  *          params - parameters as encoded in dataType, passed to `milo.util.dragDrop.setComponentMeta` by Drag facet
  *          metaDataType - data type of the data that has compClass, compName and params encoded
  *
- *      ... and DragDropDataTransfer instance as the second parameter
+ *      ... and DragDrop instance as the second parameter
  *
- *      Test function for other data types will be passed the owner of Drop facet as context and DragDropDataTransfer instance as the first parameter
+ *      Test function for other data types will be passed the owner of Drop facet as context and DragDrop instance as the first parameter
  *
  * ####Events####
  *
@@ -3205,12 +3226,15 @@ function Drop$init() {
 function Drop$start() {
     ComponentFacet.prototype.start.apply(this, arguments);
     this.owner.el.classList.add('cc-module-relative');
-    this.on('dragenter dragover', onDragging);
+    this.onMessages({
+        'dragenter dragover': onDragging,
+        'drop': onDrop
+    });
 }
 
 
 function onDragging(eventType, event) {
-    var dt = new DragDropDataTransfer(event);
+    var dt = new DragDrop(event);
 
     event.stopPropagation();
     if (_isDropAllowed.call(this, dt))
@@ -3220,10 +3244,21 @@ function onDragging(eventType, event) {
 }
 
 
+function onDrop(eventType, event) {
+    event.stopPropagation();
+    var dt = new DragDrop(event);
+    DragDrop.service.postMessage('dragdropcompleted', {
+        eventType: 'drop',
+        dragDrop: dt,
+        dropFacet: this
+    });
+}
+
+
 /**
  * Checks if drop is allowed based on facet configuration (see above)
  * 
- * @param {DragDropDataTransfer} dt
+ * @param {DragDrop} dt
  * @return {Boolean}
  */
 function _isDropAllowed(dt) {
@@ -9935,6 +9970,7 @@ function isReady() {
 'use strict';
 
 var Component = require('../components/c_class')
+    , Messenger = require('../messenger')
     , dragDropConfig = require('../config').dragDrop
     , componentMetaRegex = dragDropConfig.dataTypes.componentMetaRegex
     , jsonParse = require('./json_parse')
@@ -9942,7 +9978,7 @@ var Component = require('../components/c_class')
     , base32 = require('base32');
 
 
-module.exports = DragDropDataTransfer;
+module.exports = DragDrop;
 
 
 /**
@@ -9950,9 +9986,9 @@ module.exports = DragDropDataTransfer;
  *
  * @constructor
  * @param {event} DOM event
- * @return {DragDropDataTransfer}
+ * @return {DragDrop}
  */
-function DragDropDataTransfer(event) {
+function DragDrop(event) {
     this.event = event;
     this.dataTransfer = event.dataTransfer;
     this.types = event.dataTransfer.types;
@@ -9960,44 +9996,44 @@ function DragDropDataTransfer(event) {
 
 /**
  * Usage:
- * var testDT = new DragDropDataTransfer(event);
+ * var testDT = new DragDrop(event);
  * testDT.setComponentMeta(newComponent, {test: 'test', test2: 'test2'});
  * testDT.getComponentMeta();
  */
 
-_.extend(DragDropDataTransfer, {
-    componentDataType: DragDropDataTransfer$$componentDataType
+_.extend(DragDrop, {
+    componentDataType: DragDrop$$componentDataType
 });
 
-_.extendProto(DragDropDataTransfer, {
-    isComponent: DragDropDataTransfer$isComponent,
-    getComponentState: DragDropDataTransfer$getComponentState,
-    setComponentState: DragDropDataTransfer$setComponentState,
-    getComponentMeta: DragDropDataTransfer$getComponentMeta,
-    setComponentMeta: DragDropDataTransfer$setComponentMeta,
-    getAllowedEffects: DragDropDataTransfer$getAllowedEffects,
-    setAllowedEffects: DragDropDataTransfer$setAllowedEffects,
-    getDropEffect: DragDropDataTransfer$getDropEffect,
-    setDropEffect: DragDropDataTransfer$setDropEffect,
-    isEffectAllowed: DragDropDataTransfer$isEffectAllowed,
-    getData: DragDropDataTransfer$getData,
-    setData: DragDropDataTransfer$setData,
-    clearData: DragDropDataTransfer$clearData
+_.extendProto(DragDrop, {
+    isComponent: DragDrop$isComponent,
+    getComponentState: DragDrop$getComponentState,
+    setComponentState: DragDrop$setComponentState,
+    getComponentMeta: DragDrop$getComponentMeta,
+    setComponentMeta: DragDrop$setComponentMeta,
+    getAllowedEffects: DragDrop$getAllowedEffects,
+    setAllowedEffects: DragDrop$setAllowedEffects,
+    getDropEffect: DragDrop$getDropEffect,
+    setDropEffect: DragDrop$setDropEffect,
+    isEffectAllowed: DragDrop$isEffectAllowed,
+    getData: DragDrop$getData,
+    setData: DragDrop$setData,
+    clearData: DragDrop$clearData
 });
 
 
-function DragDropDataTransfer$$componentDataType() {
+function DragDrop$$componentDataType() {
     return dragDropConfig.dataTypes.component;
 }
 
 
-function DragDropDataTransfer$isComponent() {
-    return _.indexOf(this.types, DragDropDataTransfer.componentDataType()) >= 0;
+function DragDrop$isComponent() {
+    return _.indexOf(this.types, DragDrop.componentDataType()) >= 0;
 }
 
 
-function DragDropDataTransfer$getComponentState() {
-    var dataType = DragDropDataTransfer.componentDataType()
+function DragDrop$getComponentState() {
+    var dataType = DragDrop.componentDataType()
         , stateStr = this.dataTransfer.getData(dataType)
         , state = jsonParse(stateStr);
 
@@ -10005,12 +10041,12 @@ function DragDropDataTransfer$getComponentState() {
 }
 
 
-function DragDropDataTransfer$setComponentState(component, stateStr){
+function DragDrop$setComponentState(component, stateStr){
     if (! stateStr) {
         var state = component.getTransferState()
         stateStr = JSON.stringify(state)
     }
-    var dataType = DragDropDataTransfer.componentDataType();
+    var dataType = DragDrop.componentDataType();
 
     stateStr && this.dataTransfer.setData(dataType, stateStr);
     this.dataTransfer.setData('text/html', component.el.outerHTML);
@@ -10018,7 +10054,7 @@ function DragDropDataTransfer$setComponentState(component, stateStr){
 }
 
 
-function DragDropDataTransfer$setComponentMeta(component, params, data) {
+function DragDrop$setComponentMeta(component, params, data) {
     var meta = _componentMeta(component);
 
     var paramsStr = _.toQueryString(params);
@@ -10048,7 +10084,7 @@ function _componentMeta(component) {
 }
 
 
-function DragDropDataTransfer$getComponentMeta() {
+function DragDrop$getComponentMeta() {
     var match;
     var metaDataType = _.find(this.types, function (dType) {
         match = dType.match(componentMetaRegex);
@@ -10070,27 +10106,27 @@ function DragDropDataTransfer$getComponentMeta() {
 
 
 // as defined here: https://developer.mozilla.org/en-US/docs/DragDrop/Drag_Operations#dragstart
-function DragDropDataTransfer$getAllowedEffects() {
+function DragDrop$getAllowedEffects() {
     return this.dataTransfer.effectAllowed;
 }
 
 
-function DragDropDataTransfer$setAllowedEffects(effects) {
+function DragDrop$setAllowedEffects(effects) {
     this.dataTransfer.effectAllowed = effects;
 }
 
 
-function DragDropDataTransfer$getDropEffect() {
+function DragDrop$getDropEffect() {
     return this.dataTransfer.dropEffect;
 }
 
 
-function DragDropDataTransfer$setDropEffect(effect) {
+function DragDrop$setDropEffect(effect) {
     this.dataTransfer.dropEffect = effect;
 }
 
 
-function DragDropDataTransfer$isEffectAllowed(effect) {
+function DragDrop$isEffectAllowed(effect) {
     var allowedEffects = this.getAllowedEffects()
         , isCopy = effect == 'copy'
         , isMove = effect == 'move'
@@ -10117,21 +10153,75 @@ function DragDropDataTransfer$isEffectAllowed(effect) {
 }
 
 
-function DragDropDataTransfer$getData(dataType) {
+function DragDrop$getData(dataType) {
     this.dataTransfer.getData(dataType);
 }
 
 
-function DragDropDataTransfer$setData(dataType, dataStr) {
+function DragDrop$setData(dataType, dataStr) {
     this.dataTransfer.setData(dataType, dataStr);
 }
 
 
-function DragDropDataTransfer$clearData(dataType) {
+function DragDrop$clearData(dataType) {
     this.dataTransfer.clearData(dataType);
 }
 
-},{"../components/c_class":11,"../config":53,"./json_parse":85,"base32":92,"mol-proto":110}],83:[function(require,module,exports){
+
+/**
+ * Drag drop service compensating for the lack of communication from drop target to drag source in DOM API
+ */
+var dragDropService = new Messenger;
+
+var _currentDragDrop, _currentDragFacet;
+
+_.extend(DragDrop, {
+    service: dragDropService
+});
+
+
+dragDropService.onMessages({
+    // data is DragDropDataTransfer instance
+    // fired by Drag facet on "dragstart" event
+    'dragdropstarted': onDragDropStarted, 
+    // data is object with at least dropEffect property
+    // fired by Drop facet on "drop" event
+    'dragdropcompleted': onDragDropCompleted, 
+    // fired by Drag facet on "dragend" event to complete drag
+    // if drop happended in another window or if it was cancelled
+    'completedragdrop': onCompleteDragDrop
+});
+
+
+_.extend(dragDropService, {
+    getCurrentDragDrop: getCurrentDragDrop
+});
+
+
+function onDragDropStarted(msg, data) {
+    _currentDragDrop = data.dragDrop;
+    _currentDragFacet = data.dragFacet;
+}
+
+
+function onDragDropCompleted(msg, data) {
+    _currentDragFacet.postMessage('dragdropcompleted', data);
+    _currentDragDrop = undefined;
+    _currentDragFacet = undefined;
+}
+
+
+function onCompleteDragDrop(msg, data) {
+    if (_currentDragDrop)
+        dragDropService.postMessage('dragdropcompleted', data);
+}
+
+
+function getCurrentDragDrop() {
+    return _currentDragDrop;
+}
+
+},{"../components/c_class":11,"../config":53,"../messenger":58,"./json_parse":85,"base32":92,"mol-proto":110}],83:[function(require,module,exports){
 // <a name="utils-error"></a>
 // milo.utils.error
 // -----------
@@ -18051,7 +18141,7 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
     eachKey.call(objNode, function(value, prop) {
         var descriptor = Object.getOwnPropertyDescriptor(objNode, prop);
         if (typeof value == 'object' && value != null
-                && ! value instanceof RegExp) {
+                && ! (value instanceof RegExp)) {
             if (! (selfNode.hasOwnProperty(prop)
                     && typeof selfNode[prop] == 'object' && selfNode[prop] != null))
                 selfNode[prop] = {};
