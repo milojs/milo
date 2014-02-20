@@ -5749,7 +5749,7 @@ function componentSetup() {
         '_startIndex': 0,
         '_endIndex': MAX_RENDERED,
         '_hidden': false,
-        '_elementHeight': 0,
+        '_elementHeight': DEFAULT_ELEMENT_HEIGHT,
         '_total': 0,
         '_optionsHeight': 200,
         '_lastScrollPos': 0,
@@ -6063,8 +6063,8 @@ function onListClick (type, event) {
 function onListScroll (type, event) {
     var scrollPos = event.target.scrollTop
         , direction = scrollPos > this._lastScrollPos ? 'down' : 'up'
-        , firstChild = this._comboOptions.el.lastChild
-        , lastChild = this._comboOptions.el.firstChild
+        , firstChild = this._comboOptions.el.lastElementChild
+        , lastChild = this._comboOptions.el.firstElementChild
         , lastElPosition = firstChild ? firstChild.offsetTop : 0
         , firstElPosition = lastChild ? lastChild.offsetTop : 0
         , distFromLastEl = lastElPosition - scrollPos - this._optionsHeight + this._elementHeight
