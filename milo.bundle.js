@@ -3058,12 +3058,14 @@ function Drag$start() {
  * @private
  */
 function _addDragAttribute() {
-    this.owner.el.setAttribute('draggable', true);
+    if (this.owner.el)
+        this.owner.el.setAttribute('draggable', true);
 }
 
 
 function _removeDragAttribute() {
-    this.owner.el.removeAttribute('draggable');
+    if (this.owner.el)
+        this.owner.el.removeAttribute('draggable');
 }
 
 
