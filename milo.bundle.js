@@ -5805,7 +5805,7 @@ var Component = require('../c_class')
     , _ = require('mol-proto')
     , doT = require('dot');
 
-
+var COMBO_OPEN = 'ml-ui-supercombo-open';
 var COMBO_CHANGE_MESSAGE = 'mlsupercombochange';
 
 var OPTIONS_TEMPLATE = '{{~ it.comboOptions :option:index }}\
@@ -5940,6 +5940,7 @@ function MLSuperCombo$toggleOptions(show) {
  */
 function MLSuperCombo$showOptions() {
     this._hidden = false;
+    this.el.classList.add(COMBO_OPEN);
     this._comboList.dom.toggle(true);
 }
 
@@ -5949,6 +5950,7 @@ function MLSuperCombo$showOptions() {
  */
 function MLSuperCombo$hideOptions() {
     this._hidden = true;
+    this.el.classList.remove(COMBO_OPEN);
     this._comboList.dom.toggle(false);
 }
 
