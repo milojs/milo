@@ -5103,7 +5103,8 @@ module.exports = MLComboList;
 
 _.extendProto(MLComboList, {
     init: MLComboList$init,
-    setOptions: MLComboList$setOptions
+    setOptions: MLComboList$setOptions,
+    toggleAddButton: MLComboList$toggleAddButton
 });
 
 
@@ -5117,6 +5118,15 @@ function MLComboList$init() {
 
 function MLComboList$setOptions(arr) {
     this._combo.setOptions(arr);
+}
+
+
+/**
+ * Component instance method
+ * Hides add button
+ */
+function MLComboList$toggleAddButton(show) {
+    this._combo.toggleAddButton(show);
 }
 
 
@@ -5824,7 +5834,7 @@ var MLSuperCombo = Component.createComponentClass('MLSuperCombo', {
     },
     template: {
         template: '<input ml-bind="[data, events]:input" class="form-control ml-ui-input">\
-                   <button ml-bind="[events]:openBtn" class="btn btn-default ml-ui-button">Add</button>\
+                   <button ml-bind="[events, dom]:addBtn" class="btn btn-default ml-ui-button">Add</button>\
                    <div ml-bind="[dom, events]:list" class="ml-ui-supercombo-dropdown">\
                        <div ml-bind="[dom]:before"></div>\
                        <div ml-bind="[template, dom, events]:options" class="ml-ui-supercombo-options"></div>\
@@ -5848,7 +5858,8 @@ _.extendProto(MLSuperCombo, {
     toggleOptions: MLSuperCombo$toggleOptions,
     setOptions: MLSuperCombo$setOptions,
     setFilteredOptions: MLSuperCombo$setFilteredOptions,
-    update: MLSuperCombo$update
+    update: MLSuperCombo$update,
+    toggleAddButton: MLSuperCombo$toggleAddButton
 });
 
 
@@ -5887,7 +5898,7 @@ function componentSetup() {
         '_comboOptions': this.container.scope.options,
         '_comboBefore': this.container.scope.before,
         '_comboAfter': this.container.scope.after,
-        '_comboOpenBtn': this.container.scope.openBtn,
+        '_comboAddBtn': this.container.scope.addBtn,
         '_optionTemplate': doT.compile(OPTIONS_TEMPLATE)
     });
 
@@ -5907,7 +5918,7 @@ function componentSetup() {
     this.dom.setStyles({ position: 'relative' });
     setupComboList(this._comboList, this._comboOptions, this);
     setupComboInput(this._comboInput, this);
-    setupComboBtn(this._comboOpenBtn, this);
+    setupComboBtn(this._comboAddBtn, this);
 
     this.events.on('keydown', { subscriber: changeSelected, context: this});
 }
@@ -5939,6 +5950,14 @@ function MLSuperCombo$showOptions() {
 function MLSuperCombo$hideOptions() {
     this._hidden = true;
     this._comboList.dom.toggle(false);
+}
+
+/**
+ * Component instance method
+ * Hides add button
+ */
+function MLSuperCombo$toggleAddButton(show) {
+    this._comboAddBtn.dom.toggle(show);
 }
 
 /**
