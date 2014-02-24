@@ -56,7 +56,11 @@ describe('milo binder', function() {
         };
         ctrl.mySuperCombo.setOptions(comboTestArray);
         ctrl.mySuperCombo.data.on('', function(msg, data) {
+            console.log('before', ctrl.myMLList.model.get() && _.clone(ctrl.myMLList.model.get()));
+
             ctrl.myMLList.model.push(data.newValue);
+            
+            console.log('after', ctrl.myMLList.model.get() && _.clone(ctrl.myMLList.model.get()));
         });
 
 
