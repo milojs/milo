@@ -5112,7 +5112,6 @@ function MLComboList$init() {
     Component.prototype.init.apply(this, arguments);
     this.model.set([]);
     this.on('childrenbound', onChildrenBound);
-    
 }
 
 
@@ -5147,13 +5146,13 @@ function componentSetup() {
 }
 
 function onComboChange(msg, data) {
-    // if (data.newValue) {
-    //  var listArr = this._list.model.get();
-    //  var newArr = listArr.concat(data.newValue);
-    //  this._list.model.set(newArr);
-    // }
+    console.log('onComboChange before', this.model.get() && _.clone(this.model.get()));
+
     if (data.newValue)
-        this._list.model.push(data.newValue);
+        this.model.push(data.newValue);
+
+    console.log('onComboChange after', this.model.get() && _.clone(this.model.get()));
+
     this._combo.data.del();
 }
 
@@ -5439,16 +5438,16 @@ var MLInputList = Component.createComponentClass('MLInputList', {
     },
     template: {
         template: '\
-            <input type="text" ml-bind="MLInput:input" class="form-control">\
-            <button ml-bind="MLButton:button" class="btn btn-default">\
-                Add\
-            </button>\
             <div ml-bind="MLList:list">\
                 <div ml-bind="[item]:item" class="list-item">\
                     <span ml-bind="[data]:label"></span>\
                     <span ml-bind="[events]:deleteBtn" class="glyphicon glyphicon-remove"></span>\
                 </div>\
-            </div>'
+            </div>\
+            <input type="text" ml-bind="MLInput:input" class="form-control">\
+            <button ml-bind="MLButton:button" class="btn btn-default">\
+                Add\
+            </button>'
     }
 });
 
@@ -5491,7 +5490,7 @@ function onClick(msg) {
     var value = this._input.data.get(0);
     if (this._input.data)
         asyncHandler(value, function (label, value) {
-            this._list.model.push({ label: label, value: value });
+            this.model.push({ label: label, value: value });
         }.bind(this));
     this._input.data.del();
 }

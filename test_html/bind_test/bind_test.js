@@ -52,7 +52,7 @@ describe('milo binder', function() {
         // Setting Super Combo options
         var comboTestArray = [];
         for (var i = 0; i < 20000; i++) {
-            comboTestArray.push({value: {val: 'value ' + i, id: i}, label: 'Label ' + Math.random() + i});
+            comboTestArray.push({value: {val: 'value ' + i, id: i}, label: 'Label ' + i});
         };
         ctrl.mySuperCombo.setOptions(comboTestArray);
         ctrl.mySuperCombo.data.on('', function(msg, data) {
