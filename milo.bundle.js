@@ -5146,19 +5146,13 @@ function componentSetup() {
 }
 
 function onComboChange(msg, data) {
-    console.log('onComboChange before', this.model.get() && _.clone(this.model.get()));
-
     if (data.newValue)
         this.model.push(data.newValue);
-
-    console.log('onComboChange after', this.model.get() && _.clone(this.model.get()));
-
     this._combo.data.del();
 }
 
 function onItemsChange(msg, data) {
-    //if (data.type == 'splice')
-        this.data.getMessageSource().dispatchMessage(COMBO_LIST_CHANGE_MESSAGE);
+    this.data.getMessageSource().dispatchMessage(COMBO_LIST_CHANGE_MESSAGE);
 }
 
 function MLComboList_get() {
