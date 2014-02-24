@@ -996,4 +996,27 @@ describe('Model class', function() {
 
         assert.deepEqual(m.get(), { info: { test: 1 } });
     });
+
+
+    it('should not dispatch duplicate messages when different "*" subscriptions are present', function() {
+        var m = new Model;
+        m.on('*', logPost);
+        m.on('**', logPost2);
+
+        function logPost(msg, data) {
+            posted.push({ msg: msg, data: data });
+        }
+
+        function logPost2(msg, data) {
+            posted2.push({ msg: msg, data: data });
+        }
+
+        var posted = [];
+        var posted2 = [];
+
+        m('.name').set('milo');
+
+        assert.equal(posted.length, 2);
+        assert.equal(posted2.length, 2);
+    });
 });
