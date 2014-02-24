@@ -7969,6 +7969,7 @@ var _connectors = []
 
 _.extend(minder, {
     getConnectors: minder_getConnectors,
+    getExpandedConnections: minder_getExpandedConnections,
     destroyConnector: minder_destroyConnector
 });
 
@@ -8009,8 +8010,13 @@ function _idleCheck() {
 }
 
 
-function minder_getConnectors() {
-    return _connectors;
+function minder_getConnectors(onOff) {
+    if (typeof onOff == 'undefined')
+        return _connectors;
+
+    return _connectors.filter(function(cnct) {
+        return cnct.isOn === onOff;
+    });
 }
 
 
@@ -8021,6 +8027,47 @@ function minder_destroyConnector(cnct) {
         delete _connectors[index];
     else
         logger.warn('minder: connector destroyed that is not registered in minder');
+}
+
+
+function minder_getExpandedConnections(onOff) {
+    var connectors = minder.getConnectors(onOff);
+    return connectors.map(function(cnct) {
+        var connection = {
+            leftSource: _getExpandedSource(cnct.ds1),
+            rightSource: _getExpandedSource(cnct.ds2),
+            mode: cnct.mode,
+            isOn: cnct.isOn
+        };
+        
+        if (cnct.options)
+            connection.options = cnct.options;
+
+        return connection;
+    });
+}
+
+
+function _getExpandedSource(ds) {
+    var source = [];
+    if (typeof ds == 'function') {
+        if (ds._model && ds._accessPath) {
+            source.unshift(ds._accessPath);
+            ds = ds._model;
+        }
+
+        source.unshift(ds);
+        ds = ds._hostObject;
+    }
+
+    if (typeof ds == 'object') {
+        source.unshift(ds);
+
+        if (ds.owner)
+            source.unshift(ds.owner)
+    }
+
+    return source;
 }
 
 },{"./messenger":58,"./model/connector":66,"./util/logger":86,"mol-proto":110}],65:[function(require,module,exports){
@@ -8188,26 +8235,30 @@ function Connector(ds1, mode, ds2, options) {
         _messenger: new Messenger(this, Messenger.defaultMethods)
     });
 
-    var pathTranslation = options && options.pathTranslation;
-    if (pathTranslation)
-        _.extend(this, {
-            pathTranslation1: reverseTranslationRules(pathTranslation),
-            pathTranslation2: pathTranslation
-        });
+    if (options) {
+        this.options = options;
 
-    var dataTranslation = options && options.dataTranslation;
-    if (dataTranslation)
-        _.extend(this, {
-            dataTranslation1: dataTranslation['<-'],
-            dataTranslation2: dataTranslation['->']
-        });
+        var pathTranslation = options.pathTranslation;
+        if (pathTranslation)
+            _.extend(this, {
+                pathTranslation1: reverseTranslationRules(pathTranslation),
+                pathTranslation2: pathTranslation
+            });
 
-    var dataValidation = options && options.dataValidation;
-    if (dataValidation)
-        _.extend(this, {
-            dataValidation1: dataValidation['<-'],
-            dataValidation2: dataValidation['->']
-        });
+        var dataTranslation = options.dataTranslation;
+        if (dataTranslation)
+            _.extend(this, {
+                dataTranslation1: dataTranslation['<-'],
+                dataTranslation2: dataTranslation['->']
+            });
+
+        var dataValidation = options.dataValidation;
+        if (dataValidation)
+            _.extend(this, {
+                dataValidation1: dataValidation['<-'],
+                dataValidation2: dataValidation['->']
+            });
+    }
 
     this.turnOn();
 
@@ -8448,8 +8499,7 @@ function Model(data, hostObject) {
     model.__proto__ = Model.prototype;
 
     _.defineProperties(model, {
-        _hostObject: hostObject,
-        // _changesQueue: []
+        _hostObject: hostObject
     });
 
     model._prepareMessengers();
@@ -8704,7 +8754,6 @@ function ModelPath(model, path) { // ,... - additional arguments for interpolati
         _model: model,
         _path: path,
         _args: _.slice(arguments, 1), // path will be the first element of this array
-        // _changesQueue: []
     });
 
     // parse access path
