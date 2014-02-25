@@ -2315,19 +2315,24 @@ function onChildData(msgType, data) {
     var valueSet;
     if (value != null && typeof value == 'object') {
         if (Array.isArray(value)) {
+            valueSet = [];
+
             var listFacet = this.owner.list;
             if (listFacet){
                 var listLength = listFacet.count()
                     , newItemsCount = value.length - listLength;
                 if (newItemsCount >= 3) {
                     listFacet.addItems(newItemsCount);
-                    _.defer(_updataDataPaths, listFacet, listLength, listFacet.count());
+                    // It's not clear why it was in defer - it seems not to break anything when it is removed
+                    // _.defer(_updataDataPaths, listFacet, listLength, listFacet.count());
+                    _updataDataPaths(listFacet, listLength, listFacet.count());
                 }
-            }
-            valueSet = [];
-            value.forEach(function(childValue, index) {
-                setChildData.call(this, valueSet, childValue, index, '[$$]');
-            }, this);
+
+                value.forEach(function(childValue, index) {
+                    setChildData.call(this, valueSet, childValue, index, '[$$]');
+                }, this);
+            } else
+                logger.warn('Data: setting array data without List facet');
         } else {
             valueSet = {};
             _.eachKey(value, function(childValue, key) {
@@ -2340,7 +2345,7 @@ function onChildData(msgType, data) {
             , removeCount = listCount - value.length;
 
         while (removeCount-- > 0)
-            listFacet.removeItem(value.length, true);
+            listFacet.removeItem(value.length);
     } else
         valueSet = this._setScalarValue(value);
 
@@ -2375,13 +2380,9 @@ function onChildData(msgType, data) {
 function Data$del() {
     var componentDelete = this.config.del;
     if (typeof componentDelete == 'function')
-        return componentDelete.call(this.owner);
+        componentDelete.call(this.owner);
 
-    // var itemFacet = this.owner.item;
-    // if (itemFacet)
-    //  itemFacet.removeItem();
-    // else
-        this.set();
+    this.set();
 }
 
 
@@ -2497,7 +2498,7 @@ function Data$splice(spliceIndex, spliceHowMany) { //, ... arguments
             var item = listFacet.item(spliceIndex);
             if (item) {
                 var itemData = item.data.get();
-                listFacet.removeItem(spliceIndex, true);
+                listFacet.removeItem(spliceIndex);
             } else
                 logger.warn('Data: no item for index', i);
 
@@ -3540,7 +3541,7 @@ module.exports = ItemFacet;
  */
 function ItemFacet$removeItem() {
     // this.list and this.index are set by the list when the item is added
-    this.list.removeItem(this.index, true);
+    this.list.removeItem(this.index);
 }
 
 },{"../../mail":55,"../../model":67,"../c_facet":12,"./cf_registry":25,"mol-proto":96}],21:[function(require,module,exports){
@@ -3660,7 +3661,7 @@ function count() {
 
 
 function _setItem(index, component) {
-    this._listItems[index] = component;
+    this._listItems.splice(index, 0, component);
     this._listItemsHash[component.name] = component
     component.item.list = this;
     component.item.index = index;
@@ -3689,7 +3690,22 @@ function addItem(index) {
     // Show the list item component
     component.el.style.display = '';
 
+    _updateItemsIndexes.call(this, index + 1);
+
     return component;
+}
+
+
+function _updateItemsIndexes(fromIndex, toIndex) {
+    fromIndex = fromIndex || 0;
+    toIndex = toIndex || this.count();
+    for (var i = fromIndex; i < toIndex; i++) {
+        var component = this._listItems[i];
+        if (component)
+            component.item.index = i;
+        else
+            logger.warn('List: no item at position', i);
+    }
 }
 
 
@@ -3738,11 +3754,12 @@ function List$addItems(count, index) {
             var component = Component.getComponent(el);
             if (! component)
                 return logger.error('List: element in new items is not a component');
-            this._listItems.splice(spliceIndex++, 0, component);
-            this._listItemsHash[component.name] = component;
+            this._setItem(spliceIndex++, component);
             frag.appendChild(el);
             el.style.display = '';
         }, this);
+
+        _updateItemsIndexes.call(this, spliceIndex);
 
         // Add it to the DOM
         prevComponent.dom.insertAfter(frag);
@@ -3750,9 +3767,8 @@ function List$addItems(count, index) {
 }
 
 
-// Remove item from a particular index,
-// `doSplice` determines if the empty space should be removed
-function removeItem(index, doSplice) {
+// Remove item from a particular index
+function removeItem(index) {
     var comp = this.item(index);
 
     if (! comp)
@@ -3762,8 +3778,8 @@ function removeItem(index, doSplice) {
     delete this._listItemsHash[comp.name];
     comp.destroy();
 
-    if (doSplice)
-        this._listItems.splice(index, 1);
+    this._listItems.splice(index, 1);
+    _updateItemsIndexes.call(this, index);
 }
 
 // Returns the previous item component given an index
@@ -5567,7 +5583,7 @@ function MLList_del() {
 
 function onChildrenBound() {
     this.model.set([]);
-    milo.minder(this.model, '<<<->>>', this.data);
+    this._connector = milo.minder(this.model, '<<<->>>', this.data);
 }
 
 
@@ -5580,9 +5596,10 @@ var ITEM_PATH_REGEX = /^\[([0-9]+)\]$/;
 function onItemsChange(msg, data) {
     var self = this;
     if (data.type == 'added' && ITEM_PATH_REGEX.test(data.path)) {
-        _.defer(function() {
+        this._connector.once('changecompleted', function() {
             var index = +data.path.match(ITEM_PATH_REGEX)[1];
             var newItem = self.list.item(index);
+
             var btn = newItem.container.scope[DELETE_BUTTON_NAME];
             btn.events.on('click',
                 { subscriber: deleteItem, context: newItem });
@@ -8224,6 +8241,9 @@ var modePattern = /^(\<*)\-+(\>*)$/;
  *
  * - 'turnedon' - connector was turned on
  * - 'turnedoff' - connector was turned off
+ * - 'changestarted' - change on connected datasource is started
+ * - 'changecompleted' - change on connected datasource is completed
+ * - 'destroyed' - connector was destroyed
  * 
  * @param {Object} ds1 the first data source.
  * @param {String} mode the connection mode that defines the direction and the depth of connection. Possible values are '->', '<<-', '<<<->>>', etc.
