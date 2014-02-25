@@ -5644,7 +5644,6 @@ function MLListItem$init() {
 
 
 function onChildrenBound() {
-    console.log(this);
     var deleteBtn = this.container.scope.deleteBtn;
     deleteBtn.events.on('click', { subscriber: deleteItem, context: this });
 }
