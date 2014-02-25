@@ -5299,7 +5299,7 @@ var MLImage = Component.createComponentClass('MLImage', {
     },
     model: {
         messages: {
-            '***': { subscriber: onModelChange, context: 'owner' }
+            '**': { subscriber: onModelChange, context: 'owner' }
         }
     },
     events: undefined,
@@ -5348,7 +5348,8 @@ function MLImage_set(value) {
  * @return {String}
  */
 function MLImage_get() {
-    return this.model.get();
+    var model = this.model.get();
+    return typeof model == 'object' ? _.clone(model) : model;
 }
 
 
