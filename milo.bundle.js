@@ -3760,8 +3760,7 @@ function removeItem(index, doSplice) {
 
     this._listItems[index] = undefined;
     delete this._listItemsHash[comp.name];
-    comp.dom.remove();
-    comp.remove();
+    comp.destroy();
 
     if (doSplice)
         this._listItems.splice(index, 1);
@@ -5147,7 +5146,7 @@ function componentSetup() {
 
 function onComboChange(msg, data) {
     if (data.newValue)
-        this.model.push(data.newValue);
+        this._list.model.push(data.newValue);
     this._combo.data.del();
 }
 
@@ -5485,7 +5484,7 @@ function onClick(msg) {
     var value = this._input.data.get(0);
     if (this._input.data)
         asyncHandler(value, function (label, value) {
-            this.model.push({ label: label, value: value });
+            this._list.model.push({ label: label, value: value });
         }.bind(this));
     this._input.data.del();
 }
