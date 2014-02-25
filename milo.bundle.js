@@ -5167,8 +5167,6 @@ function MLComboList_del() {
     return this.model.set([]);
 }
 
-
-
 },{"../c_class":11,"../c_registry":27,"mol-proto":96}],39:[function(require,module,exports){
 'use strict';
 
@@ -5347,8 +5345,8 @@ function MLImage_set(value) {
  * @return {String}
  */
 function MLImage_get() {
-    var model = this.model.get();
-    return typeof model == 'object' ? _.clone(model) : model;
+    var value = this.model.get();
+    return typeof value == 'object' ? _.clone(value) : value;
 }
 
 
@@ -5573,26 +5571,32 @@ function onChildrenBound() {
 }
 
 
+function _sendChangeMessage() {
+    this.data.getMessageSource().dispatchMessage(LIST_CHANGE_MESSAGE);
+}
+
+
 var ITEM_PATH_REGEX = /^\[([0-9]+)\]$/;
 function onItemsChange(msg, data) {
     var self = this;
-    _.defer(function() {
-        if (data.type == 'added' && ITEM_PATH_REGEX.test(data.path)) {
+    if (data.type == 'added' && ITEM_PATH_REGEX.test(data.path)) {
+        _.defer(function() {
             var index = +data.path.match(ITEM_PATH_REGEX)[1];
             var newItem = self.list.item(index);
             var btn = newItem.container.scope[DELETE_BUTTON_NAME];
             btn.events.on('click',
                 { subscriber: deleteItem, context: newItem });
-        }
+            _sendChangeMessage.call(self);
 
-        function deleteItem(msg, data) {
-            btn.events.off('click',
-                { subscriber: deleteItem, context: this });
-            var index = this.data.getKey();
-            self.model.splice(index, 1);
-            //this.data.getMessageSource().dispatchMessage(LIST_CHANGE_MESSAGE);
-        }
-    });
+            function deleteItem(msg, data) {
+                btn.events.off('click',
+                    { subscriber: deleteItem, context: this });
+                var index = this.data.getKey();
+                self.model.splice(index, 1);
+                _sendChangeMessage.call(self);
+            }
+        });
+    }
 }
 
 },{"../c_class":11,"../c_registry":27,"mol-proto":96}],47:[function(require,module,exports){
