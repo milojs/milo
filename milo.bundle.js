@@ -5443,7 +5443,7 @@ var MLInputList = Component.createComponentClass('MLInputList', {
     template: {
         template: '\
             <div ml-bind="MLList:list">\
-                <div ml-bind="[item]:item" class="list-item">\
+                <div ml-bind="MLListItem:item" class="list-item">\
                     <span ml-bind="[data]:label"></span>\
                     <span ml-bind="[events]:deleteBtn" class="glyphicon glyphicon-remove"></span>\
                 </div>\
