@@ -2573,10 +2573,10 @@ function Data$_splice(spliceIndex, spliceHowMany) { //, ... arguments
         _updataDataPaths(listFacet, spliceIndex, listFacet.count());
     }
 
-    if (Array.isArray(this._value)) {
-        _.prependArray(added, [spliceIndex, spliceHowMany]);
-        Array.prototype.splice.apply(this._value, added);
-    } else
+    // if (Array.isArray(this._value)) {
+    //     _.prependArray(added, [spliceIndex, spliceHowMany]);
+    //     Array.prototype.splice.apply(this._value, added);
+    // } else
         this._value = this.get();
 
     return {
@@ -8259,22 +8259,15 @@ function _processChanges(callback) {
     callback && callback(null, false);
     this.postMessage('changestarted');
 
-    var processedMessages = [];
+    var splicedPaths = [];
 
-    this._changesQueue.forEach(function(data) {
-        processedMessages.push(data);
-        var parentPathProcessed = processedMessages.some(function(msgData) {
-            var pos = data.path.indexOf(msgData.path);
-            return pos == 0 &&
-                    (msgData.path.length < data.path.length
-                     || (msgData.type == 'added' && data.type == 'splice'));
-        });
-        if (parentPathProcessed) return;
-
+    this._changesQueue.forEach(function(data, index) {
         // set the new data
         if (data.type == 'splice') {
             var modelPath = this.path(data.path);
             if (! modelPath) return;
+
+            splicedPaths.push(data.path)
 
             var index = data.index
                 , howMany = data.removed.length
@@ -8284,6 +8277,13 @@ function _processChanges(callback) {
 
             modelPath.splice.apply(modelPath, spliceArgs);
         } else {
+            var parentPathSpliced = splicedPaths.some(function(parentPath) {
+                var pos = data.path.indexOf(parentPath)
+                return pos == 0 && data.path[parentPath.length] == '[';
+            });
+
+            if (parentPathSpliced) return;
+
             var modelPath = this.path(data.path);
             if (! modelPath) return;
 
@@ -9477,6 +9477,14 @@ function _synthesize(synthesizer, path, parsedPath) {
                 : Array.isArray(value)
                     ? value.slice()
                     : _.clone(value);
+    }
+
+    function protectValue(value) {
+        return ! valueIsNormalObject(value)
+                ? value
+                : Array.isArray(value)
+                    ? value.slice()
+                    : Object.create(value);
     }
 
     function valueIsTree(value) {
