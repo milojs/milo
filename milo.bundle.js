@@ -2430,7 +2430,7 @@ function Data$_setScalarValue(value) {
  */
 function Data$_postDataChanged(msgData) {
     var parentData = this.scopeParent();
-    
+
     if (parentData) {
         var parentMsg = _.clone(msgData);
         parentMsg.path = (this._path || ('.' + thisComp.name))  + parentMsg.path;
@@ -5578,19 +5578,9 @@ var MLList = Component.createComponentClass('MLList', {
     dom: {
         cls: 'ml-ui-list'
     },
-    data: {
-        get: MLList_get,
-        set: MLList_set,
-        del: MLList_del,
-        splice: MLList_splice,
-        event: LIST_CHANGE_MESSAGE,
-    },
+    data: undefined,
     events: undefined,
-    model: {
-        // messages: {
-        //     '**': { subscriber: onItemsChange, context: 'owner' }
-        // }
-    },
+    model: undefined,
     list: undefined
 });
 
@@ -5611,64 +5601,9 @@ function MLList$init() {
 }
 
 
-function MLList_get() {
-    var value = this.model.get();
-    return typeof value == 'object' ? _.clone(value) : value;
-}
-
-function MLList_set(value) {
-    this.data._set(value);
-    this.model.set(value);
-    _sendChangeMessage.call(this);
-    return value;
-}
-
-function MLList_del() {
-    this.data._del();
-    this.model.set([]);
-    _sendChangeMessage.call(this);
-}
-
-function MLList_splice() {
-    this.data._splice.apply(this.data, arguments);
-    var removed = this.model.splice.apply(this.model, arguments);
-    _sendChangeMessage.call(this);
-    return removed;
-}
-
 function onChildrenBound() {
     this.model.set([]);
     this._connector = milo.minder(this.model, '<<<->>>', this.data);
-}
-
-
-function _sendChangeMessage() {
-    this.data.getMessageSource().dispatchMessage(LIST_CHANGE_MESSAGE);
-}
-
-
-var ITEM_PATH_REGEX = /^\[([0-9]+)\]$/;
-function onItemsChange(msg, data) {
-    var self = this;
-    if (data.type == 'added' && ITEM_PATH_REGEX.test(data.path)) {
-        this._connector.once('changecompleted', function() {
-            var index = +data.path.match(ITEM_PATH_REGEX)[1];
-            var newItem = self.list.item(index);
-
-            var btn = newItem.container.scope[DELETE_BUTTON_NAME];
-            btn.events.on('click',
-                { subscriber: deleteItem, context: newItem });
-            _sendChangeMessage.call(self);
-
-            function deleteItem(msg, data) {
-                btn.events.off('click',
-                    { subscriber: deleteItem, context: this });
-                var index = this.data.getKey();
-                self.model.splice(index, 1);
-                _sendChangeMessage.call(self);
-            }
-        });
-    }
 }
 
 },{"../c_class":11,"../c_registry":27,"mol-proto":97}],47:[function(require,module,exports){
@@ -5679,10 +5614,18 @@ var Component = require('../c_class')
     , _ = require('mol-proto');
 
 
+var LISTITEM_CHANGE_MESSAGE = 'mllistitemchange'
+
 var MLListItem = Component.createComponentClass('MLListItem', {
     container: undefined,
     dom: undefined,
-    data: undefined,
+    data: {
+        get: MLListItem_get,
+        set: MLListItem_set,
+        del: MLListItem_del,
+        event: LISTITEM_CHANGE_MESSAGE
+    },
+    model: undefined,
     item: undefined
 });
 
@@ -5699,6 +5642,33 @@ _.extendProto(MLListItem, {
 function MLListItem$init() {
     Component.prototype.init.apply(this, arguments);
     this.on('childrenbound', onChildrenBound);
+}
+
+
+function MLListItem_get() {
+    var value = this.model.get();
+    return typeof value == 'object' ? _.clone(value) : value;
+}
+
+
+function MLListItem_set(value) {
+    if (typeof value == 'object')
+        this.data._set(value);
+    this.model.set(value);
+    _sendChangeMessage.call(this);
+    return value;
+}
+
+
+function MLListItem_del() {
+    this.data._del();
+    this.model.del();
+    _sendChangeMessage.call(this);    
+}
+
+
+function _sendChangeMessage() {
+    this.data.getMessageSource().dispatchMessage(LISTITEM_CHANGE_MESSAGE);
 }
 
 
@@ -8283,8 +8253,6 @@ function _processChanges(callback) {
             var modelPath = this.path(data.path);
             if (! modelPath) return;
 
-            // splicedPaths.push(data.path)
-
             var index = data.index
                 , howMany = data.removed.length
                 , spliceArgs = [index, howMany];
@@ -8293,13 +8261,6 @@ function _processChanges(callback) {
 
             modelPath.splice.apply(modelPath, spliceArgs);
         } else {
-            // var parentPathSpliced = splicedPaths.some(function(parentPath) {
-            //     var pos = data.path.indexOf(parentPath)
-            //     return pos == 0 && data.path[parentPath.length] == '[';
-            // });
-
-            // if (parentPathSpliced) return;
-
             var modelPath = this.path(data.path);
             if (! modelPath) return;
 
