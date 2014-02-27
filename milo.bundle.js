@@ -8136,9 +8136,9 @@ function minder_destroyConnector(cnct) {
 }
 
 
-function minder_getExpandedConnections(onOff) {
+function minder_getExpandedConnections(onOff, searchStr) {
     var connectors = minder.getConnectors(onOff);
-    return connectors.map(function(cnct) {
+    var connections =  connectors.map(function(cnct) {
         var connection = {
             leftSource: _getExpandedSource(cnct.ds1),
             rightSource: _getExpandedSource(cnct.ds2),
@@ -8151,6 +8151,14 @@ function minder_getExpandedConnections(onOff) {
 
         return connection;
     });
+
+    if (searchStr)
+        connections = connections.filter(function(cnctn) {
+            return _sourceMatchesString(cnctn.leftSource, searchStr)
+                    || _sourceMatchesString(cnctn.rightSource, searchStr);
+        });
+
+    return connections;
 }
 
 
@@ -8174,6 +8182,21 @@ function _getExpandedSource(ds) {
     }
 
     return source;
+}
+
+
+function _sourceMatchesString(source, matchStr) {
+    return source.some(function(srcNode) {
+        var className = srcNode.constructor && srcNode.constructor.name;
+        return _stringMatch(className, matchStr)
+                || _stringMatch(srcNode.name, matchStr)
+                || _stringMatch(srcNode, matchStr);
+    });
+}
+
+
+function _stringMatch(str, substr) {
+    return str && typeof str == 'string' && str.indexOf(substr) >= 0;
 }
 
 },{"./messenger":59,"./model/connector":67,"./util/logger":87,"mol-proto":97}],66:[function(require,module,exports){
