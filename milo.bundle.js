@@ -8280,12 +8280,19 @@ function _processChanges(callback) {
         if (data.type == 'finished') {
             splicedPaths.length = 0;
             changedPaths.length = 0;
-            batchCount++;
+            // batchCount++;
             return;
         }
 
         // set the new data
         if (data.type == 'splice') {
+            var parentPathChanged = changedPaths.some(function(parentPath) {
+                var pos = data.path.indexOf(parentPath)
+                return pos == 0 && data.path.length > parentPath.length;
+            });
+
+            if (parentPathChanged) return;
+
             processedCount++;
 
             var modelPath = this.path(data.path);
@@ -8308,12 +8315,14 @@ function _processChanges(callback) {
 
             if (parentPathSpliced) return;
 
-            var parentPathChanged = changedPaths.some(function() {
-                var pos = data.path.indexOf(parentPath)
-                return pos == 0 && data.path.length > parentPath.length;
-            });
+            // var parentPathChanged = changedPaths.some(function(parentPath) {
+            //     var pos = data.path.indexOf(parentPath)
+            //     return pos == 0 && data.path.length > parentPath.length;
+            // });
 
-            if (parentPathChanged) return;
+            // if (parentPathChanged) return;
+
+            changedPaths.push(data.path);
 
             processedCount++;
 
@@ -8328,9 +8337,9 @@ function _processChanges(callback) {
         }
     }, this);
 
-    console.log('batchCount', batchCount, this._changesQueue.length, processedCount);
-    if (batchCount == 0)
-        console.log(this, _.clone(this._changesQueue));
+    // logger.debug('batchCount', batchCount, this._changesQueue.length, processedCount);
+    // if (batchCount == 0)
+    //     logger.debug(this, _.clone(this._changesQueue));
 
     this._changesQueue.length = 0;
 
