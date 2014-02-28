@@ -150,6 +150,7 @@ describe('Model class', function() {
 
         m.on(/.*/, function(message, data) {
             assert.equal(m, this, 'should set message handler context to model');
+            if (data.type == 'finished') return;
             posted[data.path] = data;
         });
 
@@ -191,6 +192,7 @@ describe('Model class', function() {
             , posted = {};
 
         function postLogger(message, data) {
+            if (data.type == 'finished') return;
             posted[data.path] = data;
         }
 
@@ -214,6 +216,7 @@ describe('Model class', function() {
         function postLogger(message, data) {
             // main thing in this test!
             assert.equal(m('.list[0].info.name').get(), 'Jason', 'should set model BEFORE posting message');
+            if (data.type == 'finished') return;
             posted[data.path] = data;
         }
 
@@ -247,6 +250,7 @@ describe('Model class', function() {
         m.on(/.*/, function(path, message) {
             var accessPath = message.path;
             assert(typeof posted[accessPath] == 'undefined');
+            if (message.type == 'finished') return;
             posted[accessPath] = message;
         });
 
@@ -272,6 +276,7 @@ describe('Model class', function() {
             assert.deepEqual(m.get(), [ [ , { info: { name: 'Jason' } } ] ], 'should create array on top level');
 
         m.on(/.*/, function(message, data) {
+            if (data.type == 'finished') return;
             posted[data.path] = data;
         });
 
@@ -296,6 +301,7 @@ describe('Model class', function() {
             assert.deepEqual(m.get(), [ [ , 'scalar value' ] ], 'should create array on top level');
 
         m.on(/.*/, function(message, data) {
+            if (data.type == 'finished') return;
             posted[data.path] = data;
         });
 
@@ -328,6 +334,7 @@ describe('Model class', function() {
             , posted = {};
 
         m.on(/.*/, function(message, data) {
+            if (data.type == 'finished') return;
             posted[data.path] = data;
         });
 
@@ -358,6 +365,7 @@ describe('Model class', function() {
             assert.deepEqual(m.get(), [ [ , { info: { name: 'Jason', surname: 'Green', map: { data: 2 } } } ] ], 'should create array on top level');
 
         m.on(/.*/, function(message, data) {
+            if (data.type == 'finished') return;
             posted[data.path] = data;
         });
 
@@ -409,6 +417,7 @@ describe('Model class', function() {
 
         // should dispatch property change one level deep for both array and property syntax
         m.on('[0]*', function(message, data) {
+            if (data.type == 'finished') return;
             posted[data.path] = data;
         }); 
 
@@ -425,6 +434,7 @@ describe('Model class', function() {
 
         // should dispatch property change up to one level deep for property syntax only
         m.on('[0].*', function(message, data) {
+            if (data.type == 'finished') return;
             posted[data.path] = data;
         }); 
 
@@ -440,6 +450,7 @@ describe('Model class', function() {
 
         // should dispatch property change up to one level deep for array syntax only
         m.on('[0][*]', function(message, data) {
+            if (data.type == 'finished') return;
             posted[data.path] = data;
         }); 
 
@@ -457,6 +468,7 @@ describe('Model class', function() {
 
         // should dispatch property change up to two levels deep for both array and property syntax
         m.on('[0]**', function(message, data) {
+            if (data.type == 'finished') return;
             posted[data.path] = data;
         }); 
 
@@ -474,6 +486,7 @@ describe('Model class', function() {
 
         // should dispatch property change up to two levels deep for strict array/property syntax
         m.on('[0][*].*', function(message, data) {
+            if (data.type == 'finished') return;
             posted[data.path] = data;
         }); 
 
@@ -491,6 +504,7 @@ describe('Model class', function() {
 
         // should NOT dispatch property change up to two levels deep for incorrect strict array/property syntax
         m.on('[0].*.*', function(message, data) {
+            if (data.type == 'finished') return;
             posted[data.path] = data;
         }); 
 
@@ -506,6 +520,7 @@ describe('Model class', function() {
 
         // should dispatch property change up to two levels deep for both array and property syntax
         m.on('[0]***', function(message, data) {
+            if (data.type == 'finished') return;
             posted[data.path] = data;
         }); 
 
@@ -629,6 +644,7 @@ describe('Model class', function() {
             , posted = {};
 
         function logPosted(path, data) {
+            if (data.type == 'finished') return;
             posted[data.path] = data;
         }
 
@@ -703,6 +719,7 @@ describe('Model class', function() {
 
         var posted = {};
         m.on(/.*/, function(accessPath,  data) {
+            if (data.type == 'finished') return;
             posted[data.path] = data;
         });
 
@@ -722,6 +739,7 @@ describe('Model class', function() {
 
         var posted = {};
         m.on(/.*/, function(accessPath,  data) {
+            if (data.type == 'finished') return;
             posted[data.path] = data;
         });
 
@@ -745,6 +763,7 @@ describe('Model class', function() {
         var posted = [];
 
         m.on(/.*/, function(path, data) {
+            if (data.type == 'finished') return;
             posted.push(data);
         });
 
@@ -840,6 +859,7 @@ describe('Model class', function() {
         var m = new Model([ { item: 'item1'}, { item: 'item2' } ]);
 
         m.on(/.*/, function(path, data) {
+            if (data.type == 'finished') return;
             posted.push(data);
         })
 
@@ -880,6 +900,7 @@ describe('Model class', function() {
             , posted = [];
 
         function logPosted(path, data) {
+            if (data.type == 'finished') return;
             posted.push(data);
         }
 
@@ -913,6 +934,7 @@ describe('Model class', function() {
         var m = new Model([ { item: 'item1'}, { item: 'item2' } ]);
 
         m.on(/.*/, function(path, data) {
+            if (data.type == 'finished') return;
             posted.push(data);
         })
 
@@ -1004,10 +1026,12 @@ describe('Model class', function() {
         m.on('**', logPost2);
 
         function logPost(msg, data) {
+            if (data.type == 'finished') return;
             posted.push({ msg: msg, data: data });
         }
 
         function logPost2(msg, data) {
+            if (data.type == 'finished') return;
             posted2.push({ msg: msg, data: data });
         }
 

@@ -52,6 +52,7 @@ describe('Data facet', function() {
         var posted = {};
 
         scope.myItem.data.on(/.*/, function(path, data) {
+            if (data.type == 'finished') return;
             posted[path] = data;
         });
 
@@ -71,6 +72,7 @@ describe('Data facet', function() {
         var posted = {};
 
         function logPosted(path, data) {
+            if (data.type == 'finished') return;
             posted[path] = data;
         };
 
