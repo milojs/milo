@@ -10986,7 +10986,7 @@ function Promise$transform(transformDataFunc) {
 // });
 // ```
 
-// Only generic request and get convenience method are currently implemented.
+// Only generic request and get, json, post convenience methods are currently implemented.
 
 
 var _ = require('mol-proto')
