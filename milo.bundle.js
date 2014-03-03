@@ -2805,22 +2805,33 @@ module.exports = Dom;
 
 // start Dom facet
 function start() {
-    _applyConfigToElement(this.owner.el, this.config);
+    var el = this.owner.el;
+    _applyConfigToElement(el, this.config);
+    this._visible = el.style.display != 'none';
 }
 
 // show HTML element of component
 function show() {
-    this.owner.el.style.display = 'block';
+    this.toggle(true);
 }
 
 // hide HTML element of component
 function hide() {
-    this.owner.el.style.display = 'none';
+    this.toggle(false);
 }
 
 // show/hide
 function toggle(doShow) {
-    Dom.prototype[doShow ? 'show' : 'hide'].call(this);
+    doShow = typeof doShow == 'undefined'
+                ? ! this._visible
+                : !! doShow;
+
+    this._visible = doShow;
+    var el = this.owner.el;
+    if (! doShow) this._visibleStyle = el.style.display;
+    el.style.display = doShow
+                        ? this._visibleStyle || 'block'
+                        : 'none';
 }
 
 
@@ -6563,13 +6574,15 @@ function _toggleMenu(doShow) {
 
 var Component = require('../../c_class')
     , componentsRegistry = require('../../c_registry')
-    , componentName = require('../../../util/component_name');
+    , componentName = require('../../../util/component_name')
+    , logger = require('../../../util/logger');
 
 
 var DEFAULT_BUTTONS = [];
 
 
 var MLDialog = Component.createComponentClass('MLDialog', {
+    container: undefined,
     events: undefined,
     dom: {
         cls: ['ml-bs-dialog', 'modal', 'fade'],
@@ -6583,7 +6596,7 @@ var MLDialog = Component.createComponentClass('MLDialog', {
             <div class="modal-dialog">\
                 <div class="modal-content">\
                     <div class="modal-header">\
-                        <button type="button" class="close">&times;</button>\
+                        <button ml-bind="[events]:closeBtn" type="button" class="close">&times;</button>\
                         <h4 class="modal-title">{{= it.title }}</h4>\
                     </div>\
                     <div class="modal-body">\
@@ -6619,6 +6632,7 @@ _.extend(MLDialog, {
 _.extendProto(MLDialog, {
     openDialog: MLDialog$openDialog,
     closeDialog: MLDialog$closeDialog,
+    toggleDialog: MLDialog$toggleDialog
 });
 
 
@@ -6626,17 +6640,43 @@ function MLDialog$$createDialog(options) {
     var dialog = MLDialog.createOnElement();
 
     options = _prepareOptions(options);
-    this._options = options;
+    dialog._dialog = {
+        options: options,
+        visible: false
+    }
 
     dialog.template
         .render(options)
         .binder();
 
-    // options.buttons.forEach(function(btn) {
-    //     btn.events.on('click', btn.subscriber);
-    // });
+    var closeSubscriber = { subscriber: dialog.closeDialog, context: dialog };
+    dialog.events.on('click',
+        { subscriber: _backdropClick, context: dialog });
+    var dialogScope = dialog.container.scope;
+    dialogScope.closeBtn.events.on('click',
+        { subscriber: dialog.closeDialog, context: dialog });
+
+    options.buttons.forEach(function(btn) {
+        var buttonSubscriber = {
+            subscriber: _.partial(_dialogButtonClick, btn),
+            context: dialog
+        };
+        dialogScope[btn.name].events.on('click', buttonSubscriber);
+    });
 
     return dialog;
+}
+
+
+function _dialogButtonClick(button) {
+    if (button.action == 'close')
+        this.closeDialog();
+}
+
+
+function _backdropClick(eventType, event) {
+    if (event.target == this.el)
+        this.closeDialog();
 }
 
 
@@ -6662,24 +6702,55 @@ function MLDialog$$openDialog(options) {
 }
 
 
+function MLDialog$toggleDialog(doShow) {
+    doShow = typeof doShow == 'undefined'
+                ? ! this._dialog.visible
+                : !! doShow;
+
+    var addRemove = doShow ? 'add' : 'remove'
+        , appendRemove = doShow ? 'appendChild' : 'removeChild';
+
+    this._dialog.visible = doShow;
+
+    if (doShow && ! backdropEl)
+        _createBackdrop();
+
+    document.body[appendRemove](this.el);
+    if (backdropEl)
+        document.body[appendRemove](backdropEl);
+    this.dom.toggle(doShow);
+    this.el.setAttribute('aria-hidden', !doShow);
+    document.body.classList[addRemove]('modal-open');
+    this.el.classList[addRemove]('in');
+}
+
+
+var backdropEl;
+function _createBackdrop() {
+    backdropEl = document.createElement('div');
+    backdropEl.className = 'modal-backdrop fade in';
+}
+
+
+var openedDialog;
 function MLDialog$openDialog() {
-    document.body.appendChild(this.el);
-    this.dom.show();
-    this.owner.el.setAttribute('area-hidden', false);
-    document.body.classList.add('modal-open');
-    this.el.classList.add('in');
+    if (openedDialog)
+        return logger.warn('MLDialog openDialog: can\'t open dialog, another dialog is already open');
+
+    openedDialog = this;
+    this.toggleDialog(true);
 }
 
 
 function MLDialog$closeDialog() {
-    document.body.classList.remove('modal-open');
-    this.el.classList.remove('in');
-    this.dom.hide();
-    this.owner.el.setAttribute('area-hidden', true);
-    document.body.removeChild(this.el);
+    if (! openedDialog)
+        return logger.warn('MLDialog closeDialog: can\'t close dialog, no dialog open');
+
+    openedDialog = undefined;
+    this.toggleDialog(false);
 }
 
-},{"../../../util/component_name":81,"../../c_class":11,"../../c_registry":27}],56:[function(require,module,exports){
+},{"../../../util/component_name":81,"../../../util/logger":89,"../../c_class":11,"../../c_registry":27}],56:[function(require,module,exports){
 'use strict';
 
 
@@ -12405,6 +12476,8 @@ var arrayMethods = require('./proto_array');
  * - [memoize](proto_function.js.html#memoize)
  * - [delay](proto_function.js.html#delay)
  * - [defer](proto_function.js.html#defer)
+ * - [delayed](proto_function.js.html#delayed)
+ * - [deferred](proto_function.js.html#deferred)
  * - [deferTicks](proto_function.js.html#deferTicks)
  * - [delayMethod](proto_function.js.html#delayMethod)
  * - [deferMethod](proto_function.js.html#deferMethod)
@@ -12757,6 +12830,8 @@ var makeProtoFunction = require('./utils').makeProtoFunction
  * - [memoize](#memoize)
  * - [delay](#delay)
  * - [defer](#defer)
+ * - [delayed](#delayed)
+ * - [deferred](#deferred)
  * - [deferTicks](#deferTicks)
  * - [delayMethod](#delayMethod)
  * - [deferMethod](#deferMethod)
@@ -12773,6 +12848,8 @@ var functionMethods = module.exports = {
     memoize: memoize,
     delay: delay,
     defer: defer,
+    delayed: delayed,
+    deferred: deferred,
     deferTicks: deferTicks,
     delayMethod: delayMethod,
     deferMethod: deferMethod,
@@ -12950,6 +13027,41 @@ function _delayMethod(object, methodName, wait, args) {
     return setTimeout(function() {
         object[methodName].apply(object, args);
     }, wait);
+}
+
+
+/**
+ * Returns function that will execute the original function `wait` ms after it has been called
+ * The context in function when it is executed is set to `null`.
+ *
+ * @param {Function} self function which execution has to be deferred
+ * @param {Number} wait approximate dalay time in milliseconds
+ * @param {List} arguments optional arguments that will be passed to the function
+ * @return {Function}
+ */
+function delayed(wait) { //, ... arguments
+    var func = this
+        , args = slice.call(arguments, 1);
+    return function() {
+        return _delay(func, wait, args);
+    }
+}
+
+
+/**
+ * Returns function that will execute the original function on the next tick once it has been called
+ * The context in function when it is executed is set to `null`.
+ *
+ * @param {Function} self function which execution has to be deferred
+ * @param {List} arguments optional arguments that will be passed to the function
+ * @return {Function}
+ */
+function deferred() { //, ... arguments
+    var func = this
+        , args = arguments;
+    return function() {
+        return _delay(func, 1, args);
+    }
 }
 
 
