@@ -1125,15 +1125,23 @@ _.extendProto(Component, {
     allFacets: Component$allFacets,
     rename: Component$rename,
     remove: Component$remove,
+    
     getState: Component$getState,
     getTransferState: Component$getTransferState,
     _getState: Component$_getState,
     setState: Component$setState,
+    
     getScopeParent: Component$getScopeParent,
     getTopScopeParent: Component$getTopScopeParent,
     getScopeParentWithClass: Component$getScopeParentWithClass,
     getTopScopeParentWithClass: Component$getTopScopeParentWithClass,
+
+    findScopeParent: Component$findScopeParent,
+
     walkScopeTree: Component$walkScopeTree,
+    treeIndexOf: Component$treeIndexOf,
+    insertAtTreeIndex: Component$insertAtTreeIndex,
+
     broadcast: Component$broadcast,
     destroy: Component$destroy,
     isDestroyed: Component$isDestroyed
@@ -1755,8 +1763,33 @@ function Component$getTopScopeParentWithClass(ComponentClass) {
 
 
 /**
- * Walks component tree, calling provided callback on each component
+ * Component instance method
+ * Finds scope parent of component using DOM tree (unlike getScopeParent that simply goes up the scope tree).
+ * While getScopeParent is faster it may fail if scope chain is not setup yet (e.g., when component has been just inserted).
+ * The scope property of component will be changed to point to scope object of container facet of that parent.
+ * Returned scope parent of the component will be undefined (as well as component's scope property) if no parent in the DOM tree has container facet.
  *
+ * @return {Component}
+ */
+function Component$findScopeParent() {
+    var parentEl = this.el.parentNode;
+
+    while (parentEl && ! foundParent) {
+        var component = Component.getComponent(parentEl);
+        var foundParent = component && component.container;
+        parentEl = parentEl.parentNode;
+    }
+
+    this.remove(); // remove component from its current scope (if it is defined)
+    if (foundParent) {
+        this.scope = component.container.scope;
+        return component;
+    }        
+}
+
+
+/**
+ * Walks component tree, calling provided callback on each component
  *
  * @param callback
  * @param thisArg
@@ -1767,6 +1800,25 @@ function Component$walkScopeTree(callback, thisArg) {
     this.container.scope._each(function(component) {
         component.walkScopeTree(callback, thisArg);
     });
+}
+
+
+/**
+ * Returns sequential index of component's element inside this component's DOM tree as traversed by TreeWalker.
+ * Returns -1 if passed component is not contained, 0 if component itself is passed.
+ * 
+ * @param {Component} component
+ */
+function Component$treeIndexOf(component) {
+    return domUtils.treeIndexOf(this.el, component.el);
+}
+
+
+function Component$insertAtTreeIndex(treeIndex, component) {
+    var insertedAt = domUtils.insertAtTreeIndex(this.el, treeIndex, component.el);
+    if (! insertedAt) return;
+
+    component.findScopeParent();
 }
 
 
@@ -2794,8 +2846,10 @@ _.extendProto(Dom, {
 
     find: find,
     hasTextBeforeSelection: hasTextBeforeSelection,
-    hasTextAfterSelection: hasTextAfterSelection
-    // _reattach: _reattachEventsOnElementChange
+    hasTextAfterSelection: hasTextAfterSelection,
+
+    treeIndexOf: treeIndexOf,
+    insertAtTreeIndex: insertAtTreeIndex
 });
 
 facetsRegistry.add(Dom);
@@ -2943,7 +2997,7 @@ function prependChildren(el) {
 
 function insertAfter(el) {
     var thisEl = this.owner.el
-        , parent = thisEl.parentNode;
+        , parent = thisEl.parentNode;    
     parent.insertBefore(el, thisEl.nextSibling);
 }
 
@@ -3033,6 +3087,33 @@ function hasTextAfterSelection() {
     var isText = nextNode ? !nextNode.nodeValue == '' : false;
 
     return isText;
+}
+
+
+/**
+ * Returns sequential index of element inside current component's element in DOM tree as traversed by TreeWalker.
+ * Returns -1 if the element is not inside current component's element, 0 if the component's element is passed.
+ * 
+ * @param  {Element} el element to find the index of
+ * @return {Number}
+ */
+function treeIndexOf(el) {
+    return domUtils.treeIndexOf(this.owner.el, el);
+}
+
+
+/**
+ * Inserts an element inside this component's element at a given index in tree (that has the same meaning as the index returned by `treeIndexOf` method). If element is already in the component's DOM tree, it will be removed first and then moved to the passed treeIndex.
+ * If the index is out of bounds will insert as the lst child
+ * Returns actual index at which the element was inserted (can be less than passed if out of bounds).
+ * Insertion at index 0 will also return false as it would mean replacing the root element.
+ * 
+ * @param {Element} rootEl element into which to insert
+ * @param {Number} treeIndex index in DOM tree inside root element (see treeIndexOf)
+ * @param {Element} el element to be inserted
+ */
+function insertAtTreeIndex(treeIndex, el) {
+    return domUtils.insertAtTreeIndex(this.owner.el, treeIndex, el);
 }
 
 },{"../../attributes/a_bind":5,"../../binder":9,"../../config":56,"../../util/check":80,"../../util/dom":83,"../../util/error":86,"../c_facet":12,"./cf_registry":25,"dot":98,"mol-proto":99}],16:[function(require,module,exports){
@@ -10469,7 +10550,8 @@ module.exports = componentCount;
 'use strict';
 
 
-var config = require('../config');
+var config = require('../config')
+    , _ = require('mol-proto');
 
 
 var domUtils = {
@@ -10487,7 +10569,10 @@ var domUtils = {
     firstTextNode: firstTextNode,
     lastTextNode: lastTextNode,
     trimNodeRight: trimNodeRight,
-    trimNodeLeft: trimNodeLeft
+    trimNodeLeft: trimNodeLeft,
+
+    treeIndexOf: treeIndexOf,
+    insertAtTreeIndex: insertAtTreeIndex
 };
 
 module.exports = domUtils;
@@ -10625,7 +10710,7 @@ function removeElement(el) {
  */
 function firstTextNode(node) {
     if (node.nodeType == Node.TEXT_NODE) return node;
-    var treeWalker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+    var treeWalker = _createTreeWalker(node, NodeFilter.SHOW_TEXT);
     return treeWalker.firstChild();
 }
 
@@ -10638,7 +10723,7 @@ function firstTextNode(node) {
  */
 function lastTextNode(node) {
     if (node.nodeType == Node.TEXT_NODE) return node;
-    var treeWalker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+    var treeWalker = _createTreeWalker(node, NodeFilter.SHOW_TEXT);
     return treeWalker.lastChild();
 }
 
@@ -10716,7 +10801,68 @@ function detachComponent(el) {
     delete el[config.componentRef];
 }
 
-},{"../config":56}],84:[function(require,module,exports){
+
+/**
+ * Returns sequential index of element inside root element in DOM tree as traversed by TreeWalker.
+ * Returns -1 if the element is not inside root element, 0 if the root element itself is passed.
+ * 
+ * @param  {Element} rootEl element to search
+ * @param  {Element} el element to find the index of
+ * @return {Number}
+ */
+function treeIndexOf(rootEl, el) {
+    if (! rootEl.contains(el)) return -1;
+    if (rootEl == el) return 0;
+
+    var treeWalker = _createTreeWalker(rootEl);
+    treeWalker.currentNode = rootEl;
+    var nextNode = treeWalker.nextNode()
+        , index = 1;
+
+    while (nextNode && nextNode != el) {
+        index++;
+        nextNode = treeWalker.nextNode();
+    }
+
+    return index;
+}
+
+
+/**
+ * Inserts an element inside root at a given index in tree (that has the same meaning as the index returned by `treeIndexOf` function). If element is already in the root's tree, it will be removed first and then moved to the passed treeIndex
+ * Returns actual index at which the element was inserted (can be less than passed if out of bounds).
+ * Insertion at index 0 is not possible and will return undefined as it would mean replacing the root element.
+ * 
+ * @param {Element} rootEl element into which to insert
+ * @param {Number} treeIndex index in DOM tree inside root element (see treeIndexOf)
+ * @param {Element} el element to be inserted
+ * @return {Boolean}
+ */
+function insertAtTreeIndex(rootEl, treeIndex, el) {
+    if (rootEl.contains(el))
+        removeElement(el); // can't use removeChild as rootEl here is not an immediate parent
+
+    if (! (treeIndex > 0)) return; // not same as "<"
+
+    var treeWalker = _createTreeWalker(rootEl);
+
+    var count = treeIndex;
+    while (nextNode && count--) // same number of times as treeIndex (if not out of bounds)
+        var nextNode = treeWalker.nextNode();
+
+    var parent = nextNode && nextNode.parentNode || rootEl;
+    parent.insertBefore(el, nextNode);
+
+    return treeIndex - count;
+}
+
+
+function _createTreeWalker(el, whatToShow) {
+    whatToShow = whatToShow || (NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+    return document.createTreeWalker(el, whatToShow);
+}
+
+},{"../config":56,"mol-proto":99}],84:[function(require,module,exports){
 'use strict';
 
 
