@@ -6777,7 +6777,7 @@ function _onBackdropClick(eventType, event) {
 
 
 function _onKeyDown(eventType, event) {
-    console.log('_onKeyDown', event);
+
 }
 
 
