@@ -12649,6 +12649,7 @@ var functionMethods = require('./proto_function');
  * - [toDate](proto_string.js.html#toDate)
  * - [toQueryString](proto_string.js.html#toQueryString)
  * - [fromQueryString](proto_string.js.html#fromQueryString)
+ * - [hashCode](proto_string.js.html#hashCode)
  */
 var stringMethods = require('./proto_string');
 
@@ -13995,6 +13996,9 @@ var __ = require('./proto_object');
  * - [toRegExp](#toRegExp)
  * - [toFunction](#toFunction)
  * - [toDate](#toDate)
+ * - [toQueryString](#toQueryString)
+ * - [fromQueryString](#fromQueryString)
+ * - [hashCode](#hashCode)
  */
  var stringMethods = module.exports = {
     firstUpperCase: firstUpperCase,
@@ -14003,7 +14007,8 @@ var __ = require('./proto_object');
     toFunction: toFunction,
     toDate: toDate,
     toQueryString: toQueryString,
-    fromQueryString: fromQueryString
+    fromQueryString: fromQueryString,
+    hashCode: hashCode
 };
 
 
@@ -14116,6 +14121,24 @@ function fromQueryString(decode) {
     });
 
     return results;
+}
+
+
+/**
+ * Dan bernstein's algorythm to create hash from string
+ *
+ * @param {String} self string to convert to hash
+ * @return {Number}
+ */
+function hashCode(){
+    var hash = 5381
+        , str = this
+        , len = str.length;
+    for (var i = 0; i < len; i++) {
+        var char = str.charCodeAt(i);
+        hash = ((hash << 5) + hash) + char; /* hash * 33 + c */
+    }
+    return hash;
 }
 
 },{"./proto_object":103}],106:[function(require,module,exports){
