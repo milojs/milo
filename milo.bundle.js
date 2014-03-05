@@ -10811,7 +10811,7 @@ function detachComponent(el) {
  * @return {Number}
  */
 function treeIndexOf(rootEl, el) {
-    if (! rootEl.contains(el)) return -1;
+    if (! (rootEl && rootEl.contains(el))) return -1;
     if (rootEl == el) return 0;
 
     var treeWalker = _createTreeWalker(rootEl);
