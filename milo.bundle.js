@@ -3403,7 +3403,7 @@ function onDragging(eventType, event) {
 
     event.stopPropagation();
     event.preventDefault();
-    
+
     if (! _isDropAllowed.call(this, dt))
         dt.setDropEffect('none');
 }
@@ -3426,6 +3426,7 @@ function onDrop(eventType, event) {
  * @param {DragDrop} dt
  * @return {Boolean}
  */
+_isDropAllowed = _.throttle(_isDropAllowed, 50);
 function _isDropAllowed(dt) {
     var allow = this.config.allow;
 
