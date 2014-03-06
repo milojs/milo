@@ -91,10 +91,18 @@ milo(function () {
 ```
 
 
+Samples/Tutorials
+-----------------
+
+### Facets
+[Introduction to data facet](http://jsfiddle.net/jasoniangreen/xDFda/)
+
 ### TodoMVC
 
 The more advanced sample is __Todos__ app in
 [todomvc](https://github.com/MailOnline/milo/tree/master/todomvc) folder.
+
+
 
 
 ### Contribute
