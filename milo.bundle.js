@@ -10578,6 +10578,7 @@ var domUtils = {
     lastTextNode: lastTextNode,
     trimNodeRight: trimNodeRight,
     trimNodeLeft: trimNodeLeft,
+    stripHtml: stripHtml,
 
     treeIndexOf: treeIndexOf,
     insertAtTreeIndex: insertAtTreeIndex
@@ -10833,6 +10834,13 @@ function treeIndexOf(rootEl, el) {
     }
 
     return index;
+}
+
+
+function stripHtml(str) {
+    var div = document.createElement('DIV');
+    div.innerHTML = str;
+    return div.textContent || '';
 }
 
 
@@ -17780,8 +17788,7 @@ process.nextTick = (function () {
     if (canPost) {
         var queue = [];
         window.addEventListener('message', function (ev) {
-            var source = ev.source;
-            if ((source === window || source === null) && ev.data === 'process-tick') {
+            if (ev.source === window && ev.data === 'process-tick') {
                 ev.stopPropagation();
                 if (queue.length > 0) {
                     var fn = queue.shift();
