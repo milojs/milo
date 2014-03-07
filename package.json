@@ -41,8 +41,8 @@
         "grunt-contrib-uglify": "~0.2.7"
     },
     "dependencies": {
-        "mol-proto": "git+ssh://git@github.com/MailOnline/proto.git",
+        "mol-proto": "git://github.com/MailOnline/proto.git",
         "dot": "~1.0.2",
-        "base32": "git+ssh://git@github.com/MailOnline/base32-js.git"
+        "base32": "git://github.com/MailOnline/base32-js.git"
     }
 }
