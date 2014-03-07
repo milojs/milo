@@ -6588,86 +6588,6 @@ module.exports = MLWrapper;
 
 var Component = require('../../c_class')
     , componentsRegistry = require('../../c_registry')
-    , _ = require('mol-proto');
-
-
-var TOGGLE_CSS_CLASS = 'dropdown-toggle'
-    , MENU_CSS_CLASS = 'dropdown-menu';
-
-
-var MLDropdown = Component.createComponentClass('MLDropdown', {
-    events: undefined,
-    dom: {
-        cls: ['ml-bs-dropdown', 'dropdown']
-    }
-});
-
-componentsRegistry.add(MLDropdown);
-
-module.exports = MLDropdown;
-
-
-_.extendProto(MLDropdown, {
-    start: MLDropdown$start,
-    destroy: MLDropdown$destroy
-});
-
-
-function MLDropdown$start() {
-    var toggleEl = this.el.querySelector('.' + TOGGLE_CSS_CLASS)
-        , menuEl = this.el.querySelector('.' + MENU_CSS_CLASS);
-
-    if (! (toggleEl && menuEl))
-        return logger.error('MLDropdown:', TOGGLE_CSS_CLASS, 'or', MENU_CSS_CLASS, 'isn\'t found');
-
-    var clickHandler = _toggleMenu.bind(this, undefined);
-
-    this._dropdown = {
-        toggle: toggleEl,
-        menu: menuEl,
-        displayStyle: toggleEl.style.display,
-        clickHandler: clickHandler,
-        visible: false
-    }
-    _hideMenu.call(this);
-    toggleEl.addEventListener('click', clickHandler);
-}
-
-
-function MLDropdown$destroy() {
-    var dd = this._dropdown;
-    dd.toggle.removeEventListener('click', dd.clickHandler);
-    delete this._dropdown;
-    Component.prototype.destroy.apply(this, arguments);
-}
-
-
-function _showMenu() {
-    _toggleMenu.call(this, true);
-}
-
-
-function _hideMenu() {
-    _toggleMenu.call(this, false);
-}
-
-
-function _toggleMenu(doShow) {
-    doShow = typeof doShow == 'undefined'
-                ? ! this._dropdown.visible
-                : !! doShow;
-
-    this._dropdown.visible = doShow;
-    this._dropdown.menu.style.display = doShow
-                                            ? this._dropdown.displayStyle
-                                            : 'none';
-}
-
-},{"../../c_class":11,"../../c_registry":27,"mol-proto":99}],55:[function(require,module,exports){
-'use strict';
-
-var Component = require('../../c_class')
-    , componentsRegistry = require('../../c_registry')
     , componentName = require('../../../util/component_name')
     , logger = require('../../../util/logger')
     , check = require('../../../util/check')
@@ -6995,7 +6915,87 @@ function MLDialog$$getOpenedDialog() {
     return openedDialog;
 }
 
-},{"../../../util/check":80,"../../../util/component_name":81,"../../../util/logger":89,"../../c_class":11,"../../c_registry":27,"mol-proto":99}],56:[function(require,module,exports){
+},{"../../../util/check":80,"../../../util/component_name":81,"../../../util/logger":89,"../../c_class":11,"../../c_registry":27,"mol-proto":99}],55:[function(require,module,exports){
+'use strict';
+
+var Component = require('../../c_class')
+    , componentsRegistry = require('../../c_registry')
+    , _ = require('mol-proto');
+
+
+var TOGGLE_CSS_CLASS = 'dropdown-toggle'
+    , MENU_CSS_CLASS = 'dropdown-menu';
+
+
+var MLDropdown = Component.createComponentClass('MLDropdown', {
+    events: undefined,
+    dom: {
+        cls: ['ml-bs-dropdown', 'dropdown']
+    }
+});
+
+componentsRegistry.add(MLDropdown);
+
+module.exports = MLDropdown;
+
+
+_.extendProto(MLDropdown, {
+    start: MLDropdown$start,
+    destroy: MLDropdown$destroy
+});
+
+
+function MLDropdown$start() {
+    var toggleEl = this.el.querySelector('.' + TOGGLE_CSS_CLASS)
+        , menuEl = this.el.querySelector('.' + MENU_CSS_CLASS);
+
+    if (! (toggleEl && menuEl))
+        return logger.error('MLDropdown:', TOGGLE_CSS_CLASS, 'or', MENU_CSS_CLASS, 'isn\'t found');
+
+    var clickHandler = _toggleMenu.bind(this, undefined);
+
+    this._dropdown = {
+        toggle: toggleEl,
+        menu: menuEl,
+        displayStyle: toggleEl.style.display,
+        clickHandler: clickHandler,
+        visible: false
+    }
+    _hideMenu.call(this);
+    toggleEl.addEventListener('click', clickHandler);
+}
+
+
+function MLDropdown$destroy() {
+    var dd = this._dropdown;
+    dd.toggle.removeEventListener('click', dd.clickHandler);
+    delete this._dropdown;
+    Component.prototype.destroy.apply(this, arguments);
+}
+
+
+function _showMenu() {
+    _toggleMenu.call(this, true);
+}
+
+
+function _hideMenu() {
+    _toggleMenu.call(this, false);
+}
+
+
+function _toggleMenu(doShow) {
+    doShow = typeof doShow == 'undefined'
+                ? ! this._dropdown.visible
+                : !! doShow;
+
+    this._dropdown.visible = doShow;
+    this._dropdown.menu.style.display = doShow
+                                            ? this._dropdown.displayStyle
+                                            : 'none';
+}
+
+},{"../../c_class":11,"../../c_registry":27,"mol-proto":99}],56:[function(require,module,exports){
 'use strict';
 
 
@@ -10124,7 +10124,7 @@ require('./components/ui/DropTarget');
 require('./components/ui/bootstrap/Dropdown');
 // require('./components/ui/bootstrap/Dialog');
 
-},{"./components/classes/View":29,"./components/ui/Button":36,"./components/ui/Combo":37,"./components/ui/ComboList":38,"./components/ui/Date":39,"./components/ui/DropTarget":40,"./components/ui/Group":41,"./components/ui/Hyperlink":42,"./components/ui/Image":43,"./components/ui/Input":44,"./components/ui/InputList":45,"./components/ui/List":46,"./components/ui/ListItem":47,"./components/ui/RadioGroup":48,"./components/ui/Select":49,"./components/ui/SuperCombo":50,"./components/ui/Textarea":51,"./components/ui/Time":52,"./components/ui/Wrapper":53,"./components/ui/bootstrap/Dropdown":54}],79:[function(require,module,exports){
+},{"./components/classes/View":29,"./components/ui/Button":36,"./components/ui/Combo":37,"./components/ui/ComboList":38,"./components/ui/Date":39,"./components/ui/DropTarget":40,"./components/ui/Group":41,"./components/ui/Hyperlink":42,"./components/ui/Image":43,"./components/ui/Input":44,"./components/ui/InputList":45,"./components/ui/List":46,"./components/ui/ListItem":47,"./components/ui/RadioGroup":48,"./components/ui/Select":49,"./components/ui/SuperCombo":50,"./components/ui/Textarea":51,"./components/ui/Time":52,"./components/ui/Wrapper":53,"./components/ui/bootstrap/Dropdown":55}],79:[function(require,module,exports){
 'use strict';
 
 require('./components/c_facets/Dom');
@@ -11233,12 +11233,12 @@ var util = {
     storage: require('./storage'),
     domReady: require('./domready'),
     dragDrop: require('./dragdrop'),
-    dialog: require('../components/ui/bootstrap/dialog')
+    dialog: require('../components/ui/bootstrap/Dialog')
 };
 
 module.exports = util;
 
-},{"../components/ui/bootstrap/dialog":55,"./check":80,"./component_name":81,"./count":82,"./dom":83,"./domready":84,"./dragdrop":85,"./error":86,"./json_parse":88,"./logger":89,"./promise":91,"./request":92,"./selection":93,"./storage":94}],88:[function(require,module,exports){
+},{"../components/ui/bootstrap/Dialog":54,"./check":80,"./component_name":81,"./count":82,"./dom":83,"./domready":84,"./dragdrop":85,"./error":86,"./json_parse":88,"./logger":89,"./promise":91,"./request":92,"./selection":93,"./storage":94}],88:[function(require,module,exports){
 'use strict';
 
 
