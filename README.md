@@ -94,7 +94,8 @@ milo(function () {
 Samples/Tutorials
 -----------------
 
-### Facets
+### Getting started
+[Introduction to binding](http://jsfiddle.net/jasoniangreen/63T6V/)
 [Introduction to data facet](http://jsfiddle.net/jasoniangreen/xDFda/)
 
 ### TodoMVC
