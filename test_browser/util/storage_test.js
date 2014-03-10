@@ -294,4 +294,40 @@ describe('DOMStorage', function() {
             assert.equal(localStorage.length, 0);           
         });
     });
+
+
+    describe('getAllKeys and getAllItems instance methods', function() {
+        var itemsToStore = {
+            name: 'milo',
+            test: 1,
+            list: [ 'item1', 2 ],
+            info: { test: 3 }
+        };
+
+        beforeEach(function() {
+            assert.equal(localStorage.length, 0);           
+            domStorage.set(itemsToStore);
+            assert.equal(localStorage.length, 8);
+        });
+
+        it('getAllKeys should return the list of stored keys', function() {
+            var keys = domStorage.getAllKeys();
+            assert.deepEqual(_.object(keys, true), {
+                name: true,
+                test: true,
+                list: true,
+                info: true
+            })
+        });
+
+        it('getAllItems should return all stored values', function() {
+            var items = domStorage.getAllItems();
+            assert.deepEqual(items, {
+                name: 'milo',
+                test: 1,
+                list: [ 'item1', 2 ],
+                info: { test: 3 }
+            })
+        });
+    });
 });

@@ -1,5 +1,6 @@
 #!/bin/sh
 #npm install -g doxx
+set -e
 git stash
 git branch gh-pages | echo 'Create branch gh-pages if it does not exist'
 git checkout gh-pages

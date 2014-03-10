@@ -7038,7 +7038,8 @@ config({
     },
     domStorage: {
         typeSuffix: ':___milo_data_type',
-        prefixSeparator: '/'
+        prefixSeparator: '/',
+        root: ''
     },
     dragDrop: {
         dataTypes: {
@@ -10538,27 +10539,27 @@ function componentName() {
 
 var timestamp = Date.now()
     , count = ''
-    , componentID = '' + timestamp;
+    , uniqueID = '' + timestamp;
 
-function componentCount() {
+function uniqueCount() {
     var newTimestamp = Date.now();
-    componentID = '' + newTimestamp;
+    uniqueID = '' + newTimestamp;
     if (timestamp == newTimestamp) {
         count = count === '' ? 0 : count + 1;
-        componentID += '_' + count;
+        uniqueID += '_' + count;
     } else {
         timestamp = newTimestamp;
         count = '';
     }
 
-    return componentID;
+    return uniqueID;
 }
 
-componentCount.get = function() {
-    return componentID;
+uniqueCount.get = function() {
+    return uniqueID;
 }
 
-module.exports = componentCount;
+module.exports = uniqueCount;
 
 },{}],83:[function(require,module,exports){
 'use strict';
@@ -11225,7 +11226,8 @@ var util = {
     promise: require('./promise'),
     check: require('./check'),
     error: require('./error'),
-    count: require('./count'),
+    count: require('./count'), // deprecated
+    uniqueId: require('./count'),
     componentName: require('./component_name'),
     dom: require('./dom'),
     selection: require('./selection'),
@@ -11979,9 +11981,10 @@ function DOMStorage(keyPrefix, sessionOnly) {
     if (typeof window == 'undefined') return;
 
     _.defineProperties(this, {
-        keyPrefix: keyPrefix + config.domStorage.prefixSeparator,
+        keyPrefix: config.domStorage.root + keyPrefix + config.domStorage.prefixSeparator,
         _storage: sessionOnly ? window.sessionStorage : window.localStorage,
-        _typeSuffix: config.domStorage.typeSuffix
+        _typeSuffix: config.domStorage.typeSuffix,
+        _keys: {}
     });
 }
 
@@ -11994,7 +11997,9 @@ _.extendProto(DOMStorage, {
     getItem: DOMStorage$getItem,
     setItem: DOMStorage$setItem,
     removeItem: DOMStorage$removeItem,
-    _storageKey: DOMStorage$_storageKey
+    _storageKey: DOMStorage$_storageKey,
+    getAllKeys: DOMStorage$getAllKeys,
+    getAllItems: DOMStorage$getAllItems
 });
 
 
@@ -12096,6 +12101,7 @@ function DOMStorage$setItem(key, value) {
     var dataType = _setKeyDataType.call(this, pKey, value);
     var valueStr = _serializeData(value, dataType);
     this._storage.setItem(pKey, valueStr);
+    this._keys[key] = true;
 }
 
 
@@ -12110,6 +12116,25 @@ function DOMStorage$removeItem(key) {
     var pKey = this._storageKey(key);
     this._storage.removeItem(pKey);
     _removeKeyDataType.call(this, pKey)
+    delete this._keys[key];
+}
+
+
+/**
+ * Returns the array of all keys stored by this instance of DOMStorage
+ *
+ * @return {Array} 
+ */
+function DOMStorage$getAllKeys() {
+    return Object.keys(this._keys);
+}
+
+
+/**
+ * Returns the map with all keys and values (deserialized) stored using this instance of DOMStorage
+ */
+function DOMStorage$getAllItems() {
+    return this.get(this.getAllKeys());
 }
 
 
@@ -12788,6 +12813,7 @@ var objectMethods = require('./proto_object');
  * - [findIndex](proto_array.js.html#findIndex)
  * - [appendArray](proto_array.js.html#appendArray)
  * - [prependArray](proto_array.js.html#prependArray)
+ * - [spliceItem](proto_array.js.html#spliceItem)
  * - [toArray](proto_array.js.html#toArray)
  * - [object](proto_array.js.html#object)
  * - [mapToObject](proto_array.js.html#mapToObject)
@@ -12947,6 +12973,7 @@ var __ = require('./proto_object')
  * - [findIndex](#findIndex)
  * - [appendArray](#appendArray)
  * - [prependArray](#prependArray)
+ * - [spliceItem](#spliceItem)
  * - [toArray](#toArray)
  * - [object](#object)
  * - [mapToObject](#mapToObject)
@@ -12964,7 +12991,8 @@ var arrayMethods = module.exports = {
     object: object,
     mapToObject: mapToObject,
     unique: unique,
-    deepForEach: deepForEach
+    deepForEach: deepForEach,
+    spliceItem: spliceItem
 };
 
 
@@ -13043,6 +13071,21 @@ function prependArray(arrayToPrepend) {
     var args = [0, 0].concat(arrayToPrepend);
     arrayMethods.splice.apply(this, args);
 
+    return this;
+}
+
+
+/**
+ * Removes item from array that is found using indexOf (i.e. '===')
+ * Modifies original array and returns the reference to it.
+ * 
+ * @param {Array} self An array that will be modified
+ * @param  {Any} item item to be removed
+ * @return {Array}
+ */
+function spliceItem(item) {
+    var index = this.indexOf(item);
+    if (index >= 0) this.splice(index, 1);
     return this;
 }
 
