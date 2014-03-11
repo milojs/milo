@@ -1928,6 +1928,7 @@ _.extendProto(ComponentFacet, {
     scopeParent: scopeParent,
     postScopeParent: postScopeParent,
     getMessageSource: getMessageSource,
+    dispatchSourceMessage: dispatchSourceMessage,
     _createMessenger: _createMessenger,
     _setMessageSource: _setMessageSource,
     _createMessageSource: _createMessageSource,
@@ -2054,6 +2055,11 @@ function _setMessageSource(messageSource) {
 
 function getMessageSource() {
     return this._messenger.getMessageSource();
+}
+
+
+function dispatchSourceMessage(message, data) {
+    return this.getMessageSource().dispatchMessage(message, data);
 }
 
 
@@ -3158,8 +3164,7 @@ _.extendProto(Drag, {
     init: Drag$init,
     start: Drag$start,
 
-    setHandle: Drag$setHandle,
-    // _reattach: _reattachEventsOnElementChange
+    setHandle: Drag$setHandle
 });
 
 facetsRegistry.add(Drag);
@@ -5223,7 +5228,7 @@ function changeComboData(method, value) {
 
 // Post the data change
 function dispatchChangeMessage() {
-    this.data.getMessageSource().dispatchMessage(COMBO_CHANGE_MESSAGE);
+    this.data.dispatchSourceMessage(COMBO_CHANGE_MESSAGE);
 }
 
 function onOptionsChange(msg, data) {
@@ -5326,7 +5331,7 @@ function onComboChange(msg, data) {
 }
 
 function onItemsChange(msg, data) {
-    this.data.getMessageSource().dispatchMessage(COMBO_LIST_CHANGE_MESSAGE);
+    this.data.dispatchSourceMessage(COMBO_LIST_CHANGE_MESSAGE);
 }
 
 function MLComboList_get() {
@@ -5537,7 +5542,7 @@ function MLImage_del() {
 
 // Post the data change
 function dispatchChangeMessage() {
-    this.data.getMessageSource().dispatchMessage(IMAGE_CHANGE_MESSAGE);
+    this.data.dispatchSourceMessage(IMAGE_CHANGE_MESSAGE);
 }
 
 
@@ -5665,7 +5670,7 @@ function onClick(msg) {
 }
 
 function onItemsChange(msg, data) {
-    this.data.getMessageSource().dispatchMessage(INPUT_LIST_CHANGE_MESSAGE);
+    this.data.dispatchSourceMessage(INPUT_LIST_CHANGE_MESSAGE);
 }
 
 function MLInputList_get() {
@@ -5787,7 +5792,7 @@ function MLListItem_del() {
 
 
 function _sendChangeMessage() {
-    this.data.getMessageSource().dispatchMessage(LISTITEM_CHANGE_MESSAGE);
+    this.data.dispatchSourceMessage(LISTITEM_CHANGE_MESSAGE);
 }
 
 
@@ -5932,7 +5937,7 @@ function onGroupClick(eventType, event) {
 
 // Post the data change
 function dispatchChangeMessage() {
-    this.data.getMessageSource().dispatchMessage(RADIO_CHANGE_MESSAGE);
+    this.data.dispatchSourceMessage(RADIO_CHANGE_MESSAGE);
 }
 
 
@@ -6476,7 +6481,7 @@ function _setData() {
     this.hideOptions();
     this._comboInput.data.off('', { subscriber: onDataChange, context: this });
     this.data.set(this._selected);
-    this.data.getMessageSource().dispatchMessage(COMBO_CHANGE_MESSAGE);
+    this.data.dispatchSourceMessage(COMBO_CHANGE_MESSAGE);
     this._comboInput.data.on('', { subscriber: onDataChange, context: this });
     this._selected = null;
     this.setFilteredOptions(this._optionsData);
