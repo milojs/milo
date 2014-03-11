@@ -11970,6 +11970,13 @@ var DOMStorageError = require('./error').createClass('DomStorageError')
 module.exports = DOMStorage;
 
 
+// shared keys stored by all instances, include key prefixes
+var _storedKeys = {
+    true: {}, // session storage
+    false: {} // local storage
+};
+
+
 /**
  * DOMStorage class to simplify storage and retrieval of multiple items with types preservation to DOM storage (localStorage and sessionStorage).
  * Types will be stored in the key created from value keys with appended `milo.config.domStorage.typeSuffix`
@@ -11977,11 +11984,17 @@ module.exports = DOMStorage;
  * @param {String} keyPrefix prefix that will be added to all keys followed by `milo.config.domStorage.prefixSeparator` ("/" by default).
  * @param {Boolean} sessionOnly true to use sessionStorage. localStorage will be used by default.
  */
-function DOMStorage(keyPrefix, sessionOnly) {
+function DOMStorage(keyPrefix, sessionOnly, options) {
     if (typeof window == 'undefined') return;
 
+    keyPrefix = config.domStorage.root + 
+                (keyPrefix
+                    ? keyPrefix + config.domStorage.prefixSeparator
+                    : '');
+
     _.defineProperties(this, {
-        keyPrefix: config.domStorage.root + keyPrefix + config.domStorage.prefixSeparator,
+        keyPrefix: keyPrefix,
+        sessionOnly: !! sessionOnly,
         _storage: sessionOnly ? window.sessionStorage : window.localStorage,
         _typeSuffix: config.domStorage.typeSuffix,
         _keys: {}
@@ -12004,7 +12017,10 @@ _.extendProto(DOMStorage, {
 
 
 _.extend(DOMStorage, {
-    registerDataType: DOMStorage$$registerDataType
+    registerDataType: DOMStorage$$registerDataType,
+    getAllKeys: DOMStorage$$getAllKeys,
+    getAllItems: DOMStorage$$getAllItems,
+    _storedKeys: _storedKeys // exposed for testing
 });
 
 
@@ -12102,6 +12118,7 @@ function DOMStorage$setItem(key, value) {
     var valueStr = _serializeData(value, dataType);
     this._storage.setItem(pKey, valueStr);
     this._keys[key] = true;
+    _storedKeys[this.sessionOnly][pKey] = true;
 }
 
 
@@ -12117,6 +12134,7 @@ function DOMStorage$removeItem(key) {
     this._storage.removeItem(pKey);
     _removeKeyDataType.call(this, pKey)
     delete this._keys[key];
+    delete _storedKeys[this.sessionOnly][pKey];
 }
 
 
@@ -12132,10 +12150,37 @@ function DOMStorage$getAllKeys() {
 
 /**
  * Returns the map with all keys and values (deserialized) stored using this instance of DOMStorage
+ * 
+ * @return {Object}
  */
 function DOMStorage$getAllItems() {
     return this.get(this.getAllKeys());
 }
+
+
+/**
+ * Returns the array of all keys stored by all instances of DOMStorage
+ *
+ * @param {Boolean} sessionOnly true - local storage, false - session storage
+ * @return {Array} 
+ */
+function DOMStorage$$getAllKeys(sessionOnly) {
+    return Object.keys(_storedKeys[!! sessionOnly]);
+}
+
+
+/**
+ * Returns the map with all keys and values (deserialized) stored using this instance of DOMStorage
+ *
+ * @param {Booleab} sessionOnly true - local storage, false - session storage
+ * @return {Object}
+ */
+function DOMStorage$$getAllItems(sessionOnly) {
+    var storage = new DOMStorage('', sessionOnly);
+    return storage.get(DOMStorage.getAllKeys());
+}
+
+
 
 
 /**

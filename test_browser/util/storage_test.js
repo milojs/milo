@@ -32,6 +32,7 @@ describe('DOMStorage', function() {
 
     beforeEach(function() {
         window.localStorage.clear();
+        DOMStorage._storedKeys[false] = {};
         domStorage = new DOMStorage('MiloTest');
     });
 
@@ -296,7 +297,7 @@ describe('DOMStorage', function() {
     });
 
 
-    describe('getAllKeys and getAllItems instance methods', function() {
+    describe('getAllKeys and getAllItems instance and class methods', function() {
         var itemsToStore = {
             name: 'milo',
             test: 1,
@@ -305,12 +306,13 @@ describe('DOMStorage', function() {
         };
 
         beforeEach(function() {
-            assert.equal(localStorage.length, 0);           
+            window.localStorage.clear();
+            DOMStorage._storedKeys[false] = {};
             domStorage.set(itemsToStore);
             assert.equal(localStorage.length, 8);
         });
 
-        it('getAllKeys should return the list of stored keys', function() {
+        it('instance getAllKeys should return the list of stored keys', function() {
             var keys = domStorage.getAllKeys();
             assert.deepEqual(_.object(keys, true), {
                 name: true,
@@ -320,13 +322,33 @@ describe('DOMStorage', function() {
             })
         });
 
-        it('getAllItems should return all stored values', function() {
+        it('instance getAllItems should return all stored values', function() {
             var items = domStorage.getAllItems();
             assert.deepEqual(items, {
                 name: 'milo',
                 test: 1,
                 list: [ 'item1', 2 ],
                 info: { test: 3 }
+            })
+        });
+
+        it('class getAllKeys should return the list of stored keys', function() {
+            var keys = DOMStorage.getAllKeys();
+            assert.deepEqual(_.object(keys, true), {
+                'MiloTest/name': true,
+                'MiloTest/test': true,
+                'MiloTest/list': true,
+                'MiloTest/info': true
+            })
+        });
+
+        it('getAllItems should return all stored values', function() {
+            var items = DOMStorage.getAllItems();
+            assert.deepEqual(items, {
+                'MiloTest/name': 'milo',
+                'MiloTest/test': 1,
+                'MiloTest/list': [ 'item1', 2 ],
+                'MiloTest/info': { test: 3 }
             })
         });
     });
