@@ -11989,7 +11989,7 @@ var _storedKeys = {
  * @param {String} keyPrefix prefix that will be added to all keys followed by `milo.config.domStorage.prefixSeparator` ("/" by default).
  * @param {Boolean} sessionOnly true to use sessionStorage. localStorage will be used by default.
  */
-function DOMStorage(keyPrefix, sessionOnly, options) {
+function DOMStorage(keyPrefix, sessionOnly) {
     if (typeof window == 'undefined') return;
 
     keyPrefix = config.domStorage.root + 
@@ -12021,10 +12021,19 @@ _.extendProto(DOMStorage, {
 });
 
 
+var _sessionStorage = new DOMStorage('', true)
+    , _localStorage = new DOMStorage('', false);
+
+var _domStorage = {
+        true: _sessionStorage,
+        false: _localStorage
+    };
+
 _.extend(DOMStorage, {
     registerDataType: DOMStorage$$registerDataType,
-    getAllKeys: DOMStorage$$getAllKeys,
-    getAllItems: DOMStorage$$getAllItems,
+    local: _localStorage,
+    session: _sessionStorage,
+    storage: _domStorage,
     _storedKeys: _storedKeys // exposed for testing
 });
 
@@ -12123,7 +12132,7 @@ function DOMStorage$setItem(key, value) {
     var valueStr = _serializeData(value, dataType);
     this._storage.setItem(pKey, valueStr);
     this._keys[key] = true;
-    _storedKeys[this.sessionOnly][pKey] = true;
+    _domStorage[this.sessionOnly]._keys[pKey] = true;
 }
 
 
@@ -12139,7 +12148,7 @@ function DOMStorage$removeItem(key) {
     this._storage.removeItem(pKey);
     _removeKeyDataType.call(this, pKey)
     delete this._keys[key];
-    delete _storedKeys[this.sessionOnly][pKey];
+    delete _domStorage[this.sessionOnly]._keys[pKey];
 }
 
 
@@ -12149,7 +12158,12 @@ function DOMStorage$removeItem(key) {
  * @return {Array} 
  */
 function DOMStorage$getAllKeys() {
-    return Object.keys(this._keys);
+    var storedKeys = Object.keys(this._keys);
+    var keysInStorage = storedKeys.filter(function(key) {
+        if (this.hasItem(key)) return true;
+        else delete this._keys[key];
+    }, this);
+    return keysInStorage;
 }
 
 
@@ -12161,31 +12175,6 @@ function DOMStorage$getAllKeys() {
 function DOMStorage$getAllItems() {
     return this.get(this.getAllKeys());
 }
-
-
-/**
- * Returns the array of all keys stored by all instances of DOMStorage
- *
- * @param {Boolean} sessionOnly true - local storage, false - session storage
- * @return {Array} 
- */
-function DOMStorage$$getAllKeys(sessionOnly) {
-    return Object.keys(_storedKeys[!! sessionOnly]);
-}
-
-
-/**
- * Returns the map with all keys and values (deserialized) stored using this instance of DOMStorage
- *
- * @param {Booleab} sessionOnly true - local storage, false - session storage
- * @return {Object}
- */
-function DOMStorage$$getAllItems(sessionOnly) {
-    var storage = new DOMStorage('', sessionOnly);
-    return storage.get(DOMStorage.getAllKeys());
-}
-
-
 
 
 /**

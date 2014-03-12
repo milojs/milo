@@ -307,7 +307,7 @@ describe('DOMStorage', function() {
 
         beforeEach(function() {
             window.localStorage.clear();
-            DOMStorage._storedKeys[false] = {};
+            DOMStorage.local._keys[false] = {};
             domStorage.set(itemsToStore);
             assert.equal(localStorage.length, 8);
         });
@@ -333,7 +333,7 @@ describe('DOMStorage', function() {
         });
 
         it('class getAllKeys should return the list of stored keys', function() {
-            var keys = DOMStorage.getAllKeys();
+            var keys = DOMStorage.local.getAllKeys();
             assert.deepEqual(_.object(keys, true), {
                 'MiloTest/name': true,
                 'MiloTest/test': true,
@@ -343,7 +343,7 @@ describe('DOMStorage', function() {
         });
 
         it('getAllItems should return all stored values', function() {
-            var items = DOMStorage.getAllItems();
+            var items = DOMStorage.local.getAllItems();
             assert.deepEqual(items, {
                 'MiloTest/name': 'milo',
                 'MiloTest/test': 1,
