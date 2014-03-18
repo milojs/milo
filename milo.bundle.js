@@ -11057,6 +11057,8 @@ function DragDrop$setComponentMeta(component, params, data) {
                     .replace('%name', _encode(meta.compName || ''))
                     .replace('%params', _encode(paramsStr || ''));
 
+    if (data && typeof data == 'object') data = JSON.stringify(data);
+
     this.dataTransfer.setData(dataType, data || '');
 
     return dataType;
@@ -11094,7 +11096,9 @@ function DragDrop$getComponentMeta() {
         compName: match[2],
         params: _.fromQueryString(match[3]),
         metaDataType: metaDataType,
-        metaData: this.dataTransfer.getData(metaDataType)
+        metaData: _.jsonParse(this.dataTransfer.getData(metaDataType)) 
+                    ? _.jsonParse(this.dataTransfer.getData(metaDataType)) 
+                    : this.dataTransfer.getData(metaDataType)
     };
 }
 
