@@ -1699,8 +1699,7 @@ function Component$getScopeParent(conditionOrFacet) {
 }
 
 function _getScopeParent(conditionFunc) {
-    var parentContainer = this.scope && this.scope._hostObject
-        , parent = parentContainer && parentContainer.owner;
+    try { var parent = this.scope._hostObject.owner; } catch(e) {}
 
     // Where there is no parent, this function will return undefined
     // The parent component is checked recursively
@@ -2662,7 +2661,7 @@ function Data$_splice(spliceIndex, spliceHowMany) { //, ... arguments
         spliceIndex: spliceIndex,
         removed: removed,
         addedCount: addItems ? addedCount : 0
-    }
+    };
 }
 
 
@@ -8791,7 +8790,7 @@ changeDataHandler.initialize = function() {
 
 
 // converts _processChanges to function that passes the first parameter as the context of the original function
-var processChangesFunc = Function.prototype.call.bind(_processChanges);
+var processChangesFunc = Function.prototype.call.bind(processChanges);
 
 // map of message types to methods
 var CHANGE_TYPE_TO_METHOD_MAP = {
@@ -8807,95 +8806,112 @@ var CHANGE_TYPE_TO_METHOD_MAP = {
  *
  * @param {[Function]} callback optional callback that is called with `(null, false)` parameters before change processing starts and `(null, true)` after it's finished.
  */
-function _processChanges(callback) {
-    callback && callback(null, false);
-    this.postMessage('changestarted');
-
-    var batches = [[]]
-        , currentBatch = batches[0];
-
-    this._changesQueue.forEach(function(data) {
-        if (data.type == 'finished')
-            batches.push(currentBatch = []);
-        else
-            currentBatch.push(data);
-    });
-
-    batches.forEach(_processChangesBatch, this);
-
+function processChanges(callback) {
+    notify.call(this, callback, false);
+    var batches = splitToBatches(this._changesQueue);    
+    batches.forEach(processChangesBatch, this);
     this._changesQueue.length = 0;
+    notify.call(this, callback, true);
+}
 
-    callback && callback(null, true);
-    this.postMessage('changecompleted');
+function notify(callback, changeFinished) {
+    callback && callback(null, changeFinished);
+    this.postMessage(changeFinished ? 'changecompleted' : 'changestarted');
 }
 
 
-function _processChangesBatch(batch) {
+function splitToBatches(queue) {
+    var currentBatch = []
+        , batches = [currentBatch];
+    queue.forEach(function(data) {
+        if (data.type == 'finished') {
+            if (currentBatch.length)
+                batches.push(currentBatch = []);
+            else
+                logger.warn('changedata: empty batch of changes');
+        } else
+            currentBatch.push(data);
+    });
+    return batches;
+}
+
+function processChangesBatch(batch) {
     var splicedPaths
-        , changedPaths = [];
+        , changedPaths = []
+        , hadSplice
+        , exitLoop = {};
 
-    var hadSplice
-        , exitIteration = {};
+    batch = prepareAndValidateBatch(batch);
 
-    try {
-        batch.forEach(function(data, index) {
-            // set the new data
-            if (data.type == 'splice') {
-                // var parentPathChanged = changedPaths.some(function(parentPath) {
-                //     var pos = data.path.indexOf(parentPath);
+    try { batch.forEach(processChange, this); }
+    catch (e) { if (e != exitLoop) throw e; }
 
-                //     return pos == 0 && data.path.length > parentPath.length;
-                // });
 
-                // if (parentPathChanged) {
-                //     return;
-                // }
-
-                var modelPath = this.path(data.path);
-                if (! modelPath) return;
-
-                var index = data.index
-                    , howMany = data.removed.length
-                    , spliceArgs = [index, howMany];
-
-                spliceArgs = spliceArgs.concat(data.newValue.slice(index, index + data.addedCount));
-                modelPath.splice.apply(modelPath, spliceArgs);
-
-                if (! config.check) throw exitIteration;
-                splicedPaths = splicedPaths || [];
-                splicedPaths.push(data.path);
-                hadSplice = true;
-            } else {
-                var parentPathSpliced = splicedPaths && splicedPaths.some(function(parentPath) {
-                    var pos = data.path.indexOf(parentPath);
-                    return pos == 0 && data.path[parentPath.length] == '[';
-                });
-
-                if (parentPathSpliced) return;
-                if (hadSplice) logger.error('child change is executed after splice; probably data source did not emit message with data.type=="finished"');
-
-                // var parentPathChanged = changedPaths.some(function(parentPath) {
-                //     var pos = data.path.indexOf(parentPath)
-                //     return pos == 0 && data.path.length > parentPath.length;
-                // });
-
-                // if (parentPathChanged) return;
-
-                changedPaths.push(data.path);
-
-                var modelPath = this.path(data.path);
-                if (! modelPath) return;
-
-                var methodName = CHANGE_TYPE_TO_METHOD_MAP[data.type];
-                if (methodName)
-                    modelPath[methodName](data.newValue);
-                else
-                    logger.error('unknown data change type');
-            }
-        }, this);
-    } catch (e) {
-        if (e != exitIteration) throw e;
+    function processChange(data) {
+        (data.type == 'splice' ? executeSplice : executeMethod)
+            .call(this, data);
     }
+
+
+    function executeSplice(data) {
+        var parentPathChanged = changedPaths.some(function(parentPath) {
+            var pos = data.path.indexOf(parentPath);
+            return pos == 0 && data.path.length >= parentPath.length;
+        });
+
+        if (parentPathChanged) return;
+
+        var modelPath = this.path(data.path);
+        if (! modelPath) return;
+
+        var index = data.index
+            , howMany = data.removed.length
+            , spliceArgs = [index, howMany];
+
+        spliceArgs = spliceArgs.concat(data.newValue.slice(index, index + data.addedCount));
+        modelPath.splice.apply(modelPath, spliceArgs);
+
+        if (! config.check)
+            throw exitLoop;
+        splicedPaths = splicedPaths || [];
+        splicedPaths.push(data.path);
+        hadSplice = true;
+    }
+
+
+    function executeMethod(data) {
+        var parentPathSpliced = splicedPaths && splicedPaths.some(function(parentPath) {
+            var pos = data.path.indexOf(parentPath);
+            return pos == 0 && data.path[parentPath.length] == '[';
+        });
+
+        if (parentPathSpliced) return;
+        if (hadSplice) logger.error('changedata: child change is executed after splice; probably data source did not emit message with data.type=="finished"');
+
+        var parentPathChanged = changedPaths.some(function(parentPath) {
+            var pos = data.path.indexOf(parentPath);
+            return pos == 0 && data.path.length > parentPath.length;
+        });
+
+        if (parentPathChanged) return;
+
+        changedPaths.push(data.path);
+
+        var modelPath = this.path(data.path);
+        if (! modelPath) return;
+
+        var methodName = CHANGE_TYPE_TO_METHOD_MAP[data.type];
+        if (methodName)
+            modelPath[methodName](data.newValue);
+        else
+            logger.error('unknown data change type');
+    }
+}
+
+
+//TODO VALIDATE BATCHES
+function prepareAndValidateBatch(batch) {
+    return batch;
 }
 
 },{"../config":56,"../util/logger":89,"mol-proto":113}],69:[function(require,module,exports){
@@ -9947,7 +9963,7 @@ var templates = {
     splice: "'use strict';/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n{{# def.include_traverse_tree }}\n\nmethod = function splice(spliceIndex, spliceHowMany) { /* ,... - extra arguments to splice into array */\n    {{# def.initVars }}\n\n    var argsLen = arguments.length;\n    var addItems = argsLen > 2;\n\n    if (addItems) {\n        {{ /* only create model tree if items are inserted in array */ }}\n\n        {{ /* if model is undefined it will be set to an empty array */ }}  \n        var value = [];\n        {{# def.createTree:'splice' }}\n\n        {{? nextNode }}\n            {{\n                var currNode = nextNode;\n                var currProp = currNode.property;\n                var emptyProp = '[]';\n            }}\n\n            {{# def.createTreeStep }}\n        {{?}}\n\n    } else if (spliceHowMany > 0) {\n        {{ /* if items are not inserted, only traverse model tree if items are deleted from array */ }}\n        {{? it.parsedPath.length }}\n            {{# def.traverseTree }}\n\n            {{\n                var currNode = it.parsedPath[count];\n                var currProp = currNode.property;       \n            }}\n\n            {{ /* extra brace closes 'else' in def.traverseTreeStep */ }}\n            {{# def.traverseTreeStep }} }\n        {{?}}\n    }\n\n    {{ /* splice items */ }}\n    if (addItems || (! treeDoesNotExist && m\n            && m.length > spliceIndex ) ) {\n        var oldLength = m.length = m.length || 0;\n\n        arguments[0] = spliceIndex = normalizeSpliceIndex(spliceIndex, m.length);\n\n        {{ /* clone added arguments to prevent same references in linked models */ }}\n        if (addItems)\n            for (var i = 2; i < argsLen; i++)\n                arguments[i] = cloneTree(arguments[i]);\n\n        {{ /* actual splice call */ }}\n        var removed = Array.prototype.splice.apply(m, arguments);\n\n        {{# def.addMsg }} accessPath, type: 'splice',\n                index: spliceIndex, removed: removed, addedCount: addItems ? argsLen - 2 : 0,\n                newValue: m });\n\n        if (removed && removed.length)\n            removed.forEach(function(item, index) {\n                var itemPath = accessPath + '[' + (spliceIndex + index) + ']';\n                {{# def.addMsg }} itemPath, type: 'removed', oldValue: item });\n\n                if (valueIsTree(item))\n                    addMessages(messages, messagesHash, itemPath, item, 'removed', 'oldValue');\n            });\n\n        if (addItems)\n            for (var i = 2; i < argsLen; i++) {\n                var item = arguments[i];\n                var itemPath = accessPath + '[' + (spliceIndex + i - 2) + ']';\n                {{# def.addMsg }} itemPath, type: 'added', newValue: item });\n\n                if (valueIsTree(item))\n                    addMessages(messages, messagesHash, itemPath, item, 'added', 'newValue');\n            }\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n\n    return removed || [];\n}\n"
 };
 
-var include_defines = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts initialization code\n */\n {{## def.initVars:\n    var m = {{# def.modelAccessPrefix }};\n    var messages = [], messagesHash = {};\n    var accessPath = '';\n    var treeDoesNotExist;\n #}}\n\n/**\n * Inserts the beginning of function call to add message to list\n */\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n/**\n * Inserts current property/index for both normal and interpolated properties/indexes \n */\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n/**\n * Inserts condition to test whether normal/interpolated property/index exists \n */\n{{## def.wasDefined: m.hasOwnProperty(\n    {{? currNode.interpolate }}\n        this._args[ {{= currNode.interpolate }} ]\n    {{??}}\n        '{{= it.getPathNodeKey(currNode) }}'\n    {{?}}\n) #}}\n\n\n/**\n * Inserts code to update access path for current property\n * Because of the possibility of interpolated properties, it can't be calculated in template, it can only be calculated during accessor call. \n */\n{{## def.changeAccessPath:\n    accessPath += {{? currNode.interpolate }}\n        {{? currNode.syntax == 'array' }}\n            '[' + this._args[ {{= currNode.interpolate }} ] + ']';\n        {{??}}\n            '.' + this._args[ {{= currNode.interpolate }} ];\n        {{?}}\n    {{??}}\n        '{{= currProp }}';\n    {{?}}\n#}}\n\n\n/**\n * Inserts code to post stored messages\n */\n{{## def.postMessages:\n    messages.forEach(function(msg) {\n        {{# def.modelPostMessageCode }}(msg.path, msg);\n    }, this);\n    {{# def.modelPostMessageCode }}('', { type: 'finished' });\n#}}\n"
+var include_defines = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts initialization code\n */\n {{## def.initVars:\n    var m = {{# def.modelAccessPrefix }};\n    var messages = [], messagesHash = {};\n    var accessPath = '';\n    var treeDoesNotExist;\n #}}\n\n/**\n * Inserts the beginning of function call to add message to list\n */\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n/**\n * Inserts current property/index for both normal and interpolated properties/indexes \n */\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n/**\n * Inserts condition to test whether normal/interpolated property/index exists \n */\n{{## def.wasDefined: m.hasOwnProperty(\n    {{? currNode.interpolate }}\n        this._args[ {{= currNode.interpolate }} ]\n    {{??}}\n        '{{= it.getPathNodeKey(currNode) }}'\n    {{?}}\n) #}}\n\n\n/**\n * Inserts code to update access path for current property\n * Because of the possibility of interpolated properties, it can't be calculated in template, it can only be calculated during accessor call. \n */\n{{## def.changeAccessPath:\n    accessPath += {{? currNode.interpolate }}\n        {{? currNode.syntax == 'array' }}\n            '[' + this._args[ {{= currNode.interpolate }} ] + ']';\n        {{??}}\n            '.' + this._args[ {{= currNode.interpolate }} ];\n        {{?}}\n    {{??}}\n        '{{= currProp }}';\n    {{?}}\n#}}\n\n\n/**\n * Inserts code to post stored messages\n */\n{{## def.postMessages:\n    messages.forEach(function(msg) {\n        {{# def.modelPostMessageCode }}(msg.path, msg);\n    }, this);\n    if (messages.length)\n        {{# def.modelPostMessageCode }}('', { type: 'finished' });\n#}}\n"
     , include_create_tree = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts code to create model tree as neccessary for `set` and `splice` accessors and to add messages to send list if the tree changes.\n */\n{{## def.createTree:method:\n    var wasDef = true;\n    var old = m;\n\n    {{ var emptyProp = it.parsedPath[0] && it.parsedPath[0].empty; }}\n    {{? emptyProp }}\n        {{ /* create top level model if it was not previously defined */ }}\n        if (! m) {\n            m = {{# def.modelAccessPrefix }} = {{= emptyProp }};\n            wasDef = false;\n\n            {{# def.addMsg }} '', type: 'added',\n                  newValue: m });\n        }\n    {{??}}\n        {{? method == 'splice' }}\n            if (! m) {\n        {{?}}\n                m = {{# def.modelAccessPrefix }} = cloneTree(value);\n                wasDef = typeof old != 'undefined';\n        {{? method == 'splice' }}\n            }\n        {{?}}       \n    {{?}}\n\n\n    {{ /* create model tree if it doesn't exist */ }}\n    {{  var modelDataProperty = '';\n        var nextNode = it.parsedPath[0];\n        var count = it.parsedPath.length - 1;\n\n        for (var i = 0; i < count; i++) {\n            var currNode = nextNode;\n            var currProp = currNode.property;\n            nextNode = it.parsedPath[i + 1];\n            var emptyProp = nextNode && nextNode.empty;\n    }}\n\n        {{# def.createTreeStep }}\n\n    {{  } /* for loop */ }}\n#}}\n\n\n/**\n * Inserts code to create one step in the model tree\n */\n{{## def.createTreeStep:\n    {{# def.changeAccessPath }}\n\n    if (! {{# def.wasDefined }}) { \n        {{ /* property does not exist */ }}\n        m = m{{# def.currProp }} = {{= emptyProp }};\n\n        {{# def.addMsg }} accessPath, type: 'added', \n              newValue: m });\n\n    } else if (typeof m{{# def.currProp }} != 'object') {\n        {{ /* property is not object */ }}\n        var old = m{{# def.currProp }};\n        m = m{{# def.currProp }} = {{= emptyProp }};\n\n        {{# def.addMsg }} accessPath, type: 'changed', \n              oldValue: old, newValue: m });\n\n    } else {\n        {{ /* property exists, just traverse down the model tree */ }}\n        m = m{{# def.currProp }};\n    }\n#}}\n"
     , include_traverse_tree = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts code to traverse model tree for `delete` and `splice` accessors.\n */\n{{## def.traverseTree:\n    {{ \n        var count = it.parsedPath.length-1;\n\n        for (var i = 0; i < count; i++) { \n            var currNode = it.parsedPath[i];\n            var currProp = currNode.property;\n    }}\n            {{# def.traverseTreeStep }}\n\n    {{ } /* for loop */\n\n        var i = count;\n        while (i--) { /* closing braces for else's above */\n    }}\n            }\n    {{ } /* while loop */ }}\n#}}\n\n\n/**\n * Inserts code to traverse one step in the model tree\n */\n{{## def.traverseTreeStep:\n    if (! (m && m.hasOwnProperty && {{# def.wasDefined}} ) )\n        treeDoesNotExist = true;\n    else {\n        m = m{{# def.currProp }};\n        {{# def.changeAccessPath }}\n    {{ /* brace from else is not closed on purpose - all braces are closed in while loop */ }}\n#}}\n";
 
