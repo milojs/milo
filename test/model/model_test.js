@@ -974,14 +974,17 @@ describe('Model class', function() {
         var m= new Model;
 
         m.postMessage('changedata', { path: '.info.name', type: 'added', newValue: 'milo' });
+        m.postMessage('changedata', { type: 'finished' });
 
         setTimeout(function() {
             assert.deepEqual(m._data, { info: {name: 'milo'} } );       
             m.postMessage('changedata', { path: '.list', type: 'splice', index: 0, removed: [], addedCount: 2, newValue: ['item1', 'item2'] });
+            m.postMessage('changedata', { type: 'finished' });
 
             setTimeout(function() {
                 assert.deepEqual(m('.list').get(), ['item1', 'item2'] );
                 m.postMessage('changedata', { path: '.list', type: 'splice', index: 1, removed: ['item2'], addedCount: 1, newValue: ['item1', 'item3'] });
+                m.postMessage('changedata', { type: 'finished' });
 
                 setTimeout(function() {
                     assert.deepEqual(m('.list').get(), ['item1', 'item3'] );
