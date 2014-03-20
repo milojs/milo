@@ -99,6 +99,8 @@ Samples/Tutorials
 
 [Introduction to data facet](http://jsfiddle.net/jasoniangreen/xDFda/)
 
+[Introduction to models](http://jsfiddle.net/jasoniangreen/225Bf/)
+
 ### TodoMVC
 
 The more advanced sample is __Todos__ app in
