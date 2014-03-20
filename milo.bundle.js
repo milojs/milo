@@ -8845,7 +8845,7 @@ function splitToBatches(queue, self) {
     if (! currentBatch.length)
         batches.pop();
     // TODO Warning is disabled as Data facets sometimes fails to emit changedata message
-    // Should be re-enabled when changedata is fixed
+    // Should be re-enabled when Data facet is fixed
     // else
     //     logger.warn('changedata: no message with data.type=="finished" in the end of the queue');
     return batches;
@@ -8915,31 +8915,30 @@ function prepareBatch(batch) {
 function processBatch(batch) {
     batch.forEach(processChange, this);
 
-
     function processChange(data) {
         var modelPath = this.path(data.path);
         if (! modelPath) return;
         (data.type == 'splice' ? executeSplice : executeMethod)(modelPath, data);
     }
+}
 
 
-    function executeSplice(modelPath, data) {
-        var index = data.index
-            , howMany = data.removed.length
-            , spliceArgs = [index, howMany];
+function executeSplice(modelPath, data) {
+    var index = data.index
+        , howMany = data.removed.length
+        , spliceArgs = [index, howMany];
 
-        spliceArgs = spliceArgs.concat(data.newValue.slice(index, index + data.addedCount));
-        modelPath.splice.apply(modelPath, spliceArgs);
-    }
+    spliceArgs = spliceArgs.concat(data.newValue.slice(index, index + data.addedCount));
+    modelPath.splice.apply(modelPath, spliceArgs);
+}
 
 
-    function executeMethod(modelPath, data) {
-        var methodName = CHANGE_TYPE_TO_METHOD_MAP[data.type];
-        if (methodName)
-            modelPath[methodName](data.newValue);
-        else
-            logger.error('unknown data change type');
-    }
+function executeMethod(modelPath, data) {
+    var methodName = CHANGE_TYPE_TO_METHOD_MAP[data.type];
+    if (methodName)
+        modelPath[methodName](data.newValue);
+    else
+        logger.error('unknown data change type');
 }
 
 },{"../config":56,"../util/logger":89,"mol-proto":99}],69:[function(require,module,exports){
