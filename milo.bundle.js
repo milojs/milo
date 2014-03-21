@@ -7569,9 +7569,10 @@ function _Messenger_onWithOptions(options, messages, subscriber) {
         subscriber = {
             subscriber: subscriber,
             context: this._hostObject,
-            options: {}
+            options: options
         };
 
+    subscriber.options = subscriber.obtions || {};
     _.extend(subscriber.options, options);
     return _Messenger_on.call(this, messages, subscriber);
 }
