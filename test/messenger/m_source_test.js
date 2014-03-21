@@ -54,7 +54,7 @@ describe('MessageSource class', function() {
     });
 
 
-    it('should dispatch on Messenger when dispatched on source', function() {
+    it('should dispatch on Messenger when dispatched on source', function(done) {
         // check that there are no subscription on source
         assert.equal(sourceMsngr.getSubscribers('event1'), undefined);
 
@@ -64,25 +64,31 @@ describe('MessageSource class', function() {
         // dispatch on source
         sourceMsngr.postMessage('event1', { test: 1 });
 
+        _.defer(function() {
             assert.deepEqual(handled, { event1: { handler: 1, data: { test: 1 } } });
 
-        // subscribe to messenger another handler, should subscribe to source
-        messenger.onMessage('event2', handler2);
+            // subscribe to messenger another handler, should subscribe to source
+            messenger.onMessage('event2', handler2);
 
-        handled = {};
+            handled = {};
 
-        // dispatch on source
-        sourceMsngr.postMessage('event1', { test: 1 });
-        sourceMsngr.postMessage('event2', { test: 2 });
+            // dispatch on source
+            sourceMsngr.postMessage('event1', { test: 1 });
+            sourceMsngr.postMessage('event2', { test: 2 });
 
-            assert.deepEqual(handled, {
-                'event1': { handler: 1, data: { test: 1 } },
-                'event2': { handler: 2, data: { test: 2 } }
+            _.defer(function() {
+                assert.deepEqual(handled, {
+                    'event1': { handler: 1, data: { test: 1 } },
+                    'event2': { handler: 2, data: { test: 2 } }
+                });
+
+                done();
             });
+        });
     });
 
 
-    it('should unsubscribe from source when all handlers are unsubscribed from Messenger', function() {
+    it('should unsubscribe from source when all handlers are unsubscribed from Messenger', function(done) {
         // check that there are no subscription on source
         assert.equal(sourceMsngr.getSubscribers('event3'), undefined);
 
@@ -104,19 +110,25 @@ describe('MessageSource class', function() {
         // dispatch on source
         sourceMsngr.postMessage('event3', { test: 3 });
 
-            assert.deepEqual(handled, { event3: { handler: 1, data: { test: 3 } } });
+        _.defer(function() {
+                assert.deepEqual(handled, { event3: { handler: 1, data: { test: 3 } } });
 
-        // unsubscribe all handlers
-        messenger.offMessage('event3', handler1);
+            // unsubscribe all handlers
+            messenger.offMessage('event3', handler1);
 
-        // check subscription on source - should be unsubscribed
-        assert.equal(sourceMsngr.getSubscribers('event3'), undefined);
+            // check subscription on source - should be unsubscribed
+            assert.equal(sourceMsngr.getSubscribers('event3'), undefined);
 
-        handled = {};
-        // dispatch on source
-        sourceMsngr.postMessage('event3', { test: 4 });
+            handled = {};
+            // dispatch on source
+            sourceMsngr.postMessage('event3', { test: 4 });
 
-            // should not be dispatched on messenger
-            assert.deepEqual(handled, {});
+            _.defer(function() {
+                // should not be dispatched on messenger
+                assert.deepEqual(handled, {});
+
+                done();
+            });
+        });
     });
 });

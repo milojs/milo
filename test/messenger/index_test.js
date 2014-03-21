@@ -157,7 +157,7 @@ describe('Messenger class', function() {
             'add subscribers with events hash second time');
     });
 
-    it('should define offMessages method (proxied as offEvents)', function() {
+    it('should define offMessages method (proxied as offEvents)', function(done) {
         var result = getHostWithMessenger()
             , host = result.host
             , messenger = result.messenger;
@@ -177,48 +177,59 @@ describe('Messenger class', function() {
         var called = {}, postedData = { 'test': 1 };
         host.post('event1', postedData);
 
+        _.defer(function() {
             assert.deepEqual(called, {
                 'handler1': { msg: 'event1', data: { 'test': 1 } },
                 'handler2': { msg: 'event1', data: { 'test': 1 } }
             });
 
-        called = {}; postedData = { 'test': 2 };
-        host.post('event3', postedData);
+            called = {}; postedData = { 'test': 2 };
+            host.post('event3', postedData);
 
-            assert.deepEqual(called, {
-                'handler3': { msg: 'event3', data: { 'test': 2 } }
-            });
+            _.defer(function() {
+                assert.deepEqual(called, {
+                    'handler3': { msg: 'event3', data: { 'test': 2 } }
+                });
 
-        var result = host.offEvents({
-            'event1': handler1,
-            'event2': handler2
+                var result = host.offEvents({
+                    'event1': handler1,
+                    'event2': handler2
+                });
+
+                    assert.deepEqual(result, { 'event1': true, 'event2': true });
+                    assert.deepEqual(messenger._messageSubscribers, {
+                        'event1': [handler2],
+                        'event3': [handler3]
+                    });
+
+                var result = host.offEvents({
+                    'event1': handler2,
+                    'event2': handler2,
+                    'event3': handler3
+                });
+
+                    assert.deepEqual(result, { 'event1': true, 'event2': false, 'event3': true });
+                    assert.deepEqual(messenger._messageSubscribers, {});
+
+                _.defer(function() {
+                    var called = {}, postedData = { 'test': 3 };
+                    host.post('event1', postedData);
+                    host.post('event2', postedData);
+                    host.post('event3', postedData);
+
+                    _.defer(function() {
+                        assert.deepEqual(called, {});
+                        done();
+                    });                 
+                });
+            })
+
         });
 
-            assert.deepEqual(result, { 'event1': true, 'event2': true });
-            assert.deepEqual(messenger._messageSubscribers, {
-                'event1': [handler2],
-                'event3': [handler3]
-            });
-
-        var result = host.offEvents({
-            'event1': handler2,
-            'event2': handler2,
-            'event3': handler3
-        });
-
-            assert.deepEqual(result, { 'event1': true, 'event2': false, 'event3': true });
-            assert.deepEqual(messenger._messageSubscribers, {});
-
-        var called = {}, postedData = { 'test': 3 };
-        host.post('event1', postedData);
-        host.post('event2', postedData);
-        host.post('event3', postedData);
-
-            assert.deepEqual(called, {});
     });
 
 
-    it('should define postMessage method (proxied as post)', function() {
+    it('should define postMessage method (proxied as post)', function(done) {
         var result = getHostWithMessenger()
             , host = result.host
             , messenger = result.messenger
@@ -239,25 +250,33 @@ describe('Messenger class', function() {
 
         host.post('event1', postedData);
 
+        _.defer(function() {
             assert.equal(called.handler.msg, 'event1');
             assert.equal(called.handler.data, postedData);
 
-        host.on(/event.*/, patternSubscriber);
+            host.on(/event.*/, patternSubscriber);
 
-        called = {};
-        host.post('event1', postedData);
+            called = {};
+            host.post('event1', postedData);
 
-            assert.deepEqual(called, {
-                handler: { msg: 'event1', data: { test: 1 } },
-                patternSubscriber: { msg: 'event1', data: { test: 1 } }
+            _.defer(function() {
+                assert.deepEqual(called, {
+                    handler: { msg: 'event1', data: { test: 1 } },
+                    patternSubscriber: { msg: 'event1', data: { test: 1 } }
+                });
+
+                called = {};
+                host.post(/event.*/, postedData);
+
+                _.defer(function() {
+                    assert.deepEqual(called, {
+                        patternSubscriber: { msg: /event.*/, data: { test: 1 } }
+                    });
+
+                    done();
+                });
             });
-
-        called = {};
-        host.post(/event.*/, postedData);
-
-            assert.deepEqual(called, {
-                patternSubscriber: { msg: /event.*/, data: { test: 1 } }
-            })
+        }); 
     });
 
 
@@ -292,7 +311,7 @@ describe('Messenger class', function() {
     });
 
 
-    it('should subscribe/unsubscribe/dispatch messages for subscribers with context', function() {
+    it('should subscribe/unsubscribe/dispatch messages for subscribers with context', function(done) {
         var result = getHostWithMessenger()
             , host = result.host
             , messenger = result.messenger
@@ -314,15 +333,20 @@ describe('Messenger class', function() {
             ]);
 
         host.post('event', { test: 1 });
+
+        _.defer(function() {
             assert.deepEqual(posted, { 'event': { test: 1 } });
 
-        host.off('event', { subscriber: localHandler, context: myContext });
-            var subscribers = host.getListeners('event');
-            assert.deepEqual(subscribers, [handler1], 'should have 1 subscribers');
+            host.off('event', { subscriber: localHandler, context: myContext });
+                var subscribers = host.getListeners('event');
+                assert.deepEqual(subscribers, [handler1], 'should have 1 subscribers');
+
+            done();
+        });
     });
 
 
-    it('should define once method to subscribe to message that will be dispatched only once', function() {
+    it('should define once method to subscribe to message that will be dispatched only once', function(done) {
         var result = getHostWithMessenger()
             , host = result.host
             , messenger = result.messenger
@@ -337,6 +361,10 @@ describe('Messenger class', function() {
         host.once('event', localHandler);
         host.post('event', { test: 1 });
         host.post('event', { test: 2 });
+
+        _.defer(function() {
             assert.deepEqual(posted, [{ msg: 'event', data: { test: 1 } }]);
+            done();
+        });
     });
 });

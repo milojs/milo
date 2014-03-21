@@ -7440,6 +7440,7 @@ _.extendProto(Messenger, {
 Messenger.defaultMethods = {
     on: 'on',
     once: 'once',
+    onSync: 'onSync',
     off: 'off',
     onMessages: 'onMessages',
     offMessages: 'offMessages',
@@ -7574,6 +7575,7 @@ function _Messenger_onWithOptions(options, messages, subscriber) {
 
     subscriber.options = subscriber.obtions || {};
     _.extend(subscriber.options, options);
+
     return _Messenger_on.call(this, messages, subscriber);
 }
 
@@ -7909,28 +7911,30 @@ function _callSubscriber(subscriber, message, data, callback, _synchronous) {
     var syncSubscriber = subscriber.options && subscriber.options.sync
         , synchro = (_synchronous && syncSubscriber !== false)
                   || syncSubscriber
-        , self = this
-        , callSubscriberFunc = typeof subscriber == 'function'
-                            ? __callFuncSubscriber
-                            : __callObjSubscriber;
-    // if (synchro)
-        callSubscriberFunc();
-    // else
-    //     _.defer(callSubscriberFunc);
+        , self = this;
+
+    if (typeof subscriber == 'function')
+        __callFuncSubscriber(subscriber, self._hostObject);
+    else
+        __callObjSubscriber();
 
 
-    function __callFuncSubscriber() {
-        subscriber.call(self._hostObject, message, data, callback);
+    function __callFuncSubscriber(subscriber, context) {
+        if (synchro)
+            subscriber.call(context, message, data, callback);
+        else
+            _.deferMethod(subscriber, 'call', context, message, data, callback);
     }
 
     function __callObjSubscriber() {
-        subscriber.subscriber.call(subscriber.context, message, data, callback);
         var dispatchTimes = subscriber.options && subscriber.options.dispatchTimes;
         if (dispatchTimes <= 1) {
             var messages = subscriber.__messages;                   
             self.off(messages, subscriber);
         } else if (dispatchTimes > 1)
             subscriber.options.dispatchTimes--;
+
+        __callFuncSubscriber(subscriber.subscriber, subscriber.context);
     }
 }
 
@@ -8526,7 +8530,7 @@ function init(hostObject, proxyMethods, messengerAPI, sourceMessenger) {
  * @param {String|Regex} sourceMessage source message to subscribe to
  */
 function addSourceSubscriber(sourceMessage) {
-    this.sourceMessenger.on(sourceMessage, { context: this, subscriber: this.dispatchMessage });
+    this.sourceMessenger.onSync(sourceMessage, { context: this, subscriber: this.dispatchMessage });
 }
 
 
@@ -9190,7 +9194,7 @@ function Connector$turnOn() {
 
             function subscriptionSwitch(err, changeFinished) {
                 if (err) return;
-                var onOff = changeFinished ? 'on' : 'off';
+                var onOff = changeFinished ? 'onSync' : 'off';
                 subscribeToDS(linkToDS, onOff, self[reverseLink], subscriptionPath, reversePathTranslation);
 
                 var message = changeFinished ? 'changecompleted' : 'changestarted';
@@ -9198,8 +9202,7 @@ function Connector$turnOn() {
             }
         };
 
-        // linkedDS.on(subscriptionPath, onData);
-        subscribeToDS(linkedDS, 'on', onData, subscriptionPath, pathTranslation);
+        subscribeToDS(linkedDS, 'onSync', onData, subscriptionPath, pathTranslation);
 
         return onData;
     }
@@ -9211,7 +9214,7 @@ function Connector$turnOn() {
  *
  * @private
  * @param {Object} dataSource data source object that has messenger with proxied on/off methods
- * @param {String} onOff 'on' or 'off'
+ * @param {String} onOff 'onSync' or 'off'
  * @param {Function} subscriber
  * @param {String} subscriptionPath only used if there is no path translation
  * @param {Object[String]} pathTranslation paths translation map
