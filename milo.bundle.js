@@ -2303,13 +2303,13 @@ function Data$start() {
     //  var subscribeObj = this;
 
     // subscribe to DOM event
-    this.on('', onDataChange);
+    this.onSync('', onDataChange);
 
     // subscribe to changes in scope children with Data facet
-    this.on('childdata', onChildData);
+    this.onSync('childdata', onChildData);
 
     // subscribe to "changedata" event to enable reactive connections
-    this.on('changedata', changeDataHandler)
+    this.onSync('changedata', changeDataHandler)
 }
 
 
@@ -9324,7 +9324,7 @@ function Model(data, hostObject) {
 
     // subscribe to "changedata" message to enable reactive connections
     changeDataHandler.initialize.call(model);
-    model.on('changedata', changeDataHandler);
+    model.onSync('changedata', changeDataHandler);
 
     return model;
 }
@@ -9422,7 +9422,7 @@ function proxyMessenger(modelHostObject) {
     modelHostObject = modelHostObject || this._hostObject;
     Mixin.prototype._createProxyMethods.call(this._messenger, messengerMethodsToProxy, modelHostObject);
 }
-var messengerMethodsToProxy = ['on', 'off', 'postMessage', 'onMessages', 'offMessages', 'getSubscribers'];
+var messengerMethodsToProxy = Messenger.defaultMethods;
 
 
 /**
