@@ -110,7 +110,7 @@ describe('Data facet', function() {
 
             scope.myItem.data.set({ title: 'Title 2', desc: 'Description 2', info: { name: 'Evgeny', surname: 'Poberezkin' } });
 
-            _.deferTicks(function() {
+            _.defer(function() {
                 assert.deepEqual(posted, {
                     '.info.name': { path: '.info.name', type: 'changed', newValue: 'Evgeny', oldValue: '' },
                     '.info.surname': { path: '.info.surname', type: 'changed', newValue: 'Poberezkin', oldValue: '' },
@@ -121,7 +121,7 @@ describe('Data facet', function() {
                             oldValue: { title: '', desc: '2', info: { name: '', surname: '' } } }
                 }, 'should post messages for changes in data of component and in data of scope children');
                 done();
-            }, 2);
+            });
         });
     });
 });

@@ -2462,7 +2462,7 @@ function Data$_set(value) {
 function _postFinishedMessage() {
     this.off('', onDataChange);
     this.postMessage('', { type: 'finished' });
-    this.on('', onDataChange);
+    this.onSync('', onDataChange);
 }
 
 
@@ -9585,7 +9585,7 @@ function ModelPath(model, path) { // ,... - additional arguments for interpolati
 
     // subscribe to "changedata" message to enable reactive connections
     changeDataHandler.initialize.call(modelPath);
-    modelPath.on('changedata', changeDataHandler);
+    modelPath.onSync('changedata', changeDataHandler);
 
     Object.freeze(modelPath);
 
