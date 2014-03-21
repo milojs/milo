@@ -3703,6 +3703,10 @@ var ComponentFacet = require('../c_facet')
 var ItemFacet = _.createSubclass(ComponentFacet, 'Item');
 
 _.extendProto(ItemFacet, {
+    getState: ItemFacet$getState,
+    setState: ItemFacet$setState,
+    getIndex: ItemFacet$getIndex,
+    setIndex: ItemFacet$setIndex,
     removeItem: ItemFacet$removeItem,
     require: ['Container', 'Dom', 'Data']
 });
@@ -3710,6 +3714,28 @@ _.extendProto(ItemFacet, {
 facetsRegistry.add(ItemFacet);
 
 module.exports = ItemFacet;
+
+
+function ItemFacet$getState() {
+    return { state: {
+        index: this.getIndex()
+    }};
+}
+
+
+function ItemFacet$setState(state) {
+    this.setIndex(state.state.index);
+}
+
+
+function ItemFacet$getIndex() {
+    return this.index;
+}
+
+
+function ItemFacet$setIndex(index) {
+    this.index = index;
+}
 
 
 /**
@@ -3747,7 +3773,7 @@ var List = _.createSubclass(ComponentFacet, 'List');
 _.extendProto(List, {
     init: init,
     start: start,
-    /* update: update, */
+
     require: ['Container', 'Dom', 'Data'],
     _itemPreviousComponent: _itemPreviousComponent,
 
@@ -3759,7 +3785,6 @@ _.extendProto(List, {
     addItems: List$addItems,
     removeItem: removeItem,
     each: each
-    /* _reattach: _reattachEventsOnElementChange */
 });
 
 facetsRegistry.add(List);
@@ -3841,7 +3866,7 @@ function _setItem(index, component) {
     this._listItems.splice(index, 0, component);
     this._listItemsHash[component.name] = component
     component.item.list = this;
-    component.item.index = +index;
+    component.item.setIndex(+index);
 }
 
 // Does the list contain a particular list item component
@@ -3879,7 +3904,7 @@ function _updateItemsIndexes(fromIndex, toIndex) {
     for (var i = fromIndex; i < toIndex; i++) {
         var component = this._listItems[i];
         if (component)
-            component.item.index = i;
+            component.item.setIndex(i);
         else
             logger.warn('List: no item at position', i);
     }
