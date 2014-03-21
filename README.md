@@ -31,10 +31,6 @@ To run all tests, including browser tests:
 
     grunt tests
 
-There is also html test file (TODO: separate to browser unit tests):
-
-[bind_test.html](https://github.com/MailOnline/milo/blob/master/test_html/bind_test.html)
-
 
 ### Try
 
