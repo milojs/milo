@@ -1333,7 +1333,7 @@ function Component$$createOnElement(el, innerHTML, rootScope, extraFacets) {
 
     miloBinder(el, rootScope);
     var aComponent = rootScope[attr.compName];
-    _.deferMethod(aComponent, 'broadcast', 'stateready');
+    aComponent.broadcast('stateready');
     return aComponent;
 }
 
@@ -5304,7 +5304,7 @@ _.extendProto(MLComboList, {
 function MLComboList$init() {
     Component.prototype.init.apply(this, arguments);
     this.model.set([]);
-    this.on('childrenbound', onChildrenBound);
+    this.once('childrenbound', onChildrenBound);
 }
 
 
@@ -5323,7 +5323,6 @@ function MLComboList$toggleAddButton(show) {
 
 
 function onChildrenBound() {
-    this.off('childrenbound', onChildrenBound);
     this.template.render().binder();
     componentSetup.call(this);
 }
@@ -6100,7 +6099,7 @@ _.extendProto(MLSuperCombo, {
 function MLSuperCombo$init() {
     Component.prototype.init.apply(this, arguments);
     
-    this.on('childrenbound', onChildrenBound);
+    this.once('childrenbound', onChildrenBound);
     
     _.defineProperties(this, {
         _optionsData: [],
@@ -6112,7 +6111,6 @@ function MLSuperCombo$init() {
  * Handler for init childrenbound listener. Renders template.
  */
 function onChildrenBound() {
-    this.off('childrenbound', onChildrenBound);
     this.template.render().binder();
     componentSetup.call(this);
 }
