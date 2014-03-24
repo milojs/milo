@@ -9218,6 +9218,8 @@ function Connector$turnOn() {
  * @param {Object[String]} pathTranslation paths translation map
  */
 function subscribeToDS(dataSource, onOff, subscriber, subscriptionPath, pathTranslation) {
+    if (! subscriber)
+        return logger.warn('Connector: subscriber is undefined - caused by async messages');
     if (pathTranslation)
         _.eachKey(pathTranslation, function(translatedPath, path) {
             dataSource[onOff](path, subscriber);
