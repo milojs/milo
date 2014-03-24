@@ -3811,17 +3811,29 @@ function start() {
 }
 
 function onChildrenBound() {
-    var foundItem;
+    // get items already in the list
+    var children = this.dom.children()
+        , items = this.list._listItems
+        , itemsHash = this.list._listItemsHash;
 
-    // `this` is a component here, as the message was dispatched on a component
-    this.container.scope._each(function(childComp, name) {
-        if (childComp.item) {
-            if (foundItem) throw new ListError('More than one child component has ListItem Facet')
-            foundItem = childComp;
+    children && children.forEach(function(childEl) {
+        var comp = Component.getComponent(childEl);
+        if (comp && comp.item) {
+            items.push(comp)
+            itemsHash[comp.name] = comp;
         }
-    });
+    }, this);
+
+    if (items.length) {
+        var foundItem = items[0];
+        items.splice(0, 1);
+        delete itemsHash[foundItem.name];
+        items.forEach(function(item, index) {
+            item.item.setIndex(index);
+        });
+    }
     
-    // Component must have one and only one child with a List facet 
+    // Component must have one child with an Item facet 
     if (! foundItem) throw new ListError('No child component has ListItem Facet');
 
     this.list.itemSample = foundItem;
