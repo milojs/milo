@@ -319,3 +319,11 @@ Instead, Milo Components can have __Dom__ facet that includes several convenienc
 __milo__ uses library [__Proto__](https://github.com/MailOnline/proto) that has a grownig collection of utility functions for the manipulation of objects, prototypes, arrays, functions and strings. Please see [its repository](https://github.com/MailOnline/proto) for documentations and reasons behind the decision not to use third-party libraries.
 
 It is bundled together with __milo__ and all its functions are available as properties of `_` object, you don't need to load it separately.
+
+
+Changes log
+-----------
+
+###After 0.1.2###
+
+- List facet now allows multiple items already in DOM, but requires that all Items (components with Item facet) are immediate DOM children. The first item in the DOM is used as a sample for new items.
