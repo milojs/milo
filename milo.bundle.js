@@ -10700,6 +10700,7 @@ var domUtils = {
     trimNodeRight: trimNodeRight,
     trimNodeLeft: trimNodeLeft,
     stripHtml: stripHtml,
+    walkTree: walkTree,
 
     treeIndexOf: treeIndexOf,
     insertAtTreeIndex: insertAtTreeIndex
@@ -10957,11 +10958,32 @@ function treeIndexOf(rootEl, el) {
     return index;
 }
 
-
+/**
+ * Retrieves the content of a html string
+ * @param  {String} str Any string
+ * @return {String} returns the string cleaned of any html content.
+ */
 function stripHtml(str) {
     var div = document.createElement('DIV');
     div.innerHTML = str;
     return div.textContent || '';
+}
+
+
+/**
+ * Convenience wrapper for native TreeWalker that automatically walks the tree and calls an iterator function.
+ * This will not iterate the root element.
+ * @param  {HTMLElement} root The containing root element to be walked. Will not be iterated.
+ * @param  {NodeFiler} filter A NodeFilter constant, see https://developer.mozilla.org/en/docs/Web/API/TreeWalker
+ * @param  {Function} iterator A function to be called on each node. Returning 'false' will break.
+ * @param  {Object} context An optional context to passed, defaults to root.
+ */
+function walkTree(root, filter, iterator, context) {
+    var tw = document.createTreeWalker(root, filter);
+    while(tw.nextNode()) {
+        var result = iterator.call(context || root, tw.currentNode);
+        if (result === false) break;
+    }
 }
 
 
