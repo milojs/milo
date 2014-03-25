@@ -1,0 +1,117 @@
+<html>
+<head>
+    <title>Getting Started - Binding</title>
+    <style>
+    /*CSS*/
+    
+        .highlight {
+            color: red;
+            background: yellow;
+        }
+        .big-text {
+            font-size: 24px;
+        }
+
+    /*END CSS*/
+    </style>
+</head>
+<body>
+<!-- HTML -->
+
+    <script src="http://mailonline.github.io/milo/milo.bundle.js"></script>
+
+    <!-- Let's take a look at the basics of binding. A lot of what you see
+         will be covered in more detail in later tutorials. -->
+
+    <!-- You can bind a component to an element with ml-bind attribute.
+         The value is in the format of "ComponentClass:componentName".
+         Below is the most simple binding and binds to an instance of the
+         base Component class.-->
+    <div ml-bind="Component:myComp">My first component</div>
+
+    <!-- The base Component class is default, so you can bind like this too -->
+    <div ml-bind=":myComp2">The same component class</div>
+
+    <!-- Milo takes an aspect-oriented approach to inheritance by putting         
+         functionality into "facets" and attatching them to components. 
+         You can make your own facets, but there are many provided by milo.
+         You can use facets to configure custom classes, or put them right
+         into the ml-bind attribute. -->
+    <div ml-bind="[dom events]:facetComp">A component with facets</div>
+
+    <!-- When you configure a custom class, binding it to an element is as
+         simple as this. We'll create that class in the js below. -->
+    <div ml-bind="MyCompClass:customComp">A custom component</div>
+
+<!-- END HTML -->
+
+    <script>
+    //JS
+
+        // So lets bind these components.
+        // This function call makes sure milo and the dom are ready
+        milo(function() {
+            
+            // First we need to bind our components. We'll call binder and get
+            // a scope object containing the tree of components.
+            var scope = milo.binder();
+            
+            // We can access our first component as a property of the scope object
+            var myComp = scope.myComp;
+            
+            // All components have some base functionality.
+            // - They have methods for managing their facets.
+            // - They have methods for traversing up and down the scope tree.
+            // - They have methods for getting and setting their state which
+            //   includes the state of all facets and child components.
+            // - They each have a messenger.
+            // - And of course they each have a reference to their element.
+            myComp.el.innerHTML = 'Modified element.';
+            
+            // Facet functionality can be accessed through the facet name
+            // as a property. Facets have access to the component, and it's element.
+            // Facets can also access other facets, and call their methods.
+            var facetComp = scope.facetComp;
+            
+            // We can access the dom facet to add a css class
+            facetComp.dom.addCssClasses('highlight');
+            
+            // Or set some styles
+            facetComp.dom.setStyles({
+                'position': 'relative',
+                'left': '10px'
+            });
+            
+            // The events facet gives us a convenient method of subscribing to
+            // regular dom events.
+            facetComp.events.on('click', function(type, event) {
+                alert('Clicked');
+            });
+            
+            // Our custom component works the same way, but it can have 
+            // preconfigured and custom functionality. Let's call the render 
+            // method of the template facet of our custom component
+            var customComp = scope.customComp;
+
+            // Notice we didn't pass a template, that's because it has been
+            // setup in the class configuration.
+            customComp.template.render({type: 'awesome'});
+        });
+
+        // Now lets look create a component class. We can give it two facets,
+        // dom and template, and preconfigure them to suit our needs. 
+        var MyCompClass = milo.Component.createComponentClass('MyCompClass', {
+            // dom facet config allows us to preconfigure a css class
+            dom: {cls: 'big-text'},
+            // template facet config allows us to provide a template string
+            template: { template: 'A custom {{=it.type}} component' }
+        });
+
+        // All that's left is to add the class to the milo registry.
+        milo.registry.components.add(MyCompClass);
+
+    //END JS
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,64 @@
+<html>
+<head>
+    <title>Getting Started - Minder</title>
+    <style>
+    /*CSS*/
+
+    /*END CSS*/
+    </style>
+</head>
+<body>
+<!-- HTML -->
+
+    <script src="http://mailonline.github.io/milo/milo.bundle.js"></script>
+
+    <!-- Minder is the key to creating reactive connections in milo. We can bind
+         the data of components and models together in 1 or 2 way bindings, with
+         a variety of options including data transformations, and validation. -->
+
+    <!-- We'll start by binding an input to a span in a simple 1-way binding -->
+    <input ml-bind="[data]:nameInput" /> <span ml-bind="[data]:nameLabel"></span>
+
+    <!-- Then we'll 2-way bind a nested data structure to a milo model -->
+    <div ml-bind="[data, container]:user">
+        <p><strong>First Name:</strong> <span ml-bind="[data]:firstName"></span></p>
+        <p><strong>Last Name:</strong> <span ml-bind="[data]:lastName"></span></p>
+    </div>
+
+    <!-- TODO more complex example -->
+
+<!-- END HTML -->
+
+    <script>
+    //JS
+
+        milo(function() {
+            var m = new milo.Model
+                , scope = milo.binder()
+                , nameInput = scope.nameInput
+                , nameLabel = scope.nameLabel;
+
+            // We can establish a milo connection by calling milo.minder and
+            // passing in two data sources, and a string which describes the
+            // connection mode. The mode string is used to indicate both direction
+            // and depth of the connection. 
+            // '->' = one way connection of scalar values
+            // '->>' = one way connection of an object or an array of scalar values.
+            // '->>>' = one way connection of an array of objects
+            var connection1 = milo.minder(nameInput.data, '->', nameLabel.data);
+
+
+            // var cnct = milo.minder(m, '<->', user.data);
+            
+            // m('.firstName').set('Jason'); 
+            // m.set({
+            //     firstName: 'Jason',
+            //     lastName: 'Green'
+            // });
+        });
+
+    //END JS
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,129 @@
+<html>
+<head>
+    <title>Getting Started - Models</title>
+    <style>
+    /*CSS*/
+
+    /*END CSS*/
+    </style>
+</head>
+<body>
+<!-- HTML -->
+
+    <script src="http://mailonline.github.io/milo/milo.bundle.js"></script>
+
+    <!-- This lesson on milo models is all in the javascript below.
+         There is no HTML required. Milo models are just as useful in
+         the backend as they are in the front end. -->
+
+    <!-- You'll want to open your console to see the logs. -->
+
+<!-- END HTML -->
+
+    <script>
+    //JS
+
+        milo(function(){
+
+            // Let's create a new milo model, we'll expose it on the window so
+            // we can play around with it in the console. Just remember to set
+            // the frame (in chrome) to 'result(fiddle.jshell.net)'
+            var user = window.user = new milo.Model;
+            
+            // Milo models allow us to safely access deeply nested properties
+            // without risk of errors. The model is used as a function and takes
+            // a string in the form of a property access path. When we do this,
+            // we get a model path.
+            var streetModelPath = user('.address.street');
+            
+            // We can then retrieve and manipulate the data of the model with
+            // methods of the model path.
+            var street = streetModelPath.get();
+            
+            // Note: ModelPath instances can be used just like models. This can
+            // be conveniente when dealing with complex data structures.
+            
+            // Logs 'undefined' because we haven't set this data yet.
+            console.log('LOG 1: ', street);
+            
+            // Unless you have specific use of the model path, you can just
+            // access these methods directly like this.
+            user('.address.street').set('Victoria Street');
+            
+            // You can get the whole data object of the model simply by calling
+            // get on the model. This will console log a nested object.
+            console.log('LOG 2: ', user.get() );
+            
+            // The string used in the model safe-access function can also take
+            // array syntax.
+            user('.friends[0]').set('Jason Green');
+            user('.friends[1]').set('Evgeny Pobereskin');
+            
+            // We also have syntax for interpolation, simply pass a string with
+            // a $1 and then a second value.
+            console.log('LOG 3: ', user('.friends[$1]', 1).get());
+            
+            // This is the same as the following
+            console.log('LOG 4: ', user('.friends[' + 1 + ']').get());
+            
+            // Interpolation can be used for property names, and we can pass 
+            // multiple values
+            console.log('LOG 5: ', user('.$1[$2]', 'friends', 0).get());
+            
+            // We can delete values
+            user('.address.street').del();
+            console.log('LOG 6: ', user.get());
+            
+            // Models are also equiped with array methods for dealing with
+            // array data, you can use push, pop, splice, len, unshift, shift
+            user('.friends').splice(1, 0, 'Chris Flook');
+            console.log('LOG 7: ', user('.friends').get());
+            
+            // So it's great that models allow safe access to our data, but what
+            // else can we do with them. The most powerful feature of models, is 
+            // that for every change to the data, they are emitting messages. 
+            // Every model and model path has a milo messenger attatched. The 
+            // messenger methods are proxied to the model, so we can do this:
+            user.on('.friends', function(msg, data) {
+                // The handler will recieve the path, and a data object
+                // containing the type of operation (splice, added, deleted etc) and
+                // information about what changed, which will depend on what happened.
+                console.log('LOG 8: ', msg, data);
+            });
+            
+            // Let's add a new friend and see what gets logged.
+            user('.friends').push('Superman');
+            
+            // In the example above, we are listening to changes of the '.friends' path
+            // You can also pass regular expressions, like this to catch all /.*/
+            user.on(/.*/, function(msg, data) { /*console.log(msg, data)*/ });
+            
+            // Constructing regex can be complex and hard to read, so milo provides
+            // a syntax using * stars. The example below will get changes to all
+            // array elements.
+            user.on('.friends[*]', function(msg, data) { console.log('LOG 9: ', msg, data) });
+            user('.friends[3]').set('The Queen of England');
+            
+            // The stars also represent depth, so to get all messages for three levels
+            // of object depth, you could use three stars '***'
+            
+            // And ofcourse, as I said before, a model path can be used the same way.
+            user('.friends').on('*', function(msg, data) { /*console.log(msg, data)*/ });
+            
+            // One final note: The whole point of these models is to safely access
+            // nested data structures. So make sure you always use a path to get data.
+            // You should never be doing this.
+            var evgeny = user('.friends').get()[1]; // This could throw an error!
+            
+            // I only mention it because I did it a couple of time :o$
+            // You should do it like this.
+            evgeny = user('.friends[1]').get();
+            
+        });
+
+
+    //END JS
+    </script>
+
+</body>
+</html>

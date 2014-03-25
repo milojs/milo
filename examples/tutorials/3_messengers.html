@@ -1,0 +1,126 @@
+<html>
+<head>
+    <title>Getting Started - Messengers</title>
+    <style>
+    /*CSS*/
+
+    /*END CSS*/
+    </style>
+</head>
+<body>
+<!-- HTML -->
+
+    <script src="http://mailonline.github.io/milo/milo.bundle.js"></script>
+
+    <!-- Milo is messenger crazy, everything has a messenger, components, 
+         their facets, models, and even milo itself (milo.mail).
+         So it's obviously important that we get a handle on them. -->
+
+    <!-- Most of the tutorial will be in JavaScript, but lets setup two component
+         so we can explore messenger with components and facets. -->
+
+    <div ml-bind="[events]:comp">COMPONENT</div>
+    <input ml-bind="[data]:input" />
+
+<!-- END HTML -->
+
+    <script>
+    //JS
+
+        milo(function() {
+            var mail = milo.mail
+                , scope = milo.binder()
+                , comp = scope.comp
+                , input = scope.input;
+            // The easiest way to get to know messenger is to take a look at milo's
+            // global messenger, milo.mail. The milo.mail messenger uses the window
+            // to give us a wrapper for the native 'window.postMessage', but can also
+            // pass any custom messages, so let's have a look at that.
+            
+            // Messenger has methods for managing listeners, on and off are for 
+            // adding and removing single subscribers.
+            mail.on('mymessage', example1);
+            mail.off('mymessage', example1);
+            
+            // You can also put multiple messages in a string, or an array
+            mail.on('msg1 msg2 msg3', example1);
+            
+            // We also have onMessages, and offMessages for multiple subscribers.
+            mail.onMessages({
+                'message1': example1,
+                'message2': example2,
+                'message3': example1
+            });
+            mail.offMessages({
+                'message1': example1,
+                'message2': example2
+            });
+            
+            // We can also pass a regular expression, instead of a string, as
+            // the message.
+            milo.mail.on(/.*/, example3);
+            
+            // We can get all the subscribers for any given message using getSubscribers.
+            // Notice the only one left for 'message1' is the regex 'catch-all'.
+            console.log('LOG 1: ', mail.getSubscribers('message1'));
+            
+            // If you look at the logs, we still have one subscriber registered.
+            // Lets trigger that using the messenger postMessage method.
+            mail.postMessage('message1');
+            
+            // We can pass any data we like along with the message.
+            mail.postMessage('message1', {name: 'Jason', age: 30});
+            
+            // We also have a method for turning off all messages.
+            mail.offAll();
+
+            // More importantly, we have messengers on components and their facets.
+            // Component messengers work much the same as milo.mail, but with the
+            // context set as the component itself
+            comp.on('begin', function(msg, data) { console.log('LOG 3: ', this) });
+            comp.postMessage('begin');
+            
+            // More interesting is that our facets have their own messengers, which
+            // have been customised for their purpose. Events facet is for DOM events,
+            // and the data facet understands when the dom data changes.
+            comp.events.on('click mouseover', function(type, event) {
+                // In this case our arguments are the event type string, and the
+                // native event object. The context is the facet, but we can get back
+                // to the component using the owner property.
+                console.log('LOG 4: ', this.owner);
+                console.log('LOG 5: ', event.clientX, event.clientY);
+            });
+            
+            // Don't want to have the facet as the context, well we can pass any
+            // context we like, using an object literal with subscriber and context
+            comp.events.on('mouseup', {subscriber: example1, context: comp});
+            
+            // When it comes to creating custom component classes, there is a bit 
+            // more to learn about messenger context, but we'll learn about that in 
+            // a later lesson.
+            
+            // Let's listen to data changed on our input component. By passing
+            // an empty string as the message, we are listening to changes on
+            // the root level of our component, the scalar value of the input.
+            input.data.on('', function(msg, data) {
+                // Notice now that when you type in the input field, this event
+                // fires. The data object passed with the message is tailored
+                // for the data facet, and has oldValue, newValue as well as
+                // the type of operation, in this case, 'changed'
+                console.log('LOG 6: ', data);
+            });
+            
+            // Well that's all for messengers, it is possible to create your
+            // own types of messengers by defining a messenger source, and a
+            // messenger api, but that is a more advanced lesson.
+        });
+
+        function example1() {}
+        function example2() {}
+        function example3(msg, data) { console.log('LOG 2: ', msg, data); }
+
+    //END JS
+    </script>
+
+</body>
+</html>
