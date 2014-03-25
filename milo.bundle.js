@@ -8857,12 +8857,39 @@ var CHANGE_TYPE_TO_METHOD_MAP = {
  */
 function processChanges(callback) {
     notify.call(this, callback, false);
-    splitToBatches(this._changesQueue, this)
+    var batches = _.values(splitToBatches2(this._changesQueue));
+
+    batches
+        .sort(compareBatchIds)        
+        .map(sortBatchMesages)
         .map(prepareBatch)
         .forEach(processBatch, this);
+
     this._changesQueue.length = 0;
     notify.call(this, callback, true);
 }
+
+
+function compareBatchIds(batch1, batch2) {
+    var batch1_id = batch1[0].__batch_id;
+    var batch2_id = batch2[0].__batch_id;
+    if (batch1_id < batch2_id) return -1;
+    if (batch1_id > batch2_id) return 1;
+    return 0;
+}
+
+
+function sortBatchMesages(batch) {
+    return batch.sort(compareMsgIds);
+}
+
+
+function compareMsgIds(msg1, msg2) {
+    if (msg1.__msg_id < msg2.__msg_id) return -1;
+    if (msg1.__msg_id > msg2.__msg_id) return 1;
+    return 0;
+}
+
 
 function notify(callback, changeFinished) {
     callback && callback(null, changeFinished);
@@ -8870,7 +8897,19 @@ function notify(callback, changeFinished) {
 }
 
 
-function splitToBatches(queue, self) {
+function splitToBatches2(queue) {
+    var batchesMap = {};
+    queue.forEach(function(data) {
+        if (data.type == 'finished') return;
+        var batchId = data.__batch_id;
+        batchesMap[batchId] = batchesMap[batchId] || [];
+        batchesMap[batchId].push(data);
+    });
+    return batchesMap;
+}
+
+
+function splitToBatches(queue) {
     var currentBatch = []
         , batches = [currentBatch];
     queue.forEach(function(data) {
@@ -10015,6 +10054,7 @@ function wrapMessengerMethods(methodsNames) {
 var pathUtils = require('../path_utils')
     , modelUtils = require('../model_utils')
     , logger = require('../../util/logger')
+    , miloCount = require('../../util/count')
     , fs = require('fs')
     , doT = require('dot')
     , _ = require('mol-proto');
@@ -10030,7 +10070,7 @@ var templates = {
     splice: "'use strict';/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n{{# def.include_traverse_tree }}\n\nmethod = function splice(spliceIndex, spliceHowMany) { /* ,... - extra arguments to splice into array */\n    {{# def.initVars }}\n\n    var argsLen = arguments.length;\n    var addItems = argsLen > 2;\n\n    if (addItems) {\n        {{ /* only create model tree if items are inserted in array */ }}\n\n        {{ /* if model is undefined it will be set to an empty array */ }}  \n        var value = [];\n        {{# def.createTree:'splice' }}\n\n        {{? nextNode }}\n            {{\n                var currNode = nextNode;\n                var currProp = currNode.property;\n                var emptyProp = '[]';\n            }}\n\n            {{# def.createTreeStep }}\n        {{?}}\n\n    } else if (spliceHowMany > 0) {\n        {{ /* if items are not inserted, only traverse model tree if items are deleted from array */ }}\n        {{? it.parsedPath.length }}\n            {{# def.traverseTree }}\n\n            {{\n                var currNode = it.parsedPath[count];\n                var currProp = currNode.property;       \n            }}\n\n            {{ /* extra brace closes 'else' in def.traverseTreeStep */ }}\n            {{# def.traverseTreeStep }} }\n        {{?}}\n    }\n\n    {{ /* splice items */ }}\n    if (addItems || (! treeDoesNotExist && m\n            && m.length > spliceIndex ) ) {\n        var oldLength = m.length = m.length || 0;\n\n        arguments[0] = spliceIndex = normalizeSpliceIndex(spliceIndex, m.length);\n\n        {{ /* clone added arguments to prevent same references in linked models */ }}\n        if (addItems)\n            for (var i = 2; i < argsLen; i++)\n                arguments[i] = cloneTree(arguments[i]);\n\n        {{ /* actual splice call */ }}\n        var removed = Array.prototype.splice.apply(m, arguments);\n\n        {{# def.addMsg }} accessPath, type: 'splice',\n                index: spliceIndex, removed: removed, addedCount: addItems ? argsLen - 2 : 0,\n                newValue: m });\n\n        if (removed && removed.length)\n            removed.forEach(function(item, index) {\n                var itemPath = accessPath + '[' + (spliceIndex + index) + ']';\n                {{# def.addMsg }} itemPath, type: 'removed', oldValue: item });\n\n                if (valueIsTree(item))\n                    addMessages(messages, messagesHash, itemPath, item, 'removed', 'oldValue');\n            });\n\n        if (addItems)\n            for (var i = 2; i < argsLen; i++) {\n                var item = arguments[i];\n                var itemPath = accessPath + '[' + (spliceIndex + i - 2) + ']';\n                {{# def.addMsg }} itemPath, type: 'added', newValue: item });\n\n                if (valueIsTree(item))\n                    addMessages(messages, messagesHash, itemPath, item, 'added', 'newValue');\n            }\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n\n    return removed || [];\n}\n"
 };
 
-var include_defines = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts initialization code\n */\n {{## def.initVars:\n    var m = {{# def.modelAccessPrefix }};\n    var messages = [], messagesHash = {};\n    var accessPath = '';\n    var treeDoesNotExist;\n #}}\n\n/**\n * Inserts the beginning of function call to add message to list\n */\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n/**\n * Inserts current property/index for both normal and interpolated properties/indexes \n */\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n/**\n * Inserts condition to test whether normal/interpolated property/index exists \n */\n{{## def.wasDefined: m.hasOwnProperty(\n    {{? currNode.interpolate }}\n        this._args[ {{= currNode.interpolate }} ]\n    {{??}}\n        '{{= it.getPathNodeKey(currNode) }}'\n    {{?}}\n) #}}\n\n\n/**\n * Inserts code to update access path for current property\n * Because of the possibility of interpolated properties, it can't be calculated in template, it can only be calculated during accessor call. \n */\n{{## def.changeAccessPath:\n    accessPath += {{? currNode.interpolate }}\n        {{? currNode.syntax == 'array' }}\n            '[' + this._args[ {{= currNode.interpolate }} ] + ']';\n        {{??}}\n            '.' + this._args[ {{= currNode.interpolate }} ];\n        {{?}}\n    {{??}}\n        '{{= currProp }}';\n    {{?}}\n#}}\n\n\n/**\n * Inserts code to post stored messages\n */\n{{## def.postMessages:\n    /* if (sendingNotifications)\n        logger.error('Model accessor: sending notifications before another notifactions batch is finished'); */\n    sendingNotifications = true;\n\n    messages.forEach(function(msg) {\n        {{# def.modelPostMessageCode }}(msg.path, msg);\n    }, this);\n    if (messages.length)\n        {{# def.modelPostMessageCode }}('finished', { type: 'finished' });\n\n    sendingNotifications = false;\n#}}\n"
+var include_defines = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts initialization code\n */\n {{## def.initVars:\n    var m = {{# def.modelAccessPrefix }};\n    var messages = [], messagesHash = {};\n    var accessPath = '';\n    var treeDoesNotExist;\n #}}\n\n/**\n * Inserts the beginning of function call to add message to list\n */\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n/**\n * Inserts current property/index for both normal and interpolated properties/indexes \n */\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n/**\n * Inserts condition to test whether normal/interpolated property/index exists \n */\n{{## def.wasDefined: m.hasOwnProperty(\n    {{? currNode.interpolate }}\n        this._args[ {{= currNode.interpolate }} ]\n    {{??}}\n        '{{= it.getPathNodeKey(currNode) }}'\n    {{?}}\n) #}}\n\n\n/**\n * Inserts code to update access path for current property\n * Because of the possibility of interpolated properties, it can't be calculated in template, it can only be calculated during accessor call. \n */\n{{## def.changeAccessPath:\n    accessPath += {{? currNode.interpolate }}\n        {{? currNode.syntax == 'array' }}\n            '[' + this._args[ {{= currNode.interpolate }} ] + ']';\n        {{??}}\n            '.' + this._args[ {{= currNode.interpolate }} ];\n        {{?}}\n    {{??}}\n        '{{= currProp }}';\n    {{?}}\n#}}\n\n\n/**\n * Inserts code to post stored messages\n */\n{{## def.postMessages:\n\n    // if (sendingNotificationsModels.length)\n    //     logger.error('\\n\\nModel accessor: sending notifications before another notifactions batch is finished, current model host\\n', this._hostObject || this._model._hostObject, '\"previous\" model host\\n', sendingNotificationsModels[0]._hostObject || sendingNotificationsModels[0]._model._hostObject);\n    sendingNotifications = true;\n    // sendingNotificationsModels.unshift(this);\n\n    var batchId = miloCount(), count = 0;\n\n    messages.forEach(function(msg) {\n        addBatchIdsToMessage(msg, batchId, count++);\n        {{# def.modelPostMessageCode }}(msg.path, msg);\n    }, this);\n    if (messages.length) {\n        var msg = { type: 'finished' };\n        addBatchIdsToMessage(msg, batchId, count++);\n        {{# def.modelPostMessageCode }}('finished', msg);\n    }\n\n    sendingNotifications = false;\n    // sendingNotificationsModels.shift(this);\n#}}\n"
     , include_create_tree = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts code to create model tree as neccessary for `set` and `splice` accessors and to add messages to send list if the tree changes.\n */\n{{## def.createTree:method:\n    var wasDef = true;\n    var old = m;\n\n    {{ var emptyProp = it.parsedPath[0] && it.parsedPath[0].empty; }}\n    {{? emptyProp }}\n        {{ /* create top level model if it was not previously defined */ }}\n        if (! m) {\n            m = {{# def.modelAccessPrefix }} = {{= emptyProp }};\n            wasDef = false;\n\n            {{# def.addMsg }} '', type: 'added',\n                  newValue: m });\n        }\n    {{??}}\n        {{? method == 'splice' }}\n            if (! m) {\n        {{?}}\n                m = {{# def.modelAccessPrefix }} = cloneTree(value);\n                wasDef = typeof old != 'undefined';\n        {{? method == 'splice' }}\n            }\n        {{?}}       \n    {{?}}\n\n\n    {{ /* create model tree if it doesn't exist */ }}\n    {{  var modelDataProperty = '';\n        var nextNode = it.parsedPath[0];\n        var count = it.parsedPath.length - 1;\n\n        for (var i = 0; i < count; i++) {\n            var currNode = nextNode;\n            var currProp = currNode.property;\n            nextNode = it.parsedPath[i + 1];\n            var emptyProp = nextNode && nextNode.empty;\n    }}\n\n        {{# def.createTreeStep }}\n\n    {{  } /* for loop */ }}\n#}}\n\n\n/**\n * Inserts code to create one step in the model tree\n */\n{{## def.createTreeStep:\n    {{# def.changeAccessPath }}\n\n    if (! {{# def.wasDefined }}) { \n        {{ /* property does not exist */ }}\n        m = m{{# def.currProp }} = {{= emptyProp }};\n\n        {{# def.addMsg }} accessPath, type: 'added', \n              newValue: m });\n\n    } else if (typeof m{{# def.currProp }} != 'object') {\n        {{ /* property is not object */ }}\n        var old = m{{# def.currProp }};\n        m = m{{# def.currProp }} = {{= emptyProp }};\n\n        {{# def.addMsg }} accessPath, type: 'changed', \n              oldValue: old, newValue: m });\n\n    } else {\n        {{ /* property exists, just traverse down the model tree */ }}\n        m = m{{# def.currProp }};\n    }\n#}}\n"
     , include_traverse_tree = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts code to traverse model tree for `delete` and `splice` accessors.\n */\n{{## def.traverseTree:\n    {{ \n        var count = it.parsedPath.length-1;\n\n        for (var i = 0; i < count; i++) { \n            var currNode = it.parsedPath[i];\n            var currProp = currNode.property;\n    }}\n            {{# def.traverseTreeStep }}\n\n    {{ } /* for loop */\n\n        var i = count;\n        while (i--) { /* closing braces for else's above */\n    }}\n            }\n    {{ } /* while loop */ }}\n#}}\n\n\n/**\n * Inserts code to traverse one step in the model tree\n */\n{{## def.traverseTreeStep:\n    if (! (m && m.hasOwnProperty && {{# def.wasDefined}} ) )\n        treeDoesNotExist = true;\n    else {\n        m = m{{# def.currProp }};\n        {{# def.changeAccessPath }}\n    {{ /* brace from else is not closed on purpose - all braces are closed in while loop */ }}\n#}}\n";
 
@@ -10081,6 +10121,7 @@ function _synthesizePathMethods(path, parsedPath) {
 var normalizeSpliceIndex = modelUtils.normalizeSpliceIndex; // used in splice.dot.js
 
 var sendingNotifications = false;
+var sendingNotificationsModels = [];
 
 
 function _synthesize(synthesizer, path, parsedPath) {
@@ -10183,6 +10224,13 @@ function _synthesize(synthesizer, path, parsedPath) {
                 && ! (value instanceof Date)
                 && ! (value instanceof RegExp);
     }
+
+    function addBatchIdsToMessage(msg, batchId, msgId) {
+        _.defineProperties(msg, {
+            __batch_id: batchId,
+            __msg_id: msgId
+        });
+    }
 }
 
 
@@ -10199,7 +10247,7 @@ _.extend(synthesizePathMethods, {
     modelSplice: _synthesize(modelSpliceSynthesizer, '', [])
 });
 
-},{"../../util/logger":89,"../model_utils":73,"../path_utils":75,"dot":98,"fs":96,"mol-proto":99}],77:[function(require,module,exports){
+},{"../../util/count":82,"../../util/logger":89,"../model_utils":73,"../path_utils":75,"dot":98,"fs":96,"mol-proto":99}],77:[function(require,module,exports){
 'use strict';
 
 /**
@@ -14640,11 +14688,11 @@ function repeat(times) {
  * Function to tap into chained methods and to inspect intermediary result
  *
  * @param {Any} self value that's passed between chained methods
- * @param {Function} func function that will be called with the value
+ * @param {Function} func function that will be called with the value (both as context and as the first parameter)
  * @return {Any}
  */
 function tap(func) {
-    func(this);
+    func.call(this, this);
     return this;
 };
 
