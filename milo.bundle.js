@@ -8867,42 +8867,9 @@ function processChanges(callback) {
 }
 
 
-function compareBatchIds(batch1, batch2) {
-    var batch1_id = batch1[0].__batch_id;
-    var batch2_id = batch2[0].__batch_id;
-    if (batch1_id < batch2_id) return -1;
-    if (batch1_id > batch2_id) return 1;
-    return 0;
-}
-
-
-function sortBatchMesages(batch) {
-    return batch.sort(compareMsgIds);
-}
-
-
-function compareMsgIds(msg1, msg2) {
-    if (msg1.__msg_id < msg2.__msg_id) return -1;
-    if (msg1.__msg_id > msg2.__msg_id) return 1;
-    return 0;
-}
-
-
 function notify(callback, changeFinished) {
     callback && callback(null, changeFinished);
     this.postMessage(changeFinished ? 'changecompleted' : 'changestarted');
-}
-
-
-function splitToBatches2(queue) {
-    var batchesMap = {};
-    queue.forEach(function(data) {
-        if (data.type == 'finished') return;
-        var batchId = data.__batch_id;
-        batchesMap[batchId] = batchesMap[batchId] || [];
-        batchesMap[batchId].push(data);
-    });
-    return batchesMap;
 }
 
 
@@ -9162,7 +9129,7 @@ function Connector$turnOn() {
             // store untranslated path
             var sourcePath = data.path
                 , data = _.clone(data);
-            
+
             data.source = linkedDS;
 
             if (data.type == 'finished')
