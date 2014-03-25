@@ -7,7 +7,7 @@ var Model = require('../../lib/model')
 
 
 describe('Connector', function() {
-    it.only('should connect two models', function(done) {
+    it('should connect two models', function(done) {
         var m1 = new Model
             , m2 = new Model
             , c = new Connector(m1, '<<->>', m2);
