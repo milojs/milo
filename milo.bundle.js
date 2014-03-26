@@ -3349,8 +3349,8 @@ var ComponentFacet = require('../c_facet')
     , DOMEventsSource = require('../msg_src/dom_events')
     , DragDrop = require('../../util/dragdrop')
     , DropError = require('../../util/error').Drop
-    , _ = require('mol-proto');
-
+    , _ = require('mol-proto')
+    , _handleDropDependency;
 
 /**
  * `milo.registry.facets.get('Drop')`
@@ -3369,6 +3369,8 @@ var ComponentFacet = require('../c_facet')
  *                        OR list of additional data types that a drop target would accept
  *                        OR test function that will be passed DragDrop object
  *                        OR `true` to accept all data types
+ *      - checkParent: `false` by default
+ *                        OR `true` will call parent component drop allow to check if parent component will accept the component
  *      If test functions are used, they should return boolean. Each test function can also set drop effect as defined here:
  *      https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer#dropEffect.28.29
  *      Setting drop effect that is not allowed by dragged object will prevent drop.
@@ -3423,7 +3425,7 @@ function onDragging(eventType, event) {
     event.stopPropagation();
     event.preventDefault();
 
-    if (! _isDropAllowed.call(this, dt))
+    if (! _handleDropDependency.call(this, dt))
         dt.setDropEffect('none');
 }
 
@@ -3439,14 +3441,31 @@ function onDrop(eventType, event) {
 }
 
 
+_handleDropDependency = _.throttle(_handleDropDependencyNothrottle, 50);
+function _handleDropDependencyNothrottle(dt, originalDropComponent) {
+    var allow = this.config.allow
+        , meta = dt.getComponentMeta()
+        , parentAllowed = true;
+
+    originalDropComponent = originalDropComponent || this.owner;
+
+    if (allow.checkParent) {
+        var parent = this.owner.getScopeParent('Drop');
+        if (parent)
+            parentAllowed = _handleDropDependencyNothrottle.call(parent.drop, dt, originalDropComponent);
+    }
+
+    return parentAllowed && _isDropAllowed.call(this, dt, originalDropComponent);
+}
+
+
 /**
  * Checks if drop is allowed based on facet configuration (see above)
  * 
  * @param {DragDrop} dt
  * @return {Boolean}
  */
-_isDropAllowed = _.throttle(_isDropAllowed, 50);
-function _isDropAllowed(dt) {
+function _isDropAllowed(dt, originalDropComponent) {
     var allow = this.config.allow;
 
     if (dt.isComponent()) {
@@ -3463,7 +3482,7 @@ function _isDropAllowed(dt) {
                 return meta && meta.compClass == allowComps;
             // test function
             case 'function':
-                return allowComps.call(this.owner, meta, dt);
+                return allowComps.call(this.owner, meta, dt, originalDropComponent);
             case 'object':
                 if (Array.isArray(allowComps))
                     // list of allowed classes
@@ -14651,11 +14670,11 @@ function repeat(times) {
  * Function to tap into chained methods and to inspect intermediary result
  *
  * @param {Any} self value that's passed between chained methods
- * @param {Function} func function that will be called with the value (both as context and as the first parameter)
+ * @param {Function} func function that will be called with the value
  * @return {Any}
  */
 function tap(func) {
-    func.call(this, this);
+    func(this);
     return this;
 };
 
