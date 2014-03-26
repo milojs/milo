@@ -9497,13 +9497,13 @@ Model.prototype.__proto__ = Model.__proto__;
 _.extendProto(Model, {
     path: Model$path,
     get: Model$get,
-    set: synthesize.modelSet,
-    del: synthesize.modelDel,
-    splice: synthesize.modelSplice,
     proxyMessenger: proxyMessenger,
     proxyMethods: proxyMethods,
     _prepareMessengers: _prepareMessengers
 });
+
+// set, del, splice are added to model
+_.extendProto(Model, synthesize.modelMethods);
 
 
 /**
@@ -9583,7 +9583,7 @@ function proxyMethods(modelHostObject) {
     modelHostObject = modelHostObject || this._hostObject;
     Mixin.prototype._createProxyMethods.call(this, modelMethodsToProxy, modelHostObject);
 }
-var modelMethodsToProxy = ['path', 'get', 'set', 'splice', 'len', 'push', 'pop', 'unshift', 'shift'];
+var modelMethodsToProxy = ['path', 'get', 'set', 'del', 'splice', 'len', 'push', 'pop', 'unshift', 'shift'];
 
 
 /**
@@ -10213,9 +10213,10 @@ var synthesizers = _.mapKeys(templates, function(tmpl) {
     return doT.template(tmpl, dotSettings, dotDef); 
 });
 
-var modelSetSynthesizer = doT.template(templates.set, dotSettings, modelDotDef)
-    , modelDelSynthesizer = doT.template(templates.del, dotSettings, modelDotDef)
-    , modelSpliceSynthesizer = doT.template(templates.splice, dotSettings, modelDotDef);
+
+var modelSynthesizers = _.mapToObject(['set', 'del', 'splice'], function(methodName) {
+    return doT.template(templates[methodName], dotSettings, modelDotDef);
+});
 
 
 /**
@@ -10354,16 +10355,17 @@ function _synthesize(synthesizer, path, parsedPath) {
 /**
  * Exports `synthesize` function with the following:
  *
- * - .modelSet - `set` method for Model
- * - .modelSplice - `splice` method for Model
+ * - .modelMethods.set - `set` method for Model
+ * - .modelMethods.del - `del` method for Model
+ * - .modelMethods.splice - `splice` method for Model
  */
 module.exports = synthesizePathMethods;
 
-_.extend(synthesizePathMethods, {
-    modelSet: _synthesize(modelSetSynthesizer, '', []),
-    modelDel: _synthesize(modelDelSynthesizer, '', []),
-    modelSplice: _synthesize(modelSpliceSynthesizer, '', [])
+var modelMethods = _.mapKeys(modelSynthesizers, function(synthesizer) {
+    return _synthesize(synthesizer, '', []);
 });
+
+synthesizePathMethods.modelMethods = modelMethods;
 
 },{"../../util/count":82,"../../util/logger":89,"../change_data":68,"../model_utils":73,"../path_utils":75,"dot":98,"fs":96,"mol-proto":99}],77:[function(require,module,exports){
 'use strict';
