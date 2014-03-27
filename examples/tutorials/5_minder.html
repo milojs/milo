@@ -164,11 +164,11 @@
                     '->': {
                         '.title': [
                             function validateRequired(val, callback) {
-                                var valid = val && val.length > 5;
+                                var valid = val && val.length > 4;
 
                                 var response = valid
                                                 ? { valid: true }
-                                                : { valid: false, reason: 'value is required' };
+                                                : { valid: false, reason: 'must be minimum of 5 characters' };
 
                                 callback(null, response);
                             }
@@ -177,6 +177,10 @@
                 }
             }
             window.formConnect3 = milo.minder(formModel, '->>', bookData.data, options);
+
+            formModel.on('validated', function(msg, response) {
+                console.log(msg, response);
+            });
         });
 
     //END JS
