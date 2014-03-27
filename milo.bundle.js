@@ -3332,7 +3332,7 @@ function onDragStart(eventType, event) {
 
     _setAllowedEffects.call(this, dt);
 
-    DragDrop.service.postMessage('dragdropstarted', {
+    DragDrop.service.postMessageSync('dragdropstarted', {
         eventType: 'dragstart',
         dragDrop: dt,
         dragFacet: this
@@ -3355,7 +3355,7 @@ function onDragEnd() {
 
     event.stopPropagation();
     var dt = new DragDrop(event);
-    DragDrop.service.postMessage('completedragdrop', {
+    DragDrop.service.postMessageSync('completedragdrop', {
         eventType: 'dragend',
         dragDrop: dt,
         dragFacet: this
@@ -3476,7 +3476,7 @@ function onDragging(eventType, event) {
 function onDrop(eventType, event) {
     event.stopPropagation();
     var dt = new DragDrop(event);
-    DragDrop.service.postMessage('dragdropcompleted', {
+    DragDrop.service.postMessageSync('dragdropcompleted', {
         eventType: 'drop',
         dragDrop: dt,
         dropFacet: this
@@ -11523,7 +11523,7 @@ function onDragDropStarted(msg, data) {
 
 
 function onDragDropCompleted(msg, data) {
-    _currentDragFacet && _currentDragFacet.postMessage('dragdropcompleted', data);
+    _currentDragFacet && _currentDragFacet.postMessageSync('dragdropcompleted', data);
     _currentDragDrop = undefined;
     _currentDragFacet = undefined;
 }
@@ -11531,7 +11531,7 @@ function onDragDropCompleted(msg, data) {
 
 function onCompleteDragDrop(msg, data) {
     if (_currentDragDrop)
-        dragDropService.postMessage('dragdropcompleted', data);
+        dragDropService.postMessageSync('dragdropcompleted', data);
 }
 
 
