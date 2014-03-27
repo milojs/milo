@@ -2485,7 +2485,7 @@ function Data$_set(value) {
 
 function _postFinishedMessage() {
     this.off('', onDataChange);
-    this.postMessage('', { type: 'finished' });
+    this.postMessageSync('', { type: 'finished' });
     this.onSync('', onDataChange);
 }
 
@@ -8978,7 +8978,7 @@ function getTransactionFlag(func) {
  */
 function postTransactionFinished(inChangeTransaction) {
     if (! inChangeTransaction)
-        this.postMessage('finished', { type: 'finished' });
+        this.postMessageSync('finished', { type: 'finished' });
 }
 
 
