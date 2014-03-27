@@ -324,6 +324,19 @@ It is bundled together with __milo__ and all its functions are available as prop
 Changes log
 -----------
 
-###After 0.1.2###
+###0.1.3###
+
+- Asynchronous messaging.
+
+    - All subscribers that are now called on the next tick by default
+    - If in some circumstances subscriber needs to be called synchronously, it can subscribe to the message using `onSync` method (instead of `on`).
+    - If message sender needs the message to be dispatched synchronously to all subscribers it can be used with `postMessageSync` method (instead of `postMessage`).
+    - Subscribers can subscribe using `onAsync` in which case ALL messages, even those emitted with `postMessageSync`, will be dispatched asynchronously.
+    - DOM events are dispatched synchronously, so preventDefault etc. would work (the actual DOM event is passed as the second parameter of subscribers).
 
 - List facet now allows multiple items already in DOM, but requires that all Items (components with Item facet) are immediate DOM children. The first item in the DOM is used as a sample for new items.
+
+###0.1.2###
+
+- Data propagation mechanism fixed to prevent duplication of splice changes
+- Dragdrop redesigned to allow passing data via datatype during drag.
