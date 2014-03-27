@@ -1,0 +1,76 @@
+<html>
+<head>
+    <title>Getting Started - Data facet</title>
+    <style>
+    /*CSS*/
+
+    /*END CSS*/
+    </style>
+</head>
+<body>
+<!-- HTML -->
+
+    <script src="http://mailonline.github.io/milo/milo.bundle.js"></script>
+
+    <!-- A simple component binding with a single data facet -->
+    <div ml-bind="[data]:comp">My first component</div>
+
+    <!-- A component with two facets, data and container. 
+         Container creates a separate scope for child components. -->
+    <div ml-bind="[data container]:nested">
+        <h3 ml-bind="[data]:title"></h3>
+        <hp ml-bind="[data]:description"></hp>
+    </div>
+
+    <!-- A component and data facet bound to input element -->
+    <input ml-bind="[data]:input" />
+
+<!-- END HTML -->
+
+    <script>
+    //JS
+
+        // Call milo ready function, just like jQuery's $(function() {})
+        milo(function() {
+            
+            // Bind everything (no element passed to binder)
+            var scope = milo.binder();
+
+            // Access comp on scope object, and get the component's data
+            alert(scope.comp.data.get());
+            
+            // Set the data of comp
+            scope.comp.data.set('My data');
+            
+            // Set a data object on nested component
+            scope.nested.data.set({
+                title: 'Great Expectations',
+                description: 'A book about some expectations that were pretty great'
+            });
+            
+            // Data facet knows how to set inputs too (and images, checkboxes etc)
+            scope.input.data.set('input data set');
+            
+            // Data fires change events too, empty string means the root
+            // of the data. Try typing in the input.
+            scope.input.data.on('', function(msg, data) {
+                // We'll set the data of our first component to the input value
+                scope.comp.data.set(data.newValue);
+            });
+            
+            // With nested data, you can provide a path.
+            scope.nested.data.on('.description', function(msg, data) {
+                console.log(msg, data);
+            });
+            
+            // When we set it, the above listener will fire (open your console).
+            setTimeout(function() {
+                scope.nested.data.set({description: 'new description'});
+            }, 2000);
+        });
+
+    //END JS
+    </script>
+
+</body>
+</html>

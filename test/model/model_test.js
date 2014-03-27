@@ -1139,4 +1139,39 @@ describe('Model class', function() {
             done();
         });
     });
+
+
+    it('should define del method for models', function() {
+        var m = new Model;
+        m.set({ name: 'milo' });
+        assert.deepEqual(m.get(), { name: 'milo' });
+
+        m.del();
+        assert.equal(m.get(), undefined);
+    });
+
+
+    it('should dispatch messages when model is deleted', function() {
+        var m = new Model;
+        m.set({ name: 'milo', DOB: { year: 1972 } });
+
+        function logPost(msg, data) {
+            if (data.type == 'finished') return;
+            posted.push(data);
+        }
+
+        m.on(/.*/, logPost);
+        var posted = [];
+
+        m.del();
+
+            assert.equal(m.get(), undefined);
+            assert.deepEqual(posted,  [
+                { path: '', type: 'deleted', oldValue: { name: 'milo', DOB: { year: 1972 } } },
+                { path: '.name', type: 'removed', oldValue: 'milo' },
+                { path: '.DOB', type: 'removed', oldValue: { year: 1972 } },
+                { path: '.DOB.year', type: 'removed', oldValue: 1972 }
+            ]);
+    });
+
 });

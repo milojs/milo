@@ -2203,6 +2203,9 @@ var Mixin = require('../../abstract/mixin')
     , ModelPath = require('../../model/m_path')
     , modelUtils = require('../../model/model_utils')
     , changeDataHandler = require('../../model/change_data')
+    , getTransactionFlag = changeDataHandler.getTransactionFlag
+    , setTransactionFlag = changeDataHandler.setTransactionFlag
+    , postTransactionFinished = changeDataHandler.postTransactionFinished
 
     , _ = require('mol-proto')
     , logger = require('../../util/logger');
@@ -2304,11 +2307,12 @@ function Data$start() {
 
     // subscribe to DOM event
     this.onSync('', onDataChange);
+    this.onSync('finished', onDataChange);
 
-    // subscribe to changes in scope children with Data facet
+    // changes in scope children with Data facet
     this.onSync('childdata', onChildData);
 
-    // subscribe to "changedata" event to enable reactive connections
+    // to enable reactive connections
     this.onSync('changedata', changeDataHandler)
 }
 
@@ -2334,6 +2338,7 @@ function _prepareMessengers() {
         _internalMessenger: internalMessenger
     });
 }
+
 
 /**
  * Data facet instance method
@@ -2363,6 +2368,12 @@ function _prepareMessageSource() {
  */
 function onDataChange(msgType, data) {
     this._postDataChanged(data);
+    var inTransaction = getTransactionFlag(data);
+    if (! inTransaction) {
+        this.off('finished', onDataChange);
+        postTransactionFinished.call(this, false);
+        this.on('finished', onDataChange);
+    }
 }
 
 
@@ -2374,7 +2385,7 @@ function onDataChange(msgType, data) {
  * @param {Obejct} data data change information
  */
 function onChildData(msgType, data) {
-    this.postMessage(data.path, data);
+    this.postMessage(data.path || 'finished', data);
     this._postDataChanged(data);
 }
 
@@ -2388,24 +2399,35 @@ function onChildData(msgType, data) {
  * @return {Object|String|Number}
  */
 function Data$set(value) {
+    var inTransaction = getTransactionFlag(Data$set);
+
     var componentSetter = this.config.set;
-    if (typeof componentSetter == 'function')
-        return componentSetter.call(this.owner, value);
+    if (typeof componentSetter == 'function') {
+        var result = componentSetter.call(this.owner, value);
+        postTransactionFinished.call(this, inTransaction);
+        return result;
+    }
+
+    setTransactionFlag(this._set, inTransaction);
 
     var oldValue = this._value
         , newValue = this._set(value);
 
     // this message triggers onDataChange, as well as actuall DOM change
     // so the parent gets notified
-    this.postMessage('', { path: '', type: 'changed',
-                            newValue: newValue, oldValue: oldValue });
-    _postFinishedMessage.call(this);
+    var msg = { path: '', type: 'changed',
+                newValue: newValue, oldValue: oldValue };
+    setTransactionFlag(msg, inTransaction);
+
+    this.postMessage('', msg);
 
     return newValue;
 }
 
 
 function Data$_set(value) {
+    var inTransaction = getTransactionFlag(Data$_set);
+
     var valueSet;
     if (value != null && typeof value == 'object') {
         if (Array.isArray(value)) {
@@ -2451,8 +2473,10 @@ function Data$_set(value) {
     function setChildData(valueSet, childValue, key, pathSyntax) {
         var childPath = pathSyntax.replace('$$', key);
         var childDataFacet = this.path(childPath, true);
-        if (childDataFacet)
+        if (childDataFacet) {
+            setTransactionFlag(childDataFacet.set, inTransaction);
             valueSet[key] = childDataFacet.set(childValue);
+        }
         // else
         //  logger.warn('attempt to set data on path that does not exist: ' + childPath);
     }    
@@ -2461,7 +2485,7 @@ function Data$_set(value) {
 
 function _postFinishedMessage() {
     this.off('', onDataChange);
-    this.postMessage('', { type: 'finished' });
+    this.postMessageSync('', { type: 'finished' });
     this.onSync('', onDataChange);
 }
 
@@ -2473,22 +2497,31 @@ function _postFinishedMessage() {
  * @param {String|Number} value value to set to DOM element
  */
 function Data$del() {
+    var inTransaction = getTransactionFlag(Data$del);
+
     var componentDelete = this.config.del;
-    if (typeof componentDelete == 'function')
-        return componentDelete.call(this.owner);
+    if (typeof componentDelete == 'function') {
+        var result = componentDelete.call(this.owner);
+        postTransactionFinished.call(this, inTransaction);
+        return result;
+    }
 
     var oldValue = this._value
 
+    setTransactionFlag(this._del, inTransaction);
     this._del();
 
     // this message triggers onDataChange, as well as actuall DOM change
     // so the parent gets notified
-    this.postMessage('', { path: '', type: 'deleted', oldValue: oldValue });
-    _postFinishedMessage.call(this);
+    var msg = { path: '', type: 'deleted', oldValue: oldValue };
+    setTransactionFlag(msg, inTransaction);
+    this.postMessage('', msg);
 }
 
 
 function Data$_del() {
+    var inTransaction = getTransactionFlag(Data$_del);
+    setTransactionFlag(this._set, inTransaction);
     this._set();
 }
 
@@ -2516,9 +2549,12 @@ function Data$_postDataChanged(msgData) {
     var parentData = this.scopeParent();
 
     if (parentData) {
-        var parentMsg = _.clone(msgData);
-        parentMsg.path = (this._path || ('.' + thisComp.name))  + parentMsg.path;
-        parentData.postMessage('childdata', parentMsg);
+        if (msgData.type != 'finished') {
+            var parentMsg = _.clone(msgData);
+            parentMsg.path = (this._path || ('.' + thisComp.name))  + parentMsg.path;
+        }
+
+        parentData.postMessage('childdata', parentMsg || msgData);
     }
 }
 
@@ -2594,28 +2630,35 @@ function Data$_getScalarValue() {
  * @return {Array}
  */
 function Data$splice(spliceIndex, spliceHowMany) { //, ... arguments
-    var componentSplice = this.config.splice;
-    if (typeof componentSplice == 'function')
-        return componentSplice.apply(this.owner, arguments);
+    var inTransaction = getTransactionFlag(Data$splice);
 
+    var componentSplice = this.config.splice;
+    if (typeof componentSplice == 'function') {
+        var result = componentSplice.apply(this.owner, arguments);
+        postTransactionFinished.call(this, inTransaction);
+        return result;
+    }
+
+    setTransactionFlag(this._splice, inTransaction);
     var result = this._splice.apply(this, arguments);
 
-    if (!result)
-        return;
+    if (!result) return;
 
-    this.postMessage('', { path: '', type: 'splice',
-                        index: result.spliceIndex,
-                        removed: result.removed,
-                        addedCount: result.addedCount,
-                        newValue: this._value });
-
-    _postFinishedMessage.call(this);
+    var msg = { path: '', type: 'splice',
+                index: result.spliceIndex,
+                removed: result.removed,
+                addedCount: result.addedCount,
+                newValue: this._value };
+    setTransactionFlag(msg, inTransaction);
+    this.postMessage('', msg);
 
     return result.removed;
 }
 
 
 function Data$_splice(spliceIndex, spliceHowMany) { //, ... arguments
+    var inTransaction = getTransactionFlag(Data$_splice);
+
     var listFacet = this.owner.list;
     if (! listFacet)
         return logger.warn('Data: cannot use splice method without List facet');
@@ -2650,9 +2693,10 @@ function Data$_splice(spliceIndex, spliceHowMany) { //, ... arguments
         listFacet.addItems(addedCount, spliceIndex);
         for (var i = 2, j = spliceIndex; i < argsLen; i++, j++) {
             var item = listFacet.item(j);
-            if (item)
+            if (item) {
+                setTransactionFlag(item.data.set, inTransaction);
                 var itemData = item.data.set(arguments[i]);
-            else
+            } else
                 logger.warn('Data: no item for index', j);
 
             added.push(itemData);
@@ -3348,8 +3392,8 @@ var ComponentFacet = require('../c_facet')
     , DOMEventsSource = require('../msg_src/dom_events')
     , DragDrop = require('../../util/dragdrop')
     , DropError = require('../../util/error').Drop
-    , _ = require('mol-proto');
-
+    , _ = require('mol-proto')
+    , _handleDropDependency;
 
 /**
  * `milo.registry.facets.get('Drop')`
@@ -3368,6 +3412,8 @@ var ComponentFacet = require('../c_facet')
  *                        OR list of additional data types that a drop target would accept
  *                        OR test function that will be passed DragDrop object
  *                        OR `true` to accept all data types
+ *      - checkParent: `false` by default
+ *                        OR `true` will call parent component drop allow to check if parent component will accept the component
  *      If test functions are used, they should return boolean. Each test function can also set drop effect as defined here:
  *      https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer#dropEffect.28.29
  *      Setting drop effect that is not allowed by dragged object will prevent drop.
@@ -3422,7 +3468,7 @@ function onDragging(eventType, event) {
     event.stopPropagation();
     event.preventDefault();
 
-    if (! _isDropAllowed.call(this, dt))
+    if (! _handleDropDependency.call(this, dt))
         dt.setDropEffect('none');
 }
 
@@ -3438,14 +3484,31 @@ function onDrop(eventType, event) {
 }
 
 
+_handleDropDependency = _.throttle(_handleDropDependencyNothrottle, 50);
+function _handleDropDependencyNothrottle(dt, originalDropComponent) {
+    var allow = this.config.allow
+        , meta = dt.getComponentMeta()
+        , parentAllowed = true;
+
+    originalDropComponent = originalDropComponent || this.owner;
+
+    if (allow && allow.checkParent) {
+        var parent = this.owner.getScopeParent('Drop');
+        if (parent)
+            parentAllowed = _handleDropDependencyNothrottle.call(parent.drop, dt, originalDropComponent);
+    }
+
+    return parentAllowed && _isDropAllowed.call(this, dt, originalDropComponent);
+}
+
+
 /**
  * Checks if drop is allowed based on facet configuration (see above)
  * 
  * @param {DragDrop} dt
  * @return {Boolean}
  */
-_isDropAllowed = _.throttle(_isDropAllowed, 50);
-function _isDropAllowed(dt) {
+function _isDropAllowed(dt, originalDropComponent) {
     var allow = this.config.allow;
 
     if (dt.isComponent()) {
@@ -3462,7 +3525,7 @@ function _isDropAllowed(dt) {
                 return meta && meta.compClass == allowComps;
             // test function
             case 'function':
-                return allowComps.call(this.owner, meta, dt);
+                return allowComps.call(this.owner, meta, dt, originalDropComponent);
             case 'object':
                 if (Array.isArray(allowComps))
                     // list of allowed classes
@@ -3703,6 +3766,10 @@ var ComponentFacet = require('../c_facet')
 var ItemFacet = _.createSubclass(ComponentFacet, 'Item');
 
 _.extendProto(ItemFacet, {
+    getState: ItemFacet$getState,
+    setState: ItemFacet$setState,
+    getIndex: ItemFacet$getIndex,
+    setIndex: ItemFacet$setIndex,
     removeItem: ItemFacet$removeItem,
     require: ['Container', 'Dom', 'Data']
 });
@@ -3710,6 +3777,28 @@ _.extendProto(ItemFacet, {
 facetsRegistry.add(ItemFacet);
 
 module.exports = ItemFacet;
+
+
+function ItemFacet$getState() {
+    return { state: {
+        index: this.getIndex()
+    }};
+}
+
+
+function ItemFacet$setState(state) {
+    this.setIndex(state.state.index);
+}
+
+
+function ItemFacet$getIndex() {
+    return this.index;
+}
+
+
+function ItemFacet$setIndex(index) {
+    this.index = index;
+}
 
 
 /**
@@ -3747,7 +3836,7 @@ var List = _.createSubclass(ComponentFacet, 'List');
 _.extendProto(List, {
     init: init,
     start: start,
-    /* update: update, */
+
     require: ['Container', 'Dom', 'Data'],
     _itemPreviousComponent: _itemPreviousComponent,
 
@@ -3759,7 +3848,6 @@ _.extendProto(List, {
     addItems: List$addItems,
     removeItem: removeItem,
     each: each
-    /* _reattach: _reattachEventsOnElementChange */
 });
 
 facetsRegistry.add(List);
@@ -3786,17 +3874,30 @@ function start() {
 }
 
 function onChildrenBound() {
-    var foundItem;
+    // get items already in the list
+    var children = this.dom.children()
+        , items = this.list._listItems
+        , itemsHash = this.list._listItemsHash;
 
-    // `this` is a component here, as the message was dispatched on a component
-    this.container.scope._each(function(childComp, name) {
-        if (childComp.item) {
-            if (foundItem) throw new ListError('More than one child component has ListItem Facet')
-            foundItem = childComp;
+    children && children.forEach(function(childEl) {
+        var comp = Component.getComponent(childEl);
+        if (comp && comp.item) {
+            items.push(comp);
+            itemsHash[comp.name] = comp;
+            comp.item.list = this.list;
         }
-    });
+    }, this);
+
+    if (items.length) {
+        var foundItem = items[0];
+        items.splice(0, 1);
+        delete itemsHash[foundItem.name];
+        items.forEach(function(item, index) {
+            item.item.setIndex(index);
+        });
+    }
     
-    // Component must have one and only one child with a List facet 
+    // Component must have one child with an Item facet 
     if (! foundItem) throw new ListError('No child component has ListItem Facet');
 
     this.list.itemSample = foundItem;
@@ -3839,9 +3940,9 @@ function count() {
 
 function _setItem(index, component) {
     this._listItems.splice(index, 0, component);
-    this._listItemsHash[component.name] = component
+    this._listItemsHash[component.name] = component;
     component.item.list = this;
-    component.item.index = +index;
+    component.item.setIndex(+index);
 }
 
 // Does the list contain a particular list item component
@@ -3879,7 +3980,7 @@ function _updateItemsIndexes(fromIndex, toIndex) {
     for (var i = fromIndex; i < toIndex; i++) {
         var component = this._listItems[i];
         if (component)
-            component.item.index = i;
+            component.item.setIndex(i);
         else
             logger.warn('List: no item at position', i);
     }
@@ -3896,7 +3997,7 @@ function _updateItemsIndexes(fromIndex, toIndex) {
 function List$addItems(count, index) {
     check(count, Match.Integer);
     if (count < 0)
-        throw new ListError('can\'t add negative number of items')
+        throw new ListError('can\'t add negative number of items');
 
     if (count == 0) return;
 
@@ -7073,7 +7174,8 @@ config({
             componentMetaRegex: /^x\-application\/milo\/component\-meta\/([a-z0-9]+)\/([a-z0-9]+)\/([a-z0-9]*)$/,
         }
     },
-    check: true
+    check: true,
+    debug: false
 });
 
 },{"dot":98,"mol-proto":99}],57:[function(require,module,exports){
@@ -8804,7 +8906,8 @@ function _stringMatch(str, substr) {
 'use strict';
 
 
-var logger = require('../util/logger')
+var facetsRegistry = require('../components/c_facets/cf_registry')
+    , logger = require('../util/logger')
     , config = require('../config')
     , _ = require('mol-proto');
 
@@ -8812,6 +8915,51 @@ var logger = require('../util/logger')
  * Utility function to process "changedata" messages emitted by Connector object.
  */
 module.exports = changeDataHandler;
+
+
+_.extend(changeDataHandler, {
+    setTransactionFlag: setTransactionFlag,
+    getTransactionFlag: getTransactionFlag,
+    postTransactionFinished: postTransactionFinished
+});
+
+
+/**
+ * Change data uses hidden property on accessor methods to pass flag that the accessor is executed as a part of change transaction.
+ * Accessor methods are supposed to store this flag in a local variable and to clear it (because another accessor can be executed in or out of transaction) using `getTransactionFlag`
+ *
+ * @private
+ * @param {Function} func accessor method reference
+ * @param {Boolean} flag a flag to be set
+ */
+function setTransactionFlag(func, flag) {
+    _.defineProperty(func, '__inChangeTransaction', flag, _.CONF | _.WRIT);
+}
+
+
+/**
+ * Retrieves and clears transaction flag from accessor method
+ *
+ * @private
+ * @param {Function} func accessor method reference
+ * @return {Boolean}
+ */
+function getTransactionFlag(func) {
+    var inChangeTransaction = func.__inChangeTransaction;
+    delete func.__inChangeTransaction;
+    return inChangeTransaction;
+}
+
+
+/**
+ * Posts message on this to indicate the end of transaction unless `inChangeTransaction` is `true`.
+ * 
+ * @param  {Boolean} inChangeTransaction flag to prevent posting if inside change transaction
+ */
+function postTransactionFinished(inChangeTransaction) {
+    if (! inChangeTransaction)
+        this.postMessageSync('finished', { type: 'finished' });
+}
 
 
 /**
@@ -8851,6 +8999,9 @@ var CHANGE_TYPE_TO_METHOD_MAP = {
     'removed': 'del'
 };
 
+var DataFacetClass;
+
+
 /**
  * Processes queued "changedata" messages.
  * Posts "changestarted" and "changecompleted" messages and calls callback
@@ -8858,13 +9009,18 @@ var CHANGE_TYPE_TO_METHOD_MAP = {
  * @param {[Function]} callback optional callback that is called with `(null, false)` parameters before change processing starts and `(null, true)` after it's finished.
  */
 function processChanges(callback) {
+    DataFacetClass = DataFacetClass || facetsRegistry.get('Data');
+
     notify.call(this, callback, false);
     splitToBatches(this._changesQueue, this)
+        .map(validateBatch)
         .map(prepareBatch)
         .forEach(processBatch, this);
+
     this._changesQueue.length = 0;
     notify.call(this, callback, true);
 }
+
 
 function notify(callback, changeFinished) {
     callback && callback(null, changeFinished);
@@ -8887,8 +9043,36 @@ function splitToBatches(queue, self) {
     // TODO Warning is disabled as Data facets sometimes fails to emit changedata message
     // Should be re-enabled when Data facet is fixed
     // else
-    //     logger.warn('changedata: no message with data.type=="finished" in the end of the queue');
+    //     logger.warn('changedata: no message with data.type=="finished" in the end of the queue', _.clone(queue), batches, { self: self });
     return batches;
+}
+
+
+/**
+ * Checks that all messages from the batch come from the same source.
+ * Hack: reverses the batch if it comes from the Data facet
+ * Returns the reference to the batch (for chaining)
+ * 
+ * @param  {Array} batch batch of data changes
+ * @return {Array} 
+ */
+function validateBatch(batch) {
+    var source = batch[0].source
+        , sameSource = true;
+
+    if (batch.length > 1) {
+        for (var i = 1, len = batch.length; i < len; i++)
+            if (batch[i].source != source) {
+                logger.error('changedata: changes from different sources in the same batch, sources:', batch[i].source.name, source.name);
+                sameSource = false;
+                source = batch[i].source;
+            }
+
+        if (sameSource && source.constructor == DataFacetClass)
+            batch.reverse();
+    }
+
+    return batch;
 }
 
 
@@ -8921,8 +9105,7 @@ function prepareBatch(batch) {
 
         todo.push(data);
 
-        if (! config.check)
-            throw exitLoop;
+        if (! config.debug) throw exitLoop;
         pathsToSplice = pathsToSplice || [];
         pathsToSplice.push(data.path);
         hadSplice = true;
@@ -8954,6 +9137,8 @@ function prepareBatch(batch) {
 
 function processBatch(batch) {
     batch.forEach(processChange, this);
+    postTransactionFinished.call(this, false);
+
 
     function processChange(data) {
         var modelPath = this.path(data.path);
@@ -8969,19 +9154,21 @@ function executeSplice(modelPath, data) {
         , spliceArgs = [index, howMany];
 
     spliceArgs = spliceArgs.concat(data.newValue.slice(index, index + data.addedCount));
+    setTransactionFlag(modelPath.splice, true);
     modelPath.splice.apply(modelPath, spliceArgs);
 }
 
 
 function executeMethod(modelPath, data) {
     var methodName = CHANGE_TYPE_TO_METHOD_MAP[data.type];
-    if (methodName)
+    if (methodName) {
+        setTransactionFlag(modelPath[methodName], true);
         modelPath[methodName](data.newValue);
-    else
+    } else
         logger.error('unknown data change type');
 }
 
-},{"../config":56,"../util/logger":89,"mol-proto":99}],69:[function(require,module,exports){
+},{"../components/c_facets/cf_registry":25,"../config":56,"../util/logger":89,"mol-proto":99}],69:[function(require,module,exports){
 'use strict';
 
 var ConnectorError = require('../util/error').Connector
@@ -9128,7 +9315,7 @@ function Connector$turnOn() {
             // store untranslated path
             var sourcePath = data.path
                 , data = _.clone(data);
-            
+
             data.source = linkedDS;
 
             if (data.type == 'finished')
@@ -9350,12 +9537,13 @@ Model.prototype.__proto__ = Model.__proto__;
 _.extendProto(Model, {
     path: Model$path,
     get: Model$get,
-    set: synthesize.modelSet,
-    splice: synthesize.modelSplice,
     proxyMessenger: proxyMessenger,
     proxyMethods: proxyMethods,
     _prepareMessengers: _prepareMessengers
 });
+
+// set, del, splice are added to model
+_.extendProto(Model, synthesize.modelMethods);
 
 
 /**
@@ -9435,7 +9623,7 @@ function proxyMethods(modelHostObject) {
     modelHostObject = modelHostObject || this._hostObject;
     Mixin.prototype._createProxyMethods.call(this, modelMethodsToProxy, modelHostObject);
 }
-var modelMethodsToProxy = ['path', 'get', 'set', 'splice', 'len', 'push', 'pop', 'unshift', 'shift'];
+var modelMethodsToProxy = ['path', 'get', 'set', 'del', 'splice', 'len', 'push', 'pop', 'unshift', 'shift'];
 
 
 /**
@@ -10018,9 +10206,13 @@ function wrapMessengerMethods(methodsNames) {
 var pathUtils = require('../path_utils')
     , modelUtils = require('../model_utils')
     , logger = require('../../util/logger')
+    , miloCount = require('../../util/count')
     , fs = require('fs')
     , doT = require('dot')
-    , _ = require('mol-proto');
+    , _ = require('mol-proto')
+    , changeDataHandler = require('../change_data')
+    , getTransactionFlag = changeDataHandler.getTransactionFlag
+    , postTransactionFinished = changeDataHandler.postTransactionFinished;
 
 
 /**
@@ -10028,12 +10220,12 @@ var pathUtils = require('../path_utils')
  */
 var templates = {
     get: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\nmethod = function get() {\n    var m = {{# def.modelAccessPrefix }};\n    return m {{~ it.parsedPath :pathNode }}\n        {{? pathNode.interpolate}}\n            && (m = m[this._args[ {{= pathNode.interpolate }} ]])\n        {{??}}\n            && (m = m{{= pathNode.property }})\n        {{?}} {{~}};\n};\n",
-    set: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n\n\n/**\n * Template that synthesizes setter for Model and for ModelPath\n */\nmethod = function set(value) {\n    {{# def.initVars }}\n\n    {{# def.createTree:'set' }}\n\n    {{\n        currNode = nextNode;\n        currProp = currNode && currNode.property;\n    }}\n\n    {{ /* assign value to the last property */ }}\n    {{? currProp }}\n        wasDef = {{# def.wasDefined}};\n        {{# def.changeAccessPath }}\n\n        var old = m{{# def.currProp }};\n\n        {{ /* clone value to prevent same reference in linked models */ }}\n        m{{# def.currProp }} = cloneTree(value);\n    {{?}}\n\n    {{ /* add message related to the last property change */ }}\n    if (! wasDef)\n        {{# def.addMsg }} accessPath, type: 'added',\n                newValue: value });\n    else if (old != value)\n        {{# def.addMsg }} accessPath, type: 'changed',\n                oldValue: old, newValue: value });\n\n    {{ /* add message related to changes in (sub)properties inside removed and assigned value */ }}\n    if (! wasDef || old != value)\n        addTreeChangesMessages(messages, messagesHash,\n            accessPath, old, value); /* defined in the function that synthesizes ModelPath setter */\n\n    {{ /* post all stored messages */ }}\n    {{# def.postMessages }}\n};\n",
-    del: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_traverse_tree }}\n\nmethod = function del() {\n    {{# def.initVars }}\n\n    {{# def.traverseTree }}\n\n    {{\n        var currNode = it.parsedPath[count];\n        var currProp = currNode.property;       \n    }}\n\n    if (! treeDoesNotExist && m && m.hasOwnProperty && {{# def.wasDefined}}) {\n        var old = m{{# def.currProp }};\n        delete m{{# def.currProp }};\n        {{# def.changeAccessPath }}\n        {{# def.addMsg }} accessPath, type: 'deleted', oldValue: old });\n\n        addTreeChangesMessages(messages, messagesHash,\n            accessPath, old, undefined); /* defined in the function that synthesizes ModelPath setter */\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n};\n",
-    splice: "'use strict';/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n{{# def.include_traverse_tree }}\n\nmethod = function splice(spliceIndex, spliceHowMany) { /* ,... - extra arguments to splice into array */\n    {{# def.initVars }}\n\n    var argsLen = arguments.length;\n    var addItems = argsLen > 2;\n\n    if (addItems) {\n        {{ /* only create model tree if items are inserted in array */ }}\n\n        {{ /* if model is undefined it will be set to an empty array */ }}  \n        var value = [];\n        {{# def.createTree:'splice' }}\n\n        {{? nextNode }}\n            {{\n                var currNode = nextNode;\n                var currProp = currNode.property;\n                var emptyProp = '[]';\n            }}\n\n            {{# def.createTreeStep }}\n        {{?}}\n\n    } else if (spliceHowMany > 0) {\n        {{ /* if items are not inserted, only traverse model tree if items are deleted from array */ }}\n        {{? it.parsedPath.length }}\n            {{# def.traverseTree }}\n\n            {{\n                var currNode = it.parsedPath[count];\n                var currProp = currNode.property;       \n            }}\n\n            {{ /* extra brace closes 'else' in def.traverseTreeStep */ }}\n            {{# def.traverseTreeStep }} }\n        {{?}}\n    }\n\n    {{ /* splice items */ }}\n    if (addItems || (! treeDoesNotExist && m\n            && m.length > spliceIndex ) ) {\n        var oldLength = m.length = m.length || 0;\n\n        arguments[0] = spliceIndex = normalizeSpliceIndex(spliceIndex, m.length);\n\n        {{ /* clone added arguments to prevent same references in linked models */ }}\n        if (addItems)\n            for (var i = 2; i < argsLen; i++)\n                arguments[i] = cloneTree(arguments[i]);\n\n        {{ /* actual splice call */ }}\n        var removed = Array.prototype.splice.apply(m, arguments);\n\n        {{# def.addMsg }} accessPath, type: 'splice',\n                index: spliceIndex, removed: removed, addedCount: addItems ? argsLen - 2 : 0,\n                newValue: m });\n\n        if (removed && removed.length)\n            removed.forEach(function(item, index) {\n                var itemPath = accessPath + '[' + (spliceIndex + index) + ']';\n                {{# def.addMsg }} itemPath, type: 'removed', oldValue: item });\n\n                if (valueIsTree(item))\n                    addMessages(messages, messagesHash, itemPath, item, 'removed', 'oldValue');\n            });\n\n        if (addItems)\n            for (var i = 2; i < argsLen; i++) {\n                var item = arguments[i];\n                var itemPath = accessPath + '[' + (spliceIndex + i - 2) + ']';\n                {{# def.addMsg }} itemPath, type: 'added', newValue: item });\n\n                if (valueIsTree(item))\n                    addMessages(messages, messagesHash, itemPath, item, 'added', 'newValue');\n            }\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n\n    return removed || [];\n}\n"
+    set: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n\n\n/**\n * Template that synthesizes setter for Model and for ModelPath\n */\nmethod = function set(value) {\n    {{# def.initVars:'set' }}\n\n    {{# def.createTree:'set' }}\n\n    {{\n        currNode = nextNode;\n        currProp = currNode && currNode.property;\n    }}\n\n    {{ /* assign value to the last property */ }}\n    {{? currProp }}\n        wasDef = {{# def.wasDefined}};\n        {{# def.changeAccessPath }}\n\n        var old = m{{# def.currProp }};\n\n        {{ /* clone value to prevent same reference in linked models */ }}\n        m{{# def.currProp }} = cloneTree(value);\n    {{?}}\n\n    {{ /* add message related to the last property change */ }}\n    if (! wasDef)\n        {{# def.addMsg }} accessPath, type: 'added',\n                newValue: value });\n    else if (old != value)\n        {{# def.addMsg }} accessPath, type: 'changed',\n                oldValue: old, newValue: value });\n\n    {{ /* add message related to changes in (sub)properties inside removed and assigned value */ }}\n    if (! wasDef || old != value)\n        addTreeChangesMessages(messages, messagesHash,\n            accessPath, old, value); /* defined in the function that synthesizes ModelPath setter */\n\n    {{ /* post all stored messages */ }}\n    {{# def.postMessages }}\n};\n",
+    del: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_traverse_tree }}\n\nmethod = function del() {\n    {{# def.initVars:'del' }}\n\n    {{? it.parsedPath.length }}\n        {{# def.traverseTree }}\n\n        {{\n            var currNode = it.parsedPath[count];\n            var currProp = currNode.property;       \n        }}\n\n        if (! treeDoesNotExist && m && m.hasOwnProperty && {{# def.wasDefined}}) {\n            var old = m{{# def.currProp }};\n            delete m{{# def.currProp }};\n            {{# def.changeAccessPath }}\n            var didDelete = true;\n        }\n    {{??}}\n        if (typeof m != 'undefined') {\n            var old = m;\n            {{# def.modelAccessPrefix }} = undefined;\n            var didDelete = true;\n        }\n    {{?}}\n\n    if (didDelete) {\n        {{# def.addMsg }} accessPath, type: 'deleted', oldValue: old });\n\n        addTreeChangesMessages(messages, messagesHash,\n            accessPath, old, undefined); /* defined in the function that synthesizes ModelPath setter */\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n};\n",
+    splice: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n{{# def.include_traverse_tree }}\n\nmethod = function splice(spliceIndex, spliceHowMany) { /* ,... - extra arguments to splice into array */\n    {{# def.initVars:'splice' }}\n\n    var argsLen = arguments.length;\n    var addItems = argsLen > 2;\n\n    if (addItems) {\n        {{ /* only create model tree if items are inserted in array */ }}\n\n        {{ /* if model is undefined it will be set to an empty array */ }}  \n        var value = [];\n        {{# def.createTree:'splice' }}\n\n        {{? nextNode }}\n            {{\n                var currNode = nextNode;\n                var currProp = currNode.property;\n                var emptyProp = '[]';\n            }}\n\n            {{# def.createTreeStep }}\n        {{?}}\n\n    } else if (spliceHowMany > 0) {\n        {{ /* if items are not inserted, only traverse model tree if items are deleted from array */ }}\n        {{? it.parsedPath.length }}\n            {{# def.traverseTree }}\n\n            {{\n                var currNode = it.parsedPath[count];\n                var currProp = currNode.property;       \n            }}\n\n            {{ /* extra brace closes 'else' in def.traverseTreeStep */ }}\n            {{# def.traverseTreeStep }} }\n        {{?}}\n    }\n\n    {{ /* splice items */ }}\n    if (addItems || (! treeDoesNotExist && m\n            && m.length > spliceIndex ) ) {\n        var oldLength = m.length = m.length || 0;\n\n        arguments[0] = spliceIndex = normalizeSpliceIndex(spliceIndex, m.length);\n\n        {{ /* clone added arguments to prevent same references in linked models */ }}\n        if (addItems)\n            for (var i = 2; i < argsLen; i++)\n                arguments[i] = cloneTree(arguments[i]);\n\n        {{ /* actual splice call */ }}\n        var removed = Array.prototype.splice.apply(m, arguments);\n\n        {{# def.addMsg }} accessPath, type: 'splice',\n                index: spliceIndex, removed: removed, addedCount: addItems ? argsLen - 2 : 0,\n                newValue: m });\n\n        if (removed && removed.length)\n            removed.forEach(function(item, index) {\n                var itemPath = accessPath + '[' + (spliceIndex + index) + ']';\n                {{# def.addMsg }} itemPath, type: 'removed', oldValue: item });\n\n                if (valueIsTree(item))\n                    addMessages(messages, messagesHash, itemPath, item, 'removed', 'oldValue');\n            });\n\n        if (addItems)\n            for (var i = 2; i < argsLen; i++) {\n                var item = arguments[i];\n                var itemPath = accessPath + '[' + (spliceIndex + i - 2) + ']';\n                {{# def.addMsg }} itemPath, type: 'added', newValue: item });\n\n                if (valueIsTree(item))\n                    addMessages(messages, messagesHash, itemPath, item, 'added', 'newValue');\n            }\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n\n    return removed || [];\n}\n"
 };
 
-var include_defines = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts initialization code\n */\n {{## def.initVars:\n    var m = {{# def.modelAccessPrefix }};\n    var messages = [], messagesHash = {};\n    var accessPath = '';\n    var treeDoesNotExist;\n #}}\n\n/**\n * Inserts the beginning of function call to add message to list\n */\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n/**\n * Inserts current property/index for both normal and interpolated properties/indexes \n */\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n/**\n * Inserts condition to test whether normal/interpolated property/index exists \n */\n{{## def.wasDefined: m.hasOwnProperty(\n    {{? currNode.interpolate }}\n        this._args[ {{= currNode.interpolate }} ]\n    {{??}}\n        '{{= it.getPathNodeKey(currNode) }}'\n    {{?}}\n) #}}\n\n\n/**\n * Inserts code to update access path for current property\n * Because of the possibility of interpolated properties, it can't be calculated in template, it can only be calculated during accessor call. \n */\n{{## def.changeAccessPath:\n    accessPath += {{? currNode.interpolate }}\n        {{? currNode.syntax == 'array' }}\n            '[' + this._args[ {{= currNode.interpolate }} ] + ']';\n        {{??}}\n            '.' + this._args[ {{= currNode.interpolate }} ];\n        {{?}}\n    {{??}}\n        '{{= currProp }}';\n    {{?}}\n#}}\n\n\n/**\n * Inserts code to post stored messages\n */\n{{## def.postMessages:\n    /* if (sendingNotifications)\n        logger.error('Model accessor: sending notifications before another notifactions batch is finished'); */\n    sendingNotifications = true;\n\n    messages.forEach(function(msg) {\n        {{# def.modelPostMessageCode }}(msg.path, msg);\n    }, this);\n    if (messages.length)\n        {{# def.modelPostMessageCode }}('finished', { type: 'finished' });\n\n    sendingNotifications = false;\n#}}\n"
+var include_defines = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts initialization code\n */\n {{## def.initVars:method:\n    var m = {{# def.modelAccessPrefix }};\n    var messages = [], messagesHash = {};\n    var accessPath = '';\n    var treeDoesNotExist;\n    /* hack to prevent sending finished events to allow for propagation of batches without splitting them */\n    var inChangeTransaction = getTransactionFlag( {{= method }} );\n #}}\n\n/**\n * Inserts the beginning of function call to add message to list\n */\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n/**\n * Inserts current property/index for both normal and interpolated properties/indexes \n */\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n/**\n * Inserts condition to test whether normal/interpolated property/index exists \n */\n{{## def.wasDefined: m.hasOwnProperty(\n    {{? currNode.interpolate }}\n        this._args[ {{= currNode.interpolate }} ]\n    {{??}}\n        '{{= it.getPathNodeKey(currNode) }}'\n    {{?}}\n) #}}\n\n\n/**\n * Inserts code to update access path for current property\n * Because of the possibility of interpolated properties, it can't be calculated in template, it can only be calculated during accessor call. \n */\n{{## def.changeAccessPath:\n    accessPath += {{? currNode.interpolate }}\n        {{? currNode.syntax == 'array' }}\n            '[' + this._args[ {{= currNode.interpolate }} ] + ']';\n        {{??}}\n            '.' + this._args[ {{= currNode.interpolate }} ];\n        {{?}}\n    {{??}}\n        '{{= currProp }}';\n    {{?}}\n#}}\n\n\n/**\n * Inserts code to post stored messages\n */\n{{## def.postMessages:\n    // if (sendingNotifications)\n    //     logger.error('Model accessor: sending notifications before another notifactions batch is finished');\n    sendingNotifications = true;\n\n    messages.forEach(function(msg) {\n        {{# def.modelPostMessageCode }}(msg.path, msg);\n    }, this);\n    if (messages.length)\n        postTransactionFinished.call( {{# def.internalMessenger }}, inChangeTransaction );\n\n    sendingNotifications = false;\n#}}\n"
     , include_create_tree = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts code to create model tree as neccessary for `set` and `splice` accessors and to add messages to send list if the tree changes.\n */\n{{## def.createTree:method:\n    var wasDef = true;\n    var old = m;\n\n    {{ var emptyProp = it.parsedPath[0] && it.parsedPath[0].empty; }}\n    {{? emptyProp }}\n        {{ /* create top level model if it was not previously defined */ }}\n        if (! m) {\n            m = {{# def.modelAccessPrefix }} = {{= emptyProp }};\n            wasDef = false;\n\n            {{# def.addMsg }} '', type: 'added',\n                  newValue: m });\n        }\n    {{??}}\n        {{? method == 'splice' }}\n            if (! m) {\n        {{?}}\n                m = {{# def.modelAccessPrefix }} = cloneTree(value);\n                wasDef = typeof old != 'undefined';\n        {{? method == 'splice' }}\n            }\n        {{?}}       \n    {{?}}\n\n\n    {{ /* create model tree if it doesn't exist */ }}\n    {{  var modelDataProperty = '';\n        var nextNode = it.parsedPath[0];\n        var count = it.parsedPath.length - 1;\n\n        for (var i = 0; i < count; i++) {\n            var currNode = nextNode;\n            var currProp = currNode.property;\n            nextNode = it.parsedPath[i + 1];\n            var emptyProp = nextNode && nextNode.empty;\n    }}\n\n        {{# def.createTreeStep }}\n\n    {{  } /* for loop */ }}\n#}}\n\n\n/**\n * Inserts code to create one step in the model tree\n */\n{{## def.createTreeStep:\n    {{# def.changeAccessPath }}\n\n    if (! {{# def.wasDefined }}) { \n        {{ /* property does not exist */ }}\n        m = m{{# def.currProp }} = {{= emptyProp }};\n\n        {{# def.addMsg }} accessPath, type: 'added', \n              newValue: m });\n\n    } else if (typeof m{{# def.currProp }} != 'object') {\n        {{ /* property is not object */ }}\n        var old = m{{# def.currProp }};\n        m = m{{# def.currProp }} = {{= emptyProp }};\n\n        {{# def.addMsg }} accessPath, type: 'changed', \n              oldValue: old, newValue: m });\n\n    } else {\n        {{ /* property exists, just traverse down the model tree */ }}\n        m = m{{# def.currProp }};\n    }\n#}}\n"
     , include_traverse_tree = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts code to traverse model tree for `delete` and `splice` accessors.\n */\n{{## def.traverseTree:\n    {{ \n        var count = it.parsedPath.length-1;\n\n        for (var i = 0; i < count; i++) { \n            var currNode = it.parsedPath[i];\n            var currProp = currNode.property;\n    }}\n            {{# def.traverseTreeStep }}\n\n    {{ } /* for loop */\n\n        var i = count;\n        while (i--) { /* closing braces for else's above */\n    }}\n            }\n    {{ } /* while loop */ }}\n#}}\n\n\n/**\n * Inserts code to traverse one step in the model tree\n */\n{{## def.traverseTreeStep:\n    if (! (m && m.hasOwnProperty && {{# def.wasDefined}} ) )\n        treeDoesNotExist = true;\n    else {\n        m = m{{# def.currProp }};\n        {{# def.changeAccessPath }}\n    {{ /* brace from else is not closed on purpose - all braces are closed in while loop */ }}\n#}}\n";
 
@@ -10043,12 +10235,14 @@ var dotDef = {
     include_traverse_tree: include_traverse_tree,
     getPathNodeKey: pathUtils.getPathNodeKey,
     modelAccessPrefix: 'this._model._data',
-    modelPostMessageCode: 'this._model._internalMessenger.postMessage'
+    modelPostMessageCode: 'this._model._internalMessenger.postMessage',
+    internalMessenger: 'this._model._internalMessenger'
 };
 
 var modelDotDef = _(dotDef).clone().extend({
     modelAccessPrefix: 'this._data',
     modelPostMessageCode: 'this._internalMessenger.postMessage',
+    internalMessenger: 'this._internalMessenger'
 })._();
 
 
@@ -10059,8 +10253,10 @@ var synthesizers = _.mapKeys(templates, function(tmpl) {
     return doT.template(tmpl, dotSettings, dotDef); 
 });
 
-var modelSetSynthesizer = doT.template(templates.set, dotSettings, modelDotDef)
-    , modelSpliceSynthesizer = doT.template(templates.splice, dotSettings, modelDotDef);
+
+var modelSynthesizers = _.mapToObject(['set', 'del', 'splice'], function(methodName) {
+    return doT.template(templates[methodName], dotSettings, modelDotDef);
+});
 
 
 /**
@@ -10186,23 +10382,32 @@ function _synthesize(synthesizer, path, parsedPath) {
                 && ! (value instanceof Date)
                 && ! (value instanceof RegExp);
     }
+
+    function addBatchIdsToMessage(msg, batchId, msgId) {
+        _.defineProperties(msg, {
+            __batch_id: batchId,
+            __msg_id: msgId
+        });
+    }
 }
 
 
 /**
  * Exports `synthesize` function with the following:
  *
- * - .modelSet - `set` method for Model
- * - .modelSplice - `splice` method for Model
+ * - .modelMethods.set - `set` method for Model
+ * - .modelMethods.del - `del` method for Model
+ * - .modelMethods.splice - `splice` method for Model
  */
 module.exports = synthesizePathMethods;
 
-_.extend(synthesizePathMethods, {
-    modelSet: _synthesize(modelSetSynthesizer, '', []),
-    modelSplice: _synthesize(modelSpliceSynthesizer, '', [])
+var modelMethods = _.mapKeys(modelSynthesizers, function(synthesizer) {
+    return _synthesize(synthesizer, '', []);
 });
 
-},{"../../util/logger":89,"../model_utils":73,"../path_utils":75,"dot":98,"fs":96,"mol-proto":99}],77:[function(require,module,exports){
+synthesizePathMethods.modelMethods = modelMethods;
+
+},{"../../util/count":82,"../../util/logger":89,"../change_data":68,"../model_utils":73,"../path_utils":75,"dot":98,"fs":96,"mol-proto":99}],77:[function(require,module,exports){
 'use strict';
 
 /**
@@ -10703,6 +10908,7 @@ var domUtils = {
     trimNodeRight: trimNodeRight,
     trimNodeLeft: trimNodeLeft,
     stripHtml: stripHtml,
+    walkTree: walkTree,
 
     treeIndexOf: treeIndexOf,
     insertAtTreeIndex: insertAtTreeIndex
@@ -10960,11 +11166,32 @@ function treeIndexOf(rootEl, el) {
     return index;
 }
 
-
+/**
+ * Retrieves the content of a html string
+ * @param  {String} str Any string
+ * @return {String} returns the string cleaned of any html content.
+ */
 function stripHtml(str) {
     var div = document.createElement('DIV');
     div.innerHTML = str;
     return div.textContent || '';
+}
+
+
+/**
+ * Convenience wrapper for native TreeWalker that automatically walks the tree and calls an iterator function.
+ * This will not iterate the root element.
+ * @param  {HTMLElement} root The containing root element to be walked. Will not be iterated.
+ * @param  {NodeFiler} filter A NodeFilter constant, see https://developer.mozilla.org/en/docs/Web/API/TreeWalker
+ * @param  {Function} iterator A function to be called on each node. Returning 'false' will break.
+ * @param  {Object} context An optional context to passed, defaults to root.
+ */
+function walkTree(root, filter, iterator, context) {
+    var tw = document.createTreeWalker(root, filter);
+    while(tw.nextNode()) {
+        var result = iterator.call(context || root, tw.currentNode);
+        if (result === false) break;
+    }
 }
 
 
@@ -14621,11 +14848,11 @@ function repeat(times) {
  * Function to tap into chained methods and to inspect intermediary result
  *
  * @param {Any} self value that's passed between chained methods
- * @param {Function} func function that will be called with the value
+ * @param {Function} func function that will be called with the value (both as context and as the first parameter)
  * @return {Any}
  */
 function tap(func) {
-    func(this);
+    func.call(this, this);
     return this;
 };
 

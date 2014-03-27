@@ -31,10 +31,6 @@ To run all tests, including browser tests:
 
     grunt tests
 
-There is also html test file (TODO: separate to browser unit tests):
-
-[bind_test.html](https://github.com/MailOnline/milo/blob/master/test_html/bind_test.html)
-
 
 ### Try
 
@@ -98,6 +94,8 @@ Samples/Tutorials
 [Introduction to binding](http://jsfiddle.net/jasoniangreen/63T6V/)
 
 [Introduction to data facet](http://jsfiddle.net/jasoniangreen/xDFda/)
+
+[Introduction to messengers](http://jsfiddle.net/jasoniangreen/5Hy5F/)
 
 [Introduction to models](http://jsfiddle.net/jasoniangreen/225Bf/)
 
@@ -321,3 +319,11 @@ Instead, Milo Components can have __Dom__ facet that includes several convenienc
 __milo__ uses library [__Proto__](https://github.com/MailOnline/proto) that has a grownig collection of utility functions for the manipulation of objects, prototypes, arrays, functions and strings. Please see [its repository](https://github.com/MailOnline/proto) for documentations and reasons behind the decision not to use third-party libraries.
 
 It is bundled together with __milo__ and all its functions are available as properties of `_` object, you don't need to load it separately.
+
+
+Changes log
+-----------
+
+###After 0.1.2###
+
+- List facet now allows multiple items already in DOM, but requires that all Items (components with Item facet) are immediate DOM children. The first item in the DOM is used as a sample for new items.
