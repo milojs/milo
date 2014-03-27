@@ -12,6 +12,7 @@
 
     <script src="http://mailonline.github.io/milo/milo.bundle.js"></script>
 
+
     <!-- Minder is the key to creating reactive connections in milo. We can bind
          the data of components and models together in 1 or 2 way bindings, with
          a variety of options including data transformations, and validation. -->
@@ -19,11 +20,39 @@
     <!-- We'll start by binding an input to a span in a simple 1-way binding -->
     <input ml-bind="[data]:nameInput" /> <span ml-bind="[data]:nameLabel"></span>
 
-    <!-- Then we'll 2-way bind a nested data structure to a milo model -->
-    <div ml-bind="[data, container]:user">
+
+    <!-- Then we'll bind a nested data structure to a milo model. The top
+         level component has data facet so it can be the top of the tree. And it
+         needs the container facet in order to create a scope for its child comps-->
+    <div ml-bind="[data, container]:userProfile">
+        <!-- Notice that the child components have the data facet. This is how
+             nested data propagates up and down the tree. The component names
+             should match the model properties. -->
         <p><strong>First Name:</strong> <span ml-bind="[data]:firstName"></span></p>
         <p><strong>Last Name:</strong> <span ml-bind="[data]:lastName"></span></p>
     </div>
+
+
+    <!-- Then we'll do a 2-way bind. The easiest way show this is with input fields.
+         So let's make two nested components with some inputs in them. -->
+    <div ml-bind="[data, container]:form1">
+        <input ml-bind="[data]:title" placeholder="Title" /><br>
+        <input ml-bind="[data]:desc" placeholder="Description" /><br>
+        <input type="checkbox" ml-bind="[data]:available" />
+    </div>
+
+    <!-- To make things interesting, let's bind these two components through a model.
+         So we can see the contents of the model, we'll print its contents in a
+         simple component here. -->
+    <div ml-bind="[data]:formOut"></div>
+
+    <!-- Here is our second component -->
+    <div ml-bind="[data, container]:form2">
+        <input ml-bind="[data]:title" placeholder="Title" /><br>
+        <input ml-bind="[data]:desc" placeholder="Description" /><br>
+        <input type="checkbox" ml-bind="[data]:available" />
+    </div>
+
 
     <!-- TODO more complex example -->
 
@@ -33,10 +62,17 @@
     //JS
 
         milo(function() {
-            var m = new milo.Model
+            //We'll setup some models and bind our components
+            var userModel = new milo.Model
+                , formModel = new milo.Model
                 , scope = milo.binder()
                 , nameInput = scope.nameInput
-                , nameLabel = scope.nameLabel;
+                , nameLabel = scope.nameLabel
+                , userProfile = scope.userProfile
+                , form1 = scope.form1
+                , form2 = scope.form2
+                , formOut = scope.formOut;
+
 
             // We can establish a milo connection by calling milo.minder and
             // passing in two data sources, and a string which describes the
@@ -48,13 +84,48 @@
             var connection1 = milo.minder(nameInput.data, '->', nameLabel.data);
 
 
-            // var cnct = milo.minder(m, '<->', user.data);
+            // Connection objects returned by milo have the following methods
+            // connection.turnOff() - to stop the connection
+            // connection.turnOn() - to turn it back on
+            // connection.destroy() - to destroy the connection for good
             
-            // m('.firstName').set('Jason'); 
-            // m.set({
-            //     firstName: 'Jason',
-            //     lastName: 'Green'
-            // });
+
+            // We can also bind nested data structures to the dom. Let's setup
+            // another bind our userProfile component to userModel. Being nested
+            // data, we will need to bind one level deeper.
+            var connection2 = milo.minder(userModel, '->>', userProfile.data);
+            
+
+            // Now we can set the model, and the component data, and it's nested
+            // structure of data will be updated.
+            userModel.set({
+                firstName: 'Jason',
+                lastName: 'Green'
+            });
+
+
+            // In two seconds we'll set one of the nested values of the model,
+            // because of the deeper bind, this will propagate to the DOM data.
+            setTimeout(function() {
+                userModel('.lastName').set('Verde');
+            }, 2000);
+
+
+            // Remember we wanted to connect our two form components with a
+            // model in between. For that we'll need two connections.
+            // Both of them are two way and one level deep (two arrows).
+            var formConnect1 = milo.minder(form1.data, '<<->>', formModel);
+            var formConnect2 = milo.minder(formModel, '<<->>', form2.data);
+
+            // So we can see the structure of the model, let's listen to one
+            // level of data changes (the single '*'), and stringify the model
+            // out to our formOut component.
+            formModel.on('*', function(msg, data) {
+                var modelStr = JSON.stringify(formModel.get());
+                formOut.data.set(modelStr);
+            });
+
+
         });
 
     //END JS
