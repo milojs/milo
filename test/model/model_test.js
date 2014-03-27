@@ -1151,7 +1151,7 @@ describe('Model class', function() {
     });
 
 
-    it('should dispatch messages when model is deleted', function() {
+    it('should dispatch messages when model is deleted', function(done) {
         var m = new Model;
         m.set({ name: 'milo', DOB: { year: 1972 } });
 
@@ -1165,6 +1165,7 @@ describe('Model class', function() {
 
         m.del();
 
+        _.defer(function() {
             assert.equal(m.get(), undefined);
             assert.deepEqual(posted,  [
                 { path: '', type: 'deleted', oldValue: { name: 'milo', DOB: { year: 1972 } } },
@@ -1172,6 +1173,8 @@ describe('Model class', function() {
                 { path: '.DOB', type: 'removed', oldValue: { year: 1972 } },
                 { path: '.DOB.year', type: 'removed', oldValue: 1972 }
             ]);
+            done();
+        });
     });
 
 });
