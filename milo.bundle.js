@@ -8993,10 +8993,13 @@ function postTransactionFinished(inChangeTransaction) {
  * @param {Function} callback callback to call when the data is processed
  */
 function changeDataHandler(message, data, callback) {
-    if (! this._changesQueue.length)
-        _.defer(processChangesFunc, this, callback);
+    // if (! this._changesQueue.length)
+    //     _.defer(processChangesFunc, this, callback);
 
-    this._changesQueue.push(data);
+    // this._changesQueue.push(data);
+
+    this._changesQueue = data.changes;
+    _.defer(processChangesFunc, this, callback);
 }
 
 
@@ -9004,7 +9007,7 @@ function changeDataHandler(message, data, callback) {
  * Initializes messages queue used by changeDataHandler
  */
 changeDataHandler.initialize = function() {
-    _.defineProperty(this, '_changesQueue', []);
+    _.defineProperty(this, '_changesQueue', [], _.WRIT);
 };
 
 
@@ -9193,6 +9196,7 @@ function executeMethod(modelPath, data) {
 
 var ConnectorError = require('../util/error').Connector
     , Messenger = require('../messenger')
+    , pathUtils = require('./path_utils')
     , _ = require('mol-proto')
     , logger = require('../util/logger');
 
@@ -9320,121 +9324,116 @@ function Connector$turnOn() {
     var subscriptionPath = this._subscriptionPath =
         new Array(this.depth1 || this.depth2).join('*');
 
+    var subscriptionPattern = pathUtils.createRegexPath(subscriptionPath);
+
     var self = this;
     if (this.depth1)
-        this._link1 = linkDataSource('_link2', this.ds1, this.ds2, subscriptionPath, this.pathTranslation1, this.pathTranslation2, this.dataTranslation1, this.dataValidation1);
+        this._link1 = linkDataSource('_link2', this.ds2, this.ds1, this.pathTranslation1, this.dataTranslation1, this.dataValidation1);
     if (this.depth2)
-        this._link2 = linkDataSource('_link1', this.ds2, this.ds1, subscriptionPath, this.pathTranslation2, this.pathTranslation1, this.dataTranslation2, this.dataValidation2);
+        this._link2 = linkDataSource('_link1', this.ds1, this.ds2, this.pathTranslation2, this.dataTranslation2, this.dataValidation2);
 
     this.isOn = true;
     this.postMessage('turnedon');
 
 
-    function linkDataSource(reverseLink, linkToDS, linkedDS, subscriptionPath, pathTranslation, reversePathTranslation, dataTranslation, dataValidation) {
-        var onData = function onData(message, data) {
-            // store untranslated path
-            var sourcePath = data.path
-                , data = _.clone(data);
+    function linkDataSource(reverseLink, fromDS, toDS, pathTranslation, dataTranslation, dataValidation) {
+        fromDS.on('datachanges', onData);
+        return onData;
 
-            data.source = linkedDS;
-
-            if (data.type == 'finished')
-                return propagateData();
-
-            // translate path
-            if (pathTranslation) {
-                var translatedPath = pathTranslation[data.path];
-                if (translatedPath)
-                    data.path = translatedPath;
-                else {
-                    logger.warn('Connector: data message received that should not have been subscribed to')
-                    return; // no translation -> no dispatch
-                }
+        function onData(message, batch) {
+            var sendData = {
+                changes: [],
+                transaction: batch.transaction
             }
 
-            // translate data
-            if (dataTranslation) {
-                var translate = dataTranslation[sourcePath];
-                if (translate && typeof translate == 'function') {
-                    data.oldValue = translate(data.oldValue);
-                    data.newValue = translate(data.newValue);
-                }
-            }
+            batch.changes.forEach(function(change) {
+                var sourcePath = change.path
+                    , targetPath = translatePath(sourcePath);
 
-            // translate data
-            if (dataValidation) {
-                var validators = dataValidation[sourcePath]
-                    , passedCount = 0
-                    , alreadyFailed = false;
+                if (typeof targetPath == 'undefined') return;
 
-                if (validators)
-                    validators.forEach(callValidator);
-                else
-                    propagateData();
-            } else
-                propagateData();
-
-
-            function callValidator(validator) {
-                validator(data.newValue, function(err, response) {
-                    response.path = sourcePath;
-                    if (! alreadyFailed && (err || response.valid) && ++passedCount == validators.length) {
-                        propagateData();
-                        linkedDS.postMessage('validated', response);
-                    } else if (! response.valid) {
-                        alreadyFailed = true;
-                        linkedDS.postMessage('validated', response);
-                    }
+                var change = _.clone(change);
+                _.extend(change, {
+                    source: fromDS,
+                    path: targetPath
                 });
+
+                translateData(sourcePath, change);
+                validateData(sourcePath, change);
+            });
+
+            // prevent endless loop of updates for 2-way connection
+            if (self[reverseLink]) var callback = subscriptionSwitch;
+
+            // send data change instruction as message
+            toDS.postMessage('changedata', sendData, callback);
+
+
+            function translatePath(sourcePath) {
+                if (pathTranslation) {
+                    var translatedPath = pathTranslation[sourcePath];
+                    if (! translatedPath) return;
+                } else if (! subscriptionPattern.test(sourcePath)) return;
+
+                return translatedPath || sourcePath;
             }
 
-            function propagateData() {
-                // prevent endless loop of updates for 2-way connection
-                if (self[reverseLink])
-                    var callback = subscriptionSwitch;
 
-                // send data change instruction as message
-                linkToDS.postMessage('changedata', data, callback);
+            function translateData(sourcePath, change) {
+                if (dataTranslation) {
+                    var translate = dataTranslation[sourcePath];
+                    if (translate && typeof translate == 'function') {
+                        change.oldValue = translate(change.oldValue);
+                        change.newValue = translate(change.newValue);
+                    }
+                }
             }
+
+             
+            function validateData(sourcePath, change) {
+                if (dataValidation) {
+                    var validators = dataValidation[sourcePath]
+                        , passedCount = 0
+                        , alreadyFailed = false;
+
+                    if (validators)
+                        validators.forEach(callValidator);
+                    else
+                        propagateData(change);
+                } else
+                    propagateData(change);
+
+
+                function callValidator(validator) {
+                    validator(change.newValue, function(err, response) {
+                        response.path = sourcePath;
+                        if (! alreadyFailed && (err || response.valid) && ++passedCount == validators.length) {
+                            propagateData(change);
+                            fromDS.postMessage('validated', response);
+                        } else if (! response.valid) {
+                            alreadyFailed = true;
+                            fromDS.postMessage('validated', response);
+                        }
+                    });
+                }
+            }
+
+
+            function propagateData(change) {
+                sendData.changes.push(change);
+            }
+
 
             function subscriptionSwitch(err, changeFinished) {
                 if (err) return;
-                var onOff = changeFinished ? 'onSync' : 'off';
-                subscribeToDS(linkToDS, onOff, self[reverseLink], subscriptionPath, reversePathTranslation);
+                var onOff = changeFinished ? 'on' : 'off';
+                toDS[onOff]('datachanges', self[reverseLink]);
 
                 var message = changeFinished ? 'changecompleted' : 'changestarted';
-                self.postMessage(message, { source: linkedDS, target: linkToDS });
+                self.postMessage(message, { source: fromDS, target: toDS });
             }
-        };
-
-        subscribeToDS(linkedDS, 'onSync', onData, subscriptionPath, pathTranslation);
-
-        return onData;
+        }
     }
-}
-
-
-/**
- * Subscribes and unsubscribes to/from datasource
- *
- * @private
- * @param {Object} dataSource data source object that has messenger with proxied on/off methods
- * @param {String} onOff 'onSync' or 'off'
- * @param {Function} subscriber
- * @param {String} subscriptionPath only used if there is no path translation
- * @param {Object[String]} pathTranslation paths translation map
- */
-function subscribeToDS(dataSource, onOff, subscriber, subscriptionPath, pathTranslation) {
-    if (! subscriber)
-        return logger.warn('Connector: subscriber is undefined - caused by async messages');
-    if (pathTranslation)
-        _.eachKey(pathTranslation, function(translatedPath, path) {
-            dataSource[onOff](path, subscriber);
-        });
-    else
-        dataSource[onOff](subscriptionPath, subscriber);
-
-    dataSource[onOff]('finished', subscriber);
 }
 
 
@@ -9454,10 +9453,12 @@ function Connector$turnOff() {
     this.postMessage('turnedoff');
 
 
-    function unlinkDataSource(linkedDS, linkName, pathTranslation) {
+    function unlinkDataSource(fromDS, linkName, pathTranslation) {
         if (self[linkName]) {
-            subscribeToDS(linkedDS, 'off', self[linkName], self._subscriptionPath, pathTranslation)
-            // linkedDS.off(self._subscriptionPath, self[linkName]);
+            fromDS[onOff]('datachanges', self[linkName]);
+
+            // subscribeToDS(fromDS, 'off', self[linkName], self._subscriptionPath, pathTranslation);
+            // fromDS.off(self._subscriptionPath, self[linkName]);
             delete self[linkName];
         }
     }
@@ -9476,7 +9477,7 @@ function Connector$destroy() {
     }, this);
 }
 
-},{"../messenger":61,"../util/error":86,"../util/logger":89,"mol-proto":99}],70:[function(require,module,exports){
+},{"../messenger":61,"../util/error":86,"../util/logger":89,"./path_utils":75,"mol-proto":99}],70:[function(require,module,exports){
 'use strict';
 
 var ModelPath = require('./m_path')
@@ -10062,8 +10063,11 @@ function translateToSourceMessage(message) {
  * @return {Object}
  */
 function createInternalData(sourceMessage, message, sourceData) {
-   // TODO return on changedata too???
-   if (message == 'finished') return sourceData;
+    // TODO return on changedata too???
+    if (message == 'finished') return sourceData;
+    // if (message == 'datachanges') {
+    //     sourceData.changes.forEach();
+    // }
     var internalData = _.clone(sourceData);
     var fullPath = internalData.path;
     internalData.fullPath = fullPath;
@@ -10245,7 +10249,7 @@ var templates = {
     splice: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n{{# def.include_traverse_tree }}\n\nmethod = function splice(spliceIndex, spliceHowMany) { /* ,... - extra arguments to splice into array */\n    {{# def.initVars:'splice' }}\n\n    var argsLen = arguments.length;\n    var addItems = argsLen > 2;\n\n    if (addItems) {\n        {{ /* only create model tree if items are inserted in array */ }}\n\n        {{ /* if model is undefined it will be set to an empty array */ }}  \n        var value = [];\n        {{# def.createTree:'splice' }}\n\n        {{? nextNode }}\n            {{\n                var currNode = nextNode;\n                var currProp = currNode.property;\n                var emptyProp = '[]';\n            }}\n\n            {{# def.createTreeStep }}\n        {{?}}\n\n    } else if (spliceHowMany > 0) {\n        {{ /* if items are not inserted, only traverse model tree if items are deleted from array */ }}\n        {{? it.parsedPath.length }}\n            {{# def.traverseTree }}\n\n            {{\n                var currNode = it.parsedPath[count];\n                var currProp = currNode.property;       \n            }}\n\n            {{ /* extra brace closes 'else' in def.traverseTreeStep */ }}\n            {{# def.traverseTreeStep }} }\n        {{?}}\n    }\n\n    {{ /* splice items */ }}\n    if (addItems || (! treeDoesNotExist && m\n            && m.length > spliceIndex ) ) {\n        var oldLength = m.length = m.length || 0;\n\n        arguments[0] = spliceIndex = normalizeSpliceIndex(spliceIndex, m.length);\n\n        {{ /* clone added arguments to prevent same references in linked models */ }}\n        if (addItems)\n            for (var i = 2; i < argsLen; i++)\n                arguments[i] = cloneTree(arguments[i]);\n\n        {{ /* actual splice call */ }}\n        var removed = Array.prototype.splice.apply(m, arguments);\n\n        {{# def.addMsg }} accessPath, type: 'splice',\n                index: spliceIndex, removed: removed, addedCount: addItems ? argsLen - 2 : 0,\n                newValue: m });\n\n        if (removed && removed.length)\n            removed.forEach(function(item, index) {\n                var itemPath = accessPath + '[' + (spliceIndex + index) + ']';\n                {{# def.addMsg }} itemPath, type: 'removed', oldValue: item });\n\n                if (valueIsTree(item))\n                    addMessages(messages, messagesHash, itemPath, item, 'removed', 'oldValue');\n            });\n\n        if (addItems)\n            for (var i = 2; i < argsLen; i++) {\n                var item = arguments[i];\n                var itemPath = accessPath + '[' + (spliceIndex + i - 2) + ']';\n                {{# def.addMsg }} itemPath, type: 'added', newValue: item });\n\n                if (valueIsTree(item))\n                    addMessages(messages, messagesHash, itemPath, item, 'added', 'newValue');\n            }\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n\n    return removed || [];\n}\n"
 };
 
-var include_defines = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts initialization code\n */\n {{## def.initVars:method:\n    var m = {{# def.modelAccessPrefix }};\n    var messages = [], messagesHash = {};\n    var accessPath = '';\n    var treeDoesNotExist;\n    /* hack to prevent sending finished events to allow for propagation of batches without splitting them */\n    var inChangeTransaction = getTransactionFlag( {{= method }} );\n #}}\n\n/**\n * Inserts the beginning of function call to add message to list\n */\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n/**\n * Inserts current property/index for both normal and interpolated properties/indexes \n */\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n/**\n * Inserts condition to test whether normal/interpolated property/index exists \n */\n{{## def.wasDefined: m.hasOwnProperty(\n    {{? currNode.interpolate }}\n        this._args[ {{= currNode.interpolate }} ]\n    {{??}}\n        '{{= it.getPathNodeKey(currNode) }}'\n    {{?}}\n) #}}\n\n\n/**\n * Inserts code to update access path for current property\n * Because of the possibility of interpolated properties, it can't be calculated in template, it can only be calculated during accessor call. \n */\n{{## def.changeAccessPath:\n    accessPath += {{? currNode.interpolate }}\n        {{? currNode.syntax == 'array' }}\n            '[' + this._args[ {{= currNode.interpolate }} ] + ']';\n        {{??}}\n            '.' + this._args[ {{= currNode.interpolate }} ];\n        {{?}}\n    {{??}}\n        '{{= currProp }}';\n    {{?}}\n#}}\n\n\n/**\n * Inserts code to post stored messages\n */\n{{## def.postMessages:\n    // if (sendingNotifications)\n    //     logger.error('Model accessor: sending notifications before another notifactions batch is finished');\n    sendingNotifications = true;\n\n    messages.forEach(function(msg) {\n        {{# def.modelPostMessageCode }}(msg.path, msg);\n    }, this);\n    if (messages.length)\n        postTransactionFinished.call( {{# def.internalMessenger }}, inChangeTransaction );\n\n    sendingNotifications = false;\n#}}\n"
+var include_defines = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts initialization code\n */\n {{## def.initVars:method:\n    var m = {{# def.modelAccessPrefix }};\n    var messages = [], messagesHash = {};\n    var accessPath = '';\n    var treeDoesNotExist;\n    /* hack to prevent sending finished events to allow for propagation of batches without splitting them */\n    var inChangeTransaction = getTransactionFlag( {{= method }} );\n #}}\n\n/**\n * Inserts the beginning of function call to add message to list\n */\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n/**\n * Inserts current property/index for both normal and interpolated properties/indexes \n */\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n/**\n * Inserts condition to test whether normal/interpolated property/index exists \n */\n{{## def.wasDefined: m.hasOwnProperty(\n    {{? currNode.interpolate }}\n        this._args[ {{= currNode.interpolate }} ]\n    {{??}}\n        '{{= it.getPathNodeKey(currNode) }}'\n    {{?}}\n) #}}\n\n\n/**\n * Inserts code to update access path for current property\n * Because of the possibility of interpolated properties, it can't be calculated in template, it can only be calculated during accessor call. \n */\n{{## def.changeAccessPath:\n    accessPath += {{? currNode.interpolate }}\n        {{? currNode.syntax == 'array' }}\n            '[' + this._args[ {{= currNode.interpolate }} ] + ']';\n        {{??}}\n            '.' + this._args[ {{= currNode.interpolate }} ];\n        {{?}}\n    {{??}}\n        '{{= currProp }}';\n    {{?}}\n#}}\n\n\n/**\n * Inserts code to post stored messages\n */\n{{## def.postMessages:\n    if (sendingNotifications)\n        logger.error('Model accessor: sending notifications before another notifactions batch is finished');\n    sendingNotifications = true;\n\n    if (messages.length) {\n        {{# def.modelPostBatchCode }}('datachanges', {\n            changes: messages,\n            transaction: inChangeTransaction\n        }); \n\n        messages.forEach(function(msg) {\n            {{# def.modelPostMessageCode }}(msg.path, msg);\n        }, this);\n        \n        postTransactionFinished.call( {{# def.internalMessenger }}, inChangeTransaction );\n    }\n\n    sendingNotifications = false;\n#}}\n"
     , include_create_tree = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts code to create model tree as neccessary for `set` and `splice` accessors and to add messages to send list if the tree changes.\n */\n{{## def.createTree:method:\n    var wasDef = true;\n    var old = m;\n\n    {{ var emptyProp = it.parsedPath[0] && it.parsedPath[0].empty; }}\n    {{? emptyProp }}\n        {{ /* create top level model if it was not previously defined */ }}\n        if (! m) {\n            m = {{# def.modelAccessPrefix }} = {{= emptyProp }};\n            wasDef = false;\n\n            {{# def.addMsg }} '', type: 'added',\n                  newValue: m });\n        }\n    {{??}}\n        {{? method == 'splice' }}\n            if (! m) {\n        {{?}}\n                m = {{# def.modelAccessPrefix }} = cloneTree(value);\n                wasDef = typeof old != 'undefined';\n        {{? method == 'splice' }}\n            }\n        {{?}}       \n    {{?}}\n\n\n    {{ /* create model tree if it doesn't exist */ }}\n    {{  var modelDataProperty = '';\n        var nextNode = it.parsedPath[0];\n        var count = it.parsedPath.length - 1;\n\n        for (var i = 0; i < count; i++) {\n            var currNode = nextNode;\n            var currProp = currNode.property;\n            nextNode = it.parsedPath[i + 1];\n            var emptyProp = nextNode && nextNode.empty;\n    }}\n\n        {{# def.createTreeStep }}\n\n    {{  } /* for loop */ }}\n#}}\n\n\n/**\n * Inserts code to create one step in the model tree\n */\n{{## def.createTreeStep:\n    {{# def.changeAccessPath }}\n\n    if (! {{# def.wasDefined }}) { \n        {{ /* property does not exist */ }}\n        m = m{{# def.currProp }} = {{= emptyProp }};\n\n        {{# def.addMsg }} accessPath, type: 'added', \n              newValue: m });\n\n    } else if (typeof m{{# def.currProp }} != 'object') {\n        {{ /* property is not object */ }}\n        var old = m{{# def.currProp }};\n        m = m{{# def.currProp }} = {{= emptyProp }};\n\n        {{# def.addMsg }} accessPath, type: 'changed', \n              oldValue: old, newValue: m });\n\n    } else {\n        {{ /* property exists, just traverse down the model tree */ }}\n        m = m{{# def.currProp }};\n    }\n#}}\n"
     , include_traverse_tree = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts code to traverse model tree for `delete` and `splice` accessors.\n */\n{{## def.traverseTree:\n    {{ \n        var count = it.parsedPath.length-1;\n\n        for (var i = 0; i < count; i++) { \n            var currNode = it.parsedPath[i];\n            var currProp = currNode.property;\n    }}\n            {{# def.traverseTreeStep }}\n\n    {{ } /* for loop */\n\n        var i = count;\n        while (i--) { /* closing braces for else's above */\n    }}\n            }\n    {{ } /* while loop */ }}\n#}}\n\n\n/**\n * Inserts code to traverse one step in the model tree\n */\n{{## def.traverseTreeStep:\n    if (! (m && m.hasOwnProperty && {{# def.wasDefined}} ) )\n        treeDoesNotExist = true;\n    else {\n        m = m{{# def.currProp }};\n        {{# def.changeAccessPath }}\n    {{ /* brace from else is not closed on purpose - all braces are closed in while loop */ }}\n#}}\n";
 
@@ -10256,12 +10260,14 @@ var dotDef = {
     getPathNodeKey: pathUtils.getPathNodeKey,
     modelAccessPrefix: 'this._model._data',
     modelPostMessageCode: 'this._model._internalMessenger.postMessage',
+    modelPostBatchCode: 'this._model.postMessageSync',
     internalMessenger: 'this._model._internalMessenger'
 };
 
 var modelDotDef = _(dotDef).clone().extend({
     modelAccessPrefix: 'this._data',
     modelPostMessageCode: 'this._internalMessenger.postMessage',
+    modelPostBatchCode: 'this.postMessageSync',
     internalMessenger: 'this._internalMessenger'
 })._();
 
