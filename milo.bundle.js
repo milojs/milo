@@ -2485,7 +2485,7 @@ function Data$_set(value) {
 
 function _postFinishedMessage() {
     this.off('', onDataChange);
-    this.postMessageSync('', { type: 'finished' });
+    this.postMessage('', { type: 'finished' });
     this.onSync('', onDataChange);
 }
 
@@ -4851,6 +4851,7 @@ _.extendProto(DOMEventsSource, {
     destroy: DOMEventsSource$destroy,
     addSourceSubscriber: _.partial(sourceSubscriberMethod, 'addEventListener'),
     removeSourceSubscriber: _.partial(sourceSubscriberMethod, 'removeEventListener'),
+    postMessage: DOMEventsSource$postMessage,
     trigger: trigger,
 
     // class specific methods
@@ -4903,6 +4904,11 @@ function handleEvent(event) {
         event += useCapturePostfix;
 
     this.dispatchMessage(event.type, event);
+}
+
+
+function DOMEventsSource$postMessage(message, data) {
+    this.messenger.postMessageSync(message, data);
 }
 
 
@@ -7520,6 +7526,7 @@ _.extendProto(Messenger, {
     offMessages: offMessages,
     offAll: Messenger$offAll,
     postMessage: postMessage,
+    postMessageSync: postMessageSync,
     getSubscribers: getSubscribers,
     getMessageSource: getMessageSource,
     _chooseSubscribersHash: _chooseSubscribersHash,
@@ -7545,6 +7552,7 @@ Messenger.defaultMethods = {
     onMessages: 'onMessages',
     offMessages: 'offMessages',
     postMessage: 'postMessage',
+    postMessageSync: 'postMessageSync',
     getSubscribers: 'getSubscribers'
 };
 
@@ -8470,6 +8478,7 @@ _.extendProto(MessageSource, {
     onSubscriberAdded: onSubscriberAdded,
     onSubscriberRemoved: onSubscriberRemoved, 
     dispatchMessage: dispatchMessage,
+    postMessage: postMessage,
     _prepareMessengerAPI: _prepareMessengerAPI,
 
     // Methods below must be implemented in subclass
@@ -8581,9 +8590,20 @@ function dispatchMessage(sourceMessage, sourceData) {
 
             var shouldDispatch = api.filterSourceMessage(sourceMessage, message, internalData);
             if (shouldDispatch) 
-                this.messenger.postMessage(message, internalData);      
+                this.postMessage(message, internalData);      
             
         }, this);
+}
+
+
+/**
+ * Posts message on the messenger. This method is separated so specific message sources can make message dispatch synchronous by using `postMessageSync`
+ * 
+ * @param  {String} message
+ * @param  {Object} data
+ */
+function postMessage(message, data) {
+    this.messenger.postMessage(message, data);
 }
 
 },{"../abstract/mixin":3,"../util/check":80,"../util/error":86,"../util/logger":89,"./m_api":62,"mol-proto":99}],65:[function(require,module,exports){
@@ -8958,7 +8978,7 @@ function getTransactionFlag(func) {
  */
 function postTransactionFinished(inChangeTransaction) {
     if (! inChangeTransaction)
-        this.postMessageSync('finished', { type: 'finished' });
+        this.postMessage('finished', { type: 'finished' });
 }
 
 
