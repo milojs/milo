@@ -2,7 +2,8 @@
 
 
 var Model = require('../../lib/model')
-    , assert = require('assert');
+    , assert = require('assert')
+    , _ = require('mol-proto');
 
 
 describe('Model class', function() {
@@ -144,7 +145,7 @@ describe('Model class', function() {
     });
 
 
-    it('should postMessage on model when properties are added', function() {
+    it('should postMessage on model when properties are added', function(done) {
         var m = new Model
             , posted = {};
 
@@ -156,6 +157,7 @@ describe('Model class', function() {
 
         m('.list[0].info.name').set('Jason');
 
+        _.defer(function() {
             assert.deepEqual(posted, {
                 '': { path: '', type: 'added', newValue: { list: [ { info: { name: 'Jason' } } ] } },
                 '.list': { path: '.list', type: 'added', newValue: [ { info: { name: 'Jason' } } ] },
@@ -164,30 +166,37 @@ describe('Model class', function() {
                 '.list[0].info.name': { path: '.list[0].info.name', type: 'added', newValue: 'Jason' }
             });
 
-        var posted = {}
+            posted = {}
 
-        m('.list[0].info.name').set('Evgeny');
-        m('.list[0].info.surname').set('Poberezkin');
+            m('.list[0].info.name').set('Evgeny');
+            m('.list[0].info.surname').set('Poberezkin');
 
-            assert.deepEqual(posted, {
-                '.list[0].info.name': { path: '.list[0].info.name', type: 'changed', oldValue: 'Jason', newValue: 'Evgeny' },
-                '.list[0].info.surname': { path: '.list[0].info.surname', type: 'added', newValue: 'Poberezkin' }
-            }, 'should post messages on model when property changed');
+            _.defer(function() {
+                assert.deepEqual(posted, {
+                    '.list[0].info.name': { path: '.list[0].info.name', type: 'changed', oldValue: 'Jason', newValue: 'Evgeny' },
+                    '.list[0].info.surname': { path: '.list[0].info.surname', type: 'added', newValue: 'Poberezkin' }
+                }, 'should post messages on model when property changed');
 
-        var posted = {}
+                posted = {}
 
-        m('.list[0].extra[0]').set('extra0');
-        m('.list[0].extra[1]').set('extra1');
+                m('.list[0].extra[0]').set('extra0');
+                m('.list[0].extra[1]').set('extra1');
 
-            assert.deepEqual(posted, {
-                '.list[0].extra': { path: '.list[0].extra', type: 'added', newValue: ['extra0', 'extra1'] },
-                '.list[0].extra[0]': { path: '.list[0].extra[0]', type: 'added', newValue: 'extra0' },
-                '.list[0].extra[1]': { path: '.list[0].extra[1]', type: 'added', newValue: 'extra1' }
-            }, 'should not post messages on model when property traversed');
+                _.defer(function() {
+                    assert.deepEqual(posted, {
+                        '.list[0].extra': { path: '.list[0].extra', type: 'added', newValue: ['extra0', 'extra1'] },
+                        '.list[0].extra[0]': { path: '.list[0].extra[0]', type: 'added', newValue: 'extra0' },
+                        '.list[0].extra[1]': { path: '.list[0].extra[1]', type: 'added', newValue: 'extra1' }
+                    }, 'should not post messages on model when property traversed');
+
+                    done();
+                });
+            });
+        });
     });
 
 
-    it('should allow message subsciption on model path', function() {
+    it('should allow message subsciption on model path', function(done) {
         var m = new Model()
             , posted = {};
 
@@ -200,16 +209,17 @@ describe('Model class', function() {
 
         m('.list[0].info.name').set('Jason');
 
+        _.defer(function() {
             assert.deepEqual(posted, {
                 '': { path: '', fullPath: '.list', type: 'added', newValue: [ { info: { name: 'Jason' } } ] },
             }, 'should post messages on model when property added');
 
-
-        // m('.list').off('', postLogger);
+            done();
+        });
     });
 
 
-    it('should post message AFTER model was changed', function() {
+    it('should post message AFTER model was changed', function(done) {
         var m = new Model()
             , posted = {};
 
@@ -224,8 +234,11 @@ describe('Model class', function() {
 
         m('.list[0].info.name').set('Jason');
 
-        assert.deepEqual(posted, { '': { path: '', fullPath: '.list[0].info.name', type: 'added', newValue: 'Jason' } },
-            'should correctly post message');
+        _.defer(function() {
+            assert.deepEqual(posted, { '': { path: '', fullPath: '.list[0].info.name', type: 'added', newValue: 'Jason' } },
+                'should correctly post message');
+            done();
+        });
     });
 
 
@@ -243,7 +256,7 @@ describe('Model class', function() {
     });
 
 
-    it('should postMessage when model is set', function() {
+    it('should postMessage when model is set', function(done) {
         var m = new Model
             , posted = {};
 
@@ -258,15 +271,19 @@ describe('Model class', function() {
 
             assert.deepEqual(m.get(), { info: { name: 'Milo' } });
 
-            assert.deepEqual(posted, {
-                '': { path: '', type: 'added', newValue: { info: { name: 'Milo' } } },
-                '.info': { path: '.info', type: 'added', newValue: { name: 'Milo' } },
-                '.info.name': { path: '.info.name', type: 'added', newValue: 'Milo' } 
+            _.defer(function() {
+                assert.deepEqual(posted, {
+                    '': { path: '', type: 'added', newValue: { info: { name: 'Milo' } } },
+                    '.info': { path: '.info', type: 'added', newValue: { name: 'Milo' } },
+                    '.info.name': { path: '.info.name', type: 'added', newValue: 'Milo' } 
+                });
+
+                done();
             });
     });
 
 
-    it('should post "removed" messages for all properties of subtrees replaced with scalar values', function() {
+    it('should post "removed" messages for all properties of subtrees replaced with scalar values', function(done) {
         var m = new Model()
             , posted = {};
 
@@ -282,16 +299,18 @@ describe('Model class', function() {
 
         m('[0][1]').set('subtree removed');
 
+        _.defer(function() {
             assert.deepEqual(posted, {
                 '[0][1]': { path: '[0][1]', type: 'changed', oldValue: { info: { name: 'Jason' } }, newValue: 'subtree removed' },
                 '[0][1].info':  { path: '[0][1].info', type: 'removed', oldValue: { name: 'Jason' } },
                 '[0][1].info.name': { path: '[0][1].info.name', type: 'removed', oldValue: 'Jason' }
             });
-
+            done();
+        });
     });
 
 
-    it('should post "added" messages for all properties of subtrees that replace scalar values', function() {
+    it('should post "added" messages for all properties of subtrees that replace scalar values', function(done) {
         var m = new Model()
             , posted = {};
 
@@ -314,22 +333,31 @@ describe('Model class', function() {
 
         m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
 
+        _.defer(function() {
             assert.deepEqual(posted, shouldBePosted);
 
-        m('[0][1]').set('scalar value');
-        posted = {};
-        m('[0][1].info.name').set('Jason');
+            m('[0][1]').set('scalar value');
 
-        var shouldBePosted = {
-            '[0][1]': { path: '[0][1]', type: 'changed', oldValue: 'scalar value', newValue: { info: { name: 'Jason' } } },
-            '[0][1].info':  { path: '[0][1].info', type: 'added', newValue: { name: 'Jason' } },
-            '[0][1].info.name': { path: '[0][1].info.name', type: 'added', newValue: 'Jason' }
-        }
-            assert.deepEqual(posted, shouldBePosted);
+            _.defer(function() {
+                posted = {};
+                m('[0][1].info.name').set('Jason');
+
+                shouldBePosted = {
+                    '[0][1]': { path: '[0][1]', type: 'changed', oldValue: 'scalar value', newValue: { info: { name: 'Jason' } } },
+                    '[0][1].info':  { path: '[0][1].info', type: 'added', newValue: { name: 'Jason' } },
+                    '[0][1].info.name': { path: '[0][1].info.name', type: 'added', newValue: 'Jason' }
+                }
+
+                _.defer(function() {
+                    assert.deepEqual(posted, shouldBePosted);
+                    done();
+                });
+            });
+        });
     });
 
 
-    it('should post "added" messages for all properties of subtrees that are set for previously undefined properties', function() {
+    it('should post "added" messages for all properties of subtrees that are set for previously undefined properties', function(done) {
         var m = new Model()
             , posted = {};
 
@@ -351,11 +379,14 @@ describe('Model class', function() {
 
         m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
 
+        _.defer(function() {
             assert.deepEqual(posted, shouldBePosted);
+            done();
+        });
     });
 
 
-    it('should post "changed" messages for all properties of subtrees that replace subtrees', function() {
+    it('should post "changed" messages for all properties of subtrees that replace subtrees', function(done) {
         var m = new Model()
             , posted = {};
 
@@ -407,11 +438,14 @@ describe('Model class', function() {
 
         m('[0][1]').set({ info: { name: 'Evgeny', surname: 'Poberezkin', extra: { data: 1 } } });
 
+        _.defer(function() {
             assert.deepEqual(posted, shouldBePosted);
+            done();
+        });
     });
 
 
-    it('should support subscriptions with "*" syntax for paths', function() {
+    it('should support subscriptions with "*" syntax for paths', function(done) {
         var m = new Model()
             , posted = {};
 
@@ -423,116 +457,126 @@ describe('Model class', function() {
 
         m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
 
+        _.defer(function() {
             assert.deepEqual(posted, {
                 '[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] },
                 '[0][1]': { path: '[0][1]', type: 'added', newValue: { info: { name: 'Jason', surname: 'Green' } } }
             });
 
 
-        var m = new Model()
-            , posted = {};
+            var m = new Model();
+            posted = {};
 
-        // should dispatch property change up to one level deep for property syntax only
-        m.on('[0].*', function(message, data) {
-            if (data.type == 'finished') return;
-            posted[data.path] = data;
-        }); 
+            // should dispatch property change up to one level deep for property syntax only
+            m.on('[0].*', function(message, data) {
+                if (data.type == 'finished') return;
+                posted[data.path] = data;
+            }); 
 
-        m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
+            m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
 
-            assert.deepEqual(posted, {
-                '[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] }
+            _.defer(function() {
+                assert.deepEqual(posted, {
+                    '[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] }
+                });
+
+                var m = new Model();
+                posted = {};
+
+                // should dispatch property change up to one level deep for array syntax only
+                m.on('[0][*]', function(message, data) {
+                    if (data.type == 'finished') return;
+                    posted[data.path] = data;
+                }); 
+
+                m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
+
+                _.defer(function() {
+                    assert.deepEqual(posted, {
+                        '[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] },
+                        '[0][1]': { path: '[0][1]', type: 'added', newValue: { info: { name: 'Jason', surname: 'Green' } } }
+                    });
+
+                    var m = new Model()
+                    posted = {};
+
+                    // should dispatch property change up to two levels deep for both array and property syntax
+                    m.on('[0]**', function(message, data) {
+                        if (data.type == 'finished') return;
+                        posted[data.path] = data;
+                    }); 
+
+                    m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
+
+                    _.defer(function() {
+                        assert.deepEqual(posted, {
+                            '[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] },
+                            '[0][1]': { path: '[0][1]', type: 'added', newValue: { info: { name: 'Jason', surname: 'Green' } } },
+                            '[0][1].info': { path: '[0][1].info', type: 'added', newValue: { name: 'Jason', surname: 'Green' } }
+                        });
+
+                        var m = new Model();
+                        posted = {};
+
+                        // should dispatch property change up to two levels deep for strict array/property syntax
+                        m.on('[0][*].*', function(message, data) {
+                            if (data.type == 'finished') return;
+                            posted[data.path] = data;
+                        }); 
+
+                        m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
+
+                        _.defer(function() {
+                            assert.deepEqual(posted, {
+                                '[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] },
+                                '[0][1]': { path: '[0][1]', type: 'added', newValue: { info: { name: 'Jason', surname: 'Green' } } },
+                                '[0][1].info': { path: '[0][1].info', type: 'added', newValue: { name: 'Jason', surname: 'Green' } }
+                            });
+
+                            var m = new Model();
+                            posted = {};
+
+                            // should NOT dispatch property change up to two levels deep for incorrect strict array/property syntax
+                            m.on('[0].*.*', function(message, data) {
+                                if (data.type == 'finished') return;
+                                posted[data.path] = data;
+                            }); 
+
+                            m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
+
+                            _.defer(function() {
+                                assert.deepEqual(posted, {
+                                    '[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] }
+                                });
+
+                                var m = new Model();
+                                posted = {};
+
+                                // should dispatch property change up to two levels deep for both array and property syntax
+                                m.on('[0]***', function(message, data) {
+                                    if (data.type == 'finished') return;
+                                    posted[data.path] = data;
+                                }); 
+
+                                m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
+
+                                _.defer(function() {
+                                    assert.deepEqual(posted, {
+                                        '[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] },
+                                        '[0][1]': { path: '[0][1]', type: 'added', newValue: { info: { name: 'Jason', surname: 'Green' } } },
+                                        '[0][1].info': { path: '[0][1].info', type: 'added', newValue: { name: 'Jason', surname: 'Green' } },
+                                        '[0][1].info.name': { path: '[0][1].info.name', type: 'added', newValue: 'Jason' },
+                                        '[0][1].info.surname': { path: '[0][1].info.surname', type: 'added', newValue: 'Green' }
+                                    });
+
+                                    done();
+                                });
+                            });
+                        });
+                    });
+                });
             });
-
-        var m = new Model()
-            , posted = {};
-
-
-        // should dispatch property change up to one level deep for array syntax only
-        m.on('[0][*]', function(message, data) {
-            if (data.type == 'finished') return;
-            posted[data.path] = data;
-        }); 
-
-        m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
-
-            assert.deepEqual(posted, {
-                '[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] },
-                '[0][1]': { path: '[0][1]', type: 'added', newValue: { info: { name: 'Jason', surname: 'Green' } } }
-            });
-
-
-        var m = new Model()
-            , posted = {};
-
-
-        // should dispatch property change up to two levels deep for both array and property syntax
-        m.on('[0]**', function(message, data) {
-            if (data.type == 'finished') return;
-            posted[data.path] = data;
-        }); 
-
-        m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
-
-            assert.deepEqual(posted, {
-                '[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] },
-                '[0][1]': { path: '[0][1]', type: 'added', newValue: { info: { name: 'Jason', surname: 'Green' } } },
-                '[0][1].info': { path: '[0][1].info', type: 'added', newValue: { name: 'Jason', surname: 'Green' } }
-            });
-
-
-        var m = new Model()
-            , posted = {};
-
-        // should dispatch property change up to two levels deep for strict array/property syntax
-        m.on('[0][*].*', function(message, data) {
-            if (data.type == 'finished') return;
-            posted[data.path] = data;
-        }); 
-
-        m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
-
-            assert.deepEqual(posted, {
-                '[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] },
-                '[0][1]': { path: '[0][1]', type: 'added', newValue: { info: { name: 'Jason', surname: 'Green' } } },
-                '[0][1].info': { path: '[0][1].info', type: 'added', newValue: { name: 'Jason', surname: 'Green' } }
-            });
-
-
-        var m = new Model()
-            , posted = {};
-
-        // should NOT dispatch property change up to two levels deep for incorrect strict array/property syntax
-        m.on('[0].*.*', function(message, data) {
-            if (data.type == 'finished') return;
-            posted[data.path] = data;
-        }); 
-
-        m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
-
-            assert.deepEqual(posted, {
-                '[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] }
-            });
-
-
-        var m = new Model()
-            , posted = {};
-
-        // should dispatch property change up to two levels deep for both array and property syntax
-        m.on('[0]***', function(message, data) {
-            if (data.type == 'finished') return;
-            posted[data.path] = data;
-        }); 
-
-        m('[0][1]').set({ info: { name: 'Jason', surname: 'Green' } });
-
-            assert.deepEqual(posted, {
-                '[0]': { path: '[0]', type: 'added', newValue: [ , { info: { name: 'Jason', surname: 'Green' } } ] },
-                '[0][1]': { path: '[0][1]', type: 'added', newValue: { info: { name: 'Jason', surname: 'Green' } } },
-                '[0][1].info': { path: '[0][1].info', type: 'added', newValue: { name: 'Jason', surname: 'Green' } },
-                '[0][1].info.name': { path: '[0][1].info.name', type: 'added', newValue: 'Jason' },
-                '[0][1].info.surname': { path: '[0][1].info.surname', type: 'added', newValue: 'Green' }
-            });
+        });
     });
 
 
@@ -591,7 +635,7 @@ describe('Model class', function() {
     });
 
 
-    it('should support subscriptions for path with interpolation', function() {
+    it('should support subscriptions for path with interpolation', function(done) {
         var m = new Model;
         var posted = [];
 
@@ -603,7 +647,10 @@ describe('Model class', function() {
 
         m('.info.name').set('milo');
 
-        assert.deepEqual(posted, [ { path: '', type: 'added', newValue: 'milo', fullPath: '.info.name' } ]);
+        _.defer(function() {
+            assert.deepEqual(posted, [ { path: '', type: 'added', newValue: 'milo', fullPath: '.info.name' } ]);
+            done();
+        });
     });
 
 
@@ -639,7 +686,7 @@ describe('Model class', function() {
     });
 
 
-    it('should define "push" instance method of Model and of ModelPath', function() {
+    it('should define "push" instance method of Model and of ModelPath', function(done) {
         var m = new Model
             , posted = {};
 
@@ -654,6 +701,7 @@ describe('Model class', function() {
 
             assert.deepEqual(m._data, [ { name: 'Milo' }, { name: 'Jason', DOB: { year: 1982 } } ]);
 
+        _.defer(function() {
             assert.deepEqual(posted, {
                 '': { path: '', type: 'splice', index: 0, removed: [], addedCount: 2,
                         newValue: [ { name: 'Milo' }, { name: 'Jason', DOB: { year: 1982 } } ] },
@@ -666,12 +714,15 @@ describe('Model class', function() {
             });
 
 
-        var m = new Model;
+            var m = new Model;
 
-        m('.list').push({ name: 'Milo' });
-        m('.list').push({ name: 'Jason' });
+            m('.list').push({ name: 'Milo' });
+            m('.list').push({ name: 'Jason' });
 
-            assert.deepEqual(m._data, { list: [ { name: 'Milo' }, { name: 'Jason'} ] });
+                assert.deepEqual(m._data, { list: [ { name: 'Milo' }, { name: 'Jason'} ] });
+
+            done();
+        });
     });
 
 
@@ -711,7 +762,7 @@ describe('Model class', function() {
     });
 
 
-    it('should post "deleted" message when property is deleted', function() {
+    it('should post "deleted" message when property is deleted', function(done) {
         var m = new Model({ list: [ , { name: 'Milo' } ] });
 
             assert(m._data.list[1].hasOwnProperty('name'));
@@ -725,13 +776,16 @@ describe('Model class', function() {
 
         m('.list[$1].$2', 1, 'name').del();
 
+        _.defer(function() {
             assert.deepEqual(posted, {
                 '.list[1].name': { path: '.list[1].name', type: 'deleted', oldValue: 'Milo' }
             });
+            done();
+        });
     });
 
 
-    it('should post "removed" message for subproperties when property-object is deleted', function() {
+    it('should post "removed" message for subproperties when property-object is deleted', function(done) {
         var m = new Model({ list: [ { info: { name: 'Milo', test: 1 } } ] });
 
             assert(m._data.list[0].hasOwnProperty('info'));
@@ -745,6 +799,7 @@ describe('Model class', function() {
 
         m('.list[$1]', 0).del();
 
+        _.defer(function() {
             assert.deepEqual(posted, {
                 '.list[0]': { path: '.list[0]', type: 'deleted',
                               oldValue: { info: { name: 'Milo', test: 1} } },
@@ -755,10 +810,13 @@ describe('Model class', function() {
                 '.list[0].info.test': { path: '.list[0].info.test', type: 'removed',
                               oldValue: 1 },
             });
+
+            done();
+        });
     });
 
 
-    it('should define "splice" instance method for Model and ModelPath', function() {
+    it('should define "splice" instance method for Model and ModelPath', function(done) {
         var m = new Model;
         var posted = [];
 
@@ -771,6 +829,8 @@ describe('Model class', function() {
 
             assert.deepEqual(m._data, [ { test: 'item1' }, 'item2']);
             assert.deepEqual(removed, []);
+
+        _.defer(function() {
             assert.deepEqual(posted, [
                 { path: '', type: 'splice', index: 0, removed: [], addedCount: 2,
                         newValue: [ { test: 'item1' }, 'item2'] },
@@ -779,83 +839,95 @@ describe('Model class', function() {
                 { path: '[1]', type: 'added', newValue: 'item2' }
             ]);
 
-        m._data = { 0: 'item1', 1: 'item2', length: 2 };
-        posted = [];
+            m._data = { 0: 'item1', 1: 'item2', length: 2 };
+            posted = [];
 
-        removed = m.splice(0, 1, 'item3', 'item4');
+            removed = m.splice(0, 1, 'item3', 'item4');
 
-            assert.deepEqual(m._data, { 0: 'item3', 1: 'item4', 2: 'item2', length: 3 });
-            assert.deepEqual(removed, ['item1']);
-            assert.deepEqual(posted, [
-                { path: '', type: 'splice', index: 0, removed: [ 'item1' ], addedCount: 2,
-                        newValue: { 0: 'item3', 1: 'item4', 2: 'item2', length: 3 } },
-                { path: '[0]', type: 'removed', oldValue: 'item1' },
-                { path: '[0]', type: 'added', newValue: 'item3' },
-                { path: '[1]', type: 'added', newValue: 'item4' }
-            ]);
+                assert.deepEqual(m._data, { 0: 'item3', 1: 'item4', 2: 'item2', length: 3 });
+                assert.deepEqual(removed, ['item1']);
 
-        m._data = undefined;
-        posted = [];
+            _.defer(function() {
+                assert.deepEqual(posted, [
+                    { path: '', type: 'splice', index: 0, removed: [ 'item1' ], addedCount: 2,
+                            newValue: { 0: 'item3', 1: 'item4', 2: 'item2', length: 3 } },
+                    { path: '[0]', type: 'removed', oldValue: 'item1' },
+                    { path: '[0]', type: 'added', newValue: 'item3' },
+                    { path: '[1]', type: 'added', newValue: 'item4' }
+                ]);
 
-        removed = m('.list').splice(2, 1);
+                m._data = undefined;
+                posted = [];
 
-            assert.equal(m._data, undefined);
-            assert.deepEqual(removed, []);
-            assert.deepEqual(posted, []);
+                removed = m('.list').splice(2, 1);
 
-        removed = m('.info[0].list').splice(0, 0, 'item1', 'item2');
+                    assert.equal(m._data, undefined);
+                    assert.deepEqual(removed, []);
 
-            assert.deepEqual(m._data, { info: [ { list: ['item1', 'item2'] } ] });
-            assert.deepEqual(removed, []);
-            assert.deepEqual(posted, [
-                { path: '', type: 'added', newValue: { info: [ { list: ['item1', 'item2'] } ] } },
-                { path: '.info', type: 'added', newValue: [ { list: ['item1', 'item2'] } ] },
-                { path: '.info[0]', type: 'added', newValue: { list: ['item1', 'item2'] } },
-                { path: '.info[0].list', type: 'added', newValue: [ 'item1', 'item2' ] },
-                { path: '.info[0].list', type: 'splice', index: 0, removed: [], addedCount: 2,
-                        newValue: ['item1', 'item2'] },
-                { path: '.info[0].list[0]', type: 'added', newValue: 'item1' },
-                { path: '.info[0].list[1]', type: 'added', newValue: 'item2' }
-            ]);
+                _.defer(function() {
+                    assert.deepEqual(posted, []);
 
-        var m = new Model;
+                    removed = m('.info[0].list').splice(0, 0, 'item1', 'item2');
 
-        removed = m('.list').splice(2, 0, 'item1', 'item2');
+                        assert.deepEqual(m._data, { info: [ { list: ['item1', 'item2'] } ] });
+                        assert.deepEqual(removed, []);
+                        
+                    _.defer(function() {
+                        assert.deepEqual(posted, [
+                            { path: '', type: 'added', newValue: { info: [ { list: ['item1', 'item2'] } ] } },
+                            { path: '.info', type: 'added', newValue: [ { list: ['item1', 'item2'] } ] },
+                            { path: '.info[0]', type: 'added', newValue: { list: ['item1', 'item2'] } },
+                            { path: '.info[0].list', type: 'added', newValue: [ 'item1', 'item2' ] },
+                            { path: '.info[0].list', type: 'splice', index: 0, removed: [], addedCount: 2,
+                                    newValue: ['item1', 'item2'] },
+                            { path: '.info[0].list[0]', type: 'added', newValue: 'item1' },
+                            { path: '.info[0].list[1]', type: 'added', newValue: 'item2' }
+                        ]);
 
-            assert.deepEqual(m._data, { list: ['item1', 'item2'] });
-            assert.deepEqual(removed, []);
+                        var m = new Model;
 
-        // samples from Mozilla site
-        m = new Model([ { fish: ['angel', 'clown', 'mandarin', 'surgeon'] } ]);
+                        removed = m('.list').splice(2, 0, 'item1', 'item2');
 
-        removed = m('[0].fish').splice(2, 0, "drum");
+                            assert.deepEqual(m._data, { list: ['item1', 'item2'] });
+                            assert.deepEqual(removed, []);
 
-            assert.deepEqual(m._data, [ { fish: ['angel', 'clown', 'drum', 'mandarin', 'surgeon'] } ]);
-            assert.deepEqual(removed, []);
+                        // samples from Mozilla site
+                        m = new Model([ { fish: ['angel', 'clown', 'mandarin', 'surgeon'] } ]);
 
-        removed = m('[0].fish').splice(3, 1);
+                        removed = m('[0].fish').splice(2, 0, "drum");
 
-            assert.deepEqual(m._data, [ { fish: ['angel', 'clown', 'drum', 'surgeon'] } ]);
-            assert.deepEqual(removed, ['mandarin']);
+                            assert.deepEqual(m._data, [ { fish: ['angel', 'clown', 'drum', 'mandarin', 'surgeon'] } ]);
+                            assert.deepEqual(removed, []);
 
-        removed = m('[$1].$2', 0, 'fish').splice(2, 1, 'trumpet');
+                        removed = m('[0].fish').splice(3, 1);
 
-            assert.deepEqual(m._data, [ { fish: ['angel', 'clown', 'trumpet', 'surgeon'] } ]);
-            assert.deepEqual(removed, ['drum']);
+                            assert.deepEqual(m._data, [ { fish: ['angel', 'clown', 'drum', 'surgeon'] } ]);
+                            assert.deepEqual(removed, ['mandarin']);
 
-        removed = m('[$1]', 0).path('.$1', 'fish').splice(0, 2, 'parrot', 'anemone', 'blue');
+                        removed = m('[$1].$2', 0, 'fish').splice(2, 1, 'trumpet');
 
-            assert.deepEqual(m._data, [ { fish: ['parrot', 'anemone', 'blue', 'trumpet', 'surgeon'] } ]);
-            assert.deepEqual(removed, ['angel', 'clown']);
+                            assert.deepEqual(m._data, [ { fish: ['angel', 'clown', 'trumpet', 'surgeon'] } ]);
+                            assert.deepEqual(removed, ['drum']);
 
-        removed = m('[$1].fish', 0).splice(3, Number.MAX_VALUE);
+                        removed = m('[$1]', 0).path('.$1', 'fish').splice(0, 2, 'parrot', 'anemone', 'blue');
 
-            assert.deepEqual(m._data, [ { fish: ['parrot', 'anemone', 'blue'] } ]);
-            assert.deepEqual(removed, ['trumpet', 'surgeon']);
+                            assert.deepEqual(m._data, [ { fish: ['parrot', 'anemone', 'blue', 'trumpet', 'surgeon'] } ]);
+                            assert.deepEqual(removed, ['angel', 'clown']);
+
+                        removed = m('[$1].fish', 0).splice(3, Number.MAX_VALUE);
+
+                            assert.deepEqual(m._data, [ { fish: ['parrot', 'anemone', 'blue'] } ]);
+                            assert.deepEqual(removed, ['trumpet', 'surgeon']);
+
+                        done();
+                    });
+                });
+            });
+        });
     });
 
 
-    it('should define "pop" instance method for Model and ModelPath', function() {
+    it('should define "pop" instance method for Model and ModelPath', function(done) {
         var m = new Model([ { item: 'item1'}, { item: 'item2' } ]);
 
         m.on(/.*/, function(path, data) {
@@ -868,6 +940,8 @@ describe('Model class', function() {
 
             assert.deepEqual(last, { item: 'item2' });
             assert.deepEqual(m._data, [ { item: 'item1'} ]);
+
+        _.defer(function() {
             assert.deepEqual(posted, [
                 { path: '', type: 'splice', index: 1, removed: [ { item: 'item2' } ],
                     addedCount: 0, newValue: [ { item: 'item1'} ] },
@@ -875,27 +949,32 @@ describe('Model class', function() {
                 { path: '[1].item', type: 'removed', oldValue: 'item2' }
             ]);
 
-        var m = new Model({ list: [ { item: 'item1'}, { item: 'item2' } ] });
+            var m = new Model({ list: [ { item: 'item1'}, { item: 'item2' } ] });
 
-        m('.list').on('***', function(path, data) {
-            posted.push(data);
-        })
+            m('.list').on('***', function(path, data) {
+                posted.push(data);
+            })
 
-        var posted = [];
-        var last = m('.list').pop();
+            posted = [];
+            var last = m('.list').pop();
 
-            assert.deepEqual(last, { item: 'item2' });
-            assert.deepEqual(m._data, { list: [ { item: 'item1'} ] });
-            assert.deepEqual(posted, [
-                { path: '', type: 'splice', index: 1, removed: [ { item: 'item2' } ],
-                    addedCount: 0, newValue: [ { item: 'item1'} ], fullPath: '.list' },
-                { path: '[1]', type: 'removed', oldValue: { item: 'item2' }, fullPath: '.list[1]' },
-                { path: '[1].item', type: 'removed', oldValue: 'item2', fullPath: '.list[1].item' }
-            ]);
+                assert.deepEqual(last, { item: 'item2' });
+                assert.deepEqual(m._data, { list: [ { item: 'item1'} ] });
+
+            _.defer(function() {
+                assert.deepEqual(posted, [
+                    { path: '', type: 'splice', index: 1, removed: [ { item: 'item2' } ],
+                        addedCount: 0, newValue: [ { item: 'item1'} ], fullPath: '.list' },
+                    { path: '[1]', type: 'removed', oldValue: { item: 'item2' }, fullPath: '.list[1]' },
+                    { path: '[1].item', type: 'removed', oldValue: 'item2', fullPath: '.list[1].item' }
+                ]);
+                done();
+            });
+        });
     });
 
 
-    it('should define "unshift" instance method for Model and ModelPath', function() {
+    it('should define "unshift" instance method for Model and ModelPath', function(done) {
         var m = new Model(['item1', 'item2'])
             , posted = [];
 
@@ -910,6 +989,7 @@ describe('Model class', function() {
 
             assert.deepEqual(m._data, [ { name: 'Milo' }, { name: 'Jason', DOB: { year: 1982 } }, 'item1', 'item2' ]);
 
+        _.defer(function() {
             assert.deepEqual(posted, [
                 { path: '', type: 'splice', index: 0, removed: [], addedCount: 2,
                         newValue: [ { name: 'Milo' }, { name: 'Jason', DOB: { year: 1982 } }, 'item1', 'item2' ] },
@@ -921,16 +1001,18 @@ describe('Model class', function() {
                 { path: '[1].DOB.year', type: 'added', newValue: 1982 }
             ]);
 
+            var m = new Model({ list: ['item1', 'item2'] });
 
-        var m = new Model({ list: ['item1', 'item2'] });
+            m('.$1', 'list').unshift({ name: 'Milo' }, { name: 'Jason' });
 
-        m('.$1', 'list').unshift({ name: 'Milo' }, { name: 'Jason' });
+                assert.deepEqual(m._data, { list: [ { name: 'Milo' }, { name: 'Jason'}, 'item1', 'item2' ] });
 
-            assert.deepEqual(m._data, { list: [ { name: 'Milo' }, { name: 'Jason'}, 'item1', 'item2' ] });
+            done();
+        });
     });
 
 
-    it('should define "shift" instance method for Model and ModelPath', function() {
+    it('should define "shift" instance method for Model and ModelPath', function(done) {
         var m = new Model([ { item: 'item1'}, { item: 'item2' } ]);
 
         m.on(/.*/, function(path, data) {
@@ -943,6 +1025,8 @@ describe('Model class', function() {
 
             assert.deepEqual(first, { item: 'item1' });
             assert.deepEqual(m._data, [ { item: 'item2'} ]);
+
+        _.defer(function() {
             assert.deepEqual(posted, [
                 { path: '', type: 'splice', index: 0, removed: [ { item: 'item1' } ],
                     addedCount: 0, newValue: [ { item: 'item2'} ] },
@@ -950,23 +1034,29 @@ describe('Model class', function() {
                 { path: '[0].item', type: 'removed', oldValue: 'item1' }
             ]);
 
-        var m = new Model({ list: [ { item: 'item1'}, { item: 'item2' } ] });
+            var m = new Model({ list: [ { item: 'item1'}, { item: 'item2' } ] });
 
-        m('.list').on('***', function(path, data) {
-            posted.push(data);
-        })
+            m('.list').on('***', function(path, data) {
+                posted.push(data);
+            })
 
-        var posted = [];
-        var first = m('.list').shift();
+            posted = [];
+            var first = m('.list').shift();
 
-            assert.deepEqual(first, { item: 'item1' });
-            assert.deepEqual(m._data, { list: [ { item: 'item2'} ] });
-            assert.deepEqual(posted, [
-                { path: '', type: 'splice', index: 0, removed: [ { item: 'item1' } ],
-                    addedCount: 0, newValue: [ { item: 'item2'} ], fullPath: '.list' },
-                { path: '[0]', type: 'removed', oldValue: { item: 'item1' }, fullPath: '.list[0]' },
-                { path: '[0].item', type: 'removed', oldValue: 'item1', fullPath: '.list[0].item' }
-            ]);
+                assert.deepEqual(first, { item: 'item1' });
+                assert.deepEqual(m._data, { list: [ { item: 'item2'} ] });
+
+            _.defer(function() {
+                assert.deepEqual(posted, [
+                    { path: '', type: 'splice', index: 0, removed: [ { item: 'item1' } ],
+                        addedCount: 0, newValue: [ { item: 'item2'} ], fullPath: '.list' },
+                    { path: '[0]', type: 'removed', oldValue: { item: 'item1' }, fullPath: '.list[0]' },
+                    { path: '[0].item', type: 'removed', oldValue: 'item1', fullPath: '.list[0].item' }
+                ]);
+
+                done();
+            });
+        });
     });
 
 
@@ -1023,7 +1113,7 @@ describe('Model class', function() {
     });
 
 
-    it('should not dispatch duplicate messages when different "*" subscriptions are present', function() {
+    it('should not dispatch duplicate messages when different "*" subscriptions are present', function(done) {
         var m = new Model;
         m.on('*', logPost);
         m.on('**', logPost2);
@@ -1043,8 +1133,11 @@ describe('Model class', function() {
 
         m('.name').set('milo');
 
-        assert.equal(posted.length, 2);
-        assert.equal(posted2.length, 2);
+        _.defer(function() {
+            assert.equal(posted.length, 2);
+            assert.equal(posted2.length, 2);
+            done();
+        });
     });
 
 
@@ -1058,7 +1151,7 @@ describe('Model class', function() {
     });
 
 
-    it('should dispatch messages when model is deleted', function() {
+    it('should dispatch messages when model is deleted', function(done) {
         var m = new Model;
         m.set({ name: 'milo', DOB: { year: 1972 } });
 
@@ -1072,6 +1165,7 @@ describe('Model class', function() {
 
         m.del();
 
+        _.defer(function() {
             assert.equal(m.get(), undefined);
             assert.deepEqual(posted,  [
                 { path: '', type: 'deleted', oldValue: { name: 'milo', DOB: { year: 1972 } } },
@@ -1079,6 +1173,8 @@ describe('Model class', function() {
                 { path: '.DOB', type: 'removed', oldValue: { year: 1972 } },
                 { path: '.DOB.year', type: 'removed', oldValue: 1972 }
             ]);
+            done();
+        });
     });
 
 });

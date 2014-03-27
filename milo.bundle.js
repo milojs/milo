@@ -1333,7 +1333,7 @@ function Component$$createOnElement(el, innerHTML, rootScope, extraFacets) {
 
     miloBinder(el, rootScope);
     var aComponent = rootScope[attr.compName];
-    _.deferMethod(aComponent, 'broadcast', 'stateready');
+    aComponent.broadcast('stateready');
     return aComponent;
 }
 
@@ -2306,12 +2306,14 @@ function Data$start() {
     //  var subscribeObj = this;
 
     // subscribe to DOM event
-    this.onMessages({
-        '': onDataChange,         // programmatic or UI data change, to bubble up data messages
-        'finished': onDataChange, // end of data change transaction
-        'childdata': onChildData, // changes in scope children with Data facet
-        'changedata': changeDataHandler // to enable reactive connections
-    });
+    this.onSync('', onDataChange);
+    this.onSync('finished', onDataChange);
+
+    // changes in scope children with Data facet
+    this.onSync('childdata', onChildData);
+
+    // to enable reactive connections
+    this.onSync('changedata', changeDataHandler)
 }
 
 
@@ -2478,6 +2480,13 @@ function Data$_set(value) {
         // else
         //  logger.warn('attempt to set data on path that does not exist: ' + childPath);
     }    
+}
+
+
+function _postFinishedMessage() {
+    this.off('', onDataChange);
+    this.postMessageSync('', { type: 'finished' });
+    this.onSync('', onDataChange);
 }
 
 
@@ -4842,6 +4851,7 @@ _.extendProto(DOMEventsSource, {
     destroy: DOMEventsSource$destroy,
     addSourceSubscriber: _.partial(sourceSubscriberMethod, 'addEventListener'),
     removeSourceSubscriber: _.partial(sourceSubscriberMethod, 'removeEventListener'),
+    postMessage: DOMEventsSource$postMessage,
     trigger: trigger,
 
     // class specific methods
@@ -4894,6 +4904,11 @@ function handleEvent(event) {
         event += useCapturePostfix;
 
     this.dispatchMessage(event.type, event);
+}
+
+
+function DOMEventsSource$postMessage(message, data) {
+    this.messenger.postMessageSync(message, data);
 }
 
 
@@ -5395,11 +5410,8 @@ _.extendProto(MLComboList, {
 
 function MLComboList$init() {
     Component.prototype.init.apply(this, arguments);
-    var m = this.model;
-    _.defer(function() {
-        if (! m.get()) m.set([]);
-    });
-    this.on('childrenbound', onChildrenBound);
+    this.model.set([]);
+    this.once('childrenbound', onChildrenBound);
 }
 
 
@@ -5418,7 +5430,6 @@ function MLComboList$toggleAddButton(show) {
 
 
 function onChildrenBound() {
-    this.off('childrenbound', onChildrenBound);
     this.template.render().binder();
     componentSetup.call(this);
 }
@@ -5843,15 +5854,8 @@ function MLList$init() {
 
 
 function onChildrenBound() {
-    var self = this
-        , m = this.model
-        , d = this.data;
-    _.defer(function() {
-        var value = m.get();
-        if (value) d.set(value);
-        else m.set([]);
-        self._connector = milo.minder(m, '<<<->>>', d);
-    });
+    this.model.set([]);
+    this._connector = milo.minder(this.model, '<<<->>>', this.data);
 }
 
 },{"../c_class":11,"../c_registry":27,"mol-proto":99}],47:[function(require,module,exports){
@@ -6202,7 +6206,7 @@ _.extendProto(MLSuperCombo, {
 function MLSuperCombo$init() {
     Component.prototype.init.apply(this, arguments);
     
-    this.on('childrenbound', onChildrenBound);
+    this.once('childrenbound', onChildrenBound);
     
     _.defineProperties(this, {
         _optionsData: [],
@@ -6214,7 +6218,6 @@ function MLSuperCombo$init() {
  * Handler for init childrenbound listener. Renders template.
  */
 function onChildrenBound() {
-    this.off('childrenbound', onChildrenBound);
     this.template.render().binder();
     componentSetup.call(this);
 }
@@ -7513,7 +7516,9 @@ _.extendProto(Messenger, {
     init: init, // called by Mixin (superclass)
     destroy: Messenger$destroy,
     on: Messenger$on,
-    once: Messenger$once,
+    once: _.partial(_Messenger_onWithOptions, { dispatchTimes: 1 }),
+    onSync: _.partial(_Messenger_onWithOptions, { sync: true }),
+    onAsync: _.partial(_Messenger_onWithOptions, { sync: false }),
     onMessage: Messenger$on, // deprecated
     off: Messenger$off,
     offMessage: Messenger$off, // deprecated
@@ -7521,6 +7526,7 @@ _.extendProto(Messenger, {
     offMessages: offMessages,
     offAll: Messenger$offAll,
     postMessage: postMessage,
+    postMessageSync: postMessageSync,
     getSubscribers: getSubscribers,
     getMessageSource: getMessageSource,
     _chooseSubscribersHash: _chooseSubscribersHash,
@@ -7529,6 +7535,7 @@ _.extendProto(Messenger, {
     _removeAllSubscribers: _removeAllSubscribers,
     _callPatternSubscribers: _callPatternSubscribers,
     _callSubscribers: _callSubscribers,
+    _callSubscriber: _callSubscriber,
     _setMessageSource: _setMessageSource
 });
 
@@ -7540,10 +7547,12 @@ _.extendProto(Messenger, {
 Messenger.defaultMethods = {
     on: 'on',
     once: 'once',
+    onSync: 'onSync',
     off: 'off',
     onMessages: 'onMessages',
     offMessages: 'offMessages',
     postMessage: 'postMessage',
+    postMessageSync: 'postMessageSync',
     getSubscribers: 'getSubscribers'
 };
 
@@ -7633,9 +7642,6 @@ function Messenger$on(messages, subscriber) {
 }
 
 function _Messenger_on(messages, subscriber) {
-    // can be needed for 'once' subscription to unsubscribe from all messages
-    // passed to once
-    // !!! should NOT be moved to 'once' as options property can be used without 'once'
     if (typeof subscriber == 'object')
         _.defineProperty(subscriber, '__messages', messages);
 
@@ -7660,7 +7666,7 @@ function _Messenger_on(messages, subscriber) {
 }
 
 
-function Messenger$once(messages, subscriber) {
+function _Messenger_onWithOptions(options, messages, subscriber) {
     check(messages, Match.OneOf(String, [String], RegExp));
     check(subscriber, Match.OneOf(Function, {
         subscriber: Function,
@@ -7669,9 +7675,14 @@ function Messenger$once(messages, subscriber) {
     }));
 
     if (typeof subscriber == 'function')
-        subscriber = { context: this._hostObject, subscriber: subscriber };
+        subscriber = {
+            subscriber: subscriber,
+            context: this._hostObject,
+            options: options
+        };
 
-    subscriber.options = { dispatchTimes: 1 };
+    subscriber.options = subscriber.obtions || {};
+    _.extend(subscriber.options, options);
 
     return _Messenger_on.call(this, messages, subscriber);
 }
@@ -7921,24 +7932,38 @@ function _offAllSubscribers(subscribersHash) {
  * Dispatches the message calling all subscribers registered for this message and, if the message is a string, calling all pattern subscribers when message matches the pattern.
  * Each subscriber is passed the same parameters that are passed to theis method.
  * The context of the subscriber envocation is set to the host object (`this._hostObject`) that was passed to the messenger constructor.
- *
+ * Subscribers are called in the next tick ("asynchronously") apart from those that were subscribed with `onSync` (or that have `options.sync == true`).
+ * 
  * @param {String|RegExp} message message to be dispatched
  *  If the message is a string, the subscribers registered with exactly this message will be called and also pattern subscribers registered with the pattern that matches the dispatched message.
  *  If the message is RegExp, only the subscribers registered with exactly this pattern will be called.
  * @param {Any} data data that will be passed to the subscriber as the second parameter. Messenger does not modify this data in any way.
  * @param {Function} callback optional callback to pass to subscriber
+ * @param {Boolean} _synchronous if true passed, subscribers will be envoked synchronously apart from those that have `options.sync == false`. This parameter should not be used, instead postMessageSync should be used.
  */
-function postMessage(message, data, callback) {
+function postMessage(message, data, callback, _synchronous) {
     check(message, Match.OneOf(String, RegExp));
     check(callback, Match.Optional(Function));
 
     var subscribersHash = this._chooseSubscribersHash(message);
     var msgSubscribers = subscribersHash[message];
 
-    this._callSubscribers(message, data, callback, msgSubscribers);
+    this._callSubscribers(message, data, callback, msgSubscribers, _synchronous);
 
     if (typeof message == 'string')
-        this._callPatternSubscribers(message, data, callback, msgSubscribers);
+        this._callPatternSubscribers(message, data, callback, msgSubscribers, _synchronous);
+}
+
+
+/**
+ * Same as postMessage apart from envoking subscribers synchronously, apart from those subscribed with `onAsync` (or with `options.sync == false`).
+ * 
+ * @param {String|RegExp} message
+ * @param {Any} data
+ * @param {Function} callback
+ */
+function postMessageSync(message, data, callback) {
+    this.postMessage(message, data, callback, true);
 }
 
 
@@ -7953,7 +7978,7 @@ function postMessage(message, data, callback) {
  * @param {Function} callback optional callback to pass to subscriber
  * @param {Array[Function|Object]} calledMsgSubscribers array of subscribers already called, they won't be called again if they are among pattern subscribers.
  */
-function _callPatternSubscribers(message, data, callback, calledMsgSubscribers) {
+function _callPatternSubscribers(message, data, callback, calledMsgSubscribers, _synchronous) {
     _.eachKey(this._patternMessageSubscribers, 
         function(patternSubscribers) {
             var pattern = patternSubscribers.pattern;
@@ -7964,7 +7989,7 @@ function _callPatternSubscribers(message, data, callback, calledMsgSubscribers) 
                         return index == -1;
                     });
                 }
-                this._callSubscribers(message, data, callback, patternSubscribers);
+                this._callSubscribers(message, data, callback, patternSubscribers, _synchronous);
             }
         }
     , this);
@@ -7982,21 +8007,43 @@ function _callPatternSubscribers(message, data, callback, calledMsgSubscribers) 
  * @param {Array[Function|Object]} msgSubscribers the array of message subscribers to be called. Each subscriber is called with the host object (see Messenger constructor) as the context.
  * @param {Function} callback optional callback to pass to subscriber
  */
-function _callSubscribers(message, data, callback, msgSubscribers) {
+function _callSubscribers(message, data, callback, msgSubscribers, _synchronous) {
     if (msgSubscribers && msgSubscribers.length)
         msgSubscribers.forEach(function(subscriber) {
-            if (typeof subscriber == 'function')
-                subscriber.call(this._hostObject, message, data, callback);
-            else {
-                subscriber.subscriber.call(subscriber.context, message, data, callback);
-                var dispatchTimes = subscriber.options && subscriber.options.dispatchTimes;
-                if (dispatchTimes <= 1) {
-                    var messages = subscriber.__messages;                   
-                    this.off(messages, subscriber);
-                } else if (dispatchTimes > 1)
-                    subscriber.options.dispatchTimes--;
-            }
+            this._callSubscriber(subscriber, message, data, callback, _synchronous);
         }, this);
+}
+
+
+function _callSubscriber(subscriber, message, data, callback, _synchronous) {
+    var syncSubscriber = subscriber.options && subscriber.options.sync
+        , synchro = (_synchronous && syncSubscriber !== false)
+                  || syncSubscriber
+        , self = this;
+
+    if (typeof subscriber == 'function')
+        __callFuncSubscriber(subscriber, self._hostObject);
+    else
+        __callObjSubscriber();
+
+
+    function __callFuncSubscriber(subscriber, context) {
+        if (synchro)
+            subscriber.call(context, message, data, callback);
+        else
+            _.deferMethod(subscriber, 'call', context, message, data, callback);
+    }
+
+    function __callObjSubscriber() {
+        var dispatchTimes = subscriber.options && subscriber.options.dispatchTimes;
+        if (dispatchTimes <= 1) {
+            var messages = subscriber.__messages;                   
+            self.off(messages, subscriber);
+        } else if (dispatchTimes > 1)
+            subscriber.options.dispatchTimes--;
+
+        __callFuncSubscriber(subscriber.subscriber, subscriber.context);
+    }
 }
 
 
@@ -8431,6 +8478,7 @@ _.extendProto(MessageSource, {
     onSubscriberAdded: onSubscriberAdded,
     onSubscriberRemoved: onSubscriberRemoved, 
     dispatchMessage: dispatchMessage,
+    postMessage: postMessage,
     _prepareMessengerAPI: _prepareMessengerAPI,
 
     // Methods below must be implemented in subclass
@@ -8542,9 +8590,20 @@ function dispatchMessage(sourceMessage, sourceData) {
 
             var shouldDispatch = api.filterSourceMessage(sourceMessage, message, internalData);
             if (shouldDispatch) 
-                this.messenger.postMessage(message, internalData);      
+                this.postMessage(message, internalData);      
             
         }, this);
+}
+
+
+/**
+ * Posts message on the messenger. This method is separated so specific message sources can make message dispatch synchronous by using `postMessageSync`
+ * 
+ * @param  {String} message
+ * @param  {Object} data
+ */
+function postMessage(message, data) {
+    this.messenger.postMessage(message, data);
 }
 
 },{"../abstract/mixin":3,"../util/check":80,"../util/error":86,"../util/logger":89,"./m_api":62,"mol-proto":99}],65:[function(require,module,exports){
@@ -8591,7 +8650,7 @@ function init(hostObject, proxyMethods, messengerAPI, sourceMessenger) {
  * @param {String|Regex} sourceMessage source message to subscribe to
  */
 function addSourceSubscriber(sourceMessage) {
-    this.sourceMessenger.on(sourceMessage, { context: this, subscriber: this.dispatchMessage });
+    this.sourceMessenger.onSync(sourceMessage, { context: this, subscriber: this.dispatchMessage });
 }
 
 
@@ -8919,7 +8978,7 @@ function getTransactionFlag(func) {
  */
 function postTransactionFinished(inChangeTransaction) {
     if (! inChangeTransaction)
-        this.postMessage('finished', { type: 'finished' });
+        this.postMessageSync('finished', { type: 'finished' });
 }
 
 
@@ -9340,7 +9399,7 @@ function Connector$turnOn() {
 
             function subscriptionSwitch(err, changeFinished) {
                 if (err) return;
-                var onOff = changeFinished ? 'on' : 'off';
+                var onOff = changeFinished ? 'onSync' : 'off';
                 subscribeToDS(linkToDS, onOff, self[reverseLink], subscriptionPath, reversePathTranslation);
 
                 var message = changeFinished ? 'changecompleted' : 'changestarted';
@@ -9348,8 +9407,7 @@ function Connector$turnOn() {
             }
         };
 
-        // linkedDS.on(subscriptionPath, onData);
-        subscribeToDS(linkedDS, 'on', onData, subscriptionPath, pathTranslation);
+        subscribeToDS(linkedDS, 'onSync', onData, subscriptionPath, pathTranslation);
 
         return onData;
     }
@@ -9361,12 +9419,14 @@ function Connector$turnOn() {
  *
  * @private
  * @param {Object} dataSource data source object that has messenger with proxied on/off methods
- * @param {String} onOff 'on' or 'off'
+ * @param {String} onOff 'onSync' or 'off'
  * @param {Function} subscriber
  * @param {String} subscriptionPath only used if there is no path translation
  * @param {Object[String]} pathTranslation paths translation map
  */
 function subscribeToDS(dataSource, onOff, subscriber, subscriptionPath, pathTranslation) {
+    if (! subscriber)
+        return logger.warn('Connector: subscriber is undefined - caused by async messages');
     if (pathTranslation)
         _.eachKey(pathTranslation, function(translatedPath, path) {
             dataSource[onOff](path, subscriber);
@@ -9471,7 +9531,7 @@ function Model(data, hostObject) {
 
     // subscribe to "changedata" message to enable reactive connections
     changeDataHandler.initialize.call(model);
-    model.on('changedata', changeDataHandler);
+    model.onSync('changedata', changeDataHandler);
 
     return model;
 }
@@ -9570,7 +9630,7 @@ function proxyMessenger(modelHostObject) {
     modelHostObject = modelHostObject || this._hostObject;
     Mixin.prototype._createProxyMethods.call(this._messenger, messengerMethodsToProxy, modelHostObject);
 }
-var messengerMethodsToProxy = ['on', 'off', 'postMessage', 'onMessages', 'offMessages', 'getSubscribers'];
+var messengerMethodsToProxy = Messenger.defaultMethods;
 
 
 /**
@@ -9733,7 +9793,7 @@ function ModelPath(model, path) { // ,... - additional arguments for interpolati
 
     // subscribe to "changedata" message to enable reactive connections
     changeDataHandler.initialize.call(modelPath);
-    modelPath.on('changedata', changeDataHandler);
+    modelPath.onSync('changedata', changeDataHandler);
 
     Object.freeze(modelPath);
 

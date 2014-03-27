@@ -108,7 +108,7 @@ describe('MessengerAPI class', function() {
     });
 
 
-    it('subclass should define createInternalData and filterSourceMessage used when message dispatched on source', function() {
+    it('subclass should define createInternalData and filterSourceMessage used when message dispatched on source', function(done) {
         // check that there are no subscription on source
         assert.equal(sourceMsngr.getSubscribers('event'), undefined);
         assert.equal(sourceMsngr.getSubscribers('message'), undefined);
@@ -120,39 +120,50 @@ describe('MessengerAPI class', function() {
         // dispatch on source
         sourceMsngr.postMessage('event', { id: 33, test: 1 });
 
+        _.defer(function() {
             assert.deepEqual(handled, {});
 
-        sourceMsngr.postMessage('event', { id: 12, test: 2 });
+            sourceMsngr.postMessage('event', { id: 12, test: 2 });
 
-            assert.deepEqual(handled, { 'event12': [{ handler: 1, data: { type: 'event12', test: 2 } }] });
+            _.defer(function() {
+                assert.deepEqual(handled, { 'event12': [{ handler: 1, data: { type: 'event12', test: 2 } }] });
 
-        handled = {};
-        sourceMsngr.postMessage('event', { id: 25, test: 3 });
+                handled = {};
+                sourceMsngr.postMessage('event', { id: 25, test: 3 });
 
-            assert.deepEqual(handled, { 'event25': [{ handler: 2, data: { type: 'event25', test: 3 } }] });
+                _.defer(function(){
+                    assert.deepEqual(handled, { 'event25': [{ handler: 2, data: { type: 'event25', test: 3 } }] });
 
-        // subscribe to messenger, should subscribe to source
-        messenger.onMessage('message33', handler1);
-        messenger.onMessage('message33', handler2);
+                    // subscribe to messenger, should subscribe to source
+                    messenger.onMessage('message33', handler1);
+                    messenger.onMessage('message33', handler2);
 
-        // dispatch on source
-        handled = {}
-        sourceMsngr.postMessage('message', { id: 55, test: 4 });
+                    // dispatch on source
+                    handled = {}
+                    sourceMsngr.postMessage('message', { id: 55, test: 4 });
 
-            assert.deepEqual(handled, {});
+                    _.defer(function() {
+                        assert.deepEqual(handled, {});
 
-        sourceMsngr.postMessage('message', { id: 33, test: 5 });
+                        sourceMsngr.postMessage('message', { id: 33, test: 5 });
 
-            assert.deepEqual(handled, {
-                'message33': [
-                    { handler: 1, data: { type: 'message33', test: 5 } },
-                    { handler: 2, data: { type: 'message33', test: 5 } }
-                ]
-            }); 
+                        _.defer(function() {
+                            assert.deepEqual(handled, {
+                                'message33': [
+                                    { handler: 1, data: { type: 'message33', test: 5 } },
+                                    { handler: 2, data: { type: 'message33', test: 5 } }
+                                ]
+                            }); 
+                            done();
+                        });
+                    });
+                });
+            });
+        });
     });
 
 
-    it('should correctly unsubscribe from source when all handlers are unsubscribed from Messenger', function() {
+    it('should correctly unsubscribe from source when all handlers are unsubscribed from Messenger', function(done) {
         // check that there are no subscription on source
         assert.equal(sourceMsngr.getSubscribers('event'), undefined);
 
@@ -166,22 +177,27 @@ describe('MessengerAPI class', function() {
         // dispatch on source - should dispatch on messenger when id matches internal message
         sourceMsngr.postMessage('event', { id: 12, test: 2 });
 
+        _.defer(function() {
             assert.deepEqual(handled, { 'event12': [{ handler: 1, data: { type: 'event12', test: 2 } }] });
 
-        // now unsubscribe
-        messenger.offMessages({
-            'event12': handler1,
-            'event25': handler2
+            // now unsubscribe
+            messenger.offMessages({
+                'event12': handler1,
+                'event25': handler2
+            });
+
+            // no subscription at source
+            assert.deepEqual(sourceMsngr.getSubscribers('event'), undefined);
+
+            // no dispatch on messenger when dispatched on source
+            handled = {};
+            sourceMsngr.postMessage('event', { id: 12, test: 3 });
+            sourceMsngr.postMessage('event', { id: 25, test: 4 });
+
+            _.defer(function() {
+                assert.deepEqual(handled, {});
+                done();
+            });
         });
-
-        // no subscription at source
-        assert.deepEqual(sourceMsngr.getSubscribers('event'), undefined);
-
-        // no dispatch on messenger when dispatched on source
-        handled = {};
-        sourceMsngr.postMessage('event', { id: 12, test: 3 });
-        sourceMsngr.postMessage('event', { id: 25, test: 4 });
-
-            assert.deepEqual(handled, {});
     });
 });

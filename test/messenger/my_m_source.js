@@ -25,11 +25,11 @@ function init(hostObject, proxyMethods, messengerAPI, sourceMessenger) {
 }
 
 function addSourceSubscriber(message) {
-    this.sourceMessenger.onMessage(message, handleSourceMessage(this, message));
+    this.sourceMessenger.onSync(message, handleSourceMessage(this, message));
 }
 
 function removeSourceSubscriber(message) {
-    this.sourceMessenger.offMessage(message, handleSourceMessage(this, message));
+    this.sourceMessenger.off(message, handleSourceMessage(this, message));
 }
 
 
