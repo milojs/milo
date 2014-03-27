@@ -7177,7 +7177,8 @@ config({
             componentMetaRegex: /^x\-application\/milo\/component\-meta\/([a-z0-9]+)\/([a-z0-9]+)\/([a-z0-9]*)$/,
         }
     },
-    check: true
+    check: true,
+    debug: false
 });
 
 },{"dot":98,"mol-proto":99}],57:[function(require,module,exports){
@@ -9065,8 +9066,7 @@ function prepareBatch(batch) {
 
         todo.push(data);
 
-        if (! config.check)
-            throw exitLoop;
+        if (! config.debug) throw exitLoop;
         pathsToSplice = pathsToSplice || [];
         pathsToSplice.push(data.path);
         hadSplice = true;
