@@ -46,11 +46,25 @@
          simple component here. -->
     <div ml-bind="[data]:formOut"></div>
 
-    <!-- Here is our second component -->
+    <!-- Here is our second component for the 2-way bind -->
     <div ml-bind="[data, container]:form2">
         <input ml-bind="[data]:title" placeholder="Title" /><br>
         <input ml-bind="[data]:desc" placeholder="Description" /><br>
         <input type="checkbox" ml-bind="[data]:available" />
+    </div>
+
+
+    <!-- Finally I want to show you how to work with path translation in
+         milo.minder. Path translation can be used to link up data with
+         different structure or data paths. Let's create a component data
+         structure that does not match our previous form components. We'll 
+         also use this example to explore data transformation and validation-->
+    <div ml-bind="[data, container]:bookData">
+        <ul ml-bind="[data, container]:info">
+            <li ml-bind="[data]:name"></li>
+            <li ml-bind="[data]:description"></li>
+        </ul>
+        FREE?: <span ml-bind="[data]:free"></span>
     </div>
 
 
@@ -71,7 +85,8 @@
                 , userProfile = scope.userProfile
                 , form1 = scope.form1
                 , form2 = scope.form2
-                , formOut = scope.formOut;
+                , formOut = scope.formOut
+                , bookData = scope.bookData;
 
 
             // We can establish a milo connection by calling milo.minder and
@@ -121,11 +136,51 @@
             // level of data changes (the single '*'), and stringify the model
             // out to our formOut component.
             formModel.on('*', function(msg, data) {
+                // Get a the model data as a JSON string
                 var modelStr = JSON.stringify(formModel.get());
+
+                // And set the text of our formOut component
                 formOut.data.set(modelStr);
             });
 
 
+            var options = {
+                pathTranslation: {
+                    '.title': '.info.name',
+                    '.desc': '.info.description',
+                    '.available': '.free'
+                },
+                dataTranslation: {
+                    '->': {
+                        '.title': function (val) {
+                            return val && val.toUpperCase();
+                        },
+                        '.available': function (val) {
+                            return val && val ? 'It\'s in' : 'It\'s gone';
+                        }
+                    }
+                },
+                dataValidation: {
+                    '->': {
+                        '.title': [
+                            function validateRequired(val, callback) {
+                                var valid = val && val.length > 4;
+
+                                var response = valid
+                                                ? { valid: true }
+                                                : { valid: false, reason: 'must be minimum of 5 characters' };
+
+                                callback(null, response);
+                            }
+                        ]
+                    }
+                }
+            }
+            window.formConnect3 = milo.minder(formModel, '->>', bookData.data, options);
+
+            formModel.on('validated', function(msg, response) {
+                console.log(msg, response);
+            });
         });
 
     //END JS
