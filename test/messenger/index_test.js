@@ -13,10 +13,13 @@ describe('Messenger class', function() {
             init: 'init',
             on: 'on',
             once: 'once',
+            onSync: 'onSync',
+            onAsync: 'onAsync',
             off: 'off',
             onEvents: 'onMessages',
             offEvents: 'offMessages',
             post: 'postMessage',
+            postMessageSync: 'postMessageSync',
             getListeners: 'getSubscribers'
         });
         return {host: host, messenger: messenger};
@@ -350,7 +353,6 @@ describe('Messenger class', function() {
         var result = getHostWithMessenger()
             , host = result.host
             , messenger = result.messenger
-            , myContext = {}
             , posted = [];
 
         function localHandler(msg, data) {
@@ -361,6 +363,54 @@ describe('Messenger class', function() {
         host.once('event', localHandler);
         host.post('event', { test: 1 });
         host.post('event', { test: 2 });
+
+        _.defer(function() {
+            assert.deepEqual(posted, [{ msg: 'event', data: { test: 1 } }]);
+            done();
+        });
+    });
+
+
+    it('should define onSync and postMessageSync methods to subscribe/dispatch synchronously', function() {
+        var result = getHostWithMessenger()
+            , host = result.host
+            , messenger = result.messenger
+            , myContext = {}
+            , posted = [];
+
+        function localHandler(msg, data) {
+            assert.equal(this, host);
+            posted.push({ msg: msg, data: data });
+        }
+
+        host.onSync('event', localHandler);
+        host.post('event', { test: 1 });
+
+        assert.deepEqual(posted, [{ msg: 'event', data: { test: 1 } }]);
+
+        posted = [];
+        host.on('event2', localHandler);
+        host.postMessageSync('event2', { test: 2 });
+
+        assert.deepEqual(posted, [{ msg: 'event2', data: { test: 2 } }]);
+    });
+
+
+    it('should define onAsync method to subscribe asynchronously even if dispatch is synchronous', function(done) {
+        var result = getHostWithMessenger()
+            , host = result.host
+            , messenger = result.messenger
+            , posted = [];
+
+        function localHandler(msg, data) {
+            assert.equal(this, host);
+            posted.push({ msg: msg, data: data });
+        }
+
+        host.onAsync('event', localHandler);
+        host.postMessageSync('event', { test: 1 });
+
+        assert.deepEqual(posted, []);
 
         _.defer(function() {
             assert.deepEqual(posted, [{ msg: 'event', data: { test: 1 } }]);

@@ -2246,7 +2246,9 @@ _.extendProto(Data, {
 
     _setScalarValue: Data$_setScalarValue,
     _getScalarValue: Data$_getScalarValue,
-    _postDataChanged: Data$_postDataChanged,
+    _bubbleUpDataChange: Data$_bubbleUpDataChange,
+    _queueDataChange: Data$_queueDataChange,
+    _postDataChanges: Data$_postDataChanges,
     _prepareMessageSource: _prepareMessageSource,
 });
 
@@ -2286,6 +2288,8 @@ function Data$start() {
     // initializes queue of "changedata" messages
     changeDataHandler.initialize.call(this);
 
+    this._dataChangesQueue = [];
+
     this._prepareMessageSource();
 
     // store facet data path
@@ -2300,20 +2304,16 @@ function Data$start() {
     // prepare internal and external messengers
     // this._prepareMessengers();
 
-    // if (this.config.subscribeToComponent)
-    //  var subscribeObj = this.owner;
-    // else
-    //  var subscribeObj = this;
+    // subscribe to DOM event and accessors' messages
+    this.onSync('', onOwnDataChange);
 
-    // subscribe to DOM event
-    this.onSync('', onDataChange);
-    this.onSync('finished', onDataChange);
+    // this.onSync('finished', onOwnDataChange);
 
     // changes in scope children with Data facet
     this.onSync('childdata', onChildData);
 
     // to enable reactive connections
-    this.onSync('changedata', changeDataHandler)
+    this.onSync('changedata', changeDataHandler);
 }
 
 
@@ -2323,7 +2323,7 @@ function Data$start() {
  * External messenger's methods are proxied on the Data facet and they allows "*" subscriptions.
  */
 function _prepareMessengers() {
-    // model will post all its changes on internal messenger
+    // Data facet will post all its changes on internal messenger
     var internalMessenger = new Messenger(this);
 
     // message source to connect internal messenger to external
@@ -2366,14 +2366,67 @@ function _prepareMessageSource() {
  * @param {String} msgType in this instance will be ''
  * @param {Object} data data change information
  */
-function onDataChange(msgType, data) {
-    this._postDataChanged(data);
-    var inTransaction = getTransactionFlag(data);
-    if (! inTransaction) {
-        this.off('finished', onDataChange);
-        postTransactionFinished.call(this, false);
-        this.on('finished', onDataChange);
+function onOwnDataChange(msgType, data) {
+    this._bubbleUpDataChange(data);
+    this._queueDataChange(data);
+
+    // var inTransaction = getTransactionFlag(data);
+    // if (! inTransaction) {
+    //     this.off('finished', onOwnDataChange);
+    //     postTransactionFinished.call(this, false);
+    //     this.on('finished', onOwnDataChange);
+    // }
+}
+
+
+/**
+ * Data facet instance method
+ * Sends data `message` to DOM parent
+ *
+ * @private
+ * @param {Object} msgData data change message
+ */
+function Data$_bubbleUpDataChange(msgData) {
+    var parentData = this.scopeParent();
+
+    if (parentData) {
+        if (msgData.type != 'finished') {
+            var parentMsg = _.clone(msgData);
+            parentMsg.path = (this._path || ('.' + thisComp.name))  + parentMsg.path;
+        }
+
+        parentData.postMessage('childdata', parentMsg || msgData);
     }
+}
+
+
+/**
+ * Data facet instance method
+ * Queues data messages to be dispatched to connector
+ *
+ * @private
+ * @param {Object} change data change description
+ */
+function Data$_queueDataChange(change) {
+    if (! this._dataChangesQueue.length)
+        _.deferMethod(this, '_postDataChanges');
+
+    this._dataChangesQueue.push(change);
+}
+
+
+/**
+ * Dispatches all changes collected in the batch
+ * Used for data propagation - connector subscribes to this message
+ *
+ * @private
+ */
+function Data$_postDataChanges() {
+    this.postMessageSync('datachanges', {
+        changes: this._dataChangesQueue.reverse(),
+        transaction: undefined // TODO
+    });
+    this._dataChangesQueue = [];
 }
 
 
@@ -2386,7 +2439,8 @@ function onDataChange(msgType, data) {
  */
 function onChildData(msgType, data) {
     this.postMessage(data.path || 'finished', data);
-    this._postDataChanged(data);
+    this._bubbleUpDataChange(data);
+    this._queueDataChange(data);
 }
 
 
@@ -2413,7 +2467,7 @@ function Data$set(value) {
     var oldValue = this._value
         , newValue = this._set(value);
 
-    // this message triggers onDataChange, as well as actuall DOM change
+    // this message triggers onOwnDataChange, as well as actuall DOM change
     // so the parent gets notified
     var msg = { path: '', type: 'changed',
                 newValue: newValue, oldValue: oldValue };
@@ -2439,8 +2493,6 @@ function Data$_set(value) {
                     , newItemsCount = value.length - listLength;
                 if (newItemsCount >= 3) {
                     listFacet.addItems(newItemsCount);
-                    // It's not clear why it was in defer - it seems not to break anything when it is removed
-                    // _.defer(_updataDataPaths, listFacet, listLength, listFacet.count());
                     _updataDataPaths(listFacet, listLength, listFacet.count());
                 }
 
@@ -2483,13 +2535,6 @@ function Data$_set(value) {
 }
 
 
-function _postFinishedMessage() {
-    this.off('', onDataChange);
-    this.postMessageSync('', { type: 'finished' });
-    this.onSync('', onDataChange);
-}
-
-
 /**
  * Data facet instance method
  * Deletes component from view and scope, only in case it has Item facet on it
@@ -2511,7 +2556,7 @@ function Data$del() {
     setTransactionFlag(this._del, inTransaction);
     this._del();
 
-    // this message triggers onDataChange, as well as actuall DOM change
+    // this message triggers onOwnDataChange, as well as actuall DOM change
     // so the parent gets notified
     var msg = { path: '', type: 'deleted', oldValue: oldValue };
     setTransactionFlag(msg, inTransaction);
@@ -2535,27 +2580,6 @@ function Data$_del() {
  */
 function Data$_setScalarValue(value) {
     return this.elData.set(this.owner.el, value);
-}
-
-
-/**
- * Data facet instance method
- * Sends data `message` to DOM parent
- *
- * @private
- * @param {Object} msgData data change message
- */
-function Data$_postDataChanged(msgData) {
-    var parentData = this.scopeParent();
-
-    if (parentData) {
-        if (msgData.type != 'finished') {
-            var parentMsg = _.clone(msgData);
-            parentMsg.path = (this._path || ('.' + thisComp.name))  + parentMsg.path;
-        }
-
-        parentData.postMessage('childdata', parentMsg || msgData);
-    }
 }
 
 
@@ -8630,6 +8654,7 @@ _.extendProto(MessengerMessageSource, {
     init: init,
     addSourceSubscriber: addSourceSubscriber,
     removeSourceSubscriber: removeSourceSubscriber,
+    postMessage: MessengerMessageSource$postMessage
 });
 
 /**
@@ -8662,6 +8687,18 @@ function addSourceSubscriber(sourceMessage) {
 function removeSourceSubscriber(sourceMessage) {
     this.sourceMessenger.off(sourceMessage, { context: this, subscriber: this.dispatchMessage });
 }
+
+
+/**
+ * Overrides defalut message source to dispatch messages synchronously
+ * 
+ * @param {String} message
+ * @param {Object} data
+ */
+function MessengerMessageSource$postMessage(message, data) {
+    this.messenger.postMessageSync(message, data);
+}
+
 
 },{"../util/check":80,"./m_source":64,"mol-proto":99}],66:[function(require,module,exports){
 'use strict';
@@ -8998,7 +9035,10 @@ function changeDataHandler(message, data, callback) {
 
     // this._changesQueue.push(data);
 
-    this._changesQueue = data.changes;
+    this._changesQueue.length = 0;
+    _.appendArray(this._changesQueue, data.changes);
+
+    // this._changesQueue = data.changes;
     _.defer(processChangesFunc, this, callback);
 }
 
@@ -9007,7 +9047,8 @@ function changeDataHandler(message, data, callback) {
  * Initializes messages queue used by changeDataHandler
  */
 changeDataHandler.initialize = function() {
-    _.defineProperty(this, '_changesQueue', [], _.WRIT);
+    this._changesQueue = [];
+    // _.defineProperty(this, '_changesQueue', [], _.WRIT);
 };
 
 
@@ -9337,7 +9378,7 @@ function Connector$turnOn() {
 
 
     function linkDataSource(reverseLink, fromDS, toDS, pathTranslation, dataTranslation, dataValidation) {
-        fromDS.on('datachanges', onData);
+        fromDS.onSync('datachanges', onData);
         return onData;
 
         function onData(message, batch) {
@@ -9366,7 +9407,7 @@ function Connector$turnOn() {
             if (self[reverseLink]) var callback = subscriptionSwitch;
 
             // send data change instruction as message
-            toDS.postMessage('changedata', sendData, callback);
+            toDS.postMessageSync('changedata', sendData, callback);
 
 
             function translatePath(sourcePath) {
@@ -9426,7 +9467,7 @@ function Connector$turnOn() {
 
             function subscriptionSwitch(err, changeFinished) {
                 if (err) return;
-                var onOff = changeFinished ? 'on' : 'off';
+                var onOff = changeFinished ? 'onSync' : 'off';
                 toDS[onOff]('datachanges', self[reverseLink]);
 
                 var message = changeFinished ? 'changecompleted' : 'changestarted';
@@ -9455,10 +9496,7 @@ function Connector$turnOff() {
 
     function unlinkDataSource(fromDS, linkName, pathTranslation) {
         if (self[linkName]) {
-            fromDS[onOff]('datachanges', self[linkName]);
-
-            // subscribeToDS(fromDS, 'off', self[linkName], self._subscriptionPath, pathTranslation);
-            // fromDS.off(self._subscriptionPath, self[linkName]);
+            fromDS.off('datachanges', self[linkName]);
             delete self[linkName];
         }
     }
@@ -10046,7 +10084,7 @@ function translateToSourceMessage(message) {
     // TODO should not prepend changedata too???
     if (message instanceof RegExp)
         return message;
-    if (message == 'finished')
+    if (message == 'finished' || message == 'datachanges')
         return message;
     
     return this.rootPath + message;
@@ -10065,18 +10103,31 @@ function translateToSourceMessage(message) {
 function createInternalData(sourceMessage, message, sourceData) {
     // TODO return on changedata too???
     if (message == 'finished') return sourceData;
-    // if (message == 'datachanges') {
-    //     sourceData.changes.forEach();
-    // }
-    var internalData = _.clone(sourceData);
-    var fullPath = internalData.path;
-    internalData.fullPath = fullPath;
-    if (fullPath.indexOf(this.rootPath) == 0)
-        internalData.path = fullPath.replace(this.rootPath, '');
-    else
-        logger.warn('ModelPath message dispatched with wrong root path');
+    if (message == 'datachanges') {
+        var internalChanges = sourceData.changes
+            .map(truncateChangePath, this)
+            .filter(function(change) { return change; });
+        var internalData = {
+            changes: internalChanges,
+            transaction: sourceData.transaction
+        };
 
+        return internalData
+    }
+
+    var internalData = truncateChangePath.call(this, sourceData);
     return internalData;
+}
+
+
+function truncateChangePath(change) {
+    var fullPath = change.path;
+    if (fullPath.indexOf(this.rootPath) == 0) {
+        var change = _.clone(change);
+        change.fullPath = fullPath;
+        change.path = fullPath.replace(this.rootPath, '');
+        return change;
+    }
 }
 
 },{"../messenger/m_api":62,"../util/logger":89,"./path_utils":75,"mol-proto":99}],75:[function(require,module,exports){

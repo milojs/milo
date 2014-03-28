@@ -8,6 +8,16 @@ describe('Data facet', function() {
     var testHtml = fs.readFileSync(__dirname + '/Data_test.html');
     var element, scope;
 
+    window.__tickCounter = 0;
+
+    var __setTimeout = window.setTimeout;
+    window.setTimeout = function(func, wait) {
+        __setTimeout(function(){
+            window.__tickCounter++;
+            func();
+        }, wait);
+    }
+
 
     beforeEach(function() {
         var element = document.createElement('div');
@@ -51,9 +61,9 @@ describe('Data facet', function() {
     it('should post messages when data anywhere in scope chain changes', function(done) {
         var posted = {};
 
-        scope.myItem.data.on(/.*/, function(path, data) {
-            if (data.type == 'finished') return;
-            posted[path] = data;
+        scope.myItem.data.on(/.*/, function(msg, data) {
+            if (data.type == 'finished' || msg == 'datachanges') return;
+            posted[msg] = data;
         });
 
         scope.myItem.data.set({ title: 'Title 1', desc: 'Description 1' });
@@ -74,9 +84,9 @@ describe('Data facet', function() {
     it('should support "*" pattern subscriptions on data messages', function(done) {
         var posted = {};
 
-        function logPosted(path, data) {
-            if (data.type == 'finished') return;
-            posted[path] = data;
+        function logPosted(msg, data) {
+            if (data.type == 'finished' || msg == 'datachanges') return;
+            posted[msg] = data;
         };
 
         scope.myItem.data.on('*', logPosted);

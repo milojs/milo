@@ -62,7 +62,7 @@ describe('Connector', function() {
         });
     });
 
-    it.skip('should connect model paths', function(done) {
+    it('should connect model paths', function(done) {
         var m1 = new Model
             , m2 = new Model
             , c = new Connector(m1('.path1'), '<<->>', m2('.path2'));
@@ -73,5 +73,32 @@ describe('Connector', function() {
             assert.deepEqual(m2('.path2').get(), { info: { name: 'milo' } } );
             done();
         });
+    });
+
+    it.skip('change_data should not break change batches as they pass via connections', function(done) {
+        var m1 = new Model
+            , m2 = new Model
+            , m3 = new Model;
+
+        var testData = {
+            title: 'Title 1',
+            desc: 'Description 1',
+            info: { name: 'Jason', surname: 'Green' }
+        };
+
+        var c1 = new Connector(m1, '<<->>', m2, { pathTranslation: {
+                '.title': '.title',
+                '.desc': '.desc',
+                '.info.name': '.info.name',
+                '.info.surname': '.info.surname'
+            }});
+        var c2 = new Connector(m2, '<<->>', m3);
+
+        m1.set(testData);
+
+        _.delay(function() {
+            assert.deepEqual(m3.get(), testData );
+            done();
+        }, 250);
     });
 });

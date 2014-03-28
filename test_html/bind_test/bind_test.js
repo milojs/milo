@@ -54,7 +54,7 @@ describe('milo binder', function() {
         for (var i = 0; i < 20000; i++) {
             comboTestArray.push({value: {val: 'value ' + i, id: i}, label: 'Label ' + i});
         };
-        ctrl.mySuperCombo.setOptions(comboTestArray);
+        _.deferMethod(ctrl.mySuperCombo, 'setOptions', comboTestArray);
         ctrl.mySuperCombo.data.on('', function(msg, data) {
             console.log('before', ctrl.myMLList.model.get() && _.clone(ctrl.myMLList.model.get()));
 
@@ -66,10 +66,10 @@ describe('milo binder', function() {
 
         // Setting comboList
 
-        ctrl.myComboList.setOptions(comboTestArray);
-        ctrl.myComboList.data.on('', function(msg, data) {
-            //cnsole.log('COMBO LIST DATA', msg, data);
-        });
+        // ctrl.myComboList.setOptions(comboTestArray);
+        // ctrl.myComboList.data.on('', function(msg, data) {
+        //     //cnsole.log('COMBO LIST DATA', msg, data);
+        // });
 
     // });
 
