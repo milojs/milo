@@ -75,7 +75,7 @@ describe('Connector', function() {
         });
     });
 
-    it.skip('change_data should not break change batches as they pass via connections', function(done) {
+    it('change_data should not break change batches as they pass via connections', function(done) {
         var m1 = new Model
             , m2 = new Model
             , m3 = new Model;
@@ -96,9 +96,9 @@ describe('Connector', function() {
 
         m1.set(testData);
 
-        _.delay(function() {
+        _.deferTicks(function() {
             assert.deepEqual(m3.get(), testData );
             done();
-        }, 250);
+        }, 2);
     });
 });

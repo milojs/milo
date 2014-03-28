@@ -9014,8 +9014,8 @@ function getTransactionFlag(func) {
  * @param  {Boolean} inChangeTransaction flag to prevent posting if inside change transaction
  */
 function postTransactionFinished(inChangeTransaction) {
-    if (! inChangeTransaction)
-        this.postMessageSync('finished', { type: 'finished' });
+    // if (! inChangeTransaction)
+    this.postMessageSync('datachanges', { transaction: true, changes: [] });
 }
 
 
@@ -9026,20 +9026,14 @@ function postTransactionFinished(inChangeTransaction) {
  * TODO: optimize messages list to avoid setting duplicate values down the tree
  *
  * @param {String} msg should be "changedata" here
- * @param {Object} data data change desciption object}
- * @param {Function} callback callback to call when the data is processed
+ * @param {Object} data batch of data change desciption objects
+ * @param {Function} callback callback to call before and after the data is processed
  */
 function changeDataHandler(message, data, callback) {
-    // if (! this._changesQueue.length)
-    //     _.defer(processChangesFunc, this, callback);
+    if (! this._changesQueue.length)
+        _.defer(processChangesFunc, this, callback);
 
-    // this._changesQueue.push(data);
-
-    this._changesQueue.length = 0;
-    _.appendArray(this._changesQueue, data.changes);
-
-    // this._changesQueue = data.changes;
-    _.defer(processChangesFunc, this, callback);
+    this._changesQueue.push(data);
 }
 
 
@@ -9047,8 +9041,7 @@ function changeDataHandler(message, data, callback) {
  * Initializes messages queue used by changeDataHandler
  */
 changeDataHandler.initialize = function() {
-    this._changesQueue = [];
-    // _.defineProperty(this, '_changesQueue', [], _.WRIT);
+    _.defineProperty(this, '_changesQueue', []);
 };
 
 
@@ -9063,8 +9056,6 @@ var CHANGE_TYPE_TO_METHOD_MAP = {
     'removed': 'del'
 };
 
-var DataFacetClass;
-
 
 /**
  * Processes queued "changedata" messages.
@@ -9073,13 +9064,11 @@ var DataFacetClass;
  * @param {[Function]} callback optional callback that is called with `(null, false)` parameters before change processing starts and `(null, true)` after it's finished.
  */
 function processChanges(callback) {
-    DataFacetClass = DataFacetClass || facetsRegistry.get('Data');
-
     notify.call(this, callback, false);
-    splitToBatches(this._changesQueue, this)
-        .map(validateBatch)
-        .map(prepareBatch)
-        .forEach(processBatch, this);
+    mergeTransactions(this._changesQueue)
+        .map(validateTransaction)
+        .map(prepareTransaction)
+        .forEach(processTransaction, this);
 
     this._changesQueue.length = 0;
     notify.call(this, callback, true);
@@ -9092,55 +9081,70 @@ function notify(callback, changeFinished) {
 }
 
 
-function splitToBatches(queue, self) {
-    var currentBatch = []
-        , batches = [currentBatch];
-    queue.forEach(function(data) {
-        if (data.type == 'finished') {
-            if (currentBatch.length)
-                batches.push(currentBatch = []);
-        } else
-            currentBatch.push(data);
+function mergeTransactions(batches) {
+    var transactions = []
+        , index = 0;
+
+    batches.forEach(function(batch) {
+        var hasChanges = batch.changes && batch.changes.length;
+        if (transactions[index])
+            _.appendArray(transactions[index], batch.changes);
+        else if (hasChanges)
+            transactions[index] = batch.changes;
+
+        if (batch.transaction && hasChanges) index++;
     });
-    if (! currentBatch.length)
-        batches.pop();
-    // TODO Warning is disabled as Data facets sometimes fails to emit changedata message
-    // Should be re-enabled when Data facet is fixed
-    // else
-    //     logger.warn('changedata: no message with data.type=="finished" in the end of the queue', _.clone(queue), batches, { self: self });
-    return batches;
+
+    return transactions;
 }
+
+
+// function splitToBatches(queue, self) {
+//     var currentBatch = []
+//         , batches = [currentBatch];
+//     queue.forEach(function(data) {
+//         if (data.type == 'finished') {
+//             if (currentBatch.length)
+//                 batches.push(currentBatch = []);
+//         } else
+//             currentBatch.push(data);
+//     });
+//     if (! currentBatch.length)
+//         batches.pop();
+//     // TODO Warning is disabled as Data facets sometimes fails to emit changedata message
+//     // Should be re-enabled when Data facet is fixed
+//     // else
+//     //     logger.warn('changedata: no message with data.type=="finished" in the end of the queue', _.clone(queue), batches, { self: self });
+//     return batches;
+// }
 
 
 /**
- * Checks that all messages from the batch come from the same source.
- * Hack: reverses the batch if it comes from the Data facet
- * Returns the reference to the batch (for chaining)
+ * Checks that all messages from the transaction come from the same source.
+ * Hack: reverses the transaction if it comes from the Data facet
+ * Returns the reference to the transaction (for chaining)
  * 
- * @param  {Array} batch batch of data changes
+ * @param  {Array} transaction transaction of data changes
  * @return {Array} 
  */
-function validateBatch(batch) {
-    var source = batch[0].source
+function validateTransaction(transaction) {
+    var source = transaction[0].source
         , sameSource = true;
 
-    if (batch.length > 1) {
-        for (var i = 1, len = batch.length; i < len; i++)
-            if (batch[i].source != source) {
-                logger.error('changedata: changes from different sources in the same batch, sources:', batch[i].source.name, source.name);
+    if (transaction.length > 1) {
+        for (var i = 1, len = transaction.length; i < len; i++)
+            if (transaction[i].source != source) {
+                logger.error('changedata: changes from different sources in the same transaction, sources:', transaction[i].source.name, source.name);
                 sameSource = false;
-                source = batch[i].source;
+                source = transaction[i].source;
             }
-
-        if (sameSource && source.constructor == DataFacetClass)
-            batch.reverse();
     }
 
-    return batch;
+    return transaction;
 }
 
 
-function prepareBatch(batch) {
+function prepareTransaction(transaction) {
     var todo = []
         , pathsToSplice
         , pathsToChange = []
@@ -9148,7 +9152,7 @@ function prepareBatch(batch) {
         , exitLoop = {};
 
 
-    try { batch.forEach(checkChange); }
+    try { transaction.forEach(checkChange); }
     catch (e) { if (e != exitLoop) throw e; }
 
     return todo;
@@ -9199,8 +9203,8 @@ function prepareBatch(batch) {
 }
 
 
-function processBatch(batch) {
-    batch.forEach(processChange, this);
+function processTransaction(transaction) {
+    transaction.forEach(processChange, this);
     postTransactionFinished.call(this, false);
 
 
@@ -10300,7 +10304,7 @@ var templates = {
     splice: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n{{# def.include_traverse_tree }}\n\nmethod = function splice(spliceIndex, spliceHowMany) { /* ,... - extra arguments to splice into array */\n    {{# def.initVars:'splice' }}\n\n    var argsLen = arguments.length;\n    var addItems = argsLen > 2;\n\n    if (addItems) {\n        {{ /* only create model tree if items are inserted in array */ }}\n\n        {{ /* if model is undefined it will be set to an empty array */ }}  \n        var value = [];\n        {{# def.createTree:'splice' }}\n\n        {{? nextNode }}\n            {{\n                var currNode = nextNode;\n                var currProp = currNode.property;\n                var emptyProp = '[]';\n            }}\n\n            {{# def.createTreeStep }}\n        {{?}}\n\n    } else if (spliceHowMany > 0) {\n        {{ /* if items are not inserted, only traverse model tree if items are deleted from array */ }}\n        {{? it.parsedPath.length }}\n            {{# def.traverseTree }}\n\n            {{\n                var currNode = it.parsedPath[count];\n                var currProp = currNode.property;       \n            }}\n\n            {{ /* extra brace closes 'else' in def.traverseTreeStep */ }}\n            {{# def.traverseTreeStep }} }\n        {{?}}\n    }\n\n    {{ /* splice items */ }}\n    if (addItems || (! treeDoesNotExist && m\n            && m.length > spliceIndex ) ) {\n        var oldLength = m.length = m.length || 0;\n\n        arguments[0] = spliceIndex = normalizeSpliceIndex(spliceIndex, m.length);\n\n        {{ /* clone added arguments to prevent same references in linked models */ }}\n        if (addItems)\n            for (var i = 2; i < argsLen; i++)\n                arguments[i] = cloneTree(arguments[i]);\n\n        {{ /* actual splice call */ }}\n        var removed = Array.prototype.splice.apply(m, arguments);\n\n        {{# def.addMsg }} accessPath, type: 'splice',\n                index: spliceIndex, removed: removed, addedCount: addItems ? argsLen - 2 : 0,\n                newValue: m });\n\n        if (removed && removed.length)\n            removed.forEach(function(item, index) {\n                var itemPath = accessPath + '[' + (spliceIndex + index) + ']';\n                {{# def.addMsg }} itemPath, type: 'removed', oldValue: item });\n\n                if (valueIsTree(item))\n                    addMessages(messages, messagesHash, itemPath, item, 'removed', 'oldValue');\n            });\n\n        if (addItems)\n            for (var i = 2; i < argsLen; i++) {\n                var item = arguments[i];\n                var itemPath = accessPath + '[' + (spliceIndex + i - 2) + ']';\n                {{# def.addMsg }} itemPath, type: 'added', newValue: item });\n\n                if (valueIsTree(item))\n                    addMessages(messages, messagesHash, itemPath, item, 'added', 'newValue');\n            }\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n\n    return removed || [];\n}\n"
 };
 
-var include_defines = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts initialization code\n */\n {{## def.initVars:method:\n    var m = {{# def.modelAccessPrefix }};\n    var messages = [], messagesHash = {};\n    var accessPath = '';\n    var treeDoesNotExist;\n    /* hack to prevent sending finished events to allow for propagation of batches without splitting them */\n    var inChangeTransaction = getTransactionFlag( {{= method }} );\n #}}\n\n/**\n * Inserts the beginning of function call to add message to list\n */\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n/**\n * Inserts current property/index for both normal and interpolated properties/indexes \n */\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n/**\n * Inserts condition to test whether normal/interpolated property/index exists \n */\n{{## def.wasDefined: m.hasOwnProperty(\n    {{? currNode.interpolate }}\n        this._args[ {{= currNode.interpolate }} ]\n    {{??}}\n        '{{= it.getPathNodeKey(currNode) }}'\n    {{?}}\n) #}}\n\n\n/**\n * Inserts code to update access path for current property\n * Because of the possibility of interpolated properties, it can't be calculated in template, it can only be calculated during accessor call. \n */\n{{## def.changeAccessPath:\n    accessPath += {{? currNode.interpolate }}\n        {{? currNode.syntax == 'array' }}\n            '[' + this._args[ {{= currNode.interpolate }} ] + ']';\n        {{??}}\n            '.' + this._args[ {{= currNode.interpolate }} ];\n        {{?}}\n    {{??}}\n        '{{= currProp }}';\n    {{?}}\n#}}\n\n\n/**\n * Inserts code to post stored messages\n */\n{{## def.postMessages:\n    if (sendingNotifications)\n        logger.error('Model accessor: sending notifications before another notifactions batch is finished');\n    sendingNotifications = true;\n\n    if (messages.length) {\n        {{# def.modelPostBatchCode }}('datachanges', {\n            changes: messages,\n            transaction: inChangeTransaction\n        }); \n\n        messages.forEach(function(msg) {\n            {{# def.modelPostMessageCode }}(msg.path, msg);\n        }, this);\n        \n        postTransactionFinished.call( {{# def.internalMessenger }}, inChangeTransaction );\n    }\n\n    sendingNotifications = false;\n#}}\n"
+var include_defines = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts initialization code\n */\n {{## def.initVars:method:\n    var m = {{# def.modelAccessPrefix }};\n    var messages = [], messagesHash = {};\n    var accessPath = '';\n    var treeDoesNotExist;\n    /* hack to prevent sending finished events to allow for propagation of batches without splitting them */\n    var inChangeTransaction = getTransactionFlag( {{= method }} );\n #}}\n\n/**\n * Inserts the beginning of function call to add message to list\n */\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n/**\n * Inserts current property/index for both normal and interpolated properties/indexes \n */\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n/**\n * Inserts condition to test whether normal/interpolated property/index exists \n */\n{{## def.wasDefined: m.hasOwnProperty(\n    {{? currNode.interpolate }}\n        this._args[ {{= currNode.interpolate }} ]\n    {{??}}\n        '{{= it.getPathNodeKey(currNode) }}'\n    {{?}}\n) #}}\n\n\n/**\n * Inserts code to update access path for current property\n * Because of the possibility of interpolated properties, it can't be calculated in template, it can only be calculated during accessor call. \n */\n{{## def.changeAccessPath:\n    accessPath += {{? currNode.interpolate }}\n        {{? currNode.syntax == 'array' }}\n            '[' + this._args[ {{= currNode.interpolate }} ] + ']';\n        {{??}}\n            '.' + this._args[ {{= currNode.interpolate }} ];\n        {{?}}\n    {{??}}\n        '{{= currProp }}';\n    {{?}}\n#}}\n\n\n/**\n * Inserts code to post stored messages\n */\n{{## def.postMessages:\n    if (sendingNotifications)\n        logger.error('Model accessor: sending notifications before another notifactions batch is finished');\n    sendingNotifications = true;\n\n    if (messages.length) {\n        {{# def.modelPostBatchCode }}('datachanges', {\n            changes: messages,\n            transaction: inChangeTransaction\n        }); \n\n        messages.forEach(function(msg) {\n            {{# def.modelPostMessageCode }}(msg.path, msg);\n        }, this);\n    }\n\n    sendingNotifications = false;\n#}}\n"
     , include_create_tree = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts code to create model tree as neccessary for `set` and `splice` accessors and to add messages to send list if the tree changes.\n */\n{{## def.createTree:method:\n    var wasDef = true;\n    var old = m;\n\n    {{ var emptyProp = it.parsedPath[0] && it.parsedPath[0].empty; }}\n    {{? emptyProp }}\n        {{ /* create top level model if it was not previously defined */ }}\n        if (! m) {\n            m = {{# def.modelAccessPrefix }} = {{= emptyProp }};\n            wasDef = false;\n\n            {{# def.addMsg }} '', type: 'added',\n                  newValue: m });\n        }\n    {{??}}\n        {{? method == 'splice' }}\n            if (! m) {\n        {{?}}\n                m = {{# def.modelAccessPrefix }} = cloneTree(value);\n                wasDef = typeof old != 'undefined';\n        {{? method == 'splice' }}\n            }\n        {{?}}       \n    {{?}}\n\n\n    {{ /* create model tree if it doesn't exist */ }}\n    {{  var modelDataProperty = '';\n        var nextNode = it.parsedPath[0];\n        var count = it.parsedPath.length - 1;\n\n        for (var i = 0; i < count; i++) {\n            var currNode = nextNode;\n            var currProp = currNode.property;\n            nextNode = it.parsedPath[i + 1];\n            var emptyProp = nextNode && nextNode.empty;\n    }}\n\n        {{# def.createTreeStep }}\n\n    {{  } /* for loop */ }}\n#}}\n\n\n/**\n * Inserts code to create one step in the model tree\n */\n{{## def.createTreeStep:\n    {{# def.changeAccessPath }}\n\n    if (! {{# def.wasDefined }}) { \n        {{ /* property does not exist */ }}\n        m = m{{# def.currProp }} = {{= emptyProp }};\n\n        {{# def.addMsg }} accessPath, type: 'added', \n              newValue: m });\n\n    } else if (typeof m{{# def.currProp }} != 'object') {\n        {{ /* property is not object */ }}\n        var old = m{{# def.currProp }};\n        m = m{{# def.currProp }} = {{= emptyProp }};\n\n        {{# def.addMsg }} accessPath, type: 'changed', \n              oldValue: old, newValue: m });\n\n    } else {\n        {{ /* property exists, just traverse down the model tree */ }}\n        m = m{{# def.currProp }};\n    }\n#}}\n"
     , include_traverse_tree = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts code to traverse model tree for `delete` and `splice` accessors.\n */\n{{## def.traverseTree:\n    {{ \n        var count = it.parsedPath.length-1;\n\n        for (var i = 0; i < count; i++) { \n            var currNode = it.parsedPath[i];\n            var currProp = currNode.property;\n    }}\n            {{# def.traverseTreeStep }}\n\n    {{ } /* for loop */\n\n        var i = count;\n        while (i--) { /* closing braces for else's above */\n    }}\n            }\n    {{ } /* while loop */ }}\n#}}\n\n\n/**\n * Inserts code to traverse one step in the model tree\n */\n{{## def.traverseTreeStep:\n    if (! (m && m.hasOwnProperty && {{# def.wasDefined}} ) )\n        treeDoesNotExist = true;\n    else {\n        m = m{{# def.currProp }};\n        {{# def.changeAccessPath }}\n    {{ /* brace from else is not closed on purpose - all braces are closed in while loop */ }}\n#}}\n";
 

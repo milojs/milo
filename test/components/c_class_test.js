@@ -29,9 +29,4 @@ describe('Component class', function() {
 
         assert(aComp._messenger instanceof Messenger);
     });
-
-
-    it.skip('should define "create" class method that creates Component from ComponentInfo', function() {
-
-    });
 });
