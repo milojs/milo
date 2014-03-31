@@ -51,9 +51,9 @@ describe('Data facet', function() {
     it('should post messages when data anywhere in scope chain changes', function(done) {
         var posted = {};
 
-        scope.myItem.data.on(/.*/, function(path, data) {
-            if (data.type == 'finished') return;
-            posted[path] = data;
+        scope.myItem.data.on(/.*/, function(msg, data) {
+            if (msg == 'datachangesfinished' || msg == 'datachanges') return;
+            posted[msg] = data;
         });
 
         scope.myItem.data.set({ title: 'Title 1', desc: 'Description 1' });
@@ -74,9 +74,9 @@ describe('Data facet', function() {
     it('should support "*" pattern subscriptions on data messages', function(done) {
         var posted = {};
 
-        function logPosted(path, data) {
-            if (data.type == 'finished') return;
-            posted[path] = data;
+        function logPosted(msg, data) {
+            if (msg == 'datachangesfinished' || msg == 'datachanges') return;
+            posted[msg] = data;
         };
 
         scope.myItem.data.on('*', logPosted);
