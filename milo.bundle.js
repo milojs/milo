@@ -2285,9 +2285,6 @@ function Data$start() {
     // get/set methods to set data of element
     this.elData = getElementDataAccess(this.owner.el);
 
-    // initializes queue of "changedata" messages
-    changeDataHandler.initialize.call(this);
-
     this._dataChangesQueue = [];
 
     this._prepareMessageSource();
@@ -9029,23 +9026,14 @@ function postTransactionFinished(inChangeTransaction) {
  * @param {Function} callback callback to call before and after the data is processed
  */
 function changeDataHandler(message, data, callback) {
-    if (! this._changesQueue.length)
-        _.defer(processChangesFunc, this, callback);
+    // if (! this._changesQueue.length)
+    //     _.defer(processChangesFunc, this, callback);
 
-    this._changesQueue.push(data);
+    // this._changesQueue.push(data);
+    
+    processChanges.call(this, data.changes, callback);
 }
 
-
-/**
- * Initializes messages queue used by changeDataHandler
- */
-changeDataHandler.initialize = function() {
-    _.defineProperty(this, '_changesQueue', []);
-};
-
-
-// converts _processChanges to function that passes the first parameter as the context of the original function
-var processChangesFunc = Function.prototype.call.bind(processChanges);
 
 // map of message types to methods
 var CHANGE_TYPE_TO_METHOD_MAP = {
@@ -9062,14 +9050,11 @@ var CHANGE_TYPE_TO_METHOD_MAP = {
  *
  * @param {[Function]} callback optional callback that is called with `(null, false)` parameters before change processing starts and `(null, true)` after it's finished.
  */
-function processChanges(callback) {
+function processChanges(transaction, callback) {
     notify.call(this, callback, false);
-    mergeTransactions(this._changesQueue)
-        .map(validateTransaction)
-        .map(prepareTransaction)
-        .forEach(processTransaction, this);
-
-    this._changesQueue.length = 0;
+    processTransaction.call(this,
+        prepareTransaction(
+            validateTransaction(transaction)));
     notify.call(this, callback, true);
 }
 
@@ -9077,29 +9062,6 @@ function processChanges(callback) {
 function notify(callback, changeFinished) {
     callback && callback(null, changeFinished);
     this.postMessage(changeFinished ? 'changecompleted' : 'changestarted');
-}
-
-
-function mergeTransactions(batches) {
-    var transactions = []
-        , currentTransaction;
-
-    batches.forEach(function(batch) {
-        if (! batch.transaction) currentTransaction = undefined;
-        if (! batch.changes.length) return;
-
-        if (batch.transaction) {
-            if (currentTransaction)
-                _.appendArray(currentTransaction, batch.changes);
-            else {
-                currentTransaction = _.clone(batch.changes);
-                transactions.push(currentTransaction);
-            }
-        } else
-            transactions.push(batch.changes);
-    });
-
-    return transactions;
 }
 
 
@@ -9284,6 +9246,8 @@ function Connector(ds1, mode, ds2, options) {
         depth1: depth1,
         depth2: depth2,
         isOn: false,
+        _changesQueue1: [],
+        _changesQueue2: [],
         _messenger: new Messenger(this, Messenger.defaultMethods)
     });
 
@@ -9357,15 +9321,15 @@ function Connector$turnOn() {
 
     var self = this;
     if (this.depth1)
-        this._link1 = linkDataSource('_link2', this.ds2, this.ds1, this.pathTranslation1, this.dataTranslation1, this.dataValidation1);
+        this._link1 = linkDataSource('_link2', this.ds2, this.ds1, this._changesQueue1, this.pathTranslation1, this.dataTranslation1, this.dataValidation1);
     if (this.depth2)
-        this._link2 = linkDataSource('_link1', this.ds1, this.ds2, this.pathTranslation2, this.dataTranslation2, this.dataValidation2);
+        this._link2 = linkDataSource('_link1', this.ds1, this.ds2, this._changesQueue2, this.pathTranslation2, this.dataTranslation2, this.dataValidation2);
 
     this.isOn = true;
     this.postMessage('turnedon');
 
 
-    function linkDataSource(reverseLink, fromDS, toDS, pathTranslation, dataTranslation, dataValidation) {
+    function linkDataSource(reverseLink, fromDS, toDS, changesQueue, pathTranslation, dataTranslation, dataValidation) {
         fromDS.onSync('datachanges', onData);
         return onData;
 
@@ -9391,11 +9355,10 @@ function Connector$turnOn() {
                 validateData(sourcePath, change);
             });
 
-            // prevent endless loop of updates for 2-way connection
-            if (self[reverseLink]) var callback = subscriptionSwitch;
+            if (! changesQueue.length)
+                _.defer(postChangeData);
 
-            // send data change instruction as message
-            toDS.postMessageSync('changedata', sendData, callback);
+            changesQueue.push(sendData);
 
 
             function translatePath(sourcePath) {
@@ -9453,6 +9416,19 @@ function Connector$turnOn() {
             }
 
 
+            function postChangeData() {
+                // prevent endless loop of updates for 2-way connection
+                if (self[reverseLink]) var callback = subscriptionSwitch;
+
+                var transactions = mergeTransactions(changesQueue);
+                changesQueue.length = 0;
+                transactions.forEach(function(transaction) {
+                    // send data change instruction as message
+                    toDS.postMessageSync('changedata', { changes: transaction }, callback);
+                });
+            }
+
+
             function subscriptionSwitch(err, changeFinished) {
                 if (err) return;
                 var onOff = changeFinished ? 'onSync' : 'off';
@@ -9460,6 +9436,29 @@ function Connector$turnOn() {
 
                 var message = changeFinished ? 'changecompleted' : 'changestarted';
                 self.postMessage(message, { source: fromDS, target: toDS });
+            }
+
+
+            function mergeTransactions(batches) {
+                var transactions = []
+                    , currentTransaction;
+
+                batches.forEach(function(batch) {
+                    if (! batch.transaction) currentTransaction = undefined;
+                    if (! batch.changes.length) return;
+
+                    if (batch.transaction) {
+                        if (currentTransaction)
+                            _.appendArray(currentTransaction, batch.changes);
+                        else {
+                            currentTransaction = _.clone(batch.changes);
+                            transactions.push(currentTransaction);
+                        }
+                    } else
+                        transactions.push(batch.changes);
+                });
+
+                return transactions;
             }
         }
     }
@@ -9557,7 +9556,6 @@ function Model(data, hostObject) {
     if (data) model._data = data;
 
     // subscribe to "changedata" message to enable reactive connections
-    changeDataHandler.initialize.call(model);
     model.onSync('changedata', changeDataHandler);
 
     return model;
@@ -9819,7 +9817,6 @@ function ModelPath(model, path) { // ,... - additional arguments for interpolati
     _.defineProperties(modelPath, methods);
 
     // subscribe to "changedata" message to enable reactive connections
-    changeDataHandler.initialize.call(modelPath);
     modelPath.onSync('changedata', changeDataHandler);
 
     Object.freeze(modelPath);
@@ -13326,6 +13323,7 @@ var numberMethods = require('./proto_number');
  * - [repeat](proto_util.js.html#repeat)
  * - [tap](proto_util.js.html#tap)
  * - [result](proto_util.js.html#result)
+ * - [identity](proto_util.js.html#identity)
  */
 var utilMethods = require('./proto_util');
 
@@ -14870,12 +14868,14 @@ function hashCode(){
  * - [repeat](#repeat)
  * - [tap](#tap)
  * - [result](#result)
+ * - [identity](#identity)
  */
 var utilMethods = module.exports = {
     times: times,
     repeat: repeat,
     tap: tap,
-    result: result
+    result: result,
+    identity: identity
 };
 
 
@@ -14935,6 +14935,17 @@ function result(thisArg) { //, arguments
     return typeof this == 'function'
             ? this.apply(thisArg, args)
             : this;
+}
+
+
+/**
+ * Returns self. Useful for using as an iterator if the actual value needs to be returned. Unlike in underscore and lodash, this function is NOT used as default iterator.
+ *
+ * @param {Any} self 
+ * @return {Any}
+ */
+function identity() {
+    return this;
 }
 
 },{}],107:[function(require,module,exports){
