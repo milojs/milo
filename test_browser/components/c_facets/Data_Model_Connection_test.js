@@ -73,7 +73,7 @@ describe('Data Model connection', function() {
                 throw new Error('data propagation loop');
             });
 
-            _.defer(done);
+            _.deferTicks(done, 4);
         });
     });
 });

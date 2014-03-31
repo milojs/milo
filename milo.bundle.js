@@ -941,7 +941,7 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
             var elComp = Component.getComponent(el);
 
             if (elComp)
-                elComp.postMessage('childrenbound');
+                elComp.postMessageSync('childrenbound');
         }
     }
 
