@@ -1378,7 +1378,7 @@ function Component$$createFromState(state, rootScope, newUniqueName, throwOnErro
     // restore component state
     component.setState(state);
 
-    _.deferMethod(component, 'broadcast', 'stateready');
+    component.broadcast('stateready');
 
     return component;   
 }
