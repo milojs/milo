@@ -107,7 +107,9 @@
 
             // We can also bind nested data structures to the dom. Let's setup
             // another bind our userProfile component to userModel. Being nested
-            // data, we will need to bind one level deeper.
+            // data, we will need to bind one level deeper. Notice that for the
+            // component, the data source is not the component itself, but it's
+            // data facet.
             var connection2 = milo.minder(userModel, '->>', userProfile.data);
             
 
@@ -144,40 +146,86 @@
             });
 
 
+            // Now we want to make a more complicated data connection. Remember
+            // the last component we set up, it had a completely different data
+            // structure to our model. We can still link it up, though, by
+            // using the options of milo.minder.
+            
+            // Options, for milo.minder, have to be passed as an object, with
+            // the properties of the options you would like to customise. We
+            // can set options for path translation, data translation, and 
+            // validation. Let's have a look at the options below.
             var options = {
+
+                // Here we define our path translation. The property name
+                // represents the first data source that we pass to minder,
+                // and the value is the second. So you see we are linking 'title'
+                // of the model to 'info.name' of the component. Using this,
+                // we are free to have whatever view structure we like and link
+                // it to any model data.
                 pathTranslation: {
                     '.title': '.info.name',
                     '.desc': '.info.description',
                     '.available': '.free'
                 },
+
+                // Next we are going to define a little bit of data translation.
+                // For each direction, we define what happens to the model's
+                // data as it gets sent over to the component.
                 dataTranslation: {
                     '->': {
+                        // Here we change the title text to upper case.
                         '.title': function (val) {
                             return val && val.toUpperCase();
                         },
+                        // And here we provide a custom message instead of true
+                        // and false. Notice we have to guard the values, in 
+                        // case val is undefined.
                         '.available': function (val) {
                             return val && val ? 'It\'s in' : 'It\'s gone';
                         }
                     }
                 },
+                
+                // And now we declare som validation. Validation will do two
+                // things. If it is invalid, it will prevent the data from
+                // being written to the destination data source. And in all
+                // cases it will emit validation events on the origin data
+                // source. You can decide what data get's sent with the message.
                 dataValidation: {
+                    // So, when data goes from the model to the component.
                     '->': {
+                        // For the title we'll pass an array of validation
+                        // functions, these will be executing in order.
                         '.title': [
-                            function validateRequired(val, callback) {
+                            // We will call this function, which gets the value
+                            // and a callback as arguments.
+                            function validateLength(val, callback) {
+                                // First we find out if our data is valid
                                 var valid = val && val.length > 4;
 
+                                // Then we'll compose our response object
                                 var response = valid
                                                 ? { valid: true }
                                                 : { valid: false, reason: 'must be minimum of 5 characters' };
-
+                                
+                                // And pass it to the callback. The first argument
+                                // passed is an error, it should only be not-null
+                                // if an actual error occured, not if the validation
+                                // returns false.
                                 callback(null, response);
                             }
                         ]
                     }
                 }
             }
-            window.formConnect3 = milo.minder(formModel, '->>', bookData.data, options);
 
+            // And now we can link that form to our bookData component's data facet.
+            // Notice we are passing the options at the end.
+            var formConnect3 = milo.minder(formModel, '->>', bookData.data, options);
+
+            // Let's listen to the validated event on the model to see what happens
+            // on each validation. You can use this event to take action
             formModel.on('validated', function(msg, response) {
                 console.log(msg, response);
             });
