@@ -2304,7 +2304,8 @@ function Data$start() {
     // subscribe to DOM event and accessors' messages
     this.onSync('', onOwnDataChange);
 
-    // this.onSync('finished', onOwnDataChange);
+    // message to mark the end of batch on the current level
+    this.onSync('datachangesfinished', onDataChangesFinished);
 
     // changes in scope children with Data facet
     this.onSync('childdata', onChildData);
@@ -2366,13 +2367,10 @@ function _prepareMessageSource() {
 function onOwnDataChange(msgType, data) {
     this._bubbleUpDataChange(data);
     this._queueDataChange(data);
-
-    // var inTransaction = getTransactionFlag(data);
-    // if (! inTransaction) {
-    //     this.off('finished', onOwnDataChange);
-    //     postTransactionFinished.call(this, false);
-    //     this.on('finished', onOwnDataChange);
-    // }
+    if (data.path === '') {
+        var inTransaction = getTransactionFlag(data);
+        this.postMessage('datachangesfinished', { transaction: inTransaction });
+    }
 }
 
 
@@ -2405,10 +2403,21 @@ function Data$_bubbleUpDataChange(msgData) {
  * @param {Object} change data change description
  */
 function Data$_queueDataChange(change) {
-    if (! this._dataChangesQueue.length)
-        _.deferMethod(this, '_postDataChanges');
-
     this._dataChangesQueue.push(change);
+}
+
+
+/**
+ * Subscriber to datachangesfinished event.
+ * Calls the method to post changes batch and bubbles up the message
+ * 
+ * @param  {[type]} msg  [description]
+ * @param  {[type]} data [description]
+ */
+function onDataChangesFinished(msg, data) {
+    this._postDataChanges(data.inTransaction);
+    var parentData = this.scopeParent();
+    if (parentData) parentData.postMessage('datachangesfinished', data);
 }
 
 
@@ -2418,12 +2427,13 @@ function Data$_queueDataChange(change) {
  *
  * @private
  */
-function Data$_postDataChanges() {
+function Data$_postDataChanges(inTransaction) {
+    var queue = this._dataChangesQueue.reverse();
     this.postMessageSync('datachanges', {
-        changes: this._dataChangesQueue.reverse(),
-        transaction: undefined // TODO
+        changes: queue,
+        transaction: inTransaction
     });
-    this._dataChangesQueue = [];
+    this._dataChangesQueue = []; // it can't be .length = 0, as the actual array may still be used
 }
 
 
@@ -2455,7 +2465,6 @@ function Data$set(value) {
     var componentSetter = this.config.set;
     if (typeof componentSetter == 'function') {
         var result = componentSetter.call(this.owner, value);
-        postTransactionFinished.call(this, inTransaction);
         return result;
     }
 
@@ -2525,8 +2534,6 @@ function Data$_set(value) {
             setTransactionFlag(childDataFacet.set, inTransaction);
             valueSet[key] = childDataFacet.set(childValue);
         }
-        // else
-        //  logger.warn('attempt to set data on path that does not exist: ' + childPath);
     }    
 }
 
@@ -8973,6 +8980,7 @@ module.exports = changeDataHandler;
 _.extend(changeDataHandler, {
     setTransactionFlag: setTransactionFlag,
     getTransactionFlag: getTransactionFlag,
+    passTransactionFlag: passTransactionFlag,
     postTransactionFinished: postTransactionFinished
 });
 
@@ -8998,18 +9006,23 @@ function setTransactionFlag(func, flag) {
  * @return {Boolean}
  */
 function getTransactionFlag(func) {
-    var inChangeTransaction = func.__inChangeTransaction;
+    var inTransaction = func.__inChangeTransaction;
     delete func.__inChangeTransaction;
-    return inChangeTransaction;
+    return inTransaction;
+}
+
+
+function passTransactionFlag(fromFunc, toFunc) {
+    var inTransaction = getTransactionFlag(fromFunc);
+    setTransactionFlag(toFunc, inTransaction);
+    return inTransaction;
 }
 
 
 /**
  * Posts message on this to indicate the end of transaction unless `inChangeTransaction` is `true`.
- * 
- * @param  {Boolean} inChangeTransaction flag to prevent posting if inside change transaction
  */
-function postTransactionFinished(inChangeTransaction) {
+function postTransactionFinished() {
     this.postMessageSync('datachanges', { transaction: false, changes: [] });
 }
 

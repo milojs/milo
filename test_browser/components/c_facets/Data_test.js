@@ -8,16 +8,6 @@ describe('Data facet', function() {
     var testHtml = fs.readFileSync(__dirname + '/Data_test.html');
     var element, scope;
 
-    window.__tickCounter = 0;
-
-    var __setTimeout = window.setTimeout;
-    window.setTimeout = function(func, wait) {
-        __setTimeout(function(){
-            window.__tickCounter++;
-            func();
-        }, wait);
-    }
-
 
     beforeEach(function() {
         var element = document.createElement('div');
@@ -62,7 +52,7 @@ describe('Data facet', function() {
         var posted = {};
 
         scope.myItem.data.on(/.*/, function(msg, data) {
-            if (data.type == 'finished' || msg == 'datachanges') return;
+            if (msg == 'datachangesfinished' || msg == 'datachanges') return;
             posted[msg] = data;
         });
 
@@ -85,7 +75,7 @@ describe('Data facet', function() {
         var posted = {};
 
         function logPosted(msg, data) {
-            if (data.type == 'finished' || msg == 'datachanges') return;
+            if (msg == 'datachangesfinished' || msg == 'datachanges') return;
             posted[msg] = data;
         };
 

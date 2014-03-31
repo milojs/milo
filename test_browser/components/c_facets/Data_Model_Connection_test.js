@@ -45,17 +45,35 @@ describe('Data Model connection', function() {
         milo.minder(m, '<<<->>>', myItem.data);
         myItem.data.set(testData);
 
-        _.deferTicks(function() {
+        _.defer(function() {
             assert.deepEqual(m.get(), testData);
 
             var descField = myItem.data.path('.desc').owner;
             descField.el.value = 'New description';
             descField.data.dispatchSourceMessage('input');
 
-            _.deferTicks(function() {
+            _.defer(function() {
                 assert.equal(m('.desc').get(), 'New description');
                 done();
-            }, 2);
-        }, 2);
+            });
+        });
+    });
+
+
+    it('should propagate data from Model to Data without going into endless loop', function(done) {
+        var m = new Model;
+
+        milo.minder(m, '<<<->>>', myItem.data);
+        m.set(testData);
+
+        _.defer(function() {
+            assert.deepEqual(myItem.data.get(), testData);
+
+            m.on(/.*/, function() {
+                throw new Error('data propagation loop');
+            });
+
+            _.defer(done);
+        });
     });
 });
