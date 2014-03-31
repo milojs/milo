@@ -13281,6 +13281,7 @@ var numberMethods = require('./proto_number');
  * - [repeat](proto_util.js.html#repeat)
  * - [tap](proto_util.js.html#tap)
  * - [result](proto_util.js.html#result)
+ * - [identity](proto_util.js.html#identity)
  */
 var utilMethods = require('./proto_util');
 
@@ -14825,12 +14826,14 @@ function hashCode(){
  * - [repeat](#repeat)
  * - [tap](#tap)
  * - [result](#result)
+ * - [identity](#identity)
  */
 var utilMethods = module.exports = {
     times: times,
     repeat: repeat,
     tap: tap,
-    result: result
+    result: result,
+    identity: identity
 };
 
 
@@ -14890,6 +14893,17 @@ function result(thisArg) { //, arguments
     return typeof this == 'function'
             ? this.apply(thisArg, args)
             : this;
+}
+
+
+/**
+ * Returns self. Useful for using as an iterator if the actual value needs to be returned. Unlike in underscore and lodash, this function is NOT used as default iterator.
+ *
+ * @param {Any} self 
+ * @return {Any}
+ */
+function identity() {
+    return this;
 }
 
 },{}],107:[function(require,module,exports){

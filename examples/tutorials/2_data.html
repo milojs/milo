@@ -42,7 +42,9 @@
             // Set the data of comp
             scope.comp.data.set('My data');
             
-            // Set a data object on nested component
+            // Set a data object on nested component, when we set an object on
+            // a parent object, the properties of object will be set on any
+            // children of the component (as long as they have data facet).
             scope.nested.data.set({
                 title: 'Great Expectations',
                 description: 'A book about some expectations that were pretty great'
@@ -52,15 +54,16 @@
             scope.input.data.set('input data set');
             
             // Data fires change events too, empty string means the root
-            // of the data. Try typing in the input.
+            // of the data. Now try typing in the input.
             scope.input.data.on('', function(msg, data) {
                 // We'll set the data of our first component to the input value
                 scope.comp.data.set(data.newValue);
             });
             
-            // With nested data, you can provide a path.
+            // With nested data, you can provide a path. This data will go straight
+            // to the child component called 'description'.
             scope.nested.data.on('.description', function(msg, data) {
-                console.log(msg, data);
+                console.log('data.on(.description): ', msg, data);
             });
             
             // When we set it, the above listener will fire (open your console).
