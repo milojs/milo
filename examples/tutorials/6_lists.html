@@ -1,0 +1,57 @@
+<html>
+<head>
+    <title>Getting Started - Lists (in progress)</title>
+    <style>
+    /*CSS*/
+
+        /* Insert CSS classes here */
+    
+    /*END CSS*/
+    </style>
+</head>
+<body>
+<!-- HTML -->
+
+    <script src="http://mailonline.github.io/milo/milo.bundle.js"></script>
+    
+    <div ml-bind="[list]:list">
+        Inside we can put whatever markup we want, as long as<br>
+        we also include one component with an item facet.<br>
+        This will tell the list what it should be copying.
+        <h3>Books</h3>
+        <div ml-bind="[item]:itemSample">
+            <h4 ml-bind="[data]:title"></h4>
+            <p ml-bind="[data]:description"></p>
+        </div>
+    </div>
+
+<!-- END HTML -->
+
+    <script>
+    //JS
+
+        milo(function() {
+
+            var scope = milo.binder()
+                , bookList = scope.list
+                , books = new milo.Model;
+
+            var cnct = milo.minder(books, '<<<->>>', bookList.data);
+
+            books.set([
+                { title: 'Great Expectations', description: 'A pretty great book.' },
+                { title: 'Sense and Sensibility', description: 'A sensible book.'}
+            ]);
+        });
+
+        // Define component classes outside of milo() ready function.
+        // var MyCompClass = milo.Component.createComponentClass('MyCompClass', {
+        //     dom: {cls: 'example'}
+        // });
+        // milo.registry.components.add(MyCompClass);
+
+    //END JS
+    </script>
+
+</body>
+</html>

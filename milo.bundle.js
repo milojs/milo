@@ -1377,8 +1377,7 @@ function Component$$createFromState(state, rootScope, newUniqueName, throwOnErro
 
     // restore component state
     component.setState(state);
-
-    component.broadcast('stateready');
+    _.deferMethod(component, 'broadcast', 'stateready');
 
     return component;   
 }
@@ -1616,10 +1615,10 @@ function Component$remove(preserveScopeProperty) {
  * @return {Object}
  */
 function Component$getState() {
-    this.broadcast('getstatestarted', { rootComponent: this });
+    this.broadcast('getstatestarted', { rootComponent: this }, undefined, true);
     var state = this._getState(true);
     state.outerHTML = this.el.outerHTML;
-    _.deferMethod(this, 'broadcast', 'getstatecompleted', { rootComponent: this });
+    _.deferMethod(this, 'broadcast', 'getstatecompleted', { rootComponent: this }, undefined, true);
     return state;
 }
 
@@ -1835,10 +1834,12 @@ function Component$insertAtTreeIndex(treeIndex, component) {
  * @param {String|RegExp} msg message to be sent
  * @param {[Any]} data optional message data
  * @param {[Function]} callback optional callback
+ * @param {[Boolean]} synchronously if it should use postMessageSync
  */
-function Component$broadcast(msg, data, callback) {
+function Component$broadcast(msg, data, callback, synchronously) {
+    var postMethod = synchronously ? 'postMessageSync' : 'postMessage';
     this.walkScopeTree(function(component) {
-        component.postMessage(msg, data, callback)
+        component[postMethod](msg, data, callback)
     });
 }
 
