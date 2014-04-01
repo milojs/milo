@@ -13352,7 +13352,6 @@ var numberMethods = require('./proto_number');
  * - [repeat](proto_util.js.html#repeat)
  * - [tap](proto_util.js.html#tap)
  * - [result](proto_util.js.html#result)
- * - [identity](proto_util.js.html#identity)
  */
 var utilMethods = require('./proto_util');
 
@@ -14897,14 +14896,12 @@ function hashCode(){
  * - [repeat](#repeat)
  * - [tap](#tap)
  * - [result](#result)
- * - [identity](#identity)
  */
 var utilMethods = module.exports = {
     times: times,
     repeat: repeat,
     tap: tap,
-    result: result,
-    identity: identity
+    result: result
 };
 
 
@@ -14942,11 +14939,11 @@ function repeat(times) {
  * Function to tap into chained methods and to inspect intermediary result
  *
  * @param {Any} self value that's passed between chained methods
- * @param {Function} func function that will be called with the value (both as context and as the first parameter)
+ * @param {Function} func function that will be called with the value
  * @return {Any}
  */
 function tap(func) {
-    func.call(this, this);
+    func(this);
     return this;
 };
 
@@ -14964,17 +14961,6 @@ function result(thisArg) { //, arguments
     return typeof this == 'function'
             ? this.apply(thisArg, args)
             : this;
-}
-
-
-/**
- * Returns self. Useful for using as an iterator if the actual value needs to be returned. Unlike in underscore and lodash, this function is NOT used as default iterator.
- *
- * @param {Any} self 
- * @return {Any}
- */
-function identity() {
-    return this;
 }
 
 },{}],108:[function(require,module,exports){
