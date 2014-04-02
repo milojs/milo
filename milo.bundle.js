@@ -3689,7 +3689,8 @@ _.extendProto(Frame, {
     isReady: Frame$isReady,
     whenReady: Frame$whenReady,
     isMiloReady: Frame$isMiloReady,
-    whenMiloReady: Frame$whenMiloReady
+    whenMiloReady: Frame$whenMiloReady,
+    milo: Frame$milo
     // _reattach: _reattachEventsOnElementChange
 });
 
@@ -3720,8 +3721,6 @@ function Frame$init() {
 function Frame$start() {
     ComponentFacet.prototype.start.apply(this, arguments);
     var self = this;
-    var doc = this.getWindow().document;
-
     milo(postDomReady);
 
     function postDomReady(event) {
@@ -3762,6 +3761,14 @@ function Frame$isReady() {
 function Frame$isMiloReady() {
     var frameMilo = this.getWindow().milo;
     return this.isReady() && frameMilo && frameMilo.milo_version;
+}
+
+
+function Frame$milo(func) {
+    var self = this;
+    this.whenMiloReady(function() {
+        self.getWindow().milo(func)
+    });
 }
 
 
@@ -3858,6 +3865,9 @@ var ComponentFacet = require('../c_facet')
     , miloConfig = require('../../config');
 
 
+var LIST_SAMPLE_CSS_CLASS = 'ml-list-item-sample';
+
+
 // Data model connection facet
 var List = _.createSubclass(ComponentFacet, 'List');
 
@@ -3933,6 +3943,7 @@ function onChildrenBound() {
     // After keeping a reference to the item sample, it must be hidden and removed from scope
     foundItem.dom.hide();
     foundItem.remove(true);
+    foundItem.dom.removeCssClasses(LIST_SAMPLE_CSS_CLASS);
 
     // remove references to components from sample item
     foundItem.walkScopeTree(function(comp) {
@@ -4971,6 +4982,7 @@ var MessageSource = require('../../messenger/m_source')
     , Component = require('../c_class')
     , _ = require('mol-proto')
     , check = require('../../util/check')
+    , logger = require('../../util/logger')
     , Match = check.Match
     , FrameMessageSourceError = require('../../util/error').FrameMessageSource;
 
@@ -5010,13 +5022,17 @@ function frameWindow() {
 
 // addIFrameMessageListener
 function addSourceSubscriber(sourceMessage) {
-    this.frameWindow().addEventListener('message', this, false);
+    var win = this.frameWindow();
+    if (win) win.addEventListener('message', this, false);
+    else logger.warn('FrameMessageSource: frame window is undefined');
 }
 
 
 // removeIFrameMessageListener
 function removeSourceSubscriber(sourceMessage) {
-    this.frameWindow().removeEventListener('message', this, false);
+    var win = this.frameWindow();
+    if (win) win.removeEventListener('message', this, false);
+    else logger.warn('FrameMessageSource: frame window is undefined');
 }
 
 
@@ -5033,7 +5049,7 @@ function handleEvent(event) {
     this.dispatchMessage(event.data.type, event);
 }
 
-},{"../../messenger/m_source":65,"../../util/check":81,"../../util/error":87,"../c_class":11,"mol-proto":100}],35:[function(require,module,exports){
+},{"../../messenger/m_source":65,"../../util/check":81,"../../util/error":87,"../../util/logger":90,"../c_class":11,"mol-proto":100}],35:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -7137,7 +7153,6 @@ function MLDropdown$start() {
     this._dropdown = {
         toggle: toggleEl,
         menu: menuEl,
-        displayStyle: toggleEl.style.display,
         clickHandler: clickHandler,
         visible: false
     }
@@ -7170,9 +7185,11 @@ function _toggleMenu(doShow) {
                 : !! doShow;
 
     this._dropdown.visible = doShow;
-    this._dropdown.menu.style.display = doShow
-                                            ? this._dropdown.displayStyle
-                                            : 'none';
+
+    var menu = this._dropdown.menu;
+    menu.style.display = doShow
+                            ? 'block'
+                            : 'none';
 }
 
 },{"../../c_class":11,"../../c_registry":27,"mol-proto":100}],57:[function(require,module,exports){
@@ -9527,9 +9544,8 @@ function Connector$destroy() {
     this.turnOff();
     this.postMessage('destroyed');
     this._messenger.destroy();
-    _.eachKey(this, function(value, key) {
-        delete this[key];
-    }, this);
+    delete this.ds1;
+    delete this.ds2;
 }
 
 },{"../messenger":62,"../util/error":87,"../util/logger":90,"./path_utils":76,"mol-proto":100}],71:[function(require,module,exports){
