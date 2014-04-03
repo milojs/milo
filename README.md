@@ -324,6 +324,11 @@ It is bundled together with __milo__ and all its functions are available as prop
 Changes log
 -----------
 
+###After 0.1.3###
+
+- Data propagation redesigned to avoid using model notification messages.
+- New Frame facet method `milo` to access milo in the frame window. Can be used to call passed function when inner milo is ready even before frame is loaded (and before inner milo is available).
+
 ###0.1.3###
 
 - Asynchronous messaging.
