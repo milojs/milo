@@ -11904,7 +11904,8 @@ function Promise(dataSource) {
  */
 _.extend(Promise, {
     transformData: Promise$$transformData,
-    thenData: Promise$$thenData
+    thenData: Promise$$thenData,
+    isPromise: Promise$$isPromise
 });
 
 
@@ -11933,7 +11934,7 @@ _.extendProto(Promise, {
  * @return {Promise|Any}
  */
 function Promise$$transformData(data, transformFunc) {
-    if (data instanceof Promise)
+    if (Promise$$isPromise(data))
         return data.transform(transformFunc);
     else
         return transformFunc(data);
@@ -11948,10 +11949,19 @@ function Promise$$transformData(data, transformFunc) {
  * @return {Promise|Any}
  */
 function Promise$$thenData(data, thenFunc) {
-    if (data instanceof Promise)
+    if (Promise$$isPromise(data))
         return data.then(thenFunc);
     else
         return thenFunc(null, data);
+}
+
+
+function Promise$$isPromise(data) {
+    try { var className = data.constructor.name; } catch(e) {}
+    return className == 'Promise'
+        && _.everyKey(Promise.prototype, function(method, methodName) {
+            return typeof data[methodName] == 'function';
+        });
 }
 
 
@@ -13368,6 +13378,7 @@ var numberMethods = require('./proto_number');
  * - [repeat](proto_util.js.html#repeat)
  * - [tap](proto_util.js.html#tap)
  * - [result](proto_util.js.html#result)
+ * - [identity](proto_util.js.html#identity)
  */
 var utilMethods = require('./proto_util');
 
@@ -14912,12 +14923,14 @@ function hashCode(){
  * - [repeat](#repeat)
  * - [tap](#tap)
  * - [result](#result)
+ * - [identity](#identity)
  */
 var utilMethods = module.exports = {
     times: times,
     repeat: repeat,
     tap: tap,
-    result: result
+    result: result,
+    identity: identity
 };
 
 
@@ -14955,11 +14968,11 @@ function repeat(times) {
  * Function to tap into chained methods and to inspect intermediary result
  *
  * @param {Any} self value that's passed between chained methods
- * @param {Function} func function that will be called with the value
+ * @param {Function} func function that will be called with the value (both as context and as the first parameter)
  * @return {Any}
  */
 function tap(func) {
-    func(this);
+    func.call(this, this);
     return this;
 };
 
@@ -14977,6 +14990,17 @@ function result(thisArg) { //, arguments
     return typeof this == 'function'
             ? this.apply(thisArg, args)
             : this;
+}
+
+
+/**
+ * Returns self. Useful for using as an iterator if the actual value needs to be returned. Unlike in underscore and lodash, this function is NOT used as default iterator.
+ *
+ * @param {Any} self 
+ * @return {Any}
+ */
+function identity() {
+    return this;
 }
 
 },{}],108:[function(require,module,exports){
