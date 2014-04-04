@@ -352,4 +352,48 @@ describe('DOMStorage', function() {
             })
         });
     });
+
+
+    describe('messenger', function() {
+        var win = window.open('', 'test');
+
+        beforeEach(function() {
+            window.localStorage.clear();
+            domStorage.createMessenger();
+        });
+
+
+        it('should store data in localStorage when message is triggered', function(done) {
+            domStorage.trigger('testmessage', { test: 1 });
+
+            _.defer(function() {
+                var items = DOMStorage.local.getAllItems();
+                assert.deepEqual(items, { 'MiloTest/___milo_message/testmessage': { test: 1} });
+                done();
+            });
+        });
+
+
+        it('should deliver messages when data is stored with correct key in storage', function(done) {
+            var posted = [];
+            domStorage.on('testmessage', function(msg, data) {
+                posted.push({ message: msg, data: data });
+            });
+
+            var posted2 = [];
+            domStorage.on('anothermessage', function(msg, data) {
+                posted2.push({ message: msg, data: data });
+            });
+
+            win.localStorage.setItem('MiloTest/' + milo.config.domStorage.messageKey + 'testmessage', 'test: 2');
+            win.localStorage.setItem('MiloTest/' + milo.config.domStorage.messageKey + 'anothermessage', 'test: 3');
+            win.localStorage.setItem('anotherkey', 'test: 4');
+
+            _.deferTicks(function() {
+                assert.deepEqual(posted, [{ message: 'testmessage', data: 'test: 2' }]);
+                assert.deepEqual(posted2, [{ message: 'anothermessage', data: 'test: 3' }]);
+                done();
+            }, 4);
+        });
+    });
 });

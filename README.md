@@ -328,6 +328,7 @@ Changes log
 
 - Data propagation redesigned to avoid using model notification messages.
 - New Frame facet method `milo` to access milo in the frame window. Can be used to call passed function when inner milo is ready even before frame is loaded (and before inner milo is available).
+- Sending messages via DOM storage using DOMStorage class.
 
 ###0.1.3###
 
