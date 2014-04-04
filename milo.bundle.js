@@ -6192,7 +6192,8 @@ function onOptionsChange(path, data) {
 var Component = require('../c_class')
     , componentsRegistry = require('../c_registry')
     , _ = require('mol-proto')
-    , doT = require('dot');
+    , doT = require('dot')
+    , logger = require('../../util/logger');
 
 var COMBO_OPEN = 'ml-ui-supercombo-open';
 var COMBO_CHANGE_MESSAGE = 'mlsupercombochange';
@@ -6368,6 +6369,7 @@ function MLSuperCombo$setOptions(arr) {
  * @param {[type]} arr The options to set
  */
 function MLSuperCombo$setFilteredOptions(arr) {
+    if (! arr) return logger.error('setFilteredOptions: parameter is undefined');
     this._filteredOptionsData = arr;
     this._total = arr.length;
     this.update();
@@ -6667,7 +6669,7 @@ function _setData() {
     this.setFilteredOptions(this._optionsData);
 }
 
-},{"../c_class":11,"../c_registry":27,"dot":100,"mol-proto":101}],51:[function(require,module,exports){
+},{"../../util/logger":90,"../c_class":11,"../c_registry":27,"dot":100,"mol-proto":101}],51:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -12832,9 +12834,10 @@ var StorageMessageSource = _.createSubclass(MessageSource, 'StorageMessageSource
 _.extendProto(StorageMessageSource, {
     // implementing MessageSource interface
     init: init,
-    addSourceSubscriber: addSourceSubscriber,
-    removeSourceSubscriber: removeSourceSubscriber,
-    trigger: trigger,
+    addSourceSubscriber: StorageMessageSource$addSourceSubscriber,
+    removeSourceSubscriber: StorageMessageSource$removeSourceSubscriber,
+    postMessage: StorageMessageSource$postMessage,
+    trigger: StorageMessageSource$trigger,
 
     //class specific methods
     handleEvent: handleEvent  // event dispatcher - as defined by Event DOM API
@@ -12853,19 +12856,22 @@ function init(hostObject, proxyMethods, messengerAPIOrClass) {
 }
 
 
-// addIFrameMessageListener
-function addSourceSubscriber(sourceMessage) {
+function StorageMessageSource$addSourceSubscriber(sourceMessage) {
     this.window.addEventListener('storage', this, false);
 }
 
 
-// removeIFrameMessageListener
-function removeSourceSubscriber(sourceMessage) {
+function StorageMessageSource$removeSourceSubscriber(sourceMessage) {
     this.window.removeEventListener('storage', this, false);
 }
 
 
-function trigger(msgType, data) {
+function StorageMessageSource$postMessage(message, data) {
+    this.messenger.postMessageSync(message, data);
+}
+
+
+function StorageMessageSource$trigger(msgType, data) {
     var key = this.messageKey + msgType;
     this.storage.removeItem(key);
     _.deferMethod(this.storage, 'setItem', key, data);
@@ -12877,6 +12883,7 @@ function handleEvent(event) {
     var key = this.storage._domStorageKey(event.key); if (! key) return;
     var msgType = _.unPrefix(key, this.messageKey); if (! msgType) return;
     var data = this.storage.getItem(key); if (! data) return;
+    this.storage.removeItem(key);
     this.dispatchMessage(msgType, data);
 }
 
