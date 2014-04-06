@@ -2386,11 +2386,8 @@ function Data$_bubbleUpDataChange(msgData) {
     var parentData = this.scopeParent();
 
     if (parentData) {
-        if (msgData.type != 'finished') {
-            var parentMsg = _.clone(msgData);
-            parentMsg.path = (this._path || ('.' + thisComp.name))  + parentMsg.path;
-        }
-
+        var parentMsg = _.clone(msgData);
+        parentMsg.path = (this._path || ('.' + thisComp.name))  + parentMsg.path;
         parentData.postMessage('childdata', parentMsg || msgData);
     }
 }
@@ -2446,7 +2443,7 @@ function Data$_postDataChanges(inTransaction) {
  * @param {Obejct} data data change information
  */
 function onChildData(msgType, data) {
-    this.postMessage(data.path || 'finished', data);
+    this.postMessage(data.path, data);
     this._bubbleUpDataChange(data);
     this._queueDataChange(data);
 }
@@ -10127,7 +10124,7 @@ function translateToSourceMessage(message) {
     // TODO should not prepend changedata too???
     if (message instanceof RegExp)
         return message;
-    if (message == 'finished' || message == 'datachanges')
+    if (message == 'datachanges')
         return message;
     
     return this.rootPath + message;
@@ -10145,7 +10142,6 @@ function translateToSourceMessage(message) {
  */
 function createInternalData(sourceMessage, message, sourceData) {
     // TODO return on changedata too???
-    if (message == 'finished') return sourceData;
     if (message == 'datachanges') {
         var internalChanges = sourceData.changes
             .map(truncateChangePath, this)
