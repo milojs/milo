@@ -10970,10 +10970,6 @@ function componentName() {
 }
 
 },{"../config":57,"./count":83}],83:[function(require,module,exports){
-// <a name="utils-count"></a>
-// milo.utils.count
-// ----------------
-
 'use strict';
 
 var timestamp = Date.now()
@@ -12822,6 +12818,7 @@ function DOMStorage$createMessenger() {
 var MessageSource = require('../../messenger/m_source')
     , _ = require('mol-proto')
     , config = require('../../config')
+    , miloCount = require('../../util/count')
     , StorageMessageSourceError = require('../../util/error').StorageMessageSource;
 
 var StorageMessageSource = _.createSubclass(MessageSource, 'StorageMessageSource', true);
@@ -12869,7 +12866,8 @@ function StorageMessageSource$postMessage(message, data) {
 
 function StorageMessageSource$trigger(msgType, data) {
     var key = this.messageKey + msgType;
-    this.storage.removeItem(key);
+    data = data || {};
+    data.__milo_timestamp = miloCount();
     _.deferMethod(this.storage, 'setItem', key, data);
 }
 
@@ -12879,11 +12877,10 @@ function handleEvent(event) {
     var key = this.storage._domStorageKey(event.key); if (! key) return;
     var msgType = _.unPrefix(key, this.messageKey); if (! msgType) return;
     var data = this.storage.getItem(key); if (! data) return;
-    this.storage.removeItem(key);
     this.dispatchMessage(msgType, data);
 }
 
-},{"../../config":57,"../../messenger/m_source":65,"../../util/error":87,"mol-proto":101}],97:[function(require,module,exports){
+},{"../../config":57,"../../messenger/m_source":65,"../../util/count":83,"../../util/error":87,"mol-proto":101}],97:[function(require,module,exports){
 ;(function(){
 
 // This would be the place to edit if you want a different
