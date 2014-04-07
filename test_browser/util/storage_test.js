@@ -357,6 +357,8 @@ describe('DOMStorage', function() {
     describe('messenger', function() {
         var win = window.open('', 'test');
 
+        var messageTimestamp = milo.config.domStorage.messageTimestamp;
+
         beforeEach(function() {
             window.localStorage.clear();
             domStorage.createMessenger();
@@ -368,6 +370,9 @@ describe('DOMStorage', function() {
 
             _.defer(function() {
                 var items = DOMStorage.local.getAllItems();
+                _.eachKey(items, function(item) {
+                    delete item[messageTimestamp];
+                });
                 assert.deepEqual(items, { 'MiloTest/___milo_message/testmessage': { test: 1} });
                 done();
             });
@@ -377,11 +382,13 @@ describe('DOMStorage', function() {
         it('should deliver messages when data is stored with correct key in storage', function(done) {
             var posted = [];
             domStorage.on('testmessage', function(msg, data) {
+                delete data[messageTimestamp];
                 posted.push({ message: msg, data: data });
             });
 
             var posted2 = [];
             domStorage.on('anothermessage', function(msg, data) {
+                delete data[messageTimestamp];
                 posted2.push({ message: msg, data: data });
             });
 

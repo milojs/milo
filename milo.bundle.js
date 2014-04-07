@@ -7245,7 +7245,8 @@ config({
         typeSuffix: ':___milo_data_type',
         prefixSeparator: '/',
         root: '',
-        messageKey: '___milo_message/'
+        messageKey: '___milo_message/',
+        messageTimestamp: '___milo_timestamp'
     },
     dragDrop: {
         dataTypes: {
@@ -12867,7 +12868,7 @@ function StorageMessageSource$postMessage(message, data) {
 function StorageMessageSource$trigger(msgType, data) {
     var key = this.messageKey + msgType;
     data = data || {};
-    data.__milo_timestamp = miloCount();
+    data[config.domStorage.messageTimestamp] = miloCount();
     _.deferMethod(this.storage, 'setItem', key, data);
 }
 
