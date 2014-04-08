@@ -6729,8 +6729,6 @@ function onTextChange() {
         , minLines = this._autoresizeOptions.minLines
         , maxLines = this._autoresizeOptions.maxLines;
 
-    console.log(lines.length, minLines, maxLines);
-
     if (lines.length >= maxLines)
         this.el.rows = maxLines;
     else if (lines.length <= minLines)
