@@ -6706,6 +6706,9 @@ componentsRegistry.add(MLTextarea);
 module.exports = MLTextarea;
 
 
+var SAMPLE_AUTORESIZE_TEXT = 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit,';
+
+
 _.extendProto(MLTextarea, {
     startAutoresize: MLTextarea$startAutoresize,
     stopAutoresize: MLTextarea$stopAutoresize
@@ -6713,54 +6716,44 @@ _.extendProto(MLTextarea, {
 
 
 function MLTextarea$startAutoresize(options) {
-    return;
     if (this._autoresize)
         return logger.warn('MLTextarea startAutoresize: autoresize is already on');
     this._autoresize = true;
     this._autoresizeOptions = options;
 
-    this.events.on('input', { subscriber: onTextChange, context: this });
+    _adjustAreaHeight.call(this);
+    _subscribeTextChange.call(this, 'on');
 }
 
 
-function onTextChange() {
-    var str = this.el.value
-        , lines = str.split(/\r\n|\r|\n/)
-        , minLines = this._autoresizeOptions.minLines
-        , maxLines = this._autoresizeOptions.maxLines;
-
-    if (lines.length >= maxLines)
-        this.el.rows = maxLines;
-    else if (lines.length <= minLines)
-        this.el.rows = minLines;
-    else {
-
-    }
+function _subscribeTextChange(onOff) {
+    this.events[onOff]('input', { subscriber: _adjustAreaHeight, context: this });
 }
 
 
-function _linesInString(str) {
-    var div = document.createElement('div')
-        , thisStyle = window.getComputedStyle(this.el);
-    _.extend(div.style, {
-        font: thisStyle.font,
-        position: 'absolute',
-        visibility: 'hidden',
-        height: 'auto',
-        width: 'auto'
-    });
-    document.body.appendChild(div);
-    var width = div.offsetWidth
-        , areaWidth = this.el.offsetWidth;
+function _adjustAreaHeight() {
+    this.el.style.overflow = 'hidden';
+    this.el.style.height = 0;
 
-    return Math.floor();
+    var newHeight = this.el.scrollHeight
+        , minHeight = this._autoresizeOptions.minHeight
+        , maxHeight = this._autoresizeOptions.maxHeight;
+
+    newHeight = newHeight >= maxHeight
+                ? maxHeight
+                : newHeight <= minHeight
+                ? minHeight
+                : newHeight;
+
+    this.el.style.height = newHeight + 'px';
 }
 
 
 function MLTextarea$stopAutoresize() {
-    return;
     if (! this._autoresize)
         return logger.warn('MLTextarea stopAutoresize: autoresize is not on');
+    this._autoresize = false;
+    _subscribeTextChange.call(this, 'off');
 }
 
 
