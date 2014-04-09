@@ -2930,6 +2930,7 @@ _.extendProto(Dom, {
     prependChildren: prependChildren,
     insertAfter: insertAfter,
     insertBefore: insertBefore,
+    appendToScopeParent: appendToScopeParent,
     children: Dom$children,
     setStyle: setStyle,
     setStyles: setStyles,
@@ -3102,8 +3103,15 @@ function insertBefore(el) {
 }
 
 
+// appends component's element to scope parent. If it was alredy in DOM it will be moved
+function appendToScopeParent() {
+    var parent = this.owner.getScopeParent();
+    if (parent) parent.el.appendChild(this.owner.el);
+}
+
+
 /**
- * Dom facet instacne method
+ * Dom facet instance method
  * Returns the list of child elements of the component element
  *
  * @return {Array[Element]}
@@ -4215,6 +4223,7 @@ var Template = _.createSubclass(ComponentFacet, 'Template');
 
 _.extendProto(Template, {
     init: Template$init,
+    start: Template$start,
     set: Template$set,
     render: Template$render,
     binder: Template$binder,
@@ -4238,6 +4247,16 @@ function Template$init() {
                     : this.config.compile || milo.config.template.compile;
 
     this.set(this.config.template || '', compile);
+}
+
+
+function Template$start() {
+    ComponentFacet.prototype.start.apply(this, arguments);
+    if (this.config.autoRender) {
+        this.render();
+        if (this.config.autoBinder)
+            this.binder();
+    }
 }
 
 
