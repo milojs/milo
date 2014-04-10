@@ -1001,12 +1001,21 @@ module.exports = commandsRegistry;
 var _ = require('mol-proto');
 
 
-var CURRENT_COMMAND = '___currentCommand';
+var CURRENT_COMMAND = '___currentCommand'
+    , UNDO_COMMAND = '_undoCommand';
 
 
 module.exports = Command;
 
 
+/**
+ * Command class to implement "command pattern" - packaging ll information necessary for delayed method execution
+ *
+ * @constructor
+ * @param {Object|Any} context object which method will be executed or context for function execution
+ * @param {String|Function} methodOrFunc method name or function to be executed
+ * @param {List} *arguments parameters to be passed to method or function
+ */
 function Command(context, methodOrFunc) { // , ... arguments
     this.context = context;
     this.method = typeof methodOrFunc == 'string'
@@ -1020,6 +1029,17 @@ function Command(context, methodOrFunc) { // , ... arguments
 }
 
 
+/**
+ * Command instance methods
+ * 
+ * - [init](#Command$execute) - initialize command, should be overwritten by subclasses
+ * - [execute](#Command$execute) - execute command
+ * - [setUndo](#Command$setUndo) - set undo command for this command
+ * - [getUndo](#Command$getUndo) - get undo command of this command
+ * - [setArguments](#Command$setArguments) - set commands arguments
+ * - [addArguments](#Command$addArguments) - add arguments to command
+ * - [destroy](#Command$destroy)
+ */
 _.extendProto(Command, {
     init: function() {},
     execute: Command$execute,
@@ -1027,37 +1047,64 @@ _.extendProto(Command, {
     getUndo: Command$getUndo,
     setArguments: Command$setArguments,
     addArguments: Command$addArguments,
-    setCurrentCommand: Command$setCurrentCommand,
-    clearCurrentCommand: Command$clearCurrentCommand,
+    _setCurrentCommand: Command$_setCurrentCommand,
+    _clearCurrentCommand: Command$_clearCurrentCommand,
     destroy: Command$destroy
 });
 
 
+/**
+ * Command class methods
+ *
+ * - [create](#Command$$create) - commands factory
+ * - [getCurrentCommand](Command$$getCurrentCommand) - get command being executed from function property
+ */
 _.extend(Command, {
+    create: Command$$create,
     getCurrentCommand: Command$$getCurrentCommand
 });
 
 
+/**
+ * Execute command making command object available via function property. 
+ */
 function Command$execute() {
-    this.setCurrentCommand();
+    this._setCurrentCommand();
     var result = this.func.apply(this.context, this.args);
-    this.clearCurrentCommand();
+    this._clearCurrentCommand();
+    return result;
 }
 
 
+/**
+ * Set undo command for this command. This command becomes undo command for undo command (so undo command can change this command during its execution).
+ * 
+ * @param {Command} undoCommand
+ */
 function Command$setUndo(undoCommand) {
-    if (this._undoCommand)
+    if (this[UNDO_COMMAND])
         logger.warn('Command setUndo: undo command is already set');
 
-    this._undoCommand = undoCommand;
+    this[UNDO_COMMAND] = undoCommand;
+    undoCommand[UNDO_COMMAND] = this;
 }
 
 
+/**
+ * Returns undo command of a given command
+ *
+ * @return {Command}
+ */
 function Command$getUndo() {
-    return this._undoCommand;
+    return this[UNDO_COMMAND];
 }
 
 
+/**
+ * Set command's arguments. If arguments were set during command's creation, this method will overwrite arguments and log warning.
+ *
+ * @param {List} *arguments
+ */
 function Command$setArguments() { //, ... arguments
     if (this.args && this.args.length)
         logger.warn('Command setArguments: command arguments are already set');
@@ -1065,25 +1112,44 @@ function Command$setArguments() { //, ... arguments
 }
 
 
+/**
+ * Add (append) arguments to command
+ *
+ * @param {List} *arguments arguments list to be appended to command
+ */
 function Command$addArguments() { //, ... arguments
     if (! this.args) this.args = [];
-    _.appendToArray(this.args, arguments);
-    this.args = this.args.concat(_.toArray(arguments));
+    _.appendArray(this.args, arguments);
 }
 
 
-function Command$setCurrentCommand() {
+/**
+ * Set property of the command's function to reference this command. This allows mutation of command during its execution (setting undo command or changing its parameters).
+ *
+ * @private
+ */
+function Command$_setCurrentCommand() {
     if (this.func[CURRENT_COMMAND])
-        logger.warn('Command setCurrentCommand: command is already set');
+        logger.warn('Command _setCurrentCommand: command is already set');
     this.func[CURRENT_COMMAND] = this;
 }
 
 
-function Command$clearCurrentCommand() {
+/**
+ * Clear property of the command's function pointing to command
+ *
+ * @private
+ */
+function Command$_clearCurrentCommand() {
     delete this.func[CURRENT_COMMAND];
 }
 
 
+/**
+ * Class method. Returns reference to the command to the function during its execution
+ * 
+ * @param {Function} func command's function
+ */
 function Command$$getCurrentCommand(func) {
     var command = func[CURRENT_COMMAND];
     delete func[CURRENT_COMMAND];
@@ -1091,10 +1157,33 @@ function Command$$getCurrentCommand(func) {
 }
 
 
+/**
+ * Commands factory. Likely ot be overridden by subclasses to implement custom logic of command construction
+ * 
+ * @this {Function} Class of command
+ * @param {Object|Any} context object which method will be executed or context for function execution
+ * @param {String|Function} methodOrFunc method name or function to be executed
+ * @param {List} *arguments parameters to be passed to method or function
+ * @return {Command}
+ */
+function Command$$create(context, methodOrFunc) { // , ... arguments
+    return _.newApply(this, arguments);
+}
+
+
+/**
+ * Destroy current command (to prevent potential memory leaks when commands point to DOM elements)
+ */
 function Command$destroy() {
     delete this.context;
     delete this.func;
     delete this.args;
+    var undoCmd = this[UNDO_COMMAND];
+    if (undoCmd) {
+        delete this[UNDO_COMMAND][UNDO_COMMAND];
+        delete this[UNDO_COMMAND];
+        undoCmd.destroy();
+    }
 }
 
 },{"mol-proto":103}],13:[function(require,module,exports){
@@ -9567,6 +9656,7 @@ function Connector$changeMode(mode) {
     return this;
 }
 
+
 /**
  * Function change the mode of the connection
  *
@@ -9577,6 +9667,7 @@ function Connector$deferChangeMode(mode) {
     _.deferMethod(this, 'changeMode', mode);
     return this;
 }
+
 
 /**
  * Function that reverses translation rules for paths of connected odata sources
@@ -10183,15 +10274,14 @@ function ModelPath$path(accessPath) {  // , ... arguments that will be interpola
 
     var newPath = this._path + accessPath;
 
-    // "null" is context to pass to ModelPath, first parameter of bind
     // this._model is added in front of all arguments as the first parameter
     // of ModelPath constructor
-    var bindArgs = [null, this._model, newPath]
-                        .concat(this._args.slice(1)) // remove old path from _args, as it is 1 based
-                        .concat(_.slice(arguments, 1)); // add new interpolation arguments
+    var args = [this._model, newPath]
+                .concat(this._args.slice(1)) // remove old path from _args, as it is 1 based
+                .concat(_.slice(arguments, 1)); // add new interpolation arguments
 
     // calling ModelPath constructor with new and the list of arguments: this (model), accessPath, ...
-    return new (Function.prototype.bind.apply(ModelPath, bindArgs));
+    return _.newApply(ModelPath, args);
 }
 
 
@@ -13611,6 +13701,7 @@ var utils = require('./utils');
  * - [extendProto](proto_prototype.js.html#extendProto)
  * - [createSubclass](proto_prototype.js.html#createSubclass)
  * - [makeSubclass](proto_prototype.js.html#makeSubclass)
+ * - [newApply](proto_prototype.js.html#newApply)
  */
 var prototypeMethods = require('./proto_prototype');
 
@@ -13889,7 +13980,9 @@ arrayMethods.findIndex = Array.prototype.findIndex
  */
 function appendArray(arrayToAppend) {
     if (! arrayToAppend.length) return this;
-
+    if (! Array.isArray(arrayToAppend))
+        arrayToAppend = toArray.call(arrayToAppend);
+    
     var args = [this.length, 0].concat(arrayToAppend);
     arrayMethods.splice.apply(this, args);
 
@@ -13907,6 +14000,8 @@ function appendArray(arrayToAppend) {
  */
 function prependArray(arrayToPrepend) {
     if (! arrayToPrepend.length) return this;
+    if (! Array.isArray(arrayToPrepend))
+        arrayToPrepend = toArray.call(arrayToPrepend);
 
     var args = [0, 0].concat(arrayToPrepend);
     arrayMethods.splice.apply(this, args);
@@ -14972,13 +15067,15 @@ function omitKeys() { // , ... keys
  * - [extendProto](#extendProto)
  * - [createSubclass](#createSubclass)
  * - [makeSubclass](#makeSubclass)
+ * - [newApply](#newApply)
  *
  * These methods can be [chained](proto.js.html#Proto)
  */
 var prototypeMethods = module.exports = {
     extendProto: extendProto,
     createSubclass: createSubclass,
-    makeSubclass: makeSubclass
+    makeSubclass: makeSubclass,
+    newApply: newApply
 };
 
 
@@ -15077,6 +15174,21 @@ function makeSubclass(Superclass) {
         constructor: this
     });
     return this;
+}
+
+
+/**
+ * Calls constructor `this` with arguments passed as array
+ * 
+ * @param {Function} thisClass A class constructor that will be called
+ * @return {Array|Array-like} args Array of arguments that will be passed to constructor
+ */
+function newApply(args) {
+    if (! Array.isArray(args))
+        args = Array.prototype.slice.call(args);
+    // "null" is context to pass to class constructor, first parameter of bind
+    var args = [null].concat(args);
+    return new (Function.prototype.bind.apply(this, args));
 }
 
 },{"./proto_function":105,"./proto_object":107}],109:[function(require,module,exports){
