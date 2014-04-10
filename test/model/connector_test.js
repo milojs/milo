@@ -101,4 +101,35 @@ describe('Connector', function() {
             done();
         }, 2);
     });
+
+
+    it('I can change the mode of the connection', function(done) {
+        var m1 = new Model
+            , m2 = new Model
+            , c = new Connector(m1, '<<-', m2).changeMode('<<->>');
+
+        m1('.info.name').set('milo');
+
+        _.defer(function() {
+            assert.deepEqual(m2.get(), { info: { name: 'milo' } } );
+            done();
+        });
+    });
+
+
+    it('I can change the mode of the connection in the next tick', function(done) {
+        var m1 = new Model
+            , m2 = new Model
+            , c = new Connector(m1, '<<-', m2).deferChangeMode('<<->>');
+
+        _.defer(function (){
+            m1('.info.name').set('milo');
+            _.defer(function() {
+                assert.deepEqual(m2.get(), { info: { name: 'milo' } } );
+                done();
+            });
+        });
+
+    });
+
 });

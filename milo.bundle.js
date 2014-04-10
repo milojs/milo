@@ -9478,26 +9478,11 @@ var modePattern = /^(\<*)\-+(\>*)$/;
  * @return {Connector} when called with `new`, creates a Connector object.
  */
 function Connector(ds1, mode, ds2, options) {
-    var parsedMode = mode.match(modePattern);
-
-    if (! parsedMode)
-        modeParseError();
-
-    var depth1 = parsedMode[1].length
-        , depth2 = parsedMode[2].length;
-
-    if (depth1 && depth2 && depth1 != depth2)
-        modeParseError();
-
-    if (! depth1 && ! depth2)
-        modeParseError();
+    setupMode.call(this, mode);
 
     _.extend(this, {
         ds1: ds1,
         ds2: ds2,
-        mode: mode,
-        depth1: depth1,
-        depth2: depth2,
         isOn: false,
         _changesQueue1: [],
         _changesQueue2: [],
@@ -9531,6 +9516,30 @@ function Connector(ds1, mode, ds2, options) {
 
     this.turnOn();
 
+
+}
+
+function setupMode(mode){
+    var parsedMode = mode.match(modePattern);
+
+    if (! parsedMode)
+        modeParseError();
+
+    var depth1 = parsedMode[1].length
+        , depth2 = parsedMode[2].length;
+
+    if (depth1 && depth2 && depth1 != depth2)
+        modeParseError();
+
+    if (! depth1 && ! depth2)
+        modeParseError();
+
+    _.extend(this, {
+        mode: mode,
+        depth1: depth1,
+        depth2: depth2,
+    });
+
     function modeParseError() {
         throw new ConnectorError('invalid Connector mode: ' + mode);
     }
@@ -9540,9 +9549,34 @@ function Connector(ds1, mode, ds2, options) {
 _.extendProto(Connector, {
     turnOn: Connector$turnOn,
     turnOff: Connector$turnOff,
-    destroy: Connector$destroy
+    destroy: Connector$destroy,
+    changeMode: Connector$changeMode,
+    deferChangeMode: Connector$deferChangeMode
 });
 
+/**
+ * Function change the mode of the connection
+ *
+ * @param @param {String} mode the connection mode that defines the direction and the depth of connection. Possible values are '->', '<<-', '<<<->>>', etc.
+ * @return {Object[String]}
+ */
+function Connector$changeMode(mode) {
+    this.turnOff();
+    setupMode.call(this, mode);
+    this.turnOn();
+    return this;
+}
+
+/**
+ * Function change the mode of the connection
+ *
+ * @param @param {String} mode the connection mode that defines the direction and the depth of connection. Possible values are '->', '<<-', '<<<->>>', etc.
+ * @return {Object[String]}
+ */
+function Connector$deferChangeMode(mode) {
+    _.deferMethod(this, 'changeMode', mode);
+    return this;
+}
 
 /**
  * Function that reverses translation rules for paths of connected odata sources
