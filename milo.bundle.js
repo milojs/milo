@@ -201,7 +201,7 @@ function FacetedObject$$getFacetConfig(facetName) {
  */
 function FacetedObject$$createFacetedClass(name, facetsClasses, facetsConfig) {
     check(name, String);
-    check(facetsClasses, Match.ObjectHash(Match.Subclass(Facet, true)));
+    check(facetsClasses, Match.ObjectHash(Match.Subclass(Facet, true))); //TODO: does not allow new comp without config.
     check(facetsConfig, Match.Optional(Object));
 
     // throw exception if config passed for facet for which there is no class
@@ -1787,11 +1787,12 @@ function Component$allFacets(method) { // ,... arguments
  * Component instance method.
  * 
  * @param {[String]} name optional new name of component, 
+ * @param {[Boolean]} renameInScope optional false to not rename ComponentInfo object in its scope, true by default
  */
-function Component$rename(name) {
+function Component$rename(name, renameInScope) {
     name = name || miloComponentName();
     this.componentInfo.rename(name, false);
-    if (this.scope) {
+    if (this.scope && renameInScope !== false) {
         this.scope._remove(this.name);
         this.scope._add(this, name);
     } else
