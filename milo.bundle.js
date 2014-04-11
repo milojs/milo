@@ -998,7 +998,8 @@ module.exports = commandsRegistry;
 'use strict';
 
 
-var _ = require('mol-proto');
+var _ = require('mol-proto')
+    , logger = require('../util/logger');
 
 
 var CURRENT_COMMAND = '___currentCommand'
@@ -1045,6 +1046,8 @@ _.extendProto(Command, {
     execute: Command$execute,
     setUndo: Command$setUndo,
     getUndo: Command$getUndo,
+    undo: Command$undo,
+    redo: Command$execute, // same for command, different for transaction
     setArguments: Command$setArguments,
     addArguments: Command$addArguments,
     _setCurrentCommand: Command$_setCurrentCommand,
@@ -1097,6 +1100,16 @@ function Command$setUndo(undoCommand) {
  */
 function Command$getUndo() {
     return this[UNDO_COMMAND];
+}
+
+
+/**
+ * Executes undo command of current command
+ */
+function Command$undo() {
+    var undoCmd = this.getUndo();
+    if (! undoCmd) return logger.error('Command undo called without undo command present');
+    undoCmd.execute();
 }
 
 
@@ -1186,7 +1199,7 @@ function Command$destroy() {
     }
 }
 
-},{"mol-proto":103}],13:[function(require,module,exports){
+},{"../util/logger":92,"mol-proto":103}],13:[function(require,module,exports){
 'use strict';
 
 
@@ -14313,13 +14326,13 @@ function deferTicks(ticks) { // , arguments
  * Works like _.delay but allows to defer method call of `self` which will be the first _.delayMethod parameter
  *
  * @param {Object} self object to delay method call of
- * @param {String} methodName name of method
+ * @param {Function|String} funcOrMethodName function or name of method
  * @param {Number} wait approximate dalay time in milliseconds
  * @param {List} arguments arguments to pass to method
  */
-function delayMethod(methodName, wait) { // , ... arguments
+function delayMethod(funcOrMethodName, wait) { // , ... arguments
     var args = slice.call(arguments, 2);
-    _delayMethod(this, methodName, wait, args);
+    _delayMethod(this, funcOrMethodName, wait, args);
 }
 
 
@@ -14327,17 +14340,20 @@ function delayMethod(methodName, wait) { // , ... arguments
  * Works like _.defer but allows to defer method call of `self` which will be the first _.deferMethod parameter
  *
  * @param {Object} self object to defer method call of
- * @param {String} methodName name of method
+ * @param {Function|String} funcOrMethodName function or name of method
  * @param {List} arguments arguments to pass to method
  */
-function deferMethod(methodName) { // , ... arguments
+function deferMethod(funcOrMethodName) { // , ... arguments
     var args = slice.call(arguments, 1);
-    _delayMethod(this, methodName, 1, args);
+    _delayMethod(this, funcOrMethodName, 1, args);
 }
 
-function _delayMethod(object, methodName, wait, args) {
+function _delayMethod(object, funcOrMethodName, wait, args) {
     return setTimeout(function() {
-        object[methodName].apply(object, args);
+        var func = typeof funcOrMethodName == 'string'
+                    ? object[funcOrMethodName]
+                    : funcOrMethodName;
+        func.apply(object, args);
     }, wait);
 }
 
