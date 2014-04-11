@@ -81,4 +81,34 @@ describe('TransactionHistory', function() {
             });
         });
     });
+
+
+    it('should manage multiple transactions', function(done) {
+        history.storeCommand(createTestCommand(1));
+        history.storeCommand(createTestCommand(2));
+
+        _.defer(function() {
+            history.storeCommand(createTestCommand(3));
+
+            _.deferTicks(function() {
+                assert.equal(history.inTransaction(), false);
+
+                history.storeCommand(createTestCommand(4));
+                history.storeCommand(createTestCommand(5));
+                _.deferTicks(function() {
+                    assert.equal(history.inTransaction(), false);
+
+                    history.undo();
+                        assert.deepEqual(executed, [[-5], [-4]]);
+
+                    executed = [];
+
+                    history.undo();
+                        assert.deepEqual(executed, [[-3], [-2], [-1]]);
+
+                    done();
+                }, 2);
+            }, 2);
+        });
+    });
 });
