@@ -12692,6 +12692,7 @@ function Promise$transform(transformDataFunc) {
 
 
 var _ = require('mol-proto')
+    , count = require('./count')
     , Promise = require('./promise');
 
 module.exports = request;
@@ -12703,7 +12704,7 @@ var okStatuses = ['200', '304'];
 
 function request(url, opts, callback) {
     var req = new XMLHttpRequest();
-    req.open(opts.method, url, true); // what true means?
+    req.open(opts.method, url, true);
     req.setRequestHeader('Content-Type', opts.contentType || 'application/json;charset=UTF-8');
 
     var promise = new Promise(req);
@@ -12727,7 +12728,8 @@ function request(url, opts, callback) {
 _.extend(request, {
     get: request$get,
     post: request$post,
-    json: request$json
+    json: request$json,
+    jsonp: request$jsonp
 });
 
 
@@ -12750,7 +12752,31 @@ function request$json(url, callback) {
     return jsonPromise;
 }
 
-},{"./promise":97,"mol-proto":107}],99:[function(require,module,exports){
+function request$jsonp(url, callback) {
+
+    var script = document.createElement('script'),
+        promise = new Promise(script),
+        body = window.document.body,
+        uniqueCallback = 'ML_JSONP_' +  count();
+
+    window[uniqueCallback] = function (result) {
+        callback && callback(null, result, null);
+        promise.setData(null, result);
+        
+        body.removeChild(script);
+        delete window[uniqueCallback];
+    };
+    
+    script.type = 'text/javascript';
+    script.src = url + (url.indexOf('?') == -1 ? '?' : '&') + 'callback=' + uniqueCallback;
+
+    body.appendChild(script);
+
+    return promise;
+}
+
+
+},{"./count":88,"./promise":97,"mol-proto":107}],99:[function(require,module,exports){
 'use strict';
 
 
