@@ -2316,6 +2316,8 @@ function Component$broadcast(msg, data, callback, synchronously) {
  */
 function Component$destroy() {
     this.walkScopeTree(function(component) {
+        if (component._destroyed)
+            return logger.warn('Component destroy: component is already destroyed');
         component.remove();
         component.allFacets('destroy');
         if (! component.el) return;
@@ -12808,9 +12810,11 @@ function DeleteTextSelectionCommand$init(ts, func, selectEndContainer) {
 
 
 function DeleteTextSelectionCommand$destroy() {
-    this._removedComponents._each(function(comp) {
-        comp.destroy();
-    });
+    if (this._removedComponents) {
+        this._removedComponents.forEach(function(comp) {
+            comp.destroy();
+        });
+    }
     Command.prototype.destroy.apply(this, arguments);
 }
 
@@ -12822,36 +12826,43 @@ function deleteCmdFunc(selectEndContainer) {
 
     var selPoint = this._getPostDeleteSelectionPoint(selectEndContainer);
 
+    // detach removed components from their scopes
+    if (! this.isCollapsed && this.range) {
+        
+        var removedComponents = this.containedComponents()
+            , detached = [];
+
+        removedComponents.forEach(function(component) {
+            var parent = component.getScopeParent();
+            if (removedComponents.indexOf(parent) == -1) {
+                component.remove();
+                detached.push({ parent: parent, component: component });
+            }
+        });
+
+        // keep references of those detached components for future 'destroy' of command
+        this._removedComponents = removedComponents;
+    }
+
     // extract range. fragment will contain all components that are completely removed
     var range = this.getRange()
         , clonedRange = range.cloneRange();
+
     var deletedFragment = range.extractContents();
     this.range = clonedRange;
 
     this._selectAfterDelete(selPoint);
 
-    // detach scopes of removed components by iterating common container component
     var parentEl = this.containingElement()
         , parent = Component.getContainingComponent(parentEl, true, 'container');
 
-    var removedComponents = new Scope;
-    parent.container.scope._each(function(child) {
-        if (! parentEl.contains(child.el)) {
-            child.remove();
-            removedComponents._add(child);
-        }
-    });
-
-    // keep references of those detached components for future 'destroy' of command
-    this._removedComponents = removedComponents;
-
     // create undo command
-    var undoCmd = new Command(this, undoDeleteCmdFunc, deletedFragment, parent, removedComponents);
+    var undoCmd = new Command(this, undoDeleteCmdFunc, deletedFragment, parent, detached);
     cmd.setUndo(undoCmd);
 }
 
 
-function undoDeleteCmdFunc(deletedFragment, parent, removedComponents) {
+function undoDeleteCmdFunc(deletedFragment, parent, detached) {
     // find element immediately after deleted fragment
     var selStart = this.range.startContainer;
     var treeWalker = domUtils.createTreeWalker(parent.el);
@@ -12866,8 +12877,10 @@ function undoDeleteCmdFunc(deletedFragment, parent, removedComponents) {
     // insert fragment back
     parentEl.insertBefore(deletedFragment, nextNode);
      
-    // connect scopes - add components to parent
-    parent.container.scope._merge(removedComponents);
+    // connect scopes - add components to their previous parents
+    detached && detached.forEach(function(d) {
+        d.parent.container.scope._add(d.component);
+    });
 
     // merge elements in the beginning and in the end
 }
