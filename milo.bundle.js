@@ -2559,6 +2559,7 @@ var ComponentFacet = require('../c_facet')
     , Scope = require('../scope')
     , _ = require('mol-proto')
     , facetsRegistry = require('./cf_registry')
+    , domUtils = require('../../util/dom')
     , logger = require('../../util/logger');
 
 
@@ -2586,7 +2587,8 @@ _.extendProto(Container, {
     getState: Container$getState,
     setState: Container$setState,
     binder: Container$binder,
-    destroy: Container$destroy
+    destroy: Container$destroy,
+    unwrap: Container$unwrap
 });
 
 facetsRegistry.add(Container);
@@ -2652,7 +2654,23 @@ function Container$destroy() {
     ComponentFacet.prototype.destroy.apply(this, arguments);
     this.scope._detachElement();
 }
-},{"../../binder":9,"../../util/logger":95,"../c_facet":17,"../scope":40,"./cf_registry":30,"mol-proto":106}],19:[function(require,module,exports){
+
+
+/**
+ * Moves all of the contents of the owner into the parent scope
+ * @param {Boolean} destroy If true, the component will be destroyed at the end.
+ */
+function Container$unwrap(destroy) {
+    domUtils.unwrapElement(this.owner.el);
+    this.scope && this.scope._each(function (child) {
+        child.remove();
+        child.rename(undefined, false);
+        this.owner.scope && this.owner.scope._add(child);
+    }, this);
+    if (destroy === true) this.owner.destroy();
+}
+
+},{"../../binder":9,"../../util/dom":89,"../../util/logger":95,"../c_facet":17,"../scope":40,"./cf_registry":30,"mol-proto":106}],19:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../../abstract/mixin')
