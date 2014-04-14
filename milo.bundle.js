@@ -12753,24 +12753,23 @@ function request$json(url, callback) {
 }
 
 function request$jsonp(url, callback) {
-
     var script = document.createElement('script'),
         promise = new Promise(script),
-        body = window.document.body,
+        head = window.document.head,
         uniqueCallback = 'ML_JSONP_' +  count();
 
     window[uniqueCallback] = function (result) {
         callback && callback(null, result, null);
         promise.setData(null, result);
         
-        body.removeChild(script);
+        head.removeChild(script);
         delete window[uniqueCallback];
     };
     
     script.type = 'text/javascript';
     script.src = url + (url.indexOf('?') == -1 ? '?' : '&') + 'callback=' + uniqueCallback;
 
-    body.appendChild(script);
+    head.appendChild(script);
 
     return promise;
 }
