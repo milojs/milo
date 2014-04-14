@@ -12749,10 +12749,10 @@ function request$json(url, callback) {
 'use strict';
 
 
-var domUtil = require('./dom')
+var domUtil = require('../dom')
     , containingElement = domUtil.containingElement
     , setCaretPosition = domUtil.setCaretPosition
-    , Component = require('../components/c_class')
+    , Component = require('../../components/c_class')
     , _ = require('mol-proto');
 
 module.exports = TextSelection;
@@ -12848,7 +12848,10 @@ _.extendProto(TextSelection, {
 
     containedComponents: TextSelection$containedComponents,
     eachContainedComponent: TextSelection$eachContainedComponent,
-    del: TextSelection$del
+    del: TextSelection$del,
+
+    getRange: TextSelection$getRange,
+    setRange: TextSelection$setRange
 });
 
 
@@ -13031,13 +13034,28 @@ function TextSelection$del(selectEndContainer) {
 }
 
 
+/**
+ * Returns selection range
+ *
+ * @return {Range}
+ */
+function TextSelection$getRange() {
+    return this.range;
+}
 
 
+/**
+ * Sets selection to passed range
+ * 
+ * @param {Range} range
+ */
+function TextSelection$setRange(range) {
+    var sel = this.selection;
+    sel.removeAllRanges();
+    sel.addRange(range);
+}
 
-
-
-
-},{"../components/c_class":16,"./dom":89,"mol-proto":106}],100:[function(require,module,exports){
+},{"../../components/c_class":16,"../dom":89,"mol-proto":106}],100:[function(require,module,exports){
 'use strict';
 
 
