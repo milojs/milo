@@ -1097,6 +1097,7 @@ module.exports = commandsRegistry;
 
 var _ = require('mol-proto')
     , check = require('../util/check')
+    , Match = check.Match
     , logger = require('../util/logger');
 
 
@@ -1157,8 +1158,8 @@ _.extend(Command, {
 
 
 function Command$init(func) { // , ... arguments
-    check(func, Function);
-    this.func = func;
+    check(func, Match.Optional(Function));
+    this.func = func || function(){};
     this.args = _.slice(arguments, 1);    
 }
 
@@ -11888,7 +11889,7 @@ function treeIndexOf(rootEl, el) {
  */
 function getNodeAtTreeIndex(rootEl, treeIndex) {
     if (treeIndex == 0) return rootEl;
-    if (! (treeIndex > 0)) return; // not same as "<="
+    if (! (treeIndex > 0) || treeIndex == Infinity) return; // not same as "<="
 
     var treeWalker = createTreeWalker(rootEl);
 
