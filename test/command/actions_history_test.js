@@ -20,8 +20,8 @@ describe('ActionsHistory', function() {
         executed = [];
 
         for (var i = 1; i < 4; i++) {
-            var cmd = new Command(context, commandFunc, i)
-                , undoCmd = new Command(context, commandFunc, -i);
+            var cmd = new Command(commandFunc, i)
+                , undoCmd = new Command(commandFunc, -i);
             cmd.setUndo(undoCmd);
             history.store(cmd);
         }

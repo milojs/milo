@@ -31,8 +31,8 @@ describe('TransactionHistory', function() {
 
 
     function createTestCommand(id) {
-        var cmd = new Command(context, commandFunc, id)
-            , undoCmd = new Command(context, commandFunc, -id);
+        var cmd = new Command(commandFunc, id)
+            , undoCmd = new Command(commandFunc, -id);
         cmd.setUndo(undoCmd);
         return cmd;
     }
