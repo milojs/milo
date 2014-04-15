@@ -6444,7 +6444,7 @@ module.exports = MLListItem;
 
 
 _.extendProto(MLListItem, {
-    init: MLListItem$init,
+    init: MLListItem$init
 });
 
 

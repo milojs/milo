@@ -1,48 +1,47 @@
 {
-    "name": "mol-milo",
-    "version": "0.1.3",
-    "description": "A minimalist browser framework that binds HTML elements to JS components",
-    "main": "lib/milo.js",
-    "scripts": {
-        "test": "grunt test"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/MailOnline/milo.git"
-    },
-    "author": "MailOnline",
-    "license": "BSD",
-    "bugs": {
-        "url": "https://github.com/MailOnline/milo/issues"
-    },
-    "devDependencies": {
-        "async": "~0.2.9",
-        "grunt": "~0.4.1",
-        "grunt-mocha-test": "~0.7.0",
-        "grunt-mocha": "~0.4.5",
-        "grunt-browserify": "~1.2.11",
-        "browserify": "~2.35.4",
-        "grunt-contrib-watch": "~0.5.3",
-        "brfs": "0.0.8",
-        "karma-script-launcher": "~0.1.0",
-        "karma-firefox-launcher": "~0.1.3",
-        "karma-chrome-launcher": "~0.1.2",
-        "karma-html2js-preprocessor": "~0.1.0",
-        "karma-jasmine": "~0.1.5",
-        "requirejs": "~2.1.9",
-        "karma-requirejs": "~0.2.1",
-        "karma-coffee-preprocessor": "~0.1.2",
-        "karma-phantomjs-launcher": "~0.1.1",
-        "karma": "~0.10.9",
-        "grunt-karma": "~0.6.2",
-        "mocha": "~1.16.2",
-        "karma-mocha": "~0.1.1",
-        "karma-spec-reporter": "0.0.6",
-        "grunt-contrib-uglify": "~0.2.7"
-    },
-    "dependencies": {
-        "mol-proto": "git://github.com/MailOnline/proto.git",
-        "dot": "~1.0.2",
-        "base32": "git://github.com/MailOnline/base32-js.git"
-    }
+  "name": "mol-milo",
+  "version": "0.1.3",
+  "description": "A minimalist browser framework that binds HTML elements to JS components",
+  "main": "lib/milo.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/MailOnline/milo.git"
+  },
+  "author": "MailOnline",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/MailOnline/milo/issues"
+  },
+  "devDependencies": {
+    "async": "~0.2.9",
+    "grunt": "~0.4.1",
+    "grunt-mocha-test": "~0.7.0",
+    "grunt-browserify": "~1.2.11",
+    "browserify": "~2.35.4",
+    "grunt-contrib-watch": "~0.5.3",
+    "brfs": "0.0.8",
+    "karma-script-launcher": "~0.1.0",
+    "karma-firefox-launcher": "~0.1.3",
+    "karma-chrome-launcher": "~0.1.2",
+    "karma-html2js-preprocessor": "~0.1.0",
+    "karma-jasmine": "~0.1.5",
+    "requirejs": "~2.1.9",
+    "karma-requirejs": "~0.2.1",
+    "karma-coffee-preprocessor": "~0.1.2",
+    "karma": "~0.12",
+    "mocha": "~1.16.2",
+    "karma-mocha": "~0.1.1",
+    "karma-spec-reporter": "0.0.6",
+    "grunt-contrib-uglify": "~0.2.7",
+    "grunt-karma": "^0.8.2",
+    "karma-webdriver-launcher": "^0.2.0"
+  },
+  "dependencies": {
+    "mol-proto": "git://github.com/MailOnline/proto.git",
+    "dot": "~1.0.2",
+    "base32": "git://github.com/MailOnline/base32-js.git"
+  }
 }
