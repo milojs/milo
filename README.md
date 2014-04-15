@@ -349,3 +349,4 @@ Changes log
 - Data propagation mechanism fixed to prevent duplication of splice changes
 - Dragdrop redesigned to allow passing data via datatype during drag.
 
+
