@@ -24,8 +24,8 @@ describe('Transaction', function() {
     function createTestTransaction(from, to) {
         var trans = new Transaction;
         for (var i = from; i < to; i++) {
-            var cmd = new Command(context, commandFunc, i)
-                , undoCmd = new Command(context, commandFunc, -i);
+            var cmd = new Command(commandFunc, i)
+                , undoCmd = new Command(commandFunc, -i);
             cmd.setUndo(undoCmd);
             trans.storeCommand(cmd);
         }
