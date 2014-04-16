@@ -1,0 +1,15 @@
+<div ml-bind="[container]:body">
+    <div ml-bind="[events, container]:main">
+        <label id="range-start" for="article-id">Article ID</label>
+        <input id="article-id" type="text" ml-bind="[Data]:articleIdInput">
+        <button ml-bind="[Events]:articleButton">Open</button>
+        <div id="range-end-full" ml-bind="View:infoView">
+            <div>
+                This div is inserted on purpose
+                to test scope chain "interrupted" by DOM element
+                <p id="range-end" ml-bind=":para1">Info 1</p>
+                <p ml-bind=":para2">Info 2</p>
+            </div>
+        </div>
+    </div>
+</div>

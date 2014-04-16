@@ -12292,12 +12292,14 @@ function error$toBeImplemented() {
 
 var Component = require('../components/c_class')
     , BindAttribute = require('../attributes/a_bind')
+    , binder = require('../binder')
     , domUtils = require('./dom')
     , logger = require('./logger')
     , check = require('./check')
+    , _ = require('mol-proto')
 
 
-module.exports = {
+var fragmentUtils = module.exports = {
     getState: fragment_getState,
     createFromState: fragment_createFromState
 };
@@ -12308,24 +12310,34 @@ module.exports = {
  * This function will log error and return undefined if range has no common ancestor that has component with container facet
  * 
  * @param {Range} range DOM Range instance
- * @param {Bolean} markBalancedNodes should be `true` to mark all elements that were balanced when range was cloned
- * @return {Object}
+ * @param {Function} callback result is passed via callback with any error as first parameter
  */
-function fragment_getState(range, markBalancedNodes) {
-    var rangeContainer = _getRangeContainer(range);
-    if (! rangeContainer) return logger.error('fragment.getState: range has no common container');
+function fragment_getState(range, callback) {
+    try {
+        var rangeContainer = _getRangeContainer(range);
+        if (! rangeContainer) {
+            callback(new Error('fragment.getState: range has no common container'));
+            return; // do NOT connect it to previous callback, getState should return undefined
+        }
 
-    if (markBalancedNodes) range = _insertRangeMarkers(range);
-    var frag = range.cloneContents()
-        , wrapper = _wrapFragmentInContainer(frag);
+        var frag = range.cloneContents()
+            , wrapper = _wrapFragmentInContainer(frag);
 
-    _transferStates(rangeContainer, wrapper);
-    _renameChildren(wrapper);
-}
-
-
-function _insertRangeMarkers(range) {
-
+        _transferStates(rangeContainer, wrapper);
+        _.defer(function() {
+            wrapper.broadcast('stateready');
+            _.defer(function() {
+                _renameChildren(wrapper);
+                var state = {
+                    innerHTML: wrapper.el.innerHTML,
+                    containerState: wrapper.container.getState(true)
+                };
+                callback(null, state);
+            });
+        });
+    } catch (err) {
+        callback(err);
+    }
 }
 
 
@@ -12349,7 +12361,7 @@ function _wrapFragmentInContainer(frag) {
 
 function _getRangeContainer(range) {
     var el = domUtils.containingElement(range.commonAncestorContainer);
-    return getContainingComponent(el, true, 'container');
+    return Component.getContainingComponent(el, true, 'container');
 }
 
 
@@ -12373,17 +12385,45 @@ function _renameChildren(comp) {
 
 /**
  * Creates DOM fragment from state
- * @param  {Object} state state of the fragment, together with components states
- * @return {DocumentFragment}
+ * 
+ * @param {Object} state state of the fragment, together with components states
+ * @param {Boolean} returnWrapper optional true to return a wrapper component rather than the DocumentFragment
+ * @return {Component|DocumentFragment}
  */
-function fragment_createFromState(state) {
+function fragment_createFromState(state, returnWrapper, callback) {
+    if (typeof returnWrapper == 'function') {
+        callback = returnWrapper;
+        returnWrapper = false;
+    }
+
     check(state, {
-        html: String,
-        childrenStates: Array
+        innerHTML: String,
+        containerState: Object
     });
+
+    try {
+        var wrapper = Component.createOnElement(undefined, state.innerHTML, undefined, ['container']);
+
+        wrapper.container.setState(state.containerState);
+        _.defer(function() {
+            wrapper.broadcast('stateready');
+            _.defer(function() {
+                if (returnWrapper) return callback(null, wrapper);
+
+                var frag = document.createDocumentFragment();
+                domUtils.children(wrapper.el).forEach(function(childEl) {
+                    frag.appendChild(childEl);
+                });
+
+                callback(null, frag);
+            });
+        });
+    } catch(err) {
+        callback(err);
+    }
 }
 
-},{"../attributes/a_bind":5,"../components/c_class":16,"./check":86,"./dom":89,"./logger":96}],94:[function(require,module,exports){
+},{"../attributes/a_bind":5,"../binder":9,"../components/c_class":16,"./check":86,"./dom":89,"./logger":96,"mol-proto":107}],94:[function(require,module,exports){
 'use strict';
 
 /**
