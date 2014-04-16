@@ -13078,18 +13078,23 @@ function TextSelection$setRange(range) {
 /**
  * Stores selection window, nodes and offsets in object
  */
-function TextSelection$getState() {
+function TextSelection$getState(rootEl) {
     var r = this.range;
     return {
         window: this.window,
-        start: {
-            node: r.startContainer,
-            offset: r.startOffset
-        },
-        end: {
-            node: r.endContainer,
-            offset: r.endOffset
-        }
+        rootEl: rootEl,
+        start: _getSelectionPointState(rootEl, r.startContainer, r.startOffset),
+        end: _getSelectionPointState(rootEl, r.endContainer, r.endOffset)
+    };
+}
+
+
+function _getSelectionPointState(rootEl, node, offset) {
+    var treeIndex = domUtils.treeIndexOf(rootEl, node);
+    if (treeIndex == -1) logger.error('Selection point is outside of root element');
+    return {
+        treeIndex: treeIndex,
+        offset: offset
     };
 }
 
@@ -13099,8 +13104,22 @@ function TextSelection$getState() {
  */
 function TextSelection$$createFromState(state) {
     var setSelection = state.window.milo.util.dom.setSelection;
-    setSelection(state.start.node, state.start.offset, state.end.node, state.end.offset);
-    return new TextSelection(state.window);
+    var startNode = _selectionNodeFromState(state.rootEl, state.start)
+        , endNode = _selectionNodeFromState(state.rootEl, state.end);
+
+    try {
+        setSelection(startNode, state.start.offset, endNode, state.end.offset);
+        return new TextSelection(state.window);
+    } catch(e) {
+        logger.error('Text selection: can\'t create selection', e, e.message)
+    }
+}
+
+
+function _selectionNodeFromState(rootEl, pointState) {
+    var node = domUtils.getNodeAtTreeIndex(rootEl, pointState.treeIndex);
+    if (! node) logger.error('TextSelection createFromState: no node at treeIndex');
+    return node;
 }
 
 },{"../../components/c_class":16,"../dom":89,"mol-proto":106}],100:[function(require,module,exports){
