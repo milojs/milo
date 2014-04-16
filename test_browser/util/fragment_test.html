@@ -3,7 +3,8 @@
         <label id="range-start" for="article-id">Article ID</label>
         <input id="article-id" type="text" ml-bind="[Data]:articleIdInput">
         <button ml-bind="[Events]:articleButton">Open</button>
-        <div id="range-end-full" ml-bind="View:infoView">
+        <div ml-bind="[model]:testModel"></div>
+        <div ml-bind="View:infoView">
             <div>
                 This div is inserted on purpose
                 to test scope chain "interrupted" by DOM element

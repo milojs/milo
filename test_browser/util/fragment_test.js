@@ -15,7 +15,7 @@ describe('util.fragment', function() {
 
     beforeEach(function() {
         document.body.innerHTML = '';
-        root = milo.Component.createOnElement(undefined, html);
+        root = milo.Component.createOnElement(undefined, html, undefined, ['container']);
         document.body.appendChild(root.el);
     });
 
@@ -43,8 +43,35 @@ describe('util.fragment', function() {
 
 
     it('should return component to the same state when fragment is re-inserted', function(done) {
+        var main = root.container.scope.body.container.scope.main
+            , mainScope = main.container.scope;
+        mainScope.testModel.model.set({ test: 1 });
+        var originalState = main.container.getState(true)
+            , originalHTML = main.el.innerHTML;
+
         var range = document.createRange();
-        range.setStartBefore(document.getElementById('range-start'));
-        range.setEndAfter(document.getElementById('range-end-full'));
+        range.selectNodeContents(main.el);
+
+        fragmentUtils.getState(range, false, function(err, state) {
+            assert(!err);
+
+            mainScope._each(function(child) {
+                child.destroy();
+            });
+
+            main.el.innerHTML = '';
+            assert.equal(mainScope._length(), 0);
+
+            fragmentUtils.createFromState(state, true, function(err, wrapper) {
+                assert(!err);
+
+                main.el.appendChild(wrapper.el);
+                mainScope._add(wrapper);
+                wrapper.container.unwrap(true, false);
+
+                assert.deepEqual(main.container.getState(true), originalState);
+                done();
+            });
+        });
     });
 });

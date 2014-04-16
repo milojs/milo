@@ -2634,12 +2634,13 @@ function Container$destroy() {
  * Moves all of the contents of the owner into the parent scope
  * 
  * @param {Boolean} destroy If true, the component will be destroyed at the end.
+ * @param {Boolean} renameChildren pass false to not rename scope children (default is true)
  */
-function Container$unwrap(destroy) {
+function Container$unwrap(destroy, renameChildren) {
     domUtils.unwrapElement(this.owner.el);
     this.scope && this.scope._each(function (child) {
         child.remove();
-        child.rename(undefined, false);
+        if (renameChildren !== false) child.rename(undefined, false);
         this.owner.scope && this.owner.scope._add(child);
     }, this);
     if (destroy === true) this.owner.destroy();
@@ -12310,14 +12311,20 @@ var fragmentUtils = module.exports = {
  * This function will log error and return undefined if range has no common ancestor that has component with container facet
  * 
  * @param {Range} range DOM Range instance
- * @param {Function} callback result is passed via callback with any error as first parameter
+ * @param {Boolean} renameChildren optional parameter, `true` to rename fragment child components
+ * @param {Function} callback always the last parameter, optional parameters can be dropped; result is passed via callback with any error as first parameter
  */
-function fragment_getState(range, callback) {
+function fragment_getState(range, renameChildren, callback) {
     try {
         var rangeContainer = _getRangeContainer(range);
         if (! rangeContainer) {
             callback(new Error('fragment.getState: range has no common container'));
             return; // do NOT connect it to previous callback, getState should return undefined
+        }
+
+        if (typeof renameChildren == 'function') {
+            callback = renameChildren;
+            renameChildren = false;
         }
 
         var frag = range.cloneContents()
@@ -12327,7 +12334,7 @@ function fragment_getState(range, callback) {
         _.defer(function() {
             wrapper.broadcast('stateready');
             _.defer(function() {
-                _renameChildren(wrapper);
+                if (renameChildren) _renameChildren(wrapper);
                 var state = {
                     innerHTML: wrapper.el.innerHTML,
                     containerState: wrapper.container.getState(true)
@@ -12371,7 +12378,7 @@ function _transferStates(fromComp, toComp) {
         var fromChildComp = fromScope[name];
         if (! fromChildComp) return logger.error('fragment.getState: conponent', name, 'not found in range');
         var state = fromChildComp._getState(true);
-        toChildComp.setState(true);
+        toChildComp.setState(state);
     });
 }
 
