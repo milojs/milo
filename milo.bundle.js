@@ -12872,9 +12872,10 @@ function request$jsonp(url, callback) {
 'use strict';
 
 
-var domUtil = require('../dom')
-    , containingElement = domUtil.containingElement
-    , setCaretPosition = domUtil.setCaretPosition
+var domUtils = require('../dom')
+    , containingElement = domUtils.containingElement
+    , setCaretPosition = domUtils.setCaretPosition
+    , logger = require('../logger')
     , Component = require('../../components/c_class')
     , _ = require('mol-proto');
 
@@ -13246,7 +13247,7 @@ function _selectionNodeFromState(rootEl, pointState) {
     return node;
 }
 
-},{"../../components/c_class":16,"../dom":89,"mol-proto":107}],101:[function(require,module,exports){
+},{"../../components/c_class":16,"../dom":89,"../logger":96,"mol-proto":107}],101:[function(require,module,exports){
 'use strict';
 
 
