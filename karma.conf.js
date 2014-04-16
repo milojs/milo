@@ -43,6 +43,16 @@ module.exports = function(config) {
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: false,
 
+     customLaunchers: {
+        'RemChrome': {
+          base: 'WebDriver',
+          config: {
+            hostname: "localhost",
+            port: 4444,
+          },
+          browserName: 'chrome',
+        }
+      },
 
     // Start these browsers, currently available:
     // - Chrome
@@ -52,7 +62,7 @@ module.exports = function(config) {
     // - Safari (only Mac; has to be installed with `npm install karma-safari-launcher`)
     // - PhantomJS
     // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
-    browsers: ['Chrome'],
+    browsers: ['RemChrome'],
 
 
     // If browser does not capture in given timeout [ms], kill it

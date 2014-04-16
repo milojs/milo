@@ -95,7 +95,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-mocha-test');
-    grunt.loadNpmTasks('grunt-mocha');
     grunt.loadNpmTasks('grunt-karma');
 
     grunt.registerTask('test', 'mochaTest');

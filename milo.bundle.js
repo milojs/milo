@@ -2630,7 +2630,9 @@ function Container$destroy() {
 
 
 /**
+ * Container instance method
  * Moves all of the contents of the owner into the parent scope
+ * 
  * @param {Boolean} destroy If true, the component will be destroyed at the end.
  */
 function Container$unwrap(destroy) {
@@ -5925,7 +5927,8 @@ module.exports = MLComboList;
 _.extendProto(MLComboList, {
     init: MLComboList$init,
     setOptions: MLComboList$setOptions,
-    toggleAddButton: MLComboList$toggleAddButton
+    toggleAddButton: MLComboList$toggleAddButton,
+    destroy: MLComboList$destroy
 });
 
 
@@ -5944,9 +5947,17 @@ function MLComboList$setOptions(arr) {
 /**
  * Component instance method
  * Hides add button
+ * @param {Boolean} show
  */
 function MLComboList$toggleAddButton(show) {
     this._combo.toggleAddButton(show);
+}
+
+
+function MLComboList$destroy() {
+    Component.prototype.destroy.apply(this, arguments);
+    this._connector && milo.minder.destroyConnector(this._connector);
+    this._connector = null;
 }
 
 
@@ -5961,7 +5972,7 @@ function componentSetup() {
         '_list': this.container.scope.list
     });
 
-    milo.minder(this._list.model, '<<<->>>', this.model);
+    this._connector = milo.minder(this._list.model, '<<<->>>', this.model);
     this._combo.data.on('', {subscriber: onComboChange, context: this });   
 }
 
@@ -6274,7 +6285,8 @@ module.exports = MLInputList;
 
 _.extendProto(MLInputList, {
     init: MLInputList$init,
-    setAsync: MLInputList$setAsync
+    setAsync: MLInputList$setAsync,
+    destroy: MLInputList$destroy
 });
 
 function MLInputList$init() {
@@ -6285,6 +6297,12 @@ function MLInputList$init() {
 
 function MLInputList$setAsync(newHandler) {
     asyncHandler = newHandler || asyncHandler;
+}
+
+function MLInputList$destroy() {
+    Component.prototype.destroy.apply(this, arguments);
+    this._connector && milo.minder.destroyConnector(this._connector);
+    this._connector = null;
 }
 
 function onChildrenBound() {
@@ -6299,7 +6317,7 @@ function componentSetup() {
         '_button': this.container.scope.button,
         '_list': this.container.scope.list
     });
-    milo.minder(this._list.model, '<<<->>>', this.model);
+    this._connector = milo.minder(this._list.model, '<<<->>>', this.model);
     this._button.events.on('click', {subscriber: onClick, context: this });   
 }
 
@@ -6365,12 +6383,20 @@ module.exports = MLList;
 
 _.extendProto(MLList, {
     init: MLList$init,
+    destroy: MLList$destroy
 });
 
 
 function MLList$init() {
     Component.prototype.init.apply(this, arguments);
     this.on('childrenbound', onChildrenBound);
+}
+
+
+function MLList$destroy() {
+    Component.prototype.destroy.apply(this, arguments);
+    this._connector && milo.minder.destroyConnector(this._connector);
+    this._connector = null;
 }
 
 
@@ -6408,7 +6434,7 @@ module.exports = MLListItem;
 
 
 _.extendProto(MLListItem, {
-    init: MLListItem$init,
+    init: MLListItem$init
 });
 
 
@@ -13111,7 +13137,7 @@ function TextSelection$$createFromState(state) {
         setSelection(startNode, state.start.offset, endNode, state.end.offset);
         return new TextSelection(state.window);
     } catch(e) {
-        logger.error('Text selection: can\'t create selection', e, e.message)
+        logger.error('Text selection: can\'t create selection', e, e.message);
     }
 }
 
