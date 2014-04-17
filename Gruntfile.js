@@ -70,7 +70,7 @@ module.exports = function(grunt) {
                     'lib/**/*.js',
                     'node_modules/mol-proto/lib/**/*.js'
                 ],
-                tasks: ['browserify'],
+                tasks: ['browserify']
             },
             test1: {
                 files: ['test_html/bind_test/*.js'],

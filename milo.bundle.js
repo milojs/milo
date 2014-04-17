@@ -5147,7 +5147,7 @@ _.extendProto(DataMsgAPI, {
     createInternalData: createInternalData,
 
     // class specific methods
-    value: DataMsgAPI$value,
+    value: DataMsgAPI$value
 });
 
 module.exports = DataMsgAPI;
@@ -5189,7 +5189,7 @@ function translateToSourceMessage(message) {
 // filterDataMessage
 function filterSourceMessage(sourceMessage, message, data) {
     return data.newValue != data.oldValue;
-};
+}
 
 
 function createInternalData(sourceMessage, message, data) {
@@ -5203,7 +5203,7 @@ function createInternalData(sourceMessage, message, data) {
         newValue: newValue
     };
     return internalData;
-};
+}
 
 },{"../../messenger/m_api":68,"../../util/check":86,"./de_data":36,"mol-proto":106}],36:[function(require,module,exports){
 'use strict';
@@ -9581,7 +9581,7 @@ function _getExpandedSource(ds) {
         source.unshift(ds);
 
         if (ds.owner)
-            source.unshift(ds.owner)
+            source.unshift(ds.owner);
     }
 
     return source;
@@ -10482,7 +10482,7 @@ function ModelPath(model, path) { // ,... - additional arguments for interpolati
     _.defineProperties(modelPath, {
         _model: model,
         _path: path,
-        _args: _.slice(arguments, 1), // path will be the first element of this array
+        _args: _.slice(arguments, 1) // path will be the first element of this array
     });
 
     // parse access path
@@ -10552,7 +10552,7 @@ _.extendProto(ModelPath, {
     unshift: ModelPath$unshift,
     shift: ModelPath$shift,
     _prepareMessenger: _prepareMessenger
-})
+});
 
 
 /**
@@ -10572,7 +10572,7 @@ function ModelPath$path(accessPath) {  // , ... arguments that will be interpola
     var thisPathArgsCount = this._args.length - 1;
 
     if (thisPathArgsCount > 0) {// this path has interpolated arguments too
-        accessPath = accessPath.replace(/\$[1-9][0-9]*/g, function(str){
+        accessPath = accessPath.replace(/\$[1-9][0-9]*/g, function(str) {
             return '$' + (+str.slice(1) + thisPathArgsCount);
         });
     }
@@ -10992,7 +10992,7 @@ var modelDotDef = _(dotDef).clone().extend({
 })._();
 
 
-var dotSettings = _.clone(doT.templateSettings)
+var dotSettings = _.clone(doT.templateSettings);
 dotSettings.strip = false;
 
 var synthesizers = _.mapKeys(templates, function(tmpl) {
@@ -11017,7 +11017,7 @@ var synthesizePathMethods = _.memoize(_synthesizePathMethods, undefined, 1000);
 
 function _synthesizePathMethods(path, parsedPath) {
     var methods = _.mapKeys(synthesizers, function(synthszr) {
-        return _synthesize(synthszr, path, parsedPath)
+        return _synthesize(synthszr, path, parsedPath);
     });
     return methods;
 }
@@ -11083,7 +11083,7 @@ function _synthesize(synthesizer, path, parsedPath) {
 
             if (existingMsg) {
                 if (existingMsg.type == msgType)
-                    logger.error('setter error: same message type posted on the same path')
+                    logger.error('setter error: same message type posted on the same path');
                 else {
                     existingMsg.type = 'changed';
                     existingMsg[valueProp] = value;
@@ -11091,7 +11091,7 @@ function _synthesize(synthesizer, path, parsedPath) {
             } else {
                 var msg = { path: path, type: msgType };
                 msg[valueProp] = value;
-                addChangeMessage(messages, messagesHash, msg)
+                addChangeMessage(messages, messagesHash, msg);
             }
 
             if (valueIsTree(value))
@@ -11100,11 +11100,9 @@ function _synthesize(synthesizer, path, parsedPath) {
     }
 
     function cloneTree(value) {
-        return ! valueIsNormalObject(value)
-                ? value
-                : Array.isArray(value)
-                    ? value.slice()
-                    : _.clone(value);
+        return valueIsNormalObject(value)
+                ? _.deepClone(value)
+                : value;
     }
 
     function protectValue(value) {
@@ -12913,7 +12911,7 @@ _.extendProto(TextSelection, {
 
     getRange: TextSelection$getRange,
     setRange: TextSelection$setRange,
-    getState: TextSelection$getState,
+    getState: TextSelection$getState
 });
 
 
@@ -14983,6 +14981,7 @@ defineProperty.call(objectMethods, '_constants', constants);
  * @param {Object} self object to search in
  * @param {Function} callback should return `true` for item to pass the test, passed `value`, `key` and `self` as parameters
  * @param {Object} thisArg optional context (`this`) of callback call
+ * @param {Boolean} onlyEnumerable An optional `true` to iterate enumerable properties only.
  * @return {Any}
  */
 objectMethods.findValue = utils.makeFindMethod(eachKey, 'value');
@@ -14995,6 +14994,7 @@ objectMethods.findValue = utils.makeFindMethod(eachKey, 'value');
  * @param {Object} self object to search in
  * @param {Function} callback should return `true` for item to pass the test, passed `value`, `key` and `self` as parameters
  * @param {Object} thisArg optional context (`this`) of callback call
+ * @param {Boolean} onlyEnumerable An optional `true` to iterate enumerable properties only.
  * @return {Integer}
  */
 objectMethods.findKey = utils.makeFindMethod(eachKey, 'key');
@@ -15163,7 +15163,7 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
                 && ! (value instanceof RegExp)) {
             if (! (selfNode.hasOwnProperty(prop)
                     && typeof selfNode[prop] == 'object' && selfNode[prop] != null))
-                selfNode[prop] = {};
+                selfNode[prop] = (Array.isArray(value)) ? [] : {};
             _extendTree(selfNode[prop], value, onlyEnumerable, objTraversed);
         } else
             Object.defineProperty(selfNode, prop, descriptor);
@@ -15181,7 +15181,7 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
  * @return {Object}
  */
 function deepClone(onlyEnumerable) {
-    var clonedObject = {};
+    var clonedObject = Array.isArray(this) ? [] : {};
     deepExtend.call(clonedObject, this, onlyEnumerable);
     return clonedObject;
 }
@@ -15921,10 +15921,10 @@ var _error = new Error;
 function makeFindMethod(eachMethod, findWhat) {
     var argIndex = findWhat == 'value' ? 0 : 1;
 
-    return function findValueOrIndex(callback, thisArg) {
+    return function findValueOrIndex(callback, thisArg, onlyEnumerable) {
         var caughtError;
         try {
-            eachMethod.call(this, testItem, thisArg);
+            eachMethod.call(this, testItem, thisArg, onlyEnumerable);
         } catch (found) {
             if (found === _error) throw caughtError;
             else return found;
