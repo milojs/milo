@@ -2633,17 +2633,17 @@ function Container$destroy() {
  * Container instance method
  * Moves all of the contents of the owner into the parent scope
  * 
- * @param {Boolean} destroy If true, the component will be destroyed at the end.
  * @param {Boolean} renameChildren pass false to not rename scope children (default is true)
+ * @param {Boolean} destroy If not false, the component will be destroyed at the end (default is true).
  */
-function Container$unwrap(destroy, renameChildren) {
+function Container$unwrap(renameChildren, destroy) {
     domUtils.unwrapElement(this.owner.el);
     this.scope && this.scope._each(function (child) {
         child.remove();
         if (renameChildren !== false) child.rename(undefined, false);
         this.owner.scope && this.owner.scope._add(child);
     }, this);
-    if (destroy === true) this.owner.destroy();
+    if (destroy !== false) this.owner.destroy();
 }
 
 },{"../../binder":9,"../../util/dom":89,"../../util/logger":96,"../c_facet":17,"../scope":40,"./cf_registry":30,"mol-proto":107}],19:[function(require,module,exports){
@@ -13024,12 +13024,12 @@ _.extendProto(TextSelection, {
     _selectAfterDelete: _selectAfterDelete,
 
     getRange: TextSelection$getRange,
-    setRange: TextSelection$setRange,
     getState: TextSelection$getState,
 });
 
 
 _.extend(TextSelection, {
+    createFromRange: TextSelection$$createFromRange,
     createFromState: TextSelection$$createFromState
 });
 
@@ -13236,18 +13236,6 @@ function TextSelection$getRange() {
 
 
 /**
- * Sets selection to passed range
- * 
- * @param {Range} range
- */
-function TextSelection$setRange(range) {
-    var sel = this.selection;
-    sel.removeAllRanges();
-    sel.addRange(range);
-}
-
-
-/**
  * Stores selection window, nodes and offsets in object
  */
 function TextSelection$getState(rootEl) {
@@ -13293,6 +13281,23 @@ function _selectionNodeFromState(rootEl, pointState) {
     if (! node) logger.error('TextSelection createFromState: no node at treeIndex');
     return node;
 }
+
+
+/**
+ * Creates selection from passed range
+ * 
+ * @param {Range} range
+ * @return {TextSelection}
+ */
+function TextSelection$$createFromRange(range) {
+    var win = range.startContainer.ownerDocument.defaultView
+        , sel = win.getSelection();
+
+    sel.removeAllRanges();
+    sel.addRange(range);
+    return new TextSelection(win);
+}
+
 
 },{"../../components/c_class":16,"../dom":89,"../logger":96,"mol-proto":107}],101:[function(require,module,exports){
 'use strict';
@@ -15114,6 +15119,7 @@ defineProperty.call(objectMethods, '_constants', constants);
  * @param {Object} self object to search in
  * @param {Function} callback should return `true` for item to pass the test, passed `value`, `key` and `self` as parameters
  * @param {Object} thisArg optional context (`this`) of callback call
+ * @param {Boolean} onlyEnumerable An optional `true` to iterate enumerable properties only.
  * @return {Any}
  */
 objectMethods.findValue = utils.makeFindMethod(eachKey, 'value');
@@ -15126,6 +15132,7 @@ objectMethods.findValue = utils.makeFindMethod(eachKey, 'value');
  * @param {Object} self object to search in
  * @param {Function} callback should return `true` for item to pass the test, passed `value`, `key` and `self` as parameters
  * @param {Object} thisArg optional context (`this`) of callback call
+ * @param {Boolean} onlyEnumerable An optional `true` to iterate enumerable properties only.
  * @return {Integer}
  */
 objectMethods.findKey = utils.makeFindMethod(eachKey, 'key');
@@ -16052,10 +16059,10 @@ var _error = new Error;
 function makeFindMethod(eachMethod, findWhat) {
     var argIndex = findWhat == 'value' ? 0 : 1;
 
-    return function findValueOrIndex(callback, thisArg) {
+    return function findValueOrIndex(callback, thisArg, onlyEnumerable) {
         var caughtError;
         try {
-            eachMethod.call(this, testItem, thisArg);
+            eachMethod.call(this, testItem, thisArg, onlyEnumerable);
         } catch (found) {
             if (found === _error) throw caughtError;
             else return found;

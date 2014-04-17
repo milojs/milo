@@ -67,8 +67,9 @@ describe('util.fragment', function() {
 
                 main.el.appendChild(wrapper.el);
                 mainScope._add(wrapper);
-                wrapper.container.unwrap(true, false);
+                wrapper.container.unwrap(false);
 
+                assert.equal(originalHTML, main.el.innerHTML);
                 assert.deepEqual(main.container.getState(true), originalState);
                 done();
             });
