@@ -2,6 +2,7 @@
 
 
 var fragmentUtils = milo.util.fragment
+    , Component = milo.Component
     , assert = require('assert')
     , fs = require('fs');
 
@@ -33,11 +34,9 @@ describe('util.fragment', function() {
         fragmentUtils.getState(range, function(err, state) {
             assert(!err);
 
-            fragmentUtils.createFromState(state, function(err, frag) {
-                assert(!err);
-                assert(frag instanceof DocumentFragment);
-                done();
-            });
+            var wrapper = Component.createFromState(state); 
+            assert(wrapper instanceof Component);
+            done();
         });
     });
 
@@ -62,17 +61,15 @@ describe('util.fragment', function() {
             main.el.innerHTML = '';
             assert.equal(mainScope._length(), 0);
 
-            fragmentUtils.createFromState(state, true, function(err, wrapper) {
-                assert(!err);
+            var wrapper = Component.createFromState(state);
 
-                main.el.appendChild(wrapper.el);
-                mainScope._add(wrapper);
-                wrapper.container.unwrap(false);
+            main.el.appendChild(wrapper.el);
+            mainScope._add(wrapper);
+            wrapper.container.unwrap(false);
 
-                assert.equal(originalHTML, main.el.innerHTML);
-                assert.deepEqual(main.container.getState(true), originalState);
-                done();
-            });
+            assert.equal(originalHTML, main.el.innerHTML);
+            assert.deepEqual(main.container.getState(true), originalState);
+            done();
         });
     });
 });

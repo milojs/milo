@@ -2281,10 +2281,12 @@ function Component$broadcast(msg, data, callback, synchronously) {
 /**
  * Destroy component: removes component from DOM, removes it from scope, deletes all references to DOM nodes and unsubscribes from all messages both component and all facets
  */
-function Component$destroy() {
+function Component$destroy(quiet) {
     this.walkScopeTree(function(component) {
-        if (component._destroyed)
-            return logger.warn('Component destroy: component is already destroyed');
+        if (component._destroyed) {
+            if (!quiet) logger.warn('Component destroy: component is already destroyed');
+            return;
+        }
         component.remove();
         component.allFacets('destroy');
         if (! component.el) return;
@@ -12301,13 +12303,12 @@ var Component = require('../components/c_class')
 
 
 var fragmentUtils = module.exports = {
-    getState: fragment_getState,
-    createFromState: fragment_createFromState
+    getState: fragment_getState
 };
 
 
 /**
- * Creates an object with the html and states of all components in the range, including partially selected.
+ * Creates an object with the state of wrapped range with components, including partially selected. The range will be cloned and wrapped in component with container facet before getting its state.
  * This function will log error and return undefined if range has no common ancestor that has component with container facet
  * 
  * @param {Range} range DOM Range instance
@@ -12335,11 +12336,7 @@ function fragment_getState(range, renameChildren, callback) {
             wrapper.broadcast('stateready');
             _.defer(function() {
                 if (renameChildren) _renameChildren(wrapper);
-                var state = {
-                    innerHTML: wrapper.el.innerHTML,
-                    containerState: wrapper.container.getState(true)
-                };
-                callback(null, state);
+                callback(null, wrapper.getState());
             });
         });
     } catch (err) {
@@ -12387,47 +12384,6 @@ function _renameChildren(comp) {
     comp.container.scope._each(function(child) {
         child.rename();
     });
-}
-
-
-/**
- * Creates DOM fragment from state
- * 
- * @param {Object} state state of the fragment, together with components states
- * @param {Boolean} returnWrapper optional true to return a wrapper component rather than the DocumentFragment
- * @return {Component|DocumentFragment}
- */
-function fragment_createFromState(state, returnWrapper, callback) {
-    if (typeof returnWrapper == 'function') {
-        callback = returnWrapper;
-        returnWrapper = false;
-    }
-
-    check(state, {
-        innerHTML: String,
-        containerState: Object
-    });
-
-    try {
-        var wrapper = Component.createOnElement(undefined, state.innerHTML, undefined, ['container']);
-
-        wrapper.container.setState(state.containerState);
-        _.defer(function() {
-            wrapper.broadcast('stateready');
-            _.defer(function() {
-                if (returnWrapper) return callback(null, wrapper);
-
-                var frag = document.createDocumentFragment();
-                domUtils.children(wrapper.el).forEach(function(childEl) {
-                    frag.appendChild(childEl);
-                });
-
-                callback(null, frag);
-            });
-        });
-    } catch(err) {
-        callback(err);
-    }
 }
 
 },{"../attributes/a_bind":5,"../binder":9,"../components/c_class":16,"./check":86,"./dom":89,"./logger":96,"mol-proto":107}],94:[function(require,module,exports){
@@ -13191,7 +13147,7 @@ function TextSelection$del(selectEndContainer) {
     if (this.isCollapsed || ! this.range) return;
 
     this.eachContainedComponent(function(comp) {
-        comp.destroy();
+        comp.destroy(true);
     });
 
     var selPoint = this._getPostDeleteSelectionPoint(selectEndContainer);
@@ -15301,7 +15257,7 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
                 && ! (value instanceof RegExp)) {
             if (! (selfNode.hasOwnProperty(prop)
                     && typeof selfNode[prop] == 'object' && selfNode[prop] != null))
-                selfNode[prop] = {};
+                selfNode[prop] = (Array.isArray(value)) ? [] : {};
             _extendTree(selfNode[prop], value, onlyEnumerable, objTraversed);
         } else
             Object.defineProperty(selfNode, prop, descriptor);
@@ -15319,7 +15275,7 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
  * @return {Object}
  */
 function deepClone(onlyEnumerable) {
-    var clonedObject = {};
+    var clonedObject = Array.isArray(this) ? [] : {};
     deepExtend.call(clonedObject, this, onlyEnumerable);
     return clonedObject;
 }
