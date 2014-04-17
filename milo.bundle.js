@@ -12336,7 +12336,9 @@ function fragment_getState(range, renameChildren, callback) {
             wrapper.broadcast('stateready');
             _.defer(function() {
                 if (renameChildren) _renameChildren(wrapper);
-                callback(null, wrapper.getState());
+                var wrapperState = wrapper.getState();
+                wrapper.destroy();
+                callback(null, wrapperState);
             });
         });
     } catch (err) {
@@ -13155,6 +13157,7 @@ function TextSelection$del(selectEndContainer) {
     this.range.deleteContents();
 
     this._selectAfterDelete(selPoint);
+    selPoint.node.parentNode.normalize();
 }
 
 
