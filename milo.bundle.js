@@ -1697,6 +1697,7 @@ function Component$$copy(component, deepCopy) {
     var aComponent = ComponentClass.createOnElement(newEl, undefined, component.scope, component.extraFacets);
     var state = component._getState(deepCopy || false);
     aComponent.setState(state);
+    _.deferMethod(aComponent, 'broadcast', 'stateready');
     return aComponent;
 }
 
@@ -4540,11 +4541,14 @@ function List$addItems(count, index) {
                                 ? this.itemSample
                                 : this._listItems[spliceIndex - 1];
 
-        var frag = document.createDocumentFragment();
+        var frag = document.createDocumentFragment()
+            , newComponents = [];
+
         children.forEach(function(el, i) {
             var component = Component.getComponent(el);
             if (! component)
                 return logger.error('List: element in new items is not a component');
+            newComponents.push(component);
             this._setItem(spliceIndex++, component);
             frag.appendChild(el);
             el.style.display = '';
@@ -4554,6 +4558,10 @@ function List$addItems(count, index) {
 
         // Add it to the DOM
         prevComponent.dom.insertAfter(frag);
+
+        _.deferMethod(newComponents, 'forEach', function(comp) {
+            comp.broadcast('stateready');
+        });
     }
 }
 
