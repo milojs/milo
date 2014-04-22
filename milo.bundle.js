@@ -5116,7 +5116,7 @@ _.extendProto(DataMsgAPI, {
     createInternalData: createInternalData,
 
     // class specific methods
-    value: DataMsgAPI$value,
+    value: DataMsgAPI$value
 });
 
 module.exports = DataMsgAPI;
@@ -5158,7 +5158,7 @@ function translateToSourceMessage(message) {
 // filterDataMessage
 function filterSourceMessage(sourceMessage, message, data) {
     return data.newValue != data.oldValue;
-};
+}
 
 
 function createInternalData(sourceMessage, message, data) {
@@ -5172,7 +5172,7 @@ function createInternalData(sourceMessage, message, data) {
         newValue: newValue
     };
     return internalData;
-};
+}
 
 },{"../../messenger/m_api":68,"../../util/check":86,"./de_data":36,"mol-proto":107}],36:[function(require,module,exports){
 'use strict';
@@ -9550,7 +9550,7 @@ function _getExpandedSource(ds) {
         source.unshift(ds);
 
         if (ds.owner)
-            source.unshift(ds.owner)
+            source.unshift(ds.owner);
     }
 
     return source;
@@ -10451,7 +10451,7 @@ function ModelPath(model, path) { // ,... - additional arguments for interpolati
     _.defineProperties(modelPath, {
         _model: model,
         _path: path,
-        _args: _.slice(arguments, 1), // path will be the first element of this array
+        _args: _.slice(arguments, 1) // path will be the first element of this array
     });
 
     // parse access path
@@ -10521,7 +10521,7 @@ _.extendProto(ModelPath, {
     unshift: ModelPath$unshift,
     shift: ModelPath$shift,
     _prepareMessenger: _prepareMessenger
-})
+});
 
 
 /**
@@ -10541,7 +10541,7 @@ function ModelPath$path(accessPath) {  // , ... arguments that will be interpola
     var thisPathArgsCount = this._args.length - 1;
 
     if (thisPathArgsCount > 0) {// this path has interpolated arguments too
-        accessPath = accessPath.replace(/\$[1-9][0-9]*/g, function(str){
+        accessPath = accessPath.replace(/\$[1-9][0-9]*/g, function(str) {
             return '$' + (+str.slice(1) + thisPathArgsCount);
         });
     }
@@ -10961,7 +10961,7 @@ var modelDotDef = _(dotDef).clone().extend({
 })._();
 
 
-var dotSettings = _.clone(doT.templateSettings)
+var dotSettings = _.clone(doT.templateSettings);
 dotSettings.strip = false;
 
 var synthesizers = _.mapKeys(templates, function(tmpl) {
@@ -10986,7 +10986,7 @@ var synthesizePathMethods = _.memoize(_synthesizePathMethods, undefined, 1000);
 
 function _synthesizePathMethods(path, parsedPath) {
     var methods = _.mapKeys(synthesizers, function(synthszr) {
-        return _synthesize(synthszr, path, parsedPath)
+        return _synthesize(synthszr, path, parsedPath);
     });
     return methods;
 }
@@ -11052,7 +11052,7 @@ function _synthesize(synthesizer, path, parsedPath) {
 
             if (existingMsg) {
                 if (existingMsg.type == msgType)
-                    logger.error('setter error: same message type posted on the same path')
+                    logger.error('setter error: same message type posted on the same path');
                 else {
                     existingMsg.type = 'changed';
                     existingMsg[valueProp] = value;
@@ -11060,7 +11060,7 @@ function _synthesize(synthesizer, path, parsedPath) {
             } else {
                 var msg = { path: path, type: msgType };
                 msg[valueProp] = value;
-                addChangeMessage(messages, messagesHash, msg)
+                addChangeMessage(messages, messagesHash, msg);
             }
 
             if (valueIsTree(value))
@@ -11069,11 +11069,9 @@ function _synthesize(synthesizer, path, parsedPath) {
     }
 
     function cloneTree(value) {
-        return ! valueIsNormalObject(value)
-                ? value
-                : Array.isArray(value)
-                    ? value.slice()
-                    : _.clone(value);
+        return valueIsNormalObject(value)
+                ? _.deepClone(value)
+                : value;
     }
 
     function protectValue(value) {
@@ -12982,7 +12980,7 @@ _.extendProto(TextSelection, {
     _selectAfterDelete: _selectAfterDelete,
 
     getRange: TextSelection$getRange,
-    getState: TextSelection$getState,
+    getState: TextSelection$getState
 });
 
 
