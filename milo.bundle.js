@@ -544,7 +544,7 @@ function attrName() {
 
     this.compClass = bindTo[1] || 'Component';
     this.compFacets = (bindTo[2] && bindTo[2].split(FACETS_SPLIT_REGEXP)) || undefined;
-    this.compName = bindTo[3] || undefined;
+    this.compName = bindTo[3] || undefined; // undefined is not same as ''
 
     return this;
 }
@@ -11569,6 +11569,7 @@ var count = require('./count')
 
 module.exports = componentName;
 
+
 function componentName() {
     return prefix + count();
 }
@@ -12309,7 +12310,8 @@ var Component = require('../components/c_class')
 
 
 var fragmentUtils = module.exports = {
-    getState: fragment_getState
+    getState: fragment_getState,
+    getStateSync: fragment_getStateSync
 };
 
 
@@ -12326,7 +12328,7 @@ function fragment_getState(range, renameChildren, callback) {
         var rangeContainer = _getRangeContainer(range);
         if (! rangeContainer) {
             callback(new Error('fragment.getState: range has no common container'));
-            return; // do NOT connect it to previous callback, getState should return undefined
+            return; // do NOT connect return to previous callback, getState should return undefined
         }
 
         if (typeof renameChildren == 'function') {
@@ -12350,6 +12352,25 @@ function fragment_getState(range, renameChildren, callback) {
     } catch (err) {
         callback(err);
     }
+}
+
+
+function fragment_getStateSync(range, renameChildren) {
+    var rangeContainer = _getRangeContainer(range);
+    if (! rangeContainer) {
+        logger.error('fragment.getState: range has no common container');
+        return;
+    }
+
+    var frag = range.cloneContents()
+        , wrapper = _wrapFragmentInContainer(frag);
+
+    _transferStates(rangeContainer, wrapper);
+    wrapper.broadcast('stateready', undefined, undefined, true);
+    if (renameChildren) _renameChildren(wrapper);
+    var wrapperState = wrapper.getState();
+    wrapper.destroy();
+    return wrapperState;
 }
 
 
