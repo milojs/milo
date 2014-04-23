@@ -6323,7 +6323,7 @@ _.extendProto(MLInputList, {
 function MLInputList$init() {
     Component.prototype.init.apply(this, arguments);
     this.model.set([]);
-    this.on('childrenbound', onChildrenBound);
+    this.once('childrenbound', onChildrenBound);
 }
 
 function MLInputList$setAsync(newHandler) {
@@ -6337,7 +6337,6 @@ function MLInputList$destroy() {
 }
 
 function onChildrenBound() {
-    this.off('childrenbound', onChildrenBound);
     this.template.render().binder();
     componentSetup.call(this);
 }
@@ -6379,8 +6378,6 @@ function MLInputList_del() {
 }
 
 function MLInputList_splice() { // ... arguments
-    var dataFacet = this._list.data;
-    dataFacet._splice.apply(dataFacet, arguments);
     this.model.splice.apply(this.model, arguments);
 }
 
@@ -15308,10 +15305,12 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
     // store node to recognise recursion
     objTraversed.push(objNode);
 
-    eachKey.call(objNode, function(value, prop) {
+    var loop = Array.isArray(objNode) ? Array.prototype.forEach : eachKey;
+
+    loop.call(objNode, function(value, prop) {
         var descriptor = Object.getOwnPropertyDescriptor(objNode, prop);
         if (typeof value == 'object' && value != null
-                && ! (value instanceof RegExp)) {
+                && ! (value instanceof RegExp) && ! (value instanceof Date)) {
             if (! (selfNode.hasOwnProperty(prop)
                     && typeof selfNode[prop] == 'object' && selfNode[prop] != null))
                 selfNode[prop] = (Array.isArray(value)) ? [] : {};
