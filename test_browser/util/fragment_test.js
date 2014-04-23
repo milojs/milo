@@ -26,24 +26,21 @@ describe('util.fragment', function() {
     }
 
 
-    it('should define getState and createFromState', function(done) {
+    it('should define getState and createFromState', function() {
         var range = document.createRange();
         range.setStart(rangeNode('range-start'), 2);
         range.setEnd(rangeNode('range-end'), 3);
 
-        fragmentUtils.getState(range, function(err, state) {
-            assert(!err);
-
-            var wrapper = Component.createFromState(state); 
-            assert(wrapper instanceof Component);
-            done();
-        });
+        var state = fragmentUtils.getState(range);
+        var wrapper = Component.createFromState(state); 
+        assert(wrapper instanceof Component);
     });
 
 
-    it('should return component to the same state when fragment is re-inserted', function(done) {
+    it('should return component to the same state when fragment is re-inserted', function() {
         var main = root.container.scope.body.container.scope.main
             , mainScope = main.container.scope;
+
         mainScope.testModel.model.set({ test: 1 });
         var originalState = main.container.getState(true)
             , originalHTML = main.el.innerHTML;
@@ -51,25 +48,22 @@ describe('util.fragment', function() {
         var range = document.createRange();
         range.selectNodeContents(main.el);
 
-        fragmentUtils.getState(range, false, function(err, state) {
-            assert(!err);
+        var state = fragmentUtils.getState(range, false);
 
-            mainScope._each(function(child) {
-                child.destroy();
-            });
-
-            main.el.innerHTML = '';
-            assert.equal(mainScope._length(), 0);
-
-            var wrapper = Component.createFromState(state);
-
-            main.el.appendChild(wrapper.el);
-            mainScope._add(wrapper);
-            wrapper.container.unwrap(false);
-
-            assert.equal(originalHTML, main.el.innerHTML);
-            assert.deepEqual(main.container.getState(true), originalState);
-            done();
+        mainScope._each(function(child) {
+            child.destroy();
         });
+
+        main.el.innerHTML = '';
+        assert.equal(mainScope._length(), 0);
+
+        var wrapper = Component.createFromState(state);
+
+        main.el.appendChild(wrapper.el);
+        mainScope._add(wrapper);
+        wrapper.container.unwrap(false);
+
+        assert.equal(originalHTML, main.el.innerHTML);
+        assert.deepEqual(main.container.getState(true), originalState);
     });
 });
