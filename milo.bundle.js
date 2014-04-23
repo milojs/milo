@@ -12356,7 +12356,7 @@ function fragment_getState(range, renameChildren) {
     _transferStates(rangeContainer, wrapper);
     if (renameChildren) _renameChildren(wrapper);
     var wrapperState = wrapper.getState();
-    wrapper.destroy();
+    _.deferMethod(wrapper, 'destroy');
     return wrapperState;
 }
 
