@@ -54,29 +54,39 @@ describe('TransactionHistory', function() {
 
                     history.undo();
 
+                    _.deferTicks(function() {
                         assert.deepEqual(executed, [[-3], [-2], [-1]]);
 
-                    executed = [];
+                        executed = [];
 
-                    history.undo();
+                        history.undo();
 
-                        assert.deepEqual(executed, []);
+                        _.deferTicks(function() {
+                            assert.deepEqual(executed, []);
 
-                    executed = [];
+                            executed = [];
 
-                    history.redo();
+                            history.redo();
 
-                        assert.deepEqual(executed, [[1], [2], [3]]);
+                            _.deferTicks(function() {
 
-                    executed = [];
+                                assert.deepEqual(executed, [[1], [2], [3]]);
 
-                    history.redo();
+                                executed = [];
 
-                        assert.deepEqual(executed, []);
+                                history.redo();
 
-                    executed = [];
+                                _.deferTicks(function() {
 
-                    done();
+                                    assert.deepEqual(executed, []);
+
+                                    executed = [];
+
+                                    done();
+                                }, 4);
+                            }, 4);
+                        }, 4);
+                    }, 4);
                 });
             });
         });
@@ -99,14 +109,20 @@ describe('TransactionHistory', function() {
                     assert.equal(history.inTransaction(), false);
 
                     history.undo();
+                    
+                    _.deferTicks(function() {
                         assert.deepEqual(executed, [[-5], [-4]]);
 
-                    executed = [];
+                        executed = [];
 
-                    history.undo();
-                        assert.deepEqual(executed, [[-3], [-2], [-1]]);
+                        history.undo();
 
-                    done();
+                        _.deferTicks(function() {
+                            assert.deepEqual(executed, [[-3], [-2], [-1]]);
+
+                            done();
+                        }, 4);
+                    }, 3);
                 }, 2);
             }, 2);
         });

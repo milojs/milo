@@ -1009,6 +1009,8 @@ _.extendProto(ActionsHistory, {
     redo: ActionsHistory$redo,
     undoAll: ActionsHistory$undoAll,
     redoAll: ActionsHistory$redoAll,
+    undoAllAsync: ActionsHistory$undoAllAsync,
+    redoAllAsync: ActionsHistory$redoAllAsync,
     each: ActionsHistory$each,
     eachReverse: ActionsHistory$eachReverse
 });
@@ -1056,6 +1058,24 @@ function ActionsHistory$undoAll() {
 
 function ActionsHistory$redoAll() {
     while (this.position < this.actions.length) this.redo();
+}
+
+
+function ActionsHistory$undoAllAsync() {
+    if (this.position) {
+        this.undo();
+        if (this.position)
+            _.deferMethod(this, 'undoAllAsync');
+    }
+}
+
+
+function ActionsHistory$redoAllAsync() {
+    if (this.position < this.actions.length) {
+        this.redo();
+        if (this.position < this.actions.length)
+            _.deferMethod(this, 'redoAllAsync');
+    }
 }
 
 
@@ -1304,12 +1324,12 @@ function Transaction$execute() {
 
 
 function Transaction$undo() {
-    this.commands.undoAll();
+    this.commands.undoAllAsync();
 }
 
 
 function Transaction$redo() {
-    this.commands.redoAll();
+    this.commands.redoAllAsync();
 }
 
 

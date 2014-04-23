@@ -33,55 +33,87 @@ describe('Transaction', function() {
     }
 
 
-    it('should define undo, redo, execute methods', function() {
+    it('should define undo, redo, execute methods', function(done) {
         transaction.undo();
+
+        _.deferTicks(function() {
             assert.deepEqual(executed, [[-3], [-2], [-1]]);
 
-        executed = [];
+            executed = [];
 
-        transaction.undo();
-            assert.deepEqual(executed, []);
+            transaction.undo();
 
-        executed = [];
+            _.deferTicks(function() {
+                assert.deepEqual(executed, []);
 
-        transaction.redo();
-            assert.deepEqual(executed, [[1], [2], [3]]);
+                executed = [];
 
-        executed = [];
+                transaction.redo();
 
-        transaction.redo();
-            assert.deepEqual(executed, []);
+                _.deferTicks(function() {
+                    assert.deepEqual(executed, [[1], [2], [3]]);
 
-        transaction.execute();
-            assert.deepEqual(executed, [[1], [2], [3]]);
+                    executed = [];
+
+                    transaction.redo();
+        
+                    _.deferTicks(function() {
+                        assert.deepEqual(executed, []);
+
+                        transaction.execute();
+        
+                        _.deferTicks(function() {
+                            assert.deepEqual(executed, [[1], [2], [3]]);
+                            done();
+                        }, 4);
+                    }, 4);
+                }, 4);
+            }, 4);
+        }, 4);
     });
 
 
-    it('should define merge method', function() {
+    it('should define merge method', function(done) {
         var batch = createTestTransaction(4, 6);
         transaction.merge(batch);
 
         transaction.execute();
+
+        _.deferTicks(function() {
             assert.deepEqual(executed, [[1], [2], [3], [4], [5]]);
 
-        executed = [];
+            executed = [];
 
-        transaction.undo();
-            assert.deepEqual(executed, [[-5], [-4], [-3], [-2], [-1]]);
+            transaction.undo();
 
-        executed = [];
+            _.deferTicks(function() {
+                assert.deepEqual(executed, [[-5], [-4], [-3], [-2], [-1]]);
 
-        transaction.undo();
-            assert.deepEqual(executed, []);
+                executed = [];
 
-        executed = [];
+                transaction.undo();
 
-        transaction.redo();
-            assert.deepEqual(executed, [[1], [2], [3], [4], [5]]);
+                _.deferTicks(function() {
+                    assert.deepEqual(executed, []);
 
-        executed = [];
+                    executed = [];
 
-        transaction.redo();
-            assert.deepEqual(executed, []);
+                    transaction.redo();
+            
+                    _.deferTicks(function() {
+                        assert.deepEqual(executed, [[1], [2], [3], [4], [5]]);
+
+                        executed = [];
+
+                        transaction.redo();
+
+                        _.deferTicks(function() {
+                            assert.deepEqual(executed, []);
+                            done();
+                        }, 6);
+                    }, 6);
+                }, 6);
+            }, 6);
+        }, 6);
     });
 });
