@@ -15179,13 +15179,15 @@ function extend(obj, onlyEnumerable) {
  * ```
  * var clonedArray = [].concat(arr);
  * ```
- * This function should not be used to clone an array, both because it is inefficient and because the result will look very much like an array, it will not be a real array.
+ * This function should not be used to clone an array, because it is inefficient.
  *
  * @param {Object} self An object to be cloned
  * @return {Object}
  */
 function clone() {
     if (Array.isArray(this)) return this.slice();
+    if (this instanceof Date) return new Date(this);
+    if (this instanceof RegExp) return new RegExp(this);
     var clonedObject = Object.create(this.constructor.prototype);
     extend.call(clonedObject, this);
     return clonedObject;
@@ -15332,6 +15334,8 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
  * @return {Object}
  */
 function deepClone(onlyEnumerable) {
+    if (this instanceof Date) return new Date(this);
+    if (this instanceof RegExp) return new RegExp(this);
     var clonedObject = Array.isArray(this) ? [] : {};
     deepExtend.call(clonedObject, this, onlyEnumerable);
     return clonedObject;
@@ -15603,7 +15607,7 @@ var ArrayProto = Array.prototype
 function pickKeys() { // , ... keys
     var keys = concat.apply(ArrayProto, arguments)
         , obj = Object.create(this.constructor.prototype);
-    keys.forEach(function(key){
+    keys.forEach(function(key) {
         if (this.hasOwnProperty(key))
             obj[key] = this[key];
     }, this);
