@@ -1375,6 +1375,7 @@ function TransactionHistory(maxLength) {
 
 _.extendProto(TransactionHistory, {
     storeCommand: TransactionHistory$storeCommand,
+    storeTransaction: TransactionHistory$storeTransaction,
     undo: TransactionHistory$undo,
     redo: TransactionHistory$redo,
     inTransaction: TransactionHistory$inTransaction
@@ -1406,6 +1407,11 @@ function _storeTransaction() {
             logger.error('TransactionHistory: no current transaction');
         this[SCHEDULED] = false;
     }
+}
+
+
+function TransactionHistory$storeTransaction(transaction) {
+    this.transactions.store(transaction);
 }
 
 
@@ -1586,9 +1592,10 @@ _.extendProto(Component, {
     setScopeParentFromDOM: Component$setScopeParentFromDOM,
 
     walkScopeTree: Component$walkScopeTree,
-    treeIndexOf: Component$treeIndexOf,
-    getComponentAtTreeIndex: Component$getComponentAtTreeIndex,
-    insertAtTreeIndex: Component$insertAtTreeIndex,
+
+    treeIndexOf: Component$treeIndexOf, // deprecated
+    getComponentAtTreeIndex: Component$getComponentAtTreeIndex, // deprecated
+    insertAtTreeIndex: Component$insertAtTreeIndex, // deprecated
 
     treePathOf: Component$treePathOf,
     getComponentAtTreePath: Component$getComponentAtTreePath,
@@ -11671,9 +11678,9 @@ var domUtils = {
     walkTree: walkTree,
     createTreeWalker: createTreeWalker,
 
-    treeIndexOf: treeIndexOf,
-    getNodeAtTreeIndex: getNodeAtTreeIndex,
-    insertAtTreeIndex: insertAtTreeIndex,
+    treeIndexOf: treeIndexOf, // deprecated
+    getNodeAtTreeIndex: getNodeAtTreeIndex, // deprecated
+    insertAtTreeIndex: insertAtTreeIndex, // deprecated
 
     treePathOf: treePathOf,
     getNodeAtTreePath: getNodeAtTreePath,
