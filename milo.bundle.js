@@ -974,12 +974,13 @@ var classes = {
     MessageSource: require('./messenger/m_source'),
     MessengerAPI: require('./messenger/m_api'),
     DOMEventsSource: require('./components/msg_src/dom_events'),
+    Transaction: require('./command/transaction'),
     TransactionHistory: require('./command/transaction_history')
 };
 
 module.exports = classes;
 
-},{"./abstract/facet":1,"./abstract/faceted_object":2,"./abstract/mixin":3,"./abstract/registry":4,"./command/transaction_history":15,"./components/msg_src/dom_events":38,"./components/scope":40,"./messenger/m_api":68,"./messenger/m_source":70}],11:[function(require,module,exports){
+},{"./abstract/facet":1,"./abstract/faceted_object":2,"./abstract/mixin":3,"./abstract/registry":4,"./command/transaction":14,"./command/transaction_history":15,"./components/msg_src/dom_events":38,"./components/scope":40,"./messenger/m_api":68,"./messenger/m_source":70}],11:[function(require,module,exports){
 'use strict';
 
 
@@ -1375,6 +1376,7 @@ function TransactionHistory(maxLength) {
 
 _.extendProto(TransactionHistory, {
     storeCommand: TransactionHistory$storeCommand,
+    endTransaction: TransactionHistory$endTransaction,
     storeTransaction: TransactionHistory$storeTransaction,
     undo: TransactionHistory$undo,
     redo: TransactionHistory$redo,
@@ -1394,23 +1396,40 @@ function TransactionHistory$storeCommand(command) {
 
 function _storeTransaction() {
     if (this.currentBatch) {
-        if (! this.currentTransaction) this.currentTransaction = new Transaction;
-        this.currentTransaction.merge(this.currentBatch);
-        this.currentBatch = undefined;
+        _addBatchToTransaction.call(this);
         _.deferMethod(this, _storeTransaction);
-
     } else {
-        if (this.currentTransaction) {
-            this.transactions.store(this.currentTransaction);
-            this.currentTransaction = undefined;
-        } else
-            logger.error('TransactionHistory: no current transaction');
+        _storeCurrentTransaction.call(this);
         this[SCHEDULED] = false;
     }
 }
 
 
+function TransactionHistory$endTransaction() {
+    _addBatchToTransaction.call(this);
+    _storeCurrentTransaction.call(this);
+}
+
+
+function _addBatchToTransaction() {
+    if (this.currentBatch) {
+        if (! this.currentTransaction) this.currentTransaction = new Transaction;
+        this.currentTransaction.merge(this.currentBatch);
+        this.currentBatch = undefined;
+    } 
+}
+
+
+function _storeCurrentTransaction() {
+    if (this.currentTransaction) {
+        this.transactions.store(this.currentTransaction);
+        this.currentTransaction = undefined;
+    }
+}
+
+
 function TransactionHistory$storeTransaction(transaction) {
+    this.endTransaction();
     this.transactions.store(transaction);
 }
 
@@ -15317,15 +15336,13 @@ function extend(obj, onlyEnumerable) {
  * ```
  * var clonedArray = [].concat(arr);
  * ```
- * This function should not be used to clone an array, because it is inefficient.
+ * This function should not be used to clone an array, both because it is inefficient and because the result will look very much like an array, it will not be a real array.
  *
  * @param {Object} self An object to be cloned
  * @return {Object}
  */
 function clone() {
     if (Array.isArray(this)) return this.slice();
-    if (this instanceof Date) return new Date(this);
-    if (this instanceof RegExp) return new RegExp(this);
     var clonedObject = Object.create(this.constructor.prototype);
     extend.call(clonedObject, this);
     return clonedObject;
@@ -15446,12 +15463,10 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
     // store node to recognise recursion
     objTraversed.push(objNode);
 
-    var loop = Array.isArray(objNode) ? Array.prototype.forEach : eachKey;
-
-    loop.call(objNode, function(value, prop) {
+    eachKey.call(objNode, function(value, prop) {
         var descriptor = Object.getOwnPropertyDescriptor(objNode, prop);
         if (typeof value == 'object' && value != null
-                && ! (value instanceof RegExp) && ! (value instanceof Date)) {
+                && ! (value instanceof RegExp)) {
             if (! (selfNode.hasOwnProperty(prop)
                     && typeof selfNode[prop] == 'object' && selfNode[prop] != null))
                 selfNode[prop] = (Array.isArray(value)) ? [] : {};
@@ -15472,8 +15487,6 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
  * @return {Object}
  */
 function deepClone(onlyEnumerable) {
-    if (this instanceof Date) return new Date(this);
-    if (this instanceof RegExp) return new RegExp(this);
     var clonedObject = Array.isArray(this) ? [] : {};
     deepExtend.call(clonedObject, this, onlyEnumerable);
     return clonedObject;
@@ -15745,7 +15758,7 @@ var ArrayProto = Array.prototype
 function pickKeys() { // , ... keys
     var keys = concat.apply(ArrayProto, arguments)
         , obj = Object.create(this.constructor.prototype);
-    keys.forEach(function(key) {
+    keys.forEach(function(key){
         if (this.hasOwnProperty(key))
             obj[key] = this[key];
     }, this);
