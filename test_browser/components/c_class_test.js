@@ -54,4 +54,25 @@ describe('Component', function() {
             assert.equal(para1.scope, infoView.container.scope, 'para1.scope');
             assert.equal(infoView.container.scope.para1, para1, 'para1 in scope');
     });
+
+    it('should define treePathOf and getComponentAtTreePath', function() {
+        assert.deepEqual(root.treePathOf(scope.articleButton), [1, 5]);
+        assert.equal(root.getComponentAtTreePath([1, 5]), scope.articleButton, 'articleButton');
+    });
+
+    it('should define insertAtTreePath', function() {
+        var infoView = scope.infoView
+            , para1 = infoView.container.scope.para1
+            , treePath = root.treePathOf(para1)
+            , currentHTML = root.el.innerHTML;
+
+        para1.remove(); // removes from scope
+        para1.dom.remove(); // and from DOM
+
+        root.insertAtTreePath(treePath, para1)
+        para1.rename('para1');
+            assert.equal(currentHTML, root.el.innerHTML);
+            assert.equal(para1.scope, infoView.container.scope, 'para1.scope');
+            assert.equal(infoView.container.scope.para1, para1, 'para1 in scope');
+    });
 });

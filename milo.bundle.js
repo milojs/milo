@@ -1590,6 +1590,10 @@ _.extendProto(Component, {
     getComponentAtTreeIndex: Component$getComponentAtTreeIndex,
     insertAtTreeIndex: Component$insertAtTreeIndex,
 
+    treePathOf: Component$treePathOf,
+    getComponentAtTreePath: Component$getComponentAtTreePath,
+    insertAtTreePath: Component$insertAtTreePath,
+
     broadcast: Component$broadcast,
     destroy: Component$destroy,
     isDestroyed: Component$isDestroyed
@@ -2281,6 +2285,26 @@ function Component$insertAtTreeIndex(treeIndex, component) {
     if (wasInserted) component.setScopeParentFromDOM();
     return wasInserted;
 }
+
+
+function Component$treePathOf(component) {
+    return domUtils.treePathOf(this.el, component.el);
+}
+
+
+function Component$getComponentAtTreePath(treePath, nearest) {
+    var node = domUtils.getNodeAtTreePath(this.el, treePath, nearest);
+    return Component.getComponent(node);
+}
+
+
+function Component$insertAtTreePath(treePath, component, nearest) {
+    var wasInserted = domUtils.insertAtTreePath(this.el, treePath, component.el);
+    if (wasInserted) component.setScopeParentFromDOM();
+    return wasInserted;
+}
+
+
 
 
 /**
@@ -11967,6 +11991,7 @@ function getNodeAtTreeIndex(rootEl, treeIndex) {
  * @param {Element} rootEl element into which to insert
  * @param {Number} treeIndex index in DOM tree inside root element (see treeIndexOf)
  * @param {Element} el element to be inserted
+ * @return {Boolean} true if was successfully inserted
  */
 function insertAtTreeIndex(rootEl, treeIndex, el) {
     if (rootEl.contains(el))
@@ -12049,6 +12074,7 @@ function getNodeAtTreePath(rootEl, treePath, nearest) {
  * @param {Element} rootEl element into which to insert
  * @param {Number} treeIndex index in DOM tree inside root element (see treeIndexOf)
  * @param {Element} el element to be inserted
+ * @return {Boolean} true if was successfully inserted
  */
 function insertAtTreePath(rootEl, treePath, el, nearest) {
     if (rootEl.contains(el))
