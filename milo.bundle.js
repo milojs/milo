@@ -6265,8 +6265,6 @@ function MLInput$disable(disable) {
     this.el.disabled = disable;
 }
 },{"../c_class":16,"../c_registry":32,"mol-proto":107}],50:[function(require,module,exports){
-(function () {
-
 'use strict';
 
 var Component = require('../c_class')
@@ -6303,7 +6301,7 @@ var MLInputList = Component.createComponentClass('MLInputList', {
                     <span ml-bind="[events]:deleteBtn" class="glyphicon glyphicon-remove"></span>\
                 </div>\
             </div>\
-            <input type="text" ml-bind="MLInput:input" class="form-control">\
+            <input type="text" ml-bind="MLInput:input" class="form-control" placeholder="{{= it.placeHolder}}">\
             <button ml-bind="MLButton:button" class="btn btn-default">\
                 Add\
             </button>'
@@ -6317,13 +6315,18 @@ module.exports = MLInputList;
 _.extendProto(MLInputList, {
     init: MLInputList$init,
     setAsync: MLInputList$setAsync,
+    setPlaceHolder: MLInputList$setPlaceHolder,
     destroy: MLInputList$destroy
 });
 
 function MLInputList$init() {
     Component.prototype.init.apply(this, arguments);
     this.model.set([]);
-    this.once('childrenbound', onChildrenBound);
+}
+
+function MLInputList$setPlaceHolder(placeHolder) {
+    this._renderOptions = {placeHolder: placeHolder || ''};
+    render.call(this);
 }
 
 function MLInputList$setAsync(newHandler) {
@@ -6336,8 +6339,8 @@ function MLInputList$destroy() {
     this._connector = null;
 }
 
-function onChildrenBound() {
-    this.template.render().binder();
+function render() {
+    this.template.render(this._renderOptions).binder();
     componentSetup.call(this);
 }
 
@@ -6380,8 +6383,6 @@ function MLInputList_del() {
 function MLInputList_splice() { // ... arguments
     this.model.splice.apply(this.model, arguments);
 }
-
-})();
 },{"../c_class":16,"../c_registry":32,"mol-proto":107}],51:[function(require,module,exports){
 'use strict';
 
