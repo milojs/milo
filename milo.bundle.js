@@ -3317,8 +3317,8 @@ function Data$path(accessPath, createItem) {
     if (! accessPath)
         return this;
 
-    var parsedPath = pathUtils.parseAccessPath(accessPath)
-        , currentComponent = this.owner;
+    var parsedPath = pathUtils.parseAccessPath(accessPath);
+    var currentComponent = this.owner;
 
     for (var i = 0, len = parsedPath.length; i < len; i++) {
         var pathNode = parsedPath[i]
@@ -9682,6 +9682,7 @@ function _stringMatch(str, substr) {
 var facetsRegistry = require('../components/c_facets/cf_registry')
     , logger = require('../util/logger')
     , config = require('../config')
+    , pathUtils = require('./path_utils')
     , _ = require('mol-proto');
 
 /**
@@ -9830,9 +9831,10 @@ function prepareTransaction(transaction) {
 
 
     function checkSplice(data) {
+        var parsedPath = pathUtils.parseAccessPath(data.path);
         var parentPathChanged = pathsToChange.some(function(parentPath) {
-            var pos = data.path.indexOf(parentPath);
-            return pos == 0 && data.path.length >= parentPath.length;
+            if (parsedPath.length <= parentPath.length) return;
+            return _pathIsParentOf(parentPath, parsedPath);
         });
 
         if (parentPathChanged) return;
@@ -9841,15 +9843,17 @@ function prepareTransaction(transaction) {
 
         if (! config.debug) throw exitLoop;
         pathsToSplice = pathsToSplice || [];
-        pathsToSplice.push(data.path);
+        pathsToSplice.push(parsedPath);
         hadSplice = true;
     }
 
 
     function checkMethod(data) {
+        var parsedPath = pathUtils.parseAccessPath(data.path);
         var parentPathSpliced = pathsToSplice && pathsToSplice.some(function(parentPath) {
-            var pos = data.path.indexOf(parentPath);
-            return pos == 0 && data.path[parentPath.length] == '[';
+            if (parsedPath.length <= parentPath.length
+                || parsedPath[parentPath.length].syntax != 'array') return;
+            return _pathIsParentOf(parentPath, parsedPath);
         });
 
         if (parentPathSpliced) return;
@@ -9862,9 +9866,16 @@ function prepareTransaction(transaction) {
 
         if (parentPathChanged) return;
 
-        pathsToChange.push(data.path);
+        pathsToChange.push(parsedPath);
 
         todo.push(data);
+    }
+
+
+    function _pathIsParentOf(parentPath, childPath) {
+        return parentPath.every(function(pathNode, index) {
+            return pathNode.property == childPath[index].property;
+        });
     }
 }
 
@@ -9902,7 +9913,7 @@ function executeMethod(modelPath, data) {
         logger.error('unknown data change type');
 }
 
-},{"../components/c_facets/cf_registry":30,"../config":62,"../util/logger":96,"mol-proto":107}],75:[function(require,module,exports){
+},{"../components/c_facets/cf_registry":30,"../config":62,"../util/logger":96,"./path_utils":81,"mol-proto":107}],75:[function(require,module,exports){
 'use strict';
 
 var ConnectorError = require('../util/error').Connector
