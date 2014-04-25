@@ -11707,7 +11707,8 @@ var domUtils = {
 
     treePathOf: treePathOf,
     getNodeAtTreePath: getNodeAtTreePath,
-    insertAtTreePath: insertAtTreePath
+    insertAtTreePath: insertAtTreePath,
+    isTreePathBefore: isTreePathBefore
 };
 
 module.exports = domUtils;
@@ -12135,6 +12136,36 @@ function insertAtTreePath(rootEl, treePath, el, nearest) {
             return true;
         }
     }
+}
+
+
+/**
+ * Returns `true` if the first tree path points to a node which is before the other in the document order. 
+ * @param  {Array}  path1   A treepath array
+ * @param  {Array}  path2   A treepath array
+ * @return {Boolean}
+ */
+function isTreePathBefore(path1, path2) {
+    var i = 0
+        , isBefore;
+    if (!Array.isArray(path1) && Array.isArray(path2))
+        return logger.error('isTreePathBefore: One or both paths are not valid treepath arrays.');
+
+    for (i; i < path1.length; i++) {
+        if (path1[i] < path2[i]) {
+            isBefore = true;
+            break;
+        } else if (path1[i] > path2[i]) {
+            isBefore = false;
+            break;
+        }
+    }
+
+    if (typeof isBefore == 'undefined')
+        if (path1.length < path2.length)
+            logger.warn('isTreePathBefore: One node is inside another');
+
+    return isBefore || false;
 }
 
 
