@@ -1013,7 +1013,8 @@ _.extendProto(ActionsHistory, {
     undoAllAsync: ActionsHistory$undoAllAsync,
     redoAllAsync: ActionsHistory$redoAllAsync,
     each: ActionsHistory$each,
-    eachReverse: ActionsHistory$eachReverse
+    eachReverse: ActionsHistory$eachReverse,
+    getLastAction: ActionsHistory$getLastAction
 });
 
 
@@ -1093,6 +1094,11 @@ function ActionsHistory$eachReverse(funcOrMethod, thisArg) {
     this.actions.reverse();
     this.each(funcOrMethod, thisArg);
     this.actions.reverse();
+}
+
+
+function ActionsHistory$getLastAction() {
+    return this.position && this.actions[this.position - 1];
 }
 
 },{"../util/logger":96,"mol-proto":107}],12:[function(require,module,exports){
@@ -1384,7 +1390,18 @@ _.extendProto(TransactionHistory, {
 });
 
 
-function TransactionHistory$storeCommand(command) {
+/**
+ * Stores command in the history. 
+ * @param {Command} command           
+ * @param {Boolean} appendTransaction If `true`, appends to the current or previous transaction if there is no current transaction.
+ */
+function TransactionHistory$storeCommand(command, appendTransaction) {
+    if (appendTransaction && !(this.currentTransaction || this.currentBatch)) {
+        var transaction = this.transactions.getLastAction();
+        transaction.storeCommand(command);
+        return;
+    }
+
     if (! this.currentBatch) this.currentBatch = new Transaction;
     this.currentBatch.storeCommand(command);
     if (! this[SCHEDULED]) {
