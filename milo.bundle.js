@@ -13463,10 +13463,10 @@ function TextSelection$$createStateObject(rootEl, startContainer, startOffset, e
 
 
 function _getSelectionPointState(rootEl, node, offset) {
-    var treeIndex = domUtils.treeIndexOf(rootEl, node);
-    if (treeIndex == -1) logger.error('Selection point is outside of root element');
+    var treePath = domUtils.treePathOf(rootEl, node);
+    if (! treePath) logger.error('Selection point is outside of root element');
     return {
-        treeIndex: treeIndex,
+        treePath: treePath,
         offset: offset
     };
 }
@@ -13490,8 +13490,8 @@ function TextSelection$$createFromState(state) {
 
 
 function _selectionNodeFromState(rootEl, pointState) {
-    var node = domUtils.getNodeAtTreeIndex(rootEl, pointState.treeIndex);
-    if (! node) logger.error('TextSelection createFromState: no node at treeIndex');
+    var node = domUtils.getNodeAtTreePath(rootEl, pointState.treePath);
+    if (! node) logger.error('TextSelection createFromState: no node at treePath');
     return node;
 }
 
