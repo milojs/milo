@@ -12571,9 +12571,10 @@ var fragmentUtils = module.exports = {
  * 
  * @param {Range} range DOM Range instance
  * @param {Boolean} renameChildren optional parameter, `true` to rename fragment child components
+ * @param {String} wrapperClassName optional parameter to wrap in a custom component class
  * @return {Object}
  */
-function fragment_getState(range, renameChildren) {
+function fragment_getState(range, renameChildren, wrapperClassName) {
     var rangeContainer = _getRangeContainer(range);
     if (! rangeContainer) {
         logger.error('fragment.getState: range has no common container');
@@ -12581,7 +12582,7 @@ function fragment_getState(range, renameChildren) {
     }
 
     var frag = range.cloneContents()
-        , wrapper = _wrapFragmentInContainer(frag);
+        , wrapper = _wrapFragmentInContainer(frag, wrapperClassName);
 
     _transferStates(rangeContainer, wrapper);
     if (renameChildren) _renameChildren(wrapper);
@@ -12631,12 +12632,12 @@ function fragment_getStateAsync(range, renameChildren, callback) {
 }
 
 
-function _wrapFragmentInContainer(frag) {
+function _wrapFragmentInContainer(frag, wrapperClassName) {
     var wrapEl = document.createElement('div')
         , attr = new BindAttribute(wrapEl);
 
     _.extend(attr, {
-        compClass: 'Component',
+        compClass: wrapperClassName || 'Component',
         compFacets: ['container'],
         compName: 'wrapper'
     });
