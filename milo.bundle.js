@@ -11725,7 +11725,9 @@ var domUtils = {
     treePathOf: treePathOf,
     getNodeAtTreePath: getNodeAtTreePath,
     insertAtTreePath: insertAtTreePath,
-    isTreePathBefore: isTreePathBefore
+    isTreePathBefore: isTreePathBefore,
+
+    getNodeWindow: getNodeWindow
 };
 
 module.exports = domUtils;
@@ -11779,9 +11781,12 @@ function containingElement(node) {
  * @param {Element} el DOM element
  */
 function selectElementContents(el) {
-    var range = document.createRange();
+    var doc = el.ownerDocument;
+    if (! doc) return logger('selectElementContents: element has no document')
+    var range = doc.createRange();
     range.selectNodeContents(el);
-    var sel = window.getSelection();
+    var win = getNodeWindow(el)
+        , sel = win.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
 }
@@ -11794,9 +11799,12 @@ function selectElementContents(el) {
  * @param {Number} pos caret position
  */
 function setCaretPosition(node, pos) {
-    var range = document.createRange();
+    var doc = node.ownerDocument;
+    if (! doc) return logger('setCaretPosition: element has no document')
+    var range = doc.createRange();
     range.setStart(node, pos);
-    var sel = window.getSelection();
+    var win = getNodeWindow(node)
+        , sel = win.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
 }
@@ -11811,10 +11819,13 @@ function setCaretPosition(node, pos) {
  * @param {Number} endOffset
  */
 function setSelection(fromNode, startOffset, toNode, endOffset) {
-    var range = document.createRange();
+    var doc = fromNode.ownerDocument;
+    if (! doc) return logger('setCaretPosition: element has no document')
+    var range = doc.createRange();
     range.setStart(fromNode, startOffset);
     range.setEnd(toNode, endOffset);
-    var sel = window.getSelection();
+    var win = getNodeWindow(fromNode)
+        , sel = win.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
 }
@@ -12189,6 +12200,18 @@ function isTreePathBefore(path1, path2) {
 function createTreeWalker(el, whatToShow) {
     whatToShow = whatToShow || (NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
     return document.createTreeWalker(el, whatToShow);
+}
+
+
+/**
+ * Returns the reference to the window the node is in
+ *
+ * @param {Node} node
+ * @return {Window}
+ */
+function getNodeWindow(node) {
+    var doc = node.ownerDocument;
+    return doc && (doc.defaultView || doc.parentWindow);
 }
 
 },{"../config":62,"mol-proto":107}],90:[function(require,module,exports){
@@ -13227,6 +13250,7 @@ _.extendProto(TextSelection, {
     init: TextSelection$init,
     text: TextSelection$text,
     textNodes: TextSelection$textNodes,
+    clear: TextSelection$clear,
 
     startElement: TextSelection$startElement,
     endElement: TextSelection$endElement,
@@ -13294,6 +13318,11 @@ function TextSelection$textNodes() {
     if (! this._textNodes)
         this._textNodes = _getTextNodes.call(this);
     return this._textNodes;
+}
+
+
+function TextSelection$clear() {
+    this.selection.removeAllRanges();
 }
 
 
