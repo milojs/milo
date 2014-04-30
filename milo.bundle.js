@@ -9884,7 +9884,6 @@ function processTransaction(transaction) {
     transaction.forEach(processChange, this);
     postTransactionFinished.call(this, false);
 
-
     function processChange(data) {
         var modelPath = this.path(data.path);
         if (! modelPath) return;
@@ -11715,6 +11714,8 @@ module.exports = uniqueCount;
 var config = require('../config')
     , _ = require('mol-proto');
 
+var createRangePaths = _createNodesAndPathsFunc(treePathOf);
+var createRangeNodes = _createNodesAndPathsFunc(getNodeAtTreePath);
 
 var domUtils = {
     children: children,
@@ -11745,7 +11746,14 @@ var domUtils = {
     insertAtTreePath: insertAtTreePath,
     isTreePathBefore: isTreePathBefore,
 
-    getNodeWindow: getNodeWindow
+    getNodeWindow: getNodeWindow,
+
+    expandRangeToSiblings: expandRangeToSiblings,
+    getRangeSiblings: getRangeSiblings,
+    createRangeFromSiblings: createRangeFromSiblings,
+    createRangePaths: createRangePaths,
+    createRangeNodes: createRangeNodes,
+    createRangeFromNodes: createRangeFromNodes
 };
 
 module.exports = domUtils;
@@ -12232,6 +12240,83 @@ function getNodeWindow(node) {
     return doc && (doc.defaultView || doc.parentWindow);
 }
 
+
+function expandRangeToSiblings(range) {
+    var siblings = getRangeSiblings(range);
+    var range = createRangeFromSiblings(siblings);
+    return range;
+}
+
+function createRangeFromSiblings(nodes) {
+    var range = document.createRange();
+    if (nodes.siblings) {
+        range.setStartBefore(nodes.start);
+        range.setEndAfter(nodes.end);
+    } else
+        range.selectNode(nodes.start);
+    return range;
+}
+
+function getRangeSiblings(range) {
+    var containerNode = range.commonAncestorContainer
+        , startNode = range.startContainer
+        , endNode = range.endContainer;
+
+    if (startNode == endNode) {
+        if (startNode != containerNode) logger.error('deleteSelectionCommand logical error: start==end, but container is different');
+        return { siblings: false, start: startNode };
+    }
+
+    if (startNode == containerNode || endNode == containerNode)
+        return { siblings: false, start: containerNode };
+
+    var startSibling = _findContainingChild(containerNode, startNode);
+    var endSibling = _findContainingChild(containerNode, endNode);
+
+    if (startSibling && endSibling) {
+        if (startSibling == endSibling) {
+            logger.error('deleteSelectionCommand logical error: same siblings');
+            return { siblings: false, start: startSibling };
+        } else
+            return { siblings: true, start: startSibling, end: endSibling };
+    }
+}
+
+
+
+function createRangeFromNodes(nodes) {
+    var range = document.createRange();
+    if (nodes.siblings) {
+        range.setStartBefore(nodes.start);
+        range.setEndAfter(nodes.end);
+    } else
+        range.selectNode(nodes.start);
+    return range;
+}
+
+
+
+function _findContainingChild(containerNode, selNode) {
+    return _.find(containerNode.childNodes, function(node) {
+        return node.contains(selNode);
+    });
+}
+
+
+
+
+function _createNodesAndPathsFunc(func) {
+    return function(rootEl, fromObj) {
+        var toObj = {
+            siblings: fromObj.siblings,
+            start: func(rootEl, fromObj.start)
+        };
+        if (toObj.siblings)
+            toObj.end = func(rootEl, fromObj.end);
+        return toObj;
+    }
+}
+
 },{"../config":62,"mol-proto":107}],90:[function(require,module,exports){
 'use strict';
 
@@ -12690,6 +12775,7 @@ function _renameChildren(comp) {
         child.rename();
     });
 }
+
 
 },{"../attributes/a_bind":5,"../binder":9,"../components/c_class":16,"./check":86,"./dom":89,"./logger":96,"mol-proto":107}],94:[function(require,module,exports){
 'use strict';
@@ -13575,7 +13661,6 @@ function TextSelection$$createFromRange(range) {
     sel.addRange(range);
     return new TextSelection(win);
 }
-
 
 },{"../../components/c_class":16,"../dom":89,"../logger":96,"mol-proto":107}],101:[function(require,module,exports){
 'use strict';
@@ -15446,15 +15531,13 @@ function extend(obj, onlyEnumerable) {
  * ```
  * var clonedArray = [].concat(arr);
  * ```
- * This function should not be used to clone an array, because it is inefficient.
+ * This function should not be used to clone an array, both because it is inefficient and because the result will look very much like an array, it will not be a real array.
  *
  * @param {Object} self An object to be cloned
  * @return {Object}
  */
 function clone() {
     if (Array.isArray(this)) return this.slice();
-    if (this instanceof Date) return new Date(this);
-    if (this instanceof RegExp) return new RegExp(this);
     var clonedObject = Object.create(this.constructor.prototype);
     extend.call(clonedObject, this);
     return clonedObject;
@@ -15575,12 +15658,10 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
     // store node to recognise recursion
     objTraversed.push(objNode);
 
-    var loop = Array.isArray(objNode) ? Array.prototype.forEach : eachKey;
-
-    loop.call(objNode, function(value, prop) {
+    eachKey.call(objNode, function(value, prop) {
         var descriptor = Object.getOwnPropertyDescriptor(objNode, prop);
         if (typeof value == 'object' && value != null
-                && ! (value instanceof RegExp) && ! (value instanceof Date)) {
+                && ! (value instanceof RegExp)) {
             if (! (selfNode.hasOwnProperty(prop)
                     && typeof selfNode[prop] == 'object' && selfNode[prop] != null))
                 selfNode[prop] = (Array.isArray(value)) ? [] : {};
@@ -15601,8 +15682,6 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
  * @return {Object}
  */
 function deepClone(onlyEnumerable) {
-    if (this instanceof Date) return new Date(this);
-    if (this instanceof RegExp) return new RegExp(this);
     var clonedObject = Array.isArray(this) ? [] : {};
     deepExtend.call(clonedObject, this, onlyEnumerable);
     return clonedObject;
@@ -15874,7 +15953,7 @@ var ArrayProto = Array.prototype
 function pickKeys() { // , ... keys
     var keys = concat.apply(ArrayProto, arguments)
         , obj = Object.create(this.constructor.prototype);
-    keys.forEach(function(key) {
+    keys.forEach(function(key){
         if (this.hasOwnProperty(key))
             obj[key] = this[key];
     }, this);
