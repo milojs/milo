@@ -11714,9 +11714,6 @@ module.exports = uniqueCount;
 var config = require('../config')
     , _ = require('mol-proto');
 
-var createRangePaths = _createNodesAndPathsFunc(treePathOf);
-var createRangeNodes = _createNodesAndPathsFunc(getNodeAtTreePath);
-
 var domUtils = {
     children: children,
     filterNodeListByType: filterNodeListByType,
@@ -11748,12 +11745,7 @@ var domUtils = {
 
     getNodeWindow: getNodeWindow,
 
-    expandRangeToSiblings: expandRangeToSiblings,
-    getRangeSiblings: getRangeSiblings,
-    createRangeFromSiblings: createRangeFromSiblings,
-    createRangePaths: createRangePaths,
-    createRangeNodes: createRangeNodes,
-    createRangeFromNodes: createRangeFromNodes
+
 };
 
 module.exports = domUtils;
@@ -12241,82 +12233,6 @@ function getNodeWindow(node) {
 }
 
 
-function expandRangeToSiblings(range) {
-    var siblings = getRangeSiblings(range);
-    var range = createRangeFromSiblings(siblings);
-    return range;
-}
-
-function createRangeFromSiblings(nodes) {
-    var range = document.createRange();
-    if (nodes.siblings) {
-        range.setStartBefore(nodes.start);
-        range.setEndAfter(nodes.end);
-    } else
-        range.selectNode(nodes.start);
-    return range;
-}
-
-function getRangeSiblings(range) {
-    var containerNode = range.commonAncestorContainer
-        , startNode = range.startContainer
-        , endNode = range.endContainer;
-
-    if (startNode == endNode) {
-        if (startNode != containerNode) logger.error('deleteSelectionCommand logical error: start==end, but container is different');
-        return { siblings: false, start: startNode };
-    }
-
-    if (startNode == containerNode || endNode == containerNode)
-        return { siblings: false, start: containerNode };
-
-    var startSibling = _findContainingChild(containerNode, startNode);
-    var endSibling = _findContainingChild(containerNode, endNode);
-
-    if (startSibling && endSibling) {
-        if (startSibling == endSibling) {
-            logger.error('deleteSelectionCommand logical error: same siblings');
-            return { siblings: false, start: startSibling };
-        } else
-            return { siblings: true, start: startSibling, end: endSibling };
-    }
-}
-
-
-
-function createRangeFromNodes(nodes) {
-    var range = document.createRange();
-    if (nodes.siblings) {
-        range.setStartBefore(nodes.start);
-        range.setEndAfter(nodes.end);
-    } else
-        range.selectNode(nodes.start);
-    return range;
-}
-
-
-
-function _findContainingChild(containerNode, selNode) {
-    return _.find(containerNode.childNodes, function(node) {
-        return node.contains(selNode);
-    });
-}
-
-
-
-
-function _createNodesAndPathsFunc(func) {
-    return function(rootEl, fromObj) {
-        var toObj = {
-            siblings: fromObj.siblings,
-            start: func(rootEl, fromObj.start)
-        };
-        if (toObj.siblings)
-            toObj.end = func(rootEl, fromObj.end);
-        return toObj;
-    }
-}
-
 },{"../config":62,"mol-proto":107}],90:[function(require,module,exports){
 'use strict';
 
@@ -12659,13 +12575,25 @@ var Component = require('../components/c_class')
     , domUtils = require('./dom')
     , logger = require('./logger')
     , check = require('./check')
-    , _ = require('mol-proto')
+    , _ = require('mol-proto');
+
+
+var createRangePaths = _createNodesAndPathsFunc(domUtils.treePathOf);
+var createRangeNodes = _createNodesAndPathsFunc(domUtils.getNodeAtTreePath);
 
 
 var fragmentUtils = module.exports = {
     getState: fragment_getState,
-    getStateAsync: fragment_getStateAsync
+    getStateAsync: fragment_getStateAsync,
+
+    expandRangeToSiblings: expandRangeToSiblings,
+    getRangeSiblings: getRangeSiblings,
+    createRangeFromSiblings: createRangeFromSiblings,
+    createRangePaths: createRangePaths,
+    createRangeNodes: createRangeNodes,
+    createRangeFromNodes: createRangeFromNodes
 };
+
 
 
 /**
@@ -12775,6 +12703,85 @@ function _renameChildren(comp) {
         child.rename();
     });
 }
+
+
+
+function expandRangeToSiblings(range) {
+    var siblings = getRangeSiblings(range);
+    var range = createRangeFromSiblings(siblings);
+    return range;
+}
+
+function createRangeFromSiblings(nodes) {
+    var range = document.createRange();
+    if (nodes.siblings) {
+        range.setStartBefore(nodes.start);
+        range.setEndAfter(nodes.end);
+    } else
+        range.selectNode(nodes.start);
+    return range;
+}
+
+function getRangeSiblings(range) {
+    var containerNode = range.commonAncestorContainer
+        , startNode = range.startContainer
+        , endNode = range.endContainer;
+
+    if (startNode == endNode) {
+        if (startNode != containerNode) logger.error('deleteSelectionCommand logical error: start==end, but container is different');
+        return { siblings: false, start: startNode };
+    }
+
+    if (startNode == containerNode || endNode == containerNode)
+        return { siblings: false, start: containerNode };
+
+    var startSibling = _findContainingChild(containerNode, startNode);
+    var endSibling = _findContainingChild(containerNode, endNode);
+
+    if (startSibling && endSibling) {
+        if (startSibling == endSibling) {
+            logger.error('deleteSelectionCommand logical error: same siblings');
+            return { siblings: false, start: startSibling };
+        } else
+            return { siblings: true, start: startSibling, end: endSibling };
+    }
+}
+
+
+
+function createRangeFromNodes(nodes) {
+    var range = document.createRange();
+    if (nodes.siblings) {
+        range.setStartBefore(nodes.start);
+        range.setEndAfter(nodes.end);
+    } else
+        range.selectNode(nodes.start);
+    return range;
+}
+
+
+
+function _findContainingChild(containerNode, selNode) {
+    return _.find(containerNode.childNodes, function(node) {
+        return node.contains(selNode);
+    });
+}
+
+
+
+
+function _createNodesAndPathsFunc(func) {
+    return function(rootEl, fromObj) {
+        var toObj = {
+            siblings: fromObj.siblings,
+            start: func(rootEl, fromObj.start)
+        };
+        if (toObj.siblings)
+            toObj.end = func(rootEl, fromObj.end);
+        return toObj;
+    }
+}
+
 
 
 },{"../attributes/a_bind":5,"../binder":9,"../components/c_class":16,"./check":86,"./dom":89,"./logger":96,"mol-proto":107}],94:[function(require,module,exports){
