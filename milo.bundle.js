@@ -11755,6 +11755,8 @@ var domUtils = {
 
     getNodeWindow: getNodeWindow,
 
+    getComponentsFromRange: getComponentsFromRange,
+    deleteRange: deleteRange,
 
 };
 
@@ -12240,6 +12242,55 @@ function createTreeWalker(el, whatToShow) {
 function getNodeWindow(node) {
     var doc = node.ownerDocument;
     return doc && (doc.defaultView || doc.parentWindow);
+}
+
+
+/**
+ * get all components contained in a range
+ * 
+ * @param {range} a DOM range
+ */
+function getComponentsFromRange(range) {
+    var selStart = range.startContainer
+        , selEnd = range.endContainer
+        , rangeContainer = range.commonAncestorContainer
+        , doc = rangeContainer.ownerDocument;
+
+    var components = [];
+
+    if (selStart != selEnd) {
+        var treeWalker = doc.createTreeWalker(rangeContainer,
+                NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
+
+        treeWalker.currentNode = selStart;
+        var node = treeWalker.nextNode(); // first node after selected text node
+
+        while (node && node != selEnd) {
+            if (node.nodeType != Node.TEXT_NODE) {
+                var comp = Component.getComponent(node);
+                if (comp && !comp.el.contains(selEnd))
+                    components.push(comp);
+            }
+            node = treeWalker.nextNode();
+        }
+    }
+    return components;
+}
+
+/**
+ * delete a range
+ * 
+ * @param {range} delete a DOM range and all the components inside
+ */
+function deleteRange(range) {
+    var components = getComponentsFromRange(range);
+
+    components.forEach(function(comp) {
+        comp.destroy(true);
+    });
+
+    range.deleteContents();
+
 }
 
 
@@ -13286,6 +13337,8 @@ function request$jsonp(url, callback) {
 var domUtils = require('../dom')
     , containingElement = domUtils.containingElement
     , setCaretPosition = domUtils.setCaretPosition
+    , getComponentsFromRange = domUtils.getComponentsFromRange
+    , deleteRange = domUtils.deleteRange
     , logger = require('../logger')
     , Component = require('../../components/c_class')
     , _ = require('mol-proto');
@@ -13519,27 +13572,7 @@ function TextSelection$containedComponents() {
 
     if (this.isCollapsed || ! this.range) return components;
 
-    var selStart = this.range.startContainer
-        , selEnd = this.range.endContainer
-        , rangeContainer = this.range.commonAncestorContainer;
-
-    if (selStart != selEnd) {
-        var treeWalker = this.window.document.createTreeWalker(rangeContainer,
-                NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
-
-        treeWalker.currentNode = selStart;
-        var node = treeWalker.nextNode(); // first node after selected text node
-
-        while (node && node != selEnd) {
-            if (node.nodeType != Node.TEXT_NODE) {
-                var comp = Component.getComponent(node);
-                if (comp && !comp.el.contains(selEnd))
-                    components.push(comp);
-            }
-            node = treeWalker.nextNode();
-        }
-    }
-    return components;
+    return getComponentsFromRange(this.range);
 }
 
 
@@ -13561,13 +13594,9 @@ function TextSelection$eachContainedComponent(callback, thisArg) {
 function TextSelection$del(selectEndContainer) {
     if (this.isCollapsed || ! this.range) return;
 
-    this.eachContainedComponent(function(comp) {
-        comp.destroy(true);
-    });
-
     var selPoint = this._getPostDeleteSelectionPoint(selectEndContainer);
 
-    this.range.deleteContents();
+    deleteRange(this.range);
 
     this._selectAfterDelete(selPoint);
     selPoint.node.parentNode.normalize();
@@ -15548,15 +15577,13 @@ function extend(obj, onlyEnumerable) {
  * ```
  * var clonedArray = [].concat(arr);
  * ```
- * This function should not be used to clone an array, because it is inefficient.
+ * This function should not be used to clone an array, both because it is inefficient and because the result will look very much like an array, it will not be a real array.
  *
  * @param {Object} self An object to be cloned
  * @return {Object}
  */
 function clone() {
     if (Array.isArray(this)) return this.slice();
-    if (this instanceof Date) return new Date(this);
-    if (this instanceof RegExp) return new RegExp(this);
     var clonedObject = Object.create(this.constructor.prototype);
     extend.call(clonedObject, this);
     return clonedObject;
@@ -15677,12 +15704,10 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
     // store node to recognise recursion
     objTraversed.push(objNode);
 
-    var loop = Array.isArray(objNode) ? Array.prototype.forEach : eachKey;
-
-    loop.call(objNode, function(value, prop) {
+    eachKey.call(objNode, function(value, prop) {
         var descriptor = Object.getOwnPropertyDescriptor(objNode, prop);
         if (typeof value == 'object' && value != null
-                && ! (value instanceof RegExp) && ! (value instanceof Date)) {
+                && ! (value instanceof RegExp)) {
             if (! (selfNode.hasOwnProperty(prop)
                     && typeof selfNode[prop] == 'object' && selfNode[prop] != null))
                 selfNode[prop] = (Array.isArray(value)) ? [] : {};
@@ -15703,8 +15728,6 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
  * @return {Object}
  */
 function deepClone(onlyEnumerable) {
-    if (this instanceof Date) return new Date(this);
-    if (this instanceof RegExp) return new RegExp(this);
     var clonedObject = Array.isArray(this) ? [] : {};
     deepExtend.call(clonedObject, this, onlyEnumerable);
     return clonedObject;
@@ -15976,7 +15999,7 @@ var ArrayProto = Array.prototype
 function pickKeys() { // , ... keys
     var keys = concat.apply(ArrayProto, arguments)
         , obj = Object.create(this.constructor.prototype);
-    keys.forEach(function(key) {
+    keys.forEach(function(key){
         if (this.hasOwnProperty(key))
             obj[key] = this[key];
     }, this);
