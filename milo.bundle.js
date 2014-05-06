@@ -6658,8 +6658,10 @@ var MLRadioGroup = Component.createComponentClass('MLRadioGroup', {
     template: {
         template: '{{~ it.radioOptions :option }} \
                         {{##def.elID:{{= it.elementName }}-{{= option.value }}#}} \
-                        <input id="{{# def.elID }}" type="radio" value="{{= option.value }}" name="{{= it.elementName }}"> \
-                        <label for="{{# def.elID }}">{{= option.label }}</label> \
+                        <span class="'+ELEMENT_NAME_PREFIX+'option"> \
+                            <input id="{{# def.elID }}" type="radio" value="{{= option.value }}" name="{{= it.elementName }}"> \
+                            <label for="{{# def.elID }}">{{= option.label }}</label> \
+                        </span> \
                    {{~}}'
     }
 });
