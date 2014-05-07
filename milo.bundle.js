@@ -3883,7 +3883,8 @@ function onMouseDown(eventType, event) {
 function onMouseMovement(eventType, event) {
     var shouldBeDraggable = targetInDragHandle.call(this);
     this.owner.el.setAttribute('draggable', shouldBeDraggable);
-    event.stopPropagation();
+    if (document.body.getAttribute('data-dragEnableEvent') != 'false')
+        event.stopPropagation();
 }
 
 
