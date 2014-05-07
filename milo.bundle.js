@@ -11722,7 +11722,8 @@ module.exports = uniqueCount;
 
 
 var config = require('../config')
-    , _ = require('mol-proto');
+    , _ = require('mol-proto')
+    , logger = require('./logger');
 
 var domUtils = {
     children: children,
@@ -11813,7 +11814,7 @@ function containingElement(node) {
  */
 function selectElementContents(el) {
     var doc = el.ownerDocument;
-    if (! doc) return logger('selectElementContents: element has no document')
+    if (! doc) return logger.error('selectElementContents: element has no document')
     var range = doc.createRange();
     range.selectNodeContents(el);
     var win = getNodeWindow(el)
@@ -11831,7 +11832,7 @@ function selectElementContents(el) {
  */
 function setCaretPosition(node, pos) {
     var doc = node.ownerDocument;
-    if (! doc) return logger('setCaretPosition: element has no document')
+    if (! doc) return logger.error('setCaretPosition: element has no document')
     var range = doc.createRange();
     range.setStart(node, pos);
     var win = getNodeWindow(node)
@@ -12317,7 +12318,7 @@ function deleteRangeWithComponents(range) {
 }
 
 
-},{"../config":63,"mol-proto":108}],91:[function(require,module,exports){
+},{"../config":63,"./logger":97,"mol-proto":108}],91:[function(require,module,exports){
 'use strict';
 
 
@@ -13361,7 +13362,7 @@ var domUtils = require('../dom')
     , containingElement = domUtils.containingElement
     , setCaretPosition = domUtils.setCaretPosition
     , getComponentsFromRange = domUtils.getComponentsFromRange
-    , deleteRange = domUtils.deleteRange
+    , deleteRangeWithComponents = domUtils.deleteRangeWithComponents
     , logger = require('../logger')
     , Component = require('../../components/c_class')
     , _ = require('mol-proto');
@@ -13619,7 +13620,7 @@ function TextSelection$del(selectEndContainer) {
 
     var selPoint = this._getPostDeleteSelectionPoint(selectEndContainer);
 
-    deleteRange(this.range);
+    deleteRangeWithComponents(this.range);
 
     this._selectAfterDelete(selPoint);
     selPoint.node.parentNode.normalize();
