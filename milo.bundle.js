@@ -11756,7 +11756,8 @@ var domUtils = {
     getNodeWindow: getNodeWindow,
 
     getComponentsFromRange: getComponentsFromRange,
-    deleteRange: deleteRange,
+    deleteRangeWithComponents: deleteRangeWithComponents,
+    forEachNodesInRange: forEachNodesInRange
 
 };
 
@@ -12245,35 +12246,58 @@ function getNodeWindow(node) {
 }
 
 
+
+/**
+ * do something for each nodes contained in a range
+ * 
+ * @param {range} a range
+ * @param {cb} a function taking a node as argument
+
+ */
+function forEachNodesInRange(range, cb){
+    var rangeContainer = range.commonAncestorContainer
+        , doc = rangeContainer.ownerDocument;
+
+    var treeWalker = doc.createTreeWalker(rangeContainer,
+            NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, 
+            {
+                acceptNode: function(node) {
+                    var nodeRange = document.createRange();
+                    var isInside = false;
+                    nodeRange.selectNode(node);
+
+                    if (nodeRange.compareBoundaryPoints(Range.START_TO_START, range) != -1 
+                        && nodeRange.compareBoundaryPoints(Range.END_TO_END, range) != 1){
+                        isInside = true;
+                    }
+                    nodeRange.detach();
+                    return isInside;
+                } 
+            });
+    var currentNode;
+    while (currentNode = treeWalker.nextNode()){
+        cb(currentNode);
+    }
+}
+
 /**
  * get all components contained in a range
  * 
- * @param {range} a DOM range
+ * @param {range} a DOM range.
  */
 function getComponentsFromRange(range) {
-    var selStart = range.startContainer
-        , selEnd = range.endContainer
-        , rangeContainer = range.commonAncestorContainer
-        , doc = rangeContainer.ownerDocument;
+    var win = getNodeWindow(range.startContainer)
+        , Component = win.milo.Component;
 
     var components = [];
-
-    if (selStart != selEnd) {
-        var treeWalker = doc.createTreeWalker(rangeContainer,
-                NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
-
-        treeWalker.currentNode = selStart;
-        var node = treeWalker.nextNode(); // first node after selected text node
-
-        while (node && node != selEnd) {
-            if (node.nodeType != Node.TEXT_NODE) {
-                var comp = Component.getComponent(node);
-                if (comp && !comp.el.contains(selEnd))
-                    components.push(comp);
-            }
-            node = treeWalker.nextNode();
+    forEachNodesInRange(range, function (node){
+        if (node.nodeType != Node.TEXT_NODE) {
+            var comp = Component.getComponent(node);
+            if (comp)
+                components.push(comp);
         }
-    }
+    });
+
     return components;
 }
 
@@ -12282,7 +12306,7 @@ function getComponentsFromRange(range) {
  * 
  * @param {range} delete a DOM range and all the components inside
  */
-function deleteRange(range) {
+function deleteRangeWithComponents(range) {
     var components = getComponentsFromRange(range);
 
     components.forEach(function(comp) {
@@ -12290,7 +12314,6 @@ function deleteRange(range) {
     });
 
     range.deleteContents();
-
 }
 
 
