@@ -3397,8 +3397,6 @@ function Data$setState(state) {
 },{"../../abstract/mixin":3,"../../messenger":68,"../../model/change_data":75,"../../model/m_path":79,"../../model/model_utils":80,"../../model/path_utils":82,"../../util/logger":97,"../c_facet":17,"../msg_api/data":36,"../msg_api/de_data":37,"../msg_src/dom_events":39,"./cf_registry":31,"mol-proto":108}],20:[function(require,module,exports){
 'use strict';
 
-// <a name="components-facets-dom"></a>
-// ###dom facet
 
 var ComponentFacet = require('../c_facet')
     , facetsRegistry = require('./cf_registry') 
@@ -3425,7 +3423,7 @@ _.extend(Dom, {
  * Facet class method
  * Creates an element from a passed configuation object
  * 
- * @param {Object} config with the properties `tagName`, `cssClasses`, `attributes`, `content`, `template`
+ * @param {Object} config with the properties `domConfig`, `content`, `template`
  * @return {Element} an html element 
  */
 function Dom$$createElement(config) {
@@ -3573,29 +3571,8 @@ function setStyles(properties) {
 
 
 // create a copy of DOM element using facet config if set
-// TODO: reconsider deep copy as it wont work with a tagName
 function copy(isDeep) {
-    var tagName = this.config.tagName;
-    if (! this.config.tagName)
-        return this.owner.el.cloneNode(isDeep);
-
-    var newEl = document.createElement(tagName);
-
-    var configAttributes = this.config.attributes;
-    if (configAttributes)
-        _.eachKey(configAttributes, function(attrValue, attrName) {
-            newEl.setAttribute(attrName, attrValue);
-        });
-
-    var attributes = this.owner.el.attributes;
-    if (attributes)
-        for (var i = 0; i<attributes.length; i++) {
-            var attr = attributes[i];
-            if (attr.name == 'id') continue;
-            newEl.setAttribute(attr.name, attr.value);
-        }
-
-    return newEl;
+    return this.owner.el && this.owner.el.cloneNode(isDeep);
 }
 
 
