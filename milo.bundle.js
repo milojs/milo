@@ -7343,7 +7343,7 @@ function MLTextarea$startAutoresize(options) {
 
 
 function _subscribeTextChange(onOff) {
-    this.events[onOff]('input', { subscriber: _adjustAreaHeight, context: this });
+    this.data[onOff]('', { subscriber: _adjustAreaHeight, context: this });
 }
 
 
