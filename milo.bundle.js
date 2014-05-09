@@ -11711,6 +11711,7 @@ var domUtils = {
     getElementOffset: getElementOffset,
     setCaretPosition: setCaretPosition,
     setSelection: setSelection,
+    clearSelection: clearSelection,
     removeElement: removeElement,
     unwrapElement: unwrapElement,
     wrapInElement: wrapInElement,
@@ -11838,6 +11839,17 @@ function setSelection(fromNode, startOffset, toNode, endOffset) {
         , sel = win.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
+}
+
+
+/**
+ * Clears selection in a given window
+ * @param {Window} win
+ */
+function clearSelection(win) {
+    win = win || window;
+    var sel = win.getSelection();
+    sel.removeAllRanges();
 }
 
 
@@ -13649,6 +13661,9 @@ function TextSelection$getRange() {
  */
 function TextSelection$getState(rootEl) {
     var r = this.range;
+    var doc = rootEl.ownerDocument
+        , win = doc.defaultView || doc.parentWindow;
+    if (!r) return { window: win };
     return TextSelection.createStateObject(rootEl, r.startContainer, r.startOffset, r.endContainer, r.endOffset);
 }
 
@@ -13681,15 +13696,21 @@ function _getSelectionPointState(rootEl, node, offset) {
  * Restores actual selection to the stored range
  */
 function TextSelection$$createFromState(state) {
-    var setSelection = state.window.milo.util.dom.setSelection;
-    var startNode = _selectionNodeFromState(state.rootEl, state.start)
-        , endNode = _selectionNodeFromState(state.rootEl, state.end);
+    var domUtils = state.window.milo.util.dom;
 
-    try {
-        setSelection(startNode, state.start.offset, endNode, state.end.offset);
+    if (state.rootEl && state.start && state.end) {
+        var startNode = _selectionNodeFromState(state.rootEl, state.start)
+            , endNode = _selectionNodeFromState(state.rootEl, state.end);
+
+        try {
+            domUtils.setSelection(startNode, state.start.offset, endNode, state.end.offset);
+            return new TextSelection(state.window);
+        } catch(e) {
+            logger.error('Text selection: can\'t create selection', e, e.message);
+        }
+    } else {
+        domUtils.clearSelection(state.window);
         return new TextSelection(state.window);
-    } catch(e) {
-        logger.error('Text selection: can\'t create selection', e, e.message);
     }
 }
 
