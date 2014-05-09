@@ -13449,7 +13449,8 @@ _.extendProto(TextSelection, {
     _selectAfterDelete: _selectAfterDelete,
 
     getRange: TextSelection$getRange,
-    getState: TextSelection$getState
+    getState: TextSelection$getState,
+    getNormalizedRange: TextSelection$$getNormalizedRange
 });
 
 
@@ -13715,6 +13716,54 @@ function TextSelection$$createFromRange(range) {
     return new TextSelection(win);
 }
 
+/**
+ * Returns a normalized copy of the range
+ * If you triple click an item, the end of the range is positioned at the beginning of the NEXT node.
+ * this function returns a range with the end positioned at the end of the last textnode contained 
+ * inside a component with the "editable" facet
+ * 
+ * @return {range}
+ */
+function TextSelection$$getNormalizedRange(){
+
+    var doc = this.range.commonAncestorContainer.ownerDocument
+        , win = doc.defaultView || doc.parentWindow;
+
+    var Component = win.milo.Component;
+
+    var newRange = this.range.cloneRange();
+
+
+    if (newRange.endContainer.nodeType !== Node.TEXT_NODE) {
+        var endComp = Component.getContainingComponent(newRange.endContainer, true);
+        
+        var tw = doc.createTreeWalker(doc.body, NodeFilter.SHOW_ELEMENT);
+        tw.currentNode = endComp.el;
+        var previousSiblingEl = tw.previousNode();
+
+        // Walk tree back to find nearest editable component
+        while (previousSiblingEl) {
+            var previousSiblingComp = Component.getComponent(previousSiblingEl);
+            if (previousSiblingComp 
+                && previousSiblingComp.editable 
+                && previousSiblingComp.editable.isEditable())
+                break;
+            else
+                previousSiblingComp = null;
+
+            previousSiblingEl = tw.previousNode();
+        }
+
+        // Get the last text node of the component
+        if (previousSiblingComp)
+            var lastTextNode = domUtils.lastTextNode(previousSiblingComp.el);
+
+        newRange.setEndAfter(lastTextNode);
+
+    }
+
+    return newRange;
+}
 },{"../../components/c_class":16,"../dom":90,"../logger":97,"mol-proto":108}],102:[function(require,module,exports){
 'use strict';
 
