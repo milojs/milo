@@ -2709,7 +2709,7 @@ function Container$setState(state) {
         if (component)
             component.setState(compData);
         else
-            logger.warn('component "' + compName + '" does not exist on scope', compData);
+            logger.warn('component "' + compName + '" does not exist on scope');
     }, this);
 }
 
@@ -4710,7 +4710,10 @@ function ModelFacet$init() {
  * @return {Object}
  */
 function ModelFacet$getState() {
-    return { state: this.m.get() };
+    var modelValue = this.m.get();
+    if (typeof modelValue == 'object')
+        modelValue = _.deepClone(modelValue);
+    return { state: modelValue };
 }
 
 
