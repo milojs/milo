@@ -11171,8 +11171,8 @@ function _synthesize(synthesizer, path, parsedPath) {
 
     function cloneTree(value) {
         return valueIsNormalObject(value)
-                ? _.deepClone(value)
-                : value;
+                ? _.deepClone(value)
+                : value;
     }
 
     function protectValue(value) {
@@ -13785,6 +13785,7 @@ function TextSelection$$getNormalizedRange(){
 
     return newRange;
 }
+
 },{"../../components/c_class":16,"../dom":90,"../logger":97,"mol-proto":108}],102:[function(require,module,exports){
 'use strict';
 
