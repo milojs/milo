@@ -13987,7 +13987,8 @@ function TextSelection$$getNormalizedRange(){
         , win = doc.defaultView || doc.parentWindow;
 
     var Component = win.milo.Component;
-
+    var lastTextNode;
+    var previousSiblingComp;
     var newRange = this.range.cloneRange();
 
 
@@ -14000,7 +14001,7 @@ function TextSelection$$getNormalizedRange(){
 
         // Walk tree back to find nearest editable component
         while (previousSiblingEl) {
-            var previousSiblingComp = Component.getComponent(previousSiblingEl);
+            previousSiblingComp = Component.getComponent(previousSiblingEl);
             if (previousSiblingComp 
                 && previousSiblingComp.editable 
                 && previousSiblingComp.editable.isEditable())
@@ -14012,10 +14013,12 @@ function TextSelection$$getNormalizedRange(){
         }
 
         // Get the last text node of the component
-        if (previousSiblingComp)
-            var lastTextNode = domUtils.lastTextNode(previousSiblingComp.el);
-
-        newRange.setEndAfter(lastTextNode);
+        if (previousSiblingComp){
+            lastTextNode = domUtils.lastTextNode(previousSiblingComp.el);
+        }
+        if (lastTextNode){
+            newRange.setEndAfter(lastTextNode);            
+        }
 
     }
 
