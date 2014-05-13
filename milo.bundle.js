@@ -11911,7 +11911,8 @@ var domUtils = {
 
     getComponentsFromRange: getComponentsFromRange,
     deleteRangeWithComponents: deleteRangeWithComponents,
-    forEachNodesInRange: forEachNodesInRange
+    forEachNodesInRange: forEachNodesInRange,
+    areRangesEqual: areRangesEqual
 
 };
 
@@ -11995,7 +11996,9 @@ function setCaretPosition(node, pos) {
 }
 
 /**
- * Selects a range in a document
+ * get the direction of a selection
+ *
+ * 1 forward, -1 backward, 0 no direction, undefined one of the node is detached or in a different frame
  *
  * @param {sel} a selection object
  * @return {-1|0|1|undefined}
@@ -12527,6 +12530,16 @@ function deleteRangeWithComponents(range) {
     range.deleteContents();
 }
 
+/**
+ * check if two ranges are equivalent
+ * 
+ * @param {range} range1
+ * @param {range} range2
+ * @return {Boolean} are the two ranges equivalent
+ */
+function areRangesEqual(range1, range2){
+    return range1.compareBoundaryPoints(Range.START_TO_START, range2) == 0 && range1.compareBoundaryPoints(Range.END_TO_END, range2) == 0;
+}
 
 },{"../config":64,"./logger":98,"mol-proto":109}],92:[function(require,module,exports){
 'use strict';
@@ -13678,7 +13691,8 @@ _.extendProto(TextSelection, {
 
     getRange: TextSelection$getRange,
     getState: TextSelection$getState,
-    getNormalizedRange: TextSelection$$getNormalizedRange
+    getNormalizedRange: TextSelection$$getNormalizedRange,
+    getDirection: TextSelection$$getDirection
 });
 
 
@@ -13942,14 +13956,28 @@ function _selectionNodeFromState(rootEl, pointState) {
  * Creates selection from passed range
  * 
  * @param {Range} range
+ * @param {Boolean} backward
+ *
  * @return {TextSelection}
  */
-function TextSelection$$createFromRange(range) {
+function TextSelection$$createFromRange(range, backward) {
     var win = range.startContainer.ownerDocument.defaultView
-        , sel = win.getSelection();
+        , sel = win.getSelection()
+        , endRange;
 
     sel.removeAllRanges();
-    sel.addRange(range);
+
+    if (backward){
+        endRange = range.cloneRange();
+        endRange.collapse(false);
+
+        sel.addRange(endRange);
+        sel.extend(range.startContainer, range.startOffset)        
+    }
+    else {
+        sel.addRange(range);
+    }
+
     return new TextSelection(win);
 }
 
@@ -13967,7 +13995,8 @@ function TextSelection$$getNormalizedRange(){
         , win = doc.defaultView || doc.parentWindow;
 
     var Component = win.milo.Component;
-
+    var lastTextNode;
+    var previousSiblingComp;
     var newRange = this.range.cloneRange();
 
 
@@ -13980,7 +14009,7 @@ function TextSelection$$getNormalizedRange(){
 
         // Walk tree back to find nearest editable component
         while (previousSiblingEl) {
-            var previousSiblingComp = Component.getComponent(previousSiblingEl);
+            previousSiblingComp = Component.getComponent(previousSiblingEl);
             if (previousSiblingComp 
                 && previousSiblingComp.editable 
                 && previousSiblingComp.editable.isEditable())
@@ -13992,15 +14021,29 @@ function TextSelection$$getNormalizedRange(){
         }
 
         // Get the last text node of the component
-        if (previousSiblingComp)
-            var lastTextNode = domUtils.lastTextNode(previousSiblingComp.el);
-
-        newRange.setEndAfter(lastTextNode);
+        if (previousSiblingComp){
+            lastTextNode = domUtils.lastTextNode(previousSiblingComp.el);
+        }
+        if (lastTextNode){
+            newRange.setEndAfter(lastTextNode);            
+        }
 
     }
 
     return newRange;
 }
+
+/**
+ * get the direction of a selection
+ *
+ * 1 forward, -1 backward, 0 no direction, undefined one of the node is detached or in a different frame
+ *
+ * @return {-1|0|1|undefined}
+ */
+function TextSelection$$getDirection(){
+    return domUtils.getSelectionDirection(this.selection);    
+}
+
 
 },{"../../components/c_class":16,"../dom":91,"../logger":98,"mol-proto":109}],103:[function(require,module,exports){
 'use strict';
