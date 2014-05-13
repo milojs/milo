@@ -2,6 +2,7 @@
 
 
 var Model = require('../../lib/model')
+    , ModelPath = Model.Path
     , assert = require('assert')
     , _ = require('mol-proto');
 
@@ -1174,4 +1175,16 @@ describe('Model class', function() {
         });
     });
 
+
+    it('ModelPath should define _getDefinition and _createFromDefinition', function() {
+        var m = new Model
+            , mPath = m('.info.$1', 'name')
+            , def = mPath._getDefinition();
+
+        mPath.set('Luis');
+
+        var mPath2 = ModelPath._createFromDefinition(def);
+
+        assert.equal(mPath2.get(), 'Luis');
+    });
 });

@@ -10511,7 +10511,8 @@ _.extendProto(Model, {
     get: Model$get,
     proxyMessenger: proxyMessenger,
     proxyMethods: proxyMethods,
-    _prepareMessengers: _prepareMessengers
+    _prepareMessengers: _prepareMessengers,
+    _getHostObject: _getHostObject
 });
 
 // set, del, splice are added to model
@@ -10618,6 +10619,11 @@ function _prepareMessengers() {
         _messenger: externalMessenger,
         _internalMessenger: internalMessenger
     });
+}
+
+
+function _getHostObject() {
+    return this._hostObject;
 }
 
 
@@ -10794,8 +10800,14 @@ _.extendProto(ModelPath, {
     pop: ModelPath$pop,
     unshift: ModelPath$unshift,
     shift: ModelPath$shift,
-    _prepareMessenger: _prepareMessenger
+    _prepareMessenger: _prepareMessenger,
+    _getDefinition: _getDefinition
 });
+
+
+_.extend(ModelPath, {
+    _createFromDefinition: _createFromDefinition
+})
 
 
 /**
@@ -10918,6 +10930,40 @@ function _prepareMessenger() {
 
     // store messenger on ModelPath instance
     _.defineProperty(this, '_messenger', mPathMessenger);
+}
+
+
+/**
+ * Returns the object allowing to recreate model path
+ * 
+ * @return {Object}
+ */
+function _getDefinition() {
+    return {
+        model: this._model,
+        path: this._path,
+        args: this._args
+    };
+}
+
+
+/**
+ * Class method
+ * Creates modelPath object from definition created by _getDefinition
+ * 
+ * @param  {Object} definition
+ * @return {ModelPath}          
+ */
+function _createFromDefinition(definition) {
+    check(definition, {
+        model: Function, // Model
+        path: String,
+        args: Array
+    });
+
+    var m = definition.model;
+
+    return m.apply(m, definition.args);
 }
 
 },{"../messenger":69,"../messenger/msngr_source":73,"../util/check":88,"./change_data":76,"./path_msg_api":82,"./path_utils":83,"./synthesize":84,"mol-proto":109}],81:[function(require,module,exports){
