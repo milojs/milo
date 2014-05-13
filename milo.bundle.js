@@ -11903,7 +11903,8 @@ var domUtils = {
 
     getComponentsFromRange: getComponentsFromRange,
     deleteRangeWithComponents: deleteRangeWithComponents,
-    forEachNodesInRange: forEachNodesInRange
+    forEachNodesInRange: forEachNodesInRange,
+    areRangesEqual: areRangesEqual
 
 };
 
@@ -11987,7 +11988,9 @@ function setCaretPosition(node, pos) {
 }
 
 /**
- * Selects a range in a document
+ * get the direction of a selection
+ *
+ * 1 forward, -1 backward, 0 no direction, undefined one of the node is detached or in a different frame
  *
  * @param {sel} a selection object
  * @return {-1|0|1|undefined}
@@ -12519,6 +12522,16 @@ function deleteRangeWithComponents(range) {
     range.deleteContents();
 }
 
+/**
+ * check if two ranges are equivalent
+ * 
+ * @param {range} range1
+ * @param {range} range2
+ * @return {Boolean} are the two ranges equivalent
+ */
+function areRangesEqual(range1, range2){
+    return range1.compareBoundaryPoints(Range.START_TO_START, range2) == 0 && range1.compareBoundaryPoints(Range.END_TO_END, range2) == 0;
+}
 
 },{"../config":64,"./logger":98,"mol-proto":109}],92:[function(require,module,exports){
 'use strict';
@@ -13670,7 +13683,8 @@ _.extendProto(TextSelection, {
 
     getRange: TextSelection$getRange,
     getState: TextSelection$getState,
-    getNormalizedRange: TextSelection$$getNormalizedRange
+    getNormalizedRange: TextSelection$$getNormalizedRange,
+    getDirection: TextSelection$$getDirection
 });
 
 
@@ -13934,14 +13948,28 @@ function _selectionNodeFromState(rootEl, pointState) {
  * Creates selection from passed range
  * 
  * @param {Range} range
+ * @param {Boolean} backward
+ *
  * @return {TextSelection}
  */
-function TextSelection$$createFromRange(range) {
+function TextSelection$$createFromRange(range, backward) {
     var win = range.startContainer.ownerDocument.defaultView
-        , sel = win.getSelection();
+        , sel = win.getSelection()
+        , endRange;
 
     sel.removeAllRanges();
-    sel.addRange(range);
+
+    if (backward){
+        endRange = range.cloneRange();
+        endRange.collapse(false);
+
+        sel.addRange(endRange);
+        sel.extend(range.startContainer, range.startOffset)        
+    }
+    else {
+        sel.addRange(range);
+    }
+
     return new TextSelection(win);
 }
 
@@ -13993,6 +14021,18 @@ function TextSelection$$getNormalizedRange(){
 
     return newRange;
 }
+
+/**
+ * get the direction of a selection
+ *
+ * 1 forward, -1 backward, 0 no direction, undefined one of the node is detached or in a different frame
+ *
+ * @return {-1|0|1|undefined}
+ */
+function TextSelection$$getDirection(){
+    return domUtils.getSelectionDirection(this.selection);    
+}
+
 
 },{"../../components/c_class":16,"../dom":91,"../logger":98,"mol-proto":109}],103:[function(require,module,exports){
 'use strict';
@@ -15863,15 +15903,13 @@ function extend(obj, onlyEnumerable) {
  * ```
  * var clonedArray = [].concat(arr);
  * ```
- * This function should not be used to clone an array, because it is inefficient.
+ * This function should not be used to clone an array, both because it is inefficient and because the result will look very much like an array, it will not be a real array.
  *
  * @param {Object} self An object to be cloned
  * @return {Object}
  */
 function clone() {
     if (Array.isArray(this)) return this.slice();
-    if (this instanceof Date) return new Date(this);
-    if (this instanceof RegExp) return new RegExp(this);
     var clonedObject = Object.create(this.constructor.prototype);
     extend.call(clonedObject, this);
     return clonedObject;
@@ -15992,12 +16030,10 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
     // store node to recognise recursion
     objTraversed.push(objNode);
 
-    var loop = Array.isArray(objNode) ? Array.prototype.forEach : eachKey;
-
-    loop.call(objNode, function(value, prop) {
+    eachKey.call(objNode, function(value, prop) {
         var descriptor = Object.getOwnPropertyDescriptor(objNode, prop);
         if (typeof value == 'object' && value != null
-                && ! (value instanceof RegExp) && ! (value instanceof Date)) {
+                && ! (value instanceof RegExp)) {
             if (! (selfNode.hasOwnProperty(prop)
                     && typeof selfNode[prop] == 'object' && selfNode[prop] != null))
                 selfNode[prop] = (Array.isArray(value)) ? [] : {};
@@ -16018,8 +16054,6 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
  * @return {Object}
  */
 function deepClone(onlyEnumerable) {
-    if (this instanceof Date) return new Date(this);
-    if (this instanceof RegExp) return new RegExp(this);
     var clonedObject = Array.isArray(this) ? [] : {};
     deepExtend.call(clonedObject, this, onlyEnumerable);
     return clonedObject;
@@ -16291,7 +16325,7 @@ var ArrayProto = Array.prototype
 function pickKeys() { // , ... keys
     var keys = concat.apply(ArrayProto, arguments)
         , obj = Object.create(this.constructor.prototype);
-    keys.forEach(function(key) {
+    keys.forEach(function(key){
         if (this.hasOwnProperty(key))
             obj[key] = this[key];
     }, this);
