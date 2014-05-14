@@ -13159,12 +13159,13 @@ var util = {
     domReady: require('./domready'),
     dragDrop: require('./dragdrop'),
     dialog: require('../components/ui/bootstrap/Dialog'),
-    alert: require('../components/ui/bootstrap/Alert')
+    alert: require('../components/ui/bootstrap/Alert'),
+    doT: require('dot')
 };
 
 module.exports = util;
 
-},{"../components/ui/bootstrap/Alert":61,"../components/ui/bootstrap/Dialog":62,"./check":88,"./component_name":89,"./count":90,"./dom":91,"./domready":92,"./dragdrop":93,"./error":94,"./fragment":95,"./json_parse":97,"./logger":98,"./promise":100,"./request":101,"./selection":102,"./storage":103}],97:[function(require,module,exports){
+},{"../components/ui/bootstrap/Alert":61,"../components/ui/bootstrap/Dialog":62,"./check":88,"./component_name":89,"./count":90,"./dom":91,"./domready":92,"./dragdrop":93,"./error":94,"./fragment":95,"./json_parse":97,"./logger":98,"./promise":100,"./request":101,"./selection":102,"./storage":103,"dot":108}],97:[function(require,module,exports){
 'use strict';
 
 
