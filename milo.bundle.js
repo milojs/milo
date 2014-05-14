@@ -7786,7 +7786,7 @@ function MLDialog$$createDialog(options) {
     dialog._dialog = {
         options: options,
         visible: false
-    }
+    };
 
     dialog.template
         .render(options)
@@ -10311,24 +10311,22 @@ function Connector$turnOn() {
 
              
             function validateData(sourcePath, change) {
+                propagateData(change);
+
                 if (dataValidation) {
                     var validators = dataValidation[sourcePath]
                         , passedCount = 0
                         , alreadyFailed = false;
 
                     if (validators)
-                        validators.forEach(callValidator);
-                    else
-                        propagateData(change);
-                } else
-                    propagateData(change);
+                        validators.forEach(callValidator);   
+                }
 
 
                 function callValidator(validator) {
                     validator(change.newValue, function(err, response) {
                         response.path = sourcePath;
                         if (! alreadyFailed && (err || response.valid) && ++passedCount == validators.length) {
-                            propagateData(change);
                             fromDS.postMessage('validated', response);
                         } else if (! response.valid) {
                             alreadyFailed = true;
