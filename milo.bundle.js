@@ -7661,7 +7661,6 @@ var BUTTON_CSS_CLASSES = { // TODO - use in template
 }
 
 
-
 /**
  * Dialog class to show custom dialog boxes based on configuration - see [createDialog](#MLDialog$$createDialog) method.
  * Only one dialog can be opened at a time - trying to open another will log error to console. Currently opened dialog can be retrieved using [getCurrentDialog](#MLDialog$$getCurrentDialog) class method.
@@ -7688,7 +7687,7 @@ var MLDialog = Component.createComponentClass('MLDialog', {
                             <h4 class="modal-title">{{= it.title }}</h4>\
                         </div>\
                     {{?}}\
-                    {{? it.html || it.title }}\
+                    {{? it.html || it.text }}\
                         <div class="modal-body">\
                             {{? it.html }}\
                                 {{= it.html }}\
@@ -7798,7 +7797,7 @@ function MLDialog$$createDialog(options) {
         dialog.events.on('click',
             { subscriber: _onBackdropClick, context: dialog });
 
-    if (options.close.button)
+    if (options.title && options.close.button)
         dialogScope.closeBtn.events.on('click',
             { subscriber: _onCloseBtnClick, context: dialog });
 
@@ -7992,7 +7991,10 @@ module.exports = MLDropdown;
 
 _.extendProto(MLDropdown, {
     start: MLDropdown$start,
-    destroy: MLDropdown$destroy
+    destroy: MLDropdown$destroy,
+    toggleMenu: MLDropdown$toggleMenu,
+    showMenu: MLDropdown$showMenu,
+    hideMenu: MLDropdown$hideMenu,
 });
 
 
@@ -8003,38 +8005,48 @@ function MLDropdown$start() {
     if (! (toggleEl && menuEl))
         return logger.error('MLDropdown:', TOGGLE_CSS_CLASS, 'or', MENU_CSS_CLASS, 'isn\'t found');
 
-    var clickHandler = _toggleMenu.bind(this, undefined);
+    var clickHandler = this.toggleMenu.bind(this, undefined)
+        , docClickHandler = _onClick.bind(this);
 
     this._dropdown = {
         toggle: toggleEl,
         menu: menuEl,
         clickHandler: clickHandler,
+        docClickHandler: docClickHandler,
         visible: false
     }
-    _hideMenu.call(this);
+    this.hideMenu();
     toggleEl.addEventListener('click', clickHandler);
+    window.document.addEventListener('click', docClickHandler);
+}
+
+
+function _onClick(event) {
+    if (event.target != this._dropdown.toggle)
+        this.hideMenu();
 }
 
 
 function MLDropdown$destroy() {
     var dd = this._dropdown;
     dd.toggle.removeEventListener('click', dd.clickHandler);
+    window.document.removeEventListener('click', dd.docClickHandler);
     delete this._dropdown;
     Component.prototype.destroy.apply(this, arguments);
 }
 
 
-function _showMenu() {
-    _toggleMenu.call(this, true);
+function MLDropdown$showMenu() {
+    this.toggleMenu(true);
 }
 
 
-function _hideMenu() {
-    _toggleMenu.call(this, false);
+function MLDropdown$hideMenu() {
+    this.toggleMenu(false);
 }
 
 
-function _toggleMenu(doShow) {
+function MLDropdown$toggleMenu(doShow) {
     doShow = typeof doShow == 'undefined'
                 ? ! this._dropdown.visible
                 : !! doShow;
