@@ -1180,7 +1180,7 @@ _.extendProto(Command, {
  */
 _.extend(Command, {
     create: Command$$create,
-    createWithUndo: Command$$createWithUndo,
+    createWithUndo: Command$$createWithUndo
 });
 
 
