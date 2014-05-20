@@ -99,10 +99,14 @@ Samples/Tutorials
 
 [Introduction to models](http://jsfiddle.net/jasoniangreen/225Bf/)
 
+[Introduction to minder](https://github.com/MailOnline/milo/blob/master/examples/tutorials/5_minder.html)
+
+[Introduction to lists](https://github.com/MailOnline/milo/blob/master/examples/tutorials/6_lists.html)
+
 ### TodoMVC
 
 The more advanced sample is __Todos__ app in
-[todomvc](https://github.com/MailOnline/milo/tree/master/todomvc) folder.
+[todomvc](https://github.com/MailOnline/milo/tree/master/examples/todomvc) folder.
 
 
 

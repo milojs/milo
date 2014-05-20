@@ -8230,7 +8230,7 @@ function loadView(el, removeAttribute, callback) {
  * At the moment, in addition to application messages that you define, you can subscribe to __domready__ message that is guaranteed to fire once,
  * even if DOM was ready at the time of the subscription.
  *
- * Messaging between frames is available via milo.mail. See [Frame facet](../components/mail/index.js.html).
+ * Messaging between frames is available via milo.mail. See [Frame facet](../components/c_facets/Frame.js.html).
  *
  * See [Messenger](../messenger/index.js.html).
  * 
@@ -11523,10 +11523,9 @@ require('./components/c_facets/Transfer');
 'use strict';
 
 /**
- * milo.utils.check
- * -----------
+ * `milo.utils.check`
  *
- * Check is a module for parameters checking extracted from [Meteor]((http://docs.meteor.com/) framework.
+ * Check is a module for parameters checking extracted from [Meteor](http://docs.meteor.com/) framework.
  *
  * It allows to both document and to check parameter types in your function
  * making code both readable and stable.
@@ -11534,17 +11533,17 @@ require('./components/c_facets/Transfer');
  *
  * ### Usage
  *```
- *     var check = milo.check
- *         , Match = check.Match;
+ * var check = milo.check
+ *     , Match = check.Match;
  *
- *     function My(name, obj, cb) {
- *         // if any of checks fail an error will be thrown
- *         check(name, String);
- *         check(obj, Match.ObjectIncluding({ options: Object }));
- *         check(cb, Function);
+ * function My(name, obj, cb) {
+ *     // if any of checks fail an error will be thrown
+ *     check(name, String);
+ *     check(obj, Match.ObjectIncluding({ options: Object }));
+ *     check(cb, Function);
  *
- *         // ... your code
- *     }
+ *     // ... your code
+ * }
  *```
  * See [Meteor docs](http://docs.meteor.com/#match) to see how it works
  *
