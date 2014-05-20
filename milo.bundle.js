@@ -1176,7 +1176,6 @@ _.extendProto(Command, {
  * Command class methods
  *
  * - [create](#Command$$create) - commands factory
- * - [getCurrentCommand](Command$$getCurrentCommand) - get command being executed from function property
  */
 _.extend(Command, {
     create: Command$$create,
@@ -1492,7 +1491,7 @@ var _makeComponentConditionFunc = componentUtils._makeComponentConditionFunc;
 
 /**
  * `milo.Component`
- * Base Component class. Subclass of [FacetedObject](../abstract/faceted_object), but none of this class methods should be directly used with component.
+ * Base Component class. Subclass of [FacetedObject](../abstract/faceted_object.js.html), but none of this class methods should be directly used with component.
  * Its constructor passes its parameters, including its [scope](./scope.js.html), DOM element and name to [`init`](#init) method.
  * The constructor of Component class rarely needs to be used directly, as [milo.binder](../binder.js.html) creates components when it scans DOM tree.
  * [`Component.createComponentClass`](#createComponentClass) should be used to create a subclass of Component class with configured facets.
@@ -1519,7 +1518,7 @@ var _makeComponentConditionFunc = componentUtils._makeComponentConditionFunc;
  *
  * ####Component "lifecycle"####
  *
- * 1. Component constructor is called. Component's constructor simply calls constructor of [FacetedObject](../abstract/faceted_object) that is a superclass of Component. Subclasses of Component should not implement their own constructor, they can optionally implement `init` method, but most components do not need to do it.
+ * 1. Component constructor is called. Component's constructor simply calls constructor of [FacetedObject](../abstract/faceted_object.js.html) that is a superclass of Component. Subclasses of Component should not implement their own constructor, they can optionally implement `init` method, but most components do not need to do it.
  * 2. constructors and `init` methods of all facets are called in sequence. Same as components, facet do not implement their constructors, they can optionally implement `init` and `start` methods (see below). Inside `init` method there should be only general initialization code without any dependency on component itself (it is not ready yet) and other facets (as there is no specific facets creation order). If facet implements `init` method it MUST call inherited init with `ComponentFacet.prototype.init.apply(this, arguments)`.
  * 3. `init` method of component is called. At this point all facets are created but facets still can be not ready as they can have initialization code in `start` method. If component subclass implements `init` method it MUST call inherited method with `<Superclass>.prototype.init.apply(this, arguments)`, where <Superclass> is Component or another superclass the component is a subclass of.
  * 4. `check` method of all facets is called. This method adds facets that are not part of the component declaration (being part of the class or explicitely listed in bind attribute) but are required by facets that the compnent already has. Subclasses of [ComponentFacet](./c_facet.js.html) do not need to implement this method.
@@ -2797,7 +2796,7 @@ _.extendProto(Data, {
     _bubbleUpDataChange: Data$_bubbleUpDataChange,
     _queueDataChange: Data$_queueDataChange,
     _postDataChanges: Data$_postDataChanges,
-    _prepareMessageSource: _prepareMessageSource,
+    _prepareMessageSource: _prepareMessageSource
 });
 
 facetsRegistry.add(Data);
@@ -2955,7 +2954,7 @@ function Data$_queueDataChange(change) {
 /**
  * Subscriber to datachangesfinished event.
  * Calls the method to post changes batch and bubbles up the message
- * 
+ *
  * @param  {[type]} msg  [description]
  * @param  {[type]} data [description]
  */
@@ -3001,7 +3000,7 @@ function onChildData(msgType, data) {
  * Sets data in DOM hierarchy recursively.
  * Returns the object with the data actually set (can be different, if components matching some properties are missing).
  *
- * @param {Object|String|Number} value value to be set. If the value if scalar, it will be set on component's element, if the value is object - on DOM tree inside component 
+ * @param {Object|String|Number} value value to be set. If the value if scalar, it will be set on component's element, if the value is object - on DOM tree inside component
  * @return {Object|String|Number}
  */
 function Data$set(value) {
@@ -3068,7 +3067,7 @@ function Data$_set(value) {
         valueSet = this._setScalarValue(value);
 
     this._value = valueSet;
-    
+
     return valueSet;
 
 
@@ -3079,7 +3078,7 @@ function Data$_set(value) {
             setTransactionFlag(childDataFacet.set, inTransaction);
             valueSet[key] = childDataFacet.set(childValue);
         }
-    }    
+    }
 }
 
 
@@ -3176,7 +3175,7 @@ function Data$_get(deepGet) {
 
     this._value = scopeData;
 
-    return scopeData;    
+    return scopeData;
 }
 
 
@@ -3300,8 +3299,8 @@ function _updataDataPaths(listFacet, fromIndex, toIndex) {
         if (item)
             item.data._path = '[' + i + ']';
         else
-            logger.warn('Data: no item for index', j);      
-    }       
+            logger.warn('Data: no item for index', j);
+    }
 }
 
 
@@ -4130,7 +4129,7 @@ var Events = _.createSubclass(ComponentFacet, 'Events');
  * - [init](#Events$init) - called by constructor automatically
  */
 _.extendProto(Events, {
-    init: Events$init,
+    init: Events$init
     // _reattach: _reattachEventsOnElementChange
 });
 
@@ -10543,7 +10542,7 @@ _.extendProto(Model, synthesize.modelMethods);
 
 /**
  * - Path: ModelPath class as `milo.Model.Path`
- * - [registerWithDOMStorage](Model$$registerWithDOMStorage)
+ * - [registerWithDOMStorage](#Model$$registerWithDOMStorage)
  */
 _.extend(Model, {
     Path: ModelPath,
@@ -11601,7 +11600,7 @@ var Match = check.Match = {
     Optional: function (pattern) {
         return new Optional(pattern);
     },
-    OneOf: function (/*arguments*/) {
+    OneOf: function (/* arguments */) {
         return new OneOf(arguments);
     },
     Any: ['__any__'],
@@ -13376,7 +13375,7 @@ module.exports = Promise;
 
 /**
  * Simple Promise object to manage asynchronous data delivery
- * Can't be chained like Q promises (here, [then](#Promise$then) and [error](#Promise$error) always simply return original promise), but can be transformed to another promise using [transform](Promise$transform) method with data transformation function.
+ * Can't be chained like Q promises (here, [then](#Promise$then) and [error](#Promise$error) always simply return original promise), but can be transformed to another promise using [transform](#Promise$transform) method with data transformation function.
  * Another differences with Q:
  *
  * - `then` accepts only success callback
