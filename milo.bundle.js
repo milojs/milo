@@ -889,7 +889,16 @@ function create(scanScope, hostObject, throwOnErrors) {
     return scope;
 }
 
-
+/**
+ * `createBinderScope`
+ * @private
+ * @param  {Element} scopeEl             scopeEl root element inside which DOM will be scanned and bound (document.body by default).
+ * @param  {Function} scopeObjectFactory See [binder](#milo.binder)
+ * @param  {Scope} rootScope             Optional Root scope object where top level components will be saved.
+ * @param  {Boolean} bindRootElement     If set to false, then the root element will not be bound. True by default.
+ * @param  {Boolean} throwOnErrors       If set to false, then errors will only be logged to console. True by default.
+ * @return {Scope}                       [description]
+ */
 function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootElement, throwOnErrors) {
     var scopeEl = scopeEl || document.body
         , scope = rootScope || new Scope(scopeEl)
@@ -2398,17 +2407,18 @@ function Component$isDestroyed() {
 },{"../abstract/faceted_object":2,"../attributes/a_bind":5,"../binder":9,"../config":64,"../messenger":69,"../util/check":88,"../util/component_name":89,"../util/dom":91,"../util/error":94,"../util/json_parse":97,"../util/logger":98,"../util/storage":103,"./c_facets/cf_registry":31,"./c_utils":34,"./scope":41,"mol-proto":109}],17:[function(require,module,exports){
 'use strict';
 
-// <a name="components-facet"></a>
-// ###component facet class
-
-// The class fot the facet of component. When a component is created, it
-// creates all its facets.
-
-// See Facets section on information about available facets and on 
-// how to create new facets classes.
-
-// - Component - basic compponent class
-// - ComponentFacet - basic 
+/**
+ * `milo.Component.Facet`
+ *
+ * The class fot the facet of component. When a component is created, it
+ * creates all its facets.
+ *
+ * See Facets section on information about available facets and on
+ * how to create new facets classes.
+ *
+ * - Component - basic compponent class
+ * - ComponentFacet - basic
+ */
 
 var Facet = require('../abstract/facet')
     , Messenger = require('../messenger')
@@ -2498,7 +2508,7 @@ function ComponentFacet$onConfigMessages(messageSubscribers) {
             var contextType = typeof subscriber.context;
             if (contextType == 'object')
                 return this.on(messages, subscriber);
-            
+
             if (contextType == 'string') {
                 if (subscriber.context == this.name || subscriber.context == 'facet')
                     subscriber = {
@@ -2518,7 +2528,7 @@ function ComponentFacet$onConfigMessages(messageSubscribers) {
 
             throw new FacetError('unknown subscriber context type in configuration: ' + contextType);
         }
-        
+
         throw new FacetError('unknown subscriber type in configuration: ' + subscriberType);
     }, this);
 
@@ -2546,7 +2556,7 @@ function ComponentFacet$destroy() {
 
 /**
  * domParent
- * 
+ *
  * @return {ComponentFacet} reference to the facet of the same class of the closest parent DOM element, that has a component with the same facet class attached to it. If such element doesn't exist method will return undefined.
  */
 function domParent() {
@@ -2557,7 +2567,7 @@ function domParent() {
 
 /**
  * scopeParent
- * 
+ *
  * @return {ComponentFacet} reference to the facet of the same class as `this` facet of the closest scope parent (i.e., the component that has the scope of the current component in its container facet).
  */
 function scopeParent() {
@@ -2608,7 +2618,7 @@ function requiresFacet(facetName) {
     // 'this' refers to the Facet Class
     var facetRequire = this.prototype.require;
 
-    return facetRequire && (facetRequire.indexOf(_.firstUpperCase(facetName)) >= 0 
+    return facetRequire && (facetRequire.indexOf(_.firstUpperCase(facetName)) >= 0
                         || facetRequire.indexOf(_.firstLowerCase(facetName)) >= 0);
 }
 
