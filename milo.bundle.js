@@ -12117,26 +12117,47 @@ function _getDirection(fromNode, startOffset, toNode, endOffset){
 function setSelection(fromNode, startOffset, toNode, endOffset) {
     var doc = fromNode.ownerDocument;
     if (! doc) return logger('setCaretPosition: element has no document')
+    var backward = _getDirection(fromNode, startOffset, toNode, endOffset) == -1;
     var range = doc.createRange();
+    var container, originalContentEditable;
+    // does not work in non contentEditable items
 
     var win = getNodeWindow(fromNode)
         , sel = win.getSelection();
-    sel.removeAllRanges();
     
-    if (_getDirection(fromNode, startOffset, toNode, endOffset) == -1){ // the direction is backward
+    
+    if (backward){
         range.setStart(toNode, endOffset);
         range.setEnd(fromNode, startOffset);
         range.collapse(false);
-        sel.addRange(range);
-        sel.extend(toNode, endOffset);
     }
     else {
         range.setStart(fromNode, startOffset);
-        range.setEnd(toNode, endOffset);
-        sel.addRange(range);
+        range.setEnd(toNode, endOffset);        
     }
-}
 
+    container = range.commonAncestorContainer == Node.ELEMENT_NODE ? 
+        range.commonAncestorContainer : 
+        range.commonAncestorContainer.parentElement;
+        
+    if (!container.isContentEditable){
+        originalContentEditable = container.contentEditable; // false or inherit
+        container.contentEditable = "true";
+    }
+
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    if (backward){
+        sel.extend(toNode, endOffset);
+    }
+
+    if (originalContentEditable){
+        // restoring contentEditable
+        container.contentEditable = originalContentEditable;
+    }
+
+}
 
 /**
  * Clears selection in a given window
@@ -15993,15 +16014,13 @@ function extend(obj, onlyEnumerable) {
  * ```
  * var clonedArray = [].concat(arr);
  * ```
- * This function should not be used to clone an array, because it is inefficient.
+ * This function should not be used to clone an array, both because it is inefficient and because the result will look very much like an array, it will not be a real array.
  *
  * @param {Object} self An object to be cloned
  * @return {Object}
  */
 function clone() {
     if (Array.isArray(this)) return this.slice();
-    if (this instanceof Date) return new Date(this);
-    if (this instanceof RegExp) return new RegExp(this);
     var clonedObject = Object.create(this.constructor.prototype);
     extend.call(clonedObject, this);
     return clonedObject;
@@ -16122,12 +16141,10 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
     // store node to recognise recursion
     objTraversed.push(objNode);
 
-    var loop = Array.isArray(objNode) ? Array.prototype.forEach : eachKey;
-
-    loop.call(objNode, function(value, prop) {
+    eachKey.call(objNode, function(value, prop) {
         var descriptor = Object.getOwnPropertyDescriptor(objNode, prop);
         if (typeof value == 'object' && value != null
-                && ! (value instanceof RegExp) && ! (value instanceof Date)) {
+                && ! (value instanceof RegExp)) {
             if (! (selfNode.hasOwnProperty(prop)
                     && typeof selfNode[prop] == 'object' && selfNode[prop] != null))
                 selfNode[prop] = (Array.isArray(value)) ? [] : {};
@@ -16148,8 +16165,6 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
  * @return {Object}
  */
 function deepClone(onlyEnumerable) {
-    if (this instanceof Date) return new Date(this);
-    if (this instanceof RegExp) return new RegExp(this);
     var clonedObject = Array.isArray(this) ? [] : {};
     deepExtend.call(clonedObject, this, onlyEnumerable);
     return clonedObject;
@@ -16421,7 +16436,7 @@ var ArrayProto = Array.prototype
 function pickKeys() { // , ... keys
     var keys = concat.apply(ArrayProto, arguments)
         , obj = Object.create(this.constructor.prototype);
-    keys.forEach(function(key) {
+    keys.forEach(function(key){
         if (this.hasOwnProperty(key))
             obj[key] = this[key];
     }, this);
