@@ -4806,8 +4806,7 @@ _.extendProto(Template, {
     start: Template$start,
     set: Template$set,
     render: Template$render,
-    binder: Template$binder,
-    require: ['Container']
+    binder: Template$binder
 
     // _reattach: _reattachEventsOnElementChange
 });
@@ -4867,7 +4866,10 @@ function Template$render(data) { // we need data only if use templating engine
 
 
 function Template$binder() {
-    this.owner.container.binder();
+    if (this.owner.container)
+        this.owner.container.binder();
+    else
+        logger.error('TemplateFacet: Binder called without container facet.');
 }
 
 },{"../../binder":9,"../../util/check":88,"../c_facet":17,"./cf_registry":31,"mol-proto":109}],30:[function(require,module,exports){
