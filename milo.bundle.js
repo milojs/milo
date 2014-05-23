@@ -12441,6 +12441,8 @@ function treePathOf(rootEl, el) {
  * @return {Node}
  */
 function getNodeAtTreePath(rootEl, treePath, nearest) {
+    if (!treePath) return;
+    
     var len = treePath.length;
     if (len === 0) return rootEl;
 
