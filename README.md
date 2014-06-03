@@ -335,6 +335,7 @@ Changes log
 - Sending messages via DOM storage using DOMStorage class.
 - changeMode and deferChangeMode methods of connector allowing to change connection depth and/or direction.
 - Command class iplementing "command pattern".
+- Minor fixes.
 
 ###0.1.3###
 

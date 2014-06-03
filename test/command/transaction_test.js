@@ -34,9 +34,22 @@ describe('Transaction', function() {
 
 
     it('should define undo, redo, execute methods', function(done) {
-        transaction.undo();
+        var callbackCalled;
+        transaction.undo(testTransactionUndo);
+
+        function testTransactionUndo() {
+            callbackCalled = true;
+            assert.deepEqual(executed, [[-3], [-2], [-1]]);
+        }
+
+        function testTransactionRedo() {
+            callbackCalled = true;
+            assert.deepEqual(executed, [[1], [2], [3]]);
+        }
 
         _.deferTicks(function() {
+            assert(callbackCalled);
+            callbackCalled = false;
             assert.deepEqual(executed, [[-3], [-2], [-1]]);
 
             executed = [];
@@ -48,15 +61,16 @@ describe('Transaction', function() {
 
                 executed = [];
 
-                transaction.redo();
+                transaction.redo(testTransactionRedo);
 
                 _.deferTicks(function() {
+                    assert(callbackCalled);
                     assert.deepEqual(executed, [[1], [2], [3]]);
 
                     executed = [];
 
                     transaction.redo();
-        
+
                     _.deferTicks(function() {
                         assert.deepEqual(executed, []);
 

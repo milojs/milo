@@ -1049,17 +1049,17 @@ function _truncateToCurrentPosition() {
 }
 
 
-function ActionsHistory$undo() {
+function ActionsHistory$undo(cb) {
     if (this.position == 0) return; // nothing to undo
     var act = this.actions[--this.position];
-    act.undo();
+    act.undo(cb);
 }
 
 
-function ActionsHistory$redo() {
+function ActionsHistory$redo(cb) {
     if (this.position == this.actions.length) return; // nothing to redo
     var act = this.actions[this.position++];
-    act.redo();
+    act.redo(cb);
 }
 
 
@@ -1073,20 +1073,24 @@ function ActionsHistory$redoAll() {
 }
 
 
-function ActionsHistory$undoAllAsync() {
+function ActionsHistory$undoAllAsync(cb) {
     if (this.position) {
         this.undo();
         if (this.position)
-            _.deferMethod(this, 'undoAllAsync');
+            _.deferMethod(this, 'undoAllAsync', cb);
+        else
+            if (cb) _.defer(cb);
     }
 }
 
 
-function ActionsHistory$redoAllAsync() {
+function ActionsHistory$redoAllAsync(cb) {
     if (this.position < this.actions.length) {
         this.redo();
-        if (this.position < this.actions.length)
-            _.deferMethod(this, 'redoAllAsync');
+        if (this.position < this.actions.length) 
+            _.deferMethod(this, 'redoAllAsync', cb);
+        else
+            if (cb) _.defer(cb);
     }
 }
 
@@ -1218,8 +1222,9 @@ function Command$init(func) { // , ... arguments
 /**
  * Execute command making command object available via function property. 
  */
-function Command$execute() {
+function Command$execute(cb) {
     var result = this.func.apply(this, this.args);
+    if (cb) _.defer(cb);
     return result;
 }
 
@@ -1251,10 +1256,12 @@ function Command$getUndo() {
 /**
  * Executes undo command of current command
  */
-function Command$undo() {
+function Command$undo(cb) {
     var undoCmd = this.getUndo();
     if (! undoCmd) return logger.error('Command undo called without undo command present');
-    return undoCmd.execute();
+    var result = undoCmd.execute();
+    if (cb) _.defer(cb);
+    return result;
 }
 
 
@@ -1370,13 +1377,13 @@ function Transaction$execute() {
 }
 
 
-function Transaction$undo() {
-    this.commands.undoAllAsync();
+function Transaction$undo(cb) {
+    this.commands.undoAllAsync(cb);
 }
 
 
-function Transaction$redo() {
-    this.commands.redoAllAsync();
+function Transaction$redo(cb) {
+    this.commands.redoAllAsync(cb);
 }
 
 
@@ -1507,13 +1514,13 @@ function TransactionHistory$storeTransaction(transaction) {
 }
 
 
-function TransactionHistory$undo() {
-    this.transactions.undo();
+function TransactionHistory$undo(cb) {
+    this.transactions.undo(cb);
 }
 
 
-function TransactionHistory$redo() {
-    this.transactions.redo();
+function TransactionHistory$redo(cb) {
+    this.transactions.redo(cb);
 }
 
 
