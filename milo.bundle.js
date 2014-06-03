@@ -12053,8 +12053,9 @@ var domUtils = {
     getComponentsFromRange: getComponentsFromRange,
     deleteRangeWithComponents: deleteRangeWithComponents,
     forEachNodesInRange: forEachNodesInRange,
-    areRangesEqual: areRangesEqual
+    areRangesEqual: areRangesEqual,
 
+    addDebugPoint: addDebugPoint
 };
 
 module.exports = domUtils;
@@ -12703,6 +12704,18 @@ function deleteRangeWithComponents(range) {
  */
 function areRangesEqual(range1, range2){
     return range1.compareBoundaryPoints(Range.START_TO_START, range2) == 0 && range1.compareBoundaryPoints(Range.END_TO_END, range2) == 0;
+}
+
+
+/**
+ * Adds a single pixel div to the body at a given x and y position. Useful for debugging position specific code.
+ * @param {Number} x
+ * @param {Number} y
+ */
+function addDebugPoint(x, y) {
+    var dbEl = document.createElement('div');
+    dbEl.setAttribute('style', 'width: 1px; height: 1px; position:fixed; left:'+x+'px; top:'+y+'px; background-color:red; z-index: 100');
+    setTimeout(function() {document.body.appendChild(dbEl);}, 200);
 }
 
 },{"../config":64,"./logger":98,"mol-proto":109}],92:[function(require,module,exports){
