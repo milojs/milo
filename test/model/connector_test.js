@@ -155,4 +155,44 @@ describe('Connector', function() {
             });
         });
     });
+
+
+    it('should correctly propagate splice with path translation with patterns', function(done) {
+        var m1 = new Model({ list: [] })
+            , m2 = new Model({ myList: [] })
+            , c = new Connector(m1, '<<<->>>', m2, { pathTranslation: {
+                '.list**': '.myList**'
+            } });
+
+        m1('.list[0].name').set('milo');
+        m1('.list').push({ test: 'push' });
+
+        _.defer(function() {
+            assert.deepEqual(m2._data, { myList: [
+                { name: 'milo' },
+                { test: 'push' }
+            ] } );
+            done();
+        });
+    });
+
+
+    it('should correctly propagate splice after set', function(done) {
+        var m1 = new Model({ list: [] })
+            , m2 = new Model({ list: [] })
+            , c = new Connector(m1, '<<<<->>>>', m2);
+
+        m1('.list[0].name').set('milo');
+        m1('.list').push({ test: 'push1' });
+        m1('.list').push({ test: 'push2' });
+
+        _.deferTicks(function() {
+            assert.deepEqual(m2._data, { list: [
+                { name: 'milo' },
+                { test: 'push1' },
+                { test: 'push2' }
+            ] } );
+            done();
+        }, 2);
+    });
 });
