@@ -6394,8 +6394,7 @@ function dispatchChangeMessage() {
 
 function onModelChange(path, data) {
     var src = this.model.m('.src').get();
-    if (src)
-        this.el.src = src;
+    if (src) this.el.src = src;
     dispatchChangeMessage.call(this);
 }
 
@@ -10238,9 +10237,13 @@ function Connector(ds1, mode, ds2, options) {
 
         var pathTranslation = options.pathTranslation;
         if (pathTranslation)
+            pathTranslation = _.clone(pathTranslation);
+            var patternTranslation = getPatternTranslations(pathTranslation);
             _.extend(this, {
                 pathTranslation1: reverseTranslationRules(pathTranslation),
-                pathTranslation2: pathTranslation
+                pathTranslation2: pathTranslation,
+                patternTranslation1: reversePatternTranslationRules(patternTranslation),
+                patternTranslation2: patternTranslation
             });
 
         var dataTranslation = options.dataTranslation;
@@ -10259,9 +10262,8 @@ function Connector(ds1, mode, ds2, options) {
     }
 
     this.turnOn();
-
-
 }
+
 
 function setupMode(mode){
     var parsedMode = mode.match(modePattern);
@@ -10339,6 +10341,52 @@ function reverseTranslationRules(rules) {
 }
 
 
+function getPatternTranslations(pathTranslation) {
+    var patternTranslation = [];
+    _.eachKey(pathTranslation, function(path2_value, path1_key) {
+        var starIndex1 = path1_key.indexOf('*')
+            , starIndex2 = path2_value.indexOf('*');
+        if (starIndex1 >= 0 && starIndex2 >= 0) { // pattern translation
+            if (path1_key.slice(starIndex1) != path2_value.slice(starIndex2))
+                _throwInvalidTranslation(path1_key, path2_value);
+            delete pathTranslation[path1_key];            
+
+            patternTranslation.push({
+                fromPattern: pathUtils.createRegexPath(path1_key),
+                fromStaticPath: _getStaticPath(path1_key, starIndex1),
+                toPattern: pathUtils.createRegexPath(path2_value),
+                toStaticPath: _getStaticPath(path2_value, starIndex2)
+            });
+        } else if (starIndex1 >= 0 || starIndex2 >= 0) // pattern only on one side of translation
+            _throwInvalidTranslation(path1_key, path2_value);
+    });
+
+    return patternTranslation;
+
+
+    function _throwInvalidTranslation(path1, path2) {
+        throw new ConnectorError('Invalid pattern translation: ' + path1 + ', ' + path2);
+    }
+
+
+    function _getStaticPath(path, starIndex) {
+        return path.replace(/[\.\[]?\*.*$/, '');
+    }
+}
+
+
+function reversePatternTranslationRules(patternTranslation) {
+    return patternTranslation.map(function(pt) {
+        return {
+            fromPattern: pt.toPattern,
+            fromStaticPath: pt.toStaticPath,
+            toPattern: pt.fromPattern,
+            toStaticPath: pt.fromStaticPath
+        };
+    });
+}
+
+
 /**
  * turnOn
  * Method of Connector that enables connection (if it was previously disabled)
@@ -10354,15 +10402,15 @@ function Connector$turnOn() {
 
     var self = this;
     if (this.depth1)
-        this._link1 = linkDataSource('_link2', this.ds2, this.ds1, this._changesQueue1, this.pathTranslation1, this.dataTranslation1, this.dataValidation1);
+        this._link1 = linkDataSource('_link2', this.ds2, this.ds1, this._changesQueue1, this.pathTranslation1, this.patternTranslation1, this.dataTranslation1, this.dataValidation1);
     if (this.depth2)
-        this._link2 = linkDataSource('_link1', this.ds1, this.ds2, this._changesQueue2, this.pathTranslation2, this.dataTranslation2, this.dataValidation2);
+        this._link2 = linkDataSource('_link1', this.ds1, this.ds2, this._changesQueue2, this.pathTranslation2, this.patternTranslation2, this.dataTranslation2, this.dataValidation2);
 
     this.isOn = true;
     this.postMessage('turnedon');
 
 
-    function linkDataSource(reverseLink, fromDS, toDS, changesQueue, pathTranslation, dataTranslation, dataValidation) {
+    function linkDataSource(reverseLink, fromDS, toDS, changesQueue, pathTranslation, patternTranslation, dataTranslation, dataValidation) {
         fromDS.onSync('datachanges', onData);
         return onData;
 
@@ -10397,7 +10445,13 @@ function Connector$turnOn() {
             function translatePath(sourcePath) {
                 if (pathTranslation) {
                     var translatedPath = pathTranslation[sourcePath];
-                    if (! translatedPath) return;
+                    if (translatedPath) return translatedPath;
+                    if (!patternTranslation.length) return;
+                    var pt = _.find(patternTranslation, function(pTranslation) {
+                        return pTranslation.fromPattern.test(sourcePath);
+                    });
+                    if (!pt) return;
+                    var translatedPath = sourcePath.replace(pt.fromStaticPath, pt.toStaticPath);
                 } else if (! ((subscriptionPattern instanceof RegExp
                                  && subscriptionPattern.test(sourcePath))
                               || subscriptionPattern == sourcePath)) return;
@@ -11285,7 +11339,7 @@ function createRegexPath(path) {
 
     var parsedPath = pathUtils.parseAccessPath(path, patternPathParsePattern)
         , regexStr = '^'
-        , regexStrEnd = ''
+        // , regexStrEnd = ''
         , patternsStarted = false;
 
     parsedPath.forEach(function(pathNode) {
@@ -11301,7 +11355,7 @@ function createRegexPath(path) {
         } else {
             // if (patternsStarted)
             //  throw new ModelError('"*" path segment cannot be in the middle of the path: ' + path);
-            regexStr += prop.replace(/(\.|\[|\])/g, '\\$1');
+            regexStr += prop.replace(/(\.|\[|\])/g, '\\$1'); // add slash in front of symbols that have special meaning in regex
         }
     });
 

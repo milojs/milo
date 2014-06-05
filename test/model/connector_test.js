@@ -24,7 +24,7 @@ describe('Connector', function() {
     it('should allow path translation', function(done) {
         var m1 = new Model
             , m2 = new Model
-            , c = new Connector(m1, '<<<->>>', m2, { pathTranslation: {
+            , c = new Connector(m1, '<->', m2, { pathTranslation: {
                 '.info.name': '.myInfo.myName'
             } });
 
@@ -86,7 +86,7 @@ describe('Connector', function() {
             info: { name: 'Jason', surname: 'Green' }
         };
 
-        var c1 = new Connector(m1, '<<->>', m2, { pathTranslation: {
+        var c1 = new Connector(m1, '<->', m2, { pathTranslation: {
                 '.title': '.title',
                 '.desc': '.desc',
                 '.info.name': '.info.name',
@@ -132,4 +132,27 @@ describe('Connector', function() {
 
     });
 
+
+    it('should allow path translation with patterns', function(done) {
+        var m1 = new Model
+            , m2 = new Model
+            , c = new Connector(m1, '<->', m2, { pathTranslation: {
+                '.info**': '.myInfo**'
+            } });
+
+        m1('.info.name').set('milo');
+        m1('.info.list[0]').set({ test: 1 });
+
+        _.defer(function() {
+            assert.deepEqual(m2._data, { myInfo: { name: 'milo', list: [{ test: 1 }] } } );
+
+            m2('.myInfo.name').set('jason');
+            m2('.myInfo.list[1]').set({ test: 2 });
+
+            _.defer(function() {
+                assert.deepEqual(m1._data, { info: { name: 'jason', list: [{ test: 1 }, { test: 2 }] } } );
+                done();
+            });
+        });
+    });
 });
