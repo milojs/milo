@@ -7074,8 +7074,6 @@ function MLSuperCombo$setFilteredOptions(arr) {
  */
 function MLSuperCombo$update() {
     var wasHidden = this._hidden;
-    if (wasHidden)
-        this.showOptions();
 
     var arrToShow = this._filteredOptionsData.slice(this._startIndex, this._endIndex);
 
@@ -7187,8 +7185,7 @@ function onDataChange(msg, data) {
         filteredArr[0].selected = true;
         this._selected = filteredArr[0];
     }
-    
-    this.showOptions();
+
     this.setFilteredOptions(filteredArr);
     this._comboList.el.scrollTop = 0;
 }
@@ -15218,7 +15215,6 @@ var prototypeMethods = require('./proto_prototype');
  * - [findKey](proto_object.js.html#findKey)
  * - [pickKeys](proto_object.js.html#pickKeys)
  * - [omitKeys](proto_object.js.html#omitKeys)
- * - [isEqual](proto_object.js.html#isEqual)
  */
 var objectMethods = require('./proto_object');
 
@@ -16010,7 +16006,6 @@ var utils = require('./utils');
  * - [findKey](#findKey)
  * - [pickKeys](#pickKeys)
  * - [omitKeys](#omitKeys)
- * - [isEqual](#isEqual)
  *
  * All these methods can be [chained](proto.js.html#Proto)
  */
@@ -16033,8 +16028,7 @@ var objectMethods = module.exports = {
     someKey: someKey,
     everyKey: everyKey,
     pickKeys: pickKeys,
-    omitKeys: omitKeys,
-    isEqual: isEqual
+    omitKeys: omitKeys
 };
 
 
@@ -16110,15 +16104,13 @@ function extend(obj, onlyEnumerable) {
  * ```
  * var clonedArray = [].concat(arr);
  * ```
- * This function should not be used to clone an array, because it is inefficient.
+ * This function should not be used to clone an array, both because it is inefficient and because the result will look very much like an array, it will not be a real array.
  *
  * @param {Object} self An object to be cloned
  * @return {Object}
  */
 function clone() {
     if (Array.isArray(this)) return this.slice();
-    if (this instanceof Date) return new Date(this);
-    if (this instanceof RegExp) return new RegExp(this);
     var clonedObject = Object.create(this.constructor.prototype);
     extend.call(clonedObject, this);
     return clonedObject;
@@ -16239,12 +16231,10 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
     // store node to recognise recursion
     objTraversed.push(objNode);
 
-    var loop = Array.isArray(objNode) ? Array.prototype.forEach : eachKey;
-
-    loop.call(objNode, function(value, prop) {
+    eachKey.call(objNode, function(value, prop) {
         var descriptor = Object.getOwnPropertyDescriptor(objNode, prop);
         if (typeof value == 'object' && value != null
-                && ! (value instanceof RegExp) && ! (value instanceof Date)) {
+                && ! (value instanceof RegExp)) {
             if (! (selfNode.hasOwnProperty(prop)
                     && typeof selfNode[prop] == 'object' && selfNode[prop] != null))
                 selfNode[prop] = (Array.isArray(value)) ? [] : {};
@@ -16265,8 +16255,6 @@ function _extendTree(selfNode, objNode, onlyEnumerable, objTraversed) {
  * @return {Object}
  */
 function deepClone(onlyEnumerable) {
-    if (this instanceof Date) return new Date(this);
-    if (this instanceof RegExp) return new RegExp(this);
     var clonedObject = Array.isArray(this) ? [] : {};
     deepExtend.call(clonedObject, this, onlyEnumerable);
     return clonedObject;
@@ -16538,7 +16526,7 @@ var ArrayProto = Array.prototype
 function pickKeys() { // , ... keys
     var keys = concat.apply(ArrayProto, arguments)
         , obj = Object.create(this.constructor.prototype);
-    keys.forEach(function(key) {
+    keys.forEach(function(key){
         if (this.hasOwnProperty(key))
             obj[key] = this[key];
     }, this);
@@ -16560,45 +16548,6 @@ function omitKeys() { // , ... keys
         delete obj[key];
     }, this);
     return obj;
-}
-
-
-/**
- * Performs deep equality test of the object. Does not work with recursive objects
- * @param  {Any} self object to compare
- * @param  {Any} obj object to compare
- * @return {Boolean}
- */
-function isEqual(obj) {
-    if (this === obj) return this !== 0 || 1/this == 1/obj; // 0 and -0 are considered not equal, although 0 === -0 is true
-    if (this == null || obj == null) return false;
-    var className = this.constructor.name;
-    if (className != obj.constructor.name) return false;
-    switch (className) {
-        case 'String':
-            return this == String(obj);
-        case 'Number':
-            return this != +this ? obj != +obj : (this == 0 ? 1/this == 1/obj : this == +obj);
-        case 'Date':
-        case 'Boolean':
-            return +this == +obj;
-        case 'RegExp':
-            return this.source == obj.source
-                    && this.global == obj.global
-                    && this.multiline == obj.multiline
-                    && this.ignoreCase == obj.ignoreCase;
-    }
-    if (typeof this != 'object' || typeof obj != 'object') return false;
-
-    if (Array.isArray(this))
-        return this.length == obj.length
-                && this.every(function(item, index) {
-                    return isEqual.call(item, obj[index]);
-                });
-    else
-        return everyKey.call(this, function(value, key) {
-            return isEqual.call(value, obj[key]);
-        });
 }
 
 },{"./utils":117}],114:[function(require,module,exports){
