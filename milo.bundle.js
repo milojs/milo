@@ -10233,7 +10233,7 @@ function Connector(ds1, mode, ds2, options) {
         this.options = options;
 
         var pathTranslation = options.pathTranslation;
-        if (pathTranslation)
+        if (pathTranslation) {
             pathTranslation = _.clone(pathTranslation);
             var patternTranslation = getPatternTranslations(pathTranslation);
             _.extend(this, {
@@ -10242,20 +10242,23 @@ function Connector(ds1, mode, ds2, options) {
                 patternTranslation1: reversePatternTranslationRules(patternTranslation),
                 patternTranslation2: patternTranslation
             });
+        }
 
         var dataTranslation = options.dataTranslation;
-        if (dataTranslation)
+        if (dataTranslation) {
             _.extend(this, {
                 dataTranslation1: dataTranslation['<-'],
                 dataTranslation2: dataTranslation['->']
             });
+        }
 
         var dataValidation = options.dataValidation;
-        if (dataValidation)
+        if (dataValidation) {
             _.extend(this, {
                 dataValidation1: dataValidation['<-'],
                 dataValidation2: dataValidation['->']
             });
+        }
     }
 
     this.turnOn();
