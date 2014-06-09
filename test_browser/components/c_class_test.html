@@ -1,8 +1,8 @@
 <div ml-bind=":root">
-    <div ml-bind="[Events]:main">
+    <div ml-bind="[events]:main">
         <label for="article-id">Article ID</label>
-        <input id="article-id" type="text" ml-bind="[Data]:articleIdInput">
-        <button id="tree-index-9" ml-bind="[Events]:articleButton">Open</button>
+        <input id="article-id" type="text" ml-bind="[data]:articleIdInput">
+        <button id="tree-index-9" ml-bind="[events]:articleButton">Open</button>
         <div ml-bind="View:infoView">
             <div>
                 This div is inserted on purpose
@@ -10,6 +10,10 @@
                 <p ml-bind="Component[dom]:para1">Info 1</p>
                 <p ml-bind=":para2">Info 2</p>
             </div>
+        </div>
+    </div>
+    <div ml-bind="[container]:parent">
+        <div ml-bind="MyClass[container]:child">
         </div>
     </div>
 </div>
