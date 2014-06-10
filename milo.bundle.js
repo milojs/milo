@@ -7434,7 +7434,7 @@ function _subscribeTextChange(onOff) {
 
 
 function _adjustAreaHeight() {
-    this.el.style.overflow = 'hidden';
+    //this.el.style.overflow = 'hidden';
     this.el.style.height = 0;
 
     var newHeight = this.el.scrollHeight
