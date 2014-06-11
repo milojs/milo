@@ -64,4 +64,11 @@ describe('ActionsHistory', function() {
         history.eachReverse('undo');
         assert.deepEqual(executed, [[-3], [-2], [-1]]);
     });
+
+    it('should define deleteLast', function() {
+        history.deleteLast();
+        history.undo();
+        history.undo();
+            assert.deepEqual(executed, [[-2], [-1]]);
+    });
 });
