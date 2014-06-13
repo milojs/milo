@@ -3650,6 +3650,9 @@ function detach() {
 
 
 function setStyle(property, value) {
+    if (!this.owner.el) {
+        throw new Error("Cannot call setStyle on owner with no element: " + this.owner.constructor.name);
+    }
     this.owner.el.style[property] = value;
 }
 
