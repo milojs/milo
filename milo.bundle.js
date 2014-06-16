@@ -7319,7 +7319,6 @@ function changeSelected(type, event) {
  * @param  {Event} event
  */
 function onMouseLeave(type, event) {
-    console.log('onMouseLeave');
     this.hideOptions();
 }
 
