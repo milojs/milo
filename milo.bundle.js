@@ -6147,7 +6147,9 @@ _.extendProto(MLComboList, {
     setOptions: MLComboList$setOptions,
     setDataValidation: MLComboList$setDataValidation,
     toggleAddButton: MLComboList$toggleAddButton,
-    destroy: MLComboList$destroy
+    destroy: MLComboList$destroy,
+    setAddItemPrompt: MLComboList$setAddItemPrompt,
+    clearComboInput : MLComboList$ClearComboInput
 });
 
 
@@ -6169,6 +6171,10 @@ function MLComboList$setOptions(arr) {
 }
 
 
+function MLComboList$ClearComboInput () {
+    this._combo.clearComboInput();
+}
+
 /**
  * Component instance method
  * Hides add button
@@ -6176,6 +6182,11 @@ function MLComboList$setOptions(arr) {
  */
 function MLComboList$toggleAddButton(show) {
     this._combo.toggleAddButton(show);
+}
+
+
+function MLComboList$setAddItemPrompt(prompt) {
+   this._combo.setAddItemPrompt(prompt);
 }
 
 
@@ -6198,7 +6209,8 @@ function componentSetup() {
     });
 
     this._connector = milo.minder(this._list.model, '<<<->>>', this.model);
-    this._combo.data.on('', {subscriber: onComboChange, context: this });   
+    this._combo.data.on('', { subscriber: onComboChange, context: this });
+    this._combo.on('additem', { subscriber: onAddItem, context: this });
 }
 
 function onComboChange(msg, data) {
@@ -6222,6 +6234,12 @@ function MLComboList_set(value) {
 
 function MLComboList_del() {
     return this.model.set([]);
+}
+
+
+function onAddItem(msg, data) {
+    this.postMessage('additem', data);
+    this.events.postMessage('milo_combolistadditem', data);
 }
 
 },{"../c_class":16,"../c_registry":33,"mol-proto":109}],45:[function(require,module,exports){
@@ -6946,7 +6964,10 @@ var MLSuperCombo = Component.createComponentClass('MLSuperCombo', {
     },
     template: {
         template: '<input ml-bind="[data, events]:input" class="form-control ml-ui-input">\
-                   <button ml-bind="[events, dom]:addBtn" class="btn btn-default ml-ui-button">Add</button>\
+                   <div ml-bind="[dom]:addItemDiv">\
+                        <span ml-bind=":addPrompt"></span>\
+                        <button ml-bind="[events, dom]:addBtn" class="btn btn-default ml-ui-button">Add</button>\
+                   </div>\
                    <div ml-bind="[dom, events]:list" class="ml-ui-supercombo-dropdown">\
                        <div ml-bind="[dom]:before"></div>\
                        <div ml-bind="[template, dom, events]:options" class="ml-ui-supercombo-options"></div>\
@@ -6971,7 +6992,9 @@ _.extendProto(MLSuperCombo, {
     setOptions: MLSuperCombo$setOptions,
     setFilteredOptions: MLSuperCombo$setFilteredOptions,
     update: MLSuperCombo$update,
-    toggleAddButton: MLSuperCombo$toggleAddButton
+    toggleAddButton: MLSuperCombo$toggleAddButton,
+    setAddItemPrompt: MLSuperCombo$setAddItemPrompt,
+    clearComboInput: MLSuperCombo_del
 });
 
 
@@ -6981,9 +7004,9 @@ _.extendProto(MLSuperCombo, {
  */
 function MLSuperCombo$init() {
     Component.prototype.init.apply(this, arguments);
-    
+
     this.once('childrenbound', onChildrenBound);
-    
+
     _.defineProperties(this, {
         _optionsData: [],
         _filteredOptionsData: []
@@ -7003,26 +7026,30 @@ function onChildrenBound() {
  * Define instance properties, get subcomponents, call setup sub-tasks
  */
 function componentSetup() {
+    var scope = this.container.scope;
+
     _.defineProperties(this, {
-        '_comboInput': this.container.scope.input,
-        '_comboList': this.container.scope.list,
-        '_comboOptions': this.container.scope.options,
-        '_comboBefore': this.container.scope.before,
-        '_comboAfter': this.container.scope.after,
-        '_comboAddBtn': this.container.scope.addBtn,
-        '_optionTemplate': doT.compile(OPTIONS_TEMPLATE)
+        _comboInput: scope.input,
+        _comboList: scope.list,
+        _comboOptions: scope.options,
+        _comboBefore: scope.before,
+        _comboAfter: scope.after,
+        _comboAddItemDiv: scope.addItemDiv,
+        _comboAddPrompt: scope.addPrompt,
+        _comboAddBtn: scope.addBtn,
+        _optionTemplate: doT.compile(OPTIONS_TEMPLATE)
     });
 
     _.defineProperties(this, {
-        '_startIndex': 0,
-        '_endIndex': MAX_RENDERED,
-        '_hidden': false,
-        '_elementHeight': DEFAULT_ELEMENT_HEIGHT,
-        '_total': 0,
-        '_optionsHeight': 200,
-        '_lastScrollPos': 0,
-        '_currentValue': null,
-        '_selected': null
+        _startIndex: 0,
+        _endIndex: MAX_RENDERED,
+        _hidden: false,
+        _elementHeight: DEFAULT_ELEMENT_HEIGHT,
+        _total: 0,
+        _optionsHeight: 200,
+        _lastScrollPos: 0,
+        _currentValue: null,
+        _selected: null
     }, _.WRIT);
 
     // Component Setup
@@ -7031,13 +7058,14 @@ function componentSetup() {
     setupComboInput(this._comboInput, this);
     setupComboBtn(this._comboAddBtn, this);
 
-    this.events.on('keydown', { subscriber: changeSelected, context: this});
+    this.events.on('keydown', { subscriber: changeSelected, context: this });
+    this.events.on('mouseleave', { subscriber: MLSuperCombo$hideOptions, context: this });
 }
 
 /**
  * Component instance method
  * Shows or hides option list.
- * 
+ *
  * @param {Boolean} show true to show, false to hide
  */
 function MLSuperCombo$toggleOptions(show) {
@@ -7070,13 +7098,21 @@ function MLSuperCombo$hideOptions() {
  * Hides add button
  */
 function MLSuperCombo$toggleAddButton(show) {
-    this._comboAddBtn.dom.toggle(show);
+    this._comboAddItemDiv.dom.toggle(show);
 }
+
+
+function MLSuperCombo$setAddItemPrompt(prompt) {
+    this._addItemPrompt = prompt;
+    this._comboAddPrompt.el.innerHTML = prompt;
+    this.toggleAddButton(false);
+}
+
 
 /**
  * Component instance method
  * Sets the options of the dropdown
- * 
+ *
  * @param {Array[Object]} arr the options to set with label and value pairs. Value can be an object.
  */
 function MLSuperCombo$setOptions(arr) {
@@ -7087,7 +7123,7 @@ function MLSuperCombo$setOptions(arr) {
 /**
  * Component instance method
  * Sets the filtered options, which is a subset of normal options
- * 
+ *
  * @param {[type]} arr The options to set
  */
 function MLSuperCombo$setFilteredOptions(arr) {
@@ -7099,7 +7135,7 @@ function MLSuperCombo$setFilteredOptions(arr) {
 
 /**
  * Component instance method
- * Updates the list. This is used on scroll, and makes use of the filteredOptions to 
+ * Updates the list. This is used on scroll, and makes use of the filteredOptions to
  * intelligently show a subset of the filtered list at a time.
  */
 function MLSuperCombo$update() {
@@ -7124,14 +7160,14 @@ function MLSuperCombo$update() {
 
 /**
  * Setup the combo list
- *              
+ *
  * @param  {Component} list
  * @param  {Array} options
  * @param  {Component} self
  */
 function setupComboList(list, options, self) {
     options.template.set(OPTIONS_TEMPLATE);
-    
+
     list.dom.setStyles({
         overflow: 'scroll',
         height: self._optionsHeight + 'px',
@@ -7151,7 +7187,7 @@ function setupComboList(list, options, self) {
 
 /**
  * Setup the input component
- * 
+ *
  * @param  {Component} input
  * @param  {Component} self
  */
@@ -7199,7 +7235,7 @@ function MLSuperCombo_del() {
 /**
  * Input data change handler
  * When the input data changes, this method filters the optionsData, and sets the first element
- * to be selected. 
+ * to be selected.
  * @param  {String} msg
  * @param  {Objext} data
  */
@@ -7214,7 +7250,10 @@ function onDataChange(msg, data) {
     if (filteredArr.length) {
         filteredArr[0].selected = true;
         this._selected = filteredArr[0];
-    }
+    } else  if (this._addItemPrompt)
+        this.toggleAddButton(true);
+      if ((!data.newValue))
+        this.toggleAddButton(false);
 
     this.setFilteredOptions(filteredArr);
     this._comboList.el.scrollTop = 0;
@@ -7229,7 +7268,7 @@ var directionMap = { '40': 1, '38': -1 };
 /**
  * List keydown handler
  * Changes the selected list item by finding the adjacent item and setting it to selected.
- * 
+ *
  * @param  {string} type
  * @param  {Event} event
  */
@@ -7242,7 +7281,7 @@ function changeSelected(type, event) {
             , scrollPos = this._comboList.el.scrollTop
             , selectedPos = selected ? selected.offsetTop : 0
             , relativePos = selectedPos - scrollPos;
-        
+
         if (selected) {
             var index = _getDataValueFromElement.call(this, selected)
                 , thisItem = this._filteredOptionsData[index]
@@ -7271,7 +7310,7 @@ function changeSelected(type, event) {
 
 /**
  * Mouse leave handler
- * 
+ *
  * @param  {String} type
  * @param  {Event} event
  */
@@ -7282,7 +7321,7 @@ function onMouseLeave(type, event) {
 
 /**
  * Input click handler
- * 
+ *
  * @param  {String} type
  * @param  {Event} event
  */
@@ -7293,7 +7332,7 @@ function onInputClick(type, event) {
 
 /**
  * Enter key handler
- * 
+ *
  * @param  {String} type
  * @param  {Event} event
  */
@@ -7306,17 +7345,17 @@ function onEnterKey(type, event) {
 
 /**
  * Add button handler
- * 
+ *
  * @param  {String} type
  * @param  {Event} event
  */
 function onAddBtn (type, event) {
-    
+    this.postMessage('additem', { label: this._comboInput.el.value });
 }
 
 /**
  * List click handler
- * 
+ *
  * @param  {String} type
  * @param  {Event} event
  */
@@ -7332,7 +7371,7 @@ function onListClick (type, event) {
 
 /**
  * List scroll handler
- * 
+ *
  * @param  {String} type
  * @param  {Event} event
  */
@@ -7349,8 +7388,8 @@ function onListScroll (type, event) {
         , elsToTheEnd = Math.floor(distFromLastEl / this._elementHeight)
         , totalElementsBefore = Math.floor(scrollPos / this._elementHeight) - BUFFER;
 
-    if ((direction == 'down' && elsToTheEnd < BUFFER) 
-         || (direction == 'up' && elsFromStart < BUFFER)) {
+    if ((direction == 'down' && elsToTheEnd < BUFFER)
+        || (direction == 'up' && elsFromStart < BUFFER)) {
         this._startIndex = totalElementsBefore > 0 ? totalElementsBefore : 0;
         this._endIndex = totalElementsBefore + MAX_RENDERED;
         this._elementHeight = firstChild.style.height;
@@ -7364,7 +7403,7 @@ function onListScroll (type, event) {
  * Private method
  * Retrieves the data-value attribute value from the element and returns it as an index of
  * the filteredOptions
- * 
+ *
  * @param  {Element} el
  * @return {Number}
  */
