@@ -7167,6 +7167,7 @@ function MLSuperCombo$update() {
  * @param  {Component} self
  */
 function setupComboList(list, options, self) {
+    self.toggleAddButton(false);
     options.template.set(OPTIONS_TEMPLATE);
 
     list.dom.setStyles({
@@ -12403,8 +12404,10 @@ function getElementOffset(el) {
  */
 function removeElement(el) {
     var parent = el.parentNode;
-    if (parent)
+    if (parent){
         parent.removeChild(el);
+        parent.normalize();        
+    }
 }
 
 
@@ -12448,6 +12451,7 @@ function unwrapElement(el) {
         var children = _.slice(el.childNodes);
         children.forEach(frag.appendChild, frag);
         parent.replaceChild(frag, el);
+        parent.normalize();
     }
 }
 
@@ -12680,6 +12684,7 @@ function getNodeAtTreePath(rootEl, treePath, nearest) {
  * @return {Boolean} true if was successfully inserted
  */
 function insertAtTreePath(rootEl, treePath, el, nearest) {
+    var toNormalize = el.nodeType == Node.TEXT_NODE;
     if (rootEl.contains(el))
         removeElement(el); // can't use removeChild as rootEl here is not an immediate parent
 
@@ -12700,14 +12705,17 @@ function insertAtTreePath(rootEl, treePath, el, nearest) {
 
     if (child) {
         parent.insertBefore(el, child);
+        toNormalize && parent.normalize();
         return true;    
     } else if (children.length === 0 && (childIndex === 0 || nearest)) {
         parent.appendChild(el);
+        toNormalize && parent.normalize();
         return true;
     } else {
         child = children[childIndex - 1];
         if (child || nearest) {
             parent.appendChild(el);
+            toNormalize && parent.normalize();
             return true;
         }
     }
