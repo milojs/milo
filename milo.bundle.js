@@ -8162,7 +8162,7 @@ function MLDropdown$start() {
         clickHandler: clickHandler,
         docClickHandler: docClickHandler,
         visible: false
-    }
+    };
     this.hideMenu();
     toggleEl.addEventListener('click', clickHandler);
     window.document.addEventListener('click', docClickHandler);
@@ -8170,8 +8170,25 @@ function MLDropdown$start() {
 
 
 function _onClick(event) {
-    if (event.target != this._dropdown.toggle)
+
+    var domOwner = this.el;
+    
+    if (event && event.target)
+        var node = domParents(event.target.parentNode, function (node) {
+            return node == domOwner;
+        });
+
+    if (event && !node)
         this.hideMenu();
+}
+
+
+function domParents(node, validation) {
+    while (node) {
+        if (validation(node))
+            return node;
+        node = node.parentNode;
+    }
 }
 
 
