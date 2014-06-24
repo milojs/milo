@@ -6217,6 +6217,8 @@ function onComboChange(msg, data) {
     if (data.newValue && this._dataValidation(msg, data, this._list.model.get()))
         this._list.model.push(data.newValue);
     this._combo.data.del();
+    // because of supercombo listeners off you have to set _value explicitly
+    this._combo.data._value = '';
 }
 
 function onItemsChange(msg, data) {
@@ -7249,7 +7251,7 @@ function onDataChange(msg, data) {
         text = text.toLowerCase();
         return label ? label.indexOf(text) == 0 : false;
     });
-    
+
     if (filteredArr.length) {
         this.toggleAddButton(false);
         this.showOptions();
@@ -7425,9 +7427,11 @@ function _setData() {
     delete this._selected.selected;
     this.hideOptions();
     this._comboInput.data.off('', { subscriber: onDataChange, context: this });
+    //supercombo listeners off
     this.data.set(this._selected);
     this.data.dispatchSourceMessage(COMBO_CHANGE_MESSAGE);
     this._comboInput.data.on('', { subscriber: onDataChange, context: this });
+    //supercombo listeners on
     this._selected = null;
     this.setFilteredOptions(this._optionsData);
 }
@@ -8278,6 +8282,9 @@ config({
             componentMetaTemplate: 'x-application/milo/component-meta/%class/%name/%params',
             componentMetaRegex: /^x\-application\/milo\/component\-meta\/([a-z0-9]+)\/([a-z0-9]+)\/([a-z0-9]*)$/,
         }
+    },
+    request: {
+        jsonpTimeout: 15 // seconds
     },
     check: true,
     debug: false
@@ -13838,7 +13845,9 @@ function Promise$transform(transformDataFunc) {
 
 var _ = require('mol-proto')
     , count = require('./count')
-    , Promise = require('./promise');
+    , Promise = require('./promise')
+    , config = require('../config')
+    , logger = require('./logger');
 
 module.exports = request;
 
@@ -13903,12 +13912,18 @@ function request$jsonp(url, callback) {
         head = window.document.head,
         uniqueCallback = 'ML_JSONP_' +  count();
 
+    setTimeout(function() {
+        if (window[uniqueCallback]) {
+            callback && callback(new Error('No JSONP response or no callback in response'));
+            logger.error('JSONP response after timeout');
+            cleanUp();
+        }
+    }, config.request.jsonpTimeout * 1000);
+
     window[uniqueCallback] = function (result) {
-        callback && callback(null, result, null);
+        callback && callback(null, result);
         promise.setData(null, result);
-        
-        head.removeChild(script);
-        delete window[uniqueCallback];
+        cleanUp();
     };
     
     script.type = 'text/javascript';
@@ -13917,10 +13932,16 @@ function request$jsonp(url, callback) {
     head.appendChild(script);
 
     return promise;
+
+
+    function cleanUp() {
+        head.removeChild(script);
+        delete window[uniqueCallback];
+    }
 }
 
 
-},{"./count":90,"./promise":100,"mol-proto":109}],102:[function(require,module,exports){
+},{"../config":64,"./count":90,"./logger":98,"./promise":100,"mol-proto":109}],102:[function(require,module,exports){
 'use strict';
 
 
