@@ -6149,7 +6149,7 @@ _.extendProto(MLComboList, {
     toggleAddButton: MLComboList$toggleAddButton,
     destroy: MLComboList$destroy,
     setAddItemPrompt: MLComboList$setAddItemPrompt,
-    clearComboInput : MLComboList$ClearComboInput
+    clearComboInput : MLComboList$clearComboInput
 });
 
 
@@ -6171,7 +6171,7 @@ function MLComboList$setOptions(arr) {
 }
 
 
-function MLComboList$ClearComboInput () {
+function MLComboList$clearComboInput () {
     this._combo.clearComboInput();
 }
 
@@ -7225,6 +7225,7 @@ function MLSuperCombo_get() {
 function MLSuperCombo_set(obj) {
     this._currentValue = obj;
     this._comboInput.data.set(obj && obj.label);
+    _.deferMethod(this, 'hideOptions');
 }
 
 /**
