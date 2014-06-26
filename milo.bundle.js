@@ -7245,12 +7245,13 @@ function MLSuperCombo_del() {
  * @param  {Objext} data
  */
 function onDataChange(msg, data) {
-    var text = data.newValue;
+    var text = data.newValue && data.newValue.trim().toLowerCase();
     var filteredArr = _.filter(this._optionsData, function(option) {
         delete option.selected;
-        var label = option.label ? option.label.toLowerCase() : null;
-        text = text.toLowerCase();
-        return label ? label.indexOf(text) == 0 : false;
+        if (option.label) {
+            var label = option.label.toLowerCase();
+            return label.indexOf(text) == 0;
+        }
     });
 
     if (filteredArr.length) {
@@ -7259,7 +7260,7 @@ function onDataChange(msg, data) {
         filteredArr[0].selected = true;
         this._selected = filteredArr[0];
     } else if (this._addItemPrompt) {
-        this.toggleAddButton(true);
+        this.toggleAddButton(this._optionsData.length > 1);
         this.hideOptions();
     }
 
@@ -7358,7 +7359,11 @@ function onEnterKey(type, event) {
  * @param  {Event} event
  */
 function onAddBtn (type, event) {
-    this.postMessage('additem', { label: this._comboInput.el.value });
+    var data = { label: this._comboInput.el.value };
+    this.postMessage('additem', data);
+    this.events.postMessage('milo_supercomboadditem', data);
+    this.toggleAddButton(false);
+
 }
 
 /**
@@ -8147,7 +8152,7 @@ _.extendProto(MLDropdown, {
     destroy: MLDropdown$destroy,
     toggleMenu: MLDropdown$toggleMenu,
     showMenu: MLDropdown$showMenu,
-    hideMenu: MLDropdown$hideMenu,
+    hideMenu: MLDropdown$hideMenu
 });
 
 
@@ -13856,6 +13861,18 @@ module.exports = request;
 // TODO add error statuses
 var okStatuses = ['200', '304'];
 
+function onReady(req, callback, promise) {
+    if (req.readyState == 4) {
+        if (req.statusText.toUpperCase() == 'OK' ) {
+            callback && callback(null, req.responseText, req);
+            promise.setData(null, req.responseText);
+        } else {
+            callback && callback(req.status, req.responseText, req);
+            promise.setData(req.status, req.responseText);
+        }
+    }
+}
+
 
 function request(url, opts, callback) {
     var req = new XMLHttpRequest();
@@ -13864,17 +13881,7 @@ function request(url, opts, callback) {
 
     var promise = new Promise(req);
 
-    req.onreadystatechange = function () {
-        if (req.readyState == 4) {
-            if (req.statusText.toUpperCase() == 'OK' ) {
-                callback && callback(null, req.responseText, req);
-                promise.setData(null, req.responseText);
-            } else {
-                callback && callback(req.status, req.responseText, req);
-                promise.setData(req.status, req.responseText);
-            }
-        }
-    };
+    req.onreadystatechange = _.partial(onReady, req, callback, promise);
     req.send(JSON.stringify(opts.data));
 
     return promise;
@@ -13884,7 +13891,8 @@ _.extend(request, {
     get: request$get,
     post: request$post,
     json: request$json,
-    jsonp: request$jsonp
+    jsonp: request$jsonp,
+    file: request$file
 });
 
 
@@ -13939,6 +13947,20 @@ function request$jsonp(url, callback) {
         head.removeChild(script);
         delete window[uniqueCallback];
     }
+}
+
+function request$file(url, data, callback) {
+    var req = new XMLHttpRequest();
+    req.open('POST', url, true);
+
+    var promise = new Promise();
+
+    var formData = new FormData();
+    formData.append('file', data);
+
+    req.onreadystatechange = _.partial(onReady, req, callback, promise);
+
+    req.send(formData);
 }
 
 
