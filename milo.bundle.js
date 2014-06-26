@@ -8128,7 +8128,8 @@ function MLDialog$$getOpenedDialog() {
 
 var Component = require('../../c_class')
     , componentsRegistry = require('../../c_registry')
-    , _ = require('mol-proto');
+    , _ = require('mol-proto')
+    , logger = require('../../../util/logger');
 
 
 var TOGGLE_CSS_CLASS = 'dropdown-toggle'
@@ -8234,7 +8235,7 @@ function MLDropdown$toggleMenu(doShow) {
                             : 'none';
 }
 
-},{"../../c_class":16,"../../c_registry":33,"mol-proto":109}],64:[function(require,module,exports){
+},{"../../../util/logger":98,"../../c_class":16,"../../c_registry":33,"mol-proto":109}],64:[function(require,module,exports){
 'use strict';
 
 
