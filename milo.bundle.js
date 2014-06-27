@@ -13859,9 +13859,6 @@ var _ = require('mol-proto')
 module.exports = request;
 
 
-// TODO add error statuses
-var okStatuses = ['200', '304'];
-
 function onReady(req, callback, promise) {
     if (req.readyState == 4) {
         if (req.statusText.toUpperCase() == 'OK' ) {
@@ -13888,6 +13885,7 @@ function request(url, opts, callback) {
     return promise;
 }
 
+
 _.extend(request, {
     get: request$get,
     post: request$post,
@@ -13901,9 +13899,11 @@ function request$get(url, callback) {
     return request(url, { method: 'GET' }, callback);
 }
 
+
 function request$post(url, data, callback) {
     return request(url, { method: 'POST', data: data }, callback);
 }
+
 
 function request$json(url, callback) {
     var promise = request(url, { method: 'GET' });
@@ -13915,6 +13915,7 @@ function request$json(url, callback) {
 
     return jsonPromise;
 }
+
 
 function request$jsonp(url, callback) {
     var script = document.createElement('script'),
@@ -13949,6 +13950,7 @@ function request$jsonp(url, callback) {
         delete window[uniqueCallback];
     }
 }
+
 
 function request$file(url, data, callback) {
     var req = new XMLHttpRequest();
