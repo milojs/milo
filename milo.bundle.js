@@ -15426,7 +15426,8 @@ var arrayMethods = require('./proto_array');
  * - [debounce](proto_function.js.html#debounce)
  * - [throttle](proto_function.js.html#throttle) 
  * - [once](proto_function.js.html#once)
- */
+ * - [waitFor](proto_function.js.html#waitFor)
+*/
 var functionMethods = require('./proto_function');
 
 
@@ -15805,6 +15806,7 @@ var makeProtoFunction = require('./utils').makeProtoFunction
  * - [debounce](#debounce)
  * - [throttle](#throttle)
  * - [once](#once)
+ * - [waitFor](#waitFor)
  *
  * These methods can be [chained](proto.js.html#Proto)
  */
@@ -15822,7 +15824,8 @@ var functionMethods = module.exports = {
     deferMethod: deferMethod,
     debounce: debounce,
     throttle: throttle,
-    once: once
+    once: once,
+    waitFor: waitFor
 };
 
 
@@ -16127,6 +16130,33 @@ function once() {
         return memo;
     };
 }
+
+
+/**
+ * Execute a function when the condition function returns a truthy value
+ * it runs the condition function every `checkInterval` milliseconds (default 50)
+ *
+ * @param {Function} self function: if it returns true the callback is executed
+ * @param {Function} callback runs when the condition is true
+ * @param {Number} maxTimeout timeout before giving up (time in milliseconds)
+ * @param {Function} timedOutFunc a function called if timeout is reached
+ * @param {Number} checkInterval time interval when you run the condition function (time in milliseconds), default 50 ms
+ */
+function waitFor(callback, maxTimeout, timedOutFunc, checkInterval){
+    var start = Date.now();
+    var condition = this;
+    checkInterval = checkInterval || 50;
+    var interval = setInterval(testCondition, checkInterval);
+
+    function testCondition() {
+        if (condition()) callback();
+        else if (Date.now() - start >= maxTimeout)
+            timedOutFunc && timedOutFunc();
+        else return;
+        clearInterval(interval);
+    };
+}
+
 },{"./proto_util":116,"./utils":117}],112:[function(require,module,exports){
 'use strict';
 
