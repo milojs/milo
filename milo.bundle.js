@@ -5782,7 +5782,8 @@ _.extendProto(Scope, {
     _remove: Scope$_remove,
     _clean: Scope$_clean,
     _detachElement: Scope$_detachElement,
-    _has: Scope$_has
+    _has: Scope$_has,
+    _filter: Scope$_filter
 });
 
 module.exports = Scope;
@@ -5908,7 +5909,7 @@ function Scope$_each(callback, thisArg) {
  * @return {Array}
  */
 function Scope$_filter(callback, thisArg) {
-    return _.filter(this, callback, thisArg || this, true);
+    return _.filterKeys(this, callback, thisArg || this, true);
 }
 
 
