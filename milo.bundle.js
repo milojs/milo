@@ -12207,6 +12207,7 @@ var domUtils = {
     trimNodeRight: trimNodeRight,
     trimNodeLeft: trimNodeLeft,
     stripHtml: stripHtml,
+    htmlEntities: htmlEntities,
     walkTree: walkTree,
     createTreeWalker: createTreeWalker,
 
@@ -12780,6 +12781,18 @@ function isTreePathBefore(path1, path2) {
             logger.warn('isTreePathBefore: One node is inside another');
 
     return isBefore || false;
+}
+
+
+/**
+ * Converts non latin characters to HTML entity codes.
+ * @param  {String} str the string to convert
+ * @return {String}     the string with html entities
+ */
+function htmlEntities(str) {
+    return str.replace(/[\u00A0-\u99999<>\&]/gim, function(i) {
+        return '&#'+i.charCodeAt(0)+';';
+    });
 }
 
 
