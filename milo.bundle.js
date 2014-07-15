@@ -4521,6 +4521,7 @@ _.extendProto(List, {
     contains: contains,
     addItem: addItem,
     addItems: List$addItems,
+    _createCacheTemplate: List_createCacheTemplate,
     removeItem: removeItem,
     each: each
 });
@@ -4587,9 +4588,17 @@ function onChildrenBound() {
         delete comp.el[miloConfig.componentRef];
     });
 
+    this.list._createCacheTemplate();
+}
+
+function List_createCacheTemplate() {
+    if (!this.itemSample) return false;
+    
+    var itemSample = this.itemSample;
+
     // create item template to insert many items at once
-    var itemElCopy = foundItem.el.cloneNode(true);
-    var attr = foundItem.componentInfo.attr;
+    var itemElCopy = itemSample.el.cloneNode(true);
+    var attr = itemSample.componentInfo.attr;
     var attrCopy = _.clone(attr);
     attr.compName = '{{= it.componentName() }}';
     attr.el = itemElCopy;
@@ -4600,7 +4609,7 @@ function onChildrenBound() {
         + itemElCopy.outerHTML
         + '{{ } }}';
 
-    this.list.itemsTemplate = doT.compile(itemsTemplateStr);
+    this.itemsTemplate = doT.compile(itemsTemplateStr);
 }
 
 // Return a list item by it's index
