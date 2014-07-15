@@ -1888,7 +1888,7 @@ function Component$$createOnElement(el, innerHTML, rootScope, extraFacets) {
             domConfig: domFacetConfig,
             template: template,
             content: innerHTML
-        }
+        };
 
         el = Dom.createElement(elConfig);
     }
@@ -3162,7 +3162,7 @@ function Data$_set(value) {
 
     function setChildData(valueSet, childValue, key, pathSyntax) {
         var childPath = pathSyntax.replace('$$', key);
-        var childDataFacet = this.path(childPath, true);
+        var childDataFacet = this.path(childPath, typeof childValue != 'undefined');
         if (childDataFacet) {
             setTransactionFlag(childDataFacet.set, inTransaction);
             valueSet[key] = childDataFacet.set(childValue);
@@ -3399,8 +3399,7 @@ function _updataDataPaths(listFacet, fromIndex, toIndex) {
  * @param {String} accessPath data access path
  */
 function Data$path(accessPath, createItem) {
-    // hack
-    createItem = true;
+    // createItem = true; // this hack seems to be no longer needed...
 
     if (! accessPath)
         return this;
@@ -3413,12 +3412,11 @@ function Data$path(accessPath, createItem) {
             , nodeKey = pathUtils.getPathNodeKey(pathNode);
         if (pathNode.syntax == 'array' && currentComponent.list) {
             var itemComponent = currentComponent.list.item(nodeKey);
-            if (! itemComponent && createItem) {
+            if (! itemComponent && createItem !== false) {
                 itemComponent = currentComponent.list.addItem(nodeKey);
                 itemComponent.data._path = pathNode.property;
             }
-            if (itemComponent)
-                currentComponent = itemComponent;
+            currentComponent = itemComponent;
         } else if (currentComponent.container)
             currentComponent = currentComponent.container.scope[nodeKey];
 
@@ -10181,7 +10179,7 @@ function validateTransaction(transaction) {
 
 function prepareTransaction(transaction) {
     var todo = []
-        , pathsToSplice
+        , pathsToSplice = []
         , pathsToChange = []
         , hadSplice
         , exitLoop = {};
@@ -10210,7 +10208,6 @@ function prepareTransaction(transaction) {
         todo.push(data);
 
         if (! config.debug) throw exitLoop;
-        pathsToSplice = pathsToSplice || [];
         pathsToSplice.push(parsedPath);
         hadSplice = true;
     }
@@ -10228,8 +10225,8 @@ function prepareTransaction(transaction) {
         if (hadSplice) logger.error('changedata: child change is executed after splice; probably data source did not emit message with data.type=="finished"');
 
         var parentPathChanged = pathsToChange.some(function(parentPath) {
-            var pos = data.path.indexOf(parentPath);
-            return pos == 0 && data.path.length > parentPath.length;
+            if (parsedPath.length <= parentPath.length) return;
+            return _pathIsParentOf(parentPath, parsedPath);
         });
 
         if (parentPathChanged) return;
@@ -10253,7 +10250,7 @@ function processTransaction(transaction) {
     postTransactionFinished.call(this, false);
 
     function processChange(data) {
-        var modelPath = this.path(data.path);
+        var modelPath = this.path(data.path, data.type != 'removed' && data.type != 'deleted');
         if (! modelPath) return;
         (data.type == 'splice' ? executeSplice : executeMethod)(modelPath, data);
     }
@@ -15877,7 +15874,7 @@ function partial() { // , ... arguments
     var args = slice.call(arguments);
     return function() {
         return func.apply(this, args.concat(slice.call(arguments)));
-    }
+    };
 }
 
 
@@ -15893,7 +15890,7 @@ function partialRight() { // , ... arguments
     var args = slice.call(arguments);
     return function() {
         return func.apply(this, slice.call(arguments).concat(args));
-    }
+    };
 }
 
 
@@ -15951,8 +15948,8 @@ function defer() { // , arguments
     return _delay(this, 1, arguments);
 }
 
-function _delay(func, wait, args) {
-    return setTimeout(func.apply.bind(func, null, args), wait);
+function _delay(func, wait, args, context) {
+    return setTimeout(func.apply.bind(func, context || null, args), wait);
 }
 
 /**
@@ -16025,8 +16022,8 @@ function delayed(wait) { //, ... arguments
     var func = this
         , args = slice.call(arguments, 1);
     return function() {
-        return _delay(func, wait, args);
-    }
+        return _delay(func, wait, args, this);
+    };
 }
 
 
@@ -16042,8 +16039,8 @@ function deferred() { //, ... arguments
     var func = this
         , args = arguments;
     return function() {
-        return _delay(func, 1, args);
-    }
+        return _delay(func, 1, args, this);
+    };
 }
 
 
