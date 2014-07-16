@@ -13883,10 +13883,18 @@ function onReady(req, callback, promise) {
         if (req.statusText.toUpperCase() == 'OK' ) {
             callback && callback(null, req.responseText, req);
             promise.setData(null, req.responseText);
+            postMessage('success');
         } else {
             callback && callback(req.status, req.responseText, req);
             promise.setData(req.status, req.responseText);
+            postMessage('error');
+            postMessage('error' + req.status);
         }
+    }
+
+    function postMessage(msg) {
+        if (_messenger) request.postMessage(msg,
+            { status: req.status, response: req.responseText });
     }
 }
 
@@ -13910,8 +13918,17 @@ _.extend(request, {
     post: request$post,
     json: request$json,
     jsonp: request$jsonp,
-    file: request$file
+    file: request$file,
+    useMessenger: request$useMessenger
 });
+
+
+var _messenger;
+
+
+function request$useMessenger() {
+    _messenger = new Messenger(request, ['on', 'once', 'onSync', 'off', 'onMessages', 'offMessages']);
+}
 
 
 function request$get(url, callback) {
@@ -13984,7 +14001,6 @@ function request$file(url, data, callback) {
 
     req.send(formData);
 }
-
 
 },{"../config":64,"./count":90,"./logger":98,"./promise":100,"mol-proto":109}],102:[function(require,module,exports){
 'use strict';
