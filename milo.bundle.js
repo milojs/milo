@@ -12199,6 +12199,7 @@ var domUtils = {
     filterNodeListByType: filterNodeListByType,
     containingElement: containingElement,
     selectElementContents: selectElementContents,
+    selectElementText: selectElementText,
     getElementOffset: getElementOffset,
     setCaretPosition: setCaretPosition,
     getSelectionDirection: getSelectionDirection,
@@ -12295,6 +12296,19 @@ function selectElementContents(el) {
         , sel = win.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
+}
+
+
+/**
+ * Selects text inside element
+ * @param {Element} el
+ */
+function selectElementText(el) {
+    var fromNode = firstTextNode(el)
+        , toNode = lastTextNode(el);
+
+    if (fromNode && toNode)
+        setSelection(fromNode, 0, toNode, toNode.textContent.length);
 }
 
 
@@ -12398,7 +12412,6 @@ function setSelection(fromNode, startOffset, toNode, endOffset) {
         // restoring contentEditable
         container.contentEditable = originalContentEditable;
     }
-
 }
 
 /**
