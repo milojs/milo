@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
 
@@ -3780,7 +3780,10 @@ function find(direction, iterator) {
 function hasTextBeforeSelection() {
     var selection = window.getSelection();
     if (! selection.isCollapsed) return true;
-    if (selection.anchorOffset) return true;
+    
+    var text = selection.focusNode && selection.focusNode.textContent;
+    var startPos = text && text.charAt(0) == ' ' ? 1 : 0;
+    if (selection.anchorOffset != startPos) return true;
 
     // walk up the DOM tree to check if there are text nodes before cursor
     var treeWalker = document.createTreeWalker(this.owner.el, NodeFilter.SHOW_TEXT);
@@ -3791,7 +3794,10 @@ function hasTextBeforeSelection() {
 function hasTextAfterSelection() {
     var selection = window.getSelection();
     if (! selection.isCollapsed) return true;
-    if (selection.anchorOffset < selection.anchorNode.length) return true;
+
+    var text = selection.focusNode && selection.focusNode.textContent;
+    var startPos = text && text.charAt(text.length-1) == ' ' ? selection.anchorNode.length-1 : selection.anchorNode.length;
+    if (selection.anchorOffset < startPos) return true;
 
     // walk up the DOM tree to check if there are text nodes after cursor
     var treeWalker = document.createTreeWalker(this.owner.el, NodeFilter.SHOW_TEXT);
@@ -3831,7 +3837,7 @@ function insertAtTreeIndex(treeIndex, el) {
     return domUtils.insertAtTreeIndex(this.owner.el, treeIndex, el);
 }
 
-},{"../../attributes/a_bind":5,"../../binder":9,"../../config":64,"../../util/check":88,"../../util/dom":91,"../../util/error":94,"../c_facet":17,"./cf_registry":31,"dot":107,"mol-proto":109}],21:[function(require,module,exports){
+},{"../../attributes/a_bind":5,"../../binder":9,"../../config":64,"../../util/check":88,"../../util/dom":91,"../../util/error":94,"../c_facet":17,"./cf_registry":31,"dot":108,"mol-proto":109}],21:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drag"></a>
@@ -4776,7 +4782,7 @@ function each(callback, thisArg) {
     }, thisArg || this);
 }
 
-},{"../../binder":9,"../../config":64,"../../mail":66,"../../model":78,"../../util":96,"../c_class":16,"../c_facet":17,"./cf_registry":31,"dot":107,"mol-proto":109}],27:[function(require,module,exports){
+},{"../../binder":9,"../../config":64,"../../mail":66,"../../model":78,"../../util":96,"../c_class":16,"../c_facet":17,"./cf_registry":31,"dot":108,"mol-proto":109}],27:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -7475,7 +7481,7 @@ function _setData() {
     this.setFilteredOptions(this._optionsData);
 }
 
-},{"../../util/logger":98,"../c_class":16,"../c_registry":33,"dot":107,"mol-proto":109}],57:[function(require,module,exports){
+},{"../../util/logger":98,"../c_class":16,"../c_registry":33,"dot":108,"mol-proto":109}],57:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -8330,7 +8336,7 @@ config({
     debug: false
 });
 
-},{"dot":107,"mol-proto":109}],65:[function(require,module,exports){
+},{"dot":108,"mol-proto":109}],65:[function(require,module,exports){
 'use strict';
 
 
@@ -11734,7 +11740,7 @@ var modelMethods = _.mapKeys(modelSynthesizers, function(synthesizer) {
 
 synthesizePathMethods.modelMethods = modelMethods;
 
-},{"../../util/count":90,"../../util/logger":98,"../change_data":76,"../model_utils":81,"../path_utils":83,"dot":107,"fs":108,"mol-proto":109}],85:[function(require,module,exports){
+},{"../../util/count":90,"../../util/logger":98,"../change_data":76,"../model_utils":81,"../path_utils":83,"dot":108,"fs":106,"mol-proto":109}],85:[function(require,module,exports){
 'use strict';
 
 /**
@@ -13534,7 +13540,7 @@ var util = {
 
 module.exports = util;
 
-},{"../components/ui/bootstrap/Alert":61,"../components/ui/bootstrap/Dialog":62,"./check":88,"./component_name":89,"./count":90,"./dom":91,"./domready":92,"./dragdrop":93,"./error":94,"./fragment":95,"./json_parse":97,"./logger":98,"./promise":100,"./request":101,"./selection":102,"./storage":103,"dot":107}],97:[function(require,module,exports){
+},{"../components/ui/bootstrap/Alert":61,"../components/ui/bootstrap/Dialog":62,"./check":88,"./component_name":89,"./count":90,"./dom":91,"./domready":92,"./dragdrop":93,"./error":94,"./fragment":95,"./json_parse":97,"./logger":98,"./promise":100,"./request":101,"./selection":102,"./storage":103,"dot":108}],97:[function(require,module,exports){
 'use strict';
 
 
@@ -15140,6 +15146,12 @@ if (typeof module !== 'undefined' && module.exports) {
 })();
 
 },{}],106:[function(require,module,exports){
+
+// not implemented
+// The reason for having an empty file and not throwing is to allow
+// untraditional implementation of this module.
+
+},{}],107:[function(require,module,exports){
 // doT.js
 // 2011, Laura Doktorova, https://github.com/olado/doT
 // Licensed under the MIT license.
@@ -15276,7 +15288,7 @@ if (typeof module !== 'undefined' && module.exports) {
 	};
 }());
 
-},{}],107:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 /* doT + auto-compilation of doT templates
  *
  * 2012, Laura Doktorova, https://github.com/olado/doT
@@ -15421,9 +15433,7 @@ InstallDots.prototype.compileAll = function() {
 	return this.__rendermodule;
 };
 
-},{"./doT":106,"fs":108}],108:[function(require,module,exports){
-
-},{}],109:[function(require,module,exports){
+},{"./doT":107,"fs":106}],109:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -17349,3 +17359,4 @@ function makeFindMethod(eachMethod, findWhat) {
 }
 
 },{}]},{},[74])
+;
