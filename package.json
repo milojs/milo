@@ -15,7 +15,7 @@
   "bugs": {
     "url": "https://github.com/MailOnline/milo/issues"
   },
-  "devDependencies": {
+  "dependencies": {
     "async": "~0.2.9",
     "grunt": "~0.4.1",
     "grunt-mocha-test": "~0.7.0",
@@ -38,8 +38,6 @@
     "grunt-contrib-uglify": "~0.2.7",
     "grunt-karma": "^0.8.2",
     "karma-webdriver-launcher": "^0.2.0"
-  },
-  "dependencies": {
     "mol-proto": "git://github.com/MailOnline/proto.git",
     "dot": "~1.0.2",
     "base32": "git://github.com/MailOnline/base32-js.git"
