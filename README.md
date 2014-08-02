@@ -39,8 +39,6 @@ index.html
 <html>
 <head>
     <title>Binding example</title>
-    <script src="milo.bundle.js"></script>
-    <script src="index.js"></script>
 </head>
 <body>
     <input type="text" ml-bind="[Data]:myField">
@@ -55,6 +53,8 @@ index.html
       <h2>I am connected:</h2>
       <span ml-bind="[Data]:myTestValue2"></span>
     </div>
+    <script src="milo.bundle.js"></script>
+    <script src="index.js"></script>
 </body>
 </html>
 ```
@@ -77,13 +77,13 @@ milo(function () {
     // attach subscriber to click event via events facet
     // of myTestButton component
     scope.myTestButton.events.on('click', function(msg, event) {
-    	scope.myTestValue.el.innerHTML = ctrl.myField.data.value();
+    	scope.myTestValue.el.innerHTML = scope.myField.data.value();
     });
 
     // connect two components directly via their data facets
     // using milo.minder
     milo.minder(scope.myField.data, '->', scope.myTestValue2.data);
-}
+}());
 ```
 
 
