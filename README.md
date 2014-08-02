@@ -83,7 +83,7 @@ milo(function () {
     // connect two components directly via their data facets
     // using milo.minder
     milo.minder(scope.myField.data, '->', scope.myTestValue2.data);
-}
+});
 ```
 
 
