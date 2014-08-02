@@ -77,7 +77,7 @@ milo(function () {
     // attach subscriber to click event via events facet
     // of myTestButton component
     scope.myTestButton.events.on('click', function(msg, event) {
-    	scope.myTestValue.el.innerHTML = ctrl.myField.data.value();
+    	scope.myTestValue.el.innerHTML = scope.myField.data.value();
     });
 
     // connect two components directly via their data facets
