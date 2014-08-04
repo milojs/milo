@@ -13930,7 +13930,8 @@ function onReady(req, callback, promise) {
             callback && callback(null, req.responseText, req);
             promise.setData(null, req.responseText);
             postMessage('success');
-        } else {
+        }
+        else if(req.status != 0) { // not canceled eg. with abort() method
             callback && callback(req.status, req.responseText, req);
             promise.setData(req.status, req.responseText);
             postMessage('error');
@@ -14026,7 +14027,7 @@ function request$jsonp(url, callback) {
         promise.setData(null, result);
         cleanUp();
     };
-    
+
     script.type = 'text/javascript';
     script.src = url + (url.indexOf('?') == -1 ? '?' : '&') + 'callback=' + uniqueCallback;
 
