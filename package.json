@@ -4,7 +4,6 @@
   "description": "A minimalist browser framework that binds HTML elements to JS components",
   "main": "lib/milo.js",
   "scripts": {
-    "install": "npm install -g grunt-cli",
     "test": "grunt test"
   },
   "repository": {
