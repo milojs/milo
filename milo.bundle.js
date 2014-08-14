@@ -13925,28 +13925,6 @@ var _ = require('mol-proto')
 module.exports = request;
 
 
-function onReady(req, callback, promise) {
-    if (req.readyState == 4) {
-        if (req.statusText.toUpperCase() == 'OK' ) {
-            callback && callback(null, req.responseText, req);
-            promise.setData(null, req.responseText);
-            postMessage('success');
-        }
-        else if(req.status != 0) { // not canceled eg. with abort() method
-            callback && callback(req.status, req.responseText, req);
-            promise.setData(req.status, req.responseText);
-            postMessage('error');
-            postMessage('error' + req.status);
-        }
-    }
-
-    function postMessage(msg) {
-        if (_messenger) request.postMessageSync(msg,
-            { status: req.status, response: req.responseText });
-    }
-}
-
-
 function request(url, opts, callback) {
     opts.url = url;
     opts.contentType = opts.contentType || 'application/json;charset=UTF-8';
@@ -13962,10 +13940,35 @@ function request(url, opts, callback) {
 
     var promise = new Promise(req);
 
-    req.onreadystatechange = _.partial(onReady, req, callback, promise);
+    req.addEventListener('readystatechange', onReady);
     req.send(JSON.stringify(opts.data));
 
     return promise;
+
+
+    function onReady() {
+        if (req.readyState == 4) {
+            if (req.statusText.toUpperCase() == 'OK' ) {
+                callback && callback(null, req.responseText, req);
+                promise.setData(null, req.responseText);
+                postMessage('success');
+            }
+            else if(req.status != 0) { // not canceled eg. with abort() method
+                callback && callback(req.status, req.responseText, req);
+                promise.setData(req.status, req.responseText);
+                postMessage('error');
+                postMessage('error' + req.status);
+            }
+
+            // not removing subscription creates memory leak
+            req.removeEventListener('readystatechange', onReady);
+        }
+
+        function postMessage(msg) {
+            if (_messenger) request.postMessageSync(msg,
+                { status: req.status, response: req.responseText });
+        }
+    }
 }
 
 
