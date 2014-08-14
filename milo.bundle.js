@@ -2214,12 +2214,13 @@ function Component$getState() {
  * Returns component state
  *
  * @this {Component} component which state will be saved
+ * @param {Object} options can be used by subclasses. 
  * @return {Object}
  */
-function Component$getTransferState() {
+function Component$getTransferState(options) {
     return this.transfer
-            ? this.transfer.getState()
-            : this.getState();
+            ? this.transfer.getState(options)
+            : this.getState(options);
 }
 
 
@@ -13067,8 +13068,8 @@ function DragDrop$getComponentState() {
 
 function DragDrop$setComponentState(component, stateStr){
     if (! stateStr) {
-        var state = component.getTransferState()
-        stateStr = JSON.stringify(state)
+        var state = component.getTransferState({ requestedBy: 'drag' });
+        stateStr = JSON.stringify(state);
     }
     var dataType = DragDrop.componentDataType();
 
