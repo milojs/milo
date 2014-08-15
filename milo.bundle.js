@@ -2464,10 +2464,12 @@ function Component$destroy(quiet) {
     }
     this.remove();
     this.allFacets('destroy');
-    if (! this.el) return;
-    domUtils.detachComponent(this.el);
-    domUtils.removeElement(this.el);
-    delete this.el;
+    this._messenger.destroy();
+    if (this.el) {
+        domUtils.detachComponent(this.el);
+        domUtils.removeElement(this.el);
+        delete this.el;
+    }
     this.componentInfo.destroy();
     this._destroyed = true;
 }
@@ -2627,8 +2629,8 @@ function ComponentFacet$check() {
 
 // destroys facet
 function ComponentFacet$destroy() {
-    if(this._messenger)
-        this._messenger.destroy();
+    if (this._messenger) this._messenger.destroy();
+    this._destroyed = true;
 }
 
 
@@ -4317,6 +4319,7 @@ var Frame$whenMiloReady = _makeWhenReadyFunc(Frame$isMiloReady, 'message:milorea
 _.extendProto(Frame, {
     init: Frame$init,
     start: Frame$start,
+    destroy: Frame$destroy,
     getWindow: Frame$getWindow,
     isReady: Frame$isReady,
     whenReady: Frame$whenReady,
@@ -4358,6 +4361,11 @@ function Frame$start() {
     function postDomReady(event) {
         self.postMessage('domready', event);
     }
+}
+
+
+function Frame$destroy() {
+    ComponentFacet.prototype.destroy.apply(this, arguments);
 }
 
 
@@ -4800,7 +4808,8 @@ _.extendProto(ModelFacet, {
     init: ModelFacet$init,
     getState: ModelFacet$getState,
     setState: ModelFacet$setState,
-    _createMessenger: ModelFacet$_createMessenger
+    _createMessenger: ModelFacet$_createMessenger,
+    destroy: ModelFacet$destroy
 });
 
 facetsRegistry.add(ModelFacet);
@@ -4844,6 +4853,12 @@ function ModelFacet$setState(state) {
 
 function ModelFacet$_createMessenger() { // Called by inherited init
     this.m.proxyMessenger(this); // Creates messenger's methods directly on facet
+}
+
+
+function ModelFacet$destroy() {
+    this.m.destroy();
+    ComponentFacet.prototype.destroy.apply(this, arguments);
 }
 
 },{"../../model":78,"../c_facet":17,"./cf_registry":31,"mol-proto":109}],28:[function(require,module,exports){
@@ -9887,7 +9902,8 @@ _.extend(milo, {
     Model: require('./model'),
     Command: require('./command'),
     registry: require('./registry'),
-    milo_version: '0.1'
+    milo_version: '0.1.4',
+    destroy: destroy
 });
 
 
@@ -9899,6 +9915,13 @@ if (typeof module == 'object' && module.exports)
 if (typeof window == 'object') {
     window.milo = milo;
     milo.mail.trigger('miloready');
+}
+
+
+function destroy() {
+    milo.mail.destroy();
+    milo.minder.destroy();
+    milo.util.request.destroy();
 }
 
 },{"./attributes":8,"./binder":9,"./classes":10,"./command":13,"./components/c_class":16,"./components/c_facet":17,"./config":64,"./loader":65,"./mail":66,"./messenger":69,"./minder":75,"./model":78,"./registry":85,"./use_components":86,"./use_facets":87,"./util":96,"mol-proto":109}],75:[function(require,module,exports){
@@ -9960,7 +9983,8 @@ var _connectors = []
 _.extend(minder, {
     getConnectors: minder_getConnectors,
     getExpandedConnections: minder_getExpandedConnections,
-    destroyConnector: minder_destroyConnector
+    destroyConnector: minder_destroyConnector,
+    destroy: minder_destroy
 });
 
 
@@ -10081,6 +10105,21 @@ function _sourceMatchesString(source, matchStr) {
 
 function _stringMatch(str, substr) {
     return str && typeof str == 'string' && str.indexOf(substr) >= 0;
+}
+
+
+function minder_destroy() {
+    _connectors.forEach(function(cnct) {
+        destroyDS(cnct.ds1);
+        destroyDS(cnct.ds2);
+        cnct.destroy();
+    });
+    _messenger.destroy();
+    minder._destroyed = true;
+
+    function destroyDS(ds) {
+        if (!ds._destroyed) ds.destroy();
+    }
 }
 
 },{"./messenger":69,"./model/connector":77,"./util/logger":98,"mol-proto":109}],76:[function(require,module,exports){
@@ -10730,6 +10769,7 @@ function Connector$destroy() {
     this._messenger.destroy();
     delete this.ds1;
     delete this.ds2;
+    this._destroyed = true;
 }
 
 },{"../messenger":69,"../util/error":94,"../util/logger":98,"./path_utils":83,"mol-proto":109}],78:[function(require,module,exports){
@@ -10777,9 +10817,7 @@ function Model(data, hostObject) {
     };
     model.__proto__ = Model.prototype;
 
-    _.defineProperties(model, {
-        _hostObject: hostObject
-    });
+    model._hostObject = hostObject;
 
     model._prepareMessengers();
 
@@ -10815,7 +10853,8 @@ _.extendProto(Model, {
     proxyMessenger: proxyMessenger,
     proxyMethods: proxyMethods,
     _prepareMessengers: _prepareMessengers,
-    _getHostObject: _getHostObject
+    _getHostObject: _getHostObject,
+    destroy: Model$destroy
 });
 
 // set, del, splice are added to model
@@ -10946,6 +10985,15 @@ function Model_domStorageSerializer(value) {
 function Model_domStorageParser(valueStr) {
     var data = jsonParse(valueStr);
     return new Model(data);
+}
+
+
+function Model$destroy() {
+    this._messenger.destroy();
+    this._internalMessenger.destroy();
+    delete this._hostObject;
+    delete this._data;
+    this._destroyed = true;
 }
 
 },{"../abstract/mixin":3,"../messenger":69,"../messenger/msngr_source":73,"../util/check":88,"../util/error":94,"../util/json_parse":97,"../util/logger":98,"../util/storage":103,"./change_data":76,"./m_msg_api":79,"./m_path":80,"./path_utils":83,"./synthesize":84,"mol-proto":109}],79:[function(require,module,exports){
@@ -11104,7 +11152,8 @@ _.extendProto(ModelPath, {
     unshift: ModelPath$unshift,
     shift: ModelPath$shift,
     _prepareMessenger: _prepareMessenger,
-    _getDefinition: _getDefinition
+    _getDefinition: _getDefinition,
+    destroy: ModelPath$destroy
 });
 
 
@@ -11267,6 +11316,12 @@ function _createFromDefinition(definition) {
     var m = definition.model;
 
     return m.apply(m, definition.args);
+}
+
+
+function ModelPath$destroy() {
+    this._messenger.destroy();
+    this._destroyed = true;
 }
 
 },{"../messenger":69,"../messenger/msngr_source":73,"../util/check":88,"./change_data":76,"./path_msg_api":82,"./path_utils":83,"./synthesize":84,"mol-proto":109}],81:[function(require,module,exports){
@@ -13978,7 +14033,8 @@ _.extend(request, {
     json: request$json,
     jsonp: request$jsonp,
     file: request$file,
-    useMessenger: request$useMessenger
+    useMessenger: request$useMessenger,
+    destroy: request$destroy
 });
 
 
@@ -14059,6 +14115,12 @@ function request$file(url, data, callback) {
     req.onreadystatechange = _.partial(onReady, req, callback, promise);
 
     req.send(formData);
+}
+
+
+function request$destroy() {
+    if (_messenger) _messenger.destroy();
+    request._destroyed = true;
 }
 
 },{"../config":64,"../messenger":69,"./count":90,"./logger":98,"./promise":100,"mol-proto":109}],102:[function(require,module,exports){
@@ -14547,7 +14609,7 @@ function DOMStorage(keyPrefix, sessionOnly, win) {
         _storage: sessionOnly ? win.sessionStorage : win.localStorage,
         _typeSuffix: config.domStorage.typeSuffix,
         _keys: {}
-    });
+    }, _.WRIT);
 }
 
 
@@ -14563,7 +14625,8 @@ _.extendProto(DOMStorage, {
     _domStorageKey: DOMStorage$_domStorageKey,
     getAllKeys: DOMStorage$getAllKeys,
     getAllItems: DOMStorage$getAllItems,
-    createMessenger: DOMStorage$createMessenger
+    createMessenger: DOMStorage$createMessenger,
+    destroy: DOMStorage$destroy
 });
 
 
@@ -14882,6 +14945,14 @@ function DOMStorage$createMessenger() {
     var storageMessageSource = new StorageMessageSource(this, ['trigger']);
     var messenger = new Messenger(this, Messenger.defaultMethods, storageMessageSource);
     _.defineProperty(this, '_messenger', messenger, _.WRIT);
+}
+
+
+function DOMStorage$destroy() {
+    this._storage = undefined;
+    this.window = undefined;
+    if (this._messenger) this._messenger.destroy();
+    this._destroyed = true;
 }
 
 },{"../../config":64,"../../messenger":69,"../check":88,"../error":94,"../json_parse":97,"./msg_src":104,"mol-proto":109}],104:[function(require,module,exports){
