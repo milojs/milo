@@ -1,7 +1,7 @@
 {
   "name": "mol-milo",
   "version": "0.1.4",
-  "description": "A minimalist browser framework that binds HTML elements to JS components",
+  "description": "Browser/nodejs [reactive programming](http://en.wikipedia.org/wiki/Reactive_programming) and data driven DOM manipulation with modular components.",
   "main": "lib/milo.js",
   "scripts": {
     "test": "grunt test"
