@@ -328,13 +328,17 @@ It is bundled together with __milo__ and all its functions are available as prop
 Changes log
 -----------
 
-###After 0.1.3###
+###0.1.4###
 
 - Data propagation redesigned to avoid using model notification messages.
+- Connector supports path translations with "*" patterns.
+- Fragment utility allowing to get state of DOM fragment (including states of all components in it).
 - New Frame facet method `milo` to access milo in the frame window. Can be used to call passed function when inner milo is ready even before frame is loaded (and before inner milo is available).
+- Transfer facet supports multiple states.
 - Sending messages via DOM storage using DOMStorage class.
 - changeMode and deferChangeMode methods of connector allowing to change connection depth and/or direction.
 - Command class iplementing "command pattern".
+- util.request - messaging support (allows monitoring and modifying requests before they are sent), fixed listener leak.
 - Minor fixes.
 
 ###0.1.3###
