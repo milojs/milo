@@ -325,6 +325,11 @@ __milo__ uses library [__Proto__](https://github.com/MailOnline/proto) that has 
 It is bundled together with __milo__ and all its functions are available as properties of `_` object, you don't need to load it separately.
 
 
+License
+-------
+http://opensource.org/licenses/BSD-2-Clause
+
+
 Changes log
 -----------
 
