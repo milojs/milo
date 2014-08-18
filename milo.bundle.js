@@ -10122,7 +10122,7 @@ function minder_destroy() {
     minder._destroyed = true;
 
     function destroyDS(ds) {
-        if (!ds._destroyed) ds.destroy();
+        if (ds && !ds._destroyed) ds.destroy();
     }
 }
 
