@@ -7544,7 +7544,8 @@ var SAMPLE_AUTORESIZE_TEXT = 'Lorem ipsum dolor sit amet, consectetuer adipiscin
 
 _.extendProto(MLTextarea, {
     startAutoresize: MLTextarea$startAutoresize,
-    stopAutoresize: MLTextarea$stopAutoresize
+    stopAutoresize: MLTextarea$stopAutoresize,
+    disable: MLTextarea$disable
 });
 
 
@@ -7595,6 +7596,9 @@ function MLTextarea$destroy() {
     Component.prototype.destroy.apply(this, arguments);
 }
 
+function MLTextarea$disable(disable) {
+    this.el.disabled = disable;
+}
 },{"../../util/logger":98,"../c_class":16,"../c_registry":33,"mol-proto":109}],59:[function(require,module,exports){
 'use strict';
 
@@ -11321,7 +11325,6 @@ function _createFromDefinition(definition) {
 
 function ModelPath$destroy() {
     this._messenger.destroy();
-    this._destroyed = true;
 }
 
 },{"../messenger":69,"../messenger/msngr_source":73,"../util/check":88,"./change_data":76,"./path_msg_api":82,"./path_utils":83,"./synthesize":84,"mol-proto":109}],81:[function(require,module,exports){
@@ -15629,6 +15632,7 @@ var numberMethods = require('./proto_number');
  * - [tap](proto_util.js.html#tap)
  * - [result](proto_util.js.html#result)
  * - [identity](proto_util.js.html#identity)
+ * - [property](proto_util.js.html#property)
  */
 var utilMethods = require('./proto_util');
 
@@ -17290,13 +17294,15 @@ function unPrefix(str) {
  * - [tap](#tap)
  * - [result](#result)
  * - [identity](#identity)
+ * - [property](#property)
  */
 var utilMethods = module.exports = {
     times: times,
     repeat: repeat,
     tap: tap,
     result: result,
-    identity: identity
+    identity: identity,
+    property: property
 };
 
 
@@ -17367,6 +17373,20 @@ function result(thisArg) { //, arguments
  */
 function identity() {
     return this;
+}
+
+
+/**
+ * Returns function that picks the property from the object
+ *
+ * @param {String} self
+ * @return {Function}
+ */
+function property() {
+    var key = this;
+    return function(obj) {
+        return obj[key];
+    };
 }
 
 },{}],117:[function(require,module,exports){
