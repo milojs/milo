@@ -2178,10 +2178,11 @@ function Component$rename(name, renameInScope) {
  * Removes component from its scope.
  *
  * @param {Boolean} preserveScopeProperty true not to delete scope property of component
+ * @param {Boolean} quiet optional true to suppress the warning message if the component is not in scope
  */
-function Component$remove(preserveScopeProperty) {
+function Component$remove(preserveScopeProperty, quiet) {
     if (this.scope) {
-        this.scope._remove(this.name);
+        this.scope._remove(this.name, quiet);
         if (! preserveScopeProperty)
             delete this.scope;
     }
@@ -2462,7 +2463,7 @@ function Component$destroy(quiet) {
         if (!quiet) logger.warn('Component destroy: component is already destroyed');
         return;
     }
-    this.remove();
+    this.remove(false, quiet);
     this.allFacets('destroy');
     this._messenger.destroy();
     if (this.el) {
@@ -4524,8 +4525,9 @@ var LIST_SAMPLE_CSS_CLASS = 'ml-list-item-sample';
 var List = _.createSubclass(ComponentFacet, 'List');
 
 _.extendProto(List, {
-    init: init,
-    start: start,
+    init: List$init,
+    start: List$start,
+    destroy: List$destroy,
 
     require: ['Container', 'Dom', 'Data'],
     _itemPreviousComponent: _itemPreviousComponent,
@@ -4547,7 +4549,7 @@ module.exports = List;
 
 
 // Initialize List facet
-function init() {
+function List$init() {
     ComponentFacet.prototype.init.apply(this, arguments);
     var model = new Model
         , self = this;
@@ -4559,7 +4561,7 @@ function init() {
     _.defineProperty(this, 'itemSample', null, _.WRIT);
 }
 
-function start() {
+function List$start() {
     // Fired by __binder__ when all children of component are bound
     this.owner.on('childrenbound', onChildrenBound);
 }
@@ -4789,6 +4791,12 @@ function each(callback, thisArg) {
     this._listItems.forEach(function(item) {
         if (item) callback.apply(this, arguments);
     }, thisArg || this);
+}
+
+
+function List$destroy() {
+    if (this.itemSample) this.itemSample.destroy(true);
+    ComponentFacet.prototype.destroy.apply(this, arguments);
 }
 
 },{"../../binder":9,"../../config":64,"../../mail":66,"../../model":78,"../../util":96,"../c_class":16,"../c_facet":17,"./cf_registry":31,"dot":108,"mol-proto":109}],27:[function(require,module,exports){
@@ -6010,10 +6018,13 @@ function Scope$_any() {
  * Instance method.
  * Removes a component from the scope by it's name.
  * @param {String} name the name of the component to remove
+ * @param {Boolean} quiet optional true to suppress the warning message if the component is not in scope
  */
-function Scope$_remove(name) {
-    if (! (name in this))
-        return logger.warn('removing object that is not in scope');
+function Scope$_remove(name, quiet) {
+    if (! (name in this)) {
+        if (!quiet) logger.warn('removing object that is not in scope');
+        return;
+    }
 
     var object = this[name];
 
@@ -7948,6 +7959,7 @@ _.extend(MLDialog, {
 _.extendProto(MLDialog, {
     openDialog: MLDialog$openDialog,
     closeDialog: MLDialog$closeDialog,
+    destroy: MLDialog$destroy
 });
 
 
@@ -8188,6 +8200,12 @@ function MLDialog$closeDialog(result, data) {
  */
 function MLDialog$$getOpenedDialog() {
     return openedDialog;
+}
+
+
+function MLDialog$destroy() {
+    document.removeEventListener('keydown', _onKeyDown);
+    Component.prototype.destroy.apply(this, arguments);
 }
 
 },{"../../../util/check":88,"../../../util/component_name":89,"../../../util/logger":98,"../../c_class":16,"../../c_registry":33,"mol-proto":109}],63:[function(require,module,exports){
@@ -8823,7 +8841,7 @@ function _Messenger_on(messages, subscriber) {
     var subscribersHash = this._chooseSubscribersHash(messages);
 
     if (messages instanceof RegExp) {
-        subscriptionAdded(this, messages, subscriber);
+        // subscriptionAdded(this, messages, subscriber);
         return this._registerSubscriber(subscribersHash, messages, subscriber);
     }
 
@@ -8832,7 +8850,7 @@ function _Messenger_on(messages, subscriber) {
 
         messages.forEach(function(message) {
             var notYetRegistered = this._registerSubscriber(subscribersHash, message, subscriber); 
-            if (notYetRegistered) subscriptionAdded(this, message, subscriber);
+            // if (notYetRegistered) subscriptionAdded(this, message, subscriber);
             wasRegistered = wasRegistered || notYetRegistered;          
         }, this);
 
@@ -9040,7 +9058,7 @@ function _Messenger_off(messages, subscriber) {
     var subscribersHash = this._chooseSubscribersHash(messages);
 
     if (messages instanceof RegExp) {
-        subscriptionRemoved(this, messages, subscriber);
+        // subscriptionRemoved(this, messages, subscriber);
         return this._removeSubscriber(subscribersHash, messages, subscriber);
     }
 
@@ -9049,7 +9067,7 @@ function _Messenger_off(messages, subscriber) {
 
         messages.forEach(function(message) {
             var subscriberRemoved = this._removeSubscriber(subscribersHash, message, subscriber);           
-            subscriptionRemoved(this, message, subscriber);
+            // subscriptionRemoved(this, message, subscriber);
             wasRemoved = wasRemoved || subscriberRemoved;           
         }, this);
 
@@ -9100,7 +9118,7 @@ function _removeSubscriber(subscribersHash, message, subscriber) {
  * @param {String} message Message type
  */
 function _removeAllSubscribers(subscribersHash, message) {
-    subscriptionRemoved(this, message);
+    // subscriptionRemoved(this, message);
     delete subscribersHash[message];
     if (this._messageSource && typeof message == 'string')
         this._messageSource.onSubscriberRemoved(message);
@@ -13094,20 +13112,39 @@ var _ = require('mol-proto');
 
 module.exports = domReady;
 
+
+var domReadyFuncs = []
+    , domReadySubscribed = false;
+
+
 function domReady(func) { // , arguments
     var self = this
         , args = _.slice(arguments, 1);
     if (isReady.call(this))
         callFunc();
-    else
-        document.addEventListener('readystatechange', _.once(callFunc));
+    else {
+        if (!domReadySubscribed) {
+            document.addEventListener('readystatechange', onDomReady);
+            domReadySubscribed = true;
+        }
+        domReadyFuncs.push(callFunc); // closure is added, so every time different function will be called
+    }
 
     function callFunc() {
         func.apply(self, args);
     }
 }
 
-domReady.isReady = isReady;
+
+function onDomReady() {
+    document.removeEventListener('readystatechange', onDomReady);
+    domReadyFuncs.forEach(function(func) { func(); });
+}
+
+
+_.extend(domReady, {
+    isReady: isReady
+});
 
 
 function isReady() {
