@@ -4876,6 +4876,7 @@ var Options = _.createSubclass(ComponentFacet, 'Options');
 
 _.extendProto(Options, {
     init: Options$init,
+    destroy: Options$destroy,
     _createMessenger: Options$_createMessenger
 });
 
@@ -4893,6 +4894,12 @@ function Options$init() {
 
 function Options$_createMessenger() { // Called by inherited init
     this.m.proxyMessenger(this); // Creates messenger's methods directly on facet
+}
+
+
+function Options$destroy() {
+    this.m.destroy();
+    ComponentFacet.prototype.destroy.apply(this, arguments);
 }
 
 },{"../../model":78,"../c_facet":17,"./cf_registry":31,"mol-proto":109}],29:[function(require,module,exports){
@@ -6695,9 +6702,9 @@ function MLList$init() {
 
 
 function MLList$destroy() {
-    Component.prototype.destroy.apply(this, arguments);
     this._connector && milo.minder.destroyConnector(this._connector);
     this._connector = null;
+    Component.prototype.destroy.apply(this, arguments);
 }
 
 
@@ -6784,6 +6791,7 @@ function deleteItem() {
     
     listComp.data.splice(itemFacet.index, 1);
 }
+
 },{"../c_class":16,"../c_registry":33,"mol-proto":109}],54:[function(require,module,exports){
 'use strict';
 
@@ -8721,6 +8729,9 @@ Messenger.defaultMethods = {
 module.exports = Messenger;
 
 
+Messenger.subscriptions = [];
+
+
 /**
  * Messenger instance method
  * Initializes Messenger. Method is called by Mixin class constructor.
@@ -8811,19 +8822,50 @@ function _Messenger_on(messages, subscriber) {
 
     var subscribersHash = this._chooseSubscribersHash(messages);
 
-    if (messages instanceof RegExp)
+    if (messages instanceof RegExp) {
+        subscriptionAdded(this, messages, subscriber);
         return this._registerSubscriber(subscribersHash, messages, subscriber);
+    }
 
     else {
         var wasRegistered = false;
 
         messages.forEach(function(message) {
-            var notYetRegistered = this._registerSubscriber(subscribersHash, message, subscriber);          
+            var notYetRegistered = this._registerSubscriber(subscribersHash, message, subscriber); 
+            if (notYetRegistered) subscriptionAdded(this, message, subscriber);
             wasRegistered = wasRegistered || notYetRegistered;          
         }, this);
 
         return wasRegistered;
     }   
+}
+
+
+function subscriptionAdded(messenger, message, subscriber) {
+    if (message == 'changedata') {
+        var className = messenger._hostObject.constructor.name;
+        if (className == 'ModelPath' || className == 'Model') return;
+    }
+    Messenger.subscriptions.push({
+        messenger: messenger,
+        message: message,
+        subscriber: subscriber
+    });
+}
+
+
+function subscriptionRemoved(messenger, message, subscriber) {
+    var index = 0;
+    while (index < Messenger.subscriptions.length) {
+        var subscription = Messenger.subscriptions[index];
+        var shouldBeRemoved = subscription.messenger == messenger
+            && (subscription.message == message || (message.constructor.name == 'RegExp' && subscription.message.toString() == message.toString()))
+            && ((subscriber && subscribersEqual(messenger, subscription.subscriber, subscriber)) || !subscriber);
+        if (shouldBeRemoved)
+            Messenger.subscriptions.splice(index, 1);
+        else
+            index++;
+    }
 }
 
 
@@ -8909,6 +8951,27 @@ function _indexOfSubscriber(list, subscriber) {
 }
 
 
+function subscribersEqual(messenger, s1, s2) {
+    var s1IsFunc = typeof s1 == 'function'
+        , s2IsFunc = typeof s2 == 'function';
+
+    return s1IsFunc == s2IsFunc
+            ? ( s1IsFunc
+                ? s2 == s1
+                : (s2.subscriber == s1.subscriber 
+                    && s2.context == s1.context) )
+            : s1IsFunc
+                ? __subcribersFuncEqObj(messenger, s1, s2)
+                : __subcribersFuncEqObj(messenger, s2, s1)
+}
+
+
+function __subcribersFuncEqObj(messenger, func, obj) {
+    return func == obj.subscriber
+            && messenger._hostObject == obj.context;
+}
+
+
 /**
  * Messenger instance method.
  * Subscribes to multiple messages passed as map together with subscribers.
@@ -8976,14 +9039,17 @@ function _Messenger_off(messages, subscriber) {
 
     var subscribersHash = this._chooseSubscribersHash(messages);
 
-    if (messages instanceof RegExp)
+    if (messages instanceof RegExp) {
+        subscriptionRemoved(this, messages, subscriber);
         return this._removeSubscriber(subscribersHash, messages, subscriber);
+    }
 
     else {
         var wasRemoved = false;
 
         messages.forEach(function(message) {
             var subscriberRemoved = this._removeSubscriber(subscribersHash, message, subscriber);           
+            subscriptionRemoved(this, message, subscriber);
             wasRemoved = wasRemoved || subscriberRemoved;           
         }, this);
 
@@ -9034,6 +9100,7 @@ function _removeSubscriber(subscribersHash, message, subscriber) {
  * @param {String} message Message type
  */
 function _removeAllSubscribers(subscribersHash, message) {
+    subscriptionRemoved(this, message);
     delete subscribersHash[message];
     if (this._messageSource && typeof message == 'string')
         this._messageSource.onSubscriberRemoved(message);
@@ -9841,7 +9908,6 @@ function MessengerMessageSource$postMessage(message, data) {
     this.messenger.postMessageSync(message, data);
 }
 
-
 },{"../util/check":88,"./m_source":72,"mol-proto":109}],74:[function(require,module,exports){
 'use strict';
 
@@ -9925,7 +9991,7 @@ if (typeof window == 'object') {
 function destroy() {
     milo.mail.destroy();
     milo.minder.destroy();
-    milo.util.request.destroy();
+    milo.util.destroy();
 }
 
 },{"./attributes":8,"./binder":9,"./classes":10,"./command":13,"./components/c_class":16,"./components/c_facet":17,"./config":64,"./loader":65,"./mail":66,"./messenger":69,"./minder":75,"./model":78,"./registry":85,"./use_components":86,"./use_facets":87,"./util":96,"mol-proto":109}],75:[function(require,module,exports){
@@ -10995,8 +11061,8 @@ function Model_domStorageParser(valueStr) {
 function Model$destroy() {
     this._messenger.destroy();
     this._internalMessenger.destroy();
-    delete this._hostObject;
-    delete this._data;
+    // delete this._hostObject;
+    // delete this._data;
     this._destroyed = true;
 }
 
@@ -13263,7 +13329,8 @@ var dragDropService = new Messenger;
 var _currentDragDrop, _currentDragFacet;
 
 _.extend(DragDrop, {
-    service: dragDropService
+    service: dragDropService,
+    destroy: DragDrop_destroy
 });
 
 
@@ -13306,6 +13373,11 @@ function onCompleteDragDrop(msg, data) {
 
 function getCurrentDragDrop() {
     return _currentDragDrop;
+}
+
+
+function DragDrop_destroy() {
+    dragDropService.offAll();
 }
 
 },{"../components/c_class":16,"../config":64,"../messenger":69,"./json_parse":97,"base32":105,"mol-proto":109}],94:[function(require,module,exports){
@@ -13594,10 +13666,17 @@ var util = {
     dragDrop: require('./dragdrop'),
     dialog: require('../components/ui/bootstrap/Dialog'),
     alert: require('../components/ui/bootstrap/Alert'),
-    doT: require('dot')
+    doT: require('dot'),
+    destroy: util_destroy
 };
 
 module.exports = util;
+
+
+function util_destroy() {
+    util.request.destroy();
+    util.dragDrop.destroy();
+}
 
 },{"../components/ui/bootstrap/Alert":61,"../components/ui/bootstrap/Dialog":62,"./check":88,"./component_name":89,"./count":90,"./dom":91,"./domready":92,"./dragdrop":93,"./error":94,"./fragment":95,"./json_parse":97,"./logger":98,"./promise":100,"./request":101,"./selection":102,"./storage":103,"dot":108}],97:[function(require,module,exports){
 'use strict';
