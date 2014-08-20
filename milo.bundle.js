@@ -6748,7 +6748,8 @@ module.exports = MLRadioGroup;
 
 
 _.extendProto(MLRadioGroup, {
-    init: MLRadioGroup$init
+    init: MLRadioGroup$init,
+    destroy: MLRadioGroup$destroy
 });
 
 
@@ -6842,6 +6843,12 @@ function onOptionsChange(path, data) {
         , options = this._radioList;
     options.length = 0;
     _.forEach(radioEls, options.push, options);
+}
+
+
+function MLRadioGroup$destroy() {
+    delete this._radioList;
+    Component.prototype.destroy.apply(this, arguments);
 }
 
 },{"../../util/count":92,"../c_class":16,"../c_registry":33,"mol-proto":111}],54:[function(require,module,exports){
