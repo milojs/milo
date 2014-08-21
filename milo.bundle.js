@@ -6940,7 +6940,7 @@ var MLSuperCombo = Component.createComponentClass('MLSuperCombo', {
     },
     template: {
         template: '<input ml-bind="[data, events]:input" class="form-control ml-ui-input">\
-                   <div ml-bind="[dom]:addItemDiv">\
+                   <div ml-bind="[dom]:addItemDiv" class="ml-ui-supercombo-add">\
                         <span ml-bind=":addPrompt"></span>\
                         <button ml-bind="[events, dom]:addBtn" class="btn btn-default ml-ui-button">Add</button>\
                    </div>\
@@ -7025,7 +7025,8 @@ function componentSetup() {
         _optionsHeight: 200,
         _lastScrollPos: 0,
         _currentValue: null,
-        _selected: null
+        _selected: null,
+        _isAddButtonShown: false
     }, _.WRIT);
 
     // Component Setup
@@ -7075,7 +7076,7 @@ function MLSuperCombo$hideOptions() {
  */
 function MLSuperCombo$toggleAddButton(show) {
     this._comboAddItemDiv.dom.toggle(show);
-    this.hideOptions();
+    this._isAddButtonShown = show;
 }
 
 
@@ -7219,27 +7220,40 @@ function MLSuperCombo_del() {
  * @param  {Objext} data
  */
 function onDataChange(msg, data) {
-    var text = data.newValue && data.newValue.trim().toLowerCase();
+    var text = data.newValue && data.newValue.trim();
     var filteredArr = _.filter(this._optionsData, function(option) {
         delete option.selected;
         if (option.label) {
             var label = option.label.toLowerCase();
-            return label.indexOf(text) == 0;
+            return label.indexOf(text.toLowerCase()) == 0;
         }
     });
 
-    if (filteredArr.length) {
+    if (!text) {
         this.toggleAddButton(false);
-        this.showOptions();
-        filteredArr[0].selected = true;
-        this._selected = filteredArr[0];
-    } else if (this._addItemPrompt) {
-        this.toggleAddButton(this._optionsData.length > 1);
-        this.hideOptions();
+    } else {
+
+        if (filteredArr.length && _.find(filteredArr, isExactMatch)) {
+            this.toggleAddButton(false);
+        } else if (this._addItemPrompt) {
+            this.toggleAddButton(this._optionsData.length > 1);
+        }
+
+        if (filteredArr.length) {
+            this.showOptions();
+            filteredArr[0].selected = true;
+            this._selected = filteredArr[0];
+        } else {
+            this.hideOptions();
+        }
     }
 
     this.setFilteredOptions(filteredArr);
     this._comboList.el.scrollTop = 0;
+
+    function isExactMatch(item) {
+        return item.label.toLowerCase() === text.toLowerCase();
+    }
 }
 
 /**
@@ -7299,6 +7313,8 @@ function changeSelected(type, event) {
  */
 function onMouseLeave(type, event) {
     this.hideOptions();
+    this.__showAddOnClick = this._isAddButtonShown;
+    this.toggleAddButton(false);
 }
 
 
@@ -7310,6 +7326,8 @@ function onMouseLeave(type, event) {
  */
 function onInputClick(type, event) {
     this.showOptions();
+    this.__showAddOnClick && this.toggleAddButton(!!this.__showAddOnClick);
+    delete this.__showAddOnClick;
 }
 
 
