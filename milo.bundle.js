@@ -5622,8 +5622,8 @@ function init(hostObject, proxyMethods, messengerAPIOrClass, component) {
 
 
 function DOMEventsSource$destroy() {
-    MessageSource.prototype.destroy.apply(this, arguments);
     delete this.component;
+    MessageSource.prototype.destroy.apply(this, arguments);
 }
 
 
@@ -10790,8 +10790,8 @@ function Model_domStorageParser(valueStr) {
 function Model$destroy() {
     this._messenger.destroy();
     this._internalMessenger.destroy();
-    // delete this._hostObject;
-    // delete this._data;
+    delete this._hostObject;
+    delete this._data;
     this._destroyed = true;
 }
 
@@ -11703,8 +11703,8 @@ function init(hostObject, proxyMethods, messengerAPIOrClass, eventEmitter) {
 
 
 function DOMEmitterSource$destroy() {
-    MessageSource.prototype.destroy.apply(this, arguments);
     delete this.eventEmitter;
+    MessageSource.prototype.destroy.apply(this, arguments);
 }
 
 
