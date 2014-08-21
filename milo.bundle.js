@@ -4518,9 +4518,9 @@ function ItemFacet$setIndex(index) {
  * ItemFacet instance method
  * Removes component from the list
  */
-function ItemFacet$removeItem() {
+function ItemFacet$removeItem(useData) {
     // this.list and this.index are set by the list when the item is added
-    this.list.removeItem(this.index, true);
+    this.list.removeItem(this.index, useData);
 }
 
 },{"../../model":74,"../../services/mail":84,"../c_facet":17,"./cf_registry":31,"mol-proto":111}],26:[function(require,module,exports){
@@ -4786,6 +4786,7 @@ function List$addItems(count, index) {
 }
 
 
+<<<<<<< HEAD
 /**
  * List facet instance method
  * Removes item, returns the removed item that is destroyed by default.
@@ -4795,11 +4796,16 @@ function List$addItems(count, index) {
  * @return {Component}
  */
 function removeItem(index, doDestroyItem) {
+=======
+// Remove item from a particular index
+function removeItem(index, useData) {
+>>>>>>> Updated examples, added 'useData' option to list and item removeItem methods
     var comp = this.item(index);
 
     if (! comp)
         return logger.warn('attempt to remove list item with id that does not exist');
 
+<<<<<<< HEAD
     this._listItems[index] = undefined;
     delete this._listItemsHash[comp.name];
     if (doDestroyItem !== false) comp.destroy();
@@ -4812,6 +4818,18 @@ function removeItem(index, doDestroyItem) {
     _updateItemsIndexes.call(this, index);
 
     return comp;
+=======
+    if (useData) {
+        this.owner.data.splice(index, 1);
+    } else {
+        this._listItems[index] = undefined;
+        delete this._listItemsHash[comp.name];
+        comp.destroy();
+
+        this._listItems.splice(index, 1);
+        _updateItemsIndexes.call(this, index);
+    }
+>>>>>>> Updated examples, added 'useData' option to list and item removeItem methods
 }
 
 

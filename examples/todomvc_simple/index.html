@@ -1,0 +1,21 @@
+<html>
+<head>
+    <script src="../../milo.bundle.js"></script>
+    <script src="todo.js"></script>
+    <link rel="stylesheet" type="text/css" href="todo.css">
+</head>
+<body>
+    <input ml-bind="[data]:newTodo" />
+    <button ml-bind="[events]:addBtn">Add</button>
+    <h3>To-do's</h3>
+    <ul ml-bind="[list]:todos">
+      <li ml-bind="[item]:todo">
+        <input type="checkbox" ml-bind="[data]:checked">
+        <span ml-bind="[data]:text" contenteditable="true"></span>
+        <button ml-bind="[events]:deleteBtn">X</button>
+      </li>
+    </ul>
+
+    <h3>Model</h3>
+    <div ml-bind="[data]:modelView"></div>
+</body>
