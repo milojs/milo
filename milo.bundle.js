@@ -7075,7 +7075,10 @@ function MLSuperCombo$hideOptions() {
  * Hides add button
  */
 function MLSuperCombo$toggleAddButton(show) {
-    this._comboAddItemDiv.dom.toggle(show);
+    if (show)
+        _.delayMethod(this._comboAddItemDiv.dom, 'toggle', 300, show);
+    else 
+        this._comboAddItemDiv.dom.toggle(show);
     this._isAddButtonShown = show;
 }
 
@@ -7230,10 +7233,12 @@ function onDataChange(msg, data) {
     });
 
     if (!text) {
+        this.__showAddOnClick = this._isAddButtonShown;
         this.toggleAddButton(false);
     } else {
 
         if (filteredArr.length && _.find(filteredArr, isExactMatch)) {
+            this.__showAddOnClick = this._isAddButtonShown;
             this.toggleAddButton(false);
         } else if (this._addItemPrompt) {
             this.toggleAddButton(this._optionsData.length > 1);
@@ -7354,6 +7359,7 @@ function onAddBtn (type, event) {
     var data = { label: this._comboInput.el.value };
     this.postMessage('additem', data);
     this.events.postMessage('milo_supercomboadditem', data);
+    this.__showAddOnClick = this._isAddButtonShown;
     this.toggleAddButton(false);
 
 }
