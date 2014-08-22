@@ -18,7 +18,7 @@ function Todo$init() {
     }
 
     function removeTodo(eventType, event) {
-        this.item.removeItem(true);
+        this.item.removeItem();
     }
 }
 
