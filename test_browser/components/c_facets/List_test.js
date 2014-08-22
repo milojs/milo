@@ -43,6 +43,18 @@ describe('List facet', function() {
         assert.deepEqual(value, testData.slice(), 'should correctly retrieve data from DOM');
     });
 
+    it('modelPath shouldn\'t duplicate when list is empty', function(done) {
+        // var m1 = new Model({hello:[]});
+        var m1 = new Model;
+        milo.minder(m1('.hello'), '<<<->>>', scope.myList1.data);
+        var valueSet = m1('.hello').push(testData[0]);
+        _.deferTicks(function() {
+            console.log(m1('.hello').get(), scope.myList1.data.get());
+            assert.deepEqual(m1('.hello').get(), scope.myList1.data.get(), 'should return data that was set');
+            done();
+        }, 10);
+    });
+
     it('should propagate data from Model to Data into 2 lists', function(done) {
 
         var m = new Model;
