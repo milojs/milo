@@ -3162,7 +3162,7 @@ function Data$_set(value) {
                     , newItemsCount = value.length - listLength;
                 if (newItemsCount >= 3) {
                     listFacet._addItems(newItemsCount);
-                    listFacet._updataDataPaths(listLength, listFacet.count());
+                    listFacet._updateDataPaths(listLength, listFacet.count());
                 }
 
                 value.forEach(function(childValue, index) {
@@ -3371,7 +3371,7 @@ function Data$_splice(spliceIndex, spliceHowMany) { //, ... arguments
             removed.push(itemData);
         }
 
-        listFacet._updataDataPaths(spliceIndex, listFacet.count());
+        listFacet._updateDataPaths(spliceIndex, listFacet.count());
     }
 
     var added = [];
@@ -3393,7 +3393,7 @@ function Data$_splice(spliceIndex, spliceHowMany) { //, ... arguments
         }
 
         // change paths of items that were added and items after them
-        listFacet._updataDataPaths(spliceIndex, listFacet.count());
+        listFacet._updateDataPaths(spliceIndex, listFacet.count());
     }
 
     // if (Array.isArray(this._value)) {
@@ -4471,6 +4471,7 @@ _.extendProto(ItemFacet, {
     getIndex: ItemFacet$getIndex,
     setIndex: ItemFacet$setIndex,
     removeItem: ItemFacet$removeItem,
+    extractItem: ItemFacet$extractItem,
     require: ['Container', 'Dom', 'Data']
 });
 
@@ -4513,12 +4514,20 @@ function ItemFacet$setIndex(index) {
 
 /**
  * ItemFacet instance method
- * Removes component from the list
- * @param {Boolean} useData True to use the data facet to remove the item. False (default) will not fire data messages.
+ * Removes component from the list, component gets destroyed
  */
-function ItemFacet$removeItem(useData) {
+function ItemFacet$removeItem() {
     // this.list and this.index are set by the list when the item is added
-    this.list.removeItem(this.index, useData);
+    this.list.removeItem(this.index);
+}
+
+
+/**
+ * ItemFacet instance method
+ * Removes component from the list, component is NOT destroyed
+ */
+function ItemFacet$extractItem() {
+    this.list.extractItem(this.index);
 }
 
 },{"../../model":74,"../../services/mail":84,"../c_facet":17,"./cf_registry":31,"mol-proto":111}],26:[function(require,module,exports){
@@ -4568,7 +4577,7 @@ _.extendProto(List, {
     _addItem: List$_addItem,
     _addItems: List$_addItems,
     _createCacheTemplate: List$_createCacheTemplate,
-    _updataDataPaths: List$_updataDataPaths
+    _updateDataPaths: List$_updateDataPaths
 });
 
 facetsRegistry.add(List);
@@ -4853,7 +4862,7 @@ function List$removeItem(index) {
 
 function List$extractItem(index) {
     var itemComp = this._removeItem(index, false);
-    this._updataDataPaths(index, this.count());
+    this._updateDataPaths(index, this.count());
     return itemComp;
 }
 
@@ -4900,7 +4909,7 @@ function _itemPreviousComponent(index) {
 
 // toIndex is not included
 // no range checking is made
-function List$_updataDataPaths(fromIndex, toIndex) {
+function List$_updateDataPaths(fromIndex, toIndex) {
     for (var i = fromIndex; i < toIndex; i++) {
         var item = this.item(i);
         if (item)
