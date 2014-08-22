@@ -4504,11 +4504,21 @@ function ItemFacet$setState(state) {
 }
 
 
+/**
+ * Facet instance method
+ * Returns the index of the owner component in it's parent list component
+ * @return {Integer} The index
+ */
 function ItemFacet$getIndex() {
     return this.index;
 }
 
 
+/**
+ * Facet instance method
+ * Sets the index of this component
+ * @param {Integer} index The index to be set
+ */
 function ItemFacet$setIndex(index) {
     this.index = index;
 }
@@ -4517,6 +4527,7 @@ function ItemFacet$setIndex(index) {
 /**
  * ItemFacet instance method
  * Removes component from the list
+ * @param {Boolean} useData True to use the data facet to remove the item. False (default) will not fire data messages.
  */
 function ItemFacet$removeItem(useData) {
     // this.list and this.index are set by the list when the item is added
