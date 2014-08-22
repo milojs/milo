@@ -2741,7 +2741,10 @@ _.extendProto(Container, {
     setState: Container$setState,
     binder: Container$binder,
     destroy: Container$destroy,
-    unwrap: Container$unwrap
+    unwrap: Container$unwrap,
+
+    append: Container$append,
+    insertBefore: Container$insertBefore
 });
 
 facetsRegistry.add(Container);
@@ -2827,6 +2830,29 @@ function Container$unwrap(renameChildren, destroy) {
         this.owner.scope && this.owner.scope._add(child);
     }, this);
     if (destroy !== false) this.owner.destroy();
+}
+
+
+/**
+ * Container instance method
+ * Append component to DOM and to scope
+ * @param {Component} comp component that will be appended
+ */
+function Container$append(comp) {
+    this.scope._add(comp);
+    this.owner.el.appendChild(comp.el);
+}
+
+
+/**
+ * Container instance method
+ * Insert component to DOM and to scope before another component
+ * @param {Component} comp component that will be inserted
+ * @param {Component} sibling component before which component will be appended
+ */
+function Container$insertBefore(comp, sibling) {
+    this.scope._add(comp);
+    this.el.insertBefore(comp.el, sibling && sibling.el);
 }
 
 },{"../../binder":9,"../../util/dom":93,"../../util/logger":100,"../c_facet":17,"../scope":40,"./cf_registry":31,"mol-proto":111}],19:[function(require,module,exports){
@@ -3444,7 +3470,6 @@ function Data$getPath() {
 }
 
 
-
 /**
  * Data facet instance method
  * Returns key to access the value related to this data facet on the value related to parent data facet.
@@ -3682,7 +3707,7 @@ function remove() {
 
 // append inside HTML element of component
 function append(el) {
-    this.owner.el.appendChild(el)
+    this.owner.el.appendChild(el);
 }
 
 // prepend inside HTML element of component
@@ -4761,8 +4786,15 @@ function List$addItems(count, index) {
 }
 
 
-// Remove item from a particular index
-function removeItem(index) {
+/**
+ * List facet instance method
+ * Removes item, returns the removed item that is destroyed by default.
+ * 
+ * @param  {Number} index item index
+ * @param  {Boolean} doDestroyItem optional false to prevent item destruction, true by default
+ * @return {Component}
+ */
+function removeItem(index, doDestroyItem) {
     var comp = this.item(index);
 
     if (! comp)
@@ -4770,11 +4802,18 @@ function removeItem(index) {
 
     this._listItems[index] = undefined;
     delete this._listItemsHash[comp.name];
-    comp.destroy();
+    if (doDestroyItem !== false) comp.destroy();
+    else {
+        comp.remove();
+        comp.dom.remove();
+    }
 
     this._listItems.splice(index, 1);
     _updateItemsIndexes.call(this, index);
+
+    return comp;
 }
+
 
 // Returns the previous item component given an index
 function _itemPreviousComponent(index) {
@@ -14177,28 +14216,33 @@ function request(url, opts, callback) {
 
 
     function onReady() {
-        if (req.readyState == 4) {
-            if (req.statusText.toUpperCase() == 'OK' ) {
-                callback && callback(null, req.responseText, req);
-                promise.setData(null, req.responseText);
-                postMessage('success');
-            }
-            else if(req.status != 0) { // not canceled eg. with abort() method
-                callback && callback(req.status, req.responseText, req);
-                promise.setData(req.status, req.responseText);
-                postMessage('error');
-                postMessage('error' + req.status);
-            }
-
-            // not removing subscription creates memory leak, deleting property would not remove subscription
-            req.onreadystatechange = undefined;
-        }
-
-        function postMessage(msg) {
-            if (_messenger) request.postMessageSync(msg,
-                { status: req.status, response: req.responseText });
-        }
+        _onReady(req, callback, promise);
     }
+}
+
+
+function _onReady(req, callback, promise) {
+    if (req.readyState == 4) {
+        if (req.statusText.toUpperCase() == 'OK' ) {
+            callback && callback(null, req.responseText, req);
+            promise.setData(null, req.responseText);
+            postMessage('success');
+        }
+        else if(req.status != 0) { // not canceled eg. with abort() method
+            callback && callback(req.status, req.responseText, req);
+            promise.setData(req.status, req.responseText);
+            postMessage('error');
+            postMessage('error' + req.status);
+        }
+
+        // not removing subscription creates memory leak, deleting property would not remove subscription
+        req.onreadystatechange = undefined;
+    }
+
+    function postMessage(msg) {
+        if (_messenger) request.postMessageSync(msg,
+            { status: req.status, response: req.responseText });
+    }    
 }
 
 
@@ -14287,9 +14331,14 @@ function request$file(url, data, callback) {
     var formData = new FormData();
     formData.append('file', data);
 
-    req.onreadystatechange = _.partial(onReady, req, callback, promise);
+    req.onreadystatechange = onReady;
 
     req.send(formData);
+
+
+    function onReady() {
+        _onReady(req, callback, promise);
+    }
 }
 
 
