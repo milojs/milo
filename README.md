@@ -3,7 +3,7 @@ Milo
 
 Browser/nodejs [reactive programming](http://en.wikipedia.org/wiki/Reactive_programming) and data driven DOM manipulation with modular components.
 
-[![Build Status](https://travis-ci.org/MailOnline/milo.png?branch=master)](https://travis-ci.org/MailOnline/milo)
+[![Build Status](https://travis-ci.org/MailOnline/milo.png?branch=master)](https://travis-ci.org/MailOnline/milo) [![Code Climate](https://codeclimate.com/github/MailOnline/milo/badges/gpa.svg)](https://codeclimate.com/github/MailOnline/milo)
 
 
 Documentation: http://mailonline.github.io/milo/
