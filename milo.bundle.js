@@ -3161,8 +3161,8 @@ function Data$_set(value) {
                 var listLength = listFacet.count()
                     , newItemsCount = value.length - listLength;
                 if (newItemsCount >= 3) {
-                    listFacet.addItems(newItemsCount);
-                    _updataDataPaths(listFacet, listLength, listFacet.count());
+                    listFacet._addItems(newItemsCount);
+                    listFacet._updataDataPaths(listLength, listFacet.count());
                 }
 
                 value.forEach(function(childValue, index) {
@@ -3173,7 +3173,7 @@ function Data$_set(value) {
                     , removeCount = listCount - value.length;
 
                 while (removeCount-- > 0)
-                    listFacet.removeItem(value.length);
+                    listFacet._removeItem(value.length);
             } else
                 logger.warn('Data: setting array data without List facet');
         } else {
@@ -3364,14 +3364,14 @@ function Data$_splice(spliceIndex, spliceHowMany) { //, ... arguments
             var item = listFacet.item(spliceIndex);
             if (item) {
                 var itemData = item.data.get();
-                listFacet.removeItem(spliceIndex);
+                listFacet._removeItem(spliceIndex);
             } else
                 logger.warn('Data: no item for index', i);
 
             removed.push(itemData);
         }
 
-        _updataDataPaths(listFacet, spliceIndex, listFacet.count());
+        listFacet._updataDataPaths(spliceIndex, listFacet.count());
     }
 
     var added = [];
@@ -3380,7 +3380,7 @@ function Data$_splice(spliceIndex, spliceHowMany) { //, ... arguments
         , addItems = argsLen > 2
         , addedCount = argsLen - 2;
     if (addItems) {
-        listFacet.addItems(addedCount, spliceIndex);
+        listFacet._addItems(addedCount, spliceIndex);
         for (var i = 2, j = spliceIndex; i < argsLen; i++, j++) {
             var item = listFacet.item(j);
             if (item) {
@@ -3393,7 +3393,7 @@ function Data$_splice(spliceIndex, spliceHowMany) { //, ... arguments
         }
 
         // change paths of items that were added and items after them
-        _updataDataPaths(listFacet, spliceIndex, listFacet.count());
+        listFacet._updataDataPaths(spliceIndex, listFacet.count());
     }
 
     // if (Array.isArray(this._value)) {
@@ -3407,19 +3407,6 @@ function Data$_splice(spliceIndex, spliceHowMany) { //, ... arguments
         removed: removed,
         addedCount: addItems ? addedCount : 0
     };
-}
-
-
-// toIndex is not included
-// no range checking is made
-function _updataDataPaths(listFacet, fromIndex, toIndex) {
-    for (var i = fromIndex; i < toIndex; i++) {
-        var item = listFacet.item(i);
-        if (item)
-            item.data._path = '[' + i + ']';
-        else
-            logger.warn('Data: no item for index', j);
-    }
 }
 
 
@@ -3443,7 +3430,7 @@ function Data$path(accessPath, createItem) {
         if (pathNode.syntax == 'array' && currentComponent.list) {
             var itemComponent = currentComponent.list.item(nodeKey);
             if (! itemComponent && createItem !== false) {
-                itemComponent = currentComponent.list.addItem(nodeKey);
+                itemComponent = currentComponent.list._addItem(nodeKey);
                 itemComponent.data._path = pathNode.property;
             }
             currentComponent = itemComponent;
@@ -4570,13 +4557,18 @@ _.extendProto(List, {
 
     item: List$item,
     count: List$count,
-    _setItem: _setItem,
     contains: List$contains,
     addItem: List$addItem,
     addItems: List$addItems,
-    _createCacheTemplate: List_createCacheTemplate,
     removeItem: List$removeItem,
-    each: List$each
+    extractItem: List$extractItem,
+    each: List$each,
+    _setItem: List$_setItem,
+    _removeItem: List$_removeItem,
+    _addItem: List$_addItem,
+    _addItems: List$_addItems,
+    _createCacheTemplate: List$_createCacheTemplate,
+    _updataDataPaths: List$_updataDataPaths
 });
 
 facetsRegistry.add(List);
@@ -4609,6 +4601,7 @@ function List$start() {
     // Fired by __binder__ when all children of component are bound
     this.owner.on('childrenbound', onChildrenBound);
 }
+
 
 function onChildrenBound() {
     // get items already in the list
@@ -4652,7 +4645,8 @@ function onChildrenBound() {
     this.list._createCacheTemplate();
 }
 
-function List_createCacheTemplate() {
+
+function List$_createCacheTemplate() {
     if (!this.itemSample) return false;
     
     var itemSample = this.itemSample;
@@ -4673,6 +4667,7 @@ function List_createCacheTemplate() {
     this.itemsTemplate = doT.compile(itemsTemplateStr);
 }
 
+
 /**
  * Facet instance method
  * Retrieve a particular child item by index
@@ -4682,6 +4677,7 @@ function List_createCacheTemplate() {
 function List$item(index) {
     return this._listItems[index];
 }
+
 
 /**
  * Facet instance method
@@ -4693,12 +4689,13 @@ function List$count() {
 }
 
 
-function _setItem(index, component) {
+function List$_setItem(index, component) {
     this._listItems.splice(index, 0, component);
     this._listItemsHash[component.name] = component;
     component.item.list = this;
     component.item.setIndex(+index);
 }
+
 
 /**
  * Facet instance method
@@ -4710,13 +4707,28 @@ function List$contains(component) {
     return this._listItemsHash[component.name] == component;
 }
 
+
+/**
+ * Facet instance method
+ * Adds a new child component at a particular index and returns the new component.
+ * This method uses data facet, so notification will be emitted on data facet.
+ * @param {Integer} index The index to add at
+ * @return {Component} The newly created component
+ */
+function List$addItem(index, itemData) {
+    index = index || this.count();
+    this.owner.data.splice(index, 0, itemData || {});
+    return this.item(index);
+}
+
+
 /**
  * Facet instance method
  * Adds a new child component at a particular index and returns the new component
  * @param {Integer} index The index to add at
  * @return {Component} The newly created component
  */
-function List$addItem(index) {
+function List$_addItem(index) {
     index = index || this.count();
     if (this.item(index))
         throw ListError('attempt to create item with ID of existing item');
@@ -4756,6 +4768,16 @@ function _updateItemsIndexes(fromIndex, toIndex) {
 }
 
 
+function List$addItems(count, index) { // ,... items data
+    var itemsData = _.slice(arguments, 2);
+    if (itemsData.length < count) 
+        itemsData.concat(_.repeat(count - itemsData.length, {}));
+    var spliceArgs = [index, 0].concat(itemsData);
+    var dataFacet = this.owner.data;
+    dataFacet.splice.apply(dataFacet, spliceArgs);
+}
+
+
 /**
  * List facet instance method
  * Adds a given number of items using template rendering rather than adding elements one by one
@@ -4763,7 +4785,7 @@ function _updateItemsIndexes(fromIndex, toIndex) {
  * @param {Integer} count number of items to add
  * @param {[Integer]} index optional index of item after which to add
  */
-function List$addItems(count, index) {
+function List$_addItems(count, index) {
     check(count, Match.Integer);
     if (count < 0)
         throw new ListError('can\'t add negative number of items');
@@ -4824,6 +4846,18 @@ function List$addItems(count, index) {
 }
 
 
+function List$removeItem(index) {
+    this.owner.data.splice(index, 1);
+}
+
+
+function List$extractItem(index) {
+    var itemComp = this._removeItem(index, false);
+    this._updataDataPaths(index, this.count());
+    return itemComp;
+}
+
+
 /**
  * List facet instance method
  * Removes item, returns the removed item that is destroyed by default.
@@ -4832,7 +4866,7 @@ function List$addItems(count, index) {
  * @param  {Boolean} doDestroyItem optional false to prevent item destruction, true by default
  * @return {Component}
  */
-function List$removeItem(index, doDestroyItem) {
+function List$_removeItem(index, doDestroyItem) {
     var comp = this.item(index);
 
     if (! comp)
@@ -4862,6 +4896,20 @@ function _itemPreviousComponent(index) {
                 ? this._listItems[index]
                 : this.itemSample;
 }
+
+
+// toIndex is not included
+// no range checking is made
+function List$_updataDataPaths(fromIndex, toIndex) {
+    for (var i = fromIndex; i < toIndex; i++) {
+        var item = this.item(i);
+        if (item)
+            item.data._path = '[' + i + ']';
+        else
+            logger.warn('Data: no item for index', j);
+    }
+}
+
 
 /**
  * Facet instance method
