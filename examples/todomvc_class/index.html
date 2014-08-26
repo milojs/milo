@@ -3,20 +3,46 @@
     <script src="../../milo.bundle.js"></script>
     <script src="todo.js"></script>
     <link rel="stylesheet" type="text/css" href="todo.css">
+    <style>
+        /* Style for checked items */
+        .todo-item-checked {
+            color: #888;
+            text-decoration: line-through;
+        }
+    </style>
 </head>
 <body>
+    <!-- An HTML input managed by a component with a `data` facet -->
     <input ml-bind="[data]:newTodo" />
+
+    <!-- A button with an `events` facet -->
     <button ml-bind="[events]:addBtn">Add</button>
     <h3>To-do's</h3>
+
+    <!-- Since we have only one list it makes sense to declare
+         it like this. To manage multiple lists, a list class
+         should be setup like this: ml-bind="MyList:todos" -->
     <ul ml-bind="[list]:todos">
-        <!--<li ml-bind="Todo:todo">-->
-        <li ml-bind="Todo[item]:todo">
+
+        <!-- A single todo item in the list. Every list requires
+             one child with an item facet. This is basically milo's
+             ng-repeat, except that we manage lists and items separately
+             and you can include any other markup in here that you need. -->
+        <li ml-bind="Todo:todo">
+
+            <!-- And each list has the following markup and child
+                 components that it manages. -->
             <input ml-bind="[data]:checked" type="checkbox">
+
+            <!-- Notice the `contenteditable`. This works, out-of-the-box
+            with `data` facet to fire off changes to the `minder`. -->
             <span ml-bind="[data]:text" contenteditable="true"></span>
             <button ml-bind="[events]:deleteBtn">X</button>
+
         </li>
     </ul>
 
+    <!-- This component is only to show the contents of the model -->
     <h3>Model</h3>
     <div ml-bind="[data]:modelView"></div>
 </body>
