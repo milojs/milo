@@ -25,9 +25,9 @@
 
         <!-- A single todo item in the list. Every list requires
              one child with an item facet. This is basically milo's
-             ng-repeat, except that we manage lists and items separately
-             and you can include any other markup in here that you need. -->
-        <li ml-bind="Todo:todo">
+             ng-repeat, except that we manage lists and items separately.
+             The item facet is added here so we can use Todo on it's own. -->
+        <li ml-bind="Todo[item]:todo">
 
             <!-- And each list has the following markup and child
                  components that it manages. -->

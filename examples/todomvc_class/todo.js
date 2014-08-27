@@ -4,7 +4,7 @@
 // This would usually be defined in it's own file.
 // Note: The item facet will `require` in 
 // the `container`, `data` and `dom` facets
-var Todo = milo.Component.createComponentClass('Todo', ['item']);
+var Todo = milo.Component.createComponentClass('Todo', ['container', 'dom', 'data']);
 milo.registry.components.add(Todo);
 
 // Adding our own custom init method
