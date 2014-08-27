@@ -4154,7 +4154,6 @@ function onDrop(eventType, event) {
 _handleDropDependency = _.throttle(_handleDropDependencyNothrottle, 50);
 function _handleDropDependencyNothrottle(dt, originalDropComponent) {
     var allow = this.config.allow
-        , meta = dt.getComponentMeta()
         , parentAllowed = true;
 
     originalDropComponent = originalDropComponent || this.owner;
