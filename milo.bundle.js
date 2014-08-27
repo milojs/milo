@@ -8002,7 +8002,7 @@ var MLDialog = Component.createComponentClass('MLDialog', {
                     <div class="modal-footer">\
                         {{~ it.buttons :btn }}\
                             <button type="button"\
-                                class="btn btn-{{= btn.type }}"\
+                                class="btn btn-{{= btn.type }}{{=btn.cls}}"\
                                 ml-bind="[events]:{{= btn.name }}">{{= btn.label }}</button>\
                         {{~}}\
                     </div>\
@@ -8080,6 +8080,7 @@ function MLDialog$$createDialog(options) {
             close: Match.Optional(Boolean),
             result: Match.Optional(String),
             data: Match.Optional(Match.Any),
+            cls: Match.Optional(String)
         } ])
     });
 
@@ -8160,6 +8161,11 @@ function _prepareOptions(options) {
     options.buttons.forEach(function(btn) {
         if (! btn.name)
             btn.name = componentName();
+
+        if (! btn.cls)
+            btn.cls = '';
+        else
+            btn.cls = ' ' + btn.cls;
     });
 
     options.close = typeof options.close == 'undefined' || options.close === true
