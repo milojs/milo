@@ -16506,6 +16506,7 @@ function _delayMethod(object, funcOrMethodName, wait, args) {
 /**
  * Returns function that will execute the original function `wait` ms after it has been called
  * The context in function when it is executed is set to `null`.
+ * Arguments passed to the function are appended to the arguments passed to delayed.
  *
  * @param {Function} self function which execution has to be deferred
  * @param {Number} wait approximate dalay time in milliseconds
@@ -16515,8 +16516,9 @@ function _delayMethod(object, funcOrMethodName, wait, args) {
 function delayed(wait) { //, ... arguments
     var func = this
         , args = slice.call(arguments, 1);
-    return function() {
-        return _delay(func, wait, args, this);
+    return function() { // ... arguments
+        var passArgs = args.concat(slice.call(arguments));
+        return _delay(func, wait, passArgs, this);
     };
 }
 
@@ -16524,6 +16526,7 @@ function delayed(wait) { //, ... arguments
 /**
  * Returns function that will execute the original function on the next tick once it has been called
  * The context in function when it is executed is set to `null`.
+ * Arguments passed to the function are appended to the arguments passed to deferred.
  *
  * @param {Function} self function which execution has to be deferred
  * @param {List} arguments optional arguments that will be passed to the function
@@ -16531,9 +16534,10 @@ function delayed(wait) { //, ... arguments
  */
 function deferred() { //, ... arguments
     var func = this
-        , args = arguments;
-    return function() {
-        return _delay(func, 1, args, this);
+        , args = slice.call(arguments);
+    return function() { // ... arguments
+        var passArgs = args.concat(slice.call(arguments));
+        return _delay(func, 1, passArgs, this);
     };
 }
 
