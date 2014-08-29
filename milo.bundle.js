@@ -7218,10 +7218,7 @@ function MLSuperCombo$hideOptions() {
  * Hides add button
  */
 function MLSuperCombo$toggleAddButton(show) {
-    if (show)
-        _.delayMethod(this._comboAddItemDiv.dom, 'toggle', 300, show);
-    else 
-        this._comboAddItemDiv.dom.toggle(show);
+    this._comboAddItemDiv.dom.toggle(show);
     this._isAddButtonShown = show;
 }
 
@@ -7400,6 +7397,7 @@ function onDataChange(msg, data) {
     this._comboList.el.scrollTop = 0;
 
     function isExactMatch(item) {
+        console.log(item.label, text)
         return item.label.toLowerCase() === text.toLowerCase();
     }
 }
@@ -16307,6 +16305,7 @@ var makeProtoFunction = require('./utils').makeProtoFunction
  * - [throttle](#throttle)
  * - [once](#once)
  * - [waitFor](#waitFor)
+ * - [not](#not)
  *
  * These methods can be [chained](proto.js.html#Proto)
  */
@@ -16325,7 +16324,8 @@ var functionMethods = module.exports = {
     debounce: debounce,
     throttle: throttle,
     once: once,
-    waitFor: waitFor
+    waitFor: waitFor,
+    not: not
 };
 
 
@@ -16658,6 +16658,19 @@ function waitFor(callback, maxTimeout, timedOutFunc, checkInterval){
             timedOutFunc && timedOutFunc();
         else return;
         clearInterval(interval);
+    };
+}
+
+
+/**
+ * returns the function that negates (! operator) the result of the original function
+ * @param {Function} self function to negate
+ * @return {Function}
+ */
+function not() {
+    var func = this;
+    return function() {
+        return !func.apply(this, arguments);
     };
 }
 
