@@ -41,7 +41,7 @@ function send(data) {
                     ? handler(data)
                     : handler;
 
-        _response_ready.call(this, response);
+        _.deferMethod(this, _response_ready, response);
     } else
         milo.util.logger.error('unknown mock route', this.method, this.url);
 }

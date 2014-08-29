@@ -28,13 +28,28 @@ var requests = {
 
 
 describe('request', function() {
+    var requestMessageDispatched, requestMessages;
+
     before(function() {
         window.XMLHttpRequest.setMockRoutes(requests);
+        request.useMessenger();
+        request.on('request success error requestscompleted', function(msg, data) {
+            requestMessages.push(msg);
+            requestMessageDispatched();
+        });
+    });
+
+
+    beforeEach(function() {
+        requestMessages = [];
     });
 
 
     it('should send request', function(done) {
-        var completed = doneTimes(2, done);
+        var completed = requestMessageDispatched = doneTimes(5, function() {
+            assert.deepEqual(requestMessages, ['request', 'success', 'requestscompleted']);
+            done();
+        });
 
         var promise = request('http://example.com/test1', { method: 'GET' }, function(err, resp) {
             assert.equal(resp, 'test1');
@@ -49,14 +64,24 @@ describe('request', function() {
 
 
     it('should define request.get', function(done) {
+        var completed = requestMessageDispatched = doneTimes(4, function() {
+            assert.deepEqual(requestMessages, ['request', 'success', 'requestscompleted']);
+            done();
+        });
+
         request.get('http://example.com/test1', function(err, resp) {
             assert.equal(resp, 'test1');
-            done();
+            completed();
         });
     });
 
 
     it('should define request.post', function(done) {
+        var completed = requestMessageDispatched = doneTimes(4, function() {
+            assert.deepEqual(requestMessages, ['request', 'success', 'requestscompleted']);
+            done();
+        });
+
         var testData = { data: 'test2' };
         currentTestResponse = function(data) {
             assert.deepEqual(JSON.parse(data), testData)
@@ -65,18 +90,26 @@ describe('request', function() {
 
         request.post('http://example.com/test2', testData, function(err, resp) {
             assert.equal(resp, 'test2 response');
-            done();
+            completed();
         });
     });
 
 
     it('should define request.json', function(done) {
-        request.jsonp('http://example.com/test3', function(err, resp) {
-            assert.deepEqual(resp, {"data": "test3"});
+        var completed = requestMessageDispatched = doneTimes(5, function() {
+            assert.deepEqual(requestMessages, ['request', 'success', 'requestscompleted']);
             done();
         });
 
-        window['___milo_callback_' + count.get()]({"data": "test3"});
+        var promise = request.json('http://example.com/test3', function(err, resp) {
+            assert.deepEqual(resp, {"data": "test3"});
+            completed();
+        });
+
+        promise.then(function(err, data) {
+            assert.deepEqual(data, {"data": "test3"});
+            completed();
+        });
     });
 
 

@@ -14369,7 +14369,7 @@ function _onReady(req, callback, promise) {
     }
 
     function postMessage(msg) {
-        if (_messenger) request.postMessageSync(msg,
+        if (_messenger) request.postMessage(msg,
             { status: req.status, response: req.responseText });
     }    
 }
@@ -14391,7 +14391,7 @@ var _messenger;
 
 
 function request$useMessenger() {
-    _messenger = new Messenger(request, ['on', 'once', 'onSync', 'off', 'onMessages', 'offMessages', 'postMessageSync']);
+    _messenger = new Messenger(request, ['on', 'once', 'onSync', 'off', 'onMessages', 'offMessages', 'postMessage', 'postMessageSync']);
 }
 
 
