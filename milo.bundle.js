@@ -8447,7 +8447,8 @@ config({
     },
     request: {
         jsonpTimeout: 15, // seconds
-        optionsKey: '___milo_options'
+        jsonpCallbackPrefix: '___milo_callback_',
+        optionsKey: '___milo_options',
     },
     check: true,
     debug: false
@@ -14420,7 +14421,7 @@ function request$jsonp(url, callback) {
     var script = document.createElement('script'),
         promise = new Promise(script),
         head = window.document.head,
-        uniqueCallback = 'ML_JSONP_' +  count();
+        uniqueCallback = config.request.jsonpCallbackPrefix + count();
 
     setTimeout(function() {
         if (window[uniqueCallback]) {
