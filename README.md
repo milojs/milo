@@ -333,6 +333,11 @@ http://opensource.org/licenses/BSD-2-Clause
 Changes log
 -----------
 
+###After 0.1.4###
+
+- Added mock for XMLHTTPRequest.
+
+
 ###0.1.4###
 
 - Data propagation redesigned to avoid using model notification messages.
@@ -346,6 +351,7 @@ Changes log
 - util.request - messaging support (allows monitoring and modifying requests before they are sent), fixed listener leak.
 - Minor fixes.
 
+
 ###0.1.3###
 
 - Asynchronous messaging.
@@ -357,6 +363,7 @@ Changes log
     - DOM events are dispatched synchronously, so preventDefault etc. would work (the actual DOM event is passed as the second parameter of subscribers).
 
 - List facet now allows multiple items already in DOM, but requires that all Items (components with Item facet) are immediate DOM children. The first item in the DOM is used as a sample for new items.
+
 
 ###0.1.2###
 

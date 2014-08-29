@@ -8446,7 +8446,8 @@ config({
         }
     },
     request: {
-        jsonpTimeout: 15 // seconds
+        jsonpTimeout: 15, // seconds
+        optionsKey: '___milo_options'
     },
     check: true,
     debug: false
@@ -14301,6 +14302,9 @@ var _ = require('mol-proto')
 module.exports = request;
 
 
+var _pendingRequests = [];
+
+
 function request(url, opts, callback) {
     opts.url = url;
     opts.contentType = opts.contentType || 'application/json;charset=UTF-8';
@@ -14318,6 +14322,9 @@ function request(url, opts, callback) {
 
     req.onreadystatechange = onReady;
     req.send(JSON.stringify(opts.data));
+    req[config.request.optionsKey] = opts;
+
+    _pendingRequests.push(req);
 
     return promise;
 
@@ -14330,20 +14337,34 @@ function request(url, opts, callback) {
 
 function _onReady(req, callback, promise) {
     if (req.readyState == 4) {
-        if (req.statusText.toUpperCase() == 'OK' ) {
-            callback && callback(null, req.responseText, req);
-            promise.setData(null, req.responseText);
-            postMessage('success');
+        _.spliceItem(_pendingRequests, req);
+
+        var error;
+        try {
+            if (req.statusText.toUpperCase() == 'OK' ) {
+                try { callback && callback(null, req.responseText, req); }
+                catch(e) { error = e; }
+                promise.setData(null, req.responseText);
+                postMessage('success');
+            }
+            else if(req.status != 0) { // not canceled eg. with abort() method
+                try { callback && callback(req.status, req.responseText, req); }
+                catch(e) { error = e; }
+                promise.setData(req.status, req.responseText);
+                postMessage('error');
+                postMessage('error' + req.status);
+            }
+        } catch(e) {
+            error = error || e;
         }
-        else if(req.status != 0) { // not canceled eg. with abort() method
-            callback && callback(req.status, req.responseText, req);
-            promise.setData(req.status, req.responseText);
-            postMessage('error');
-            postMessage('error' + req.status);
-        }
+
+        if (!_pendingRequests.length)
+            postMessage('requestscompleted');
 
         // not removing subscription creates memory leak, deleting property would not remove subscription
         req.onreadystatechange = undefined;
+
+        if (error) throw error;
     }
 
     function postMessage(msg) {
@@ -14360,7 +14381,8 @@ _.extend(request, {
     jsonp: request$jsonp,
     file: request$file,
     useMessenger: request$useMessenger,
-    destroy: request$destroy
+    destroy: request$destroy,
+    whenRequestsCompleted: whenRequestsCompleted
 });
 
 
@@ -14452,6 +14474,36 @@ function request$file(url, data, callback) {
 function request$destroy() {
     if (_messenger) _messenger.destroy();
     request._destroyed = true;
+}
+
+
+function whenRequestsCompleted(options, callback) {
+    if (typeof options == 'function') {
+        callback = options;
+        options = undefined;
+    }
+    var optionsKey = config.request.optionsKey;
+
+    var somePending = _pendingRequests.length;
+    if (options && somePending) {
+        if (options.matchURL)
+            somePending = _pendingRequests.some(matchPattern('matchURL'));
+
+        if (options.ignoreURL && somePending)
+            somePending = _pendingRequests.some(_.not(matchPattern('ignoreURL')));
+    }
+
+    if (somePending)
+        _messenger.once('requestscompleted', callback);
+    else
+        _.defer(callback);
+
+
+    function matchPattern(patternKey) {
+        return function(req) {
+            return options[patternKey].test(req[optionsKey].url);
+        }
+    }
 }
 
 },{"../config":63,"../messenger":65,"./count":92,"./logger":100,"./promise":102,"mol-proto":111}],104:[function(require,module,exports){
