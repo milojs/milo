@@ -121,7 +121,7 @@ describe('request', function() {
 
         var promise = request.jsonp('http://example.com/test3', function(err, resp) {
             assert.deepEqual(resp, {"data": "test3"});
-            done();
+            completed();
         });
 
         window['___milo_callback_' + count.get()]({"data": "test3"});
@@ -145,7 +145,7 @@ describe('request', function() {
 
         var promise = request.file('http://example.com/test4', 'file data', function(err, resp) {
             assert.equal(resp, 'test4 uploaded');
-            done();
+            completed();
         });
 
         promise.then(function(err, data) {
