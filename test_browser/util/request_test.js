@@ -33,7 +33,7 @@ describe('request', function() {
     before(function() {
         window.XMLHttpRequest.setMockRoutes(requests);
         request.useMessenger();
-        request.on('request success error requestscompleted', function(msg, data) {
+        request.on(/.*/, function(msg, data) {
             requestMessages.push(msg);
             requestMessageDispatched();
         });
@@ -114,23 +114,71 @@ describe('request', function() {
 
 
     it('should define request.jsonp', function(done) {
-        request.jsonp('http://example.com/test3', function(err, resp) {
+        var completed = requestMessageDispatched = doneTimes(5, function() {
+            assert.deepEqual(requestMessages, ['request', 'success', 'requestscompleted']);
+            done();
+        });
+
+        var promise = request.jsonp('http://example.com/test3', function(err, resp) {
             assert.deepEqual(resp, {"data": "test3"});
             done();
         });
 
         window['___milo_callback_' + count.get()]({"data": "test3"});
+
+        promise.then(function(err, data) {
+            assert.deepEqual(data, {"data": "test3"});
+            completed();
+        });
     });
 
 
     it('should define request.file', function(done) {
+        var completed = requestMessageDispatched = doneTimes(5, function() {
+            assert.deepEqual(requestMessages, ['request', 'success', 'requestscompleted']);
+            done();
+        });
+
         currentTestResponse = function(data) {
             return 'test4 uploaded'
         };
 
-        request.file('http://example.com/test4', 'file data', function(err, resp) {
+        var promise = request.file('http://example.com/test4', 'file data', function(err, resp) {
             assert.equal(resp, 'test4 uploaded');
             done();
+        });
+
+        promise.then(function(err, data) {
+            assert.equal(data, 'test4 uploaded');
+            completed();
+        });
+    });
+
+
+    it('should define request.whenRequestsCompleted', function(done) {
+        var completed = requestMessageDispatched = doneTimes(9, function() {
+            console.log(requestMessages);
+            assert.deepEqual(requestMessages, [
+                'request', 'test_whenRequestsCompleted_none',
+                'request', 'request',
+                'success', 'success', 'success',
+                'requestscompleted', 'test_whenRequestsCompleted_all'
+            ]);
+            done();
+        });
+
+        request.whenRequestsCompleted(function() {
+            request.postMessageSync('test_whenRequestsCompleted_none');
+        });
+
+        request.get('http://example.com/test3', function() {
+            request.get('http://example.com/test1', function () {
+                request.get('http://example.com/test1');
+            });
+        });        
+
+        request.whenRequestsCompleted(function() {
+            request.postMessage('test_whenRequestsCompleted_all');
         });
     });
 
