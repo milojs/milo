@@ -157,7 +157,6 @@ describe('request', function() {
 
     it('should define request.whenRequestsCompleted', function(done) {
         var completed = requestMessageDispatched = doneTimes(9, function() {
-            console.log(requestMessages);
             assert.deepEqual(requestMessages, [
                 'request', 'test_whenRequestsCompleted_none',
                 'request', 'request',

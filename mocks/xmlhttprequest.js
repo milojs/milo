@@ -38,12 +38,17 @@ function send(data) {
 
     if (handler) {
         var response = typeof handler == 'function'
-                    ? handler(data)
-                    : handler;
-
-        _.deferMethod(this, _response_ready, response);
-    } else
+                        ? handler(data)
+                        : handler;
+    } else {
         milo.util.logger.error('unknown mock route', this.method, this.url);
+        response = {
+            status: 404,
+            body: 'unknown mock route: ' + this.method + ' ' + this.url
+        };
+    }
+
+    _.deferMethod(this, _response_ready, response);
 }
 
 
