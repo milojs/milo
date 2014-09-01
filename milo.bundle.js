@@ -9948,12 +9948,14 @@ var _messenger = new Messenger(minder, Messenger.defaultMethods);
 
 var _connectors = []
     , _receivedMessages = []
-    , _idleCheckDeferred = false;
+    , _isPropagating = false;
 
 
 _.extend(minder, {
     getConnectors: minder_getConnectors,
     getExpandedConnections: minder_getExpandedConnections,
+    isPropagating: minder_isPropagating,
+    whenPropagationCompleted: minder_whenPropagationCompleted,
     destroyConnector: minder_destroyConnector,
     destroy: minder_destroy
 });
@@ -9974,9 +9976,9 @@ function onConnectorMessage(msg, data) {
         connector: this
     });
     minder.postMessage(msg, data);
-    if (! _receivedMessages.length && ! _idleCheckDeferred) {
+    if (! _receivedMessages.length && ! _isPropagating) {
         _.defer(_idleCheck);
-        _idleCheckDeferred = true;
+        _isPropagating = true;
     }
 
     _receivedMessages.push({ msg: msg, data: data });
@@ -9989,8 +9991,28 @@ function _idleCheck() {
         _.defer(_idleCheck);
         minder.postMessage('propagationticked');
     } else {
-        _idleCheckDeferred = false;
+        _isPropagating = false;
         minder.postMessage('propagationcompleted');
+    }
+}
+
+
+function minder_isPropagating() {
+    return _isPropagating;
+}
+
+
+function minder_whenPropagationCompleted(callback) {
+    if (_isPropagating)
+        minder.once('propagationcompleted', executeCallback);
+    else
+        _.defer(executeCallback);
+
+    function executeCallback() {
+        if (_isPropagating)
+            minder.once('propagationcompleted', executeCallback);
+        else
+            callback();
     }
 }
 
@@ -14519,13 +14541,6 @@ function whenRequestsCompleted(callback) {
         _messenger.once('requestscompleted', callback);
     else
         _.defer(callback);
-
-
-    function matchPattern(patternKey) {
-        return function(req) {
-            return options[patternKey].test(req[optionsKey].url);
-        }
-    }
 }
 
 },{"../config":63,"../messenger":65,"./count":92,"./logger":100,"./promise":102,"mol-proto":111}],104:[function(require,module,exports){
