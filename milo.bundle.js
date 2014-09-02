@@ -5747,6 +5747,9 @@ _.extendProto(DropMsgAPI, {
 });
 
 
+module.exports = DropMsgAPI;
+
+
 var dropEventsMap = {
     'dragin': 'dragenter',
     'dragout': 'dragleave'
@@ -5775,7 +5778,6 @@ function filterSourceMessage(sourceMessage, message, data) { // data is DOM even
         }
     }
 
-    console.log(sourceMessage, message, ok);
     return ok;
 }
 
