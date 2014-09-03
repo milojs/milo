@@ -34,14 +34,21 @@ function setRequestHeader(header, content) {
 
 function send(data) {
     this.data = data;
-    var handler = _mock_routes[this.method.toUpperCase()][this.url];
+    var url = this.url;
+    var methodRoutes = _mock_routes[this.method.toUpperCase()];
+
+    var handlerKey = _.find(Object.keys(methodRoutes), function(regex) {
+        return url.match(new RegExp(regex));
+    });
+
+    var handler = methodRoutes[handlerKey];
 
     if (handler) {
         var response = typeof handler == 'function'
                         ? handler(data)
                         : handler;
     } else {
-        milo.util.logger.error('unknown mock route', this.method, this.url);
+        milo.util.logger.error('*unknown mock route', this.method, this.url);
         response = {
             status: 404,
             body: 'unknown mock route: ' + this.method + ' ' + this.url
