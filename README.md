@@ -333,9 +333,33 @@ http://opensource.org/licenses/BSD-2-Clause
 Changes log
 -----------
 
-###After 0.1.4###
+###0.1.5###
 
-- Added mock for XMLHTTPRequest.
+- `milo.util.request`
+
+    - messaging support for jsonp and file requests.
+    - `whenRequestsCompleted` method to call callback when all requests are completed
+      (or if there are no pending requests)
+    - tests
+
+- `Drop` facet
+
+    - `dragin` and `dragout` messages that only fire when mouse enters/leaves the component's element,
+      ignoring enter/leave of child elements (`dragenter` and `dragleave` messages are still emitted as usual).
+    - all messages are re-emitted on drag-drop service (`milo.util.dragDrop.service`).
+
+- `milo.minder` 
+
+    - `whenPropagationCompleted` method that calls passed callback when propagation is completed or
+      when there is no data propagation. Using this function is better than subscription
+      `milo.minder.once('propagationcompleted', callback)` because in the former case callback will always be called
+      and in the latter only if there is propagation happening.
+    - `isPropagating` method that allows to determine if data propagation is currently happening.
+
+- Added mock for XMLHTTPRequest for testing.
+
+- Fixed memory leaks, added `destroy` methods (`milo.destroy` and others).
+  Calling `milo.destroy()` will make milo unusable, only useful inside iframe that has to be disposed of.
 
 
 ###0.1.4###
