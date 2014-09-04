@@ -87,6 +87,12 @@ milo(function () {
 ```
 
 
+### Note on runtime parameter type checking
+
+Milo uses check module (`milo.util.check` - forked from check package of Meteor framework) for runtime checking of parameter types. It is highly recommended to switch off this checks using: `milo.config({ check: false })`.
+Depending on your application, it can improve performance more than twice.
+
+
 Samples/Tutorials
 -----------------
 
@@ -232,7 +238,7 @@ See [Connector documentation](http://mailonline.github.io/milo/model/connector.j
 
 ### Utilities
 
-- [check](http://mailonline.github.io/milo/util/check.js.html) - check parameter types.
+- [check](http://mailonline.github.io/milo/util/check.js.html) - check parameter types (forked from check package of Meteor framework).
 - [logger](http://mailonline.github.io/milo/util/logger.js.html) - configurable logger with log levels.
 - [request](http://mailonline.github.io/milo/util/request.js.html) - HTTP requests library.
 - [dom](http://mailonline.github.io/milo/util/dom.js.html) - library to manipulate DOM elements.
@@ -332,6 +338,13 @@ http://opensource.org/licenses/BSD-2-Clause
 
 Changes log
 -----------
+
+###0.1.6###
+
+- Mixin abstract class: added methods to expose mixin subclass methods on host class prototype rather than on host object instance.
+- Messenger methods are exposed on Component, facets, Model, and ModelPath using approach above
+- Substantially improved performance
+
 
 ###0.1.5###
 
