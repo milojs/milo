@@ -1843,6 +1843,16 @@ _.extendProto(Component, {
     isDestroyed: Component$isDestroyed
 });
 
+
+/**
+ * Expose Messenger methods on Component prototype
+ */
+var MESSENGER_PROPERTY = '_messenger';
+Messenger.addMethods(Messenger.defaultMethods, Component);
+Messenger.setInstanceKey(Component, MESSENGER_PROPERTY);
+
+
+
 var COMPONENT_DATA_TYPE_PREFIX = 'x-application/milo-component';
 var COMPONENT_DATA_TYPE_REGEX = /x-application\/milo-component\/([a-z_$][0-9a-z_$]*)(?:\/())/i;
 
@@ -2153,9 +2163,8 @@ function Component$init(scope, element, name, componentInfo) {
     this.scope = scope;
 
     // create component messenger
-    var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
-
-    _.defineProperty(this, '_messenger', messenger);
+    var messenger = new Messenger(this);
+    _.defineProperty(this, MESSENGER_PROPERTY, messenger);
 
     // check all facets dependencies (required facets)
     this.allFacets('check');
@@ -2579,7 +2588,7 @@ function Component$destroy(quiet) {
     }
     this.remove(false, quiet);
     this.allFacets('destroy');
-    this._messenger.destroy();
+    this[MESSENGER_PROPERTY].destroy();
     if (this.el) {
         domUtils.detachComponent(this.el);
         domUtils.removeElement(this.el);
@@ -2670,19 +2679,23 @@ _.extend(ComponentFacet, {
 });
 
 
+/**
+ * Expose Messenger methods on Facet prototype
+ */
+var MESSENGER_PROPERTY = '_messenger';
+Messenger.addMethods(Messenger.defaultMethods, ComponentFacet);
+Messenger.setInstanceKey(ComponentFacet, MESSENGER_PROPERTY);
+
+
 // initComponentFacet
 function ComponentFacet$init() {
     this._createMessenger();
 }
 
 
-// some classes (e.g. ModelFacet) overrride this method and do not create their own messenger
+// some subclasses (e.g. ModelFacet) overrride this method and do not create their own messenger
 function _createMessenger(){
-    var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
-
-    _.defineProperties(this, {
-        _messenger: messenger
-    });
+    _.defineProperty(this, MESSENGER_PROPERTY, new Messenger(this));
 }
 
 
@@ -2744,7 +2757,7 @@ function ComponentFacet$check() {
 
 // destroys facet
 function ComponentFacet$destroy() {
-    if (this._messenger) this._messenger.destroy();
+    if (this[MESSENGER_PROPERTY]) this[MESSENGER_PROPERTY].destroy();
     this._destroyed = true;
 }
 
@@ -2779,12 +2792,12 @@ function _postParent(getParentMethod, messageType, messageData) {
 
 
 function _setMessageSource(messageSource) {
-    this._messenger._setMessageSource(messageSource);
+    this[MESSENGER_PROPERTY]._setMessageSource(messageSource);
 }
 
 
 function getMessageSource() {
-    return this._messenger.getMessageSource();
+    return this[MESSENGER_PROPERTY].getMessageSource();
 }
 
 
@@ -5136,7 +5149,7 @@ function ModelFacet$setState(state) {
 
 
 function ModelFacet$_createMessenger() { // Called by inherited init
-    this.m.proxyMessenger(this); // Creates messenger's methods directly on facet
+    this._messenger = this.m._messenger;
 }
 
 
@@ -5177,7 +5190,7 @@ function Options$init() {
 
 
 function Options$_createMessenger() { // Called by inherited init
-    this.m.proxyMessenger(this); // Creates messenger's methods directly on facet
+    this._messenger = this.m._messenger;
 }
 
 
@@ -8635,7 +8648,7 @@ config({
     request: {
         jsonpTimeout: 15, // seconds
         jsonpCallbackPrefix: '___milo_callback_',
-        optionsKey: '___milo_options',
+        optionsKey: '___milo_options'
     },
     check: true,
     debug: false
@@ -11052,6 +11065,14 @@ _.extend(Model, {
 
 
 /**
+ * Expose Messenger methods on Facet prototype
+ */
+var MESSENGER_PROPERTY = '_messenger';
+Messenger.addMethods(Messenger.defaultMethods, Model);
+Messenger.setInstanceKey(Model, MESSENGER_PROPERTY);
+
+
+/**
  * ModelPath methods added to Model prototype
  */
 ['len', 'push', 'pop', 'unshift', 'shift'].forEach(function(methodName) {
@@ -11103,9 +11124,8 @@ function Model$path(accessPath) {  // , ... arguments that will be interpolated
  */
 function proxyMessenger(modelHostObject) {
     modelHostObject = modelHostObject || this._hostObject;
-    Mixin.prototype._createProxyMethods.call(this._messenger, messengerMethodsToProxy, modelHostObject);
+    Mixin.prototype._createProxyMethods.call(this[MESSENGER_PROPERTY], Messenger.defaultMethods, modelHostObject);
 }
-var messengerMethodsToProxy = Messenger.defaultMethods;
 
 
 /**
@@ -11135,12 +11155,10 @@ function _prepareMessengers() {
 
     // external messenger to which all model users will subscribe,
     // that will allow "*" subscriptions and support "changedata" message api.
-    var externalMessenger = new Messenger(this, Messenger.defaultMethods, internalMessengerSource);
+    var externalMessenger = new Messenger(this, undefined, internalMessengerSource);
 
-    _.defineProperties(this, {
-        _messenger: externalMessenger,
-        _internalMessenger: internalMessenger
-    });
+    _.defineProperty(this, MESSENGER_PROPERTY, externalMessenger);
+    _.defineProperty(this, '_internalMessenger', internalMessenger);
 }
 
 
@@ -11169,7 +11187,7 @@ function Model_domStorageParser(valueStr) {
 
 
 function Model$destroy() {
-    this._messenger.destroy();
+    this[MESSENGER_PROPERTY].destroy();
     this._internalMessenger.destroy();
     // delete this._hostObject;
     // delete this._data;
@@ -11343,6 +11361,14 @@ _.extend(ModelPath, {
 
 
 /**
+ * Expose Messenger methods on Facet prototype
+ */
+var MESSENGER_PROPERTY = '_messenger';
+Messenger.addMethods(Messenger.defaultMethods, ModelPath);
+Messenger.setInstanceKey(ModelPath, MESSENGER_PROPERTY);
+
+
+/**
  * ModelPath instance method
  * Gives access to path inside ModelPath. Method works similarly to [path method](#Model$path) of model, using relative paths.
  * 
@@ -11458,10 +11484,10 @@ function _prepareMessenger() {
 
     // create messenger with model passed as hostObject (default message dispatch context)
     // and without proxying methods (we don't want to proxy them to Model)
-    var mPathMessenger = new Messenger(this, Messenger.defaultMethods, modelMessageSource);
+    var mPathMessenger = new Messenger(this, undefined, modelMessageSource);
 
     // store messenger on ModelPath instance
-    _.defineProperty(this, '_messenger', mPathMessenger);
+    _.defineProperty(this, MESSENGER_PROPERTY, mPathMessenger);
 }
 
 
@@ -11500,7 +11526,7 @@ function _createFromDefinition(definition) {
 
 
 function ModelPath$destroy() {
-    this._messenger.destroy();
+    this[MESSENGER_PROPERTY].destroy();
 }
 
 },{"../messenger":66,"../messenger/msngr_source":70,"../util/check":91,"./change_data":73,"./path_msg_api":79,"./path_utils":80,"./synthesize":81,"mol-proto":112}],78:[function(require,module,exports){
