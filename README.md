@@ -89,7 +89,8 @@ milo(function () {
 
 ### Note on runtime parameter type checking
 
-Milo uses check module (`milo.util.check` - forked from check package of Meteor framework) for runtime checking of parameter types. It is highly recommended to switch off this checks using: `milo.config({ check: false })`.
+Milo uses check module (`milo.util.check` - forked from check package of [Meteor framework](https://www.meteor.com/)) for runtime checking of parameter types. It is highly recommended to switch off this checks using: `milo.config({ check: false })`.
+
 Depending on your application, it can improve performance more than twice.
 
 
