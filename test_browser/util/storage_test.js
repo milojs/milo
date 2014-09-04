@@ -41,7 +41,7 @@ describe('DOMStorage', function() {
         it('should store and get strings', function() {
             domStorage.setItem('name', 'milo');
             assert.deepEqual(getLocalStorage(), {
-                'MiloTest/name': 'milo', 
+                'MiloTest/name': 'milo',
                 'MiloTest/name:___milo_data_type': 'string'
             })
             var itemValue = domStorage.getItem('name');
@@ -52,7 +52,7 @@ describe('DOMStorage', function() {
         it('should store and get numbers', function() {
             domStorage.setItem('year', 2014);
             assert.deepEqual(getLocalStorage(), {
-                'MiloTest/year': '2014', 
+                'MiloTest/year': '2014',
                 'MiloTest/year:___milo_data_type': 'number'
             })
             var itemValue = domStorage.getItem('year');
@@ -64,9 +64,9 @@ describe('DOMStorage', function() {
             domStorage.setItem('trueValue', true);
             domStorage.setItem('falseValue', false);
             assert.deepEqual(getLocalStorage(), {
-                'MiloTest/trueValue': 'true', 
+                'MiloTest/trueValue': 'true',
                 'MiloTest/trueValue:___milo_data_type': 'boolean',
-                'MiloTest/falseValue': 'false', 
+                'MiloTest/falseValue': 'false',
                 'MiloTest/falseValue:___milo_data_type': 'boolean',
             })
             var itemValue = domStorage.getItem('trueValue');
@@ -80,7 +80,7 @@ describe('DOMStorage', function() {
             var now = new Date;
             domStorage.setItem('time', now);
             assert.deepEqual(getLocalStorage(), {
-                'MiloTest/time': now.toString(), 
+                'MiloTest/time': now.toString(),
                 'MiloTest/time:___milo_data_type': 'Date'
             })
             var itemValue = domStorage.getItem('time');
@@ -93,7 +93,7 @@ describe('DOMStorage', function() {
         it('should store and get Objects', function() {
             domStorage.setItem('info', { name: 'milo', test: 1, list: ['item1', 2] });
             assert.deepEqual(getLocalStorage(), {
-                'MiloTest/info': '{"name":"milo","test":1,"list":["item1",2]}', 
+                'MiloTest/info': '{"name":"milo","test":1,"list":["item1",2]}',
                 'MiloTest/info:___milo_data_type': 'Object'
             })
             var itemValue = domStorage.getItem('info');
@@ -105,7 +105,7 @@ describe('DOMStorage', function() {
         it('should store and get Arrays', function() {
             domStorage.setItem('list', [ 'item1', 2, { item: 3 } ]);
             assert.deepEqual(getLocalStorage(), {
-                'MiloTest/list': '["item1",2,{"item":3}]', 
+                'MiloTest/list': '["item1",2,{"item":3}]',
                 'MiloTest/list:___milo_data_type': 'Array'
             })
             var itemValue = domStorage.getItem('list');
@@ -118,7 +118,7 @@ describe('DOMStorage', function() {
             function myFunc() { return 1234; }
             domStorage.setItem('myFunc', myFunc);
             assert.deepEqual(getLocalStorage(), {
-                'MiloTest/myFunc': 'function myFunc() { return 1234; }', 
+                'MiloTest/myFunc': 'function myFunc() { return 1234; }',
                 'MiloTest/myFunc:___milo_data_type': 'function'
             })
             var itemValue = domStorage.getItem('myFunc');
@@ -131,7 +131,7 @@ describe('DOMStorage', function() {
         it('should store and get RegExp', function() {
             domStorage.setItem('pattern', /ab+c/i);
             assert.deepEqual(getLocalStorage(), {
-                'MiloTest/pattern': '/ab+c/i', 
+                'MiloTest/pattern': '/ab+c/i',
                 'MiloTest/pattern:___milo_data_type': 'RegExp'
             })
             var itemValue = domStorage.getItem('pattern');
@@ -149,9 +149,9 @@ describe('DOMStorage', function() {
             domStorage.setItem('mPath', m('.info'));
 
             assert.deepEqual(getLocalStorage(), {
-                'MiloTest/myModel': '{"info":{"name":"milo"}}', 
+                'MiloTest/myModel': '{"info":{"name":"milo"}}',
                 'MiloTest/myModel:___milo_data_type': 'Model',
-                'MiloTest/mPath': '{"name":"milo"}', 
+                'MiloTest/mPath': '{"name":"milo"}',
                 'MiloTest/mPath:___milo_data_type': 'Model'
             })
             var itemValue = domStorage.getItem('myModel');
@@ -198,7 +198,7 @@ describe('DOMStorage', function() {
             var myClass = new MyClass({ name: 'milo' });
             domStorage.setItem('myClass', myClass);
             assert.deepEqual(getLocalStorage(), {
-                'MiloTest/myClass': '{"name":"milo"}', 
+                'MiloTest/myClass': '{"name":"milo"}',
                 'MiloTest/myClass:___milo_data_type': 'MyClass'
             })
             var itemValue = domStorage.getItem('myClass');
@@ -210,7 +210,7 @@ describe('DOMStorage', function() {
 
     describe('removeItem method', function() {
         it('should remove items', function() {
-            assert.equal(localStorage.length, 0);           
+            assert.equal(localStorage.length, 0);
             domStorage.setItem('name', 'milo');
             assert.equal(localStorage.length, 2);
             domStorage.removeItem('name');
@@ -228,13 +228,13 @@ describe('DOMStorage', function() {
         };
 
         var expectedLocalStorage = {
-            'MiloTest/name': 'milo', 
+            'MiloTest/name': 'milo',
             'MiloTest/name:___milo_data_type': 'string',
-            'MiloTest/test': '1', 
+            'MiloTest/test': '1',
             'MiloTest/test:___milo_data_type': 'number',
-            'MiloTest/list': '["item1",2]', 
+            'MiloTest/list': '["item1",2]',
             'MiloTest/list:___milo_data_type': 'Array',
-            'MiloTest/info': '{"test":3}', 
+            'MiloTest/info': '{"test":3}',
             'MiloTest/info:___milo_data_type': 'Object',
         }
 
@@ -263,6 +263,27 @@ describe('DOMStorage', function() {
             );
             testStoredValues();
         });
+
+        it('should send message on QuotaExceededError', function(done) {
+            milo.config({ domStorage: { quotaExceeded: {
+                message: true,
+                throwError: false
+            } } });
+
+            var recognizedData;
+            function recognizeTrojan(msg, data) {
+                recognizedData = _.deepClone(data);
+                assert.deepEqual(recognizedData, trojanData);
+                done();
+            }
+
+            milo.mail.onMessage('quotaExceededError', recognizeTrojan);
+
+            var trojanData = [];
+            for(var i=0; i<1000*1000; i++){trojanData.push(i)}
+            domStorage.set('trojanData', trojanData);
+        });
+
     });
 
 
@@ -275,24 +296,24 @@ describe('DOMStorage', function() {
         };
 
         beforeEach(function() {
-            assert.equal(localStorage.length, 0);           
+            assert.equal(localStorage.length, 0);
             domStorage.set(itemsToStore);
             assert.equal(localStorage.length, 8);
         });
 
         it('should remove multiple keys when passed as array', function() {
             domStorage.remove(['name', 'test', 'list', 'info']);
-            assert.equal(localStorage.length, 0);           
+            assert.equal(localStorage.length, 0);
         });
 
         it('should remove multiple keys when passed as list', function() {
             domStorage.remove('name', 'test', 'list', 'info');
-            assert.equal(localStorage.length, 0);           
+            assert.equal(localStorage.length, 0);
         });
 
         it('should remove multiple keys when passed as list/arrays combination', function() {
             domStorage.remove('name', ['test', ['list', 'info']]);
-            assert.equal(localStorage.length, 0);           
+            assert.equal(localStorage.length, 0);
         });
     });
 
