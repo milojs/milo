@@ -12,7 +12,7 @@ describe('Messenger class with methods on host class prototype', function() {
         this[MESSENGER_PROPERTY] = new Messenger(this);
     }
 
-    Messenger.addMethods({
+    Messenger.useWith(Host, MESSENGER_PROPERTY, {
         init: 'init',
         on: 'on',
         once: 'once',
@@ -24,9 +24,7 @@ describe('Messenger class with methods on host class prototype', function() {
         post: 'postMessage',
         postMessageSync: 'postMessageSync',
         getListeners: 'getSubscribers'
-    }, Host);
-
-    Messenger.setInstanceKey(Host, MESSENGER_PROPERTY);
+    });
 
 
     function getHostWithMessenger() {

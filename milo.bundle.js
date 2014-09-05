@@ -244,7 +244,8 @@ function FacetedObject$$createFacetedClass(name, facetsClasses, facetsConfig) {
 var _ = require('mol-proto')
     , check = require('../util/check')
     , Match = check.Match
-    , MixinError = require('../util/error').Mixin;
+    , MixinError = require('../util/error').Mixin
+    , config = require('../config');
 
 
 module.exports = Mixin;
@@ -288,8 +289,19 @@ function Mixin(hostObject, proxyMethods) { // , other args - passed to init meth
  * - [_createProxyMethods](#_createProxyMethods)
  */
 _.extendProto(Mixin, {
-    _createProxyMethod: _createProxyMethod,
-    _createProxyMethods: _createProxyMethods
+    _createProxyMethod: _createProxyMethod,  // deprecated, should not be used
+    _createProxyMethods: _createProxyMethods  // deprecated, should not be used
+});
+
+
+/**
+ * ####Mixin class methods####
+ * These method should be called in host class declaration.
+ *
+ * - [useWith](#Mixin$$useWith)
+ */
+_.extend(Mixin, {
+    useWith: Mixin$$useWith
 });
 
 
@@ -308,10 +320,11 @@ function _createProxyMethod(proxyMethodName, mixinMethodName, hostObject) {
         throw new MixinError('method ' + proxyMethodName +
                                  ' already defined in host object');
 
-    check(this[mixinMethodName], Function);
+    var method = this[mixinMethodName]
+    check(method, Function);
 
     // Bind proxied Mixin's method to Mixin instance
-    var boundMethod = this[mixinMethodName].bind(this);
+    var boundMethod = method.bind(this);
 
     _.defineProperty(hostObject, proxyMethodName, boundMethod, _.WRIT);
 }
@@ -320,7 +333,7 @@ function _createProxyMethod(proxyMethodName, mixinMethodName, hostObject) {
 /**
  * Creates proxied methods of Mixin subclass on host object.
  *
- * @param {Hash[String]} proxyMethods map of names of methods, key - proxy method, value - mixin method.
+ * @param {Hash[String]|Array[String]} proxyMethods map of names of methods, key - proxy method name, value - mixin method name. Can be array.
  * @param {Object} hostObject an optional reference to the host object; if not specified the host object passed to constructor wil be used. It allows to use the same instance of Mixin on two host objects.
  */
 function _createProxyMethods(proxyMethods, hostObject) {
@@ -329,18 +342,116 @@ function _createProxyMethods(proxyMethods, hostObject) {
     // creating and binding proxy methods on the host object
     if (Array.isArray(proxyMethods))
         proxyMethods.forEach(function(methodName) {
-            // method called this way to allow using _createProxyMethods with objects that are not inheriting from Mixin
+            // method called this way to allow using _createProxyMethods with objects
+            // that are not inheriting from Mixin
             _createProxyMethod.call(this, methodName, methodName, hostObject);
         }, this);
     else
         _.eachKey(proxyMethods, function(mixinMethodName, proxyMethodName) {
-
-            // method called this way to allow using _createProxyMethods with objects that are not inheriting from Mixin
+            // method called this way to allow using _createProxyMethods with objects
+            // that are not inheriting from Mixin
             _createProxyMethod.call(this, proxyMethodName, mixinMethodName, hostObject);
         }, this);
 }
 
-},{"../util/check":91,"../util/error":97,"mol-proto":112}],4:[function(require,module,exports){
+
+/**
+ * Sets mixin instance property name on the host class
+ * Can be called only once
+ *
+ * @private
+ * @param {Function} this Mixin subclass (not instance)
+ * @param {Function} hostClass
+ * @param {String} instanceKey
+ */
+function Mixin_setInstanceKey(hostClass, method, instanceKey) {
+    check(hostClass, Function);
+    check(instanceKey, Match.IdentifierString);
+
+    var prop = config.mixin.instancePropertiesMap
+        , instanceKeys = hostClass[prop] = hostClass[prop] || {};
+
+    if (instanceKeys[method.name])
+        throw new Error('Mixin: instance property for method with name '
+            + method.name + ' is already set');
+
+    instanceKeys[method.name] = instanceKey;
+}
+
+
+/**
+ * Adds method of Mixin subclass to host class prototype.
+ *
+ * @private
+ * @param {Function} this Mixin subclass (not instance)
+ * @param {String} mixinMethodName name of method in Mixin subclass
+ * @param {String} hostMethodName (optional) name of created proxy method on host object, same if not specified
+ * @param {Object} hostObject object class, must be specified as the last parameter (2nd or 3rd)
+ */
+function Mixin_addMethod(hostClass, instanceKey, mixinMethodName, hostMethodName) {
+    var method = this.prototype[mixinMethodName];
+    check(method, Function);
+
+    var wrappedMethod = _wrapMixinMethod.call(this, method);
+
+    _.defineProperty(hostClass.prototype, hostMethodName, wrappedMethod, _.WRIT);
+
+    Mixin_setInstanceKey(hostClass, method, instanceKey)
+}
+
+
+/**
+ * Returns method that will be exposed on the host class prototype
+ *
+ * @private
+ * @param {Function} this Mixin subclass (not instance)
+ * @return {Function}
+ */
+function _wrapMixinMethod(method) {
+    return function() { // ,... arguments
+        var mixinInstance = _getMixinInstance.call(this, method.name);
+        return method.apply(mixinInstance, arguments);
+    }
+}
+
+
+/**
+ * Returns the reference to the instance of mixin subclass.
+ * This method is used when methods are exposed on the host class prototype (using addMehtods) rather than on host instance.
+ * Subclasses should not use this methods - whenever subclass method is exposed on the prototype it will be wrapped to set correct context for the subclass method.
+ *
+ * @private
+ * @return {Object}
+ */
+function _getMixinInstance(methodName) {
+    if (this instanceof Mixin) return this;
+    var instanceKeys = this.constructor[config.mixin.instancePropertiesMap]
+    return this[instanceKeys[methodName]];
+}
+
+
+/**
+ * Adds methods of Mixin subclass to host class prototype.
+ *
+ * @param {Function} this Mixin subclass (not instance)
+ * @param {Object} hostClass host object class; must be specified.
+ * @param {String} instanceKey the name of the property the host class instance will store mixin instance on
+ * @param {Hash[String]|Array[String]} mixinMethods map of names of methods, key - host method name, value - mixin method name. Can be array.
+ */
+function Mixin$$useWith(hostClass, instanceKey, mixinMethods) {
+    check(mixinMethods, Match.Optional(Match.OneOf([String], Match.ObjectHash(String))));
+
+    if (Array.isArray(mixinMethods))
+        mixinMethods.forEach(function(methodName) {
+            Mixin_addMethod.call(this, hostClass, instanceKey, methodName, methodName);
+        }, this);
+    else
+        _.eachKey(mixinMethods, function(mixinMethodName, hostMethodName) {
+            Mixin_addMethod.call(this, hostClass, instanceKey, mixinMethodName, hostMethodName);
+        }, this);
+}
+
+},{"../config":64,"../util/check":91,"../util/error":97,"mol-proto":112}],4:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -1729,6 +1840,14 @@ _.extendProto(Component, {
     isDestroyed: Component$isDestroyed
 });
 
+
+/**
+ * Expose Messenger methods on Component prototype
+ */
+var MESSENGER_PROPERTY = '_messenger';
+Messenger.useWith(Component, MESSENGER_PROPERTY, Messenger.defaultMethods);
+
+
 var COMPONENT_DATA_TYPE_PREFIX = 'x-application/milo-component';
 var COMPONENT_DATA_TYPE_REGEX = /x-application\/milo-component\/([a-z_$][0-9a-z_$]*)(?:\/())/i;
 
@@ -2039,9 +2158,8 @@ function Component$init(scope, element, name, componentInfo) {
     this.scope = scope;
 
     // create component messenger
-    var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
-
-    _.defineProperty(this, '_messenger', messenger);
+    var messenger = new Messenger(this);
+    _.defineProperty(this, MESSENGER_PROPERTY, messenger);
 
     // check all facets dependencies (required facets)
     this.allFacets('check');
@@ -2465,7 +2583,7 @@ function Component$destroy(quiet) {
     }
     this.remove(false, quiet);
     this.allFacets('destroy');
-    this._messenger.destroy();
+    this[MESSENGER_PROPERTY].destroy();
     if (this.el) {
         domUtils.detachComponent(this.el);
         domUtils.removeElement(this.el);
@@ -2556,19 +2674,22 @@ _.extend(ComponentFacet, {
 });
 
 
+/**
+ * Expose Messenger methods on Facet prototype
+ */
+var MESSENGER_PROPERTY = '_messenger';
+Messenger.useWith(ComponentFacet, MESSENGER_PROPERTY, Messenger.defaultMethods);
+
+
 // initComponentFacet
 function ComponentFacet$init() {
     this._createMessenger();
 }
 
 
-// some classes (e.g. ModelFacet) overrride this method and do not create their own messenger
+// some subclasses (e.g. ModelFacet) overrride this method and do not create their own messenger
 function _createMessenger(){
-    var messenger = new Messenger(this, Messenger.defaultMethods, undefined /* no messageSource */);
-
-    _.defineProperties(this, {
-        _messenger: messenger
-    });
+    _.defineProperty(this, MESSENGER_PROPERTY, new Messenger(this));
 }
 
 
@@ -2630,7 +2751,7 @@ function ComponentFacet$check() {
 
 // destroys facet
 function ComponentFacet$destroy() {
-    if (this._messenger) this._messenger.destroy();
+    if (this[MESSENGER_PROPERTY]) this[MESSENGER_PROPERTY].destroy();
     this._destroyed = true;
 }
 
@@ -2665,12 +2786,12 @@ function _postParent(getParentMethod, messageType, messageData) {
 
 
 function _setMessageSource(messageSource) {
-    this._messenger._setMessageSource(messageSource);
+    this[MESSENGER_PROPERTY]._setMessageSource(messageSource);
 }
 
 
 function getMessageSource() {
-    return this._messenger.getMessageSource();
+    return this[MESSENGER_PROPERTY].getMessageSource();
 }
 
 
@@ -4277,15 +4398,22 @@ module.exports = Events;
 
 
 /**
+ * Expose DOMEventsSource trigger method on Events prototype
+ */
+var MSG_SOURCE_KEY = '_domEventsSource'
+DOMEventsSource.useWith(Events, MSG_SOURCE_KEY, ['trigger']);
+
+
+/**
  * Events facet instance method
  * Initialzes facet, connects DOMEventsSource to facet's messenger
  */
 function Events$init() {
     ComponentFacet.prototype.init.apply(this, arguments);
 
-    var domEventsSource = new DOMEventsSource(this, { trigger: 'trigger' }, undefined, this.owner);
+    var domEventsSource = new DOMEventsSource(this, undefined, undefined, this.owner);
     this._setMessageSource(domEventsSource);
-    _.defineProperty(this, '_domEventsSource', domEventsSource);
+    _.defineProperty(this, MSG_SOURCE_KEY, domEventsSource);
 }
 
 },{"../../messenger":66,"../c_facet":17,"../msg_src/dom_events":39,"./cf_registry":31,"mol-proto":112}],24:[function(require,module,exports){
@@ -4367,16 +4495,23 @@ module.exports = Frame;
 
 
 /**
+ * Expose FrameMessageSource trigger method on Events prototype
+ */
+var MSG_SOURCE_KEY = '_messageSource';
+FrameMessageSource.useWith(Frame, MSG_SOURCE_KEY, ['trigger']);
+
+
+/**
  * Frame facet instance method
  * Initialzes facet, connects FrameMessageSource to facet's messenger
  */
 function Frame$init() {
     ComponentFacet.prototype.init.apply(this, arguments);
     
-    var messageSource = new FrameMessageSource(this, { trigger: 'trigger' }, undefined, this.owner);
+    var messageSource = new FrameMessageSource(this, undefined, undefined, this.owner);
     this._setMessageSource(messageSource);
 
-    _.defineProperty(this, '_messageSource', messageSource);
+    _.defineProperty(this, MSG_SOURCE_KEY, messageSource);
 }
 
 
@@ -4967,7 +5102,7 @@ function List$destroy() {
 var ComponentFacet = require('../c_facet')
     , facetsRegistry = require('./cf_registry')
     , Model = require('../../model')
-
+    , Mixin = require('../../abstract/mixin')
     , _ = require('mol-proto');
 
 
@@ -4987,10 +5122,16 @@ facetsRegistry.add(ModelFacet);
 module.exports = ModelFacet;
 
 
+/**
+ * Expose Model class methods on ModelFacet
+ */
+Model.useWith(ModelFacet, 'm');
+
+
 function ModelFacet$init() {
     this.m = new Model(this.config.data, this);
     ComponentFacet.prototype.init.apply(this, arguments);
-    this.m.proxyMethods(this); // Creates model's methods directly on facet
+    // this.m.proxyMethods(this); // Creates model's methods directly on facet
 }
 
 
@@ -5022,7 +5163,7 @@ function ModelFacet$setState(state) {
 
 
 function ModelFacet$_createMessenger() { // Called by inherited init
-    this.m.proxyMessenger(this); // Creates messenger's methods directly on facet
+    this._messenger = this.m._messenger;
 }
 
 
@@ -5031,7 +5172,7 @@ function ModelFacet$destroy() {
     ComponentFacet.prototype.destroy.apply(this, arguments);
 }
 
-},{"../../model":75,"../c_facet":17,"./cf_registry":31,"mol-proto":112}],28:[function(require,module,exports){
+},{"../../abstract/mixin":3,"../../model":75,"../c_facet":17,"./cf_registry":31,"mol-proto":112}],28:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -5063,7 +5204,7 @@ function Options$init() {
 
 
 function Options$_createMessenger() { // Called by inherited init
-    this.m.proxyMessenger(this); // Creates messenger's methods directly on facet
+    this._messenger = this.m._messenger;
 }
 
 
@@ -8498,6 +8639,9 @@ config({
     },
     componentRef: '___milo_component',
     componentPrefix: 'milo_',
+    mixin: {
+        instancePropertiesMap: '___mixin_instances'
+    },
     template: {
         compile: doT.compile
     },
@@ -8518,7 +8662,7 @@ config({
     request: {
         jsonpTimeout: 15, // seconds
         jsonpCallbackPrefix: '___milo_callback_',
-        optionsKey: '___milo_options',
+        optionsKey: '___milo_options'
     },
     check: true,
     debug: false
@@ -8689,9 +8833,9 @@ _.extendProto(Messenger, {
     init: init, // called by Mixin (superclass)
     destroy: Messenger$destroy,
     on: Messenger$on,
-    once: _.partial(_Messenger_onWithOptions, { dispatchTimes: 1 }),
-    onSync: _.partial(_Messenger_onWithOptions, { sync: true }),
-    onAsync: _.partial(_Messenger_onWithOptions, { sync: false }),
+    once: Messenger$once,
+    onSync: Messenger$onSync,
+    onAsync: Messenger$onAsync,
     onMessage: Messenger$on, // deprecated
     off: Messenger$off,
     offMessage: Messenger$off, // deprecated
@@ -8840,6 +8984,21 @@ function _Messenger_on(messages, subscriber) {
         return wasRegistered;
     }   
 }
+
+
+function Messenger$once(messages, subscriber) {
+    return _Messenger_onWithOptions.call(this, { dispatchTimes: 1 }, messages, subscriber);
+} 
+
+
+function Messenger$onSync(messages, subscriber) {
+    return _Messenger_onWithOptions.call(this, { sync: true }, messages, subscriber);
+} 
+
+
+function Messenger$onAsync(messages, subscriber) {
+    return _Messenger_onWithOptions.call(this, { sync: false }, messages, subscriber);
+} 
 
 
 function _Messenger_onWithOptions(options, messages, subscriber) {
@@ -10913,7 +11072,7 @@ Model.prototype.__proto__ = Model.__proto__;
 _.extendProto(Model, {
     path: Model$path,
     get: Model$get,
-    proxyMessenger: proxyMessenger,
+    proxyMessenger: proxyMessenger, // deprecated, should not be used
     proxyMethods: proxyMethods,
     _prepareMessengers: _prepareMessengers,
     _getHostObject: _getHostObject,
@@ -10930,8 +11089,16 @@ _.extendProto(Model, synthesize.modelMethods);
  */
 _.extend(Model, {
     Path: ModelPath,
-    registerWithDOMStorage: Model$$registerWithDOMStorage
+    registerWithDOMStorage: Model$$registerWithDOMStorage,
+    useWith: Model$$useWith
 });
+
+
+/**
+ * Expose Messenger methods on Facet prototype
+ */
+var MESSENGER_PROPERTY = '_messenger';
+Messenger.useWith(Model, MESSENGER_PROPERTY, Messenger.defaultMethods);
 
 
 /**
@@ -10986,9 +11153,25 @@ function Model$path(accessPath) {  // , ... arguments that will be interpolated
  */
 function proxyMessenger(modelHostObject) {
     modelHostObject = modelHostObject || this._hostObject;
-    Mixin.prototype._createProxyMethods.call(this._messenger, messengerMethodsToProxy, modelHostObject);
+    Mixin.prototype._createProxyMethods.call(this[MESSENGER_PROPERTY], Messenger.defaultMethods, modelHostObject);
 }
-var messengerMethodsToProxy = Messenger.defaultMethods;
+
+
+var modelMethodsToProxy = ['path', 'get', 'set', 'del', 'splice', 'len', 'push', 'pop', 'unshift', 'shift'];
+
+
+/**
+ * Expose model methods on 
+ * See same method in Mixin class for parameters meaning
+ * 
+ * @param {Function} hostClass
+ * @param {[type]} instanceKey
+ * @param {[type]} mixinMethods optional
+ */
+function Model$$useWith(hostClass, instanceKey, mixinMethods) {
+    mixinMethods = mixinMethods || modelMethodsToProxy;
+    Mixin.useWith.call(Model, hostClass, instanceKey, mixinMethods);
+}
 
 
 /**
@@ -11001,7 +11184,6 @@ function proxyMethods(modelHostObject) {
     modelHostObject = modelHostObject || this._hostObject;
     Mixin.prototype._createProxyMethods.call(this, modelMethodsToProxy, modelHostObject);
 }
-var modelMethodsToProxy = ['path', 'get', 'set', 'del', 'splice', 'len', 'push', 'pop', 'unshift', 'shift'];
 
 
 /**
@@ -11018,12 +11200,10 @@ function _prepareMessengers() {
 
     // external messenger to which all model users will subscribe,
     // that will allow "*" subscriptions and support "changedata" message api.
-    var externalMessenger = new Messenger(this, Messenger.defaultMethods, internalMessengerSource);
+    var externalMessenger = new Messenger(this, undefined, internalMessengerSource);
 
-    _.defineProperties(this, {
-        _messenger: externalMessenger,
-        _internalMessenger: internalMessenger
-    });
+    _.defineProperty(this, MESSENGER_PROPERTY, externalMessenger);
+    _.defineProperty(this, '_internalMessenger', internalMessenger);
 }
 
 
@@ -11052,7 +11232,7 @@ function Model_domStorageParser(valueStr) {
 
 
 function Model$destroy() {
-    this._messenger.destroy();
+    this[MESSENGER_PROPERTY].destroy();
     this._internalMessenger.destroy();
     // delete this._hostObject;
     // delete this._data;
@@ -11226,6 +11406,13 @@ _.extend(ModelPath, {
 
 
 /**
+ * Expose Messenger methods on Facet prototype
+ */
+var MESSENGER_PROPERTY = '_messenger';
+Messenger.useWith(ModelPath, MESSENGER_PROPERTY, Messenger.defaultMethods);
+
+
+/**
  * ModelPath instance method
  * Gives access to path inside ModelPath. Method works similarly to [path method](#Model$path) of model, using relative paths.
  * 
@@ -11341,10 +11528,10 @@ function _prepareMessenger() {
 
     // create messenger with model passed as hostObject (default message dispatch context)
     // and without proxying methods (we don't want to proxy them to Model)
-    var mPathMessenger = new Messenger(this, Messenger.defaultMethods, modelMessageSource);
+    var mPathMessenger = new Messenger(this, undefined, modelMessageSource);
 
     // store messenger on ModelPath instance
-    _.defineProperty(this, '_messenger', mPathMessenger);
+    _.defineProperty(this, MESSENGER_PROPERTY, mPathMessenger);
 }
 
 
@@ -11383,7 +11570,7 @@ function _createFromDefinition(definition) {
 
 
 function ModelPath$destroy() {
-    this._messenger.destroy();
+    this[MESSENGER_PROPERTY].destroy();
 }
 
 },{"../messenger":66,"../messenger/msngr_source":70,"../util/check":91,"./change_data":73,"./path_msg_api":79,"./path_utils":80,"./synthesize":81,"mol-proto":112}],78:[function(require,module,exports){
@@ -17564,7 +17751,7 @@ function createSubclass(name, applyConstructor) {
     // copy class methods
     // - for them to work correctly they should not explictly use superclass name
     // and use "this" instead
-    __.extend.call(subclass, thisClass, true);
+    __.deepExtend.call(subclass, thisClass, true);
 
     return subclass;
 }
