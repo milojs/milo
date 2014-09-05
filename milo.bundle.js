@@ -8665,9 +8665,12 @@ config({
         }
     },
     request: {
-        jsonpTimeout: 15, // seconds
+        jsonpTimeout: 15000,
         jsonpCallbackPrefix: '___milo_callback_',
-        optionsKey: '___milo_options'
+        optionsKey: '___milo_options',
+        defaults: {
+            timeout: 30000
+        }
     },
     check: true,
     debug: false
@@ -14611,6 +14614,12 @@ function request(url, opts, callback) {
 
     _pendingRequests.push(req);
 
+    req._delayedCall = _.delay(function(){
+        req.onreadystatechange = undefined;
+        req.abort();
+        onReady();
+    }, opts.timeout || config.request.defaults.timeout);
+
     return promise;
 
 
@@ -14621,41 +14630,43 @@ function request(url, opts, callback) {
 
 
 function _onReady(req, callback, promise) {
-    if (req.readyState == 4) {
-        _.spliceItem(_pendingRequests, req);
+    if (req.readyState != 4) return;
 
-        var error;
-        try {
-            if (req.statusText.toUpperCase() == 'OK' ) {
-                try { callback && callback(null, req.responseText, req); }
-                catch(e) { error = e; }
-                promise.setData(null, req.responseText);
-                postMessage('success');
-            }
-            else if(req.status != 0) { // not canceled eg. with abort() method
-                try { callback && callback(req.status, req.responseText, req); }
-                catch(e) { error = e; }
-                promise.setData(req.status, req.responseText);
-                postMessage('error');
-                postMessage('error' + req.status);
-            }
-        } catch(e) {
-            error = error || e;
+    clearTimeout(req._delayedCall);
+    _.spliceItem(_pendingRequests, req);
+
+    var error;
+    try {
+        if (req.statusText.toUpperCase() == 'OK' ) {
+            try { callback && callback(null, req.responseText, req); }
+            catch(e) { error = e; }
+            promise.setData(null, req.responseText);
+            postMessage('success');
         }
-
-        if (!_pendingRequests.length)
-            postMessage('requestscompleted');
-
-        // not removing subscription creates memory leak, deleting property would not remove subscription
-        req.onreadystatechange = undefined;
-
-        if (error) throw error;
+        else {
+            req.status == req.status || 'timeout'; // request was aborted in case of timeout
+            try { callback && callback(req.status, req.responseText, req); }
+            catch(e) { error = e; }
+            promise.setData(req.status, req.responseText);
+            postMessage('error');
+            postMessage('error' + req.status);
+        }
+    } catch(e) {
+        error = error || e;
     }
+
+    if (!_pendingRequests.length)
+        postMessage('requestscompleted');
+
+    // not removing subscription creates memory leak, deleting property would not remove subscription
+    req.onreadystatechange = undefined;
+
+    if (error) throw error;
 
     function postMessage(msg) {
         if (_messenger) request.postMessage(msg,
             { status: req.status, response: req.responseText });
-    }    
+    }
 }
 
 
@@ -14717,7 +14728,7 @@ function request$jsonp(url, callback) {
     var timeout = setTimeout(function() {
         var err = new Error('No JSONP response or no callback in response');
         _onResult(err);
-    }, config.request.jsonpTimeout * 1000);
+    }, config.request.jsonpTimeout);
 
     window[uniqueCallback] = _.partial(_onResult, null);
 
@@ -14760,7 +14771,7 @@ function request$jsonp(url, callback) {
     function postMessage(msg, status, result) {
         if (_messenger) request.postMessage(msg,
             { status: status, response: result });
-    }    
+    }
 }
 
 
@@ -14798,7 +14809,7 @@ function request$destroy() {
 }
 
 
-function whenRequestsCompleted(callback) {
+function whenRequestsCompleted(callback, timeout) {
     if (_pendingRequests.length)
         _messenger.once('requestscompleted', callback);
     else
@@ -16834,7 +16845,7 @@ function deferTicks(ticks) { // , arguments
     if (ticks < 2) return defer.apply(this, arguments);
     var args = repeat.call(deferFunc, ticks - 1);
     args = args.concat(this, slice.call(arguments, 1)); 
-    deferFunc.apply(null, args);
+    return deferFunc.apply(null, args);
 }
 
 
@@ -16848,7 +16859,7 @@ function deferTicks(ticks) { // , arguments
  */
 function delayMethod(funcOrMethodName, wait) { // , ... arguments
     var args = slice.call(arguments, 2);
-    _delayMethod(this, funcOrMethodName, wait, args);
+    return _delayMethod(this, funcOrMethodName, wait, args);
 }
 
 
@@ -16861,7 +16872,7 @@ function delayMethod(funcOrMethodName, wait) { // , ... arguments
  */
 function deferMethod(funcOrMethodName) { // , ... arguments
     var args = slice.call(arguments, 1);
-    _delayMethod(this, funcOrMethodName, 1, args);
+    return _delayMethod(this, funcOrMethodName, 1, args);
 }
 
 function _delayMethod(object, funcOrMethodName, wait, args) {
