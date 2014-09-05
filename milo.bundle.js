@@ -8650,7 +8650,11 @@ config({
         prefixSeparator: '/',
         root: '',
         messageKey: '___milo_message/',
-        messageTimestamp: '___milo_timestamp'
+        messageTimestamp: '___milo_timestamp',
+        quotaExceeded: {
+            throwError: true,
+            message: false
+        }
     },
     dragDrop: {
         dataTypes: {
@@ -15265,7 +15269,7 @@ var _storedKeys = {
 /**
  * DOMStorage class to simplify storage and retrieval of multiple items with types preservation to DOM storage (localStorage and sessionStorage).
  * Types will be stored in the key created from value keys with appended `milo.config.domStorage.typeSuffix`
- * 
+ *
  * @param {String} keyPrefix prefix that will be added to all keys followed by `milo.config.domStorage.prefixSeparator` ("/" by default).
  * @param {Boolean} sessionOnly true to use sessionStorage. localStorage will be used by default.
  * @param {Window} win window to work in
@@ -15274,7 +15278,7 @@ function DOMStorage(keyPrefix, sessionOnly, win) {
     if (typeof window == 'undefined') return;
     win = win || window;
 
-    keyPrefix = config.domStorage.root + 
+    keyPrefix = config.domStorage.root +
                 (keyPrefix
                     ? keyPrefix + config.domStorage.prefixSeparator
                     : '');
@@ -15307,6 +15311,13 @@ _.extendProto(DOMStorage, {
 });
 
 
+/**
+ * Expose Mesenger and MessageSource methods on DOMStorage
+ */
+Messenger.useWith(DOMStorage, '_messenger', Messenger.defaultMethods);
+StorageMessageSource.useWith(DOMStorage, '_messageSource', ['trigger']);
+
+
 var _sessionStorage = new DOMStorage('', true)
     , _localStorage = new DOMStorage('', false);
 
@@ -15326,13 +15337,13 @@ _.extend(DOMStorage, {
 
 /**
  * Sets data to DOM storage. `this.keyPrefix` is prepended to keys.
- * 
+ *
  * @param {Object} data single object can be passed in which case keys will be used as keys in local storage.
  * @param {List} arguments alternatively just the list of arguments can be passed where arguments can be sequentially used as keys and values.
  */
 function DOMStorage$set(data) { // or arguments
     if (typeof data == 'object')
-        _.eachKey(data, function(value, key) {          
+        _.eachKey(data, function(value, key) {
             this.setItem(key, value);
         }, this);
     else {
@@ -15352,7 +15363,7 @@ function DOMStorage$set(data) { // or arguments
 
 /**
  * Gets data from DOM storage. `this.keyPrefix` is prepended to passed keys, but returned object will have keys without root keys.
- * 
+ *
  * @param {List} arguments keys can be passed as strings or arrays of strings
  * @returns {Object}
  */
@@ -15367,7 +15378,7 @@ function DOMStorage$get() { // , ... arguments
 
 /**
  * Removes keys from DOM storage. `this.keyPrefix` is prepended to passed keys.
- * 
+ *
  * @param {List} arguments keys can be passed as strings or arrays of strings
  */
 function DOMStorage$remove() { //, ... arguments
@@ -15379,7 +15390,7 @@ function DOMStorage$remove() { //, ... arguments
 
 /**
  * Check for presence of single item in DOM storage. `this.keyPrefix` is prepended to passed key.
- * 
+ *
  * @param {String} key
  * @return {Boolean}
  */
@@ -15392,7 +15403,7 @@ function DOMStorage$hasItem(key) {
 /**
  * Gets single item from DOM storage prepending `this.keyPrefix` to passed key.
  * Reads type of the originally stored value from `key + this._typeSuffix` and converts data to the original type.
- * 
+ *
  * @param {String} key
  * @return {Any}
  */
@@ -15408,7 +15419,7 @@ function DOMStorage$getItem(key) {
 /**
  * Sets single item to DOM storage prepending `this.keyPrefix` to passed key.
  * Stores type of the stored value to `key + this._typeSuffix`.
- * 
+ *
  * @param {String} key
  * @return {Any}
  */
@@ -15416,7 +15427,18 @@ function DOMStorage$setItem(key, value) {
     var pKey = this._storageKey(key);
     var dataType = _setKeyDataType.call(this, pKey, value);
     var valueStr = _serializeData(value, dataType);
-    this._storage.setItem(pKey, valueStr);
+    try {
+        this._storage.setItem(pKey, valueStr);
+    } catch(e) {
+        if (e.name == 'QuotaExceededError') {
+            var cfg = config.domStorage.quotaExceeded;
+            if (cfg.message && this._messenger)
+                milo.mail.postMessage('quotaexceedederror', value);
+            if (cfg.throwError)
+                throw e;
+        } else
+            throw e;
+    }
     this._keys[key] = true;
     _domStorage[this.sessionOnly]._keys[pKey] = true;
 }
@@ -15425,7 +15447,7 @@ function DOMStorage$setItem(key, value) {
 /**
  * Removes single item from DOM storage prepending `this.keyPrefix` to passed key.
  * Type of the stored value (in `key + this._typeSuffix` key) is also removed.
- * 
+ *
  * @param {String} key
  * @return {Any}
  */
@@ -15441,7 +15463,7 @@ function DOMStorage$removeItem(key) {
 /**
  * Returns the array of all keys stored by this instance of DOMStorage
  *
- * @return {Array} 
+ * @return {Array}
  */
 function DOMStorage$getAllKeys() {
     var storedKeys = Object.keys(this._keys);
@@ -15455,7 +15477,7 @@ function DOMStorage$getAllKeys() {
 
 /**
  * Returns the map with all keys and values (deserialized) stored using this instance of DOMStorage
- * 
+ *
  * @return {Object}
  */
 function DOMStorage$getAllItems() {
@@ -15465,7 +15487,7 @@ function DOMStorage$getAllItems() {
 
 /**
  * Returns prefixed key for DOM storage for given unprefixed key.
- * 
+ *
  * @param {String} key
  * @return {String}
  */
@@ -15477,7 +15499,7 @@ function DOMStorage$_storageKey(key) {
 /**
  * Returns unprefixed key to be used with this instance of DOMStorage fir given actual key in storage
  * If key has different prefix from the keyPrefix returns undefined
- * 
+ *
  * @param {String} storageKey actual key in local/session storage
  * @return {String}
  */
@@ -15502,7 +15524,7 @@ function _getKeyDataType(pKey) {
 /**
  * Stores data type for given (prefixed) `key` and `value`.
  * Returns data type for `value`.
- * 
+ *
  * @param {String} pKey prefixed key of stored value
  * @param {Any} value
  * @return {String}
@@ -15517,7 +15539,7 @@ function _setKeyDataType(pKey, value) {
 
 /**
  * Removes stored data type for given (prefixed) `key`.
- * 
+ *
  * @param  {String} pKey prefixed key of stored value
  */
 function _removeKeyDataType(pKey) {
@@ -15528,7 +15550,7 @@ function _removeKeyDataType(pKey) {
 
 /**
  * Returns the key to store data type for given (prefixed) `key`.
- * 
+ *
  * @param  {String} pKey prefixed key of stored value
  * @return {String}
  */
@@ -15560,7 +15582,7 @@ var valuesDataTypes = {
 
 /**
  * Serializes value to be stored in DOM storage.
- * 
+ *
  * @param  {Any} value value to be serialized
  * @param  {String} valueType optional data type to define serializer, _getValueType is used if not passed.
  * @return {String}
@@ -15581,7 +15603,7 @@ var dataSerializers = {
 
 /**
  * Parses string retrieved from DOM storage.
- * 
+ *
  * @param  {String} valueStr
  * @param  {String} valueType data type that defines parser. Original sring will be returned if parser is not defined.
  * @return {Any}
@@ -15605,7 +15627,7 @@ var dataParsers = {
 
 /**
  * Registers data type to be saved in DOM storage. Class name can be used or result of `typeof` operator for non-objects to override default conversions.
- * 
+ *
  * @param {String} valueType class (constructor) name or the string returned by typeof.
  * @param {Function} serializer optional serializer for this type
  * @param {Function} parser optional parser for this type
@@ -15619,9 +15641,12 @@ function DOMStorage$$registerDataType(valueType, serializer, parser, storeAsData
 
 
 function DOMStorage$createMessenger() {
-    var storageMessageSource = new StorageMessageSource(this, ['trigger']);
-    var messenger = new Messenger(this, Messenger.defaultMethods, storageMessageSource);
-    _.defineProperty(this, '_messenger', messenger, _.WRIT);
+    var storageMessageSource = new StorageMessageSource(this);
+    var messenger = new Messenger(this, undefined, storageMessageSource);
+    _.defineProperties(this, {
+        _messenger: messenger,
+        _messageSource: storageMessageSource
+    }, _.WRIT);
 }
 
 
