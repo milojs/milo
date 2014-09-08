@@ -14607,11 +14607,7 @@ function request(url, opts, callback) {
         });
 
     req.timeout = opts.timeout || config.request.defaults.timeout;
-    req.ontimeout = function () {
-        req._timedout = true;
-        req.onreadystatechange = undefined;
-        onReady();
-    };
+    req.ontimeout = onTimeout;
 
     var promise = new Promise(req);
 
@@ -14627,10 +14623,14 @@ function request(url, opts, callback) {
     function onReady() {
         _onReady(req, callback, promise);
     }
+
+    function onTimeout() {
+        _onReady(req, callback, promise, true);
+    }
 }
 
 
-function _onReady(req, callback, promise) {
+function _onReady(req, callback, promise, timedout) {
     if (req.readyState != 4) return;
 
     _.spliceItem(_pendingRequests, req);
@@ -14644,28 +14644,28 @@ function _onReady(req, callback, promise) {
             postMessage('success');
         }
         else {
-            req._status = req.status || (req._timedout ? 'timeout' : 'canceled'); // request was aborted in case of timeout
-            try { callback && callback(req._status, req.responseText, req); }
+            var status = req.status || (timedout ? 'timeout' : 'canceled'); // request was aborted in case of timeout
+            try { callback && callback(status, req.responseText, req); }
             catch(e) { error = e; }
-            promise.setData(req._status, req.responseText);
+            promise.setData(status, req.responseText);
             postMessage('error');
-            postMessage('error' + req._status);
+            postMessage('error' + status);
         }
     } catch(e) {
         error = error || e;
     }
 
-    if (!_pendingRequests.length)
-        postMessage('requestscompleted');
-
     // not removing subscription creates memory leak, deleting property would not remove subscription
     req.onreadystatechange = undefined;
+
+    if (!_pendingRequests.length)
+        postMessage('requestscompleted');
 
     if (error) throw error;
 
     function postMessage(msg) {
         if (_messenger) request.postMessage(msg,
-            { status: req._status, response: req.responseText });
+            { status: status, response: req.responseText });
     }
 }
 
@@ -16849,7 +16849,7 @@ function deferTicks(ticks) { // , arguments
     if (ticks < 2) return defer.apply(this, arguments);
     var args = repeat.call(deferFunc, ticks - 1);
     args = args.concat(this, slice.call(arguments, 1)); 
-    deferFunc.apply(null, args);
+    return deferFunc.apply(null, args);
 }
 
 
@@ -16863,7 +16863,7 @@ function deferTicks(ticks) { // , arguments
  */
 function delayMethod(funcOrMethodName, wait) { // , ... arguments
     var args = slice.call(arguments, 2);
-    _delayMethod(this, funcOrMethodName, wait, args);
+    return _delayMethod(this, funcOrMethodName, wait, args);
 }
 
 
@@ -16876,7 +16876,7 @@ function delayMethod(funcOrMethodName, wait) { // , ... arguments
  */
 function deferMethod(funcOrMethodName) { // , ... arguments
     var args = slice.call(arguments, 1);
-    _delayMethod(this, funcOrMethodName, 1, args);
+    return _delayMethod(this, funcOrMethodName, 1, args);
 }
 
 function _delayMethod(object, funcOrMethodName, wait, args) {
