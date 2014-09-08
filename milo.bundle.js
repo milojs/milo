@@ -14606,6 +14606,13 @@ function request(url, opts, callback) {
             req.setRequestHeader(key, value);
         });
 
+    req.timeout = opts.timeout || config.request.defaults.timeout;
+    req.ontimeout = function () {
+        req._timedout = true;
+        req.onreadystatechange = undefined;
+        onReady();
+    };
+
     var promise = new Promise(req);
 
     req.onreadystatechange = onReady;
@@ -14613,13 +14620,6 @@ function request(url, opts, callback) {
     req[config.request.optionsKey] = opts;
 
     _pendingRequests.push(req);
-
-    req.timeout = opts.timeout || config.request.defaults.timeout;
-    req.ontimeout = function () {
-        req.onreadystatechange = undefined;
-        req.abort();
-        onReady();
-    };
 
     return promise;
 
@@ -14644,12 +14644,12 @@ function _onReady(req, callback, promise) {
             postMessage('success');
         }
         else {
-            req.status == req.status || 'canceled'; // request was aborted in case of timeout
-            try { callback && callback(req.status, req.responseText, req); }
+            req._status = req.status || (req._timedout ? 'timeout' : 'canceled'); // request was aborted in case of timeout
+            try { callback && callback(req._status, req.responseText, req); }
             catch(e) { error = e; }
-            promise.setData(req.status, req.responseText);
+            promise.setData(req._status, req.responseText);
             postMessage('error');
-            postMessage('error' + req.status);
+            postMessage('error' + req._status);
         }
     } catch(e) {
         error = error || e;
@@ -14665,7 +14665,7 @@ function _onReady(req, callback, promise) {
 
     function postMessage(msg) {
         if (_messenger) request.postMessage(msg,
-            { status: req.status, response: req.responseText });
+            { status: req._status, response: req.responseText });
     }
 }
 
@@ -14813,7 +14813,7 @@ function whenRequestsCompleted(callback, timeout) {
     callback = _.once(callback);
     if (timeout)
         _.delay(callback, timeout, 'timeout');
-    
+
     if (_pendingRequests.length)
         _messenger.once('requestscompleted', callback);
     else
@@ -16849,7 +16849,7 @@ function deferTicks(ticks) { // , arguments
     if (ticks < 2) return defer.apply(this, arguments);
     var args = repeat.call(deferFunc, ticks - 1);
     args = args.concat(this, slice.call(arguments, 1)); 
-    return deferFunc.apply(null, args);
+    deferFunc.apply(null, args);
 }
 
 
@@ -16863,7 +16863,7 @@ function deferTicks(ticks) { // , arguments
  */
 function delayMethod(funcOrMethodName, wait) { // , ... arguments
     var args = slice.call(arguments, 2);
-    return _delayMethod(this, funcOrMethodName, wait, args);
+    _delayMethod(this, funcOrMethodName, wait, args);
 }
 
 
@@ -16876,7 +16876,7 @@ function delayMethod(funcOrMethodName, wait) { // , ... arguments
  */
 function deferMethod(funcOrMethodName) { // , ... arguments
     var args = slice.call(arguments, 1);
-    return _delayMethod(this, funcOrMethodName, 1, args);
+    _delayMethod(this, funcOrMethodName, 1, args);
 }
 
 function _delayMethod(object, funcOrMethodName, wait, args) {
