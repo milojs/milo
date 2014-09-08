@@ -14607,11 +14607,12 @@ function request(url, opts, callback) {
         });
 
     req.timeout = opts.timeout || config.request.defaults.timeout;
+    req.onreadystatechange = onStateChange;
     req.ontimeout = onTimeout;
+    req.onabort = onAbort;
 
     var promise = new Promise(req);
 
-    req.onreadystatechange = onReady;
     req.send(JSON.stringify(opts.data));
     req[config.request.optionsKey] = opts;
 
@@ -14620,18 +14621,22 @@ function request(url, opts, callback) {
     return promise;
 
 
-    function onReady() {
+    function onStateChange() {
         _onReady(req, callback, promise);
     }
 
     function onTimeout() {
-        _onReady(req, callback, promise, true);
+        _onReady(req, callback, promise, 'timeout');
+    }
+
+    function onAbort() {
+        _onReady(req, callback, promise, 'canceled');
     }
 }
 
 
-function _onReady(req, callback, promise, timedout) {
-    if (req.readyState != 4) return;
+function _onReady(req, callback, promise, forcedReason) {
+    if (req.readyState != 4 || (!req.status && !forcedReason)) return; // not ready yet
 
     _.spliceItem(_pendingRequests, req);
 
@@ -14644,12 +14649,12 @@ function _onReady(req, callback, promise, timedout) {
             postMessage('success');
         }
         else {
-            var status = req.status || (timedout ? 'timeout' : 'canceled'); // request was aborted in case of timeout
-            try { callback && callback(status, req.responseText, req); }
+            var errorReason = req.status || forcedReason || 'unknown reason';
+            try { callback && callback(errorReason, req.responseText, req); }
             catch(e) { error = e; }
-            promise.setData(status, req.responseText);
+            promise.setData(errorReason, req.responseText);
             postMessage('error');
-            postMessage('error' + status);
+            postMessage('error' + errorReason);
         }
     } catch(e) {
         error = error || e;
@@ -14657,6 +14662,8 @@ function _onReady(req, callback, promise, timedout) {
 
     // not removing subscription creates memory leak, deleting property would not remove subscription
     req.onreadystatechange = undefined;
+    req.ontimeout = undefined;
+    req.onabort = undefined;
 
     if (!_pendingRequests.length)
         postMessage('requestscompleted');
@@ -16849,7 +16856,7 @@ function deferTicks(ticks) { // , arguments
     if (ticks < 2) return defer.apply(this, arguments);
     var args = repeat.call(deferFunc, ticks - 1);
     args = args.concat(this, slice.call(arguments, 1)); 
-    return deferFunc.apply(null, args);
+    deferFunc.apply(null, args);
 }
 
 
@@ -16863,7 +16870,7 @@ function deferTicks(ticks) { // , arguments
  */
 function delayMethod(funcOrMethodName, wait) { // , ... arguments
     var args = slice.call(arguments, 2);
-    return _delayMethod(this, funcOrMethodName, wait, args);
+    _delayMethod(this, funcOrMethodName, wait, args);
 }
 
 
@@ -16876,7 +16883,7 @@ function delayMethod(funcOrMethodName, wait) { // , ... arguments
  */
 function deferMethod(funcOrMethodName) { // , ... arguments
     var args = slice.call(arguments, 1);
-    return _delayMethod(this, funcOrMethodName, 1, args);
+    _delayMethod(this, funcOrMethodName, 1, args);
 }
 
 function _delayMethod(object, funcOrMethodName, wait, args) {
