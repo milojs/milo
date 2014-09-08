@@ -14810,28 +14810,14 @@ function request$destroy() {
 
 
 function whenRequestsCompleted(callback, timeout) {
-    if(timeout)
-        _.delay(fireCallbackOnce.bind(this, callback, 'timeout'), timeout);
+    callback = _.once(callback);
+    if (timeout)
+        _.delay(callback, timeout, 'timeout');
+    
     if (_pendingRequests.length)
-        _messenger.once('requestscompleted', fireCallbackOnce.bind(this, callback, 'requestscompleted'));
+        _messenger.once('requestscompleted', callback);
     else
-        _.defer(fireCallbackOnce.bind(this, callback, 'deferred'));
-
-    function fireCallbackOnce(func, message){
-        if(!func._firedOnce){
-            if(message == 'timeout')
-                brandRequests();
-            func.call(this, message);
-            func._firedOnce = true;
-        }
-    }
-
-    function brandRequests() {
-        _.forEach(_pendingRequests, function(req){
-            req._overtime = true;
-        });
-    }
-
+        _.defer(callback);
 }
 
 },{"../config":64,"../messenger":66,"./count":93,"./logger":101,"./promise":103,"mol-proto":112}],105:[function(require,module,exports){
@@ -16863,7 +16849,7 @@ function deferTicks(ticks) { // , arguments
     if (ticks < 2) return defer.apply(this, arguments);
     var args = repeat.call(deferFunc, ticks - 1);
     args = args.concat(this, slice.call(arguments, 1)); 
-    deferFunc.apply(null, args);
+    return deferFunc.apply(null, args);
 }
 
 
@@ -16877,7 +16863,7 @@ function deferTicks(ticks) { // , arguments
  */
 function delayMethod(funcOrMethodName, wait) { // , ... arguments
     var args = slice.call(arguments, 2);
-    _delayMethod(this, funcOrMethodName, wait, args);
+    return _delayMethod(this, funcOrMethodName, wait, args);
 }
 
 
@@ -16890,7 +16876,7 @@ function delayMethod(funcOrMethodName, wait) { // , ... arguments
  */
 function deferMethod(funcOrMethodName) { // , ... arguments
     var args = slice.call(arguments, 1);
-    _delayMethod(this, funcOrMethodName, 1, args);
+    return _delayMethod(this, funcOrMethodName, 1, args);
 }
 
 function _delayMethod(object, funcOrMethodName, wait, args) {
