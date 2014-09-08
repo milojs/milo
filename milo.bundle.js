@@ -372,7 +372,7 @@ function Mixin_setInstanceKey(hostClass, method, instanceKey) {
         , instanceKeys = hostClass[prop] = hostClass[prop] || {};
 
     if (instanceKeys[method.name])
-        throw new Error('Mixin: instance property for method with name '
+        throw new MixinError('Mixin: instance property for method with name '
             + method.name + ' is already set');
 
     instanceKeys[method.name] = instanceKey;
@@ -391,6 +391,9 @@ function Mixin_setInstanceKey(hostClass, method, instanceKey) {
 function Mixin_addMethod(hostClass, instanceKey, mixinMethodName, hostMethodName) {
     var method = this.prototype[mixinMethodName];
     check(method, Function);
+
+    if (hostClass.prototype[hostMethodName])
+        throw new MixinError('Mixin: method ' + hostMethodName + ' already exists');
 
     var wrappedMethod = _wrapMixinMethod.call(this, method);
 
@@ -424,7 +427,6 @@ function _wrapMixinMethod(method) {
  * @return {Object}
  */
 function _getMixinInstance(methodName) {
-    if (this instanceof Mixin) return this;
     var instanceKeys = this.constructor[config.mixin.instancePropertiesMap]
     return this[instanceKeys[methodName]];
 }
@@ -16834,7 +16836,7 @@ function deferTicks(ticks) { // , arguments
     if (ticks < 2) return defer.apply(this, arguments);
     var args = repeat.call(deferFunc, ticks - 1);
     args = args.concat(this, slice.call(arguments, 1)); 
-    deferFunc.apply(null, args);
+    return deferFunc.apply(null, args);
 }
 
 
@@ -16848,7 +16850,7 @@ function deferTicks(ticks) { // , arguments
  */
 function delayMethod(funcOrMethodName, wait) { // , ... arguments
     var args = slice.call(arguments, 2);
-    _delayMethod(this, funcOrMethodName, wait, args);
+    return _delayMethod(this, funcOrMethodName, wait, args);
 }
 
 
@@ -16861,7 +16863,7 @@ function delayMethod(funcOrMethodName, wait) { // , ... arguments
  */
 function deferMethod(funcOrMethodName) { // , ... arguments
     var args = slice.call(arguments, 1);
-    _delayMethod(this, funcOrMethodName, 1, args);
+    return _delayMethod(this, funcOrMethodName, 1, args);
 }
 
 function _delayMethod(object, funcOrMethodName, wait, args) {
