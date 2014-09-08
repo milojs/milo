@@ -14614,11 +14614,12 @@ function request(url, opts, callback) {
 
     _pendingRequests.push(req);
 
-    req._delayedCall = _.delay(function(){
+    req.timeout = opts.timeout || config.request.defaults.timeout;
+    req.ontimeout = function () {
         req.onreadystatechange = undefined;
         req.abort();
         onReady();
-    }, opts.timeout || config.request.defaults.timeout);
+    };
 
     return promise;
 
@@ -14632,7 +14633,6 @@ function request(url, opts, callback) {
 function _onReady(req, callback, promise) {
     if (req.readyState != 4) return;
 
-    clearTimeout(req._delayedCall);
     _.spliceItem(_pendingRequests, req);
 
     var error;
@@ -14644,7 +14644,7 @@ function _onReady(req, callback, promise) {
             postMessage('success');
         }
         else {
-            req.status == req.status || 'timeout'; // request was aborted in case of timeout
+            req.status == req.status || 'canceled'; // request was aborted in case of timeout
             try { callback && callback(req.status, req.responseText, req); }
             catch(e) { error = e; }
             promise.setData(req.status, req.responseText);
@@ -14810,10 +14810,28 @@ function request$destroy() {
 
 
 function whenRequestsCompleted(callback, timeout) {
+    if(timeout)
+        _.delay(fireCallbackOnce.bind(this, callback, 'timeout'), timeout);
     if (_pendingRequests.length)
-        _messenger.once('requestscompleted', callback);
+        _messenger.once('requestscompleted', fireCallbackOnce.bind(this, callback, 'requestscompleted'));
     else
-        _.defer(callback);
+        _.defer(fireCallbackOnce.bind(this, callback, 'deferred'));
+
+    function fireCallbackOnce(func, message){
+        if(!func._firedOnce){
+            if(message == 'timeout')
+                brandRequests();
+            func.call(this, message);
+            func._firedOnce = true;
+        }
+    }
+
+    function brandRequests() {
+        _.forEach(_pendingRequests, function(req){
+            req._overtime = true;
+        });
+    }
+
 }
 
 },{"../config":64,"../messenger":66,"./count":93,"./logger":101,"./promise":103,"mol-proto":112}],105:[function(require,module,exports){
@@ -16845,7 +16863,7 @@ function deferTicks(ticks) { // , arguments
     if (ticks < 2) return defer.apply(this, arguments);
     var args = repeat.call(deferFunc, ticks - 1);
     args = args.concat(this, slice.call(arguments, 1)); 
-    return deferFunc.apply(null, args);
+    deferFunc.apply(null, args);
 }
 
 
@@ -16859,7 +16877,7 @@ function deferTicks(ticks) { // , arguments
  */
 function delayMethod(funcOrMethodName, wait) { // , ... arguments
     var args = slice.call(arguments, 2);
-    return _delayMethod(this, funcOrMethodName, wait, args);
+    _delayMethod(this, funcOrMethodName, wait, args);
 }
 
 
@@ -16872,7 +16890,7 @@ function delayMethod(funcOrMethodName, wait) { // , ... arguments
  */
 function deferMethod(funcOrMethodName) { // , ... arguments
     var args = slice.call(arguments, 1);
-    return _delayMethod(this, funcOrMethodName, 1, args);
+    _delayMethod(this, funcOrMethodName, 1, args);
 }
 
 function _delayMethod(object, funcOrMethodName, wait, args) {
