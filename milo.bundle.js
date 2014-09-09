@@ -6790,13 +6790,19 @@ componentsRegistry.add(MLInput);
 module.exports = MLInput;
 
 _.extendProto(MLInput, {
-    disable: MLInput$disable
+    disable: MLInput$disable,
+    setMaxLength: MLInput$setMaxLength
 });
 
 
 function MLInput$disable(disable) {
     this.el.disabled = disable;
 }
+
+function MLInput$setMaxLength(length) {
+    this._input.el.setAttribute('maxlength', length);
+}
+
 },{"../c_class":16,"../c_registry":33,"mol-proto":112}],51:[function(require,module,exports){
 'use strict';
 
@@ -16846,7 +16852,7 @@ function deferTicks(ticks) { // , arguments
     if (ticks < 2) return defer.apply(this, arguments);
     var args = repeat.call(deferFunc, ticks - 1);
     args = args.concat(this, slice.call(arguments, 1)); 
-    deferFunc.apply(null, args);
+    return deferFunc.apply(null, args);
 }
 
 
@@ -16860,7 +16866,7 @@ function deferTicks(ticks) { // , arguments
  */
 function delayMethod(funcOrMethodName, wait) { // , ... arguments
     var args = slice.call(arguments, 2);
-    _delayMethod(this, funcOrMethodName, wait, args);
+    return _delayMethod(this, funcOrMethodName, wait, args);
 }
 
 
@@ -16873,7 +16879,7 @@ function delayMethod(funcOrMethodName, wait) { // , ... arguments
  */
 function deferMethod(funcOrMethodName) { // , ... arguments
     var args = slice.call(arguments, 1);
-    _delayMethod(this, funcOrMethodName, 1, args);
+    return _delayMethod(this, funcOrMethodName, 1, args);
 }
 
 function _delayMethod(object, funcOrMethodName, wait, args) {
