@@ -14601,10 +14601,7 @@ function request(url, opts, callback) {
     var req = new XMLHttpRequest();
     req.open(opts.method, opts.url, true);
     req.setRequestHeader('Content-Type', opts.contentType);
-    if (opts.headers)
-        _.eachKey(opts.headers, function(value, key) {
-            req.setRequestHeader(key, value);
-        });
+    setRequestHeaders(req, opts.headers);
 
     req.timeout = opts.timeout || config.request.defaults.timeout;
     req.onreadystatechange = req.ontimeout = req.onabort = onReady;
@@ -14621,6 +14618,13 @@ function request(url, opts, callback) {
     function onReady(e) {
         _onReady(req, callback, promise, e.type);
     }
+}
+
+function setRequestHeaders(req, headers) {
+    if (headers)
+        _.eachKey(headers, function(value, key) {
+            req.setRequestHeader(key, value);
+        });
 }
 
 function _onReady(req, callback, promise, eventType) {
@@ -14775,24 +14779,23 @@ function request$file(url, data, callback) {
 
     var req = new XMLHttpRequest();
     req.open('POST', opts.url, true);
-    if (opts.headers)
-        _.eachKey(opts.headers, function(value, key) {
-            req.setRequestHeader(key, value);
-        });
+    setRequestHeaders(req, opts.headers);
+
+    req.timeout = opts.timeout || config.request.defaults.timeout;
+    req.onreadystatechange = req.ontimeout = req.onabort = onReady;
 
     var promise = new Promise();
 
     var formData = new FormData();
     formData.append('file', data);
 
-    req.onreadystatechange = onReady;
     req.send(formData);
     _pendingRequests.push(req);
 
     return promise;
 
-    function onReady() {
-        _onReady(req, callback, promise);
+    function onReady(e) {
+        _onReady(req, callback, promise, e.type);
     }
 }
 
