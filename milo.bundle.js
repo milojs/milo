@@ -15455,7 +15455,7 @@ function DOMStorage$setItem(key, value) {
     } catch(e) {
         if (e.name == 'QuotaExceededError') {
             var cfg = config.domStorage.quotaExceeded;
-            if (cfg.message && this._messenger)
+            if (cfg.message)
                 milo.mail.postMessage('quotaexceedederror', value);
             if (cfg.throwError)
                 throw e;

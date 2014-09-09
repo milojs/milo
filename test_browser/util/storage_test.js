@@ -264,7 +264,7 @@ describe('DOMStorage', function() {
             testStoredValues();
         });
 
-        it.skip('should send message on QuotaExceededError', function(done) {
+        it('should send message on QuotaExceededError', function(done) {
             milo.config({ domStorage: { quotaExceeded: {
                 message: true,
                 throwError: false
