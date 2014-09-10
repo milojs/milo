@@ -5232,6 +5232,7 @@ var ComponentFacet = require('../c_facet')
     , facetsRegistry = require('./cf_registry') 
     , _ = require('mol-proto')
     , check = require('../../util/check')
+    , logger = require('../../util/logger')
     , Match = check.Match
     , binder = require('../../binder');
 
@@ -5310,7 +5311,7 @@ function Template$binder() {
         logger.error('TemplateFacet: Binder called without container facet.');
 }
 
-},{"../../binder":9,"../../util/check":91,"../c_facet":17,"./cf_registry":31,"mol-proto":112}],30:[function(require,module,exports){
+},{"../../binder":9,"../../util/check":91,"../../util/logger":101,"../c_facet":17,"./cf_registry":31,"mol-proto":112}],30:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
