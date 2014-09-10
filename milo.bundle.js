@@ -6791,13 +6791,19 @@ componentsRegistry.add(MLInput);
 module.exports = MLInput;
 
 _.extendProto(MLInput, {
-    disable: MLInput$disable
+    disable: MLInput$disable,
+    setMaxLength: MLInput$setMaxLength
 });
 
 
 function MLInput$disable(disable) {
     this.el.disabled = disable;
 }
+
+function MLInput$setMaxLength(length) {
+    this.el.setAttribute('maxlength', length);
+}
+
 },{"../c_class":16,"../c_registry":33,"mol-proto":112}],51:[function(require,module,exports){
 'use strict';
 
