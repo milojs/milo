@@ -12398,12 +12398,22 @@ var Messenger = require('../messenger')
     , DOMEmitterSource = require('./dom_source');
 
 
-var windowMessenger = new Messenger;
-var domEmitterSource = new DOMEmitterSource(windowMessenger, { trigger: 'trigger' }, undefined, window);
-windowMessenger._setMessageSource(domEmitterSource);
+var windowService = new Messenger;
+var domEmitterSource = new DOMEmitterSource(windowService, { trigger: 'trigger' }, undefined, window);
+windowService._setMessageSource(domEmitterSource);
 
 
-module.exports = windowMessenger;
+module.exports = windowService;
+
+
+_.extend(windowService, {
+    isTop: windowService_isTop
+});
+
+
+function windowService_isTop() {
+    return window.top == window.self || window.__karma__;
+}
 
 },{"../messenger":66,"./dom_source":84}],89:[function(require,module,exports){
 'use strict';
