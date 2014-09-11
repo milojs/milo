@@ -159,9 +159,9 @@ describe('request', function() {
         var completed = requestMessageDispatched = doneTimes(9, function() {
             assert.deepEqual(requestMessages, [
                 'request', 'test_whenRequestsCompleted_none',
-                'request', 'request',
-                'success', 'success', 'success',
-                'requestscompleted', 'test_whenRequestsCompleted_all'
+                'request', 'success', 'request',
+                'success', 'success', 'requestscompleted',
+                'test_whenRequestsCompleted_all'
             ]);
             done();
         });

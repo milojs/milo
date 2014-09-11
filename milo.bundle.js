@@ -14643,18 +14643,20 @@ function _onReady(req, callback, promise, eventType) {
     var error;
     try {
         if (req.statusText.toUpperCase() == 'OK' ) {
-            try { callback && callback(null, req.responseText, req); }
-            catch(e) { error = e; }
+            try {
+                postMessage('success');
+                callback && callback(null, req.responseText, req);
+            } catch(e) { error = e; }
             promise.setData(null, req.responseText);
-            postMessage('success');
         }
         else {
             var errorReason = req.status || eventType;
-            try { callback && callback(errorReason, req.responseText, req); }
-            catch(e) { error = e; }
+            try {
+                postMessage('error');
+                postMessage('error' + errorReason);
+                callback && callback(errorReason, req.responseText, req);
+            } catch(e) { error = e; }
             promise.setData(errorReason, req.responseText);
-            postMessage('error');
-            postMessage('error' + errorReason);
         }
     } catch(e) {
         error = error || e;
@@ -14749,15 +14751,17 @@ function request$jsonp(url, callback) {
 
     function _onResult(err, result) {
         _.spliceItem(_pendingRequests, window[uniqueCallback]);
-        try { callback && callback(err, result); }
+        try {
+            postMessage(err ? 'error' : 'success', err, result);
+            if (err) {
+                logger.error('No JSONP response or timeout');
+                postMessage('errorjsonptimeout', err);
+            }
+            callback && callback(err, result);
+        }
         catch(e) { var error = e; }
         promise.setData(err, result);
 
-        postMessage(err ? 'error' : 'success', err, result);
-        if (err) {
-            logger.error('No JSONP response or timeout');
-            postMessage('errorjsonptimeout', err);
-        }
         cleanUp();
         if (!_pendingRequests.length)
             postMessage('requestscompleted');
