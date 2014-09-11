@@ -4724,6 +4724,7 @@ _.extendProto(List, {
     contains: List$contains,
     addItem: List$addItem,
     addItems: List$addItems,
+    replaceItem: List$replaceItem,
     removeItem: List$removeItem,
     extractItem: List$extractItem,
     each: List$each,
@@ -5048,6 +5049,14 @@ function List$_removeItem(index, doDestroyItem) {
     _updateItemsIndexes.call(this, index);
 
     return comp;
+}
+
+
+function List$replaceItem(index, newItem){
+    var oldItem = this.item(index);
+    oldItem.dom.insertAfter(newItem.el);
+    this._removeItem(index);
+    this._setItem(index, newItem);
 }
 
 
