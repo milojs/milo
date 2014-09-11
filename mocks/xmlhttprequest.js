@@ -71,7 +71,7 @@ function _response_ready(response) {
             this.status = 200;
             this.responseText = response;
         }
-        this.onreadystatechange();
+        this.onreadystatechange({ type: 'readystatechange' });
     } else
         milo.util.logger.warn('no request handler');
 }

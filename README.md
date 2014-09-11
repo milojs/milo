@@ -110,6 +110,9 @@ Samples/Tutorials
 
 [Introduction to lists](https://github.com/MailOnline/milo/blob/master/examples/tutorials/6_lists.html)
 
+Article about creating milo [Rolling Your Own Framework](http://code.tutsplus.com/articles/rolling-your-own-framework--cms-21810) on tuts+
+
+
 ### TodoMVC
 
 The more advanced sample is __Todos__ app in
@@ -339,6 +342,19 @@ http://opensource.org/licenses/BSD-2-Clause
 
 Changes log
 -----------
+
+###0.1.8###
+
+- Changes to `milo.util.request`
+
+    - Handle timeout and abort events.
+    - Separate timeout for `whenRequestsCompleted` method.
+
+
+###0.1.7###
+
+- Fixes and minor performance improvements
+
 
 ###0.1.6###
 

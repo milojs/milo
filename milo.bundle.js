@@ -372,7 +372,7 @@ function Mixin_setInstanceKey(hostClass, method, instanceKey) {
         , instanceKeys = hostClass[prop] = hostClass[prop] || {};
 
     if (instanceKeys[method.name])
-        throw new MixinError('Mixin: instance property for method with name '
+        throw new Error('Mixin: instance property for method with name '
             + method.name + ' is already set');
 
     instanceKeys[method.name] = instanceKey;
@@ -391,9 +391,6 @@ function Mixin_setInstanceKey(hostClass, method, instanceKey) {
 function Mixin_addMethod(hostClass, instanceKey, mixinMethodName, hostMethodName) {
     var method = this.prototype[mixinMethodName];
     check(method, Function);
-
-    if (hostClass.prototype[hostMethodName])
-        throw new MixinError('Mixin: method ' + hostMethodName + ' already exists');
 
     var wrappedMethod = _wrapMixinMethod.call(this, method);
 
@@ -427,6 +424,7 @@ function _wrapMixinMethod(method) {
  * @return {Object}
  */
 function _getMixinInstance(methodName) {
+    if (this instanceof Mixin) return this;
     var instanceKeys = this.constructor[config.mixin.instancePropertiesMap]
     return this[instanceKeys[methodName]];
 }
@@ -5243,6 +5241,7 @@ var ComponentFacet = require('../c_facet')
     , facetsRegistry = require('./cf_registry') 
     , _ = require('mol-proto')
     , check = require('../../util/check')
+    , logger = require('../../util/logger')
     , Match = check.Match
     , binder = require('../../binder');
 
@@ -5321,7 +5320,7 @@ function Template$binder() {
         logger.error('TemplateFacet: Binder called without container facet.');
 }
 
-},{"../../binder":9,"../../util/check":91,"../c_facet":17,"./cf_registry":31,"mol-proto":112}],30:[function(require,module,exports){
+},{"../../binder":9,"../../util/check":91,"../../util/logger":101,"../c_facet":17,"./cf_registry":31,"mol-proto":112}],30:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -6755,7 +6754,7 @@ function MLImage_set(value) {
  */
 function MLImage_get() {
     var value = this.model.get();
-    return typeof value == 'object' ? _.clone(value) : value;
+    return value && typeof value == 'object' ? _.clone(value) : value;
 }
 
 
@@ -6801,13 +6800,19 @@ componentsRegistry.add(MLInput);
 module.exports = MLInput;
 
 _.extendProto(MLInput, {
-    disable: MLInput$disable
+    disable: MLInput$disable,
+    setMaxLength: MLInput$setMaxLength
 });
 
 
 function MLInput$disable(disable) {
     this.el.disabled = disable;
 }
+
+function MLInput$setMaxLength(length) {
+    this.el.setAttribute('maxlength', length);
+}
+
 },{"../c_class":16,"../c_registry":33,"mol-proto":112}],51:[function(require,module,exports){
 'use strict';
 
@@ -8676,9 +8681,12 @@ config({
         }
     },
     request: {
-        jsonpTimeout: 15, // seconds
+        jsonpTimeout: 60000,
         jsonpCallbackPrefix: '___milo_callback_',
-        optionsKey: '___milo_options'
+        optionsKey: '___milo_options',
+        defaults: {
+            timeout: 60000
+        }
     },
     check: true,
     debug: false
@@ -14609,14 +14617,13 @@ function request(url, opts, callback) {
     var req = new XMLHttpRequest();
     req.open(opts.method, opts.url, true);
     req.setRequestHeader('Content-Type', opts.contentType);
-    if (opts.headers)
-        _.eachKey(opts.headers, function(value, key) {
-            req.setRequestHeader(key, value);
-        });
+    setRequestHeaders(req, opts.headers);
+
+    req.timeout = opts.timeout || config.request.defaults.timeout;
+    req.onreadystatechange = req.ontimeout = req.onabort = onReady;
 
     var promise = new Promise(req);
 
-    req.onreadystatechange = onReady;
     req.send(JSON.stringify(opts.data));
     req[config.request.optionsKey] = opts;
 
@@ -14624,49 +14631,58 @@ function request(url, opts, callback) {
 
     return promise;
 
-
-    function onReady() {
-        _onReady(req, callback, promise);
+    function onReady(e) {
+        _onReady(req, callback, promise, e.type);
     }
 }
 
+function setRequestHeaders(req, headers) {
+    if (headers)
+        _.eachKey(headers, function(value, key) {
+            req.setRequestHeader(key, value);
+        });
+}
 
-function _onReady(req, callback, promise) {
-    if (req.readyState == 4) {
-        _.spliceItem(_pendingRequests, req);
+function _onReady(req, callback, promise, eventType) {
+    if (req.readyState != 4) return;
+    if (!req.status && eventType == 'readystatechange') return;
 
-        var error;
-        try {
-            if (req.statusText.toUpperCase() == 'OK' ) {
-                try { callback && callback(null, req.responseText, req); }
-                catch(e) { error = e; }
-                promise.setData(null, req.responseText);
+    _.spliceItem(_pendingRequests, req);
+
+    var error;
+    try {
+        if (req.statusText.toUpperCase() == 'OK' ) {
+            try {
                 postMessage('success');
-            }
-            else if(req.status != 0) { // not canceled eg. with abort() method
-                try { callback && callback(req.status, req.responseText, req); }
-                catch(e) { error = e; }
-                promise.setData(req.status, req.responseText);
-                postMessage('error');
-                postMessage('error' + req.status);
-            }
-        } catch(e) {
-            error = error || e;
+                callback && callback(null, req.responseText, req);
+            } catch(e) { error = e; }
+            promise.setData(null, req.responseText);
         }
-
-        if (!_pendingRequests.length)
-            postMessage('requestscompleted');
-
-        // not removing subscription creates memory leak, deleting property would not remove subscription
-        req.onreadystatechange = undefined;
-
-        if (error) throw error;
+        else {
+            var errorReason = req.status || eventType;
+            try {
+                postMessage('error');
+                postMessage('error' + errorReason);
+                callback && callback(errorReason, req.responseText, req);
+            } catch(e) { error = e; }
+            promise.setData(errorReason, req.responseText);
+        }
+    } catch(e) {
+        error = error || e;
     }
+
+    // not removing subscription creates memory leak, deleting property would not remove subscription
+    req.onreadystatechange = req.ontimeout = req.onabort = undefined;
+
+    if (!_pendingRequests.length)
+        postMessage('requestscompleted');
+
+    if (error) throw error;
 
     function postMessage(msg) {
         if (_messenger) request.postMessage(msg,
-            { status: req.status, response: req.responseText });
-    }    
+            { status: status, response: req.responseText });
+    }
 }
 
 
@@ -14728,7 +14744,7 @@ function request$jsonp(url, callback) {
     var timeout = setTimeout(function() {
         var err = new Error('No JSONP response or no callback in response');
         _onResult(err);
-    }, config.request.jsonpTimeout * 1000);
+    }, config.request.jsonpTimeout);
 
     window[uniqueCallback] = _.partial(_onResult, null);
 
@@ -14744,15 +14760,17 @@ function request$jsonp(url, callback) {
 
     function _onResult(err, result) {
         _.spliceItem(_pendingRequests, window[uniqueCallback]);
-        try { callback && callback(err, result); }
+        try {
+            postMessage(err ? 'error' : 'success', err, result);
+            if (err) {
+                logger.error('No JSONP response or timeout');
+                postMessage('errorjsonptimeout', err);
+            }
+            callback && callback(err, result);
+        }
         catch(e) { var error = e; }
         promise.setData(err, result);
 
-        postMessage(err ? 'error' : 'success', err, result);
-        if (err) {
-            logger.error('No JSONP response or timeout');
-            postMessage('errorjsonptimeout', err);
-        }
         cleanUp();
         if (!_pendingRequests.length)
             postMessage('requestscompleted');
@@ -14771,7 +14789,7 @@ function request$jsonp(url, callback) {
     function postMessage(msg, status, result) {
         if (_messenger) request.postMessage(msg,
             { status: status, response: result });
-    }    
+    }
 }
 
 
@@ -14781,24 +14799,23 @@ function request$file(url, data, callback) {
 
     var req = new XMLHttpRequest();
     req.open('POST', opts.url, true);
-    if (opts.headers)
-        _.eachKey(opts.headers, function(value, key) {
-            req.setRequestHeader(key, value);
-        });
+    setRequestHeaders(req, opts.headers);
+
+    req.timeout = opts.timeout || config.request.defaults.timeout;
+    req.onreadystatechange = req.ontimeout = req.onabort = onReady;
 
     var promise = new Promise();
 
     var formData = new FormData();
     formData.append('file', data);
 
-    req.onreadystatechange = onReady;
     req.send(formData);
     _pendingRequests.push(req);
 
     return promise;
 
-    function onReady() {
-        _onReady(req, callback, promise);
+    function onReady(e) {
+        _onReady(req, callback, promise, e.type);
     }
 }
 
@@ -14809,7 +14826,11 @@ function request$destroy() {
 }
 
 
-function whenRequestsCompleted(callback) {
+function whenRequestsCompleted(callback, timeout) {
+    callback = _.once(callback);
+    if (timeout)
+        _.delay(callback, timeout, 'timeout');
+
     if (_pendingRequests.length)
         _messenger.once('requestscompleted', callback);
     else
@@ -15444,7 +15465,7 @@ function DOMStorage$setItem(key, value) {
     } catch(e) {
         if (e.name == 'QuotaExceededError') {
             var cfg = config.domStorage.quotaExceeded;
-            if (cfg.message && this._messenger)
+            if (cfg.message)
                 milo.mail.postMessage('quotaexceedederror', value);
             if (cfg.throwError)
                 throw e;
