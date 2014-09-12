@@ -3634,7 +3634,10 @@ var ComponentFacet = require('../c_facet')
     , doT = require('dot');
 
 
-// data model connection facet
+/**
+ * `milo.registry.facets.get('Dom')`
+ * Facet with component related dom utils
+ */
 var Dom = _.createSubclass(ComponentFacet, 'Dom');
 
 _.extend(Dom, {
@@ -4689,7 +4692,6 @@ function ItemFacet$extractItem() {
 var ComponentFacet = require('../c_facet')
     , Component = require('../c_class')
     , facetsRegistry = require('./cf_registry')
-    , Model = require('../../model')
     , _ = require('mol-proto')
     , miloMail = require('../../services/mail')
     , miloBinder = require('../../binder')
@@ -4705,8 +4707,10 @@ var ComponentFacet = require('../c_facet')
 
 var LIST_SAMPLE_CSS_CLASS = 'ml-list-item-sample';
 
-
-// Data model connection facet
+/**
+ * `milo.registry.facets.get('List')`
+ * Facet enabling list functionality
+ */
 var List = _.createSubclass(ComponentFacet, 'List');
 
 _.extendProto(List, {
@@ -4745,8 +4749,7 @@ module.exports = List;
  */
 function List$init() {
     ComponentFacet.prototype.init.apply(this, arguments);
-    var model = new Model
-        , self = this;
+    var self = this;
 
     _.defineProperties(this, {
         _listItems: [],
@@ -5009,11 +5012,21 @@ function List$_addItems(count, index) {
 }
 
 
+/**
+ * List facet instance method
+ * @param {Integer} index The index of the item to remove
+ * @return {Array[Object]} The spliced data
+ */
 function List$removeItem(index) {
-    this.owner.data.splice(index, 1);
+    return this.owner.data.splice(index, 1);
 }
 
 
+/**
+ * List facet instance method
+ * @param {Integer} index The index of the item to extract
+ * @return {Component} The extracted item
+ */
 function List$extractItem(index) {
     var itemComp = this._removeItem(index, false);
     this._updateDataPaths(index, this.count());
@@ -5105,7 +5118,7 @@ function List$destroy() {
     ComponentFacet.prototype.destroy.apply(this, arguments);
 }
 
-},{"../../binder":9,"../../config":64,"../../model":75,"../../services/mail":85,"../../util":99,"../c_class":16,"../c_facet":17,"./cf_registry":31,"dot":111,"mol-proto":112}],27:[function(require,module,exports){
+},{"../../binder":9,"../../config":64,"../../services/mail":85,"../../util":99,"../c_class":16,"../c_facet":17,"./cf_registry":31,"dot":111,"mol-proto":112}],27:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -6965,7 +6978,8 @@ module.exports = MLList;
 
 _.extendProto(MLList, {
     init: MLList$init,
-    destroy: MLList$destroy
+    destroy: MLList$destroy,
+    moveItem: MLList$moveItem
 });
 
 
@@ -6982,6 +6996,12 @@ function MLList$destroy() {
 }
 
 
+function MLList$moveItem(from, to) {
+    var splicedData = this.model.splice(from, 1);
+    return this.model.splice(to, 0, splicedData[0]);
+}
+
+
 function onChildrenBound() {
     this.model.set([]);
     this._connector = milo.minder(this.model, '<<<->>>', this.data);
@@ -6991,6 +7011,7 @@ function onChildrenBound() {
 'use strict';
 
 var Component = require('../c_class')
+    , DragDrop = require('../../util/dragdrop')
     , componentsRegistry = require('../c_registry')
     , _ = require('mol-proto');
 
@@ -7000,6 +7021,19 @@ var LISTITEM_CHANGE_MESSAGE = 'mllistitemchange'
 var MLListItem = Component.createComponentClass('MLListItem', {
     container: undefined,
     dom: undefined,
+    drag: {
+        meta: {
+            params: getMetaData
+        }
+    },
+    drop: {
+        messages: {
+            'dragenter': { subscriber: onDragHover, context: 'owner' },
+            'dragover': { subscriber: onDragHover, context: 'owner' },
+            'dragleave': { subscriber: onDragOut, context: 'owner' },
+            'drop': { subscriber: onItemDrop, context: 'owner' }
+        }
+    },
     data: {
         get: MLListItem_get,
         set: MLListItem_set,
@@ -7016,13 +7050,58 @@ module.exports = MLListItem;
 
 
 _.extendProto(MLListItem, {
-    init: MLListItem$init
+    init: MLListItem$init,
+    moveItem: MLListItem$moveItem
 });
 
 
 function MLListItem$init() {
     Component.prototype.init.apply(this, arguments);
     this.on('childrenbound', onChildrenBound);
+}
+
+
+function onChildrenBound() {
+    var deleteBtn = this.container.scope.deleteBtn;
+    deleteBtn.events.on('click', { subscriber: this.item.removeItem, context: this.item });
+}
+
+
+function MLListItem$moveItem(index) {
+    var listOwner = this.item.list.owner;
+    listOwner && listOwner.moveItem(this.item.index, index);
+}
+
+
+function onItemDrop(eventType, event) {
+    var dt = new DragDrop(event);
+    var meta = dt.getComponentMeta();
+    var listOwner = this.item.list.owner;
+    if (meta.compClass != 'MLListItem') return;
+    
+    var index = meta.params && meta.params.index;
+
+    if (index)
+        listOwner.moveItem(+index, this.item.index);
+    
+    this.dom.removeCssClasses('ml-drag-over');
+}
+
+
+function onDragHover(eventType, event) {
+    this.dom.addCssClasses('ml-drag-over');
+}
+
+
+function onDragOut(eventType, event) {
+    this.dom.removeCssClasses('ml-drag-over');
+}
+
+
+function getMetaData() {
+    return {
+        index: this.item.index
+    }
 }
 
 
@@ -7053,20 +7132,9 @@ function _sendChangeMessage() {
 }
 
 
-function onChildrenBound() {
-    var deleteBtn = this.container.scope.deleteBtn;
-    deleteBtn.events.on('click', { subscriber: deleteItem, context: this });
-}
 
 
-function deleteItem() {
-    var itemFacet = this.item
-        , listComp = itemFacet.list.owner;
-    
-    listComp.data.splice(itemFacet.index, 1);
-}
-
-},{"../c_class":16,"../c_registry":33,"mol-proto":112}],54:[function(require,module,exports){
+},{"../../util/dragdrop":96,"../c_class":16,"../c_registry":33,"mol-proto":112}],54:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
