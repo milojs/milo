@@ -7032,6 +7032,9 @@ var MLListItem = Component.createComponentClass('MLListItem', {
             'dragover': { subscriber: onDragHover, context: 'owner' },
             'dragleave': { subscriber: onDragOut, context: 'owner' },
             'drop': { subscriber: onItemDrop, context: 'owner' }
+        },
+        allow: {
+            components: 'MLListItem'
         }
     },
     data: {
@@ -7083,7 +7086,7 @@ function onItemDrop(eventType, event) {
 
     if (index)
         listOwner.moveItem(+index, this.item.index);
-    
+
     this.dom.removeCssClasses('ml-drag-over');
 }
 
