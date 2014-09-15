@@ -1,0 +1,82 @@
+.ml-ui-foldtree-button, .ml-ui-foldtree-item {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-ui-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.ml-ui-foldtree-button, .ml-ui-foldtree-label {
+    cursor: pointer;
+}
+
+.ml-ui-foldtree-sub {
+    margin-left: 10px;
+    border-left: 1px solid;
+}
+
+.ml-ui-foldtree-item {
+    cursor: default;
+    padding: 2px 5px;
+    border-right: 1px solid;
+    border-top: 1px solid;
+}
+
+.ml-ui-foldtree-item:before {
+    width: 30px;
+    content: ' ';
+    text-align: center;
+    display: inline-block;
+}
+
+.ml-ui-foldtree-button {
+    display: inline-block;
+    width: 30px;
+}
+
+.ml-ui-foldtree-button:before {
+    content: '[ + ]';
+}
+
+.ml-ui-foldtree-list {
+    list-style: none;
+    display: none;
+}
+
+.ml-ui-foldtree-main > .ml-ui-foldtree-list {
+    display: block;
+}
+
+.ml-ui-foldtree-main > .ml-ui-foldtree-list > li:last-child > .ml-ui-foldtree-item {
+    border-bottom: 1px solid;
+}
+
+.ml-ui-foldtree-main-list > li:last-child > .ml-ui-foldtree-item {
+    border-bottom: 1px solid;
+}
+
+.ml-ui-foldtree-main-list > li:last-child.ml-ui-foldtree--unfold .ml-ui-foldtree-list li:last-child .ml-ui-foldtree-item {
+    border-bottom: 1px solid;
+}
+
+.ml-ui-foldtree--has-multiple .ml-ui-foldtree-item:before {
+    content: '';
+    width: 0;
+}
+
+.ml-ui-foldtree--unfold > .ml-ui-foldtree-item {
+    border-bottom: 1px solid;
+}
+
+.ml-ui-foldtree--unfold > .ml-ui-foldtree-item .ml-ui-foldtree-button:before {
+    content: '[ - ]';
+}
+
+.ml-ui-foldtree--unfold > .ml-ui-foldtree-list {
+    display: block;
+}
+
+.ml-ui-foldtree--unfold > .ml-ui-foldtree-list > li:first-child .ml-ui-foldtree-item {
+    border-top: none;
+}

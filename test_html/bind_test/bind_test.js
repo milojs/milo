@@ -115,5 +115,33 @@ describe('milo binder', function() {
 
         // simple data to data connection
         milo.minder(ctrl.data1.data, '<<->>', ctrl.data2.data);
+
+
+
+        var foldData = {items: [
+            { label: 'Jason Green', id: '001', items:
+                [
+                    { label: 'child01', id: '005', items: 
+                        [
+                            { label: 'subchild01', id: '006', item: []}
+                        ]
+                    }
+                ]
+            },
+            { label: 'Luis Fetzner', id: '002'},
+            { label: 'Tom Burnell', id: '003', items:
+                [
+                    { label: 'child02', id: '007', items: 
+                        [
+                            { label: 'subchild02', id: '008', item: []}
+                        ]
+                    }
+                ]
+            },
+            { label: 'Evgeny Poberezkin', id: '004'}
+        ]};
+
+        //Foldtree test
+        ctrl.myTree.renderTree(foldData);
     });
 });

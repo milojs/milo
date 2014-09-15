@@ -4,6 +4,7 @@
     <meta http-equiv="Content-type" content="text/html; charset=utf-8">
     <title>Simple binding test</title>
     <link rel="stylesheet" href="css/mocha.css" type="text/css" charset="utf-8" />
+    <link rel="stylesheet" href="css/bind_test.css" type="text/css" charset="utf-8" />
 </head>
 <body ml-bind=":body">
     <div ml-bind="[Events]:main">
@@ -60,6 +61,9 @@
         <!-- COMBO LIST -->
         <h1>Combo List</h1>
         <div ml-bind="MLComboList:myComboList"></div>
+
+        <h1>FoldTree</h1>
+        <div ml-bind="MLFoldTree:myTree"></div>
     </div>
 
     <!-- Required for browser reporter -->
