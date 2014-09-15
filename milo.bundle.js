@@ -7117,8 +7117,7 @@ function MLList$moveItem(from, to) {
 
 
 function onChildrenBound() {
-    this.model.set([]);
-    this._connector = milo.minder(this.model, '<<<->>>', this.data);
+    this._connector = milo.minder(this.model, '<<<-', this.data).deferChangeMode('<<<->>>');
 }
 
 },{"../c_class":16,"../c_registry":33,"mol-proto":113}],54:[function(require,module,exports){
@@ -7148,7 +7147,7 @@ var MLListItem = Component.createComponentClass('MLListItem', {
             'drop': { subscriber: onItemDrop, context: 'owner' }
         },
         allow: {
-            components: 'MLListItem'
+            components: isComponentAllowed
         }
     },
     data: {
@@ -7163,12 +7162,13 @@ var MLListItem = Component.createComponentClass('MLListItem', {
 
 componentsRegistry.add(MLListItem);
 
-module.exports = MLListItem;
+var MLListItem = module.exports = MLListItem;
 
 
 _.extendProto(MLListItem, {
     init: MLListItem$init,
-    moveItem: MLListItem$moveItem
+    moveItem: MLListItem$moveItem,
+    isDropAllowed: MLListItem$isDropAllowed
 });
 
 
@@ -7190,17 +7190,24 @@ function MLListItem$moveItem(index) {
 }
 
 
+function MLListItem$isDropAllowed(meta, dragDrop){
+    return meta.params && meta.params.index && meta.compClass == 'MLListItem';
+}
+
+
+function isComponentAllowed() {
+    return this.isDropAllowed.apply(this, arguments);
+}
+
+
 function onItemDrop(eventType, event) {
     onDragOut.call(this);
     var dt = new DragDrop(event);
     var meta = dt.getComponentMeta();
     var listOwner = this.item.list.owner;
-    if (meta.compClass != 'MLListItem') return;
-    
     var index = meta.params && meta.params.index;
 
-    if (index)
-        listOwner.moveItem(+index, this.item.index);
+    listOwner.moveItem(+index, this.item.index);
 }
 
 
