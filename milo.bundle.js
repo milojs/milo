@@ -8879,6 +8879,12 @@ config({
             timeout: 60000
         }
     },
+    websocket: {
+        rpc: {
+            timeout: 15000,
+            responsePrefix: 'response_'
+        }
+    },
     check: true,
     debug: false
 });
@@ -16038,6 +16044,8 @@ function createInternalData(sourceMessage, message, event) {
 var MessageSource = require('../../messenger/m_source')
     , _ = require('mol-proto')
     , logger = require('../../util/logger')
+    , uniqueId = require('../../util/count')
+    , config = require('../../config')
     , check = require('../../util/check')
     , Match = check.Match;
 
@@ -16081,43 +16089,65 @@ function WSMessageSource$connect(options) {
 
 
 
-function addSourceSubscriber(sourceMessage) {
+function addSourceSubscriber (sourceMessage) {
     _wsSubscriberMethod.call(this, 'addEventListener', sourceMessage);
 }
 
 
-function removeSourceSubscriber(sourceMessage) {
+function removeSourceSubscriber (sourceMessage) {
     _wsSubscriberMethod.call(this, 'removeEventListener', sourceMessage);
 }
 
 
-function _wsSubscriberMethod(method, sourceMessage) {    
+function _wsSubscriberMethod (method, sourceMessage) {    
     if (!this._ws) return logger.error('websocket is not created');
     this._ws[method](sourceMessage, this);
 }
 
 
 // event dispatcher - as defined by Event DOM API
-function WSMessageSource$handleEvent(event) {
+function WSMessageSource$handleEvent (event) {
     this.dispatchMessage(event.type, event);
 }
 
 
-function WSMessageSource$trigger (msg, data) {
+function WSMessageSource$trigger (msg, data, callback) {
     if (!this._ws) return logger.error('websocket is not created');
 
     data = data || {};
     data.type = msg;
+
+    var self = this;
     
-    // if (callback) {
-    //     data.callbackCorrId = milo.util.uniqueId();
-    //     this.listeners[data.callbackCorrId] = callback;    
-    // }    
+    if (callback) {
+        data.callbackCorrId = uniqueId();
+        var interval = _.delay(onTimeout, config.websocket.rpc.timeout);
+        toggleRpcSubscription('once', data.callbackCorrId);
+    }    
 
     this._ws.send(JSON.stringify(data));
+
+
+    function onTimeout() {
+        toggleRpcSubscription('off', data.callbackCorrId);
+        callback(new Error('websocket rpc: timeout'));
+    }
+
+    function onResponse(msg, msgData) {
+        clearInterval(interval);
+        if (typeof msgData == 'object') {
+            var err = msgData.error ? new Error(msgData.error) : null;
+            callback(err, msgData.data)
+        } else
+            callback(new Error('websocket rpc: invalid response data'), msgData);
+    }
+
+    function toggleRpcSubscription(onOff, corrId) {
+        self.messenger[onOff](config.websocket.rpc.responsePrefix + corrId, onResponse);
+    }
 }
 
-},{"../../messenger/m_source":70,"../../util/check":92,"../../util/logger":102,"mol-proto":116}],112:[function(require,module,exports){
+},{"../../config":65,"../../messenger/m_source":70,"../../util/check":92,"../../util/count":94,"../../util/logger":102,"mol-proto":116}],112:[function(require,module,exports){
 ;(function(){
 
 // This would be the place to edit if you want a different
