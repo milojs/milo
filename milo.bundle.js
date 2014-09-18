@@ -7093,6 +7093,7 @@ module.exports = MLList;
 _.extendProto(MLList, {
     init: MLList$init,
     destroy: MLList$destroy,
+    removeItem: MLList$removeItem,
     moveItem: MLList$moveItem
 });
 
@@ -7107,6 +7108,11 @@ function MLList$destroy() {
     this._connector && milo.minder.destroyConnector(this._connector);
     this._connector = null;
     Component.prototype.destroy.apply(this, arguments);
+}
+
+
+function MLList$removeItem(index){
+    this.model.splice(index, 1);
 }
 
 
@@ -7169,6 +7175,7 @@ var MLListItem = module.exports = MLListItem;
 _.extendProto(MLListItem, {
     init: MLListItem$init,
     moveItem: MLListItem$moveItem,
+    removeItem: MLListItem$removeItem,
     isDropAllowed: MLListItem$isDropAllowed
 });
 
@@ -7181,7 +7188,13 @@ function MLListItem$init() {
 
 function onChildrenBound() {
     var deleteBtn = this.container.scope.deleteBtn;
-    deleteBtn.events.on('click', { subscriber: this.item.removeItem, context: this.item });
+    deleteBtn.events.on('click', { subscriber: this.removeItem, context: this });
+}
+
+
+function MLListItem$removeItem() {
+    try { var listOwner = this.item.list.owner; } catch(e) {}
+    listOwner && listOwner.removeItem(this.item.index);
 }
 
 
@@ -9591,6 +9604,7 @@ function _callSubscribers(message, data, callback, msgSubscribers, _synchronous)
         // can be unsubscribed during the dispatch
         // so this array would change in the process
         msgSubscribers = msgSubscribers.slice();
+
         msgSubscribers.forEach(function(subscriber) {
             this._callSubscriber(subscriber, message, data, callback, _synchronous);
         }, this);
@@ -9601,32 +9615,32 @@ function _callSubscribers(message, data, callback, msgSubscribers, _synchronous)
 function _callSubscriber(subscriber, message, data, callback, _synchronous) {
     var syncSubscriber = subscriber.options && subscriber.options.sync
         , synchro = (_synchronous && syncSubscriber !== false)
-                  || syncSubscriber
-        , self = this;
+                  || syncSubscriber;
 
     if (typeof subscriber == 'function')
-        __callFuncSubscriber(subscriber, self._hostObject);
+        __callFuncSubscriber(subscriber, this._hostObject, message, data, callback, synchro);
     else
-        __callObjSubscriber();
+        __callObjSubscriber.call(this, subscriber, message, data, callback, synchro);
+}
 
 
-    function __callFuncSubscriber(subscriber, context) {
-        if (synchro)
-            subscriber.call(context, message, data, callback);
-        else
-            _.deferMethod(subscriber, 'call', context, message, data, callback);
-    }
+function __callFuncSubscriber(subscriber, context, message, data, callback, synchro) {
+    if (synchro)
+        subscriber.call(context, message, data, callback);
+    else
+        _.deferMethod(subscriber, 'call', context, message, data, callback);
+}
 
-    function __callObjSubscriber() {
-        var dispatchTimes = subscriber.options && subscriber.options.dispatchTimes;
-        if (dispatchTimes <= 1) {
-            var messages = subscriber.__messages;                   
-            self.off(messages, subscriber);
-        } else if (dispatchTimes > 1)
-            subscriber.options.dispatchTimes--;
 
-        __callFuncSubscriber(subscriber.subscriber, subscriber.context);
-    }
+function __callObjSubscriber(subscriber, message, data, callback, synchro) {
+    var dispatchTimes = subscriber.options && subscriber.options.dispatchTimes;
+    if (dispatchTimes <= 1) {
+        var messages = subscriber.__messages;
+        this.off(messages, subscriber);
+    } else if (dispatchTimes > 1)
+        subscriber.options.dispatchTimes--;
+
+    __callFuncSubscriber(subscriber.subscriber, subscriber.context, message, data, callback, synchro);
 }
 
 
