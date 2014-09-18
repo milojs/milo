@@ -7117,6 +7117,7 @@ function MLList$moveItem(from, to) {
 
 
 function onChildrenBound() {
+    this.model.set([]);
     this._connector = milo.minder(this.model, '<<<-', this.data).deferChangeMode('<<<->>>');
 }
 
