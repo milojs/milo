@@ -1812,7 +1812,8 @@ _.extendProto(Component, {
     allFacets: Component$allFacets,
     rename: Component$rename,
     remove: Component$remove,
-    
+    insertInto: Component$insertInto,
+
     getState: Component$getState,
     getTransferState: Component$getTransferState,
     _getState: Component$_getState,
@@ -2304,6 +2305,18 @@ function Component$remove(preserveScopeProperty, quiet) {
         if (! preserveScopeProperty)
             delete this.scope;
     }
+}
+
+
+/**
+ * Component instance method.
+ * Inserts the component into the DOM and attempts to adjust the scope tree accordingly.
+ * @param {HTMLElement} parentEl    The element into which the component should be inserted.
+ * @param {HTMLElement} referenceEl (optional) The reference element it should be inserted before.
+ */
+function Component$insertInto(parentEl, referenceEl) {
+    parentEl.insertBefore(this.el, referenceEl);
+    this.setScopeParentFromDOM();
 }
 
 
@@ -7188,7 +7201,7 @@ function MLListItem$init() {
 
 function onChildrenBound() {
     var deleteBtn = this.container.scope.deleteBtn;
-    deleteBtn.events.on('click', { subscriber: this.removeItem, context: this });
+    deleteBtn && deleteBtn.events.on('click', { subscriber: this.removeItem, context: this });
 }
 
 
