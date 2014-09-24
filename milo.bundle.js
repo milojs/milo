@@ -2490,6 +2490,7 @@ function Component$getTopScopeParentWithClass(ComponentClass) {
  * While getScopeParent is faster it may fail if scope chain is not setup yet (e.g., when component has been just inserted).
  * The scope property of component will be changed to point to scope object of container facet of that parent.
  * Returned scope parent of the component will be undefined (as well as component's scope property) if no parent in the DOM tree has container facet.
+ * TODO Method will not bind DOM children correctly if component has no container facet.
  *
  * @return {Component}
  */
@@ -8764,19 +8765,55 @@ function MLDropdown$start() {
     if (! (toggleEl && menuEl))
         return logger.error('MLDropdown:', TOGGLE_CSS_CLASS, 'or', MENU_CSS_CLASS, 'isn\'t found');
 
-    var clickHandler = this.toggleMenu.bind(this, undefined)
-        , docClickHandler = _onClick.bind(this);
+    var doc = window.document
+        , clickHandler = this.toggleMenu.bind(this, undefined)
+        , docClickHandler = _onClick.bind(this)
+        , docOutHandler = _onDocOut.bind(this, 'click', docClickHandler);
 
     this._dropdown = {
-        toggle: toggleEl,
         menu: menuEl,
-        clickHandler: clickHandler,
-        docClickHandler: docClickHandler,
-        visible: false
+        visible: false,
+        eventsHandlers: []
     };
     this.hideMenu();
-    toggleEl.addEventListener('click', clickHandler);
-    window.document.addEventListener('click', docClickHandler);
+
+    _addHandler.call(this, toggleEl, 'click', clickHandler);
+    //maybe only add this events if is open?
+    _addHandler.call(this, doc, 'mouseout', docOutHandler);
+    _addHandler.call(this, doc, 'click', docClickHandler);
+}
+
+function _addHandler(target, eventType, handler) {
+    var events = this._dropdown.eventsHandlers;
+    events.push({target: target, type: eventType, handler: handler});
+    target.addEventListener(eventType, handler);
+}
+
+function _removeHandler(target, eventType, handler) {
+    var dd = this._dropdown;
+    var idx = _.findIndex(dd.eventsHandlers, function(item) {
+        return item.target == target && item.handler == handler && item.type == eventType;
+    });
+
+    if (idx > -1) {
+        dd.eventsHandlers.splice(idx, 1);
+        target.removeEventListener(eventType, handler);
+    }
+}
+
+function _onDocOut(eventType, handler, event) {
+    var target = event.target,
+        relatedTarget = event.relatedTarget;
+
+    if (isIframe(target))
+        _removeHandler.call(this, target.contentWindow.document, eventType, handler);
+
+    if (isIframe(relatedTarget))
+        _addHandler.call(this, relatedTarget.contentWindow.document, eventType, handler)
+}
+
+function isIframe(el) {
+    return el && el.tagName == 'IFRAME';
 }
 
 
@@ -8805,8 +8842,9 @@ function domParents(node, validation) {
 
 function MLDropdown$destroy() {
     var dd = this._dropdown;
-    dd.toggle.removeEventListener('click', dd.clickHandler);
-    window.document.removeEventListener('click', dd.docClickHandler);
+    dd.eventsHandlers.forEach(function (eHandler) {
+        eHandler.target.removeEventListener(eHandler.type, eHandler.handler);
+    });
     delete this._dropdown;
     Component.prototype.destroy.apply(this, arguments);
 }
