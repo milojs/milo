@@ -40,14 +40,17 @@ describe('MessageSource class', function() {
 
         // subscribe to messenger
         messenger.onMessage('event1', handler1);
-        assert.deepEqual(messenger.getSubscribers('event1'), [ handler1 ]);
+        assert.deepEqual(messenger.getSubscribers('event1'), [ { subscriber: handler1, context: messenger } ]);
 
         // check subscription on source
         assert.equal(sourceMsngr.getSubscribers('event1').length, 1);
 
         // subscribe another handler to same message
         messenger.onMessage('event1', handler2);
-        assert.deepEqual(messenger.getSubscribers('event1'), [ handler1, handler2 ]);
+        assert.deepEqual(messenger.getSubscribers('event1'), [
+            { subscriber: handler1, context: messenger },
+            { subscriber: handler2, context: messenger }
+        ]);
 
         // check subscription on source - should not change
         assert.equal(sourceMsngr.getSubscribers('event1').length, 1);
@@ -95,7 +98,10 @@ describe('MessageSource class', function() {
         // subscribe to messenger
         messenger.onMessage('event3', handler1);
         messenger.onMessage('event3', handler2);
-        assert.deepEqual(messenger.getSubscribers('event3'), [ handler1, handler2 ]);
+        assert.deepEqual(messenger.getSubscribers('event3'), [
+            { subscriber: handler1, context: messenger },
+            { subscriber: handler2, context: messenger }
+        ]);
 
         // check subscription on source - should not change
         assert.equal(sourceMsngr.getSubscribers('event3').length, 1);

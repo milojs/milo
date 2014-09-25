@@ -50,17 +50,17 @@ var messengerTests = module.exports = function(getHostWithMessenger) {
             , handler2 = function(){};
 
         assert(host.on('event1 event2', handler1));
-        assert(Match.test(messenger._messageSubscribers, {event1: [Function], event2: [Function]}),
+        assert(Match.test(messenger._messageSubscribers, {event1: [Object], event2: [Object]}),
                 '_messageSubscribers hash has events');
         assert.equal( host.on('event1 event2', handler1), false, 'subscribe with string the second time');
         assert(host.on(/event1/, handler1), 'subscribe with regex');
-        assert(Match.test(messenger._patternMessageSubscribers, {'/event1/': [Function]}),
+        assert(Match.test(messenger._patternMessageSubscribers, {'/event1/': [Object]}),
                 '_patternMessageSubscribers hash has events');
         assert.equal(host.on(/event1/, handler1), false, 'subscribe with regex a second time');
         assert(host.on(['event1', 'event3'], handler2), 'subscribe with array');
         assert.equal(host.on(['event3'], handler2), false, 'subscribe with array a second time');
         assert.equal(messenger._messageSubscribers.event1.length, 2, 'there are 2 subscribers for event 1');
-        assert(Match.test(messenger._messageSubscribers, {event1: [Function], event2: [Function], event3: [Function]}),
+        assert(Match.test(messenger._messageSubscribers, {event1: [Object], event2: [Object], event3: [Object]}),
                 '_messageSubscribers hash has events');
     });
 
@@ -108,13 +108,17 @@ var messengerTests = module.exports = function(getHostWithMessenger) {
         host.on('event', localHandler);
         host.on('event', handler1);
             var subscribers = host.getListeners('event');
-            assert.deepEqual(subscribers, [localHandler, handler1], 'should have 2 subscribers');
+
+            assert.deepEqual(subscribers, [
+                { subscriber: localHandler, context: host },
+                { subscriber: handler1, context: host }
+            ]);
 
         host.post('event');
 
         host.off('event', localHandler);
             var subscribers = host.getListeners('event');
-            assert.deepEqual(subscribers, [handler1], 'should have 1 subscribers');
+            assert.deepEqual(subscribers, [ { subscriber: handler1, context: host } ], 'should have 1 subscribers');
     });
 
 
@@ -130,7 +134,7 @@ var messengerTests = module.exports = function(getHostWithMessenger) {
 
         assert.deepEqual(host.onEvents(events), {event1: true, 'event1 event2': true, event3: true}, 
             'add subscribers with events hash');
-        assert(Match.test(messenger._messageSubscribers, Match.ObjectHash([Function])), '_messageSubscribers is set');
+        assert(Match.test(messenger._messageSubscribers, Match.ObjectHash([Object])), '_messageSubscribers is set');
         assert.deepEqual(host.onEvents(events), {event1: false, 'event1 event2': false, event3: false}, 
             'add subscribers with events hash second time');
     });
@@ -177,8 +181,8 @@ var messengerTests = module.exports = function(getHostWithMessenger) {
 
                     assert.deepEqual(result, { 'event1': true, 'event2': true });
                     assert.deepEqual(messenger._messageSubscribers, {
-                        'event1': [handler2],
-                        'event3': [handler3]
+                        'event1': [{ subscriber: handler2, context: host }],
+                        'event3': [{ subscriber: handler3, context: host }]
                     });
 
                 var result = host.offEvents({
@@ -281,12 +285,15 @@ var messengerTests = module.exports = function(getHostWithMessenger) {
         // pattern subscriber will be included
         var event1_Subscribers = host.getListeners('event1');
 
-            assert.deepEqual(event1_Subscribers, [handler1, patternSubscriber]);
+            assert.deepEqual(event1_Subscribers, [
+                { subscriber: handler1, context: host },
+                { subscriber: patternSubscriber, context: host }
+            ]);
         
         // pattern subscriber will NOT be included
         var event1_Subscribers = host.getListeners('event1', false);
 
-            assert.deepEqual(event1_Subscribers, [handler1]);
+            assert.deepEqual(event1_Subscribers, [{ subscriber: handler1, context: host }]);
     });
 
 
@@ -308,7 +315,7 @@ var messengerTests = module.exports = function(getHostWithMessenger) {
 
             assert.deepEqual(subscribers, [
                 { subscriber: localHandler, context: myContext },
-                handler1
+                { subscriber: handler1, context: host }
             ]);
 
         host.post('event', { test: 1 });
@@ -318,7 +325,7 @@ var messengerTests = module.exports = function(getHostWithMessenger) {
 
             host.off('event', { subscriber: localHandler, context: myContext });
                 var subscribers = host.getListeners('event');
-                assert.deepEqual(subscribers, [handler1], 'should have 1 subscribers');
+                assert.deepEqual(subscribers, [{ subscriber: handler1, context: host }], 'should have 1 subscribers');
 
             done();
         });
