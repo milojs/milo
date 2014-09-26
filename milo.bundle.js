@@ -7516,7 +7516,6 @@ var DEFAULT_ELEMENT_HEIGHT = 20;
 var MLSuperCombo = Component.createComponentClass('MLSuperCombo', {
     events: {
         messages: {
-            'mouseleave': {subscriber: onMouseLeave, context: 'owner'}
         }
     },
     data: {
@@ -7530,7 +7529,7 @@ var MLSuperCombo = Component.createComponentClass('MLSuperCombo', {
         cls: 'ml-ui-supercombo'
     },
     template: {
-        template: '<input ml-bind="[data, events]:input" class="form-control ml-ui-input">\
+        template: '<input type="text" ml-bind="[data, events]:input" class="form-control ml-ui-input">\
                    <div ml-bind="[dom]:addItemDiv" class="ml-ui-supercombo-add">\
                         <span ml-bind=":addPrompt"></span>\
                         <button ml-bind="[events, dom]:addBtn" class="btn btn-default ml-ui-button">Add</button>\
@@ -7666,7 +7665,8 @@ function MLSuperCombo$hideOptions() {
  * Hides add button
  */
 function MLSuperCombo$toggleAddButton(show) {
-    this._comboAddItemDiv.dom.toggle(show);
+//    this._comboAddItemDiv.dom.toggle(show);
+    this.el.classList.toggle('ml-ui-show-add', show);
     this._isAddButtonShown = show;
 }
 
@@ -7765,6 +7765,7 @@ function setupComboInput(input, self) {
     input.data.on('', { subscriber: onDataChange, context: self });
     input.events.on('click', {subscriber: onInputClick, context: self });
     input.events.on('keydown', {subscriber: onEnterKey, context: self });
+    input.events.on('blur', {subscriber: onFocusBlur, context: self });
 }
 
 /**
@@ -7808,7 +7809,7 @@ function MLSuperCombo_del() {
  * When the input data changes, this method filters the optionsData, and sets the first element
  * to be selected.
  * @param  {String} msg
- * @param  {Objext} data
+ * @param  {Object} data
  */
 function onDataChange(msg, data) {
     var text = data.newValue && data.newValue.trim();
@@ -7899,15 +7900,17 @@ function changeSelected(type, event) {
 }
 
 /**
- * Mouse leave handler
+ * Input blur handler
  *
  * @param  {String} type
  * @param  {Event} event
  */
-function onMouseLeave(type, event) {
-    this.hideOptions();
-    this.__showAddOnClick = this._isAddButtonShown;
-    this.toggleAddButton(false);
+function onFocusBlur(type, event) {
+    _.delay(function() {
+        this.hideOptions();
+        this.__showAddOnClick = this._isAddButtonShown;
+        this.toggleAddButton(false);
+    }.bind(this), 20);
 }
 
 
