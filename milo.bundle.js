@@ -7232,10 +7232,11 @@ function onItemDrop(eventType, event) {
     onDragOut.call(this);
     var dt = new DragDrop(event);
     var meta = dt.getComponentMeta();
+    var state = dt.getComponentState();
     var listOwner = this.item.list.owner;
     var index = meta.params && meta.params.index;
 
-    listOwner.moveItem(+index, this.item.index);
+    listOwner.moveItem(+index, this.item.index, state);
 }
 
 
