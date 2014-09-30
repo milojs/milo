@@ -7516,6 +7516,8 @@ var DEFAULT_ELEMENT_HEIGHT = 20;
 var MLSuperCombo = Component.createComponentClass('MLSuperCombo', {
     events: {
         messages: {
+            'mouseleave': {subscriber: onMouseLeave, context: 'owner'},
+            'mouseover': {subscriber: onMouseOver, context: 'owner'}
         }
     },
     data: {
@@ -7529,7 +7531,7 @@ var MLSuperCombo = Component.createComponentClass('MLSuperCombo', {
         cls: 'ml-ui-supercombo'
     },
     template: {
-        template: '<input type="text" ml-bind="[data, events]:input" class="form-control ml-ui-input">\
+        template: '<input ml-bind="[data, events]:input" class="form-control ml-ui-input">\
                    <div ml-bind="[dom]:addItemDiv" class="ml-ui-supercombo-add">\
                         <span ml-bind=":addPrompt"></span>\
                         <button ml-bind="[events, dom]:addBtn" class="btn btn-default ml-ui-button">Add</button>\
@@ -7665,8 +7667,7 @@ function MLSuperCombo$hideOptions() {
  * Hides add button
  */
 function MLSuperCombo$toggleAddButton(show) {
-//    this._comboAddItemDiv.dom.toggle(show);
-    this.el.classList.toggle('ml-ui-show-add', show);
+    this._comboAddItemDiv.dom.toggle(show);
     this._isAddButtonShown = show;
 }
 
@@ -7765,7 +7766,6 @@ function setupComboInput(input, self) {
     input.data.on('', { subscriber: onDataChange, context: self });
     input.events.on('click', {subscriber: onInputClick, context: self });
     input.events.on('keydown', {subscriber: onEnterKey, context: self });
-    input.events.on('blur', {subscriber: onFocusBlur, context: self });
 }
 
 /**
@@ -7809,7 +7809,7 @@ function MLSuperCombo_del() {
  * When the input data changes, this method filters the optionsData, and sets the first element
  * to be selected.
  * @param  {String} msg
- * @param  {Object} data
+ * @param  {Objext} data
  */
 function onDataChange(msg, data) {
     var text = data.newValue && data.newValue.trim();
@@ -7899,18 +7899,37 @@ function changeSelected(type, event) {
     }
 }
 
+
 /**
- * Input blur handler
+ * Mouse over handler
+ * 
+ * @param  {String} type
+ * @param  {Event} event
+ */
+function onMouseOver(type, event) {
+    this._mouseIsOver = true;
+}
+
+
+/**
+ * Mouse leave handler
  *
  * @param  {String} type
  * @param  {Event} event
  */
-function onFocusBlur(type, event) {
-    _.delay(function() {
-        this.hideOptions();
-        this.__showAddOnClick = this._isAddButtonShown;
-        this.toggleAddButton(false);
-    }.bind(this), 20);
+function onMouseLeave(type, event) {
+    var self = this;
+    this._mouseIsOver = false;
+    setTimeout(function(){
+        if (!self._mouseIsOver)
+            _onMouseLeave.call(self);
+    }, 750);
+}
+
+function _onMouseLeave() {
+    this.hideOptions();
+    this.__showAddOnClick = this._isAddButtonShown;
+    this.toggleAddButton(false);
 }
 
 
@@ -7923,7 +7942,7 @@ function onFocusBlur(type, event) {
 function onInputClick(type, event) {
     this.showOptions();
     this.__showAddOnClick && this.toggleAddButton(!!this.__showAddOnClick);
-    delete this.__showAddOnClick;
+    //delete this.__showAddOnClick;
 }
 
 
@@ -18121,10 +18140,12 @@ function isEqual(obj) {
                 && this.every(function(item, index) {
                     return isEqual.call(item, obj[index]);
                 });
-    else
-        return everyKey.call(this, function(value, key) {
-            return isEqual.call(value, obj[key]);
-        });
+    else {
+        return allKeys.call(this).length == allKeys.call(obj).length
+                && everyKey.call(this, function(value, key) {
+                    return isEqual.call(value, obj[key]);
+                });
+    }
 }
 
 },{"./utils":124}],121:[function(require,module,exports){
