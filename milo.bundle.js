@@ -7920,7 +7920,8 @@ function onMouseOver(type, event) {
 function onMouseLeave(type, event) {
     var self = this;
     this._mouseIsOver = false;
-    setTimeout(function(){
+    if (this._mouseOutTimer) clearInterval(this._mouseOutTimer);
+    this._mouseOutTimer = setTimeout(function(){
         if (!self._mouseIsOver)
             _onMouseLeave.call(self);
     }, 750);
