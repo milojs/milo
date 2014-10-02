@@ -8041,6 +8041,7 @@ function _getDataValueFromElement(el) {
 function _setData() {
     delete this._selected.selected;
     this.hideOptions();
+    this.toggleAddButton(false);
     this._comboInput.data.off('', { subscriber: onDataChange, context: this });
     //supercombo listeners off
     this.data.set(this._selected);
