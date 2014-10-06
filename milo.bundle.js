@@ -11497,8 +11497,6 @@ function Model_domStorageParser(valueStr) {
 function Model$destroy() {
     this[MESSENGER_PROPERTY].destroy();
     this._internalMessenger.destroy();
-    // delete this._hostObject;
-    // delete this._data;
     this._destroyed = true;
 }
 
