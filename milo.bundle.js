@@ -16793,6 +16793,7 @@ var numberMethods = require('./proto_number');
  * - [result](proto_util.js.html#result)
  * - [identity](proto_util.js.html#identity)
  * - [property](proto_util.js.html#property)
+ * - [noop](proto_util.js.html#noop)
  */
 var utilMethods = require('./proto_util');
 
@@ -18476,6 +18477,7 @@ function unPrefix(str) {
  * - [result](#result)
  * - [identity](#identity)
  * - [property](#property)
+ * - [noop](#noop)
  */
 var utilMethods = module.exports = {
     times: times,
@@ -18483,7 +18485,8 @@ var utilMethods = module.exports = {
     tap: tap,
     result: result,
     identity: identity,
-    property: property
+    property: property,
+    noop: noop
 };
 
 
@@ -18569,6 +18572,12 @@ function property() {
         return obj[key];
     };
 }
+
+
+/**
+ * Function that does nothing
+ */
+function noop() {}
 
 },{}],124:[function(require,module,exports){
 'use strict';
