@@ -7259,7 +7259,7 @@ function getMetaData() {
 
 function MLListItem_get() {
     var value = this.model.get();
-    return typeof value == 'object' ? _.clone(value) : value;
+    return value !== null && typeof value == 'object' ? _.clone(value) : value;
 }
 
 
