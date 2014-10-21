@@ -13359,9 +13359,10 @@ function clearSelection(win) {
  * Calculates an element's total top and left offset from the document edge.
  * 
  * @param {Element} el the element for which position needs to be returned
+ * @param {includeBorder} if is to include the border width
  * @return {Object} vector object with properties topOffset and leftOffset
  */
-function getElementOffset(el) {
+function getElementOffset(el, includeBorder) {
     var yPos, xPos;     
 
     yPos = el.offsetTop;
@@ -13369,12 +13370,24 @@ function getElementOffset(el) {
     el = el.offsetParent;
 
     while (el != null) {
-        yPos += el.offsetTop;
-        xPos += el.offsetLeft;
+        yPos += el.offsetTop + getBorder(el, 'Height', includeBorder);
+        xPos += el.offsetLeft + getBorder(el, 'Width', includeBorder);
         el = el.offsetParent;
-    }  
+    }
 
     return { topOffset: yPos, leftOffset: xPos };
+}
+
+
+function getBorder(el, type, includeBorder) {
+    if (includeBorder) {
+        var side = (type == 'Height') ? 'top' : 'left',
+            styles = window.getComputedStyle(el),
+            sideValue = styles.getPropertyCSSValue('border-' + side + '-width');
+
+        if (sideValue) return sideValue.getFloatValue(sideValue.CSS_PX);
+    }
+    return 0;
 }
 
 
