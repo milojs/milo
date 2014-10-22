@@ -6027,6 +6027,10 @@ function translateToSourceMessage(message) {
             : message;
 }
 
+function resetFilterVars() {
+    delete this._currentTarget;
+    delete this._inside;
+}
 
 function filterSourceMessage(sourceMessage, message, data) { // data is DOM event object
     var ok = true;
@@ -6037,11 +6041,8 @@ function filterSourceMessage(sourceMessage, message, data) { // data is DOM even
         this._inside = true;
     } else if (sourceMessage == 'dragleave' && message == 'dragout') {
         ok = this._currentTarget == data.target;
-        if (ok) {
-            delete this._currentTarget;
-            delete this._inside;
-        }
-    }
+        if (ok) resetFilterVars.call(this);
+    } else if (sourceMessage == 'drop') resetFilterVars.call(this);
 
     return ok;
 }
