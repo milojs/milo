@@ -343,6 +343,14 @@ http://opensource.org/licenses/BSD-2-Clause
 Changes log
 -----------
 
+###0.1.9###
+
+- `MLFoldTree` - tree view UI component
+- `MLSuperCombo` UI component improvements
+- `milo.util.websocket` - client-side websockets (less than 150 loc)
+- `Messenger` performance improvements
+
+
 ###0.1.8###
 
 - Changes to `milo.util.request`

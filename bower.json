@@ -1,11 +1,11 @@
 {
   "name": "milo",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "homepage": "https://github.com/MailOnline/milo",
   "authors": [
     "MOL Technical <MOL_Technical@assocnews.co.uk>"
   ],
-  "description": "A minimalist browser framework that binds HTML elements to JS components and components to models",
+  "description": "Browser/nodejs reactive programming and data driven DOM manipulation with modular components.",
   "main": "milo.bundle.js",
   "license": "MIT",
   "ignore": [
