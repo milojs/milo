@@ -1,3 +1,6 @@
 {
-	"laxcomma": true
+	"laxcomma": true,
+	"laxbreak": true,
+	"browser": true,
+	"node": true
 }
