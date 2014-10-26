@@ -1890,7 +1890,7 @@ function Component$$createComponentClass(name, facetsConfig) {
     _registerWithDomStorage(name);
 
     return ComponentClass;
-};
+}
 
 
 function _registerWithDomStorage(className) {
@@ -1996,7 +1996,7 @@ function Component$$createOnElement(el, innerHTML, rootScope, extraFacets) {
     var elementPassed = !!el;
 
     // should required here to resolve circular dependency
-    var miloBinder = require('../binder')
+    var miloBinder = require('../binder');
 
     // create element if it wasn't passed
     if (! elementPassed) {
@@ -2115,7 +2115,7 @@ function Component$$createFromDataTransfer(dataTransfer) {
     });
     if (!dataType) return;
 
-    var state = milo.util.jsonParse(dataTransfer.getData(dataType));
+    var state = _.jsonParse(dataTransfer.getData(dataType));
     if (!state) return;
 
     return Component.createFromState(state, undefined, true);
@@ -2169,7 +2169,7 @@ function Component$init(scope, element, name, componentInfo) {
     this.allFacets('start');
 
     // call start method if it's defined in subclass
-    this.start && this.start();
+    if (this.start) this.start();
 }
 
 
@@ -2244,7 +2244,7 @@ function Component$addFacet(facetNameOrClass, facetConfig, facetName, throwOnErr
         FacetClass = facetNameOrClass;
 
     if (!facetName)
-        facetName = _.firstLowerCase(FacetClass.name)
+        facetName = _.firstLowerCase(FacetClass.name);
 
     this.extraFacets.push(facetName);
 
@@ -2252,8 +2252,8 @@ function Component$addFacet(facetNameOrClass, facetConfig, facetName, throwOnErr
     var newFacet = FacetedObject.prototype.addFacet.call(this, FacetClass, facetConfig, facetName, throwOnErrors);
 
     // check depenedencies and start facet
-    newFacet.check && newFacet.check();
-    newFacet.start && newFacet.start();
+    if (newFacet.check) newFacet.check();
+    if (newFacet.start) newFacet.start();
 }
 
 
@@ -2284,11 +2284,7 @@ function Component$allFacets(method) { // ,... arguments
 function Component$rename(name, renameInScope) {
     name = name || miloComponentName();
     this.componentInfo.rename(name, false);
-    if (this.scope && renameInScope !== false) {
-        this.scope._remove(this.name);
-        this.scope._add(this, name);
-    } else
-        this.name = name;
+    Scope.rename(this, name, renameInScope);
 }
 
 
@@ -2408,13 +2404,18 @@ function Component$setState(state) {
  * @return {Component|undefined}
  */
 function Component$getScopeParent(conditionOrFacet) {
+    return _callGetScopeParent.call(this, _getScopeParent, conditionOrFacet);
+}
+
+function _callGetScopeParent(_getScopeParentFunc, conditionOrFacet) {
     check(conditionOrFacet, Match.Optional(Match.OneOf(Function, String)));
-    var conditionFunc = _makeComponentConditionFunc(conditionOrFacet);
-    return _getScopeParent.call(this, conditionFunc);   
+    var conditionFunc = componentUtils._makeComponentConditionFunc(conditionOrFacet);
+    return _getScopeParentFunc.call(this, conditionFunc);   
 }
 
 function _getScopeParent(conditionFunc) {
-    try { var parent = this.scope._hostObject.owner; } catch(e) {}
+    var parent;
+    try { parent = this.scope._hostObject.owner; } catch(e) {}
 
     // Where there is no parent, this function will return undefined
     // The parent component is checked recursively
@@ -2438,7 +2439,7 @@ function Component$getScopeParentWithClass(ComponentClass) {
     ComponentClass = ComponentClass || this.constructor;
     return _getScopeParent.call(this, function(comp) {
         return comp instanceof ComponentClass;
-    })
+    });
 }
 
 
@@ -2451,9 +2452,7 @@ function Component$getScopeParentWithClass(ComponentClass) {
  * @return {Component|undefined}
  */
 function Component$getTopScopeParent(conditionOrFacet) {
-    check(conditionOrFacet, Match.Optional(Match.OneOf(Function, String)));
-    var conditionFunc = _makeComponentConditionFunc(conditionOrFacet);
-    return _getTopScopeParent.call(this, conditionFunc);    
+    return _callGetScopeParent.call(this, _getTopScopeParent, conditionOrFacet);
 }
 
 function _getTopScopeParent(conditionFunc) {
@@ -2480,7 +2479,7 @@ function Component$getTopScopeParentWithClass(ComponentClass) {
     ComponentClass = ComponentClass || this.constructor;
     return _getTopScopeParent.call(this, function(comp) {
         return comp instanceof ComponentClass;
-    })
+    });
 }
 
 
@@ -2497,9 +2496,10 @@ function Component$getTopScopeParentWithClass(ComponentClass) {
 function Component$setScopeParentFromDOM() {
     var parentEl = this.el.parentNode;
 
+    var parent, foundParent;
     while (parentEl && ! foundParent) {
-        var parent = Component.getComponent(parentEl);
-        var foundParent = parent && parent.container;
+        parent = Component.getComponent(parentEl);
+        foundParent = parent && parent.container;
         parentEl = parentEl.parentNode;
     }
 
@@ -2582,7 +2582,7 @@ function Component$insertAtTreePath(treePath, component, nearest) {
 function Component$broadcast(msg, data, callback, synchronously) {
     var postMethod = synchronously ? 'postMessageSync' : 'postMessage';
     this.walkScopeTree(function(component) {
-        component[postMethod](msg, data, callback)
+        component[postMethod](msg, data, callback);
     });
 }
 
@@ -5472,6 +5472,7 @@ module.exports = facetsRegistry;
 var componentsRegistry = require('./c_registry')
     , facetsRegistry = require('./c_facets/cf_registry')
     , componentName = require('../util/component_name')
+    , Scope = require('./scope')
     , BinderError = require('../util/error').Binder
     , logger = require('../util/logger')
     , _ = require('mol-proto');
@@ -5538,12 +5539,7 @@ function ComponentInfo$destroy() {
  */
 function ComponentInfo$rename(name, renameInScope) {
     name = name || componentName();
-    if (this.scope && renameInScope !== false) {
-        this.scope._remove(this.name);
-        this.scope._add(this, name);
-    } else
-        this.name = name;
-
+    Scope.rename(this, name, renameInScope);
     this.attr.compName = name;
     this.attr.decorate();
 }
@@ -5602,7 +5598,7 @@ function hasContainerFacet(ComponentClass, extraFacetsClasses) {
     }
 }
 
-},{"../util/component_name":93,"../util/error":98,"../util/logger":102,"./c_facets/cf_registry":31,"./c_registry":33,"mol-proto":116}],33:[function(require,module,exports){
+},{"../util/component_name":93,"../util/error":98,"../util/logger":102,"./c_facets/cf_registry":31,"./c_registry":33,"./scope":41,"mol-proto":116}],33:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -6149,6 +6145,12 @@ _.extendProto(Scope, {
     _filter: Scope$_filter
 });
 
+
+_.extend(Scope, {
+    rename: Scope$$rename
+});
+
+
 module.exports = Scope;
 
 
@@ -6352,6 +6354,21 @@ function Scope$_detachElement() {
  */
 function Scope$_has(object) {
     return this.hasOwnProperty(object.name);
+}
+
+
+/**
+ * Change object name, renaming it in scope unless renameInScope is false
+ * @param {Object} obj
+ * @param {String} name new name
+ * @param {Boolean} renameInScope true by default
+ */
+function Scope$$rename(obj, name, renameInScope) {
+    if (obj.scope && renameInScope !== false) {
+        obj.scope._remove(obj.name);
+        obj.scope._add(obj, name);
+    } else
+        obj.name = name;
 }
 
 },{"../util/check":92,"../util/component_name":93,"../util/error":98,"../util/logger":102,"mol-proto":116}],42:[function(require,module,exports){
@@ -8470,7 +8487,7 @@ var MLDialog = Component.createComponentClass('MLDialog', {
                     <div class="modal-footer">\
                         {{~ it.buttons :btn }}\
                             <button type="button"\
-                                class="btn btn-{{= btn.type }}{{=btn.cls}}"\
+                                class="btn btn-{{= btn.type }}{{? btn.cls }} {{= btn.cls }}{{?}}"\
                                 ml-bind="[events]:{{= btn.name }}">{{= btn.label }}</button>\
                         {{~}}\
                     </div>\
@@ -8627,13 +8644,7 @@ function _prepareOptions(options) {
     options = _.clone(options);
     options.buttons = _.clone(options.buttons || DEFAULT_BUTTONS);
     options.buttons.forEach(function(btn) {
-        if (! btn.name)
-            btn.name = componentName();
-
-        if (! btn.cls)
-            btn.cls = '';
-        else
-            btn.cls = ' ' + btn.cls;
+        btn.name = btn.name || componentName();
     });
 
     options.close = typeof options.close == 'undefined' || options.close === true
@@ -9306,25 +9317,29 @@ function _Messenger_onWithOptions(messages, subscriber, options) {
 
 function _Messenger_on(messages, subscriber) {
     _.defineProperty(subscriber, '__messages', messages);
+    return _eachMessage.call(this, '_registerSubscriber', messages, subscriber);
+}
 
+
+function _eachMessage(methodName, messages, subscriber) {
     if (typeof messages == 'string')
         messages = messages.split(messagesSplitRegExp);
 
     var subscribersHash = this._chooseSubscribersHash(messages);
 
     if (messages instanceof RegExp)
-        return this._registerSubscriber(subscribersHash, messages, subscriber);
+        return this[methodName](subscribersHash, messages, subscriber);
 
     else {
-        var wasRegistered = false;
+        var changed = false;
 
         messages.forEach(function(message) {
-            var notYetRegistered = this._registerSubscriber(subscribersHash, message, subscriber); 
-            wasRegistered = wasRegistered || notYetRegistered;          
+            var subscriptionChanged = this[methodName](subscribersHash, message, subscriber);
+            changed = changed || subscriptionChanged;
         }, this);
 
-        return wasRegistered;
-    }   
+        return changed;
+    }
 }
 
 
@@ -9438,24 +9453,7 @@ function Messenger$off(messages, subscriber) {
 
 
 function _Messenger_off(messages, subscriber) {
-    if (typeof messages == 'string')
-        messages = messages.split(messagesSplitRegExp);
-
-    var subscribersHash = this._chooseSubscribersHash(messages);
-
-    if (messages instanceof RegExp)
-        return this._removeSubscriber(subscribersHash, messages, subscriber);
-
-    else {
-        var wasRemoved = false;
-
-        messages.forEach(function(message) {
-            var subscriberRemoved = this._removeSubscriber(subscribersHash, message, subscriber);           
-            wasRemoved = wasRemoved || subscriberRemoved;           
-        }, this);
-
-        return wasRemoved;
-    }
+    return _eachMessage.call(this, '_removeSubscriber', messages, subscriber);
 }
 
 
@@ -13473,11 +13471,7 @@ function wrapInElement(wrapIntoEl, el) {
  * @return {Boolean}
  */
 function trimNodeRight(node) {
-    var lengthBefore = node.length;
-    node.textContent = node.textContent.trimRight();
-    var lengthAfter = node.length;
-
-    return lengthBefore !== lengthAfter;
+    return _trimNode(node, 'trimRight');
 }
 
 
@@ -13488,11 +13482,14 @@ function trimNodeRight(node) {
  * @return {Boolean}
  */
 function trimNodeLeft(node) {
-    var lengthBefore = node.length;
-    node.textContent = node.textContent.trimLeft();
-    var lengthAfter = node.length;
+    return _trimNode(node, 'trimLeft');
+}
 
-    return lengthBefore !== lengthAfter;
+
+function _trimNode(node, methodName) {
+    var len = node.length;
+    node.textContent = node.textContent[methodName]();
+    return len !== node.length;
 }
 
 
@@ -14662,7 +14659,8 @@ module.exports = Logger;
 },{"mol-proto":116}],104:[function(require,module,exports){
 'use strict';
 
-var _ = require('mol-proto');
+var _ = require('mol-proto')
+    , logger = require('./logger');
 
 module.exports = Promise;
 
@@ -14825,6 +14823,7 @@ function Promise$transform(transformDataFunc) {
             var transformedData = transformDataFunc(data);
             promise.setData(error, transformedData);
         } catch (e) {
+            logger.error('Promise transform error');
             promise.setData(e);
         }
     })
@@ -14834,7 +14833,7 @@ function Promise$transform(transformDataFunc) {
     return promise;
 }
 
-},{"mol-proto":116}],105:[function(require,module,exports){
+},{"./logger":102,"mol-proto":116}],105:[function(require,module,exports){
 'use strict';
 
 // milo.utils.request
