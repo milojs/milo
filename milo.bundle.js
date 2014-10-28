@@ -11148,7 +11148,7 @@ function Connector$turnOn() {
 
 
                 function callValidator(validator) {
-                    validator(change.newValue, function(err, response) {
+                    validator.call(fromDS, change.newValue, function(err, response) {
                         response.path = sourcePath;
                         if (! alreadyFailed && (err || response.valid) && ++passedCount == validators.length) {
                             fromDS.postMessage('validated', response);
