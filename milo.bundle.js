@@ -8113,6 +8113,7 @@ var SAMPLE_AUTORESIZE_TEXT = 'Lorem ipsum dolor sit amet, consectetuer adipiscin
 _.extendProto(MLTextarea, {
     startAutoresize: MLTextarea$startAutoresize,
     stopAutoresize: MLTextarea$stopAutoresize,
+    isAutoresized: MLTextarea$isAutoresized,
     disable: MLTextarea$disable
 });
 
@@ -8155,6 +8156,11 @@ function MLTextarea$stopAutoresize() {
         return logger.warn('MLTextarea stopAutoresize: autoresize is not on');
     this._autoresize = false;
     _subscribeTextChange.call(this, 'off');
+}
+
+
+function MLTextarea$isAutoresized() {
+    return this._autoresize;
 }
 
 
