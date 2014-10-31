@@ -35,7 +35,7 @@ function setRequestHeader(header, content) {
 function send(data) {
     this.data = data;
     var url = this.url;
-    var methodRoutes = _mock_routes[this.method.toUpperCase()];
+    var methodRoutes = _mock_routes[this.method.toUpperCase()] || {};
 
     var handlerKey = _.find(Object.keys(methodRoutes), function(regex) {
         return url.match(new RegExp(regex));
