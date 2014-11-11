@@ -7697,8 +7697,9 @@ function MLSuperCombo$hideOptions() {
  * Component instance method
  * Hides add button
  */
-function MLSuperCombo$toggleAddButton(show) {
+function MLSuperCombo$toggleAddButton(show, options) {
     this._comboAddItemDiv.dom.toggle(show);
+    if (options && options.preserveState) this.__showAddOnClick = this._isAddButtonShown;
     this._isAddButtonShown = show;
 }
 
@@ -7738,16 +7739,20 @@ function MLSuperCombo$initOptionsURL(options) {
  * Private method
  * Sets the options of the dropdown based on a request
  */
-function _setOptionsURL(cb) {
+function _getOptionsURL(cb) {
     var url = this._optionsURL,
         queryString = this._comboInput.data.get();
     var self = this;
+    cb = cb || _.noop;
     milo.util.request.post(url, { name: queryString }, function (err, response) {
-        if (err) return logger.error('Can not search for "' + queryString + '"');
+        if (err) {
+            logger.error('Can not search for "' + queryString + '"');
+            return cb(new Error('Request error'));
+        } 
 
-        var responseData = _.jsonParse(response).data.map(self._formatOptionsURL);
-        self.setOptions(responseData);
-        if(cb) cb();
+        var responseData = _.jsonParse(response);
+        if (responseData) cb(null, responseData);
+        else cb(new Error('Data error'));
     });
 }
 
@@ -7874,34 +7879,43 @@ function MLSuperCombo_del() {
  * @param  {Objext} data
  */
 function onDataChange(msg, data) {
-    var self = this;
-    if(this._optionsURL)
-        _setOptionsURL.call(this, function(){
-            _filterData.call(self, msg, data);
+    var text = data.newValue && data.newValue.trim();
+    if (this._optionsURL) {
+        var self = this;
+        _getOptionsURL.call(this, function(err, responseData){
+            if (err || !responseData) return;
+            try { 
+                var options = responseData.data.map(self._formatOptionsURL);
+                self.setOptions(options);
+                _updateOptionsAndAddButton.call(self, text, self._optionsData);
+            } catch(e) {
+                logger.error('Data error', e);
+            }
         });
-    else
-        _filterData.call(self, msg, data);
+    } else {
+        var filteredData = _filterData.call(this, text);
+        _updateOptionsAndAddButton.call(this, text, filteredData);
+    }   
 }
 
 
-function _filterData(msg, data) {
-    var text = data.newValue && data.newValue.trim();
-    var filteredArr = _.filter(this._optionsData, function(option) {
+function _filterData(text) {    
+    return this._optionsData.filter(function(option) {
         delete option.selected;
         if (option.label) {
             var label = option.label.toLowerCase();
             return label.trim().toLowerCase().indexOf(text.toLowerCase()) == 0;
         }
     });
+}
 
+
+function _updateOptionsAndAddButton(text, filteredArr) {
     if (!text) {
-        this.__showAddOnClick = this._isAddButtonShown;
-        this.toggleAddButton(false);
+        this.toggleAddButton(false, { preserveState: true });
     } else {
-
         if (filteredArr.length && _.find(filteredArr, isExactMatch)) {
-            this.__showAddOnClick = this._isAddButtonShown;
-            this.toggleAddButton(false);
+            this.toggleAddButton(false, { preserveState: true });
         } else if (this._addItemPrompt) {
             this.toggleAddButton(this._optionsData.length > 1 || this._optionsURL);
         }
@@ -8006,8 +8020,7 @@ function onMouseLeave(type, event) {
 
 function _onMouseLeave() {
     this.hideOptions();
-    this.__showAddOnClick = this._isAddButtonShown;
-    this.toggleAddButton(false);
+    this.toggleAddButton(false, { preserveState: true });
 }
 
 
@@ -8019,8 +8032,7 @@ function _onMouseLeave() {
  */
 function onInputClick(type, event) {
     this.showOptions();
-    this.__showAddOnClick && this.toggleAddButton(!!this.__showAddOnClick);
-    //delete this.__showAddOnClick;
+    if (this.__showAddOnClick) this.toggleAddButton(true);
 }
 
 
@@ -8047,8 +8059,7 @@ function onAddBtn (type, event) {
     var data = { label: this._comboInput.el.value };
     this.postMessage('additem', data);
     this.events.postMessage('milo_supercomboadditem', data);
-    this.__showAddOnClick = this._isAddButtonShown;
-    this.toggleAddButton(false);
+    this.toggleAddButton(false, { preserveState: true });
 
 }
 
