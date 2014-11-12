@@ -1172,6 +1172,7 @@ function ActionsHistory$undo(cb) {
     if (this.position == 0) return; // nothing to undo
     var act = this.actions[--this.position];
     act.undo(cb);
+    return act;
 }
 
 
@@ -1179,6 +1180,7 @@ function ActionsHistory$redo(cb) {
     if (this.position == this.actions.length) return; // nothing to redo
     var act = this.actions[this.position++];
     act.redo(cb);
+    return act;
 }
 
 
@@ -1543,6 +1545,7 @@ function Transaction$getDescription() {
 var ActionsHistory = require('./actions_history')
     , Transaction = require('./transaction')
     , logger = require('../util/logger')
+    , Messenger = require('../messenger')
     , _ = require('mol-proto');
 
 
@@ -1569,7 +1572,8 @@ _.extendProto(TransactionHistory, {
     redo: TransactionHistory$redo,
     inTransaction: TransactionHistory$inTransaction,
 
-    getDescription: TransactionHistory$getDescription
+    getDescription: TransactionHistory$getDescription,
+    useMessenger: TransactionHistory$useMessenger
 });
 
 
@@ -1582,6 +1586,7 @@ function TransactionHistory$storeCommand(command, appendTransaction) {
     if (appendTransaction && !(this.currentTransaction || this.currentBatch)) {
         var transaction = this.transactions.getLastAction();
         transaction.storeCommand(command);
+        _postTransactionMessage.call(this, 'appended', transaction);
         return;
     }
 
@@ -1632,7 +1637,10 @@ function _addBatchToTransaction() {
 
 function _storeCurrentTransaction() {
     if (this.currentTransaction) {
-        this.transactions.store(this.currentTransaction);
+        var t = this.currentTransaction;
+        this.transactions.store(t);
+        _postTransactionMessage.call(this, 'stored', t);
+
         this.currentTransaction = undefined;
     }
 }
@@ -1640,17 +1648,29 @@ function _storeCurrentTransaction() {
 
 function TransactionHistory$storeTransaction(transaction) {
     this.endTransaction();
+
     this.transactions.store(transaction);
+    _postTransactionMessage.call(this, 'stored', transaction);
+}
+
+
+function _postTransactionMessage(msg, transaction) {
+    if (this._messenger)
+        this._messenger.postMessage(msg, { transaction: transaction });
 }
 
 
 function TransactionHistory$undo(cb) {
-    this.transactions.undo(cb);
+    var t = this.transactions.undo(cb);
+    _postTransactionMessage.call(this, 'undone', t);
+    return t;
 }
 
 
 function TransactionHistory$redo(cb) {
-    this.transactions.redo(cb);
+    var t = this.transactions.redo(cb);
+    _postTransactionMessage.call(this, 'redone', t);
+    return t;
 }
 
 
@@ -1663,7 +1683,12 @@ function TransactionHistory$getDescription() {
     return this.transactions.getDescription();
 }
 
-},{"../util/logger":102,"./actions_history":11,"./transaction":14,"mol-proto":116}],16:[function(require,module,exports){
+
+function TransactionHistory$useMessenger() {
+    this._messenger = new Messenger(this, ['on', 'once', 'onSync', 'off', 'onMessages', 'offMessages', 'postMessage', 'postMessageSync']);
+}
+
+},{"../messenger":67,"../util/logger":102,"./actions_history":11,"./transaction":14,"mol-proto":116}],16:[function(require,module,exports){
 'use strict';
 
 

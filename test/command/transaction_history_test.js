@@ -127,4 +127,48 @@ describe('TransactionHistory', function() {
             }, 2);
         });
     });
+
+
+    it('should emit messages', function(done) {
+        var messages = [];
+        history.useMessenger();
+        history.onSync(/.*/, function(msg, data) {
+            messages.push({ msg: msg, data: data });
+        });
+
+        history.storeCommand(createTestCommand(1));
+        history.storeCommand(createTestCommand(2));
+
+        _.defer(function() {
+            history.storeCommand(createTestCommand(3));
+
+            assert.equal(messages.length, 0);
+
+            _.deferTicks(function() {
+                assert.equal(history.inTransaction(), false);
+
+                assert.equal(messages.length, 1);
+                assert.equal(messages[0].msg, 'stored');
+
+                history.storeCommand(createTestCommand(4), true);
+
+                _.deferTicks(function() {
+                    assert.equal(history.inTransaction(), false);
+
+                    assert.equal(messages.length, 2);
+                    assert.equal(messages[1].msg, 'appended');
+    
+                    var t = history.undo();
+
+                    _.defer(function() {
+                        assert.equal(history.inTransaction(), false);
+                        assert.equal(messages.length, 3);
+                        assert.equal(messages[2].msg, 'undone');
+                        assert(messages[2].data.transaction == t);
+                        done();
+                    });
+                }, 2);
+            }, 2);
+        });
+    });
 });
