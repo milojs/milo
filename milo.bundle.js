@@ -4046,6 +4046,8 @@ var Drag = _.createSubclass(ComponentFacet, 'Drag');
 _.extendProto(Drag, {
     init: Drag$init,
     start: Drag$start,
+    disable: Drag$disableDrag,
+    enable: Drag$enableDrag,
 
     setHandle: Drag$setHandle
 });
@@ -4084,6 +4086,8 @@ function Drag$setHandle(handleEl) {
 function Drag$start() {
     ComponentFacet.prototype.start.apply(this, arguments);
     _addDragAttribute.call(this);
+
+    this._enabled = true;
 
     this.onMessages({
         'mousedown': onMouseDown,
@@ -4129,6 +4133,8 @@ function onMouseDown(eventType, event) {
 
 
 function onMouseMovement(eventType, event) {
+    if (_dragIsDisabled.call(this)) return;
+
     var shouldBeDraggable = targetInDragHandle.call(this);
     this.owner.el.setAttribute('draggable', shouldBeDraggable);
     if (document.body.getAttribute('data-dragEnableEvent') != 'false')
@@ -4201,11 +4207,24 @@ function targetInDragHandle() {
 }
 
 
+function Drag$enableDrag() {
+    _addDragAttribute.call(this);
+    this._enabled = true;
+}
+
+
+function Drag$disableDrag() {
+    _removeDragAttribute.call(this);
+    this._enabled = false;
+}
+
+
 function _dragIsDisabled() {
-    if (this.config.off) {
+    if (!this._enabled || this.config.off) {
         event.preventDefault();
         return true;
     }
+    return false;
 }
 
 },{"../../util/dragdrop":97,"../../util/logger":102,"../c_class":16,"../c_facet":17,"../msg_src/dom_events":39,"./cf_registry":31,"mol-proto":116}],22:[function(require,module,exports){
