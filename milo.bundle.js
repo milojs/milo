@@ -18452,7 +18452,7 @@ var __ = require('./proto_object');
  * @param {String} self A string that will have its first character replaced
  */
 function firstUpperCase() {
-    return this[0].toUpperCase() + this.slice(1);
+    return this ? this[0].toUpperCase() + this.slice(1) : this;
 }
 
 
@@ -18462,7 +18462,7 @@ function firstUpperCase() {
  * @param {String} self A string that will have its first character replaced
  */
 function firstLowerCase() {
-    return this[0].toLowerCase() + this.slice(1);
+    return this ? this[0].toLowerCase() + this.slice(1) : this;
 }
 
 
