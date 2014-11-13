@@ -1091,6 +1091,7 @@ var classes = {
     ClassRegistry: require('./abstract/registry'),
     Mixin: require('./abstract/mixin'),
     MessageSource: require('./messenger/m_source'),
+    MessengerMessageSource: require('./messenger/msngr_source'),
     MessengerAPI: require('./messenger/m_api'),
     DOMEventsSource: require('./components/msg_src/dom_events'),
     Transaction: require('./command/transaction'),
@@ -1099,7 +1100,7 @@ var classes = {
 
 module.exports = classes;
 
-},{"./abstract/facet":1,"./abstract/faceted_object":2,"./abstract/mixin":3,"./abstract/registry":4,"./command/transaction":14,"./command/transaction_history":15,"./components/msg_src/dom_events":39,"./components/scope":41,"./messenger/m_api":68,"./messenger/m_source":70}],11:[function(require,module,exports){
+},{"./abstract/facet":1,"./abstract/faceted_object":2,"./abstract/mixin":3,"./abstract/registry":4,"./command/transaction":14,"./command/transaction_history":15,"./components/msg_src/dom_events":39,"./components/scope":41,"./messenger/m_api":68,"./messenger/m_source":70,"./messenger/msngr_source":71}],11:[function(require,module,exports){
 'use strict';
 
 
@@ -1685,7 +1686,7 @@ function TransactionHistory$getDescription() {
 
 
 function TransactionHistory$useMessenger() {
-    this._messenger = new Messenger(this, ['on', 'once', 'onSync', 'off', 'onMessages', 'offMessages', 'postMessage', 'postMessageSync']);
+    return this._messenger = new Messenger(this, Messenger.defaultMethods);
 }
 
 },{"../messenger":67,"../util/logger":102,"./actions_history":11,"./transaction":14,"mol-proto":116}],16:[function(require,module,exports){
@@ -2837,7 +2838,7 @@ function dispatchSourceMessage(message, data) {
 
 
 function _createMessageSource(MessageSourceClass, options) {
-    var messageSource = new MessageSourceClass(this, undefined, this.owner, options);
+    var messageSource = new MessageSourceClass(this, undefined, undefined, this.owner, options);
     this._setMessageSource(messageSource)
 
     _.defineProperty(this, '_messageSource', messageSource);
