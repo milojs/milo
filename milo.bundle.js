@@ -4139,7 +4139,7 @@ function onMouseDown(eventType, event) {
 
 
 function onMouseMovement(eventType, event) {
-    if (_dragIsDisabled.call(this)) return;
+    if (_dragIsDisabled.call(this, event)) return;
 
     var shouldBeDraggable = targetInDragHandle.call(this);
     this.owner.el.setAttribute('draggable', shouldBeDraggable);
@@ -4180,7 +4180,7 @@ function onDragStart(eventType, event) {
 
 
 function onDragging(eventType, event) {
-    if (_dragIsDisabled.call(this)) return;
+    if (_dragIsDisabled.call(this, event)) return;
 
     var dt = new DragDrop(event);
     dt.setComponentState(this.owner, this._dragData);
@@ -4190,7 +4190,7 @@ function onDragging(eventType, event) {
 
 
 function onDragEnd(eventType, event) {
-    if (_dragIsDisabled.call(this)) return;
+    if (_dragIsDisabled.call(this, event)) return;
 
     event.stopPropagation();
     var dt = new DragDrop(event);
@@ -4225,7 +4225,7 @@ function Drag$disableDrag() {
 }
 
 
-function _dragIsDisabled() {
+function _dragIsDisabled(event) {
     if (!this._enabled || this.config.off) {
         event.preventDefault();
         return true;
@@ -5399,7 +5399,7 @@ function Template$render(data) { // we need data only if use templating engine
 
 function Template$binder() {
     if (this.owner.container)
-        this.owner.container.binder();
+        return this.owner.container.binder();
     else
         logger.error('TemplateFacet: Binder called without container facet.');
 }
