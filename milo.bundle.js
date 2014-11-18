@@ -4059,9 +4059,6 @@ var Drag = _.createSubclass(ComponentFacet, 'Drag');
 _.extendProto(Drag, {
     init: Drag$init,
     start: Drag$start,
-    disable: Drag$disableDrag,
-    enable: Drag$enableDrag,
-
     setHandle: Drag$setHandle
 });
 
@@ -4099,8 +4096,6 @@ function Drag$setHandle(handleEl) {
 function Drag$start() {
     ComponentFacet.prototype.start.apply(this, arguments);
     _addDragAttribute.call(this);
-
-    this._enabled = true;
 
     this.onMessages({
         'mousedown': onMouseDown,
@@ -4218,20 +4213,8 @@ function targetInDragHandle() {
 }
 
 
-function Drag$enableDrag() {
-    _addDragAttribute.call(this);
-    this._enabled = true;
-}
-
-
-function Drag$disableDrag() {
-    _removeDragAttribute.call(this);
-    this._enabled = false;
-}
-
-
 function _dragIsDisabled(event) {
-    if (!this._enabled || this.config.off) {
+    if (this.config.off) {
         event.preventDefault();
         return true;
     }
