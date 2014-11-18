@@ -4139,8 +4139,6 @@ function onMouseDown(eventType, event) {
 
 
 function onMouseMovement(eventType, event) {
-    if (_dragIsDisabled.call(this, event)) return;
-
     var shouldBeDraggable = targetInDragHandle.call(this);
     this.owner.el.setAttribute('draggable', shouldBeDraggable);
     if (document.body.getAttribute('data-dragEnableEvent') != 'false')
