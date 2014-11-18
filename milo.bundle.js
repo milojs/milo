@@ -1663,14 +1663,14 @@ function _postTransactionMessage(msg, transaction) {
 
 function TransactionHistory$undo(cb) {
     var t = this.transactions.undo(cb);
-    _postTransactionMessage.call(this, 'undone', t);
+    if (t) _postTransactionMessage.call(this, 'undone', t);
     return t;
 }
 
 
 function TransactionHistory$redo(cb) {
     var t = this.transactions.redo(cb);
-    _postTransactionMessage.call(this, 'redone', t);
+    if (t) _postTransactionMessage.call(this, 'redone', t);
     return t;
 }
 
