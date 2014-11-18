@@ -6442,12 +6442,17 @@ componentsRegistry.add(MLButton);
 module.exports = MLButton;
 
 _.extendProto(MLButton, {
-    disable: MLButton$disable
+    disable: MLButton$disable,
+    isDisabled: MLButton$isDisabled
 });
 
 
 function MLButton$disable(disable) {
     this.el.disabled = disable;
+}
+
+function MLButton$isDisabled() {
+    return !!this.el.disabled;
 }
 
 
@@ -7021,12 +7026,16 @@ module.exports = MLInput;
 
 _.extendProto(MLInput, {
     disable: MLInput$disable,
+    isDisabled: MLInput$isDisabled,
     setMaxLength: MLInput$setMaxLength
 });
 
-
 function MLInput$disable(disable) {
     this.el.disabled = disable;
+}
+
+function MLInput$isDisabled() {
+    return !!this.el.disabled;
 }
 
 function MLInput$setMaxLength(length) {
