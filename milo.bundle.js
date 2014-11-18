@@ -1574,7 +1574,8 @@ _.extendProto(TransactionHistory, {
     inTransaction: TransactionHistory$inTransaction,
 
     getDescription: TransactionHistory$getDescription,
-    useMessenger: TransactionHistory$useMessenger
+    useMessenger: TransactionHistory$useMessenger,
+    destroy: TransactionHistory$destroy
 });
 
 
@@ -1687,6 +1688,12 @@ function TransactionHistory$getDescription() {
 
 function TransactionHistory$useMessenger() {
     return this._messenger = new Messenger(this, Messenger.defaultMethods);
+}
+
+
+function TransactionHistory$destroy() {
+    if (this._messenger) this._messenger.destroy();
+    delete this.transactions;
 }
 
 },{"../messenger":67,"../util/logger":102,"./actions_history":11,"./transaction":14,"mol-proto":116}],16:[function(require,module,exports){
