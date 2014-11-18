@@ -6441,6 +6441,16 @@ componentsRegistry.add(MLButton);
 
 module.exports = MLButton;
 
+_.extendProto(MLButton, {
+    disable: MLButton$disable
+});
+
+
+function MLButton$disable(disable) {
+    this.el.disabled = disable;
+}
+
+
 },{"../c_class":16,"../c_registry":33}],43:[function(require,module,exports){
 'use strict';
 
