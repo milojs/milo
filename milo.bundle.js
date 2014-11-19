@@ -12114,7 +12114,7 @@ var pathUtils = {
 module.exports = pathUtils;
 
 
-var propertyPathSyntax = '\\.[A-Za-z][A-Za-z0-9_]*'
+var propertyPathSyntax = '\\.[A-Za-z_][A-Za-z0-9_]*'
     , arrayPathSyntax = '\\[[0-9]+\\]'
     , interpolationSyntax = '\\$[1-9][0-9]*'
     , propertyInterpolateSyntax = '\\.' + interpolationSyntax
