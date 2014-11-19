@@ -5435,7 +5435,7 @@ function Transfer$init() {
  * @return {Object}
  */
 function Transfer$getState() {
-    return this._state[this._activeState];
+    return this._state[this._activeState] || this._state[this._defaultKey];
 }
 
 
@@ -5465,9 +5465,13 @@ function Transfer$setActiveState(key) {
  * When the active state is set to the expected key
  * @param {[type]} key   [description]
  * @param {[type]} state [description]
+ * @param {Boolean} isDefaultKey (Optional)
  */
-function Transfer$setStateWithKey(key, state) {
+function Transfer$setStateWithKey(key, state, isDefaultKey) {
     if (!key) throw new Error('Transfer$setStateWithKey: no key');
+
+    if (isDefaultKey)
+        this._defaultKey = key;
 
     this._state[key] = state;
     this.setActiveState(key);
