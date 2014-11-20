@@ -11423,13 +11423,14 @@ module.exports = Model;
  * Model constructor returns objects that are functions at the same time; when called they return ModelPath objects that allow get/set access to any point in model data. See [ModelData](#ModelData) below.
  *
  * You can subscribe to model changes with `on` method by passing model access path in place of message, pattern or string with any number of stars to subscribe to a certain depth in model (e.g., `'***'` to subscribe to three levels).
- * 
+ *
  * @constructor
  * @param {Object|Array} data optional initial array data. If it is planned to connect model to view it is usually better to instantiate an empty Model (`var m = new Model`), connect it to [Component](../components/c_class.js.html)'s [Data facet](../components/c_facets/Data.js.html) (e.g., `milo.minder(m, '<<->>', c.data);`) and then set the model with `m.set(data)` - the view will be automatically updated.
  * @param {Object} hostObject optional object that hosts model on one of its properties. Can be used when model itself is the context of the message subscriber and you need to travers to this object (although it is possible to set any context). Can also be used to proxy model's methods to the host like [Model facet](../components/c_facets/ModelFacet.js.html) is doing.
+ * @param {Object} options pass { reactive: false } to use model without messaging when it is not needed - it makes it much faster
  * @return {Model}
  */
-function Model(data, hostObject) {
+function Model(data, hostObject, options) {
     // `model` will be returned by constructor instead of `this`. `model`
     // (`modelPath` function) should return a ModelPath object with "synthesized" methods
     // to get/set model properties, to subscribe to property changes, etc.
@@ -11440,13 +11441,15 @@ function Model(data, hostObject) {
     model.__proto__ = Model.prototype;
 
     model._hostObject = hostObject;
+    model._options = options || {};
 
-    model._prepareMessengers();
+    if (model._options.reactive !== false) {
+        model._prepareMessengers();
+        // subscribe to "changedata" message to enable reactive connections
+        model.onSync('changedata', changeDataHandler);
+    }
 
     if (data) model._data = data;
-
-    // subscribe to "changedata" message to enable reactive connections
-    model.onSync('changedata', changeDataHandler);
 
     return model;
 }
@@ -11454,7 +11457,7 @@ function Model(data, hostObject) {
 Model.prototype.__proto__ = Model.__proto__;
 
 
-/** 
+/**
  * ####Model instance methods####
  *
  * - [path](#path) - returns ModelPath object that allows access to any point in Model
@@ -11525,7 +11528,7 @@ function Model$get() {
  * Model instance method.
  * Returns ModelPath object that implements the same API as model but allows access to any point inside model as defined by `accessPath`.
  * See [ModelPath](./m_path.js.html) class for more information.
- * 
+ *
  * @param {String} accessPath string that defines path to access model.
  *  Path string consists of parts to define either property access (`".name"` to access property name) or array item access (`"[1]"` to access item with index 1).
  *  Access path can contain as many parts as necessary (e.g. `".list[0].name"` to access property `name` in the first element of array stored in property `list`.
@@ -11561,9 +11564,9 @@ var modelMethodsToProxy = ['path', 'get', 'set', 'del', 'splice', 'len', 'push',
 
 
 /**
- * Expose model methods on 
+ * Expose model methods on
  * See same method in Mixin class for parameters meaning
- * 
+ *
  * @param {Function} hostClass
  * @param {[type]} instanceKey
  * @param {[type]} mixinMethods optional
@@ -11723,7 +11726,8 @@ function ModelPath(model, path) { // ,... - additional arguments for interpolati
     _.defineProperties(modelPath, {
         _model: model,
         _path: path,
-        _args: _.slice(arguments, 1) // path will be the first element of this array
+        _args: _.slice(arguments, 1), // path will be the first element of this array
+        _options: model._options
     });
 
     // parse access path
@@ -11732,17 +11736,18 @@ function ModelPath(model, path) { // ,... - additional arguments for interpolati
     // compute access path string
     _.defineProperty(modelPath, '_accessPath', interpolateAccessPath(parsedPath, modelPath._args));
 
-    // messenger fails on "*" subscriptions
-    modelPath._prepareMessenger();
+    if (modelPath._options.reactive !== false) {
+        // messenger fails on "*" subscriptions
+        modelPath._prepareMessenger();
+        // subscribe to "changedata" message to enable reactive connections
+        modelPath.onSync('changedata', changeDataHandler);
+    }
 
     // compiling getter and setter
     var methods = synthesize(path, parsedPath);
 
     // adding methods to model path
     _.defineProperties(modelPath, methods);
-
-    // subscribe to "changedata" message to enable reactive connections
-    modelPath.onSync('changedata', changeDataHandler);
 
     Object.freeze(modelPath);
 
@@ -11762,7 +11767,7 @@ ModelPath.prototype.__proto__ = ModelPath.__proto__;
 function interpolateAccessPath(parsedPath, args) {
     return parsedPath.reduce(function(accessPathStr, currNode, index) {
         var interpolate = currNode.interpolate;
-        return accessPathStr + 
+        return accessPathStr +
                 (interpolate
                     ? (currNode.syntax == 'array'
                         ? '[' + args[interpolate] + ']'
@@ -11774,7 +11779,7 @@ function interpolateAccessPath(parsedPath, args) {
 
 /**
  * ####ModelPath instance methods####
- * 
+ *
  * - [path](#ModelPath$path) - gives access to path inside ModelPath
  * - get - synthesized
  * - set - synthesized
@@ -11813,7 +11818,7 @@ Messenger.useWith(ModelPath, MESSENGER_PROPERTY, Messenger.defaultMethods);
 /**
  * ModelPath instance method
  * Gives access to path inside ModelPath. Method works similarly to [path method](#Model$path) of model, using relative paths.
- * 
+ *
  * @param {String} accessPath string that defines path to access model.
  *  Path string consists of parts to define either property access (`".name"` to access property name) or array item access (`"[1]"` to access item with index 1).
  *  Access path can contain as many parts as necessary (e.g. `".list[0].name"` to access property `name` in the first element of array stored in property `list`.
@@ -11935,7 +11940,7 @@ function _prepareMessenger() {
 
 /**
  * Returns the object allowing to recreate model path
- * 
+ *
  * @return {Object}
  */
 function _getDefinition() {
@@ -11950,9 +11955,9 @@ function _getDefinition() {
 /**
  * Class method
  * Creates modelPath object from definition created by _getDefinition
- * 
+ *
  * @param  {Object} definition
- * @return {ModelPath}          
+ * @return {ModelPath}
  */
 function _createFromDefinition(definition) {
     check(definition, {
@@ -12258,13 +12263,13 @@ var pathUtils = require('../path_utils')
  */
 var templates = {
     get: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\nmethod = function get() {\n    var m = {{# def.modelAccessPrefix }};\n    return m {{~ it.parsedPath :pathNode }}\n        {{? pathNode.interpolate}}\n            && (m = m[this._args[ {{= pathNode.interpolate }} ]])\n        {{??}}\n            && (m = m{{= pathNode.property }})\n        {{?}} {{~}};\n};\n",
-    set: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n\n\n/**\n * Template that synthesizes setter for Model and for ModelPath\n */\nmethod = function set(value) {\n    {{# def.initVars:'set' }}\n\n    {{# def.createTree:'set' }}\n\n    {{\n        currNode = nextNode;\n        currProp = currNode && currNode.property;\n    }}\n\n    {{ /* assign value to the last property */ }}\n    {{? currProp }}\n        wasDef = {{# def.wasDefined}};\n        {{# def.changeAccessPath }}\n\n        var old = m{{# def.currProp }};\n\n        {{ /* clone value to prevent same reference in linked models */ }}\n        m{{# def.currProp }} = cloneTree(value);\n    {{?}}\n\n    {{ /* add message related to the last property change */ }}\n    if (! wasDef)\n        {{# def.addMsg }} accessPath, type: 'added',\n                newValue: value });\n    else if (old != value)\n        {{# def.addMsg }} accessPath, type: 'changed',\n                oldValue: old, newValue: value });\n\n    {{ /* add message related to changes in (sub)properties inside removed and assigned value */ }}\n    if (! wasDef || old != value)\n        addTreeChangesMessages(messages, messagesHash,\n            accessPath, old, value); /* defined in the function that synthesizes ModelPath setter */\n\n    {{ /* post all stored messages */ }}\n    {{# def.postMessages }}\n};\n",
-    del: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_traverse_tree }}\n\nmethod = function del() {\n    {{# def.initVars:'del' }}\n\n    {{? it.parsedPath.length }}\n        {{# def.traverseTree }}\n\n        {{\n            var currNode = it.parsedPath[count];\n            var currProp = currNode.property;       \n        }}\n\n        if (! treeDoesNotExist && m && m.hasOwnProperty && {{# def.wasDefined}}) {\n            var old = m{{# def.currProp }};\n            delete m{{# def.currProp }};\n            {{# def.changeAccessPath }}\n            var didDelete = true;\n        }\n    {{??}}\n        if (typeof m != 'undefined') {\n            var old = m;\n            {{# def.modelAccessPrefix }} = undefined;\n            var didDelete = true;\n        }\n    {{?}}\n\n    if (didDelete) {\n        {{# def.addMsg }} accessPath, type: 'deleted', oldValue: old });\n\n        addTreeChangesMessages(messages, messagesHash,\n            accessPath, old, undefined); /* defined in the function that synthesizes ModelPath setter */\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n};\n",
-    splice: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n{{# def.include_traverse_tree }}\n\nmethod = function splice(spliceIndex, spliceHowMany) { /* ,... - extra arguments to splice into array */\n    {{# def.initVars:'splice' }}\n\n    var argsLen = arguments.length;\n    var addItems = argsLen > 2;\n\n    if (addItems) {\n        {{ /* only create model tree if items are inserted in array */ }}\n\n        {{ /* if model is undefined it will be set to an empty array */ }}  \n        var value = [];\n        {{# def.createTree:'splice' }}\n\n        {{? nextNode }}\n            {{\n                var currNode = nextNode;\n                var currProp = currNode.property;\n                var emptyProp = '[]';\n            }}\n\n            {{# def.createTreeStep }}\n        {{?}}\n\n    } else if (spliceHowMany > 0) {\n        {{ /* if items are not inserted, only traverse model tree if items are deleted from array */ }}\n        {{? it.parsedPath.length }}\n            {{# def.traverseTree }}\n\n            {{\n                var currNode = it.parsedPath[count];\n                var currProp = currNode.property;       \n            }}\n\n            {{ /* extra brace closes 'else' in def.traverseTreeStep */ }}\n            {{# def.traverseTreeStep }} }\n        {{?}}\n    }\n\n    {{ /* splice items */ }}\n    if (addItems || (! treeDoesNotExist && m\n            && m.length > spliceIndex ) ) {\n        var oldLength = m.length = m.length || 0;\n\n        arguments[0] = spliceIndex = normalizeSpliceIndex(spliceIndex, m.length);\n\n        {{ /* clone added arguments to prevent same references in linked models */ }}\n        if (addItems)\n            for (var i = 2; i < argsLen; i++)\n                arguments[i] = cloneTree(arguments[i]);\n\n        {{ /* actual splice call */ }}\n        var removed = Array.prototype.splice.apply(m, arguments);\n\n        {{# def.addMsg }} accessPath, type: 'splice',\n                index: spliceIndex, removed: removed, addedCount: addItems ? argsLen - 2 : 0,\n                newValue: m });\n\n        if (removed && removed.length)\n            removed.forEach(function(item, index) {\n                var itemPath = accessPath + '[' + (spliceIndex + index) + ']';\n                {{# def.addMsg }} itemPath, type: 'removed', oldValue: item });\n\n                if (valueIsTree(item))\n                    addMessages(messages, messagesHash, itemPath, item, 'removed', 'oldValue');\n            });\n\n        if (addItems)\n            for (var i = 2; i < argsLen; i++) {\n                var item = arguments[i];\n                var itemPath = accessPath + '[' + (spliceIndex + i - 2) + ']';\n                {{# def.addMsg }} itemPath, type: 'added', newValue: item });\n\n                if (valueIsTree(item))\n                    addMessages(messages, messagesHash, itemPath, item, 'added', 'newValue');\n            }\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n\n    return removed || [];\n}\n"
+    set: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n\n\n/**\n * Template that synthesizes setter for Model and for ModelPath\n */\nmethod = function set(value) {\n    {{# def.initVars:'set' }}\n\n    {{# def.createTree:'set' }}\n\n    {{\n        currNode = nextNode;\n        currProp = currNode && currNode.property;\n    }}\n\n    {{ /* assign value to the last property */ }}\n    {{? currProp }}\n        wasDef = {{# def.wasDefined}};\n        {{# def.changeAccessPath }}\n\n        var old = m{{# def.currProp }};\n\n        {{ /* clone value to prevent same reference in linked models */ }}\n        m{{# def.currProp }} = cloneTree(value);\n    {{?}}\n\n    {{ /* add message related to the last property change */ }}\n    if (this._options.reactive !== false) {\n        if (! wasDef)\n            {{# def.addMsg }} accessPath, type: 'added',\n                newValue: value });\n        else if (old != value)\n            {{# def.addMsg }} accessPath, type: 'changed',\n                oldValue: old, newValue: value });\n\n        {{ /* add message related to changes in (sub)properties inside removed and assigned value */ }}\n        if (! wasDef || old != value)\n            addTreeChangesMessages(messages, messagesHash,\n                accessPath, old, value); /* defined in the function that synthesizes ModelPath setter */\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n};\n",
+    del: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_traverse_tree }}\n\nmethod = function del() {\n    {{# def.initVars:'del' }}\n\n    {{? it.parsedPath.length }}\n        {{# def.traverseTree }}\n\n        {{\n            var currNode = it.parsedPath[count];\n            var currProp = currNode.property;       \n        }}\n\n        if (! treeDoesNotExist && m && m.hasOwnProperty && {{# def.wasDefined}}) {\n            var old = m{{# def.currProp }};\n            delete m{{# def.currProp }};\n            {{# def.changeAccessPath }}\n            var didDelete = true;\n        }\n    {{??}}\n        if (typeof m != 'undefined') {\n            var old = m;\n            {{# def.modelAccessPrefix }} = undefined;\n            var didDelete = true;\n        }\n    {{?}}\n\n    if (didDelete && this._options.reactive !== false) {\n        {{# def.addMsg }} accessPath, type: 'deleted', oldValue: old });\n\n        addTreeChangesMessages(messages, messagesHash,\n            accessPath, old, undefined); /* defined in the function that synthesizes ModelPath setter */\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n};\n",
+    splice: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n{{# def.include_traverse_tree }}\n\nmethod = function splice(spliceIndex, spliceHowMany) { /* ,... - extra arguments to splice into array */\n    {{# def.initVars:'splice' }}\n\n    var argsLen = arguments.length;\n    var addItems = argsLen > 2;\n\n    if (addItems) {\n        {{ /* only create model tree if items are inserted in array */ }}\n\n        {{ /* if model is undefined it will be set to an empty array */ }}  \n        var value = [];\n        {{# def.createTree:'splice' }}\n\n        {{? nextNode }}\n            {{\n                var currNode = nextNode;\n                var currProp = currNode.property;\n                var emptyProp = '[]';\n            }}\n\n            {{# def.createTreeStep }}\n        {{?}}\n\n    } else if (spliceHowMany > 0) {\n        {{ /* if items are not inserted, only traverse model tree if items are deleted from array */ }}\n        {{? it.parsedPath.length }}\n            {{# def.traverseTree }}\n\n            {{\n                var currNode = it.parsedPath[count];\n                var currProp = currNode.property;       \n            }}\n\n            {{ /* extra brace closes 'else' in def.traverseTreeStep */ }}\n            {{# def.traverseTreeStep }} }\n        {{?}}\n    }\n\n    {{ /* splice items */ }}\n    if (addItems || (! treeDoesNotExist && m\n            && m.length > spliceIndex ) ) {\n        var oldLength = m.length = m.length || 0;\n\n        arguments[0] = spliceIndex = normalizeSpliceIndex(spliceIndex, m.length);\n\n        {{ /* clone added arguments to prevent same references in linked models */ }}\n        if (addItems)\n            for (var i = 2; i < argsLen; i++)\n                arguments[i] = cloneTree(arguments[i]);\n\n        {{ /* actual splice call */ }}\n        var removed = Array.prototype.splice.apply(m, arguments);\n\n        if (this._options.reactive !== false) {\n            {{# def.addMsg }} accessPath, type: 'splice',\n                    index: spliceIndex, removed: removed, addedCount: addItems ? argsLen - 2 : 0,\n                    newValue: m });\n\n            if (removed && removed.length)\n                removed.forEach(function(item, index) {\n                    var itemPath = accessPath + '[' + (spliceIndex + index) + ']';\n                    {{# def.addMsg }} itemPath, type: 'removed', oldValue: item });\n\n                    if (valueIsTree(item))\n                        addMessages(messages, messagesHash, itemPath, item, 'removed', 'oldValue');\n                });\n\n            if (addItems)\n                for (var i = 2; i < argsLen; i++) {\n                    var item = arguments[i];\n                    var itemPath = accessPath + '[' + (spliceIndex + i - 2) + ']';\n                    {{# def.addMsg }} itemPath, type: 'added', newValue: item });\n\n                    if (valueIsTree(item))\n                        addMessages(messages, messagesHash, itemPath, item, 'added', 'newValue');\n                }\n\n            {{ /* post all stored messages */ }}\n            {{# def.postMessages }}\n        }\n    }\n\n    return removed || [];\n}\n"
 };
 
-var include_defines = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts initialization code\n */\n {{## def.initVars:method:\n    var m = {{# def.modelAccessPrefix }};\n    var messages = [], messagesHash = {};\n    var accessPath = '';\n    var treeDoesNotExist;\n    /* hack to prevent sending finished events to allow for propagation of batches without splitting them */\n    var inChangeTransaction = getTransactionFlag( {{= method }} );\n #}}\n\n/**\n * Inserts the beginning of function call to add message to list\n */\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n/**\n * Inserts current property/index for both normal and interpolated properties/indexes \n */\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n/**\n * Inserts condition to test whether normal/interpolated property/index exists \n */\n{{## def.wasDefined: m.hasOwnProperty(\n    {{? currNode.interpolate }}\n        this._args[ {{= currNode.interpolate }} ]\n    {{??}}\n        '{{= it.getPathNodeKey(currNode) }}'\n    {{?}}\n) #}}\n\n\n/**\n * Inserts code to update access path for current property\n * Because of the possibility of interpolated properties, it can't be calculated in template, it can only be calculated during accessor call. \n */\n{{## def.changeAccessPath:\n    accessPath += {{? currNode.interpolate }}\n        {{? currNode.syntax == 'array' }}\n            '[' + this._args[ {{= currNode.interpolate }} ] + ']';\n        {{??}}\n            '.' + this._args[ {{= currNode.interpolate }} ];\n        {{?}}\n    {{??}}\n        '{{= currProp }}';\n    {{?}}\n#}}\n\n\n/**\n * Inserts code to post stored messages\n */\n{{## def.postMessages:\n    if (messages.length) {\n        {{# def.modelPostBatchCode }}('datachanges', {\n            changes: messages,\n            transaction: inChangeTransaction\n        }); \n\n        messages.forEach(function(msg) {\n            {{# def.modelPostMessageCode }}(msg.path, msg);\n        }, this);\n    }\n#}}\n"
-    , include_create_tree = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts code to create model tree as neccessary for `set` and `splice` accessors and to add messages to send list if the tree changes.\n */\n{{## def.createTree:method:\n    var wasDef = true;\n    var old = m;\n\n    {{ var emptyProp = it.parsedPath[0] && it.parsedPath[0].empty; }}\n    {{? emptyProp }}\n        {{ /* create top level model if it was not previously defined */ }}\n        if (! m) {\n            m = {{# def.modelAccessPrefix }} = {{= emptyProp }};\n            wasDef = false;\n\n            {{# def.addMsg }} '', type: 'added',\n                  newValue: m });\n        }\n    {{??}}\n        {{? method == 'splice' }}\n            if (! m) {\n        {{?}}\n                m = {{# def.modelAccessPrefix }} = cloneTree(value);\n                wasDef = typeof old != 'undefined';\n        {{? method == 'splice' }}\n            }\n        {{?}}       \n    {{?}}\n\n\n    {{ /* create model tree if it doesn't exist */ }}\n    {{  var modelDataProperty = '';\n        var nextNode = it.parsedPath[0];\n        var count = it.parsedPath.length - 1;\n\n        for (var i = 0; i < count; i++) {\n            var currNode = nextNode;\n            var currProp = currNode.property;\n            nextNode = it.parsedPath[i + 1];\n            var emptyProp = nextNode && nextNode.empty;\n    }}\n\n        {{# def.createTreeStep }}\n\n    {{  } /* for loop */ }}\n#}}\n\n\n/**\n * Inserts code to create one step in the model tree\n */\n{{## def.createTreeStep:\n    {{# def.changeAccessPath }}\n\n    if (! {{# def.wasDefined }}) { \n        {{ /* property does not exist */ }}\n        m = m{{# def.currProp }} = {{= emptyProp }};\n\n        {{# def.addMsg }} accessPath, type: 'added', \n              newValue: m });\n\n    } else if (typeof m{{# def.currProp }} != 'object') {\n        {{ /* property is not object */ }}\n        var old = m{{# def.currProp }};\n        m = m{{# def.currProp }} = {{= emptyProp }};\n\n        {{# def.addMsg }} accessPath, type: 'changed', \n              oldValue: old, newValue: m });\n\n    } else {\n        {{ /* property exists, just traverse down the model tree */ }}\n        m = m{{# def.currProp }};\n    }\n#}}\n"
+var include_defines = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts initialization code\n */\n {{## def.initVars:method:\n    var m = {{# def.modelAccessPrefix }};\n    var messages = [], messagesHash = {};\n    var accessPath = '';\n    var treeDoesNotExist;\n    /* hack to prevent sending finished events to allow for propagation of batches without splitting them */\n    var inChangeTransaction = getTransactionFlag( {{= method }} );\n #}}\n\n/**\n * Inserts the beginning of function call to add message to list\n */\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n/**\n * Inserts current property/index for both normal and interpolated properties/indexes\n */\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n/**\n * Inserts condition to test whether normal/interpolated property/index exists\n */\n{{## def.wasDefined: m.hasOwnProperty(\n    {{? currNode.interpolate }}\n        this._args[ {{= currNode.interpolate }} ]\n    {{??}}\n        '{{= it.getPathNodeKey(currNode) }}'\n    {{?}}\n) #}}\n\n\n/**\n * Inserts code to update access path for current property\n * Because of the possibility of interpolated properties, it can't be calculated in template, it can only be calculated during accessor call.\n */\n{{## def.changeAccessPath:\n    accessPath += {{? currNode.interpolate }}\n        {{? currNode.syntax == 'array' }}\n            '[' + this._args[ {{= currNode.interpolate }} ] + ']';\n        {{??}}\n            '.' + this._args[ {{= currNode.interpolate }} ];\n        {{?}}\n    {{??}}\n        '{{= currProp }}';\n    {{?}}\n#}}\n\n\n/**\n * Inserts code to post stored messages\n */\n{{## def.postMessages:\n    if (messages.length) {\n        {{# def.modelPostBatchCode }}('datachanges', {\n            changes: messages,\n            transaction: inChangeTransaction\n        });\n\n        messages.forEach(function(msg) {\n            {{# def.modelPostMessageCode }}(msg.path, msg);\n        }, this);\n    }\n#}}\n"
+    , include_create_tree = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts code to create model tree as neccessary for `set` and `splice` accessors and to add messages to send list if the tree changes.\n */\n{{## def.createTree:method:\n    var wasDef = true;\n    var old = m;\n\n    {{ var emptyProp = it.parsedPath[0] && it.parsedPath[0].empty; }}\n    {{? emptyProp }}\n        {{ /* create top level model if it was not previously defined */ }}\n        if (! m) {\n            m = {{# def.modelAccessPrefix }} = {{= emptyProp }};\n            wasDef = false;\n\n            if (this._options.reactive !== false) {\n                {{# def.addMsg }} '', type: 'added',\n                      newValue: m });\n            }\n        }\n    {{??}}\n        {{? method == 'splice' }}\n            if (! m) {\n        {{?}}\n                m = {{# def.modelAccessPrefix }} = cloneTree(value);\n                wasDef = typeof old != 'undefined';\n        {{? method == 'splice' }}\n            }\n        {{?}}       \n    {{?}}\n\n\n    {{ /* create model tree if it doesn't exist */ }}\n    {{  var modelDataProperty = '';\n        var nextNode = it.parsedPath[0];\n        var count = it.parsedPath.length - 1;\n\n        for (var i = 0; i < count; i++) {\n            var currNode = nextNode;\n            var currProp = currNode.property;\n            nextNode = it.parsedPath[i + 1];\n            var emptyProp = nextNode && nextNode.empty;\n    }}\n\n        {{# def.createTreeStep }}\n\n    {{  } /* for loop */ }}\n#}}\n\n\n/**\n * Inserts code to create one step in the model tree\n */\n{{## def.createTreeStep:\n    {{# def.changeAccessPath }}\n\n    if (! {{# def.wasDefined }}) { \n        {{ /* property does not exist */ }}\n        m = m{{# def.currProp }} = {{= emptyProp }};\n\n        if (this._options.reactive !== false) {\n            {{# def.addMsg }} accessPath, type: 'added', \n                  newValue: m });\n        }\n\n    } else if (typeof m{{# def.currProp }} != 'object') {\n        {{ /* property is not object */ }}\n        var old = m{{# def.currProp }};\n        m = m{{# def.currProp }} = {{= emptyProp }};\n\n        if (this._options.reactive !== false) {\n            {{# def.addMsg }} accessPath, type: 'changed', \n                  oldValue: old, newValue: m });\n        }\n\n    } else {\n        {{ /* property exists, just traverse down the model tree */ }}\n        m = m{{# def.currProp }};\n    }\n#}}\n"
     , include_traverse_tree = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts code to traverse model tree for `delete` and `splice` accessors.\n */\n{{## def.traverseTree:\n    {{ \n        var count = it.parsedPath.length-1;\n\n        for (var i = 0; i < count; i++) { \n            var currNode = it.parsedPath[i];\n            var currProp = currNode.property;\n    }}\n            {{# def.traverseTreeStep }}\n\n    {{ } /* for loop */\n\n        var i = count;\n        while (i--) { /* closing braces for else's above */\n    }}\n            }\n    {{ } /* while loop */ }}\n#}}\n\n\n/**\n * Inserts code to traverse one step in the model tree\n */\n{{## def.traverseTreeStep:\n    if (! (m && m.hasOwnProperty && {{# def.wasDefined}} ) )\n        treeDoesNotExist = true;\n    else {\n        m = m{{# def.currProp }};\n        {{# def.changeAccessPath }}\n    {{ /* brace from else is not closed on purpose - all braces are closed in while loop */ }}\n#}}\n";
 
 var dotDef = {
@@ -12930,7 +12935,7 @@ var Match = check.Match = {
     Integer: ['__integer__'],
 
     // Matches string that is a valid identifier, will not allow javascript reserved words
-    IdentifierString: /^[a-z_$][0-9a-z_$]*$/i, 
+    IdentifierString: /^[a-z_$][0-9a-z_$]*$/i,
 
     // Matches hash (object) with values matching pattern
     ObjectHash: function(pattern) {
@@ -13136,7 +13141,7 @@ function checkSubtree(value, pattern) {
 
     if (pattern instanceof Subclass) {
         var Superclass = pattern.Superclass;
-        if (pattern.matchSuperclass && value == Superclass) 
+        if (pattern.matchSuperclass && value == Superclass)
             return;
         if (! (value.prototype instanceof Superclass))
             throw new Match.Error("Expected " + pattern.constructor.name + " of " + Superclass.name);
@@ -13209,7 +13214,6 @@ function _prependPath(key, base) {
         return key + '.' + base;
     return key + base;
 };
-
 
 },{"../config":65,"mol-proto":116}],93:[function(require,module,exports){
 'use strict';

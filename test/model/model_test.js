@@ -65,7 +65,17 @@ describe('Model class', function() {
 
     it('should return ModelPath that has compiled setter "set()"', function() {
         var m = new Model();
+        testSetter(m);
+    });
 
+
+    it('should allow setter without messaging', function() {
+        var m = new Model(undefined, undefined, { reactive: false });
+        testSetter(m);
+    });
+
+
+    function testSetter(m) {
         m('.info.name').set('Jason');
         m('.info.DOB.year').set(1982);
 
@@ -108,7 +118,7 @@ describe('Model class', function() {
                     }
                 }
             }, 'should correctly overwrite properties')
-    });
+    }
 
 
     it('should support array syntax for property access paths for get() and set()', function() {
@@ -728,7 +738,19 @@ describe('Model class', function() {
 
 
     it('should define "del" instance method for ModelPath', function() {
-        var m = new Model({ test: 1 });
+        var m = new Model;
+        testDel(m);
+    });
+
+
+    it('should allow "del" without messaging', function() {
+        var m = new Model(undefined, undefined, { reactive: false });
+        testDel(m);
+    });
+
+
+    function testDel(m) {
+        m.set({ test: 1 });
 
             assert(m._data.hasOwnProperty('test'));
             assert.equal(m._data.test, 1);
@@ -747,7 +769,7 @@ describe('Model class', function() {
 
             assert.equal(m._data.list[0].hasOwnProperty('name'), false);
             assert.equal(m._data.list[0].name, undefined);
-    });
+    }
 
 
     it('should allow "del" with interpolation', function() {
@@ -885,47 +907,54 @@ describe('Model class', function() {
                             { path: '.info[0].list[1]', type: 'added', newValue: 'item2' }
                         ]);
 
-                        var m = new Model;
-
-                        removed = m('.list').splice(2, 0, 'item1', 'item2');
-
-                            assert.deepEqual(m._data, { list: ['item1', 'item2'] });
-                            assert.deepEqual(removed, []);
-
-                        // samples from Mozilla site
-                        m = new Model([ { fish: ['angel', 'clown', 'mandarin', 'surgeon'] } ]);
-
-                        removed = m('[0].fish').splice(2, 0, "drum");
-
-                            assert.deepEqual(m._data, [ { fish: ['angel', 'clown', 'drum', 'mandarin', 'surgeon'] } ]);
-                            assert.deepEqual(removed, []);
-
-                        removed = m('[0].fish').splice(3, 1);
-
-                            assert.deepEqual(m._data, [ { fish: ['angel', 'clown', 'drum', 'surgeon'] } ]);
-                            assert.deepEqual(removed, ['mandarin']);
-
-                        removed = m('[$1].$2', 0, 'fish').splice(2, 1, 'trumpet');
-
-                            assert.deepEqual(m._data, [ { fish: ['angel', 'clown', 'trumpet', 'surgeon'] } ]);
-                            assert.deepEqual(removed, ['drum']);
-
-                        removed = m('[$1]', 0).path('.$1', 'fish').splice(0, 2, 'parrot', 'anemone', 'blue');
-
-                            assert.deepEqual(m._data, [ { fish: ['parrot', 'anemone', 'blue', 'trumpet', 'surgeon'] } ]);
-                            assert.deepEqual(removed, ['angel', 'clown']);
-
-                        removed = m('[$1].fish', 0).splice(3, Number.MAX_VALUE);
-
-                            assert.deepEqual(m._data, [ { fish: ['parrot', 'anemone', 'blue'] } ]);
-                            assert.deepEqual(removed, ['trumpet', 'surgeon']);
-
                         done();
                     });
                 });
             });
         });
     });
+
+
+    it('should define "splice" - more tests', function() {
+        var m = new Model;
+        testSplice(m);
+    });
+
+
+    it('should allow "splice" without messaging', function() {
+        var m = new Model(undefined, undefined, { reactive: false });
+        testSplice(m);
+    });
+
+
+    function testSplice(m) {
+        m.set([ { fish: ['angel', 'clown', 'mandarin', 'surgeon'] } ]);
+
+        var removed = m('[0].fish').splice(2, 0, "drum");
+
+            assert.deepEqual(m._data, [ { fish: ['angel', 'clown', 'drum', 'mandarin', 'surgeon'] } ]);
+            assert.deepEqual(removed, []);
+
+        removed = m('[0].fish').splice(3, 1);
+
+            assert.deepEqual(m._data, [ { fish: ['angel', 'clown', 'drum', 'surgeon'] } ]);
+            assert.deepEqual(removed, ['mandarin']);
+
+        removed = m('[$1].$2', 0, 'fish').splice(2, 1, 'trumpet');
+
+            assert.deepEqual(m._data, [ { fish: ['angel', 'clown', 'trumpet', 'surgeon'] } ]);
+            assert.deepEqual(removed, ['drum']);
+
+        removed = m('[$1]', 0).path('.$1', 'fish').splice(0, 2, 'parrot', 'anemone', 'blue');
+
+            assert.deepEqual(m._data, [ { fish: ['parrot', 'anemone', 'blue', 'trumpet', 'surgeon'] } ]);
+            assert.deepEqual(removed, ['angel', 'clown']);
+
+        removed = m('[$1].fish', 0).splice(3, Number.MAX_VALUE);
+
+            assert.deepEqual(m._data, [ { fish: ['parrot', 'anemone', 'blue'] } ]);
+            assert.deepEqual(removed, ['trumpet', 'surgeon']);
+    }
 
 
     it('should define "pop" instance method for Model and ModelPath', function(done) {
