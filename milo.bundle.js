@@ -15055,7 +15055,7 @@ function _onReady(req, callback, promise, eventType) {
 
     var error;
     try {
-        if (req.statusText.toUpperCase() == 'OK' ) {
+        if ( req.status < 400 ) {
             try {
                 postMessage('success');
                 callback && callback(null, req.responseText, req);
