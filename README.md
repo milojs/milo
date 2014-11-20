@@ -343,6 +343,16 @@ http://opensource.org/licenses/BSD-2-Clause
 Changes log
 -----------
 
+###0.1.10###
+- `Messenger` performance improvement
+- `MLSuperCombo` support for remote list of options
+- `TransactionHistory` can emit messages
+- `Model` can be used without messaging:
+```
+var m = new Model(data, hostObject, { reactive: false });
+// data and hostObject can be undefined
+```
+
 ###0.1.9###
 
 - `MLFoldTree` - tree view UI component
