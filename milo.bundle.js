@@ -15532,10 +15532,13 @@ function _getPostDeleteSelectionPoint(selectEndContainer) {
 function _selectAfterDelete(selPoint) {
     var selNode = selPoint.node
         , selOffset = selPoint.offset;
-    selNode.textContent = selNode.textContent.trimRight();
-    if (selNode && !selNode.nodeValue)
+
+    if (!selNode) return;
+    if (selNode.nodeType == Node.TEXT_NODE)
+        selNode.textContent = selNode.textContent.trimRight();
+    if (!selNode.nodeValue)
         selNode.nodeValue = '\u00A0'; //non-breaking space, \u200B for zero width space;
-    
+
     var position = selOffset > selNode.length ? selNode.length : selOffset;
     setCaretPosition(selNode, position);
 }
