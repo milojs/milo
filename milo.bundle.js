@@ -15083,7 +15083,7 @@ function _onReady(req, callback, promise, eventType) {
     if (!_pendingRequests.length)
         postMessage('requestscompleted');
 
-    if (error) throw error;
+    if (error) throw new Error("Exception: " + error.stack);
 
     function postMessage(msg) {
         if (_messenger) request.postMessage(msg,
