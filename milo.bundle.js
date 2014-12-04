@@ -12121,7 +12121,7 @@ var pathUtils = {
 module.exports = pathUtils;
 
 
-var propertyPathSyntax = '\\.[A-Za-z_][A-Za-z0-9_]*'
+var propertyPathSyntax = '\\.[A-Za-z_-][A-Za-z0-9_-]*'
     , arrayPathSyntax = '\\[[0-9]+\\]'
     , interpolationSyntax = '\\$[1-9][0-9]*'
     , propertyInterpolateSyntax = '\\.' + interpolationSyntax
@@ -16953,6 +16953,7 @@ var numberMethods = require('./proto_number');
  * - [result](proto_util.js.html#result)
  * - [identity](proto_util.js.html#identity)
  * - [property](proto_util.js.html#property)
+ * - [compareProperty](proto_util.js.html#compareProperty)
  * - [noop](proto_util.js.html#noop)
  */
 var utilMethods = require('./proto_util');
@@ -18637,6 +18638,7 @@ function unPrefix(str) {
  * - [result](#result)
  * - [identity](#identity)
  * - [property](#property)
+ * - [compareProperty](#compareProperty)
  * - [noop](#noop)
  */
 var utilMethods = module.exports = {
@@ -18646,6 +18648,7 @@ var utilMethods = module.exports = {
     result: result,
     identity: identity,
     property: property,
+    compareProperty: compareProperty,
     noop: noop
 };
 
@@ -18730,6 +18733,24 @@ function property() {
     var key = this;
     return function(obj) {
         return obj[key];
+    };
+}
+
+
+/**
+ * Returns function that can be used in array sort to sort by a given property
+ *
+ * @param {String} self
+ * @return {Function}
+ */
+function compareProperty() {
+    var key = this;
+    return function(a, b) {
+        return a[key] < b[key]
+            ? -1
+            : a[key] > b[key]
+                ? 1
+                : 0;
     };
 }
 
