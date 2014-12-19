@@ -1,4 +1,4 @@
-;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
 
@@ -4026,7 +4026,7 @@ function insertAtTreeIndex(treeIndex, el) {
     return domUtils.insertAtTreeIndex(this.owner.el, treeIndex, el);
 }
 
-},{"../../attributes/a_bind":5,"../../binder":9,"../../config":65,"../../util/check":92,"../../util/dom":95,"../../util/error":98,"../c_facet":17,"./cf_registry":31,"dot":115,"mol-proto":116}],21:[function(require,module,exports){
+},{"../../attributes/a_bind":5,"../../binder":9,"../../config":65,"../../util/check":92,"../../util/dom":95,"../../util/error":98,"../c_facet":17,"./cf_registry":31,"dot":114,"mol-proto":116}],21:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drag"></a>
@@ -5167,7 +5167,7 @@ function List$destroy() {
     ComponentFacet.prototype.destroy.apply(this, arguments);
 }
 
-},{"../../binder":9,"../../config":65,"../../services/mail":86,"../../util":100,"../c_class":16,"../c_facet":17,"./cf_registry":31,"dot":115,"mol-proto":116}],27:[function(require,module,exports){
+},{"../../binder":9,"../../config":65,"../../services/mail":86,"../../util":100,"../c_class":16,"../c_facet":17,"./cf_registry":31,"dot":114,"mol-proto":116}],27:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -6874,7 +6874,7 @@ function MLFoldTree$renderTree (data) {
     }
 }
 
-},{"../../util/count":94,"../c_class":16,"../c_registry":33,"dot":115}],48:[function(require,module,exports){
+},{"../../util/count":94,"../c_class":16,"../c_registry":33,"dot":114}],48:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -8204,7 +8204,7 @@ function _setData() {
     this.setFilteredOptions(this._optionsData);
 }
 
-},{"../../util/logger":102,"../c_class":16,"../c_registry":33,"dot":115,"mol-proto":116}],58:[function(require,module,exports){
+},{"../../util/logger":102,"../c_class":16,"../c_registry":33,"dot":114,"mol-proto":116}],58:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -8234,11 +8234,7 @@ var Component = require('../c_class')
 
 var MLTextarea = Component.createComponentClass('MLTextarea', {
     data: undefined,
-    events: {
-        messages: {
-            'click': { subscriber: _adjustAreaHeight, context: 'owner' }
-        }
-    },
+    events: undefined,
     dom: {
         cls: 'ml-ui-textarea'
     }
@@ -8267,11 +8263,12 @@ function MLTextarea$startAutoresize(options) {
     this._autoresizeOptions = options;
 
     _adjustAreaHeight.call(this);
-    _subscribeTextChange.call(this, 'on');
+    _manageSubscriptions.call(this, 'on');
 }
 
 
-function _subscribeTextChange(onOff) {
+function _manageSubscriptions(onOff) {
+    this.events[onOff]('click', { subscriber: _adjustAreaHeight, context: this });
     this.data[onOff]('', { subscriber: _adjustAreaHeight, context: this });
 }
 
@@ -8297,7 +8294,7 @@ function MLTextarea$stopAutoresize() {
     if (! this._autoresize)
         return logger.warn('MLTextarea stopAutoresize: autoresize is not on');
     this._autoresize = false;
-    _subscribeTextChange.call(this, 'off');
+    _manageSubscriptions.call(this, 'off');
 }
 
 
@@ -9134,7 +9131,7 @@ config({
     debug: false
 });
 
-},{"dot":115,"mol-proto":116}],66:[function(require,module,exports){
+},{"dot":114,"mol-proto":116}],66:[function(require,module,exports){
 'use strict';
 
 
@@ -12454,7 +12451,7 @@ var modelMethods = _.mapKeys(modelSynthesizers, function(synthesizer) {
 
 synthesizePathMethods.modelMethods = modelMethods;
 
-},{"../../util/count":94,"../../util/logger":102,"../change_data":74,"../model_utils":79,"../path_utils":81,"dot":115,"fs":113,"mol-proto":116}],83:[function(require,module,exports){
+},{"../../util/count":94,"../../util/logger":102,"../change_data":74,"../model_utils":79,"../path_utils":81,"dot":114,"fs":115,"mol-proto":116}],83:[function(require,module,exports){
 'use strict';
 
 /**
@@ -14630,7 +14627,7 @@ function util_destroy() {
     util.dragDrop.destroy();
 }
 
-},{"../components/ui/bootstrap/Alert":62,"../components/ui/bootstrap/Dialog":63,"./check":92,"./component_name":93,"./count":94,"./dom":95,"./domready":96,"./dragdrop":97,"./error":98,"./fragment":99,"./json_parse":101,"./logger":102,"./promise":104,"./request":105,"./selection":106,"./storage":107,"./websocket":109,"dot":115}],101:[function(require,module,exports){
+},{"../components/ui/bootstrap/Alert":62,"../components/ui/bootstrap/Dialog":63,"./check":92,"./component_name":93,"./count":94,"./dom":95,"./domready":96,"./dragdrop":97,"./error":98,"./fragment":99,"./json_parse":101,"./logger":102,"./promise":104,"./request":105,"./selection":106,"./storage":107,"./websocket":109,"dot":114}],101:[function(require,module,exports){
 'use strict';
 
 
@@ -16558,21 +16555,15 @@ if (typeof module !== 'undefined' && module.exports) {
 })();
 
 },{}],113:[function(require,module,exports){
-
-// not implemented
-// The reason for having an empty file and not throwing is to allow
-// untraditional implementation of this module.
-
-},{}],114:[function(require,module,exports){
 // doT.js
-// 2011, Laura Doktorova, https://github.com/olado/doT
+// 2011-2014, Laura Doktorova, https://github.com/olado/doT
 // Licensed under the MIT license.
 
 (function() {
 	"use strict";
 
 	var doT = {
-		version: '1.0.1',
+		version: "1.0.3",
 		templateSettings: {
 			evaluate:    /\{\{([\s\S]+?(\}?)+)\}\}/g,
 			interpolate: /\{\{=([\s\S]+?)\}\}/g,
@@ -16583,45 +16574,47 @@ if (typeof module !== 'undefined' && module.exports) {
 			defineParams:/^\s*([\w$]+):([\s\S]+)/,
 			conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g,
 			iterate:     /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g,
-			varname:	'it',
+			varname:	"it",
 			strip:		true,
 			append:		true,
-			selfcontained: false
+			selfcontained: false,
+			doNotSkipEncoded: false
 		},
 		template: undefined, //fn, compile template
 		compile:  undefined  //fn, for express
+	}, _globals;
+
+	doT.encodeHTMLSource = function(doNotSkipEncoded) {
+		var encodeHTMLRules = { "&": "&#38;", "<": "&#60;", ">": "&#62;", '"': "&#34;", "'": "&#39;", "/": "&#47;" },
+			matchHTML = doNotSkipEncoded ? /[&<>"'\/]/g : /&(?!#?\w+;)|<|>|"|'|\//g;
+		return function(code) {
+			return code ? code.toString().replace(matchHTML, function(m) {return encodeHTMLRules[m] || m;}) : "";
+		};
 	};
 
-	if (typeof module !== 'undefined' && module.exports) {
+	_globals = (function(){ return this || (0,eval)("this"); }());
+
+	if (typeof module !== "undefined" && module.exports) {
 		module.exports = doT;
-	} else if (typeof define === 'function' && define.amd) {
+	} else if (typeof define === "function" && define.amd) {
 		define(function(){return doT;});
 	} else {
-		(function(){ return this || (0,eval)('this'); }()).doT = doT;
+		_globals.doT = doT;
 	}
-
-	function encodeHTMLSource() {
-		var encodeHTMLRules = { "&": "&#38;", "<": "&#60;", ">": "&#62;", '"': '&#34;', "'": '&#39;', "/": '&#47;' },
-			matchHTML = /&(?!#?\w+;)|<|>|"|'|\//g;
-		return function() {
-			return this ? this.replace(matchHTML, function(m) {return encodeHTMLRules[m] || m;}) : this;
-		};
-	}
-	String.prototype.encodeHTML = encodeHTMLSource();
 
 	var startend = {
-		append: { start: "'+(",      end: ")+'",      endencode: "||'').toString().encodeHTML()+'" },
-		split:  { start: "';out+=(", end: ");out+='", endencode: "||'').toString().encodeHTML();out+='"}
+		append: { start: "'+(",      end: ")+'",      startencode: "'+encodeHTML(" },
+		split:  { start: "';out+=(", end: ");out+='", startencode: "';out+=encodeHTML(" }
 	}, skip = /$^/;
 
 	function resolveDefs(c, block, def) {
-		return ((typeof block === 'string') ? block : block.toString())
+		return ((typeof block === "string") ? block : block.toString())
 		.replace(c.define || skip, function(m, code, assign, value) {
-			if (code.indexOf('def.') === 0) {
+			if (code.indexOf("def.") === 0) {
 				code = code.substring(4);
 			}
 			if (!(code in def)) {
-				if (assign === ':') {
+				if (assign === ":") {
 					if (c.defineParams) value.replace(c.defineParams, function(m, param, v) {
 						def[code] = {arg: param, text: v};
 					});
@@ -16630,12 +16623,12 @@ if (typeof module !== 'undefined' && module.exports) {
 					new Function("def", "def['"+code+"']=" + value)(def);
 				}
 			}
-			return '';
+			return "";
 		})
 		.replace(c.use || skip, function(m, code) {
 			if (c.useParams) code = code.replace(c.useParams, function(m, s, d, param) {
 				if (def[d] && def[d].arg && param) {
-					var rw = (d+":"+param).replace(/'|\\/g, '_');
+					var rw = (d+":"+param).replace(/'|\\/g, "_");
 					def.__exp = def.__exp || {};
 					def.__exp[rw] = def[d].text.replace(new RegExp("(^|[^\\w$])" + def[d].arg + "([^\\w$])", "g"), "$1" + param + "$2");
 					return s + "def.__exp['"+rw+"']";
@@ -16647,7 +16640,7 @@ if (typeof module !== 'undefined' && module.exports) {
 	}
 
 	function unescape(code) {
-		return code.replace(/\\('|\\)/g, "$1").replace(/[\r\t\n]/g, ' ');
+		return code.replace(/\\('|\\)/g, "$1").replace(/[\r\t\n]/g, " ");
 	}
 
 	doT.template = function(tmpl, c, def) {
@@ -16655,15 +16648,15 @@ if (typeof module !== 'undefined' && module.exports) {
 		var cse = c.append ? startend.append : startend.split, needhtmlencode, sid = 0, indv,
 			str  = (c.use || c.define) ? resolveDefs(c, tmpl, def || {}) : tmpl;
 
-		str = ("var out='" + (c.strip ? str.replace(/(^|\r|\n)\t* +| +\t*(\r|\n|$)/g,' ')
-					.replace(/\r|\n|\t|\/\*[\s\S]*?\*\//g,''): str)
-			.replace(/'|\\/g, '\\$&')
+		str = ("var out='" + (c.strip ? str.replace(/(^|\r|\n)\t* +| +\t*(\r|\n|$)/g," ")
+					.replace(/\r|\n|\t|\/\*[\s\S]*?\*\//g,""): str)
+			.replace(/'|\\/g, "\\$&")
 			.replace(c.interpolate || skip, function(m, code) {
 				return cse.start + unescape(code) + cse.end;
 			})
 			.replace(c.encode || skip, function(m, code) {
 				needhtmlencode = true;
-				return cse.start + unescape(code) + cse.endencode;
+				return cse.startencode + unescape(code) + cse.end;
 			})
 			.replace(c.conditional || skip, function(m, elsecase, code) {
 				return elsecase ?
@@ -16680,17 +16673,20 @@ if (typeof module !== 'undefined' && module.exports) {
 				return "';" + unescape(code) + "out+='";
 			})
 			+ "';return out;")
-			.replace(/\n/g, '\\n').replace(/\t/g, '\\t').replace(/\r/g, '\\r')
-			.replace(/(\s|;|\}|^|\{)out\+='';/g, '$1').replace(/\+''/g, '')
-			.replace(/(\s|;|\}|^|\{)out\+=''\+/g,'$1out+=');
+			.replace(/\n/g, "\\n").replace(/\t/g, '\\t').replace(/\r/g, "\\r")
+			.replace(/(\s|;|\}|^|\{)out\+='';/g, '$1').replace(/\+''/g, "");
+			//.replace(/(\s|;|\}|^|\{)out\+=''\+/g,'$1out+=');
 
-		if (needhtmlencode && c.selfcontained) {
-			str = "String.prototype.encodeHTML=(" + encodeHTMLSource.toString() + "());" + str;
+		if (needhtmlencode) {
+			if (!c.selfcontained && _globals && !_globals._encodeHTML) _globals._encodeHTML = doT.encodeHTMLSource(c.doNotSkipEncoded);
+			str = "var encodeHTML = typeof _encodeHTML !== 'undefined' ? _encodeHTML : ("
+				+ doT.encodeHTMLSource.toString() + "(" + (c.doNotSkipEncoded || '') + "));"
+				+ str;
 		}
 		try {
 			return new Function(c.varname, str);
 		} catch (e) {
-			if (typeof console !== 'undefined') console.log("Could not create a template function: " + str);
+			if (typeof console !== "undefined") console.log("Could not create a template function: " + str);
 			throw e;
 		}
 	};
@@ -16700,7 +16696,7 @@ if (typeof module !== 'undefined' && module.exports) {
 	};
 }());
 
-},{}],115:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
 /* doT + auto-compilation of doT templates
  *
  * 2012, Laura Doktorova, https://github.com/olado/doT
@@ -16779,7 +16775,7 @@ InstallDots.prototype.compileToFile = function(path, template, def) {
 	}
 	compiled += defaultcompiled.toString().replace('anonymous', modulename);
 	fs.writeFileSync(path, "(function(){" + compiled
-		+ "var itself=" + modulename + ";"
+		+ "var itself=" + modulename + ", _encodeHTML=(" + doT.encodeHTMLSource.toString() + "(" + (settings.doNotSkipEncoded || '') + "));"
 		+ addexports(exports)
 		+ "if(typeof module!=='undefined' && module.exports) module.exports=itself;else if(typeof define==='function')define(function(){return itself;});else {"
 		+ this.__global + "=" + this.__global + "||{};" + this.__global + "['" + modulename + "']=itself;}}());");
@@ -16845,7 +16841,9 @@ InstallDots.prototype.compileAll = function() {
 	return this.__rendermodule;
 };
 
-},{"./doT":114,"fs":113}],116:[function(require,module,exports){
+},{"./doT":113,"fs":115}],115:[function(require,module,exports){
+
+},{}],116:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -18839,4 +18837,3 @@ function makeFindMethod(eachMethod, findWhat) {
 }
 
 },{}]},{},[72])
-;
