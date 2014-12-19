@@ -15200,7 +15200,7 @@ function request$jsonp(url, callback) {
 }
 
 
-function request$file(opts, fileData, callback) {
+function request$file(opts, fileData, callback, progress) {
     if (typeof opts == 'string')
         opts = { method: 'POST', url: opts };
 
@@ -15210,13 +15210,15 @@ function request$file(opts, fileData, callback) {
     if (_messenger) request.postMessageSync('request', { options: opts });
 
     var req = new XMLHttpRequest();
+    if (progress) req.upload.onprogress = progress;
+
     req.open(opts.method, opts.url, true);
     setRequestHeaders(req, opts.headers);
 
     req.timeout = opts.timeout || config.request.defaults.timeout;
     req.onreadystatechange = req.ontimeout = req.onabort = onReady;
 
-    var promise = new Promise();
+    var promise = new Promise(req);
 
     if (opts.binary)
         req.send(fileData);
@@ -15231,6 +15233,7 @@ function request$file(opts, fileData, callback) {
     return promise;
 
     function onReady(e) {
+        if (progress) req.upload.onprogress = undefined;
         _onReady(req, callback, promise, e.type);
     }
 }
