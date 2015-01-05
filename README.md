@@ -18,7 +18,7 @@ Quick start
 
 or
 
-    bower intall milo
+    bower install milo
 
 
 ### Test
