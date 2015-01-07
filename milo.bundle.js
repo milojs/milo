@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
 
@@ -4026,7 +4026,7 @@ function insertAtTreeIndex(treeIndex, el) {
     return domUtils.insertAtTreeIndex(this.owner.el, treeIndex, el);
 }
 
-},{"../../attributes/a_bind":5,"../../binder":9,"../../config":65,"../../util/check":92,"../../util/dom":95,"../../util/error":98,"../c_facet":17,"./cf_registry":31,"dot":114,"mol-proto":116}],21:[function(require,module,exports){
+},{"../../attributes/a_bind":5,"../../binder":9,"../../config":65,"../../util/check":92,"../../util/dom":95,"../../util/error":98,"../c_facet":17,"./cf_registry":31,"dot":115,"mol-proto":116}],21:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drag"></a>
@@ -5167,7 +5167,7 @@ function List$destroy() {
     ComponentFacet.prototype.destroy.apply(this, arguments);
 }
 
-},{"../../binder":9,"../../config":65,"../../services/mail":86,"../../util":100,"../c_class":16,"../c_facet":17,"./cf_registry":31,"dot":114,"mol-proto":116}],27:[function(require,module,exports){
+},{"../../binder":9,"../../config":65,"../../services/mail":86,"../../util":100,"../c_class":16,"../c_facet":17,"./cf_registry":31,"dot":115,"mol-proto":116}],27:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -6874,7 +6874,7 @@ function MLFoldTree$renderTree (data) {
     }
 }
 
-},{"../../util/count":94,"../c_class":16,"../c_registry":33,"dot":114}],48:[function(require,module,exports){
+},{"../../util/count":94,"../c_class":16,"../c_registry":33,"dot":115}],48:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -8204,7 +8204,7 @@ function _setData() {
     this.setFilteredOptions(this._optionsData);
 }
 
-},{"../../util/logger":102,"../c_class":16,"../c_registry":33,"dot":114,"mol-proto":116}],58:[function(require,module,exports){
+},{"../../util/logger":102,"../c_class":16,"../c_registry":33,"dot":115,"mol-proto":116}],58:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -9131,7 +9131,7 @@ config({
     debug: false
 });
 
-},{"dot":114,"mol-proto":116}],66:[function(require,module,exports){
+},{"dot":115,"mol-proto":116}],66:[function(require,module,exports){
 'use strict';
 
 
@@ -12451,7 +12451,7 @@ var modelMethods = _.mapKeys(modelSynthesizers, function(synthesizer) {
 
 synthesizePathMethods.modelMethods = modelMethods;
 
-},{"../../util/count":94,"../../util/logger":102,"../change_data":74,"../model_utils":79,"../path_utils":81,"dot":114,"fs":115,"mol-proto":116}],83:[function(require,module,exports){
+},{"../../util/count":94,"../../util/logger":102,"../change_data":74,"../model_utils":79,"../path_utils":81,"dot":115,"fs":113,"mol-proto":116}],83:[function(require,module,exports){
 'use strict';
 
 /**
@@ -14627,7 +14627,7 @@ function util_destroy() {
     util.dragDrop.destroy();
 }
 
-},{"../components/ui/bootstrap/Alert":62,"../components/ui/bootstrap/Dialog":63,"./check":92,"./component_name":93,"./count":94,"./dom":95,"./domready":96,"./dragdrop":97,"./error":98,"./fragment":99,"./json_parse":101,"./logger":102,"./promise":104,"./request":105,"./selection":106,"./storage":107,"./websocket":109,"dot":114}],101:[function(require,module,exports){
+},{"../components/ui/bootstrap/Alert":62,"../components/ui/bootstrap/Dialog":63,"./check":92,"./component_name":93,"./count":94,"./dom":95,"./domready":96,"./dragdrop":97,"./error":98,"./fragment":99,"./json_parse":101,"./logger":102,"./promise":104,"./request":105,"./selection":106,"./storage":107,"./websocket":109,"dot":115}],101:[function(require,module,exports){
 'use strict';
 
 
@@ -16558,6 +16558,12 @@ if (typeof module !== 'undefined' && module.exports) {
 })();
 
 },{}],113:[function(require,module,exports){
+
+// not implemented
+// The reason for having an empty file and not throwing is to allow
+// untraditional implementation of this module.
+
+},{}],114:[function(require,module,exports){
 // doT.js
 // 2011-2014, Laura Doktorova, https://github.com/olado/doT
 // Licensed under the MIT license.
@@ -16699,7 +16705,7 @@ if (typeof module !== 'undefined' && module.exports) {
 	};
 }());
 
-},{}],114:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 /* doT + auto-compilation of doT templates
  *
  * 2012, Laura Doktorova, https://github.com/olado/doT
@@ -16844,9 +16850,7 @@ InstallDots.prototype.compileAll = function() {
 	return this.__rendermodule;
 };
 
-},{"./doT":113,"fs":115}],115:[function(require,module,exports){
-
-},{}],116:[function(require,module,exports){
+},{"./doT":114,"fs":113}],116:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -16888,6 +16892,7 @@ var prototypeMethods = require('./proto_prototype');
  * - [pickKeys](proto_object.js.html#pickKeys)
  * - [omitKeys](proto_object.js.html#omitKeys)
  * - [isEqual](proto_object.js.html#isEqual)
+ * - [isNot](proto_object.js.html#isNot)
  */
 var objectMethods = require('./proto_object');
 
@@ -16926,7 +16931,7 @@ var arrayMethods = require('./proto_array');
  * - [delayMethod](proto_function.js.html#delayMethod)
  * - [deferMethod](proto_function.js.html#deferMethod)
  * - [debounce](proto_function.js.html#debounce)
- * - [throttle](proto_function.js.html#throttle) 
+ * - [throttle](proto_function.js.html#throttle)
  * - [once](proto_function.js.html#once)
  * - [waitFor](proto_function.js.html#waitFor)
 */
@@ -16952,7 +16957,7 @@ var stringMethods = require('./proto_string');
 
 /**
  * [__Number functions__](proto_number.js.html)
- * 
+ *
  * - [isNumeric](proto_number.js.html#isNumeric)
  */
 var numberMethods = require('./proto_number');
@@ -16960,7 +16965,7 @@ var numberMethods = require('./proto_number');
 
 /**
  * [__Utility functions__](proto_util.js.html)
- * 
+ *
  * - [times](proto_util.js.html#times)
  * - [repeat](proto_util.js.html#repeat)
  * - [tap](proto_util.js.html#tap)
@@ -17732,6 +17737,7 @@ var utils = require('./utils');
  * - [pickKeys](#pickKeys)
  * - [omitKeys](#omitKeys)
  * - [isEqual](#isEqual)
+ * - [isNot](#isNot)
  *
  * All these methods can be [chained](proto.js.html#Proto)
  */
@@ -17755,7 +17761,8 @@ var objectMethods = module.exports = {
     everyKey: everyKey,
     pickKeys: pickKeys,
     omitKeys: omitKeys,
-    isEqual: isEqual
+    isEqual: isEqual,
+    isNot: isNot
 };
 
 
@@ -17891,14 +17898,14 @@ function _getDescriptor(value, decriptorFlags) {
  * ```
  * _.defineProperties(obj, {
  *     key1: value1,
- *     key2: value2 
+ *     key2: value2
  * });
  * ```
  * To define some other properties use sum of the flags `_.ENUMERABLE` (or `_.ENUM`), `_.CONFIGURABLE` (or `_.CONF`) and `_.WRITABLE` (or `_.WRIT`):
  * ```
  * _.defineProperties(obj, {
  *     key1: value1,
- *     key2: value2 
+ *     key2: value2
  * }, _.ENUM + _.WRIT);
  * ```
  * Returns `self`.
@@ -17910,7 +17917,7 @@ function _getDescriptor(value, decriptorFlags) {
  */
 function defineProperties(propertyValues, decriptorFlags) {
     var descriptors = mapKeys.call(propertyValues, function(value) {
-        return _getDescriptor(value, decriptorFlags);       
+        return _getDescriptor(value, decriptorFlags);
     }, true);
     Object.defineProperties(this, descriptors);
     return this;
@@ -17945,7 +17952,7 @@ function defineProperties(propertyValues, decriptorFlags) {
  * Returns `self`.
  *
  * @param {Object} self An object to be extended
- * @param {Object} obj An object with properties to copy to 
+ * @param {Object} obj An object with properties to copy to
  * @param {Boolean} onlyEnumerable Optional `true` to use only enumerable properties
  * @return {Object}
  */
@@ -18036,24 +18043,24 @@ function values(onlyEnumerable) {
 
 /**
  * An analogue of `indexOf` method of Array prototype.
- * Returns the `key` of `searchElement` in the object `self`. 
+ * Returns the `key` of `searchElement` in the object `self`.
  * As object keys are unsorted, if there are several keys that hold `searchElement` any of them can be returned. Use `allKeysOf` to return all keys.
  * All own properties are searched (not those inherited via prototype chain), including non-enumerable properties (unless `onlyEnumerable` is truthy).
  *
  * @param {Object} self An object to search a value in
  * @param {Any} searchElement An element that will be searched. An exact equality is tested, so `0` is not the same as `'0'`.
  * @param {Boolean} onlyEnumerable An optional true to search among enumerable properties only.
- * @return {String} 
+ * @return {String}
  */
 function keyOf(searchElement, onlyEnumerable) {
-    var properties = onlyEnumerable 
+    var properties = onlyEnumerable
                         ? Object.keys(this)
                         : allKeys.call(this);
 
     for (var i = 0; i < properties.length; i++)
         if (searchElement === this[properties[i]])
             return properties[i];
-    
+
     return undefined;
 }
 
@@ -18064,10 +18071,10 @@ function keyOf(searchElement, onlyEnumerable) {
  * @param {Object} self An object to search a value in
  * @param {Any} searchElement An element that will be searched. An exact equality is tested, so `0` is not the same as `'0'`.
  * @param {Boolean} onlyEnumerable An optional true to search among enumerable properties only.
- * @return {Array[String]} 
+ * @return {Array[String]}
  */
 function allKeysOf(searchElement, onlyEnumerable) {
-    var properties = onlyEnumerable 
+    var properties = onlyEnumerable
                         ? Object.keys(this)
                         : allKeys.call(this);
 
@@ -18095,7 +18102,7 @@ function allKeysOf(searchElement, onlyEnumerable) {
  * @param {Boolean} onlyEnumerable An optional `true` to iterate enumerable properties only.
  */
 function eachKey(callback, thisArg, onlyEnumerable) {
-    var properties = onlyEnumerable 
+    var properties = onlyEnumerable
                         ? Object.keys(this)
                         : allKeys.call(this);
 
@@ -18117,7 +18124,7 @@ function eachKey(callback, thisArg, onlyEnumerable) {
  * ```
  * var result = _.map(arguments, callback, thisArg);
  * ```
- * 
+ *
  * @param {Object} self An object which properties will be iterated
  * @param {Function} callback Callback is passed `value`, `key` and `self` and should return value that will be included in the map.
  * @param {Object} thisArg An optional context of iteration (the valueof `this`), will be undefined if this parameter is not passed.
@@ -18144,7 +18151,7 @@ function mapKeys(callback, thisArg, onlyEnumerable) {
  * ```
  * var result = _.reduce(arguments, callback, initialValue, thisArg);
  * ```
- * 
+ *
  * @param {Object} self An object which properties will be iterated
  * @param {Function} callback Callback is passed `previousValue`, `value`, `key` and `self` and should return value that will be used as the `previousValue` for the next `callback` call.
  * @param {Any} initialValue The initial value passed to callback as the first parameter on the first call.
@@ -18153,7 +18160,7 @@ function mapKeys(callback, thisArg, onlyEnumerable) {
  * @return {Any}
  */
 function reduceKeys(callback, initialValue, thisArg, onlyEnumerable) {
-    var properties = onlyEnumerable 
+    var properties = onlyEnumerable
                         ? Object.keys(this)
                         : allKeys.call(this);
 
@@ -18170,7 +18177,7 @@ function reduceKeys(callback, initialValue, thisArg, onlyEnumerable) {
 /**
  * An analogue of [filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter) method of Array prototype.
  * Returns the new object with keys for which callback returns true.
- * Property descriptors of the returned object will have the same `enumerable`, `configurable` and `writable` settings as the properties of `self`. 
+ * Property descriptors of the returned object will have the same `enumerable`, `configurable` and `writable` settings as the properties of `self`.
  * To filter array-like objects use:
  * ```
  * var result = _.filter(arguments, callback, thisArg);
@@ -18254,7 +18261,7 @@ var ArrayProto = Array.prototype
  *
  * @param {Object} self an object to pick keys from
  * @param {List[String|Array]} arguments list of keys (or array(s) of keys)
- * @return {Object} 
+ * @return {Object}
  */
 function pickKeys() { // , ... keys
     var keys = concat.apply(ArrayProto, arguments)
@@ -18272,7 +18279,7 @@ function pickKeys() { // , ... keys
  *
  * @param {Object} self an object to omit keys in
  * @param {List[String|Array]} arguments list of keys (or array(s) of keys)
- * @return {Object} 
+ * @return {Object}
  */
 function omitKeys() { // , ... keys
     var keys = concat.apply(ArrayProto, arguments)
@@ -18322,6 +18329,17 @@ function isEqual(obj) {
                     return isEqual.call(value, obj[key]);
                 });
     }
+}
+
+
+/**
+ * The opposite of isEqual
+ * @param  {Any} self object to compare
+ * @param  {Any} obj object to compare
+ * @return {Boolean}
+ */
+function isNot(obj) {
+    return !isEqual.call(this, obj);
 }
 
 },{"./utils":124}],121:[function(require,module,exports){
@@ -18840,3 +18858,4 @@ function makeFindMethod(eachMethod, findWhat) {
 }
 
 },{}]},{},[72])
+;
