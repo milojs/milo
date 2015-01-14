@@ -11,5 +11,11 @@ describe('Container', function() {
         var subchild = comp.container.path('.child.subchild');
         assert(subchild instanceof Component);
         assert.equal(subchild.el.getAttribute('data'), 'this is it');
+
+        var noSuchChild = comp.container.path('.child.another');
+        assert.equal(noSuchChild, undefined);
+
+        var noSuchChild = comp.container.path('.child.subchild.deeper');
+        assert.equal(noSuchChild, undefined);
     });
 });
