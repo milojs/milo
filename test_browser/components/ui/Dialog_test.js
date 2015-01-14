@@ -33,7 +33,7 @@ describe('Dialog', function() {
             assert(clicked);
             dialog.destroy();
             done();
-        })
+        });
 
         function initialize(dialog) {
             button = dialog.container.path('.dialogBody.button');
