@@ -22,4 +22,24 @@ describe('Dialog', function() {
         assert(button instanceof milo.Component);
         dialog.destroy();
     });
+
+
+    it('should allow custom initialization', function(done) {
+        var button, clicked;
+        var dialog = MLDialog.createDialog(options, initialize);
+        dialog.openDialog(_.noop);
+        button.events.postMessage('click');
+        _.defer(function() {
+            assert(clicked);
+            dialog.destroy();
+            done();
+        })
+
+        function initialize(dialog) {
+            button = dialog.container.path('.dialogBody.button');
+            button.events.on('click', function() {
+                clicked = true;
+            });
+        }
+    });
 });
