@@ -2902,6 +2902,7 @@ var Container = _.createSubclass(ComponentFacet, 'Container');
  */
 _.extendProto(Container, {
     start: Container$start,
+    path: Container$path,
     getState: Container$getState,
     setState: Container$setState,
     binder: Container$binder,
@@ -2918,7 +2919,7 @@ module.exports = Container;
 
 
 /**
- * Component instance method.
+ * Container instance method.
  * Scans DOM, creates components and adds to scope children of component element.
  */
 function Container$binder() {
@@ -2927,12 +2928,38 @@ function Container$binder() {
 
 
 /**
- * Component instance method.
+ * Container instance method.
  * Setup empty scope object on start
  */
 function Container$start() {
     ComponentFacet.prototype.start.apply(this, arguments);
     this.scope = new Scope(this.owner.el, this);
+}
+
+
+var allowedNamePattern = /^[A-Za-z][A-Za-z0-9\_\$]*$/;
+/**
+ * Container instance method.
+ * Safely traverses component scope
+ * Returns component in scope for a given path
+ * 
+ * @param {String} path path of child component in scope, each name should be prefixed with '.', e.g.: '.child.subchild'
+ */
+function Container$path(path) {
+    path = path.split('.');
+    var len = path.length;
+    if (path[0] || len < 2) throwInvalidPath();
+    var comp = this.owner;
+    for (var i = 1; i < len; i++) {
+        var name = path[i];
+        if (!allowedNamePattern.test(name)) throwInvalidPath();
+        comp = comp.container.scope[path[i]];
+    }
+    return comp;
+
+    function throwInvalidPath() {
+        throw new Error('path ' + path + ' is invalid');
+    }
 }
 
 
@@ -8618,7 +8645,7 @@ var MLDialog = Component.createComponentClass('MLDialog', {
                         </div>\
                     {{?}}\
                     {{? it.html || it.text }}\
-                        <div class="modal-body">\
+                        <div class="modal-body" ml-bind="[container]:dialogBody">\
                             {{? it.html }}\
                                 {{= it.html }}\
                             {{??}}\
@@ -8688,9 +8715,10 @@ _.extendProto(MLDialog, {
  * If backdrop is clicked or ESC key is pressed the result will be 'dismissed'
  * If close button in the top right corner is clicked, the result will be 'closed' (default result)
  * 
- * @param {Object} options dialog configuration.
+ * @param {Object} options dialog configuration
+ * @param {Function} initialize function that is called to initialize the dialog
  */
-function MLDialog$$createDialog(options) {
+function MLDialog$$createDialog(options, initialize) {
     check(options, {
         title: Match.Optional(String),
         html: Match.Optional(String),
@@ -8741,6 +8769,7 @@ function MLDialog$$createDialog(options) {
         dialogScope[btn.name].events.on('click', buttonSubscriber);
     });
 
+    if (initialize) initialize(dialog);
     return dialog;
 }
 
@@ -8806,8 +8835,8 @@ function _prepareOptions(options) {
  * @param {Object} options object with title, text and buttons. See [createDialog](#MLDialog$$createDialog) for more information.
  * @param {Function|Object} subscriber optional subscriber function or object that is passed result and optional data. Unless context is defined, dialog will be the context.
  */
-function MLDialog$$openDialog(options, subscriber) {
-    var dialog = MLDialog.createDialog(options);
+function MLDialog$$openDialog(options, subscriber, initialize) {
+    var dialog = MLDialog.createDialog(options, initialize);
     dialog.openDialog(subscriber);
     return dialog;
 }
