@@ -7504,6 +7504,7 @@ _.extendProto(MLRadioGroup, {
 function MLRadioGroup$init() {
     _.defineProperty(this, '_radioList', [], _.CONF);
     _.defineProperty(this, ELEMENT_NAME_PROPERTY, ELEMENT_NAME_PREFIX + miloCount());
+    this._renderOptions = {};
     Component.prototype.init.apply(this, arguments);
 }
 
