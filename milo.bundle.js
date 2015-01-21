@@ -1,4 +1,4 @@
-;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
 
@@ -3856,6 +3856,8 @@ function toggle(doShow) {
     var el = this.owner.el;
 
     el.style.display = doShow ? 'block' : 'none';
+
+    return doShow;
 }
 
 
@@ -4085,7 +4087,7 @@ function insertAtTreeIndex(treeIndex, el) {
     return domUtils.insertAtTreeIndex(this.owner.el, treeIndex, el);
 }
 
-},{"../../attributes/a_bind":5,"../../binder":9,"../../config":65,"../../util/check":92,"../../util/dom":95,"../../util/error":98,"../c_facet":17,"./cf_registry":31,"dot":115,"mol-proto":116}],21:[function(require,module,exports){
+},{"../../attributes/a_bind":5,"../../binder":9,"../../config":65,"../../util/check":92,"../../util/dom":95,"../../util/error":98,"../c_facet":17,"./cf_registry":31,"dot":114,"mol-proto":116}],21:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drag"></a>
@@ -5226,7 +5228,7 @@ function List$destroy() {
     ComponentFacet.prototype.destroy.apply(this, arguments);
 }
 
-},{"../../binder":9,"../../config":65,"../../services/mail":86,"../../util":100,"../c_class":16,"../c_facet":17,"./cf_registry":31,"dot":115,"mol-proto":116}],27:[function(require,module,exports){
+},{"../../binder":9,"../../config":65,"../../services/mail":86,"../../util":100,"../c_class":16,"../c_facet":17,"./cf_registry":31,"dot":114,"mol-proto":116}],27:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -6765,13 +6767,15 @@ var Component = require('../c_class')
     , componentsRegistry = require('../c_registry')
     , _ = require('mol-proto');
 
+var DATE_CHANGE_MESSAGE = 'mldatechange';
 
 var MLDate = Component.createComponentClass('MLDate', {
     events: undefined,
     data: {
         get: MLDate_get,
         set: MLDate_set,
-        del: MLDate_del
+        del: MLDate_del,
+        event: DATE_CHANGE_MESSAGE
     },
     dom: {
         cls: 'ml-ui-date'
@@ -6823,11 +6827,19 @@ function MLDate_set(value) {
     var date = _.toDate(value);
 
     this.el.value = date ? toISO8601Format(date) : '';
-}
 
+    dispatchChangeMessage.call(this);
+}
 
 function MLDate_del() {
     this.el.value = '';
+
+    dispatchChangeMessage.call(this);
+}
+
+
+function dispatchChangeMessage() {
+    this.data.dispatchSourceMessage(DATE_CHANGE_MESSAGE);
 }
 
 
@@ -6963,7 +6975,7 @@ function MLFoldTree$renderTree (data) {
     }
 }
 
-},{"../../util/count":94,"../c_class":16,"../c_registry":33,"dot":115}],48:[function(require,module,exports){
+},{"../../util/count":94,"../c_class":16,"../c_registry":33,"dot":114}],48:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -8300,7 +8312,7 @@ function _setData() {
     this.setFilteredOptions(this._optionsData);
 }
 
-},{"../../util/logger":102,"../c_class":16,"../c_registry":33,"dot":115,"mol-proto":116}],58:[function(require,module,exports){
+},{"../../util/logger":102,"../c_class":16,"../c_registry":33,"dot":114,"mol-proto":116}],58:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -9231,7 +9243,7 @@ config({
     debug: false
 });
 
-},{"dot":115,"mol-proto":116}],66:[function(require,module,exports){
+},{"dot":114,"mol-proto":116}],66:[function(require,module,exports){
 'use strict';
 
 
@@ -12553,7 +12565,7 @@ var modelMethods = _.mapKeys(modelSynthesizers, function(synthesizer) {
 
 synthesizePathMethods.modelMethods = modelMethods;
 
-},{"../../util/count":94,"../../util/logger":102,"../change_data":74,"../model_utils":79,"../path_utils":81,"dot":115,"fs":113,"mol-proto":116}],83:[function(require,module,exports){
+},{"../../util/count":94,"../../util/logger":102,"../change_data":74,"../model_utils":79,"../path_utils":81,"dot":114,"fs":115,"mol-proto":116}],83:[function(require,module,exports){
 'use strict';
 
 /**
@@ -14729,7 +14741,7 @@ function util_destroy() {
     util.dragDrop.destroy();
 }
 
-},{"../components/ui/bootstrap/Alert":62,"../components/ui/bootstrap/Dialog":63,"./check":92,"./component_name":93,"./count":94,"./dom":95,"./domready":96,"./dragdrop":97,"./error":98,"./fragment":99,"./json_parse":101,"./logger":102,"./promise":104,"./request":105,"./selection":106,"./storage":107,"./websocket":109,"dot":115}],101:[function(require,module,exports){
+},{"../components/ui/bootstrap/Alert":62,"../components/ui/bootstrap/Dialog":63,"./check":92,"./component_name":93,"./count":94,"./dom":95,"./domready":96,"./dragdrop":97,"./error":98,"./fragment":99,"./json_parse":101,"./logger":102,"./promise":104,"./request":105,"./selection":106,"./storage":107,"./websocket":109,"dot":114}],101:[function(require,module,exports){
 'use strict';
 
 
@@ -16660,12 +16672,6 @@ if (typeof module !== 'undefined' && module.exports) {
 })();
 
 },{}],113:[function(require,module,exports){
-
-// not implemented
-// The reason for having an empty file and not throwing is to allow
-// untraditional implementation of this module.
-
-},{}],114:[function(require,module,exports){
 // doT.js
 // 2011-2014, Laura Doktorova, https://github.com/olado/doT
 // Licensed under the MIT license.
@@ -16807,7 +16813,7 @@ if (typeof module !== 'undefined' && module.exports) {
 	};
 }());
 
-},{}],115:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
 /* doT + auto-compilation of doT templates
  *
  * 2012, Laura Doktorova, https://github.com/olado/doT
@@ -16952,7 +16958,9 @@ InstallDots.prototype.compileAll = function() {
 	return this.__rendermodule;
 };
 
-},{"./doT":114,"fs":113}],116:[function(require,module,exports){
+},{"./doT":113,"fs":115}],115:[function(require,module,exports){
+
+},{}],116:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -18960,4 +18968,3 @@ function makeFindMethod(eachMethod, findWhat) {
 }
 
 },{}]},{},[72])
-;
