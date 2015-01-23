@@ -13433,7 +13433,7 @@ function containingElement(node) {
 
 /**
  * Selects inner contents of DOM element
- * 
+ *
  * @param {Element} el DOM element
  */
 function selectElementContents(el) {
@@ -13463,7 +13463,7 @@ function selectElementText(el) {
 
 /**
  * Sets the caret position to the position in the node
- * 
+ *
  * @param {Node} node DOM node
  * @param {Number} pos caret position
  */
@@ -13529,8 +13529,8 @@ function setSelection(fromNode, startOffset, toNode, endOffset) {
 
     var win = getNodeWindow(fromNode)
         , sel = win.getSelection();
-    
-    
+
+
     if (backward){
         range.setStart(toNode, endOffset);
         range.setEnd(fromNode, startOffset);
@@ -13538,13 +13538,13 @@ function setSelection(fromNode, startOffset, toNode, endOffset) {
     }
     else {
         range.setStart(fromNode, startOffset);
-        range.setEnd(toNode, endOffset);        
+        range.setEnd(toNode, endOffset);
     }
 
-    container = range.commonAncestorContainer == Node.ELEMENT_NODE ? 
-        range.commonAncestorContainer : 
+    container = range.commonAncestorContainer == Node.ELEMENT_NODE ?
+        range.commonAncestorContainer :
         range.commonAncestorContainer.parentElement;
-        
+
     if (!container.isContentEditable){
         originalContentEditable = container.contentEditable; // false or inherit
         container.contentEditable = "true";
@@ -13576,13 +13576,13 @@ function clearSelection(win) {
 
 /**
  * Calculates an element's total top and left offset from the document edge.
- * 
+ *
  * @param {Element} el the element for which position needs to be returned
  * @param {includeBorder} if is to include the border width
  * @return {Object} vector object with properties topOffset and leftOffset
  */
 function getElementOffset(el, includeBorder) {
-    var yPos, xPos;     
+    var yPos, xPos;
 
     yPos = el.offsetTop;
     xPos = el.offsetLeft;
@@ -13602,9 +13602,9 @@ function getBorder(el, type, includeBorder) {
     if (includeBorder) {
         var side = (type == 'Height') ? 'top' : 'left',
             styles = window.getComputedStyle(el),
-            sideValue = styles.getPropertyCSSValue('border-' + side + '-width');
+            sideValue = parseInt(styles.getPropertyValue('border-' + side + '-width'), 10);
 
-        if (sideValue) return sideValue.getFloatValue(sideValue.CSS_PX);
+        if (sideValue) return sideValue;
     }
     return 0;
 }
@@ -13619,7 +13619,7 @@ function removeElement(el) {
     var parent = el.parentNode;
     if (parent){
         parent.removeChild(el);
-        parent.normalize();        
+        parent.normalize();
     }
 }
 
@@ -13687,7 +13687,7 @@ function wrapInElement(wrapIntoEl, el) {
 
 /**
  * Trims a text node of trailing spaces, and returns true if a trim was performed.
- * 
+ *
  * @param  {TextNode} node
  * @return {Boolean}
  */
@@ -13698,7 +13698,7 @@ function trimNodeRight(node) {
 
 /**
  * Trims a text node of leading spaces, and returns true if a trim was performed.
- * 
+ *
  * @param  {TextNode} node
  * @return {Boolean}
  */
@@ -13716,7 +13716,7 @@ function _trimNode(node, methodName) {
 
 /**
  * Removes the reference to component from element
- * 
+ *
  * @param  {Element} el
  */
 function detachComponent(el) {
@@ -13756,7 +13756,7 @@ function walkTree(root, filter, iterator, context) {
 /**
  * Returns sequential index of element inside root element in DOM tree as traversed by TreeWalker.
  * Returns -1 if the element is not inside root element, 0 if the root element itself is passed.
- * 
+ *
  * @param  {Element} rootEl element to search
  * @param  {Element} el element to find the index of
  * @return {Number}
@@ -13781,8 +13781,8 @@ function treeIndexOf(rootEl, el) {
 
 /**
  * Returns element at given tree index
- * 
- * @param {Element} rootEl 
+ *
+ * @param {Element} rootEl
  * @param {Number} treeIndex
  * @return {Node}
  */
@@ -13804,7 +13804,7 @@ function getNodeAtTreeIndex(rootEl, treeIndex) {
 /**
  * Inserts an element inside root at a given index in tree (that has the same meaning as the index returned by `treeIndexOf` function). If element is already in the root's tree, it will be removed first and then moved to the passed treeIndex
  * Insertion at index 0 is not possible and will return undefined as it would mean replacing the root element.
- * 
+ *
  * @param {Element} rootEl element into which to insert
  * @param {Number} treeIndex index in DOM tree inside root element (see treeIndexOf)
  * @param {Element} el element to be inserted
@@ -13826,7 +13826,7 @@ function insertAtTreeIndex(rootEl, treeIndex, el) {
 /**
  * Returns array of child indexes of element path inside root element in DOM tree using breadth first tree traversal.
  * Returns undefined if the element is not inside root element, 0 if the root element itself is passed.
- * 
+ *
  * @param  {Element} rootEl element to search
  * @param  {Element} el element to find the index of
  * @return {Array[Number]}
@@ -13851,15 +13851,15 @@ function treePathOf(rootEl, el) {
 
 /**
  * Returns element at given tree path
- * 
- * @param {Element} rootEl 
+ *
+ * @param {Element} rootEl
  * @param {Array[Number]} treePath
  * @param {Boolean} nearest return nearest possible node if exact node does not exist
  * @return {Node}
  */
 function getNodeAtTreePath(rootEl, treePath, nearest) {
     if (!treePath) return;
-    
+
     var len = treePath.length;
     if (len === 0) return rootEl;
 
@@ -13889,7 +13889,7 @@ function getNodeAtTreePath(rootEl, treePath, nearest) {
 /**
  * Inserts an element inside root at a given path in tree (that has the same meaning as the index returned by `treeIndexOf` function). If element is already in the root's tree, it will be removed first and then moved to the passed treeIndex
  * Insertion at index 0 is not possible and will return undefined as it would mean replacing the root element.
- * 
+ *
  * @param {Element} rootEl element into which to insert
  * @param {Number} treeIndex index in DOM tree inside root element (see treeIndexOf)
  * @param {Element} el element to be inserted
@@ -13918,7 +13918,7 @@ function insertAtTreePath(rootEl, treePath, el, nearest) {
     if (child) {
         parent.insertBefore(el, child);
         toNormalize && parent.normalize();
-        return true;    
+        return true;
     } else if (children.length === 0 && (childIndex === 0 || nearest)) {
         parent.appendChild(el);
         toNormalize && parent.normalize();
@@ -13935,7 +13935,7 @@ function insertAtTreePath(rootEl, treePath, el, nearest) {
 
 
 /**
- * Returns `true` if the first tree path points to a node which is before the other in the document order. 
+ * Returns `true` if the first tree path points to a node which is before the other in the document order.
  * @param  {Array}  path1   A treepath array
  * @param  {Array}  path2   A treepath array
  * @return {Boolean}
@@ -13997,7 +13997,7 @@ function getNodeWindow(node) {
 
 /**
  * do something for each nodes contained in a range
- * 
+ *
  * @param {range} a range
  * @param {cb} a function taking a node as argument
 
@@ -14011,12 +14011,12 @@ function forEachNodesInRange(range, cb){
         var isInside = false;
         nodeRange.selectNode(node);
 
-        if (nodeRange.compareBoundaryPoints(Range.START_TO_START, range) != -1 
+        if (nodeRange.compareBoundaryPoints(Range.START_TO_START, range) != -1
             && nodeRange.compareBoundaryPoints(Range.END_TO_END, range) != 1){
             isInside = true;
         }
         nodeRange.detach();
-        return isInside;      
+        return isInside;
     }
 
     var treeWalker = doc.createTreeWalker(rangeContainer,
@@ -14032,7 +14032,7 @@ function forEachNodesInRange(range, cb){
 
 /**
  * get all components contained in a range
- * 
+ *
  * @param {range} a DOM range.
  */
 function getComponentsFromRange(range) {
@@ -14053,7 +14053,7 @@ function getComponentsFromRange(range) {
 
 /**
  * delete a range
- * 
+ *
  * @param {range} delete a DOM range and all the components inside
  */
 function deleteRangeWithComponents(range) {
@@ -14068,7 +14068,7 @@ function deleteRangeWithComponents(range) {
 
 /**
  * check if two ranges are equivalent
- * 
+ *
  * @param {range} range1
  * @param {range} range2
  * @return {Boolean} are the two ranges equivalent
