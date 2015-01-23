@@ -618,6 +618,16 @@ _.extendProto(BindAttribute, {
 });
 
 
+/**
+ * BindAttribute class methods
+ *
+ * - [setInfo](#BindAttribute$$setInfo)
+ */
+_.extend(BindAttribute, {
+    setInfo: BindAttribute$$setInfo
+});
+
+
 module.exports = BindAttribute;
 
 
@@ -691,6 +701,24 @@ function render() {
                                             ? '[' + this.compFacets.join(', ') + ']'
                                             : '')
                 .replace('%compName', this.compName);
+}
+
+
+/**
+ * BindAttribute class method
+ * @param {Element} el
+ * @param {String} componentClass optional class name
+ * @param {String} componentName optional
+ * @param {Array<String>} componentFacets optional extra facet to add to the class
+ */
+function BindAttribute$$setInfo(el, componentClass, componentName, componentFacets) {
+    var attr = new BindAttribute(el);
+    _.extend(attr, {
+        compClass: componentClass,
+        compName: componentName,
+        compFacets: componentFacets
+    });
+    attr.decorate();
 }
 
 },{"../config":65,"../util/check":92,"../util/error":98,"./a_class":6,"mol-proto":116}],6:[function(require,module,exports){
