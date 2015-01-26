@@ -7022,7 +7022,7 @@ var MLImage = Component.createComponentClass('MLImage', {
     },
     model: {
         messages: {
-            '**': { subscriber: onModelChange, context: 'owner' }
+            '.src': { subscriber: onModelChange, context: 'owner' }
         }
     },
     events: undefined,
@@ -7092,8 +7092,7 @@ function dispatchChangeMessage() {
 
 
 function onModelChange(path, data) {
-    var src = this.model.m('.src').get();
-    if (src) this.el.src = src;
+    this.el.src = data.newValue;
     dispatchChangeMessage.call(this);
 }
 
