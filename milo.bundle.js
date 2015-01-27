@@ -7661,7 +7661,7 @@ var MLSelect = Component.createComponentClass('MLSelect', {
     },
     template: {
         template: '{{~ it.selectOptions :option }} \
-                        <option value="{{= option.value }}">{{= option.label }}</option> \
+                        <option value="{{= option.value }}" {{? option.selected }}selected{{?}}>{{= option.label }}</option> \
                    {{~}}'
     }
 });
