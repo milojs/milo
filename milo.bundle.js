@@ -3126,6 +3126,7 @@ _.extendProto(Data, {
     set: Data$set,
     del: Data$del,
     splice: Data$splice,
+    len: Data$len,
     path: Data$path,
     getPath: Data$getPath,
     getKey: Data$getKey,
@@ -3151,7 +3152,7 @@ module.exports = Data;
 /**
  * ModelPath methods added to Data prototype
  */
-['len', 'push', 'pop', 'unshift', 'shift'].forEach(function(methodName) {
+['push', 'pop', 'unshift', 'shift'].forEach(function(methodName) {
     var method = ModelPath.prototype[methodName];
     _.defineProperty(Data.prototype, methodName, method);
 });
@@ -3631,6 +3632,12 @@ function Data$_splice(spliceIndex, spliceHowMany) { //, ... arguments
         removed: removed,
         addedCount: addItems ? addedCount : 0
     };
+}
+
+
+function Data$len() {
+    if (this.owner.list) return this.owner.list.count();
+    else logger.error('Data: len called without list facet');
 }
 
 
