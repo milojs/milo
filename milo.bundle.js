@@ -1,4 +1,4 @@
-;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
 
@@ -2938,7 +2938,8 @@ _.extendProto(Container, {
     unwrap: Container$unwrap,
 
     append: Container$append,
-    insertBefore: Container$insertBefore
+    insertBefore: Container$insertBefore,
+    remove: Container$remove
 });
 
 facetsRegistry.add(Container);
@@ -3077,6 +3078,11 @@ function Container$append(comp) {
 function Container$insertBefore(comp, sibling) {
     this.scope._add(comp);
     this.el.insertBefore(comp.el, sibling && sibling.el);
+}
+
+function Container$remove(comp) {
+    this.scope._remove(comp);
+    this.owner.el.removeChild(comp.el);
 }
 
 },{"../../binder":9,"../../util/dom":95,"../../util/logger":102,"../c_facet":17,"../scope":41,"./cf_registry":31,"mol-proto":116}],19:[function(require,module,exports){
@@ -4095,7 +4101,7 @@ function insertAtTreeIndex(treeIndex, el) {
     return domUtils.insertAtTreeIndex(this.owner.el, treeIndex, el);
 }
 
-},{"../../attributes/a_bind":5,"../../binder":9,"../../config":65,"../../util/check":92,"../../util/dom":95,"../../util/error":98,"../c_facet":17,"./cf_registry":31,"dot":115,"mol-proto":116}],21:[function(require,module,exports){
+},{"../../attributes/a_bind":5,"../../binder":9,"../../config":65,"../../util/check":92,"../../util/dom":95,"../../util/error":98,"../c_facet":17,"./cf_registry":31,"dot":114,"mol-proto":116}],21:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drag"></a>
@@ -5258,7 +5264,7 @@ function List$destroy() {
     ComponentFacet.prototype.destroy.apply(this, arguments);
 }
 
-},{"../../binder":9,"../../config":65,"../../services/mail":86,"../../util":100,"../c_class":16,"../c_facet":17,"./cf_registry":31,"dot":115,"mol-proto":116}],27:[function(require,module,exports){
+},{"../../binder":9,"../../config":65,"../../services/mail":86,"../../util":100,"../c_class":16,"../c_facet":17,"./cf_registry":31,"dot":114,"mol-proto":116}],27:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -7008,7 +7014,7 @@ function MLFoldTree$renderTree (data) {
     }
 }
 
-},{"../../util/count":94,"../c_class":16,"../c_registry":33,"dot":115}],48:[function(require,module,exports){
+},{"../../util/count":94,"../c_class":16,"../c_registry":33,"dot":114}],48:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -8345,7 +8351,7 @@ function _setData() {
     this.setFilteredOptions(this._optionsData);
 }
 
-},{"../../util/logger":102,"../c_class":16,"../c_registry":33,"dot":115,"mol-proto":116}],58:[function(require,module,exports){
+},{"../../util/logger":102,"../c_class":16,"../c_registry":33,"dot":114,"mol-proto":116}],58:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -9276,7 +9282,7 @@ config({
     debug: false
 });
 
-},{"dot":115,"mol-proto":116}],66:[function(require,module,exports){
+},{"dot":114,"mol-proto":116}],66:[function(require,module,exports){
 'use strict';
 
 
@@ -12598,7 +12604,7 @@ var modelMethods = _.mapKeys(modelSynthesizers, function(synthesizer) {
 
 synthesizePathMethods.modelMethods = modelMethods;
 
-},{"../../util/count":94,"../../util/logger":102,"../change_data":74,"../model_utils":79,"../path_utils":81,"dot":115,"fs":113,"mol-proto":116}],83:[function(require,module,exports){
+},{"../../util/count":94,"../../util/logger":102,"../change_data":74,"../model_utils":79,"../path_utils":81,"dot":114,"fs":115,"mol-proto":116}],83:[function(require,module,exports){
 'use strict';
 
 /**
@@ -14774,7 +14780,7 @@ function util_destroy() {
     util.dragDrop.destroy();
 }
 
-},{"../components/ui/bootstrap/Alert":62,"../components/ui/bootstrap/Dialog":63,"./check":92,"./component_name":93,"./count":94,"./dom":95,"./domready":96,"./dragdrop":97,"./error":98,"./fragment":99,"./json_parse":101,"./logger":102,"./promise":104,"./request":105,"./selection":106,"./storage":107,"./websocket":109,"dot":115}],101:[function(require,module,exports){
+},{"../components/ui/bootstrap/Alert":62,"../components/ui/bootstrap/Dialog":63,"./check":92,"./component_name":93,"./count":94,"./dom":95,"./domready":96,"./dragdrop":97,"./error":98,"./fragment":99,"./json_parse":101,"./logger":102,"./promise":104,"./request":105,"./selection":106,"./storage":107,"./websocket":109,"dot":114}],101:[function(require,module,exports){
 'use strict';
 
 
@@ -16705,12 +16711,6 @@ if (typeof module !== 'undefined' && module.exports) {
 })();
 
 },{}],113:[function(require,module,exports){
-
-// not implemented
-// The reason for having an empty file and not throwing is to allow
-// untraditional implementation of this module.
-
-},{}],114:[function(require,module,exports){
 // doT.js
 // 2011-2014, Laura Doktorova, https://github.com/olado/doT
 // Licensed under the MIT license.
@@ -16852,7 +16852,7 @@ if (typeof module !== 'undefined' && module.exports) {
 	};
 }());
 
-},{}],115:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
 /* doT + auto-compilation of doT templates
  *
  * 2012, Laura Doktorova, https://github.com/olado/doT
@@ -16997,7 +16997,9 @@ InstallDots.prototype.compileAll = function() {
 	return this.__rendermodule;
 };
 
-},{"./doT":114,"fs":113}],116:[function(require,module,exports){
+},{"./doT":113,"fs":115}],115:[function(require,module,exports){
+
+},{}],116:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -19005,4 +19007,3 @@ function makeFindMethod(eachMethod, findWhat) {
 }
 
 },{}]},{},[72])
-;
