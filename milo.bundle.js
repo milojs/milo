@@ -3141,6 +3141,7 @@ _.extendProto(Data, {
     _set: Data$_set,
     _del: Data$_del,
     _splice: Data$_splice,
+    _len: Data$_len,
 
     _setScalarValue: Data$_setScalarValue,
     _getScalarValue: Data$_getScalarValue,
@@ -3642,6 +3643,15 @@ function Data$_splice(spliceIndex, spliceHowMany) { //, ... arguments
 
 
 function Data$len() {
+    var componentLen = this.config.len;
+    if (typeof componentLen == 'function')
+        return componentLen.call(this.owner);
+    else
+        return this._len();
+}
+
+
+function Data$_len() {
     if (this.owner.list) return this.owner.list.count();
     else logger.error('Data: len called without list facet');
 }
