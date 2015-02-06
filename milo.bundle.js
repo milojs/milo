@@ -9137,14 +9137,12 @@ function MLDropdown$start() {
 
 
     function onDocOut(event) {
-        var target = event.target
-            , relatedTarget = event.relatedTarget
-            , listeners = self._dropdown.listeners;
+        var listeners = self._dropdown.listeners;
 
-        if (isIframe(target))
+        if (isIframe(event.target))
             listeners.remove(target.contentWindow.document, 'click', onClick);
 
-        if (isIframe(relatedTarget))
+        if (isIframe(event.relatedTarget))
             listeners.add(relatedTarget.contentWindow.document, 'click', onClick);
     }
 
@@ -14194,7 +14192,7 @@ function DOMListeners$remove(target, eventType, handler) {
         eventType: eventType,
         handler: handler
     };
-    var idx = _.findIndex(this.listeners, _.partial(listener, _.isEqual));
+    var idx = _.findIndex(this.listeners, _.partial(_.isEqual, listener));
 
     if (idx > -1) {
         this.listeners.splice(idx, 1);
