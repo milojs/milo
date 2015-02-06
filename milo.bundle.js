@@ -4272,7 +4272,7 @@ function onDragStart(eventType, event) {
             this._dataTypesData = _.mapKeys(this.config.dataTypes, function (getDataFunc, dataType) {
                 var data = getDataFunc.call(this.owner, dataType);
                 if (typeof data == 'object') data = JSON.stringify(data);
-                dt.setData(dataType, data);
+                if (data) dt.setData(dataType, data);
                 return data;
             }, this);
         }
@@ -4288,7 +4288,7 @@ function onDragging(eventType, event) {
     dt.setData(this._dragMetaDataType, this._dragMetaData);
     if (this._dataTypesData) {
         _.eachKey(this._dataTypesData, function(data, dataType) {
-            dt.setData(dataType, data);
+            if (data) dt.setData(dataType, data);
         });
     }
 
