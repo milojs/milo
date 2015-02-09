@@ -9137,12 +9137,14 @@ function MLDropdown$start() {
 
 
     function onDocOut(event) {
-        var listeners = self._dropdown.listeners;
+        var target = event.target
+            , relatedTarget = event.relatedTarget
+            , listeners = self._dropdown.listeners;
 
-        if (isIframe(event.target))
+        if (isIframe(target))
             listeners.remove(target.contentWindow.document, 'click', onClick);
 
-        if (isIframe(event.relatedTarget))
+        if (isIframe(relatedTarget))
             listeners.add(relatedTarget.contentWindow.document, 'click', onClick);
     }
 
