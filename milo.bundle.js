@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
 
@@ -201,7 +201,7 @@ function FacetedObject$$getFacetConfig(facetName) {
  */
 function FacetedObject$$createFacetedClass(name, facetsClasses, facetsConfig) {
     check(name, String);
-    check(facetsClasses, Match.Optional(Match.ObjectHash(Match.Subclass(Facet, true)))); //TODO: does not allow new comp without config.
+    check(facetsClasses, Match.Optional(Match.ObjectHash(Match.Subclass(Facet, true))));
     check(facetsConfig, Match.Optional(Object));
 
     // throw exception if config passed for facet for which there is no class
@@ -4113,7 +4113,7 @@ function insertAtTreeIndex(treeIndex, el) {
     return domUtils.insertAtTreeIndex(this.owner.el, treeIndex, el);
 }
 
-},{"../../attributes/a_bind":5,"../../binder":9,"../../config":65,"../../util/check":92,"../../util/dom":96,"../../util/error":100,"../c_facet":17,"./cf_registry":31,"dot":116,"mol-proto":118}],21:[function(require,module,exports){
+},{"../../attributes/a_bind":5,"../../binder":9,"../../config":65,"../../util/check":92,"../../util/dom":96,"../../util/error":100,"../c_facet":17,"./cf_registry":31,"dot":117,"mol-proto":118}],21:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drag"></a>
@@ -5276,7 +5276,7 @@ function List$destroy() {
     ComponentFacet.prototype.destroy.apply(this, arguments);
 }
 
-},{"../../binder":9,"../../config":65,"../../services/mail":86,"../../util":102,"../c_class":16,"../c_facet":17,"./cf_registry":31,"dot":116,"mol-proto":118}],27:[function(require,module,exports){
+},{"../../binder":9,"../../config":65,"../../services/mail":86,"../../util":102,"../c_class":16,"../c_facet":17,"./cf_registry":31,"dot":117,"mol-proto":118}],27:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -7029,7 +7029,7 @@ function MLFoldTree$renderTree (data) {
     }
 }
 
-},{"../../util/count":94,"../c_class":16,"../c_registry":33,"dot":116}],48:[function(require,module,exports){
+},{"../../util/count":94,"../c_class":16,"../c_registry":33,"dot":117}],48:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -8379,7 +8379,7 @@ function _setData() {
     this.setFilteredOptions(this._optionsData);
 }
 
-},{"../../util/logger":104,"../c_class":16,"../c_registry":33,"dot":116,"mol-proto":118}],58:[function(require,module,exports){
+},{"../../util/logger":104,"../c_class":16,"../c_registry":33,"dot":117,"mol-proto":118}],58:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -9275,7 +9275,7 @@ config({
     debug: false
 });
 
-},{"dot":116,"mol-proto":118}],66:[function(require,module,exports){
+},{"dot":117,"mol-proto":118}],66:[function(require,module,exports){
 'use strict';
 
 
@@ -12598,7 +12598,7 @@ var modelMethods = _.mapKeys(modelSynthesizers, function(synthesizer) {
 
 synthesizePathMethods.modelMethods = modelMethods;
 
-},{"../../util/count":94,"../../util/logger":104,"../change_data":74,"../model_utils":79,"../path_utils":81,"dot":116,"fs":117,"mol-proto":118}],83:[function(require,module,exports){
+},{"../../util/count":94,"../../util/logger":104,"../change_data":74,"../model_utils":79,"../path_utils":81,"dot":117,"fs":115,"mol-proto":118}],83:[function(require,module,exports){
 'use strict';
 
 /**
@@ -13408,6 +13408,8 @@ uniqueCount.get = function() {
 module.exports = uniqueCount;
 
 },{}],95:[function(require,module,exports){
+'use strict';
+
 module.exports = createComponentClass;
 
 /**
@@ -13415,7 +13417,7 @@ module.exports = createComponentClass;
  * a reference to the super class used in its creation (Accessable using <ComponentClass>.super).
  *
  * @param {string} config.className - The name of the new component
- * @param {string} ['Component'] config.superClassName - The name of an existing component to be used as a super class
+ * @param {string} ['Component'] config.superClassName - The name of an existing component to be used as the new component's super class
  * @param {object=} config.facets - Facet configuration (Hash of facet name {string} to config {object})
  * @param {object=} config.methods - Methods of the new component (Hash of function name {string} to function {function})
  * @param {object=} config.staticMethods - Static methods of the new component (Hash of function name {string} to function {function})
@@ -13426,13 +13428,13 @@ function createComponentClass(config) {
     var ComponentClass = SuperClass.createComponentClass(config.className, config.facets);
 
     if(config.methods) {
-    	_.extendProto(ComponentClass, config.methods);
+        _.extendProto(ComponentClass, config.methods);
     }
 
     if(config.staticMethods) {
-    	if(config.staticMethods.super !== undefined) throw '\'super\' is a reserved keyword';
+        if(config.staticMethods.super !== undefined) throw '\'super\' is a reserved keyword';
 
-    	_.extend(ComponentClass, config.staticMethods);
+        _.extend(ComponentClass, config.staticMethods);
     }
 
     ComponentClass.super = SuperClass.prototype;
@@ -14867,7 +14869,7 @@ function util_destroy() {
     util.dragDrop.destroy();
 }
 
-},{"../components/ui/bootstrap/Alert":62,"../components/ui/bootstrap/Dialog":63,"./check":92,"./component_name":93,"./count":94,"./dom":96,"./dom_listeners":97,"./domready":98,"./dragdrop":99,"./error":100,"./fragment":101,"./json_parse":103,"./logger":104,"./promise":106,"./request":107,"./selection":108,"./storage":109,"./websocket":111,"dot":116}],103:[function(require,module,exports){
+},{"../components/ui/bootstrap/Alert":62,"../components/ui/bootstrap/Dialog":63,"./check":92,"./component_name":93,"./count":94,"./dom":96,"./dom_listeners":97,"./domready":98,"./dragdrop":99,"./error":100,"./fragment":101,"./json_parse":103,"./logger":104,"./promise":106,"./request":107,"./selection":108,"./storage":109,"./websocket":111,"dot":117}],103:[function(require,module,exports){
 'use strict';
 
 
@@ -16798,6 +16800,12 @@ if (typeof module !== 'undefined' && module.exports) {
 })();
 
 },{}],115:[function(require,module,exports){
+
+// not implemented
+// The reason for having an empty file and not throwing is to allow
+// untraditional implementation of this module.
+
+},{}],116:[function(require,module,exports){
 // doT.js
 // 2011-2014, Laura Doktorova, https://github.com/olado/doT
 // Licensed under the MIT license.
@@ -16939,7 +16947,7 @@ if (typeof module !== 'undefined' && module.exports) {
 	};
 }());
 
-},{}],116:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
 /* doT + auto-compilation of doT templates
  *
  * 2012, Laura Doktorova, https://github.com/olado/doT
@@ -17084,9 +17092,7 @@ InstallDots.prototype.compileAll = function() {
 	return this.__rendermodule;
 };
 
-},{"./doT":115,"fs":117}],117:[function(require,module,exports){
-
-},{}],118:[function(require,module,exports){
+},{"./doT":116,"fs":115}],118:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -19094,3 +19100,4 @@ function makeFindMethod(eachMethod, findWhat) {
 }
 
 },{}]},{},[72])
+;
