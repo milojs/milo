@@ -5534,6 +5534,7 @@ module.exports = Transfer;
 function Transfer$init() {
     ComponentFacet.prototype.init.apply(this, arguments);
     this._activeState = '';
+    this._defaultKey = '';
     this._state = {};
 }
 
@@ -5582,6 +5583,8 @@ function Transfer$setStateWithKey(key, state, isDefaultKey) {
 
     if (isDefaultKey)
         this._defaultKey = key;
+    else
+        this._defaultKey = this._defaultKey || key;
 
     this._state[key] = state;
     this.setActiveState(key);
