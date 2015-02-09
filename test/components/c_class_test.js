@@ -29,4 +29,9 @@ describe('Component class', function() {
 
         assert(aComp._messenger instanceof Messenger);
     });
+
+    it('should be able to be created without facet config', function() {
+        assert(Component.createComponentClass('MyComponent') != null);
+        assert(Component.createComponentClass('MyComponent', {}) != null);
+    });
 });

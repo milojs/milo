@@ -32,7 +32,6 @@ describe('FacetedObject class', function() {
 
 
         assert.throws(function() { factory(); });
-        assert.throws(function() { factory('name'); });
         assert.throws(function() { factory('name', {facet: 1}); });
     });
 
