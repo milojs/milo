@@ -28,6 +28,8 @@ var requests = {
 
 
 describe('request', function() {
+    this.timeout(10000);
+
     var requestMessageDispatched, requestMessages;
 
     before(function() {
@@ -56,7 +58,7 @@ describe('request', function() {
             completed();
         });
 
-        promise.then(function(err, data) {
+        promise.then(function(data) {
             assert.equal(data, 'test1');
             completed();
         });
@@ -106,7 +108,7 @@ describe('request', function() {
             completed();
         });
 
-        promise.then(function(err, data) {
+        promise.then(function(data) {
             assert.deepEqual(data, {"data": "test3"});
             completed();
         });
@@ -126,7 +128,7 @@ describe('request', function() {
 
         window['___milo_callback_' + count.get()]({"data": "test3"});
 
-        promise.then(function(err, data) {
+        promise.then(function(data) {
             assert.deepEqual(data, {"data": "test3"});
             completed();
         });
@@ -148,7 +150,7 @@ describe('request', function() {
             completed();
         });
 
-        promise.then(function(err, data) {
+        promise.then(function(data) {
             assert.equal(data, 'test4 uploaded');
             completed();
         });
