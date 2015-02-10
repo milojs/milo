@@ -15150,7 +15150,7 @@ function _onReady(req, callback, xPromise, eventType) {
                 postMessage('error' + errorReason);
                 callback && callback(errorReason, req.responseText, req);
             } catch(e) { error = e; }
-            xPromise.reject(errorReason, req.responseText);
+            xPromise.reject({ reason: errorReason, response: req.responseText });
         }
     } catch(e) {
         error = error || e;
@@ -15209,7 +15209,7 @@ function request$json(url, callback) {
     if (callback)
         jsonPromise
         .then(function(data) { callback(null, data); })
-        .catch(function(err) { callback(err); });
+        .catch(function(errData) { callback(errData.reason, errData.response); });
 
     return jsonPromise;
 }
