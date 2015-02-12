@@ -1,6 +1,8 @@
 Milo
 ====
 
+[![Join the chat at https://gitter.im/MailOnline/milo](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/MailOnline/milo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Browser/nodejs [reactive programming](http://en.wikipedia.org/wiki/Reactive_programming) and data driven DOM manipulation with modular components.
 
 [![Build Status](https://travis-ci.org/MailOnline/milo.png?branch=master)](https://travis-ci.org/MailOnline/milo) [![Code Climate](https://codeclimate.com/github/MailOnline/milo/badges/gpa.svg)](https://codeclimate.com/github/MailOnline/milo)
