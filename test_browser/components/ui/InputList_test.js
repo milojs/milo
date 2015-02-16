@@ -24,6 +24,8 @@ function getListComponentList(scope) {
 
 
 describe('InputList UI', function() {
+    this.timeout(10000);
+
     var testHtml = fs.readFileSync(__dirname + '/InputList_test.html');
     var element, scope,
         testData = [
@@ -43,7 +45,6 @@ describe('InputList UI', function() {
     });
 
     it('should define methods get/set to access data in DOM', function(done) {
-
         // set data
         scope.inputList.model.set(testData.slice());
         assert.deepEqual(scope.inputList.model.get(), testData.slice(), 'should return data that was set');
@@ -58,11 +59,8 @@ describe('InputList UI', function() {
                 assert.equal(innerScope.label.el.innerHTML, testData[index].label, 'should set name innerHTML span element');
             });
 
-            _.deferTicks(function() {
-                done();
-            }, 4);
-
-        }, 4);
+            done();
+        }, 2);
     });
 
     it('should add a new item when press the add button', function(done) {
@@ -93,10 +91,8 @@ describe('InputList UI', function() {
                 assert.equal(innerScope.label.el.innerHTML, testData[addIndex[index]].label, 'should set name innerHTML span element');
             });
 
-            _.deferTicks(function() {
-                done();
-            }, 4);
-        }, 4);
+            done();
+        }, 2);
     });
 
     it('should delete item when delete is pressed', function(done) {
@@ -128,13 +124,9 @@ describe('InputList UI', function() {
                     assert.equal(innerScope.label.el.innerHTML, cloneTest[index].label, 'should set name innerHTML span element');
                 });
 
-                _.deferTicks(function() {
-                    done();
-                }, 4);
-
-            }, 4);
-
-        }, 4);
+                done();
+            }, 2);
+        }, 2);
     });
 
     it('should propagate data from Model to Data into 2 lists', function(done) {
@@ -165,10 +157,8 @@ describe('InputList UI', function() {
                 });
             });
 
-            _.deferTicks(function() {
-                done();
-            }, 4);
-        }, 6);
+            done();
+        }, 4);
     });
 
     it('should propagate data from Model to Model and Data and populate DOM in to 2 lists', function(done) {
@@ -207,12 +197,10 @@ describe('InputList UI', function() {
            
             _.deferTicks(function() {
                 testEqualData();
-                
-                _.deferTicks(function() {
-                    done();
-                }, 4);
-            }, 8);
-        }, 8);
+
+                done();
+            }, 4);
+        }, 4);
 
         function testEqualData() {
             //get data

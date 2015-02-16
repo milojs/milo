@@ -6,6 +6,8 @@ var fs = require('fs')
 
 
 describe('List facet', function() {
+    this.timeout(10000);
+
     var testHtml = fs.readFileSync(__dirname + '/List_test.html');
     var element, scope,
         testData = [
@@ -49,7 +51,6 @@ describe('List facet', function() {
         milo.minder(m1('.hello'), '<<<->>>', scope.myList1.data);
         var valueSet = m1('.hello').push(testData[0]);
         _.deferTicks(function() {
-            console.log(m1('.hello').get(), scope.myList1.data.get());
             assert.deepEqual(m1('.hello').get(), scope.myList1.data.get(), 'should return data that was set');
             done();
         }, 10);
@@ -107,9 +108,7 @@ describe('List facet', function() {
             _.deferTicks(function() {
                 testEqualData();
                 
-                _.deferTicks(function() {
-                    done();
-                }, 4);
+                done();
             }, 3);
         }, 3);
 

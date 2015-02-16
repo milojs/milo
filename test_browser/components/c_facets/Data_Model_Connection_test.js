@@ -6,6 +6,7 @@ var fs = require('fs')
 
 
 describe('Data Model connection', function() {
+    this.timeout(10000);
     var testHtml = fs.readFileSync(__dirname + '/Data_test.html');
     var element, scope, myItem;
 
