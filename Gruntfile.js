@@ -1,4 +1,5 @@
 module.exports = function(grunt) {
+
     grunt.initConfig({
         mochaTest: {
             test: {
@@ -44,6 +45,14 @@ module.exports = function(grunt) {
                 }],
                 options: {
                     transform: ['brfs']
+                }
+            }
+        },
+        exorcise: {
+            build: {
+                options: {},
+                files: {
+                    'milo.bundle.map': 'milo.bundle.js'
                 }
             }
         },
@@ -97,11 +106,13 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-mocha-test');
     grunt.loadNpmTasks('grunt-karma');
+    grunt.loadNpmTasks('grunt-exorcise');
 
     grunt.registerTask('test', 'mochaTest');
     grunt.registerTask('karmatest', 'karma');
     grunt.registerTask('htmltest', ['browserify:test1', 'watch']);
     grunt.registerTask('tests', ['mochaTest', 'browserify', 'uglify', 'karmatest']);
-    grunt.registerTask('default', ['test', 'browserify', 'uglify', 'watch']);
+    grunt.registerTask('default', ['test', 'browserify', 'exorcise', 'uglify', 'watch']);
     grunt.registerTask('skiptest', ['browserify', 'watch']);
+
 };
