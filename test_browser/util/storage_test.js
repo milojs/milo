@@ -381,6 +381,8 @@ describe('DOMStorage', function() {
 
 
     describe('messenger', function() {
+        this.timeout(10000);
+
         var win = window.open('', 'test');
 
         var messageTimestamp = milo.config.domStorage.messageTimestamp;

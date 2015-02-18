@@ -1889,10 +1889,6 @@ _.extendProto(Component, {
 
     walkScopeTree: Component$walkScopeTree,
 
-    treeIndexOf: Component$treeIndexOf, // deprecated
-    getComponentAtTreeIndex: Component$getComponentAtTreeIndex, // deprecated
-    insertAtTreeIndex: Component$insertAtTreeIndex, // deprecated
-
     treePathOf: Component$treePathOf,
     getComponentAtTreePath: Component$getComponentAtTreePath,
     insertAtTreePath: Component$insertAtTreePath,
@@ -2587,30 +2583,6 @@ function Component$walkScopeTree(callback, thisArg) {
 }
 
 
-/**
- * Returns sequential index of component's element inside this component's DOM tree as traversed by TreeWalker.
- * Returns -1 if passed component is not contained, 0 if component itself is passed.
- * 
- * @param {Component} component
- */
-function Component$treeIndexOf(component) {
-    return domUtils.treeIndexOf(this.el, component.el);
-}
-
-
-function Component$getComponentAtTreeIndex(treeIndex) {
-    var node = domUtils.getNodeAtTreeIndex(this.el, treeIndex);
-    return Component.getComponent(node);
-}
-
-
-function Component$insertAtTreeIndex(treeIndex, component) {
-    var wasInserted = domUtils.insertAtTreeIndex(this.el, treeIndex, component.el);
-    if (wasInserted) component.setScopeParentFromDOM();
-    return wasInserted;
-}
-
-
 function Component$treePathOf(component) {
     return domUtils.treePathOf(this.el, component.el);
 }
@@ -2627,8 +2599,6 @@ function Component$insertAtTreePath(treePath, component, nearest) {
     if (wasInserted) component.setScopeParentFromDOM();
     return wasInserted;
 }
-
-
 
 
 /**
@@ -3843,9 +3813,6 @@ _.extendProto(Dom, {
     find: find,
     hasTextBeforeSelection: hasTextBeforeSelection,
     hasTextAfterSelection: hasTextAfterSelection,
-
-    treeIndexOf: treeIndexOf,
-    insertAtTreeIndex: insertAtTreeIndex
 });
 
 facetsRegistry.add(Dom);
@@ -4084,33 +4051,6 @@ function hasTextAfterSelection() {
     var isText = nextNode ? !nextNode.nodeValue.trim() == '' : false;
 
     return isText;
-}
-
-
-/**
- * Returns sequential index of element inside current component's element in DOM tree as traversed by TreeWalker.
- * Returns -1 if the element is not inside current component's element, 0 if the component's element is passed.
- * 
- * @param  {Element} el element to find the index of
- * @return {Number}
- */
-function treeIndexOf(el) {
-    return domUtils.treeIndexOf(this.owner.el, el);
-}
-
-
-/**
- * Inserts an element inside this component's element at a given index in tree (that has the same meaning as the index returned by `treeIndexOf` method). If element is already in the component's DOM tree, it will be removed first and then moved to the passed treeIndex.
- * If the index is out of bounds will insert as the lst child
- * Returns actual index at which the element was inserted (can be less than passed if out of bounds).
- * Insertion at index 0 will also return false as it would mean replacing the root element.
- * 
- * @param {Element} rootEl element into which to insert
- * @param {Number} treeIndex index in DOM tree inside root element (see treeIndexOf)
- * @param {Element} el element to be inserted
- */
-function insertAtTreeIndex(treeIndex, el) {
-    return domUtils.insertAtTreeIndex(this.owner.el, treeIndex, el);
 }
 
 },{"../../attributes/a_bind":5,"../../binder":9,"../../config":65,"../../util/check":92,"../../util/dom":96,"../../util/error":100,"../c_facet":17,"./cf_registry":31,"dot":116,"mol-proto":117}],21:[function(require,module,exports){
@@ -13482,10 +13422,6 @@ var domUtils = {
     walkTree: walkTree,
     createTreeWalker: createTreeWalker,
 
-    treeIndexOf: treeIndexOf, // deprecated
-    getNodeAtTreeIndex: getNodeAtTreeIndex, // deprecated
-    insertAtTreeIndex: insertAtTreeIndex, // deprecated
-
     treePathOf: treePathOf,
     getNodeAtTreePath: getNodeAtTreePath,
     insertAtTreePath: insertAtTreePath,
@@ -13869,76 +13805,6 @@ function walkTree(root, filter, iterator, context) {
 
 
 /**
- * Returns sequential index of element inside root element in DOM tree as traversed by TreeWalker.
- * Returns -1 if the element is not inside root element, 0 if the root element itself is passed.
- *
- * @param  {Element} rootEl element to search
- * @param  {Element} el element to find the index of
- * @return {Number}
- */
-function treeIndexOf(rootEl, el) {
-    if (! (rootEl && rootEl.contains(el))) return -1;
-    if (rootEl == el) return 0;
-
-    var treeWalker = createTreeWalker(rootEl);
-    treeWalker.currentNode = rootEl;
-    var nextNode = treeWalker.nextNode()
-        , index = 1;
-
-    while (nextNode && nextNode != el) {
-        index++;
-        nextNode = treeWalker.nextNode();
-    }
-
-    return index;
-}
-
-
-/**
- * Returns element at given tree index
- *
- * @param {Element} rootEl
- * @param {Number} treeIndex
- * @return {Node}
- */
-function getNodeAtTreeIndex(rootEl, treeIndex) {
-    if (treeIndex == 0) return rootEl;
-    if (! (treeIndex > 0) || treeIndex == Infinity) return; // not same as "<="
-
-    var treeWalker = createTreeWalker(rootEl);
-
-    var count = treeIndex;
-    do {
-        var node = treeWalker.nextNode();
-    } while (--count && node); // same number of times as treeIndex (if not out of bounds)
-
-    return node;
-}
-
-
-/**
- * Inserts an element inside root at a given index in tree (that has the same meaning as the index returned by `treeIndexOf` function). If element is already in the root's tree, it will be removed first and then moved to the passed treeIndex
- * Insertion at index 0 is not possible and will return undefined as it would mean replacing the root element.
- *
- * @param {Element} rootEl element into which to insert
- * @param {Number} treeIndex index in DOM tree inside root element (see treeIndexOf)
- * @param {Element} el element to be inserted
- * @return {Boolean} true if was successfully inserted
- */
-function insertAtTreeIndex(rootEl, treeIndex, el) {
-    if (rootEl.contains(el))
-        removeElement(el); // can't use removeChild as rootEl here is not an immediate parent
-
-    if (! (treeIndex > 0)) return; // not same as "<="
-
-    var node = getNodeAtTreeIndex(rootEl, treeIndex)
-        , parent = node && node.parentNode || rootEl;
-    parent.insertBefore(el, node);
-    return true;
-}
-
-
-/**
  * Returns array of child indexes of element path inside root element in DOM tree using breadth first tree traversal.
  * Returns undefined if the element is not inside root element, 0 if the root element itself is passed.
  *
@@ -14002,11 +13868,11 @@ function getNodeAtTreePath(rootEl, treePath, nearest) {
 
 
 /**
- * Inserts an element inside root at a given path in tree (that has the same meaning as the index returned by `treeIndexOf` function). If element is already in the root's tree, it will be removed first and then moved to the passed treeIndex
+ * Inserts an element inside root at a given path in tree (that has the same meaning as the index returned by `treePathOf` function). If element is already in the root's tree, it will be removed first and then moved to the passed treeIndex
  * Insertion at index 0 is not possible and will return undefined as it would mean replacing the root element.
  *
  * @param {Element} rootEl element into which to insert
- * @param {Number} treeIndex index in DOM tree inside root element (see treeIndexOf)
+ * @param {Number} treeIndex index in DOM tree inside root element (see treePathOf)
  * @param {Element} el element to be inserted
  * @return {Boolean} true if was successfully inserted
  */
