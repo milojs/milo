@@ -1,14 +1,14 @@
 Milo
 ====
 
-[![Join the chat at https://gitter.im/MailOnline/milo](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/MailOnline/milo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/milojs/milo](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/milojs/milo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Browser/nodejs [reactive programming](http://en.wikipedia.org/wiki/Reactive_programming) and data driven DOM manipulation with modular components.
 
-[![Build Status](https://travis-ci.org/MailOnline/milo.png?branch=master)](https://travis-ci.org/MailOnline/milo) [![Code Climate](https://codeclimate.com/github/MailOnline/milo/badges/gpa.svg)](https://codeclimate.com/github/MailOnline/milo)
+[![Build Status](https://travis-ci.org/milojs/milo.png?branch=master)](https://travis-ci.org/milojs/milo) [![Code Climate](https://codeclimate.com/github/milojs/milo/badges/gpa.svg)](https://codeclimate.com/github/milojs/milo)
 
 
-Documentation: http://mailonline.github.io/milo/
+Documentation: http://milojs.github.io/milo/
 
 
 Quick start
@@ -108,9 +108,9 @@ Samples/Tutorials
 
 [Introduction to models](http://jsfiddle.net/jasoniangreen/225Bf/)
 
-[Introduction to minder](https://github.com/MailOnline/milo/blob/master/examples/tutorials/5_minder.html)
+[Introduction to minder](https://github.com/milojs/milo/blob/master/examples/tutorials/5_minder.html)
 
-[Introduction to lists](https://github.com/MailOnline/milo/blob/master/examples/tutorials/6_lists.html)
+[Introduction to lists](https://github.com/milojs/milo/blob/master/examples/tutorials/6_lists.html)
 
 Article about creating milo [Rolling Your Own Framework](http://code.tutsplus.com/articles/rolling-your-own-framework--cms-21810) on tuts+
 
@@ -118,7 +118,7 @@ Article about creating milo [Rolling Your Own Framework](http://code.tutsplus.co
 ### TodoMVC
 
 The more advanced sample is __Todos__ app in
-[todomvc](https://github.com/MailOnline/milo/tree/master/examples/todomvc) folder.
+[todomvc](https://github.com/milojs/milo/tree/master/examples/todomvc) folder.
 
 
 
@@ -149,7 +149,7 @@ Concepts
 
 Although __milo__ is packaged as one bundle, it has very modular structure. It consists of several independent modules that can be used together or separately and that are designed to simplify common application tasks rather than to create any particular application structure.
 
-Some modules in __milo__ can be used only in browser ([Component](http://mailonline.github.io/milo/components/c_class.js.html), [ComponentFacet](http://mailonline.github.io/milo/components/c_facet.js.html), [milo.binder](http://mailonline.github.io/milo/binder.js.html)), some both in browser and in nodejs ([Messenger](http://mailonline.github.io/milo/messenger/index.js.html) and its related classes, [Model](http://mailonline.github.io/milo/model/index.js.html), [Connector](http://mailonline.github.io/milo/model/connector.js.html), [milo.minder](http://mailonline.github.io/milo/minder.js.html)).
+Some modules in __milo__ can be used only in browser ([Component](http://milojs.github.io/milo/components/c_class.js.html), [ComponentFacet](http://milojs.github.io/milo/components/c_facet.js.html), [milo.binder](http://milojs.github.io/milo/binder.js.html)), some both in browser and in nodejs ([Messenger](http://milojs.github.io/milo/messenger/index.js.html) and its related classes, [Model](http://milojs.github.io/milo/model/index.js.html), [Connector](http://milojs.github.io/milo/model/connector.js.html), [milo.minder](http://milojs.github.io/milo/minder.js.html)).
 
 Milo itself uses browserify to package bundle, but any modules system can be used in an app that uses __milo__ - __milo__ does not suggest any application structure.
 
@@ -158,11 +158,11 @@ Milo itself uses browserify to package bundle, but any modules system can be use
 
 Component is designed to simplify the management of DOM. Component is attached to a certain DOM element. Attaching several components to the same DOM element is usually an application (or milo) design mistake, so if it happens an error will be logged to console.
 
-Components allow very easy creation of subclasses that are defined as a collection of configured "facets". For example, see the definition of [MLSelect](http://mailonline.github.io/milo/components/ui/Select.js.html) UI component.
+Components allow very easy creation of subclasses that are defined as a collection of configured "facets". For example, see the definition of [MLSelect](http://milojs.github.io/milo/components/ui/Select.js.html) UI component.
 
-There is a [Component template](https://github.com/MailOnline/milo/blob/master/lib/components/ComponentTemplate.js) to simplify creation of your own components.
+There is a [Component template](https://github.com/milojs/milo/blob/master/lib/components/ComponentTemplate.js) to simplify creation of your own components.
 
-See [Component documentation](http://mailonline.github.io/milo/components/c_class.js.html).
+See [Component documentation](http://milojs.github.io/milo/components/c_class.js.html).
 
 
 ### Component facet
@@ -173,27 +173,27 @@ You would rarely need to instantiate a facet - when a component is created it cr
 
 There are the following facets defined in __milo__:
 
-- [Container](http://mailonline.github.io/milo/components/c_facets/Container.js.html) - a special facet that creates a scope of components
-- [Dom](http://mailonline.github.io/milo/components/c_facets/Dom.js.html) - a collection of helper methods simplifying DOM manipulation of component element
-- [Events](http://mailonline.github.io/milo/components/c_facets/Events.js.html) - gives a convenient API to subscribe to DOM events
-- [Data](http://mailonline.github.io/milo/components/c_facets/Data.js.html) - an api to manipulate DOM tree inside component element as data, allowing both getting/setting structured data from/to many DOM elements at once and creating reactive data connection of Models (see below) to DOM.
-- [List](http://mailonline.github.io/milo/components/c_facets/List.js.html) and [Item](http://mailonline.github.io/milo/components/c_facets/Item.js.html) - allow creating lists in DOM from arays in your data. Component class using any of these facets require Data facet (will be added automatically) that should be used to get/set list data and to create reactive data connection.
-- [Template](http://mailonline.github.io/milo/components/c_facets/Template.js.html) - simplifies rendering of component DOM element from template.
-- [Frame](http://mailonline.github.io/milo/components/c_facets/Frame.js.html) - manages sending/receiveing messages to/from iframe.
-- [Drag](http://mailonline.github.io/milo/components/c_facets/Drag.js.html) - allows easy management of draggable DOM elements.
-- [Drop](http://mailonline.github.io/milo/components/c_facets/Drop.js.html) - helps creating drop targets.
+- [Container](http://milojs.github.io/milo/components/c_facets/Container.js.html) - a special facet that creates a scope of components
+- [Dom](http://milojs.github.io/milo/components/c_facets/Dom.js.html) - a collection of helper methods simplifying DOM manipulation of component element
+- [Events](http://milojs.github.io/milo/components/c_facets/Events.js.html) - gives a convenient API to subscribe to DOM events
+- [Data](http://milojs.github.io/milo/components/c_facets/Data.js.html) - an api to manipulate DOM tree inside component element as data, allowing both getting/setting structured data from/to many DOM elements at once and creating reactive data connection of Models (see below) to DOM.
+- [List](http://milojs.github.io/milo/components/c_facets/List.js.html) and [Item](http://milojs.github.io/milo/components/c_facets/Item.js.html) - allow creating lists in DOM from arays in your data. Component class using any of these facets require Data facet (will be added automatically) that should be used to get/set list data and to create reactive data connection.
+- [Template](http://milojs.github.io/milo/components/c_facets/Template.js.html) - simplifies rendering of component DOM element from template.
+- [Frame](http://milojs.github.io/milo/components/c_facets/Frame.js.html) - manages sending/receiveing messages to/from iframe.
+- [Drag](http://milojs.github.io/milo/components/c_facets/Drag.js.html) - allows easy management of draggable DOM elements.
+- [Drop](http://milojs.github.io/milo/components/c_facets/Drop.js.html) - helps creating drop targets.
 - Editable - manages contenteditable DOM elements enabling splitting and merging of components (moved to app)
 - Split - manages the process of splitting the component at the current selection point (moved to app)
-- [Model](http://mailonline.github.io/milo/components/c_facets/ModelFacet.js.html) - simple wrapper for __milo__ Model (see below), helping to store data on component.
+- [Model](http://milojs.github.io/milo/components/c_facets/ModelFacet.js.html) - simple wrapper for __milo__ Model (see below), helping to store data on component.
 
-There is a [Component facet template](https://github.com/MailOnline/milo/blob/master/lib/components/c_facets/facet_template.js) to simplify creation of your own facets. All facets of components should be subclasses of [ComponentFacet](http://mailonline.github.io/milo/components/c_facet.js.html).
+There is a [Component facet template](https://github.com/milojs/milo/blob/master/lib/components/c_facets/facet_template.js) to simplify creation of your own facets. All facets of components should be subclasses of [ComponentFacet](http://milojs.github.io/milo/components/c_facet.js.html).
 
 
 ### DOM binding and creation of component instances
 
-Instances of your components are usually created automatically when you call [milo.binder](http://mailonline.github.io/milo/binder.js.html) based on information about components classes, facets and component name in `ml-bind` attribute (can be changed via [milo.config](http://mailonline.github.io/milo/config.js.html)).
+Instances of your components are usually created automatically when you call [milo.binder](http://milojs.github.io/milo/binder.js.html) based on information about components classes, facets and component name in `ml-bind` attribute (can be changed via [milo.config](http://milojs.github.io/milo/config.js.html)).
 
-To make your components available to __milo__ their classes should be registered in components registry ([milo.registry.components](http://mailonline.github.io/milo/components/c_registry.js.html)). If you define new facets, their classes should also be registered (in [milo.registry.facets](http://mailonline.github.io/milo/components/c_facets/cf_registry.js.html)).
+To make your components available to __milo__ their classes should be registered in components registry ([milo.registry.components](http://milojs.github.io/milo/components/c_registry.js.html)). If you define new facets, their classes should also be registered (in [milo.registry.facets](http://milojs.github.io/milo/components/c_facets/cf_registry.js.html)).
 
 As registering of components and facets classes usually happens in the same module (file) that defines the class, you have to execute this module. If you use broserify for module management it is enough to use:
 ```
@@ -208,7 +208,7 @@ __milo__ supplies internal messaging classes that can also be used for applicati
 
 Messenger instances use instances of `MessageSource` subclasses to connect to external sources and instances of `MessengerAPI` subclasses to create higher level internal messages and transform message data. This architecture allows creating an advanced functionality in just a few lines of code.
 
-See [Messenger documentation](http://mailonline.github.io/milo/messenger/index.js.html).
+See [Messenger documentation](http://milojs.github.io/milo/messenger/index.js.html).
 
 
 ### Model
@@ -217,7 +217,7 @@ __milo__ defines Model to allow safe access to the data without the need to worr
 
 Using Model does not require these APIs, and unlike these APIs it allows subscribing to changes on properties of your Models to any depth.
 
-See Model [demo](https://github.com/MailOnline/milo/blob/master/lib/model/demo.js) and [Model documentation](http://mailonline.github.io/milo/model/index.js.html).
+See Model [demo](https://github.com/milojs/milo/blob/master/lib/model/demo.js) and [Model documentation](http://milojs.github.io/milo/model/index.js.html).
 
 
 ### Connector
@@ -230,24 +230,24 @@ These connections do not have overhead of comparing data in the loop like `angul
 
 Very soon Connector instances will support structure translation allowing creating reactive connections between models with fixed structures and DOM trees with flexible structures.
 
-One or multiple reactive connections can be created with [milo.minder](http://mailonline.github.io/milo/minder.js.html).
+One or multiple reactive connections can be created with [milo.minder](http://milojs.github.io/milo/minder.js.html).
 
-See [Connector documentation](http://mailonline.github.io/milo/model/connector.js.html).
+See [Connector documentation](http://milojs.github.io/milo/model/connector.js.html).
 
 
 ### Views and application management
 
-- [milo.loader](http://mailonline.github.io/milo/loader.js.html) - loading subviews into page.
-- [milo.mail](http://mailonline.github.io/milo/mail/index.js.html) - applicaiton level messenger that also defines `domready` event and simplifies routing of messages between iframes (see [Frame facet](http://mailonline.github.io/milo/components/c_facets/Frame.js.html)).
-- [milo.config](http://mailonline.github.io/milo/config.js.html) - configuring __milo__ settings.
+- [milo.loader](http://milojs.github.io/milo/loader.js.html) - loading subviews into page.
+- [milo.mail](http://milojs.github.io/milo/mail/index.js.html) - applicaiton level messenger that also defines `domready` event and simplifies routing of messages between iframes (see [Frame facet](http://milojs.github.io/milo/components/c_facets/Frame.js.html)).
+- [milo.config](http://milojs.github.io/milo/config.js.html) - configuring __milo__ settings.
 
 
 ### Utilities
 
-- [check](http://mailonline.github.io/milo/util/check.js.html) - check parameter types (forked from check package of Meteor framework).
-- [logger](http://mailonline.github.io/milo/util/logger.js.html) - configurable logger with log levels.
-- [request](http://mailonline.github.io/milo/util/request.js.html) - HTTP requests library.
-- [dom](http://mailonline.github.io/milo/util/dom.js.html) - library to manipulate DOM elements.
+- [check](http://milojs.github.io/milo/util/check.js.html) - check parameter types (forked from check package of Meteor framework).
+- [logger](http://milojs.github.io/milo/util/logger.js.html) - configurable logger with log levels.
+- [request](http://milojs.github.io/milo/util/request.js.html) - HTTP requests library.
+- [dom](http://milojs.github.io/milo/util/dom.js.html) - library to manipulate DOM elements.
 
 
 Why Milo?
@@ -316,7 +316,7 @@ Components and Facets register themselves in registries that allows to avoid req
 Dependencies
 ------------
 
-The dependencies of Milo are [__Proto__](https://github.com/MailOnline/proto), an object manipulation library and [__doT__](http://olado.github.io/doT/index.html), a templating engine (both are included in milo bundle).
+The dependencies of Milo are [__Proto__](https://github.com/milojs/proto), an object manipulation library and [__doT__](http://olado.github.io/doT/index.html), a templating engine (both are included in milo bundle).
 
 
 ### No jQuery, Zepto, etc.
@@ -332,7 +332,7 @@ Instead, Milo Components can have __Dom__ facet that includes several convenienc
 
 ### No underscore, lo-dash, etc.
 
-__milo__ uses library [__Proto__](https://github.com/MailOnline/proto) that has a grownig collection of utility functions for the manipulation of objects, prototypes, arrays, functions and strings. Please see [its repository](https://github.com/MailOnline/proto) for documentations and reasons behind the decision not to use third-party libraries.
+__milo__ uses library [__Proto__](https://github.com/milojs/proto) that has a grownig collection of utility functions for the manipulation of objects, prototypes, arrays, functions and strings. Please see [its repository](https://github.com/milojs/proto) for documentations and reasons behind the decision not to use third-party libraries.
 
 It is bundled together with __milo__ and all its functions are available as properties of `_` object, you don't need to load it separately.
 
