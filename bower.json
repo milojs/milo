@@ -1,13 +1,13 @@
 {
   "name": "milo",
   "version": "0.1.10",
-  "homepage": "https://github.com/MailOnline/milo",
+  "homepage": "https://github.com/milojs/milo",
   "authors": [
     "MOL Technical <MOL_Technical@assocnews.co.uk>"
   ],
   "description": "Browser/nodejs reactive programming and data driven DOM manipulation with modular components.",
   "main": "milo.bundle.js",
-  "license": "MIT",
+  "license": "BSD",
   "ignore": [
     "**/.*",
     "node_modules",
