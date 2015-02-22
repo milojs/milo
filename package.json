@@ -1,6 +1,6 @@
 {
   "name": "mol-milo",
-  "version": "0.1.10",
+  "version": "0.2.0",
   "description": "Browser/nodejs reactive programming and data driven DOM manipulation with modular components.",
   "main": "lib/milo.js",
   "scripts": {
@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "base32": "git://github.com/milojs/base32-js.git",
-    "milo-core": "^0.1.13"
+    "milo-core": "^0.1.14"
   },
   "devDependencies": {
     "async": "~0.2.9",

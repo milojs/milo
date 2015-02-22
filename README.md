@@ -344,7 +344,24 @@ http://opensource.org/licenses/BSD-2-Clause
 
 Changes log
 -----------
+###0.2.0
+
+- `Messenger` (and related classes), `Model`, `Connector`, `minder`, `util.check` and `util.logger` extracted to [milo-core](https://github.com/milojs/milo-core) that can be used in node.js. They are still bundled with `milo` so `milo-core` doesn't have to be required separately.
+- `Model` properties allow '-' symbol in them
+- `util.request.file` support for upload progress
+- `MLDialog` support for custom initialization
+- `MLDate` support for min/max
+- `Drag` facet support for additional data types supplied to drag operation
+- `util.promise` removed, either native Promise or 3rd party library can be used
+- `util.request` returns native promises (if 3rd party library is used, it should define global `window.Promise` with the same API as native Promise)
+- `Messenger.prototype.onceSync` method added
+- `milo.createComponentClass` added to simplify creation of component classes
+- `util.jsonParse` deprecated, _.jsonParse should be used instead
+- `util.error` deprecated
+
+
 ###0.1.10###
+
 - `Messenger` performance improvement
 - `MLSuperCombo` support for remote list of options
 - `TransactionHistory` can emit messages
