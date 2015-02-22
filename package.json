@@ -18,9 +18,13 @@
   "dependencies": {
     "async": "~0.2.9",
     "base32": "git://github.com/milojs/base32-js.git",
+    "dot": "^1.0.3",
+    "milo-core": "^0.1.13",
+    "mol-proto": "^0.1.12"
+  },
+  "devDependencies": {
     "brfs": "0.0.8",
     "browserify": "~2.35.4",
-    "dot": "^1.0.3",
     "grunt": "~0.4.1",
     "grunt-browserify": "~1.2.11",
     "grunt-contrib-uglify": "~0.2.7",
@@ -40,7 +44,6 @@
     "karma-spec-reporter": "0.0.6",
     "karma-webdriver-launcher": "^0.2.0",
     "mocha": "~1.16.2",
-    "mol-proto": "git://github.com/milojs/proto.git",
     "requirejs": "~2.1.9"
   }
 }
