@@ -2,7 +2,7 @@
 
 var ClassRegistry = require('../../lib/abstract/registry')
     , assert = require('assert')
-    , _ = require('mol-proto');
+    , _ = require('milo-core').proto;
 
 module.exports = testRegistry;
 

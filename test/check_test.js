@@ -1,8 +1,8 @@
 'use strict';
 
-var _ = require('mol-proto')
+var _ = require('milo-core').proto
     , assert = require('assert')
-    , check = require('../lib/util/check')
+    , check = require('milo-core').util.check
     , Match = check.Match;
 
 describe('check module', function() {

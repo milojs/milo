@@ -16,13 +16,11 @@
     "url": "https://github.com/milojs/milo/issues"
   },
   "dependencies": {
-    "async": "~0.2.9",
     "base32": "git://github.com/milojs/base32-js.git",
-    "dot": "^1.0.3",
-    "milo-core": "^0.1.13",
-    "mol-proto": "^0.1.12"
+    "milo-core": "^0.1.13"
   },
   "devDependencies": {
+    "async": "~0.2.9",
     "brfs": "0.0.8",
     "browserify": "~2.35.4",
     "grunt": "~0.4.1",

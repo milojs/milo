@@ -344,7 +344,6 @@ http://opensource.org/licenses/BSD-2-Clause
 
 Changes log
 -----------
-
 ###0.1.10###
 - `Messenger` performance improvement
 - `MLSuperCombo` support for remote list of options

@@ -3,7 +3,7 @@
 var Component = require('../../lib/components/c_class')
     , ComponentFacet = require('../../lib/components/c_facet')
     , FacetedObject = require('../../lib/abstract/faceted_object')
-    , Messenger = require('../../lib/messenger')
+    , Messenger = require('milo-core').Messenger
     , assert = require('assert');
 
 

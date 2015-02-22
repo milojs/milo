@@ -2,7 +2,7 @@
 
 var Facet = require('../../lib/abstract/facet')
     , assert = require('assert')
-    , _ = require('mol-proto');
+    , _ = require('milo-core').proto;
 
 describe('Facet class', function() {
     it('should initialize Facet objects', function() {

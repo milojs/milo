@@ -1,7 +1,7 @@
 'use strict';
 
 var ClassRegistry = require('../../lib/abstract/registry.js')
-    , _ = require('mol-proto')
+    , _ = require('milo-core').proto
     , assert = require('assert');
 
 describe('ClassRegistry class', function() {

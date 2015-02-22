@@ -2,7 +2,7 @@
 
 var fs = require('fs')
     , assert = require('assert')
-    , Model = require('../../../lib/model');
+    , Model = milo.Model;
 
 
 describe('List facet', function() {

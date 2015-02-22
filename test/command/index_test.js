@@ -3,7 +3,7 @@
 
 var Command = require('../../lib/command')
     , assert = require('assert')
-    , _ = require('mol-proto');
+    , _ = require('milo-core').proto;
 
 
 describe('Command', function() {

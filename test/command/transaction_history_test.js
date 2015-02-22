@@ -4,7 +4,7 @@
 var TransactionHistory = require('../../lib/command/transaction_history')
     , Command = require('../../lib/command')
     , assert = require('assert')
-    , _ = require('mol-proto');
+    , _ = require('milo-core').proto;
 
 
 describe('TransactionHistory', function() {
