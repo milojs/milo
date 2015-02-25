@@ -29,7 +29,7 @@ _.extendProto(Facet, {
     init: function() {}
 });
 
-},{"milo-core":105}],2:[function(require,module,exports){
+},{"milo-core":107}],2:[function(require,module,exports){
 'use strict';
 
 
@@ -238,7 +238,7 @@ function FacetedObject$$createFacetedClass(name, facetsClasses, facetsConfig) {
     }
 };
 
-},{"./facet":1,"milo-core":105}],3:[function(require,module,exports){
+},{"./facet":1,"milo-core":107}],3:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -358,7 +358,7 @@ function setClass(FoundationClass) {
     _.defineProperty(this, 'FoundationClass', FoundationClass, _.ENUM);
 }
 
-},{"milo-core":105}],4:[function(require,module,exports){
+},{"milo-core":107}],4:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -508,7 +508,7 @@ function BindAttribute$$setInfo(el, componentClass, componentName, componentFace
     attr.decorate();
 }
 
-},{"../config":64,"./a_class":5,"milo-core":105}],5:[function(require,module,exports){
+},{"../config":64,"./a_class":5,"milo-core":107}],5:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -628,7 +628,7 @@ function toBeImplemented() {
     throw new Error('calling the method of an absctract class');
 }
 
-},{"milo-core":105}],6:[function(require,module,exports){
+},{"milo-core":107}],6:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -714,7 +714,7 @@ function render() {
     return this.loadUrl;
 }
 
-},{"../config":64,"./a_class":5,"milo-core":105}],7:[function(require,module,exports){
+},{"../config":64,"./a_class":5,"milo-core":107}],7:[function(require,module,exports){
 'use strict';
 
 /**
@@ -894,7 +894,7 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
     }
 }
 
-},{"./attributes/a_bind":4,"./components/c_facets/cf_registry":30,"./components/c_info":31,"./components/c_registry":32,"./components/scope":40,"./services/mail":70,"./util/dom":79,"milo-core":105}],9:[function(require,module,exports){
+},{"./attributes/a_bind":4,"./components/c_facets/cf_registry":30,"./components/c_info":31,"./components/c_registry":32,"./components/scope":40,"./services/mail":70,"./util/dom":79,"milo-core":107}],9:[function(require,module,exports){
 'use strict';
 
 var coreClasses = require('milo-core').classes;
@@ -921,7 +921,7 @@ var classes = {
 
 module.exports = classes;
 
-},{"./abstract/facet":1,"./abstract/faceted_object":2,"./abstract/registry":3,"./command/transaction":13,"./command/transaction_history":14,"./components/msg_src/dom_events":38,"./components/scope":40,"milo-core":105}],10:[function(require,module,exports){
+},{"./abstract/facet":1,"./abstract/faceted_object":2,"./abstract/registry":3,"./command/transaction":13,"./command/transaction_history":14,"./components/msg_src/dom_events":38,"./components/scope":40,"milo-core":107}],10:[function(require,module,exports){
 'use strict';
 
 
@@ -1071,7 +1071,7 @@ function ActionsHistory$getDescription() {
     };
 }
 
-},{"milo-core":105}],11:[function(require,module,exports){
+},{"milo-core":107}],11:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -1288,7 +1288,7 @@ function Command$getDescription() {
     };
 }
 
-},{"milo-core":105}],13:[function(require,module,exports){
+},{"milo-core":107}],13:[function(require,module,exports){
 'use strict';
 
 
@@ -1362,7 +1362,7 @@ function Transaction$getDescription() {
     }
 }
 
-},{"./actions_history":10,"milo-core":105}],14:[function(require,module,exports){
+},{"./actions_history":10,"milo-core":107}],14:[function(require,module,exports){
 'use strict';
 
 
@@ -1520,7 +1520,7 @@ function TransactionHistory$destroy() {
     delete this.transactions;
 }
 
-},{"./actions_history":10,"./transaction":13,"milo-core":105}],15:[function(require,module,exports){
+},{"./actions_history":10,"./transaction":13,"milo-core":107}],15:[function(require,module,exports){
 'use strict';
 
 
@@ -2442,7 +2442,7 @@ function Component$isDestroyed() {
     return this._destroyed;
 }
 
-},{"../abstract/faceted_object":2,"../attributes/a_bind":4,"../binder":8,"../config":64,"../util/component_name":76,"../util/dom":79,"../util/storage":89,"./c_facets/cf_registry":30,"./c_utils":33,"./scope":40,"milo-core":105}],16:[function(require,module,exports){
+},{"../abstract/faceted_object":2,"../attributes/a_bind":4,"../binder":8,"../config":64,"../util/component_name":76,"../util/dom":79,"../util/storage":89,"./c_facets/cf_registry":30,"./c_utils":33,"./scope":40,"milo-core":107}],16:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2663,7 +2663,7 @@ function requiresFacet(facetName) {
                         || facetRequire.indexOf(_.firstLowerCase(facetName)) >= 0);
 }
 
-},{"../abstract/facet":1,"./c_utils":33,"milo-core":105}],17:[function(require,module,exports){
+},{"../abstract/facet":1,"./c_utils":33,"milo-core":107}],17:[function(require,module,exports){
 'use strict';
 
 
@@ -2853,7 +2853,7 @@ function Container$remove(comp) {
     this.owner.el.removeChild(comp.el);
 }
 
-},{"../../binder":8,"../../util/dom":79,"../c_facet":16,"../scope":40,"./cf_registry":30,"milo-core":105}],18:[function(require,module,exports){
+},{"../../binder":8,"../../util/dom":79,"../c_facet":16,"../scope":40,"./cf_registry":30,"milo-core":107}],18:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -3533,7 +3533,7 @@ function Data$setState(state) {
     return this.set(state.state);
 }
 
-},{"../c_facet":16,"../msg_api/data":35,"../msg_api/de_data":36,"../msg_src/dom_events":38,"./cf_registry":30,"milo-core":105}],19:[function(require,module,exports){
+},{"../c_facet":16,"../msg_api/data":35,"../msg_api/de_data":36,"../msg_src/dom_events":38,"./cf_registry":30,"milo-core":107}],19:[function(require,module,exports){
 'use strict';
 
 
@@ -3871,7 +3871,7 @@ function hasTextAfterSelection() {
     return isText;
 }
 
-},{"../../attributes/a_bind":4,"../../binder":8,"../../config":64,"../../util/dom":79,"../c_facet":16,"./cf_registry":30,"milo-core":105}],20:[function(require,module,exports){
+},{"../../attributes/a_bind":4,"../../binder":8,"../../config":64,"../../util/dom":79,"../c_facet":16,"./cf_registry":30,"milo-core":107}],20:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drag"></a>
@@ -4090,7 +4090,7 @@ function _dragIsDisabled(event) {
     return false;
 }
 
-},{"../../util/dragdrop":82,"../c_class":15,"../c_facet":16,"../msg_src/dom_events":38,"./cf_registry":30,"milo-core":105}],21:[function(require,module,exports){
+},{"../../util/dragdrop":82,"../c_class":15,"../c_facet":16,"../msg_src/dom_events":38,"./cf_registry":30,"milo-core":107}],21:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drop"></a>
@@ -4276,7 +4276,7 @@ function _isDropAllowed(dt, originalDropComponent) {
     // TODO test for other data types
 }
 
-},{"../../util/dragdrop":82,"../c_facet":16,"../msg_api/drop":37,"../msg_src/dom_events":38,"./cf_registry":30,"milo-core":105}],22:[function(require,module,exports){
+},{"../../util/dragdrop":82,"../c_facet":16,"../msg_api/drop":37,"../msg_src/dom_events":38,"./cf_registry":30,"milo-core":107}],22:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -4336,7 +4336,7 @@ function Events$init() {
     _.defineProperty(this, MSG_SOURCE_KEY, domEventsSource);
 }
 
-},{"../c_facet":16,"../msg_src/dom_events":38,"./cf_registry":30,"milo-core":105}],23:[function(require,module,exports){
+},{"../c_facet":16,"../msg_src/dom_events":38,"./cf_registry":30,"milo-core":107}],23:[function(require,module,exports){
 'use strict';
 
 
@@ -4526,7 +4526,7 @@ function _makeWhenReadyFunc(isReadyFunc, event) {
     }
 }
 
-},{"../../services/de_constrs":68,"../c_facet":16,"../msg_src/frame":39,"./cf_registry":30,"milo-core":105}],24:[function(require,module,exports){
+},{"../../services/de_constrs":68,"../c_facet":16,"../msg_src/frame":39,"./cf_registry":30,"milo-core":107}],24:[function(require,module,exports){
 'use strict';
 
 
@@ -4605,7 +4605,7 @@ function ItemFacet$extractItem() {
     this.list.extractItem(this.index);
 }
 
-},{"../../services/mail":70,"../c_facet":16,"./cf_registry":30,"milo-core":105}],25:[function(require,module,exports){
+},{"../../services/mail":70,"../c_facet":16,"./cf_registry":30,"milo-core":107}],25:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -5037,7 +5037,7 @@ function List$destroy() {
     ComponentFacet.prototype.destroy.apply(this, arguments);
 }
 
-},{"../../binder":8,"../../config":64,"../../services/mail":70,"../../util/component_name":76,"../../util/dom":79,"../c_class":15,"../c_facet":16,"./cf_registry":30,"milo-core":105}],26:[function(require,module,exports){
+},{"../../binder":8,"../../config":64,"../../services/mail":70,"../../util/component_name":76,"../../util/dom":79,"../c_class":15,"../c_facet":16,"./cf_registry":30,"milo-core":107}],26:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -5114,7 +5114,7 @@ function ModelFacet$destroy() {
     ComponentFacet.prototype.destroy.apply(this, arguments);
 }
 
-},{"../c_facet":16,"./cf_registry":30,"milo-core":105}],27:[function(require,module,exports){
+},{"../c_facet":16,"./cf_registry":30,"milo-core":107}],27:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -5155,7 +5155,7 @@ function Options$destroy() {
     ComponentFacet.prototype.destroy.apply(this, arguments);
 }
 
-},{"../c_facet":16,"./cf_registry":30,"milo-core":105}],28:[function(require,module,exports){
+},{"../c_facet":16,"./cf_registry":30,"milo-core":107}],28:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-template"></a>
@@ -5264,7 +5264,7 @@ function Template$binder() {
         logger.error('TemplateFacet: Binder called without container facet.');
 }
 
-},{"../../binder":8,"../c_facet":16,"./cf_registry":30,"milo-core":105}],29:[function(require,module,exports){
+},{"../../binder":8,"../c_facet":16,"./cf_registry":30,"milo-core":107}],29:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -5367,7 +5367,7 @@ function Transfer$getComponentMeta() {
     };
 }
 
-},{"../c_facet":16,"./cf_registry":30,"milo-core":105}],30:[function(require,module,exports){
+},{"../c_facet":16,"./cf_registry":30,"milo-core":107}],30:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../../abstract/registry')
@@ -5518,7 +5518,7 @@ function hasContainerFacet(ComponentClass, extraFacetsClasses) {
     }
 }
 
-},{"../util/component_name":76,"./c_facets/cf_registry":30,"./c_registry":32,"./scope":40,"milo-core":105}],32:[function(require,module,exports){
+},{"../util/component_name":76,"./c_facets/cf_registry":30,"./c_registry":32,"./scope":40,"milo-core":107}],32:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -5628,7 +5628,7 @@ function _getContainingComponent(el, returnCurrent, conditionFunc) {
         return _getContainingComponent(el.parentNode, true, conditionFunc);
 }
 
-},{"../config":64,"milo-core":105}],34:[function(require,module,exports){
+},{"../config":64,"milo-core":107}],34:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -5727,7 +5727,7 @@ function createInternalData(sourceMessage, message, data) {
     return internalData;
 }
 
-},{"./de_data":36,"milo-core":105}],36:[function(require,module,exports){
+},{"./de_data":36,"milo-core":107}],36:[function(require,module,exports){
 'use strict';
 
 
@@ -5871,7 +5871,7 @@ function inputChangeEvent(el) {
             : inputElementTypes.byDefault.event;
 }
 
-},{"milo-core":105}],37:[function(require,module,exports){
+},{"milo-core":107}],37:[function(require,module,exports){
 'use strict';
 
 
@@ -5923,7 +5923,7 @@ function filterSourceMessage(sourceMessage, message, data) { // data is DOM even
     return ok;
 }
 
-},{"milo-core":105}],38:[function(require,module,exports){
+},{"milo-core":107}],38:[function(require,module,exports){
 'use strict';
 
 
@@ -5970,7 +5970,7 @@ function emitter() {
     return this.component.el;
 }
 
-},{"../../services/dom_source":69,"../c_class":15,"milo-core":105}],39:[function(require,module,exports){
+},{"../../services/dom_source":69,"../c_class":15,"milo-core":107}],39:[function(require,module,exports){
 'use strict';
 
 // ###component iframe source
@@ -6046,7 +6046,7 @@ function handleEvent(event) {
     this.dispatchMessage(event.data.type, event);
 }
 
-},{"../c_class":15,"milo-core":105}],40:[function(require,module,exports){
+},{"../c_class":15,"milo-core":107}],40:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -6312,7 +6312,7 @@ function Scope$$rename(obj, name, renameInScope) {
         obj.name = name;
 }
 
-},{"../util/component_name":76,"milo-core":105}],41:[function(require,module,exports){
+},{"../util/component_name":76,"milo-core":107}],41:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -6346,7 +6346,7 @@ function MLButton$isDisabled() {
 }
 
 
-},{"../c_class":15,"../c_registry":32,"milo-core":105}],42:[function(require,module,exports){
+},{"../c_class":15,"../c_registry":32,"milo-core":107}],42:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -6439,7 +6439,7 @@ function onOptionsChange(msg, data) {
     });
 }
 
-},{"../c_class":15,"../c_registry":32,"milo-core":105}],43:[function(require,module,exports){
+},{"../c_class":15,"../c_registry":32,"milo-core":107}],43:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -6585,7 +6585,7 @@ function onAddItem(msg, data) {
     this.events.postMessage('milo_combolistadditem', data);
 }
 
-},{"../c_class":15,"../c_registry":32,"milo-core":105}],44:[function(require,module,exports){
+},{"../c_class":15,"../c_registry":32,"milo-core":107}],44:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -6678,7 +6678,7 @@ function toISO8601Format(date) {
 
     function pad(n) { return n < 10 ? '0' + n : n; }
 }
-},{"../c_class":15,"../c_registry":32,"milo-core":105}],45:[function(require,module,exports){
+},{"../c_class":15,"../c_registry":32,"milo-core":107}],45:[function(require,module,exports){
 'use strict';
 
 
@@ -6797,7 +6797,7 @@ function MLFoldTree$renderTree (data) {
     }
 }
 
-},{"../../util/count":77,"../c_class":15,"../c_registry":32,"milo-core":105}],47:[function(require,module,exports){
+},{"../../util/count":77,"../c_class":15,"../c_registry":32,"milo-core":107}],47:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -6930,7 +6930,7 @@ function onModelChange(path, data) {
     dispatchChangeMessage.call(this);
 }
 
-},{"../c_class":15,"../c_registry":32,"milo-core":105}],50:[function(require,module,exports){
+},{"../c_class":15,"../c_registry":32,"milo-core":107}],50:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -6968,7 +6968,7 @@ function MLInput$setMaxLength(length) {
     this.el.setAttribute('maxlength', length);
 }
 
-},{"../c_class":15,"../c_registry":32,"milo-core":105}],51:[function(require,module,exports){
+},{"../c_class":15,"../c_registry":32,"milo-core":107}],51:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -7091,7 +7091,7 @@ function MLInputList_del() {
 function MLInputList_splice() { // ... arguments
     this.model.splice.apply(this.model, arguments);
 }
-},{"../c_class":15,"../c_registry":32,"milo-core":105}],52:[function(require,module,exports){
+},{"../c_class":15,"../c_registry":32,"milo-core":107}],52:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -7155,7 +7155,7 @@ function onChildrenBound() {
     this._connector = milo.minder(this.model, '<<<-', this.data).deferChangeMode('<<<->>>');
 }
 
-},{"../c_class":15,"../c_registry":32,"milo-core":105}],53:[function(require,module,exports){
+},{"../c_class":15,"../c_registry":32,"milo-core":107}],53:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -7300,7 +7300,7 @@ function _sendChangeMessage() {
 
 
 
-},{"../../util/dragdrop":82,"../c_class":15,"../c_registry":32,"milo-core":105}],54:[function(require,module,exports){
+},{"../../util/dragdrop":82,"../c_class":15,"../c_registry":32,"milo-core":107}],54:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -7464,7 +7464,7 @@ function MLRadioGroup$destroy() {
     Component.prototype.destroy.apply(this, arguments);
 }
 
-},{"../../util/count":77,"../c_class":15,"../c_registry":32,"milo-core":105}],55:[function(require,module,exports){
+},{"../../util/count":77,"../c_class":15,"../c_registry":32,"milo-core":107}],55:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -7523,7 +7523,7 @@ function onOptionsChange(path, data) {
     this.template.render({ selectOptions: this.model.get() });
 }
 
-},{"../c_class":15,"../c_registry":32,"milo-core":105}],56:[function(require,module,exports){
+},{"../c_class":15,"../c_registry":32,"milo-core":107}],56:[function(require,module,exports){
 'use strict';
 
 /**
@@ -8148,7 +8148,7 @@ function _setData() {
     this.setFilteredOptions(this._optionsData);
 }
 
-},{"../c_class":15,"../c_registry":32,"milo-core":105}],57:[function(require,module,exports){
+},{"../c_class":15,"../c_registry":32,"milo-core":107}],57:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -8257,7 +8257,7 @@ function MLTextarea$destroy() {
 function MLTextarea$disable(disable) {
     this.el.disabled = disable;
 }
-},{"../c_class":15,"../c_registry":32,"milo-core":105}],59:[function(require,module,exports){
+},{"../c_class":15,"../c_registry":32,"milo-core":107}],59:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -8320,7 +8320,7 @@ function MLTime_del() {
     this.el.value = '';
 }
 
-},{"../c_class":15,"../c_registry":32,"milo-core":105}],60:[function(require,module,exports){
+},{"../c_class":15,"../c_registry":32,"milo-core":107}],60:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -8511,7 +8511,7 @@ function _toggleAlert(doShow) {
     this.el[doShow ? 'focus' : 'blur']();
 }
 
-},{"../../../util/component_name":76,"../../c_class":15,"../../c_registry":32,"milo-core":105}],62:[function(require,module,exports){
+},{"../../../util/component_name":76,"../../c_class":15,"../../c_registry":32,"milo-core":107}],62:[function(require,module,exports){
 'use strict';
 
 var Component = require('../../c_class')
@@ -8555,7 +8555,7 @@ var MLDialog = Component.createComponentClass('MLDialog', {
     },
     template: {
         template: '\
-            <div class="modal-dialog">\
+            <div class="modal-dialog {{= it.cssClass }}">\
                 <div class="modal-content">\
                     {{? it.title }}\
                         <div class="modal-header">\
@@ -8630,14 +8630,14 @@ _.extendProto(MLDialog, {
  *         data:   any value/object or function to create data that will be passed to dialog subscriber as the second parameter.
  *                 If function is passed it will be called with dialog as context and button options as parameter.
  *
- *     If `title` is not passed, dialog will not have title section   
+ *     If `title` is not passed, dialog will not have title section
  *     If neither `text` nor `html` is passed, dialog will not have body section.
  *     If `buttons` are not passed, there will only be OK button.
  *
  * When dialog is closed, the subscriber is called with reault and optional data as defined in buttons configurations.
  * If backdrop is clicked or ESC key is pressed the result will be 'dismissed'
  * If close button in the top right corner is clicked, the result will be 'closed' (default result)
- * 
+ *
  * @param {Object} options dialog configuration
  * @param {Function} initialize function that is called to initialize the dialog
  */
@@ -8659,7 +8659,8 @@ function MLDialog$$createDialog(options, initialize) {
             result: Match.Optional(String),
             data: Match.Optional(Match.Any),
             cls: Match.Optional(String)
-        } ])
+        } ]),
+        cssClass: Match.Optional(String)
     });
 
     var dialog = MLDialog.createOnElement();
@@ -8754,7 +8755,7 @@ function _prepareOptions(options) {
 
 /**
  * Create and show dialog popup
- * 
+ *
  * @param {Object} options object with title, text and buttons. See [createDialog](#MLDialog$$createDialog) for more information.
  * @param {Function|Object} subscriber optional subscriber function or object that is passed result and optional data. Unless context is defined, dialog will be the context.
  */
@@ -8807,7 +8808,7 @@ var openedDialog;
 /**
  * Opens dialog instance.
  * Subscriber object should have the same format as the subscriber for the Messenger (although Messenger is not used) - either function or object with subscriber and context properties.
- * 
+ *
  * @param {Function|Object} subscriber subscriber object
  */
 function MLDialog$openDialog(subscriber) {
@@ -8854,7 +8855,7 @@ function MLDialog$destroy() {
     Component.prototype.destroy.apply(this, arguments);
 }
 
-},{"../../../util/component_name":76,"../../c_class":15,"../../c_registry":32,"milo-core":105}],63:[function(require,module,exports){
+},{"../../../util/component_name":76,"../../c_class":15,"../../c_registry":32,"milo-core":107}],63:[function(require,module,exports){
 'use strict';
 
 var Component = require('../../c_class')
@@ -8969,7 +8970,7 @@ function MLDropdown$toggleMenu(doShow) {
                             : 'none';
 }
 
-},{"../../../util/dom_listeners":80,"../../c_class":15,"../../c_registry":32,"milo-core":105}],64:[function(require,module,exports){
+},{"../../../util/dom_listeners":80,"../../c_class":15,"../../c_registry":32,"milo-core":107}],64:[function(require,module,exports){
 'use strict';
 
 
@@ -9042,7 +9043,7 @@ config({
     }
 });
 
-},{"milo-core":105}],65:[function(require,module,exports){
+},{"milo-core":107}],65:[function(require,module,exports){
 'use strict';
 
 
@@ -9145,7 +9146,7 @@ function loadView(el, removeAttribute, callback) {
     });
 }
 
-},{"./attributes/a_load":6,"./config":64,"./services/mail":70,"./util/dom":79,"./util/request":87,"milo-core":105}],66:[function(require,module,exports){
+},{"./attributes/a_load":6,"./config":64,"./services/mail":70,"./util/dom":79,"./util/request":87,"milo-core":107}],66:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -9235,7 +9236,7 @@ function destroy() {
     milo.util.destroy();
 }
 
-},{"./attributes":7,"./binder":8,"./classes":9,"./command":12,"./components/c_class":15,"./components/c_facet":16,"./config":64,"./loader":65,"./registry":67,"./services/mail":70,"./services/window":73,"./use_components":74,"./use_facets":75,"./util":85,"./util/create_component_class":78,"milo-core":105}],67:[function(require,module,exports){
+},{"./attributes":7,"./binder":8,"./classes":9,"./command":12,"./components/c_class":15,"./components/c_facet":16,"./config":64,"./loader":65,"./registry":67,"./services/mail":70,"./services/window":73,"./use_components":74,"./use_facets":75,"./util":85,"./util/create_component_class":78,"milo-core":107}],67:[function(require,module,exports){
 'use strict';
 
 /**
@@ -9301,7 +9302,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"milo-core":105}],69:[function(require,module,exports){
+},{"milo-core":107}],69:[function(require,module,exports){
 'use strict';
 
 
@@ -9401,7 +9402,7 @@ function trigger(eventType, properties) {
     return notCancelled;
 }
 
-},{"../components/c_class":15,"./de_constrs":68,"milo-core":105}],70:[function(require,module,exports){
+},{"../components/c_class":15,"./de_constrs":68,"milo-core":107}],70:[function(require,module,exports){
 'use strict';
 
 /**
@@ -9434,7 +9435,7 @@ miloMail._setMessageSource(mailMsgSource);
 
 module.exports = miloMail;
 
-},{"./mail_api":71,"./mail_source":72,"milo-core":105}],71:[function(require,module,exports){
+},{"./mail_api":71,"./mail_source":72,"milo-core":107}],71:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -9480,7 +9481,7 @@ function filterSourceMessage(sourceMessage, msgType, msgData) {
         return windowMessagePrefix + msgData.data.type == msgType;
 };
 
-},{"milo-core":105}],72:[function(require,module,exports){
+},{"milo-core":107}],72:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -9559,7 +9560,7 @@ function trigger(msgType, data) {
         window.postMessage(data, '*')
 }
 
-},{"../de_constrs":68,"milo-core":105}],73:[function(require,module,exports){
+},{"../de_constrs":68,"milo-core":107}],73:[function(require,module,exports){
 'use strict';
 
 
@@ -9586,7 +9587,7 @@ function windowService_isTop() {
     return window.top == window.self || window.__karma__;
 }
 
-},{"./dom_source":69,"milo-core":105}],74:[function(require,module,exports){
+},{"./dom_source":69,"milo-core":107}],74:[function(require,module,exports){
 'use strict';
 
 require('./components/classes/View');
@@ -9713,7 +9714,7 @@ function createComponentClass(config) {
     return ComponentClass;
 }
 
-},{"milo-core":105}],79:[function(require,module,exports){
+},{"milo-core":107}],79:[function(require,module,exports){
 'use strict';
 
 
@@ -10396,7 +10397,7 @@ function addDebugPoint(x, y) {
     setTimeout(function() {document.body.appendChild(dbEl);}, 200);
 }
 
-},{"../config":64,"milo-core":105}],80:[function(require,module,exports){
+},{"../config":64,"milo-core":107}],80:[function(require,module,exports){
 'use strict';
 
 
@@ -10453,7 +10454,7 @@ function _removeListener(l) {
     l.target.removeEventListener(l.eventType, l.handler);
 }
 
-},{"milo-core":105}],81:[function(require,module,exports){
+},{"milo-core":107}],81:[function(require,module,exports){
 'use strict';
 
 
@@ -10502,7 +10503,7 @@ function isReady() {
     return readyState == 'loading' ? false : readyState;
 }
 
-},{"milo-core":105}],82:[function(require,module,exports){
+},{"milo-core":107}],82:[function(require,module,exports){
 'use strict';
 
 var Component = require('../components/c_class')
@@ -10767,7 +10768,7 @@ function DragDrop_destroy() {
     dragDropService.offAll();
 }
 
-},{"../components/c_class":15,"../config":64,"base32":95,"milo-core":105}],83:[function(require,module,exports){
+},{"../components/c_class":15,"../config":64,"base32":95,"milo-core":107}],83:[function(require,module,exports){
 // <a name="utils-error"></a>
 // milo.utils.error
 // -----------
@@ -10810,7 +10811,7 @@ function error$toBeImplemented() {
     throw new error.AbstractClass('calling the method of an absctract class');
 }
 
-},{"milo-core":105}],84:[function(require,module,exports){
+},{"milo-core":107}],84:[function(require,module,exports){
 'use strict';
 
 
@@ -11015,7 +11016,7 @@ function _createNodesAndPathsFunc(func) {
 
 
 
-},{"../attributes/a_bind":4,"../binder":8,"../components/c_class":15,"./dom":79,"milo-core":105}],85:[function(require,module,exports){
+},{"../attributes/a_bind":4,"../binder":8,"../components/c_class":15,"./dom":79,"milo-core":107}],85:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core');
@@ -11054,7 +11055,7 @@ function util_destroy() {
     util.dragDrop.destroy();
 }
 
-},{"../components/ui/bootstrap/Alert":61,"../components/ui/bootstrap/Dialog":62,"./component_name":76,"./count":77,"./dom":79,"./dom_listeners":80,"./domready":81,"./dragdrop":82,"./error":83,"./fragment":84,"./json_parse":86,"./request":87,"./selection":88,"./storage":89,"./websocket":92,"milo-core":105}],86:[function(require,module,exports){
+},{"../components/ui/bootstrap/Alert":61,"../components/ui/bootstrap/Dialog":62,"./component_name":76,"./count":77,"./dom":79,"./dom_listeners":80,"./domready":81,"./dragdrop":82,"./error":83,"./fragment":84,"./json_parse":86,"./request":87,"./selection":88,"./storage":89,"./websocket":92,"milo-core":107}],86:[function(require,module,exports){
 'use strict';
 
 
@@ -11400,7 +11401,7 @@ function whenRequestsCompleted(callback, timeout) {
         _.defer(callback);
 }
 
-},{"../config":64,"./count":77,"milo-core":105}],88:[function(require,module,exports){
+},{"../config":64,"./count":77,"milo-core":107}],88:[function(require,module,exports){
 'use strict';
 
 
@@ -11842,7 +11843,7 @@ function TextSelection$$getDirection(){
 }
 
 
-},{"../../components/c_class":15,"../dom":79,"milo-core":105}],89:[function(require,module,exports){
+},{"../../components/c_class":15,"../dom":79,"milo-core":107}],89:[function(require,module,exports){
 'use strict';
 
 
@@ -12257,7 +12258,7 @@ function DOMStorage$destroy() {
     this._destroyed = true;
 }
 
-},{"../../config":64,"./model":90,"./msg_src":91,"milo-core":105}],90:[function(require,module,exports){
+},{"../../config":64,"./model":90,"./msg_src":91,"milo-core":107}],90:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -12285,7 +12286,7 @@ function Model_domStorageParser(valueStr) {
     return new Model(data);
 }
 
-},{"./index":89,"milo-core":105}],91:[function(require,module,exports){
+},{"./index":89,"milo-core":107}],91:[function(require,module,exports){
 'use strict';
 
 
@@ -12354,7 +12355,7 @@ function handleEvent(event) {
     this.dispatchMessage(msgType, data);
 }
 
-},{"../../config":64,"../../util/count":77,"milo-core":105}],92:[function(require,module,exports){
+},{"../../config":64,"../../util/count":77,"milo-core":107}],92:[function(require,module,exports){
 'use strict';
 
 /**
@@ -12377,7 +12378,7 @@ function websocket() {
 
 module.exports = websocket;
 
-},{"./msg_api":93,"./msg_src":94,"milo-core":105}],93:[function(require,module,exports){
+},{"./msg_api":93,"./msg_src":94,"milo-core":107}],93:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -12424,7 +12425,7 @@ function createInternalData(sourceMessage, message, event) {
     return internalData;
 }
 
-},{"milo-core":105}],94:[function(require,module,exports){
+},{"milo-core":107}],94:[function(require,module,exports){
 'use strict';
 
 
@@ -12535,7 +12536,7 @@ function WSMessageSource$trigger (msg, data, callback) {
     }
 }
 
-},{"../../config":64,"../../util/count":77,"milo-core":105}],95:[function(require,module,exports){
+},{"../../config":64,"../../util/count":77,"milo-core":107}],95:[function(require,module,exports){
 ;(function(){
 
 // This would be the place to edit if you want a different
@@ -12739,6 +12740,293 @@ if (typeof module !== 'undefined' && module.exports) {
 // untraditional implementation of this module.
 
 },{}],97:[function(require,module,exports){
+// doT.js
+// 2011-2014, Laura Doktorova, https://github.com/olado/doT
+// Licensed under the MIT license.
+
+(function() {
+	"use strict";
+
+	var doT = {
+		version: "1.0.3",
+		templateSettings: {
+			evaluate:    /\{\{([\s\S]+?(\}?)+)\}\}/g,
+			interpolate: /\{\{=([\s\S]+?)\}\}/g,
+			encode:      /\{\{!([\s\S]+?)\}\}/g,
+			use:         /\{\{#([\s\S]+?)\}\}/g,
+			useParams:   /(^|[^\w$])def(?:\.|\[[\'\"])([\w$\.]+)(?:[\'\"]\])?\s*\:\s*([\w$\.]+|\"[^\"]+\"|\'[^\']+\'|\{[^\}]+\})/g,
+			define:      /\{\{##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\}\}/g,
+			defineParams:/^\s*([\w$]+):([\s\S]+)/,
+			conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g,
+			iterate:     /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g,
+			varname:	"it",
+			strip:		true,
+			append:		true,
+			selfcontained: false,
+			doNotSkipEncoded: false
+		},
+		template: undefined, //fn, compile template
+		compile:  undefined  //fn, for express
+	}, _globals;
+
+	doT.encodeHTMLSource = function(doNotSkipEncoded) {
+		var encodeHTMLRules = { "&": "&#38;", "<": "&#60;", ">": "&#62;", '"': "&#34;", "'": "&#39;", "/": "&#47;" },
+			matchHTML = doNotSkipEncoded ? /[&<>"'\/]/g : /&(?!#?\w+;)|<|>|"|'|\//g;
+		return function(code) {
+			return code ? code.toString().replace(matchHTML, function(m) {return encodeHTMLRules[m] || m;}) : "";
+		};
+	};
+
+	_globals = (function(){ return this || (0,eval)("this"); }());
+
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports = doT;
+	} else if (typeof define === "function" && define.amd) {
+		define(function(){return doT;});
+	} else {
+		_globals.doT = doT;
+	}
+
+	var startend = {
+		append: { start: "'+(",      end: ")+'",      startencode: "'+encodeHTML(" },
+		split:  { start: "';out+=(", end: ");out+='", startencode: "';out+=encodeHTML(" }
+	}, skip = /$^/;
+
+	function resolveDefs(c, block, def) {
+		return ((typeof block === "string") ? block : block.toString())
+		.replace(c.define || skip, function(m, code, assign, value) {
+			if (code.indexOf("def.") === 0) {
+				code = code.substring(4);
+			}
+			if (!(code in def)) {
+				if (assign === ":") {
+					if (c.defineParams) value.replace(c.defineParams, function(m, param, v) {
+						def[code] = {arg: param, text: v};
+					});
+					if (!(code in def)) def[code]= value;
+				} else {
+					new Function("def", "def['"+code+"']=" + value)(def);
+				}
+			}
+			return "";
+		})
+		.replace(c.use || skip, function(m, code) {
+			if (c.useParams) code = code.replace(c.useParams, function(m, s, d, param) {
+				if (def[d] && def[d].arg && param) {
+					var rw = (d+":"+param).replace(/'|\\/g, "_");
+					def.__exp = def.__exp || {};
+					def.__exp[rw] = def[d].text.replace(new RegExp("(^|[^\\w$])" + def[d].arg + "([^\\w$])", "g"), "$1" + param + "$2");
+					return s + "def.__exp['"+rw+"']";
+				}
+			});
+			var v = new Function("def", "return " + code)(def);
+			return v ? resolveDefs(c, v, def) : v;
+		});
+	}
+
+	function unescape(code) {
+		return code.replace(/\\('|\\)/g, "$1").replace(/[\r\t\n]/g, " ");
+	}
+
+	doT.template = function(tmpl, c, def) {
+		c = c || doT.templateSettings;
+		var cse = c.append ? startend.append : startend.split, needhtmlencode, sid = 0, indv,
+			str  = (c.use || c.define) ? resolveDefs(c, tmpl, def || {}) : tmpl;
+
+		str = ("var out='" + (c.strip ? str.replace(/(^|\r|\n)\t* +| +\t*(\r|\n|$)/g," ")
+					.replace(/\r|\n|\t|\/\*[\s\S]*?\*\//g,""): str)
+			.replace(/'|\\/g, "\\$&")
+			.replace(c.interpolate || skip, function(m, code) {
+				return cse.start + unescape(code) + cse.end;
+			})
+			.replace(c.encode || skip, function(m, code) {
+				needhtmlencode = true;
+				return cse.startencode + unescape(code) + cse.end;
+			})
+			.replace(c.conditional || skip, function(m, elsecase, code) {
+				return elsecase ?
+					(code ? "';}else if(" + unescape(code) + "){out+='" : "';}else{out+='") :
+					(code ? "';if(" + unescape(code) + "){out+='" : "';}out+='");
+			})
+			.replace(c.iterate || skip, function(m, iterate, vname, iname) {
+				if (!iterate) return "';} } out+='";
+				sid+=1; indv=iname || "i"+sid; iterate=unescape(iterate);
+				return "';var arr"+sid+"="+iterate+";if(arr"+sid+"){var "+vname+","+indv+"=-1,l"+sid+"=arr"+sid+".length-1;while("+indv+"<l"+sid+"){"
+					+vname+"=arr"+sid+"["+indv+"+=1];out+='";
+			})
+			.replace(c.evaluate || skip, function(m, code) {
+				return "';" + unescape(code) + "out+='";
+			})
+			+ "';return out;")
+			.replace(/\n/g, "\\n").replace(/\t/g, '\\t').replace(/\r/g, "\\r")
+			.replace(/(\s|;|\}|^|\{)out\+='';/g, '$1').replace(/\+''/g, "");
+			//.replace(/(\s|;|\}|^|\{)out\+=''\+/g,'$1out+=');
+
+		if (needhtmlencode) {
+			if (!c.selfcontained && _globals && !_globals._encodeHTML) _globals._encodeHTML = doT.encodeHTMLSource(c.doNotSkipEncoded);
+			str = "var encodeHTML = typeof _encodeHTML !== 'undefined' ? _encodeHTML : ("
+				+ doT.encodeHTMLSource.toString() + "(" + (c.doNotSkipEncoded || '') + "));"
+				+ str;
+		}
+		try {
+			return new Function(c.varname, str);
+		} catch (e) {
+			if (typeof console !== "undefined") console.log("Could not create a template function: " + str);
+			throw e;
+		}
+	};
+
+	doT.compile = function(tmpl, def) {
+		return doT.template(tmpl, null, def);
+	};
+}());
+
+},{}],98:[function(require,module,exports){
+/* doT + auto-compilation of doT templates
+ *
+ * 2012, Laura Doktorova, https://github.com/olado/doT
+ * Licensed under the MIT license
+ *
+ * Compiles .def, .dot, .jst files found under the specified path.
+ * It ignores sub-directories.
+ * Template files can have multiple extensions at the same time.
+ * Files with .def extension can be included in other files via {{#def.name}}
+ * Files with .dot extension are compiled into functions with the same name and
+ * can be accessed as renderer.filename
+ * Files with .jst extension are compiled into .js files. Produced .js file can be
+ * loaded as a commonJS, AMD module, or just installed into a global variable
+ * (default is set to window.render).
+ * All inline defines defined in the .jst file are
+ * compiled into separate functions and are available via _render.filename.definename
+ *
+ * Basic usage:
+ * var dots = require("dot").process({path: "./views"});
+ * dots.mytemplate({foo:"hello world"});
+ *
+ * The above snippet will:
+ * 1. Compile all templates in views folder (.dot, .def, .jst)
+ * 2. Place .js files compiled from .jst templates into the same folder.
+ *    These files can be used with require, i.e. require("./views/mytemplate").
+ * 3. Return an object with functions compiled from .dot templates as its properties.
+ * 4. Render mytemplate template.
+ */
+
+var fs = require("fs"),
+	doT = module.exports = require("./doT");
+
+doT.process = function(options) {
+	//path, destination, global, rendermodule, templateSettings
+	return new InstallDots(options).compileAll();
+};
+
+function InstallDots(o) {
+	this.__path 		= o.path || "./";
+	if (this.__path[this.__path.length-1] !== '/') this.__path += '/';
+	this.__destination	= o.destination || this.__path;
+	if (this.__destination[this.__destination.length-1] !== '/') this.__destination += '/';
+	this.__global		= o.global || "window.render";
+	this.__rendermodule	= o.rendermodule || {};
+	this.__settings 	= o.templateSettings ? copy(o.templateSettings, copy(doT.templateSettings)) : undefined;
+	this.__includes		= {};
+}
+
+InstallDots.prototype.compileToFile = function(path, template, def) {
+	def = def || {};
+	var modulename = path.substring(path.lastIndexOf("/")+1, path.lastIndexOf("."))
+		, defs = copy(this.__includes, copy(def))
+		, settings = this.__settings || doT.templateSettings
+		, compileoptions = copy(settings)
+		, defaultcompiled = doT.template(template, settings, defs)
+		, exports = []
+		, compiled = ""
+		, fn;
+
+	for (var property in defs) {
+		if (defs[property] !== def[property] && defs[property] !== this.__includes[property]) {
+			fn = undefined;
+			if (typeof defs[property] === 'string') {
+				fn = doT.template(defs[property], settings, defs);
+			} else if (typeof defs[property] === 'function') {
+				fn = defs[property];
+			} else if (defs[property].arg) {
+				compileoptions.varname = defs[property].arg;
+				fn = doT.template(defs[property].text, compileoptions, defs);
+			}
+			if (fn) {
+				compiled += fn.toString().replace('anonymous', property);
+				exports.push(property);
+			}
+		}
+	}
+	compiled += defaultcompiled.toString().replace('anonymous', modulename);
+	fs.writeFileSync(path, "(function(){" + compiled
+		+ "var itself=" + modulename + ", _encodeHTML=(" + doT.encodeHTMLSource.toString() + "(" + (settings.doNotSkipEncoded || '') + "));"
+		+ addexports(exports)
+		+ "if(typeof module!=='undefined' && module.exports) module.exports=itself;else if(typeof define==='function')define(function(){return itself;});else {"
+		+ this.__global + "=" + this.__global + "||{};" + this.__global + "['" + modulename + "']=itself;}}());");
+};
+
+function addexports(exports) {
+	for (var ret ='', i=0; i< exports.length; i++) {
+		ret += "itself." + exports[i]+ "=" + exports[i]+";";
+	}
+	return ret;
+}
+
+function copy(o, to) {
+	to = to || {};
+	for (var property in o) {
+		to[property] = o[property];
+	}
+	return to;
+}
+
+function readdata(path) {
+	var data = fs.readFileSync(path);
+	if (data) return data.toString();
+	console.log("problems with " + path);
+}
+
+InstallDots.prototype.compilePath = function(path) {
+	var data = readdata(path);
+	if (data) {
+		return doT.template(data,
+					this.__settings || doT.templateSettings,
+					copy(this.__includes));
+	}
+};
+
+InstallDots.prototype.compileAll = function() {
+	console.log("Compiling all doT templates...");
+
+	var defFolder = this.__path,
+		sources = fs.readdirSync(defFolder),
+		k, l, name;
+
+	for( k = 0, l = sources.length; k < l; k++) {
+		name = sources[k];
+		if (/\.def(\.dot|\.jst)?$/.test(name)) {
+			console.log("Loaded def " + name);
+			this.__includes[name.substring(0, name.indexOf('.'))] = readdata(defFolder + name);
+		}
+	}
+
+	for( k = 0, l = sources.length; k < l; k++) {
+		name = sources[k];
+		if (/\.dot(\.def|\.jst)?$/.test(name)) {
+			console.log("Compiling " + name + " to function");
+			this.__rendermodule[name.substring(0, name.indexOf('.'))] = this.compilePath(defFolder + name);
+		}
+		if (/\.jst(\.dot|\.def)?$/.test(name)) {
+			console.log("Compiling " + name + " to file");
+			this.compileToFile(this.__destination + name.substring(0, name.indexOf('.')) + '.js',
+					readdata(defFolder + name));
+		}
+	}
+	return this.__rendermodule;
+};
+
+},{"./doT":97,"fs":96}],99:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -12950,7 +13238,7 @@ function Mixin$$useWith(hostClass, instanceKey, mixinMethods) {
         }, this);
 }
 
-},{"../config":99,"../util/check":116,"mol-proto":122}],98:[function(require,module,exports){
+},{"../config":101,"../util/check":118,"mol-proto":122}],100:[function(require,module,exports){
 'use strict';
 
 // <a name="classes"></a>
@@ -12969,7 +13257,7 @@ var classes = {
 
 module.exports = classes;
 
-},{"./abstract/mixin":97,"./messenger/m_api":101,"./messenger/m_api_rx":102,"./messenger/m_source":103,"./messenger/msngr_source":104}],99:[function(require,module,exports){
+},{"./abstract/mixin":99,"./messenger/m_api":103,"./messenger/m_api_rx":104,"./messenger/m_source":105,"./messenger/msngr_source":106}],101:[function(require,module,exports){
 'use strict';
 
 
@@ -12990,7 +13278,7 @@ config({
     debug: false
 });
 
-},{"mol-proto":122}],100:[function(require,module,exports){
+},{"mol-proto":122}],102:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -13655,7 +13943,7 @@ function getMessageSource() {
     return this._messageSource
 }
 
-},{"../abstract/mixin":97,"../util/check":116,"./m_source":103,"mol-proto":122}],101:[function(require,module,exports){
+},{"../abstract/mixin":99,"../util/check":118,"./m_source":105,"mol-proto":122}],103:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto')
@@ -13848,7 +14136,7 @@ function filterSourceMessage(sourceMessage, message, internalData) {
     return true;
 }
 
-},{"../util/logger":118,"mol-proto":122}],102:[function(require,module,exports){
+},{"../util/logger":120,"mol-proto":122}],104:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('./m_api')
@@ -13962,7 +14250,7 @@ function getInternalMessages(sourceMessage) {
     return internalMessages;
 }
 
-},{"./m_api":101,"mol-proto":122}],103:[function(require,module,exports){
+},{"./m_api":103,"mol-proto":122}],105:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('../abstract/mixin')
@@ -14138,7 +14426,7 @@ function toBeImplemented() {
     throw new Error('calling the method of an absctract class');
 }
 
-},{"../abstract/mixin":97,"../util/check":116,"../util/logger":118,"./m_api":101,"mol-proto":122}],104:[function(require,module,exports){
+},{"../abstract/mixin":99,"../util/check":118,"../util/logger":120,"./m_api":103,"mol-proto":122}],106:[function(require,module,exports){
 'use strict';
 
 
@@ -14207,7 +14495,7 @@ function MessengerMessageSource$postMessage(message, data) {
     this.messenger.postMessageSync(message, data);
 }
 
-},{"../util/check":116,"./m_source":103,"mol-proto":122}],105:[function(require,module,exports){
+},{"../util/check":118,"./m_source":105,"mol-proto":122}],107:[function(require,module,exports){
 'use strict';
 
 var _ = require('mol-proto');
@@ -14248,7 +14536,7 @@ function destroy() {
     milo.minder.destroy();
 }
 
-},{"./classes":98,"./config":99,"./messenger":100,"./minder":106,"./model":109,"./util":117,"mol-proto":122}],106:[function(require,module,exports){
+},{"./classes":100,"./config":101,"./messenger":102,"./minder":108,"./model":111,"./util":119,"mol-proto":122}],108:[function(require,module,exports){
 'use strict';
 
 var Connector = require('./model/connector')
@@ -14468,7 +14756,7 @@ function minder_destroy() {
     }
 }
 
-},{"./messenger":100,"./model/connector":108,"./util/logger":118,"mol-proto":122}],107:[function(require,module,exports){
+},{"./messenger":102,"./model/connector":110,"./util/logger":120,"mol-proto":122}],109:[function(require,module,exports){
 'use strict';
 
 
@@ -14703,7 +14991,7 @@ function executeMethod(modelPath, data) {
         logger.error('unknown data change type');
 }
 
-},{"../config":99,"../util/logger":118,"./path_utils":114,"mol-proto":122}],108:[function(require,module,exports){
+},{"../config":101,"../util/logger":120,"./path_utils":116,"mol-proto":122}],110:[function(require,module,exports){
 'use strict';
 
 var Messenger = require('../messenger')
@@ -15116,7 +15404,7 @@ function Connector$destroy() {
     this._destroyed = true;
 }
 
-},{"../messenger":100,"../util/logger":118,"./path_utils":114,"mol-proto":122}],109:[function(require,module,exports){
+},{"../messenger":102,"../util/logger":120,"./path_utils":116,"mol-proto":122}],111:[function(require,module,exports){
 'use strict';
 
 var ModelPath = require('./m_path')
@@ -15345,7 +15633,7 @@ function Model$destroy() {
     this._destroyed = true;
 }
 
-},{"../abstract/mixin":97,"../messenger":100,"../messenger/msngr_source":104,"../util/check":116,"../util/logger":118,"./change_data":107,"./m_msg_api":110,"./m_path":111,"./model_utils":112,"./path_utils":114,"./synthesize":115,"mol-proto":122}],110:[function(require,module,exports){
+},{"../abstract/mixin":99,"../messenger":102,"../messenger/msngr_source":106,"../util/check":118,"../util/logger":120,"./change_data":109,"./m_msg_api":112,"./m_path":113,"./model_utils":114,"./path_utils":116,"./synthesize":117,"mol-proto":122}],112:[function(require,module,exports){
 'use strict';
 
 var MessengerRegexpAPI = require('../messenger/m_api_rx')
@@ -15384,7 +15672,7 @@ function translateToSourceMessage(accessPath) {
     return pathUtils.createRegexPath(accessPath);
 }
 
-},{"../messenger/m_api_rx":102,"./path_utils":114,"mol-proto":122}],111:[function(require,module,exports){
+},{"../messenger/m_api_rx":104,"./path_utils":116,"mol-proto":122}],113:[function(require,module,exports){
 'use strict';
 
 var synthesize = require('./synthesize')
@@ -15681,7 +15969,7 @@ function ModelPath$destroy() {
     this[MESSENGER_PROPERTY].destroy();
 }
 
-},{"../messenger":100,"../messenger/msngr_source":104,"../util/check":116,"./change_data":107,"./path_msg_api":113,"./path_utils":114,"./synthesize":115,"mol-proto":122}],112:[function(require,module,exports){
+},{"../messenger":102,"../messenger/msngr_source":106,"../util/check":118,"./change_data":109,"./path_msg_api":115,"./path_utils":116,"./synthesize":117,"mol-proto":122}],114:[function(require,module,exports){
 'use strict';
 
 
@@ -15702,7 +15990,7 @@ function normalizeSpliceIndex(spliceIndex, length) {
                     : 0;
 }
 
-},{}],113:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('../messenger/m_api')
@@ -15803,7 +16091,7 @@ function truncateChangePath(change) {
     }
 }
 
-},{"../messenger/m_api":101,"../util/logger":118,"./path_utils":114,"mol-proto":122}],114:[function(require,module,exports){
+},{"../messenger/m_api":103,"../util/logger":120,"./path_utils":116,"mol-proto":122}],116:[function(require,module,exports){
 'use strict';
 
 // <a name="model-path"></a>
@@ -15947,7 +16235,7 @@ function wrapMessengerMethods(methodsNames) {
     _.defineProperties(this, wrappedMethods);
 }
 
-},{"../util/check":116,"mol-proto":122}],115:[function(require,module,exports){
+},{"../util/check":118,"mol-proto":122}],117:[function(require,module,exports){
 'use strict';
 
 var pathUtils = require('../path_utils')
@@ -16151,7 +16439,7 @@ var modelMethods = _.mapKeys(modelSynthesizers, function(synthesizer) {
 
 synthesizePathMethods.modelMethods = modelMethods;
 
-},{"../../util/logger":118,"../change_data":107,"../model_utils":112,"../path_utils":114,"dot":121,"fs":96,"mol-proto":122}],116:[function(require,module,exports){
+},{"../../util/logger":120,"../change_data":109,"../model_utils":114,"../path_utils":116,"dot":98,"fs":96,"mol-proto":122}],118:[function(require,module,exports){
 'use strict';
 
 /**
@@ -16527,7 +16815,7 @@ function _prependPath(key, base) {
     return key + base;
 };
 
-},{"../config":99,"mol-proto":122}],117:[function(require,module,exports){
+},{"../config":101,"mol-proto":122}],119:[function(require,module,exports){
 'use strict';
 
 /**
@@ -16541,7 +16829,7 @@ var util = {
 
 module.exports = util;
 
-},{"./check":116,"./logger":118,"dot":121}],118:[function(require,module,exports){
+},{"./check":118,"./logger":120,"dot":98}],120:[function(require,module,exports){
 'use strict';
 
 // <a name="utils-logger"></a>
@@ -16571,7 +16859,7 @@ var logger = new Logger({ level: 3 });
 
 module.exports = logger;
 
-},{"./logger_class":119}],119:[function(require,module,exports){
+},{"./logger_class":121}],121:[function(require,module,exports){
 'use strict';
 
 // ### Logger Class
@@ -16696,294 +16984,7 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"mol-proto":122}],120:[function(require,module,exports){
-// doT.js
-// 2011-2014, Laura Doktorova, https://github.com/olado/doT
-// Licensed under the MIT license.
-
-(function() {
-	"use strict";
-
-	var doT = {
-		version: "1.0.3",
-		templateSettings: {
-			evaluate:    /\{\{([\s\S]+?(\}?)+)\}\}/g,
-			interpolate: /\{\{=([\s\S]+?)\}\}/g,
-			encode:      /\{\{!([\s\S]+?)\}\}/g,
-			use:         /\{\{#([\s\S]+?)\}\}/g,
-			useParams:   /(^|[^\w$])def(?:\.|\[[\'\"])([\w$\.]+)(?:[\'\"]\])?\s*\:\s*([\w$\.]+|\"[^\"]+\"|\'[^\']+\'|\{[^\}]+\})/g,
-			define:      /\{\{##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\}\}/g,
-			defineParams:/^\s*([\w$]+):([\s\S]+)/,
-			conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g,
-			iterate:     /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g,
-			varname:	"it",
-			strip:		true,
-			append:		true,
-			selfcontained: false,
-			doNotSkipEncoded: false
-		},
-		template: undefined, //fn, compile template
-		compile:  undefined  //fn, for express
-	}, _globals;
-
-	doT.encodeHTMLSource = function(doNotSkipEncoded) {
-		var encodeHTMLRules = { "&": "&#38;", "<": "&#60;", ">": "&#62;", '"': "&#34;", "'": "&#39;", "/": "&#47;" },
-			matchHTML = doNotSkipEncoded ? /[&<>"'\/]/g : /&(?!#?\w+;)|<|>|"|'|\//g;
-		return function(code) {
-			return code ? code.toString().replace(matchHTML, function(m) {return encodeHTMLRules[m] || m;}) : "";
-		};
-	};
-
-	_globals = (function(){ return this || (0,eval)("this"); }());
-
-	if (typeof module !== "undefined" && module.exports) {
-		module.exports = doT;
-	} else if (typeof define === "function" && define.amd) {
-		define(function(){return doT;});
-	} else {
-		_globals.doT = doT;
-	}
-
-	var startend = {
-		append: { start: "'+(",      end: ")+'",      startencode: "'+encodeHTML(" },
-		split:  { start: "';out+=(", end: ");out+='", startencode: "';out+=encodeHTML(" }
-	}, skip = /$^/;
-
-	function resolveDefs(c, block, def) {
-		return ((typeof block === "string") ? block : block.toString())
-		.replace(c.define || skip, function(m, code, assign, value) {
-			if (code.indexOf("def.") === 0) {
-				code = code.substring(4);
-			}
-			if (!(code in def)) {
-				if (assign === ":") {
-					if (c.defineParams) value.replace(c.defineParams, function(m, param, v) {
-						def[code] = {arg: param, text: v};
-					});
-					if (!(code in def)) def[code]= value;
-				} else {
-					new Function("def", "def['"+code+"']=" + value)(def);
-				}
-			}
-			return "";
-		})
-		.replace(c.use || skip, function(m, code) {
-			if (c.useParams) code = code.replace(c.useParams, function(m, s, d, param) {
-				if (def[d] && def[d].arg && param) {
-					var rw = (d+":"+param).replace(/'|\\/g, "_");
-					def.__exp = def.__exp || {};
-					def.__exp[rw] = def[d].text.replace(new RegExp("(^|[^\\w$])" + def[d].arg + "([^\\w$])", "g"), "$1" + param + "$2");
-					return s + "def.__exp['"+rw+"']";
-				}
-			});
-			var v = new Function("def", "return " + code)(def);
-			return v ? resolveDefs(c, v, def) : v;
-		});
-	}
-
-	function unescape(code) {
-		return code.replace(/\\('|\\)/g, "$1").replace(/[\r\t\n]/g, " ");
-	}
-
-	doT.template = function(tmpl, c, def) {
-		c = c || doT.templateSettings;
-		var cse = c.append ? startend.append : startend.split, needhtmlencode, sid = 0, indv,
-			str  = (c.use || c.define) ? resolveDefs(c, tmpl, def || {}) : tmpl;
-
-		str = ("var out='" + (c.strip ? str.replace(/(^|\r|\n)\t* +| +\t*(\r|\n|$)/g," ")
-					.replace(/\r|\n|\t|\/\*[\s\S]*?\*\//g,""): str)
-			.replace(/'|\\/g, "\\$&")
-			.replace(c.interpolate || skip, function(m, code) {
-				return cse.start + unescape(code) + cse.end;
-			})
-			.replace(c.encode || skip, function(m, code) {
-				needhtmlencode = true;
-				return cse.startencode + unescape(code) + cse.end;
-			})
-			.replace(c.conditional || skip, function(m, elsecase, code) {
-				return elsecase ?
-					(code ? "';}else if(" + unescape(code) + "){out+='" : "';}else{out+='") :
-					(code ? "';if(" + unescape(code) + "){out+='" : "';}out+='");
-			})
-			.replace(c.iterate || skip, function(m, iterate, vname, iname) {
-				if (!iterate) return "';} } out+='";
-				sid+=1; indv=iname || "i"+sid; iterate=unescape(iterate);
-				return "';var arr"+sid+"="+iterate+";if(arr"+sid+"){var "+vname+","+indv+"=-1,l"+sid+"=arr"+sid+".length-1;while("+indv+"<l"+sid+"){"
-					+vname+"=arr"+sid+"["+indv+"+=1];out+='";
-			})
-			.replace(c.evaluate || skip, function(m, code) {
-				return "';" + unescape(code) + "out+='";
-			})
-			+ "';return out;")
-			.replace(/\n/g, "\\n").replace(/\t/g, '\\t').replace(/\r/g, "\\r")
-			.replace(/(\s|;|\}|^|\{)out\+='';/g, '$1').replace(/\+''/g, "");
-			//.replace(/(\s|;|\}|^|\{)out\+=''\+/g,'$1out+=');
-
-		if (needhtmlencode) {
-			if (!c.selfcontained && _globals && !_globals._encodeHTML) _globals._encodeHTML = doT.encodeHTMLSource(c.doNotSkipEncoded);
-			str = "var encodeHTML = typeof _encodeHTML !== 'undefined' ? _encodeHTML : ("
-				+ doT.encodeHTMLSource.toString() + "(" + (c.doNotSkipEncoded || '') + "));"
-				+ str;
-		}
-		try {
-			return new Function(c.varname, str);
-		} catch (e) {
-			if (typeof console !== "undefined") console.log("Could not create a template function: " + str);
-			throw e;
-		}
-	};
-
-	doT.compile = function(tmpl, def) {
-		return doT.template(tmpl, null, def);
-	};
-}());
-
-},{}],121:[function(require,module,exports){
-/* doT + auto-compilation of doT templates
- *
- * 2012, Laura Doktorova, https://github.com/olado/doT
- * Licensed under the MIT license
- *
- * Compiles .def, .dot, .jst files found under the specified path.
- * It ignores sub-directories.
- * Template files can have multiple extensions at the same time.
- * Files with .def extension can be included in other files via {{#def.name}}
- * Files with .dot extension are compiled into functions with the same name and
- * can be accessed as renderer.filename
- * Files with .jst extension are compiled into .js files. Produced .js file can be
- * loaded as a commonJS, AMD module, or just installed into a global variable
- * (default is set to window.render).
- * All inline defines defined in the .jst file are
- * compiled into separate functions and are available via _render.filename.definename
- *
- * Basic usage:
- * var dots = require("dot").process({path: "./views"});
- * dots.mytemplate({foo:"hello world"});
- *
- * The above snippet will:
- * 1. Compile all templates in views folder (.dot, .def, .jst)
- * 2. Place .js files compiled from .jst templates into the same folder.
- *    These files can be used with require, i.e. require("./views/mytemplate").
- * 3. Return an object with functions compiled from .dot templates as its properties.
- * 4. Render mytemplate template.
- */
-
-var fs = require("fs"),
-	doT = module.exports = require("./doT");
-
-doT.process = function(options) {
-	//path, destination, global, rendermodule, templateSettings
-	return new InstallDots(options).compileAll();
-};
-
-function InstallDots(o) {
-	this.__path 		= o.path || "./";
-	if (this.__path[this.__path.length-1] !== '/') this.__path += '/';
-	this.__destination	= o.destination || this.__path;
-	if (this.__destination[this.__destination.length-1] !== '/') this.__destination += '/';
-	this.__global		= o.global || "window.render";
-	this.__rendermodule	= o.rendermodule || {};
-	this.__settings 	= o.templateSettings ? copy(o.templateSettings, copy(doT.templateSettings)) : undefined;
-	this.__includes		= {};
-}
-
-InstallDots.prototype.compileToFile = function(path, template, def) {
-	def = def || {};
-	var modulename = path.substring(path.lastIndexOf("/")+1, path.lastIndexOf("."))
-		, defs = copy(this.__includes, copy(def))
-		, settings = this.__settings || doT.templateSettings
-		, compileoptions = copy(settings)
-		, defaultcompiled = doT.template(template, settings, defs)
-		, exports = []
-		, compiled = ""
-		, fn;
-
-	for (var property in defs) {
-		if (defs[property] !== def[property] && defs[property] !== this.__includes[property]) {
-			fn = undefined;
-			if (typeof defs[property] === 'string') {
-				fn = doT.template(defs[property], settings, defs);
-			} else if (typeof defs[property] === 'function') {
-				fn = defs[property];
-			} else if (defs[property].arg) {
-				compileoptions.varname = defs[property].arg;
-				fn = doT.template(defs[property].text, compileoptions, defs);
-			}
-			if (fn) {
-				compiled += fn.toString().replace('anonymous', property);
-				exports.push(property);
-			}
-		}
-	}
-	compiled += defaultcompiled.toString().replace('anonymous', modulename);
-	fs.writeFileSync(path, "(function(){" + compiled
-		+ "var itself=" + modulename + ", _encodeHTML=(" + doT.encodeHTMLSource.toString() + "(" + (settings.doNotSkipEncoded || '') + "));"
-		+ addexports(exports)
-		+ "if(typeof module!=='undefined' && module.exports) module.exports=itself;else if(typeof define==='function')define(function(){return itself;});else {"
-		+ this.__global + "=" + this.__global + "||{};" + this.__global + "['" + modulename + "']=itself;}}());");
-};
-
-function addexports(exports) {
-	for (var ret ='', i=0; i< exports.length; i++) {
-		ret += "itself." + exports[i]+ "=" + exports[i]+";";
-	}
-	return ret;
-}
-
-function copy(o, to) {
-	to = to || {};
-	for (var property in o) {
-		to[property] = o[property];
-	}
-	return to;
-}
-
-function readdata(path) {
-	var data = fs.readFileSync(path);
-	if (data) return data.toString();
-	console.log("problems with " + path);
-}
-
-InstallDots.prototype.compilePath = function(path) {
-	var data = readdata(path);
-	if (data) {
-		return doT.template(data,
-					this.__settings || doT.templateSettings,
-					copy(this.__includes));
-	}
-};
-
-InstallDots.prototype.compileAll = function() {
-	console.log("Compiling all doT templates...");
-
-	var defFolder = this.__path,
-		sources = fs.readdirSync(defFolder),
-		k, l, name;
-
-	for( k = 0, l = sources.length; k < l; k++) {
-		name = sources[k];
-		if (/\.def(\.dot|\.jst)?$/.test(name)) {
-			console.log("Loaded def " + name);
-			this.__includes[name.substring(0, name.indexOf('.'))] = readdata(defFolder + name);
-		}
-	}
-
-	for( k = 0, l = sources.length; k < l; k++) {
-		name = sources[k];
-		if (/\.dot(\.def|\.jst)?$/.test(name)) {
-			console.log("Compiling " + name + " to function");
-			this.__rendermodule[name.substring(0, name.indexOf('.'))] = this.compilePath(defFolder + name);
-		}
-		if (/\.jst(\.dot|\.def)?$/.test(name)) {
-			console.log("Compiling " + name + " to file");
-			this.compileToFile(this.__destination + name.substring(0, name.indexOf('.')) + '.js',
-					readdata(defFolder + name));
-		}
-	}
-	return this.__rendermodule;
-};
-
-},{"./doT":120,"fs":96}],122:[function(require,module,exports){
+},{"mol-proto":122}],122:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
