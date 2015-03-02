@@ -3,7 +3,7 @@
 
 var assert = require('assert')
     , request = milo.util.request
-    , count = milo.util.count;
+    , uniqueId = milo.util.uniqueId;
 
 
 require('../../mocks/xmlhttprequest');
@@ -126,7 +126,7 @@ describe('request', function() {
             completed();
         });
 
-        window['___milo_callback_' + count.get()]({"data": "test3"});
+        window['___milo_callback_' + uniqueId.get()]({"data": "test3"});
 
         promise.then(function(data) {
             assert.deepEqual(data, {"data": "test3"});

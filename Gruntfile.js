@@ -112,7 +112,7 @@ module.exports = function(grunt) {
     grunt.registerTask('karmatest', 'karma');
     grunt.registerTask('htmltest', ['browserify:test1', 'watch']);
     grunt.registerTask('tests', ['mochaTest', 'browserify', 'karmatest']);
-    grunt.registerTask('default', ['test', 'browserify', 'exorcise', 'watch']);
+    grunt.registerTask('default', ['test', 'browserify', 'uglify', 'exorcise', 'watch']);
     grunt.registerTask('skiptest', ['browserify', 'watch']);
 
 };

@@ -1,7 +1,21 @@
 {
   "name": "mol-milo",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Browser/nodejs reactive programming and data driven DOM manipulation with modular components.",
+  "keywords": [
+    "framework",
+    "reactive",
+    "reactive programming",
+    "binding",
+    "data binding",
+    "mvc",
+    "model",
+    "view",
+    "controller",
+    "component",
+    "messenger",
+    "one-page app"
+  ],
   "main": "lib/milo.js",
   "scripts": {
     "test": "grunt test"
