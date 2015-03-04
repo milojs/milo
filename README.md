@@ -16,7 +16,7 @@ Quick start
 
 ### Install
 
-    npm install mol-milo
+    npm install milojs
 
 or
 
@@ -130,8 +130,8 @@ cd $MILO_FOLDER
 npm link
 
 cd $MY_PROJECT
-rm -R -f -d node_modules/mol-milo
-npm link mol-milo # link milo to your current project to use with browserify
+rm -R -f -d node_modules/milojs
+npm link milojs # link milo to your current project to use with browserify
 
 cd $MILO_FOLDER
 grunt # rebuild milo bundle every time you change any .js file
@@ -208,7 +208,7 @@ __milo__ supplies internal messaging classes that can also be used for applicati
 
 Messenger instances use instances of `MessageSource` subclasses to connect to external sources and instances of `MessengerAPI` subclasses to create higher level internal messages and transform message data. This architecture allows creating an advanced functionality in just a few lines of code.
 
-See [Messenger documentation](http://milojs.github.io/milo/messenger/index.js.html).
+See [Messenger documentation](http://milojs.github.io/milo-core/messenger/index.js.html).
 
 
 ### Model
@@ -217,7 +217,7 @@ __milo__ defines Model to allow safe access to the data without the need to worr
 
 Using Model does not require these APIs, and unlike these APIs it allows subscribing to changes on properties of your Models to any depth.
 
-See Model [demo](https://github.com/milojs/milo/blob/master/lib/model/demo.js) and [Model documentation](http://milojs.github.io/milo/model/index.js.html).
+See Model [demo](https://github.com/milojs/milo/blob/master/lib/model/demo.js) and [Model documentation](http://milojs.github.io/milo-core/model/index.js.html).
 
 
 ### Connector
@@ -232,7 +232,7 @@ Very soon Connector instances will support structure translation allowing creati
 
 One or multiple reactive connections can be created with [milo.minder](http://milojs.github.io/milo/minder.js.html).
 
-See [Connector documentation](http://milojs.github.io/milo/model/connector.js.html).
+See [Connector documentation](http://milojs.github.io/milo-core/model/connector.js.html).
 
 
 ### Views and application management
