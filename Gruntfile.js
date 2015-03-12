@@ -22,7 +22,7 @@ module.exports = function(grunt) {
         browserify: {
             milo: {
                 files: {
-                    'milo.bundle.js': 'lib/milo.js'
+                    'dist/milo.bundle.js': 'lib/milo.js'
                 },
                 options: {
                     transform: ['brfs'],
@@ -52,7 +52,7 @@ module.exports = function(grunt) {
             build: {
                 options: {},
                 files: {
-                    'milo.bundle.map': 'milo.bundle.js'
+                    'dist/milo.bundle.map': 'dist/milo.bundle.js'
                 }
             }
         },
@@ -65,7 +65,7 @@ module.exports = function(grunt) {
             },
             milo: {
                 files: {
-                    'milo.min.js': 'milo.bundle.js'
+                    'dist/milo.min.js': 'dist/milo.bundle.js'
                 }
             }
         },
