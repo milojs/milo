@@ -238,7 +238,7 @@ See [Connector documentation](http://milojs.github.io/milo-core/model/connector.
 ### Views and application management
 
 - [milo.loader](http://milojs.github.io/milo/loader.js.html) - loading subviews into page.
-- [milo.mail](http://milojs.github.io/milo/mail/index.js.html) - applicaiton level messenger that also defines `domready` event and simplifies routing of messages between iframes (see [Frame facet](http://milojs.github.io/milo/components/c_facets/Frame.js.html)).
+- [milo.mail](http://milojs.github.io/milo/services/mail/index.js.html) - applicaiton level messenger that also defines `domready` event and simplifies routing of messages between iframes (see [Frame facet](http://milojs.github.io/milo/components/c_facets/Frame.js.html)).
 - [milo.config](http://milojs.github.io/milo/config.js.html) - configuring __milo__ settings.
 
 
