@@ -30,7 +30,7 @@
     "url": "https://github.com/milojs/milo/issues"
   },
   "dependencies": {
-    "base32": "milojs/base32-js",
+    "base32": "git://github.com/milojs/base32-js",
     "milo-core": "^0.1.15"
   },
   "devDependencies": {
