@@ -1,6 +1,6 @@
 {
   "name": "milojs",
-  "version": "0.2.7",
+  "version": "0.2.6",
   "description": "Browser/nodejs reactive programming and data driven DOM manipulation with modular components.",
   "keywords": [
     "framework",
@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "base32": "git://github.com/milojs/base32-js",
-    "milo-core": "^0.1.18"
+    "milo-core": "^0.1.15"
   },
   "devDependencies": {
     "async": "~0.2.9",
