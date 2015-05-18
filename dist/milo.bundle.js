@@ -7685,6 +7685,7 @@ _.extendProto(MLSuperCombo, {
     update: MLSuperCombo$update,
     toggleAddButton: MLSuperCombo$toggleAddButton,
     setAddItemPrompt: MLSuperCombo$setAddItemPrompt,
+    setPlaceholder: MLSuperCombo$setPlaceholder,
     clearComboInput: MLSuperCombo_del
 });
 
@@ -7817,6 +7818,9 @@ function MLSuperCombo$setAddItemPrompt(prompt) {
     this.toggleAddButton(false);
 }
 
+function MLSuperCombo$setPlaceholder(placeholder) {
+    this._comboInput.el.placeholder = placeholder;
+}
 
 /**
  * Component instance method
@@ -17409,7 +17413,7 @@ __.extend.call(arrayMethods, nativeArrayMethods);
  * @return {Any}
  */
 arrayMethods.find = Array.prototype.find
-    || utils.makeFindMethod(arrayMethods.forEach, 'value');
+    || utils.makeFindMethod(arrayMethods.some, 'value');
 
 
 /**
@@ -17422,7 +17426,7 @@ arrayMethods.find = Array.prototype.find
  * @return {Integer}
  */
 arrayMethods.findIndex = Array.prototype.findIndex
-    || utils.makeFindMethod(arrayMethods.forEach, 'index');
+    || utils.makeFindMethod(arrayMethods.some, 'index');
 
 
 /**
@@ -18080,7 +18084,7 @@ defineProperty.call(objectMethods, '_constants', constants);
  * @param {Boolean} onlyEnumerable An optional `true` to iterate enumerable properties only.
  * @return {Any}
  */
-objectMethods.findValue = utils.makeFindMethod(eachKey, 'value');
+objectMethods.findValue = utils.makeFindMethod(someKey, 'value');
 
 
 /**
@@ -18093,7 +18097,7 @@ objectMethods.findValue = utils.makeFindMethod(eachKey, 'value');
  * @param {Boolean} onlyEnumerable An optional `true` to iterate enumerable properties only.
  * @return {Integer}
  */
-objectMethods.findKey = utils.makeFindMethod(eachKey, 'key');
+objectMethods.findKey = utils.makeFindMethod(someKey, 'key');
 
 
 /**
@@ -19130,31 +19134,24 @@ var _error = new Error;
  * @param {String} findWhat 'value' - returns find method of Array (implemented in ES6) or findValue method of Object, anything else = returns findIndex/findKey methods.
  * @return {Function}
  */
-function makeFindMethod(eachMethod, findWhat) {
+function makeFindMethod(someMethod, findWhat) {
     var argIndex = findWhat == 'value' ? 0 : 1;
 
     return function findValueOrIndex(callback, thisArg, onlyEnumerable) {
-        var caughtError;
-        try {
-            eachMethod.call(this, testItem, thisArg, onlyEnumerable);
-        } catch (found) {
-            if (found === _error) throw caughtError;
-            else return found;
-        }
+        var foundValueOrIndex;
+        var found = someMethod.call(this, testItem, thisArg, onlyEnumerable);
+        if (found)
+            return foundValueOrIndex;
         // if looking for index and not found, return -1
-        if (argIndex && eachMethod == Array.prototype.forEach)
-            return -1; 
+        else if (argIndex && someMethod == Array.prototype.some)
+            return -1;
 
         function testItem(value, index, self) {
-            var test;
-            try {
-                test = callback.call(this, value, index, self);
-            } catch(err) {
-                caughtError = err;
-                throw _error;
+            var test = callback.call(this, value, index, self);
+            if (test) {
+                foundValueOrIndex = arguments[argIndex]
+                return test;
             }
-            if (test)
-                throw arguments[argIndex];
         }
     }
 }
