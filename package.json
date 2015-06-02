@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "base32": "git://github.com/milojs/base32-js",
-    "milo-core": "^0.1.15"
+    "milo-core": "^0.1.18"
   },
   "devDependencies": {
     "async": "~0.2.9",
