@@ -9146,6 +9146,9 @@ config({
             responsePrefix: 'response_'
         }
     },
+    messaging: {
+        zeroTimeoutMessage: '___milo_zero_timeout_message'
+    },
     deprecationWarning: 'once'
 });
 
@@ -9547,7 +9550,8 @@ var miloCore = require('milo-core')
     , MessengerAPI = miloCore.classes.MessengerAPI
     , _ = miloCore.proto
     , check = miloCore.util.check
-    , Match = check.Match;
+    , Match = check.Match
+    , config = require('../../config');
 
 
 var MailMsgAPI = _.createSubclass(MessengerAPI, 'MailMsgAPI', true);
@@ -9582,11 +9586,13 @@ function filterSourceMessage(sourceMessage, msgType, msgData) {
         //  return false;
         // _.defineProperty(this, '_domReadyFired', true, _.WRIT);
         return true;
-    } else if (sourceMessage == 'message')
-        return windowMessagePrefix + msgData.data.type == msgType;
+    } else if (sourceMessage == 'message') {
+        if (msgData.data == config.messaging.zeroTimeoutMessage) return false;
+        else return windowMessagePrefix + msgData.data.type == msgType;
+    }
 };
 
-},{"milo-core":106}],72:[function(require,module,exports){
+},{"../../config":64,"milo-core":106}],72:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -13158,6 +13164,10 @@ var Mixin = require('../abstract/mixin')
     , Match = check.Match;
 
 
+// in browser code can be replaced with milo.util.zeroTimeout using useSetTimeout method
+var _setTimeout = setTimeout;
+
+
 /**
  * `milo.Messenger`
  * A generic Messenger class that is used for all kinds of messaging in milo. It is subclassed from [Mixin](../abstract/mixin.js.html) and it proxies its methods to the host object for convenience.
@@ -13251,6 +13261,13 @@ Messenger.defaultMethods = {
     postMessageSync: 'postMessageSync',
     getSubscribers: 'getSubscribers'
 };
+
+
+/**
+ * Messenger class (static) methods
+ * - [useSetTimeout](#useSetTimeout)
+ */
+Messenger.useSetTimeout = useSetTimeout;
 
 
 module.exports = Messenger;
@@ -13729,7 +13746,17 @@ function _callSubscriber(subscriber, message, data, callback, _synchronous) {
     if (synchro)
         subscriber.subscriber.call(subscriber.context, message, data, callback);
     else
-        _.deferMethod(subscriber.subscriber, 'call', subscriber.context, message, data, callback);
+        _setTimeout(function() { subscriber.subscriber.call(subscriber.context, message, data, callback); }, 0);
+}
+
+
+/**
+ * Replace setTimeout with another function (e.g. setImmediate in node or milo.util.zeroTimeout in browser)
+ *
+ * @param  {Function} setTimeoutFunc function to use to delay execution
+ */
+function useSetTimeout(setTimeoutFunc) {
+    _setTimeout = setTimeoutFunc;
 }
 
 
