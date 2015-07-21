@@ -1,11 +1,10 @@
 Milo
 ====
 
-[![Join the chat at https://gitter.im/milojs/milo](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/milojs/milo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 Browser/nodejs [reactive programming](http://en.wikipedia.org/wiki/Reactive_programming) and data driven DOM manipulation with modular components.
 
-[![Build Status](https://travis-ci.org/milojs/milo.png?branch=master)](https://travis-ci.org/milojs/milo) [![Code Climate](https://codeclimate.com/github/milojs/milo/badges/gpa.svg)](https://codeclimate.com/github/milojs/milo)
+[![Build Status](https://travis-ci.org/milojs/milo.png?branch=master)](https://travis-ci.org/milojs/milo)
+[![Code Climate](https://codeclimate.com/github/milojs/milo/badges/gpa.svg)](https://codeclimate.com/github/milojs/milo)
 
 
 Documentation: http://milojs.github.io/milo/
