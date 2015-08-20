@@ -3,7 +3,9 @@
 var FacetedObject = require('../../lib/abstract/faceted_object')
     , Facet = require('../../lib/abstract/facet')
     , assert = require('assert')
-    , _ = require('milo-core').proto;
+    , _ = require('milo-core').proto
+    , config = require('../../lib/config');
+
 
 describe('FacetedObject class', function() {
     var factory = FacetedObject.createFacetedClass.bind(FacetedObject);
@@ -13,6 +15,17 @@ describe('FacetedObject class', function() {
         };
 
     var MyFacet = _.createSubclass(Facet, 'MyFacet');
+
+
+    before(function() {
+        config({ check: true });
+    });
+
+
+    after(function() {
+        config({ check: false });
+    });
+
 
     it('should define a factory createFacetedClass that creates classes of faceted objects', function() {
         var TestFacetedClass = factory('TestFacetedClass', facetsClasses, {

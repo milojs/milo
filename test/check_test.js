@@ -3,7 +3,8 @@
 var _ = require('milo-core').proto
     , assert = require('assert')
     , check = require('milo-core').util.check
-    , Match = check.Match;
+    , Match = check.Match
+    , config = require('../lib/config');
 
 describe('check module', function() {
     var notDefined
@@ -41,6 +42,14 @@ describe('check module', function() {
         undefined,
         undefined
     ];
+
+    before(function() {
+        config({ check: true });
+    });
+
+    after(function() {
+        config({ check: false });
+    });
 
     it('should match.test for different data types', function() {
         toTest.forEach(function(val, i) {

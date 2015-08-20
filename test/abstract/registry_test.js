@@ -2,10 +2,19 @@
 
 var ClassRegistry = require('../../lib/abstract/registry.js')
     , _ = require('milo-core').proto
-    , assert = require('assert');
+    , assert = require('assert')
+    , config = require('../../lib/config');
 
 describe('ClassRegistry class', function() {
     var registry = new ClassRegistry(Object);
+
+    before(function() {
+        config({ check: true });
+    });
+
+    after(function() {
+        config({ check: false });
+    });
 
     beforeEach(function() {
         registry.clean();

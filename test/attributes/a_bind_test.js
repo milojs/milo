@@ -1,10 +1,19 @@
 'use strict';
 
 var BindAttribute = require('../../lib/attributes/a_bind')
-    , assert = require('assert');
+    , assert = require('assert')
+    , config = require('../../lib/config');
 
 
 describe('BindAttribute class', function() {
+    before(function() {
+        config({ check: true });
+    });
+
+    after(function() {
+        config({ check: false });
+    });
+
     it('should have parse and validate methods', function() {
         var elMock = {
             attributes: {
