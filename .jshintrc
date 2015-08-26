@@ -6,5 +6,6 @@
     "curly": false,
     "-W058": true,
     "eqeqeq": false,
-    "validthis": true
+    "validthis": true,
+    "funcscope": true
 }
