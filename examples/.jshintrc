@@ -7,5 +7,6 @@
     "-W058": true,
     "eqeqeq": false,
     "validthis": true,
+    "funcscope": true,
     "predef": ["milo", "_"]
 }

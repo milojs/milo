@@ -1,7 +1,7 @@
 'use strict';
 
 
-window.XMLHttpRequest = function XMLHttpRequestMock() {}
+window.XMLHttpRequest = function XMLHttpRequestMock() {};
 
 _.extendProto(window.XMLHttpRequest, {
     open: open,
@@ -16,7 +16,7 @@ _.extend(window.XMLHttpRequest, {
 
 var _mock_routes;
 function setMockRoutes(routes) {
-    _mock_routes = routes
+    _mock_routes = routes;
 }
 
 
