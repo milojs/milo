@@ -14,8 +14,8 @@ milo(function() {
         , modelView = scope.modelView;
 
     var storedModelDataStr = window.localStorage.getItem('todos-milo');
-    if (storedModelDataStr)
-        var storedModelData = milo.util.jsonParse(storedModelDataStr);
+    var storedModelData;
+    if (storedModelDataStr) storedModelData = milo.util.jsonParse(storedModelDataStr);
 
     var m = new milo.Model;
 
@@ -97,6 +97,7 @@ milo(function() {
     }
 
     function removeTodo(eventType, event) {
+        /* jshint validthis: true */
         var id = this.data.getKey();
         m.splice(id, 1);
         showCounters();

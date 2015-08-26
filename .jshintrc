@@ -5,5 +5,6 @@
 	"node": true,
     "curly": false,
     "-W058": true,
-    "eqeqeq": false
+    "eqeqeq": false,
+    "predef": ["this"]
 }
