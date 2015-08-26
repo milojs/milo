@@ -6,5 +6,5 @@
     "curly": false,
     "-W058": true,
     "eqeqeq": false,
-    "predef": ["this"]
+    "validthis": true
 }
