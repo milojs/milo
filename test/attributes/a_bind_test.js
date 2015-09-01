@@ -66,18 +66,14 @@ describe('BindAttribute class', function() {
 
             attr.parse();
             assert.equal(attr.compClass, 'Button', 'comp class should be Button');
-            assert.equal(attr.compName, undefined, 'comp name should be undefined');
-            assert.throws(attr.validate.bind(attr),
-                'attribute ' + attr.name + ' can\'t contain empty name');
+            assert.equal(typeof attr.compName, 'string', 'comp name should be automatically generated');
 
         attr = new BindAttribute(elMock, 'ml-bind');
         elMock.getAttribute = function(name) { return 'myButton'; }
 
             attr.parse();
             assert.equal(attr.compClass, 'myButton', 'comp class should be myButton');
-            assert.equal(attr.compName, undefined, 'comp name should be undefined');
-            assert.throws(attr.validate.bind(attr),
-                'attribute ' + attr.name + ' can\'t contain empty name');
+            assert.equal(typeof attr.compName, 'string', 'comp name should be automatically generated');
 
         attr = new BindAttribute(elMock, 'ml-bind');
         elMock.getAttribute = function(name) { return 'View[Events, Data]:myView'; }
