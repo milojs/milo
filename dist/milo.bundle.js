@@ -7324,6 +7324,9 @@ var domUtils = {
     forEachNodesInRange: forEachNodesInRange,
     areRangesEqual: areRangesEqual,
 
+    xpathSelector: xpathSelector,
+    xpathSelectorAll: xpathSelectorAll,
+
     addDebugPoint: addDebugPoint
 };
 
@@ -7948,6 +7951,36 @@ function deleteRangeWithComponents(range) {
  */
 function areRangesEqual(range1, range2){
     return range1.compareBoundaryPoints(window.Range.START_TO_START, range2) === 0 && range1.compareBoundaryPoints(window.Range.END_TO_END, range2) === 0;
+}
+
+
+/**
+ * Return the first node that matches xpath expression
+ * @param  {String} xpath xpath expression, e.g. '//a[contains(text(), "Click here")]' or '/html/body//h1'
+ * @param  {Node} context optional context node to search inside, document by default
+ * @return {Node}
+ */
+function xpathSelector(xpath, context) {
+    if (!document.evaluate) return logger.error('document.evaluate is not supported');
+    context = context || document;
+    var result = document.evaluate(xpath, context, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    return result && result.singleNodeValue;
+}
+
+
+/**
+ * Return array of nodes that match xpath expression
+ * @param  {String} xpath xpath expression, e.g. '//a[contains(text(), "Click here")]' or '/html/body//h1'
+ * @param  {Node} context optional context node to search inside, document by default
+ * @return {Array[Node]}
+ */
+function xpathSelectorAll(xpath, context) {
+    if (!document.evaluate) return logger.error('document.evaluate is not supported');
+    context = context || document;
+    var result = document.evaluate(xpath, context, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+    var nodes = [], i = 0, node;
+    while (node = result.snapshotItem(i)) nodes[i++] = node;
+    return nodes;
 }
 
 
@@ -16497,7 +16530,7 @@ var formatRegexp = /\$[0-9]+|\$\$/g;
 function format() { // , ... arguments
     var str = this;
     var args = arguments;
-    return str.replace(formatRegexp, function (item) {
+    return str.replace(formatRegexp, function(item) {
         if (item == '$$') return '$';
         item = item.slice(1);
         return args[item - 1];

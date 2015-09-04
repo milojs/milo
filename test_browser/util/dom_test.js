@@ -86,4 +86,41 @@ describe('DOM utils', function() {
         assert.deepEqual(treePathOf(root, p), [2, 3, 1]);
         assert.equal(currentHTML, root.innerHTML);
     });
+
+
+    it('should define xpathSelector', function() {
+        var p1 = document.getElementById('tree-index-1')        
+            , p2 = document.getElementById('tree-index-6')
+        assert.equal(domUtils.xpathSelector('/html/body//p'), p1);
+        assert.equal(domUtils.xpathSelector('//p[@id="tree-index-6"]'), p2);
+        assert.equal(domUtils.xpathSelector('//p[contains(text(), "Second")]'), p2);
+    });
+
+
+    it('should define xpathSelectorAll', function() {
+        var p1 = document.getElementById('tree-index-1')
+            , p2 = document.getElementById('tree-index-6')
+            , p3 = document.getElementById('tree-index-11')
+            , p4 = document.getElementById('tree-index-16');
+
+        sameElements(domUtils.xpathSelectorAll('/html/body//p'), [ p1, p2, p3, p4 ]);
+        assert.throws(function() {
+            sameElements(domUtils.xpathSelectorAll('/html/body//p'), [ p1, p2, p3, p3 ]);
+        });
+
+        sameElements(domUtils.xpathSelectorAll('//p[@class="odd"]'), [ p1, p3 ]);
+        sameElements(domUtils.xpathSelectorAll('//p[@class="even"]'), [ p2, p4 ]);
+        sameElements(domUtils.xpathSelectorAll('//p[contains(text(), "paragraph")]'), [ p1, p2, p3]);
+        sameElements(domUtils.xpathSelectorAll('//p[contains(@id, "tree")]'), [ p1, p2, p3, p4 ]);
+
+        function sameElements(elements, expectedElements) {
+            // deep equal can't be used here (it gives false positives)
+            // as long as the length of arrays are the same, they will be "deepEqual" even if elements are different
+            // because elements don't have own properties apart from those assigned in code
+            assert.equal(elements.length, expectedElements.length);
+            elements.forEach(function (el, i) {
+                assert.equal(el, expectedElements[i]);
+            });
+        }
+    });
 });
