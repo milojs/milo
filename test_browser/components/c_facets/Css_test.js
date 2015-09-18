@@ -3,7 +3,9 @@
 var assert = require('assert')
     , async = require('async');
 
-describe('Css facet', function() {
+describe.only('Css facet', function() {
+    milo.config.check = true; // Enable 'check' library so that inputs to the Css facet are validated
+
     var ComponentClass = milo.createComponentClass({
         className: 'CssComponent',
         facets: {
@@ -123,8 +125,61 @@ describe('Css facet', function() {
         }
     });
 
+    it('should delete all classes when data is set to null/undefined', function() {
+        testWith(null);
+        testWith(undefined);
+
+        function testWith(data) {
+            component.css.set({
+                '.modelPath1': true,
+                '.modelPath2': 'red',
+                '.modelPath3': 'pear',
+                '.modelPath4': 'pig'
+            });
+
+            assertCssExists('css-class-1'); // modelPath1
+            assertCssExists('red-css-class'); // modelPath2
+            assertCssExists('pear-class'); // modelPath3
+            assertCssExists('pig-class'); // modelPath4
+
+            component.css.set(data);
+
+            assert.equal(component.el.classList.length, 0, 'Expected all Css classes to have been removed');
+        }
+
+        function assertCssExists(className) {
+            assert(component.el.classList.contains(className), 'Expected ' + className + ' css class to exist');
+        }
+    });
+
+    it('should throw exception if supplied with invalid data', function() {
+        // Valid inputs
+        trySet({}, true);
+        trySet(null, true);
+        trySet(undefined, true);
+
+        // Invalid inputs
+        trySet(true, false);
+        trySet(false, false);
+        trySet('Hello world', false);
+        trySet(1, false);
+
+        function trySet(data, isValidInput) {
+            var exceptionThrown = false;
+            var message = (isValidInput ? 'Unexpected' : 'Expected') + ' exception when setting data type ' + typeof data;
+
+            try {
+               component.css.set(data);
+            } catch(e) {
+               exceptionThrown = true;
+            }
+
+            assert(isValidInput != exceptionThrown, message);
+        }
+    });
+
     function runTests(next, testSpecs) {
-        this.timeout(100000);
+        this.timeout(5000);
 
         async.forEachSeries(testSpecs, runTest, next);
 
