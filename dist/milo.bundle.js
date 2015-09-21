@@ -2955,7 +2955,9 @@ function CssFacet$del() {
 }
 
 function CssFacet$path(modelPath) {
-    return this.config.classes && this.config.classes[modelPath] ? new Path(this, modelPath) : this;
+    var pathAccessor = this.config.classes && this.config.classes[modelPath] ? new Path(this, modelPath) : null;
+
+    return modelPath ? pathAccessor : this;
 }
 
 function CssFacet$update(modelPath, value) {
