@@ -2967,9 +2967,10 @@ function CssFacet$del() {
 }
 
 function CssFacet$path(modelPath) {
-    var pathAccessor = this.config.classes && this.config.classes[modelPath] ? new Path(this, modelPath) : null;
+    if (!modelPath) return this; // No model path (or '') means the root object
 
-    return modelPath ? pathAccessor : this;
+    // Otherwise the modelPath has to exist in the facet configuration
+    return this.config.classes && this.config.classes[modelPath] ? new Path(this, modelPath) : null;
 }
 
 function CssFacet$update(modelPath, value) {
