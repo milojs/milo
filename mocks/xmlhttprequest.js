@@ -33,6 +33,7 @@ function setRequestHeader(header, content) {
 
 
 function send(data) {
+    var self = this;
     this.data = data;
     var url = this.url;
     var methodRoutes = _mock_routes[this.method.toUpperCase()] || {};
@@ -44,9 +45,11 @@ function send(data) {
     var handler = methodRoutes[handlerKey];
 
     if (handler) {
-        var response = typeof handler == 'function'
-                        ? handler(data)
-                        : handler;
+        if (typeof handler == 'function' && handler.length == 2)
+            return handler(data, done);
+        
+        var response = typeof handler == 'function' ? handler(data) : handler;
+        _.deferMethod(this, _response_ready, response);
     } else {
         milo.util.logger.error('*unknown mock route', this.method, this.url);
         response = {
@@ -55,7 +58,9 @@ function send(data) {
         };
     }
 
-    _.deferMethod(this, _response_ready, response);
+    function done(res) {
+        _.deferMethod(self, _response_ready, res);
+    }
 }
 
 
@@ -74,4 +79,13 @@ function _response_ready(response) {
         this.onreadystatechange({ type: 'readystatechange' });
     } else
         milo.util.logger.warn('no request handler');
+}
+
+
+var ARGS_PATTERN = /\(\s*([^)]+?)\s*\)/;
+var WHITESPACE_PATTERN = /\s*,\s*/;
+function extractFuncArgs(func) {
+    var str = func.toString();
+    var args = ARGS_PATTERN.exec(str)[1];
+    if (args) return args.split(WHITESPACE_PATTERN);
 }
