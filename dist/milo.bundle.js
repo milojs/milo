@@ -4148,10 +4148,8 @@ function Drag$start() {
     });
 
     this.owner.onMessages({
-        'getstatestarted':
-            { subscriber: _removeDragAttribute, context: this },
-        'getstatecompleted':
-            { subscriber: _addDragAttribute, context: this }
+        'getstatestarted': _removeDragAttribute,
+        'getstatecompleted': _addDragAttribute
     });
 }
 
@@ -4162,14 +4160,12 @@ function Drag$start() {
  * @private
  */
 function _addDragAttribute() {
-    if (this.owner.el)
-        this.owner.el.setAttribute('draggable', true);
+    if (this.el) this.el.setAttribute('draggable', true);
 }
 
 
 function _removeDragAttribute() {
-    if (this.owner.el)
-        this.owner.el.removeAttribute('draggable');
+    if (this.el) this.el.removeAttribute('draggable');
 }
 
 
@@ -7928,7 +7924,6 @@ function forEachNodesInRange(range, cb){
             && nodeRange.compareBoundaryPoints(window.Range.END_TO_END, range) != 1){
             isInside = true;
         }
-        nodeRange.detach();
         return isInside;
     }
 
