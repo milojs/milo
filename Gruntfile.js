@@ -29,6 +29,11 @@ module.exports = function(grunt) {
                     debug: true
                 }
             },
+            cover: {
+                files: {
+                    'dist/milo.cover.bundle.js': 'build/instrument/lib/milo.js'
+                }
+            },
             test1: {
                 files: {
                     'test_html/bind_test.bundle.js': 'test_html/bind_test/*.js'
@@ -46,6 +51,12 @@ module.exports = function(grunt) {
                 options: {
                     transform: ['brfs']
                 }
+            }
+        },
+        instrument: {
+            files: 'lib/**/*.js',
+            options: {
+                cwd: __dirname
             }
         },
         exorcise: {
@@ -107,6 +118,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-mocha-test');
     grunt.loadNpmTasks('grunt-karma');
     grunt.loadNpmTasks('grunt-exorcise');
+    grunt.loadNpmTasks('grunt-istanbul');
 
     grunt.registerTask('test', 'mochaTest');
     grunt.registerTask('karma', 'browserify:tests');

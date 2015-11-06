@@ -3,7 +3,7 @@
 var assert = require('assert')
     , async = require('async');
 
-describe.only('Css facet', function() {
+describe('Css facet', function() {
     milo.config.check = true; // Enable 'check' library so that inputs to the Css facet are validated
 
     var ComponentClass = milo.createComponentClass({
@@ -203,7 +203,7 @@ describe.only('Css facet', function() {
     });
 
     function runTests(next, testSpecs) {
-        this.timeout(5000);
+        this.timeout(10000);
 
         async.forEachSeries(testSpecs, runTest, next);
 

@@ -9,3 +9,7 @@ test_html/bind_test.bundle.js
 docs/
 npm-debug.log
 bower_components
+
+build/
+coverage/
+dist/milo.cover.bundle.js

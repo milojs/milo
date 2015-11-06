@@ -1,6 +1,6 @@
 {
   "name": "milojs",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "Browser/nodejs reactive programming and data driven DOM manipulation with modular components.",
   "keywords": [
     "framework",
@@ -18,7 +18,10 @@
   ],
   "main": "lib/milo.js",
   "scripts": {
-    "test": "grunt test"
+    "test": "./node_modules/.bin/mocha --recursive --reporter=spec",
+    "test-cov": "istanbul cover -x 'test' --dir ./coverage/node node_modules/mocha/bin/_mocha -- --recursive --reporter=spec",
+    "test-browser": "grunt karma && karma start --single-run --browsers Chrome",
+    "test-travis": "npm run test-cov && grunt build && karma start --single-run --browsers Firefox && istanbul report"
   },
   "repository": {
     "type": "git",
@@ -42,13 +45,18 @@
     "grunt-contrib-uglify": "~0.2.7",
     "grunt-contrib-watch": "~0.5.3",
     "grunt-exorcise": "^1.0.0",
+    "grunt-istanbul": "^0.6.1",
     "grunt-karma": "^0.8.2",
     "grunt-mocha-test": "~0.7.0",
+    "istanbul": "^0.4.0",
     "karma": "~0.12",
     "karma-chrome-launcher": "~0.1.2",
+    "karma-coverage": "^0.5.3",
+    "karma-firefox-launcher": "^0.1.6",
     "karma-mocha": "~0.1.1",
     "karma-spec-reporter": "0.0.6",
     "karma-webdriver-launcher": "^0.2.0",
-    "mocha": "~1.16.2"
+    "mocha": "~1.16.2",
+    "phantomjs": "^1.9.18"
   }
 }

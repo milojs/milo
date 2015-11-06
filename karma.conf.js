@@ -11,7 +11,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'dist/milo.bundle.js',
+      'dist/milo.cover.bundle.js',
       '.tmp-test-browser/**/*.js'
     ],
 
@@ -24,8 +24,12 @@ module.exports = function(config) {
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-    reporters: ['spec'],
+    reporters: ['spec', 'coverage'],
 
+    coverageReporter: {
+        type: 'json',
+        dir: 'coverage'
+    },
 
     // web server port
     port: 9876,

@@ -114,7 +114,7 @@ describe('DOMStorage', function() {
         });
 
 
-        it('should store and get functions', function() {
+        it.skip('should store and get functions', function() {
             function myFunc() { return 1234; }
             domStorage.setItem('myFunc', myFunc);
             assert.deepEqual(getLocalStorage(), {

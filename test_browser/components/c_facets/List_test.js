@@ -46,6 +46,7 @@ describe('List facet', function() {
     });
 
     it('modelPath shouldn\'t duplicate when list is empty', function(done) {
+        this.timeout(20000);
         // var m1 = new Model({hello:[]});
         var m1 = new Model;
         milo.minder(m1('.hello'), '<<<->>>', scope.myList1.data);
