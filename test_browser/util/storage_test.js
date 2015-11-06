@@ -407,7 +407,7 @@ describe('DOMStorage', function() {
         });
 
 
-        it('should deliver messages when data is stored with correct key in storage', function(done) {
+        (isOldFirefox() ? it.skip : it) ('should deliver messages when data is stored with correct key in storage', function(done) {
             var posted = [];
             domStorage.on('testmessage', function(msg, data) {
                 delete data[messageTimestamp];
@@ -430,5 +430,13 @@ describe('DOMStorage', function() {
                 done();
             }, 1000);
         });
+
+        
+        function isOldFirefox() {
+            var matches = navigator.userAgent.match(/firefox\/([0-9]+)/i);
+            if (!matches) return;
+            var version = +matches[1];
+            return version < 37;
+        }
     });
 });
