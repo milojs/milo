@@ -3,7 +3,7 @@
 var assert = require('assert')
     , async = require('async');
 
-describe('Css facet', function() {
+describe.only('Css facet', function() {
     milo.config.check = true; // Enable 'check' library so that inputs to the Css facet are validated
 
     var ComponentClass = milo.createComponentClass({
@@ -37,7 +37,7 @@ describe('Css facet', function() {
     var dataSource;
 
     beforeEach(function() {
-        component = ComponentClass.createOnElement(null, '<div ml-bind="CssComponent:test"></div>');
+        component = ComponentClass.createOnElement();
         dataSource = new milo.Model();
 
         milo.minder(dataSource, '->>', component.css);
@@ -50,6 +50,30 @@ describe('Css facet', function() {
             test('.modelPath1', {}, ['css-class-1']), // Add class (truthy value, not boolean true)
             test('.modelPath1', '', []) // Remove class (falsey value, not boolean false)
         ]);
+    });
+
+    it('should apply css classes to element supplied with getClassList', function(done) {
+        var TestClass = milo.createComponentClass({
+            className: 'TestClass',
+            facets: {
+                css: {
+                    getClassList: function () {return this.owner.el.querySelector('.inner').classList;},
+                    classes: {'.test': 'test'}
+                }
+            }
+        });
+
+        var comp = TestClass.createOnElement(null, '<strong class="inner"></strong>');
+        var m = new milo.Model();
+
+        milo.minder(m, '->>', comp.css);
+
+        comp.css.once('changed', function() {
+            var innerClassList = comp.el.querySelector('.inner').classList;
+            assert(innerClassList.contains('test'));
+            done();
+        });
+        m('.test').set(true);
     });
 
     it('should apply classes based on model values in a lookup table', function(done) {
