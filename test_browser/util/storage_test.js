@@ -424,11 +424,11 @@ describe('DOMStorage', function() {
             win.localStorage.setItem('MiloTest/' + milo.config.domStorage.messageKey + 'anothermessage', 'test: 3');
             win.localStorage.setItem('anotherkey', 'test: 4');
 
-            _.deferTicks(function() {
+            _.delay(function() {
                 assert.deepEqual(posted, [{ message: 'testmessage', data: 'test: 2' }]);
                 assert.deepEqual(posted2, [{ message: 'anothermessage', data: 'test: 3' }]);
                 done();
-            }, 4);
+            }, 1000);
         });
     });
 });
