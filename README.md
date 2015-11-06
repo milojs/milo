@@ -4,8 +4,9 @@ Milo
 Browser/nodejs [reactive programming](http://en.wikipedia.org/wiki/Reactive_programming) and data driven DOM manipulation with modular components.
 
 [![Build Status](https://travis-ci.org/milojs/milo.png?branch=master)](https://travis-ci.org/milojs/milo)
+[![npm version](https://badge.fury.io/js/milojs.svg)](https://badge.fury.io/js/milojs)
 [![Code Climate](https://codeclimate.com/github/milojs/milo/badges/gpa.svg)](https://codeclimate.com/github/milojs/milo)
-
+[![Test Coverage](https://codeclimate.com/github/milojs/milo/badges/coverage.svg)](https://codeclimate.com/github/milojs/milo/coverage)
 
 Documentation: http://milojs.github.io/milo/
 
