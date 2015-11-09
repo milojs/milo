@@ -44,18 +44,18 @@ function send(data) {
 
     var handler = methodRoutes[handlerKey];
 
-    if (handler) {
-        if (typeof handler == 'function' && handler.length == 2)
-            return handler(data, done);
-        
-        var response = typeof handler == 'function' ? handler(data) : handler;
-        _.deferMethod(this, _response_ready, response);
-    } else {
+    if (handler === undefined) {
         milo.util.logger.error('*unknown mock route', this.method, this.url);
-        response = {
+        done({
             status: 404,
             body: 'unknown mock route: ' + this.method + ' ' + this.url
-        };
+        });
+    } else {
+        if (typeof handler == 'function') {
+            if (handler.length == 2) handler(data, done);
+            else done(handler(data));
+        } else
+            done(handler);
     }
 
     function done(res) {
