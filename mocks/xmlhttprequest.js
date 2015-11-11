@@ -65,20 +65,31 @@ function send(data) {
 
 
 function _response_ready(response) {
-    if (typeof this.onreadystatechange == 'function') {
-        this.readyState = 4;
-        if (typeof response == 'object') {
-            this.statusText = 'Error';
-            this.status = response.status;
-            this.responseText = response.body;
-        } else {
-            this.statusText = 'OK';
-            this.status = 200;
-            this.responseText = response;
+    var self = this;
+    var handler, eventType;
+    if (!setHandler('loadend'))
+        if (!setHandler('readystatechange'))
+            return milo.util.logger.warn('no request handler');
+
+    this.readyState = 4;
+    if (typeof response == 'object') {
+        this.statusText = 'Error';
+        this.status = response.status;
+        this.responseText = response.body;
+    } else {
+        this.statusText = 'OK';
+        this.status = 200;
+        this.responseText = response;
+    }
+    handler({ type: eventType });
+
+    function setHandler(et) {
+        if (typeof self['on' + et] == 'function') {
+            handler = self['on' + et];
+            eventType = et;
+            return true;
         }
-        this.onreadystatechange({ type: 'readystatechange' });
-    } else
-        milo.util.logger.warn('no request handler');
+    }
 }
 
 

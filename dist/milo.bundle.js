@@ -15016,7 +15016,7 @@ arrayMethods.findIndex = Array.prototype.findIndex
  * Changes the value of `self` (it uses `Array.prototype.splice`) and returns `self`.
  *
  * @param {Array} self An array that will be modified
- * @param {Array|Array-like} arrayToAppend An array that will be appended
+ * @param {Array} arrayToAppend An array that will be appended
  * @return {Array}
  */
 function appendArray(arrayToAppend) {
@@ -15036,7 +15036,7 @@ function appendArray(arrayToAppend) {
  * Changes the value of `self` (it uses `Array.prototype.splice`) and returns `self`.
  *
  * @param {Array} self An array that will be modified
- * @param {Array|Array-like} arrayToAppend An array that will be prepended
+ * @param {Array} arrayToAppend An array that will be prepended
  * @return {Array}
  */
 function prependArray(arrayToPrepend) {
@@ -15069,7 +15069,7 @@ function spliceItem(item) {
 /**
  * Returns new array created from array-like object (e.g., `arguments` pseudo-array).
  *
- * @param {Array-like} self Object with numeric property length
+ * @param {PseudoArray} self Object with numeric property length
  * @return {Array}
  */
 function toArray() {
@@ -15149,7 +15149,7 @@ function unique(callback) {
 /**
  * Iterates array and elements that are arrays calling callback with each element that is not an array. Can be used to iterate over arguments list to avoid checking whether array or list of parameters is passed.
  *
- * @param {Array|Array-like} self array of elements and arraysto iterate.
+ * @param {Array} self array of elements and arraysto iterate.
  * @param {Function} callback called for each item that is not an array. Callback is passed item, index and original array as parameters.
  * @param {Any} thisArg optional callback envocation context
  */
@@ -15959,7 +15959,7 @@ function keyOf(searchElement, onlyEnumerable) {
  * @param {Object} self An object to search a value in
  * @param {Any} searchElement An element that will be searched. An exact equality is tested, so `0` is not the same as `'0'`.
  * @param {Boolean} onlyEnumerable An optional true to search among enumerable properties only.
- * @return {Array[String]}
+ * @return {Array<String>}
  */
 function allKeysOf(searchElement, onlyEnumerable) {
     var properties = onlyEnumerable
@@ -16148,7 +16148,7 @@ var ArrayProto = Array.prototype
  * Returns object of the same class with only specified keys, that are passed as string parameters or array(s) of keys.
  *
  * @param {Object} self an object to pick keys from
- * @param {List[String|Array]} arguments list of keys (or array(s) of keys)
+ * @param {List<String|Array>} arguments list of keys (or array(s) of keys)
  * @return {Object}
  */
 function pickKeys() { // , ... keys
@@ -16166,7 +16166,7 @@ function pickKeys() { // , ... keys
  * Returns object of the same class without specified keys, that are passed as string parameters or array(s) of keys.
  *
  * @param {Object} self an object to omit keys in
- * @param {List[String|Array]} arguments list of keys (or array(s) of keys)
+ * @param {List<String|Array>} arguments list of keys (or array(s) of keys)
  * @return {Object}
  */
 function omitKeys() { // , ... keys
@@ -16351,7 +16351,7 @@ function makeSubclass(Superclass) {
  * Calls constructor `this` with arguments passed as array
  * 
  * @param {Function} thisClass A class constructor that will be called
- * @return {Array|Array-like} args Array of arguments that will be passed to constructor
+ * @return {Array} args Array of arguments that will be passed to constructor
  */
 function newApply(args) {
     if (! Array.isArray(args))
@@ -16451,7 +16451,7 @@ function toFunction() {
  * Converts string to date in a safe way so that the resiult is undefined if date is invalid
  *
  * @param {String|Date} self string or date object to convert to VALID date
- * @return {[type]} [description]
+ * @return {Date|undefined}
  */
 function toDate() {
     if (! this) return;
@@ -16618,7 +16618,7 @@ function times(callback, thisArg) {
  * Returns array with the first argument repeated `times` times
  * @param  {Any} self
  * @param  {Integer} times
- * @return {Array[Any]}
+ * @return {Array}
  */
 function repeat(times) {
     var arr = Array(Math.max(0, times));;

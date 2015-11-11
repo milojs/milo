@@ -27,7 +27,7 @@ var requests = {
 };
 
 
-(isOldFirefox() ? describe.skip : describe) ('request', function() {
+describe('request', function() {
     this.timeout(10000);
 
     var requestMessageDispatched, requestMessages;
@@ -190,11 +190,3 @@ var requests = {
         }
     }
 });
-
-
-function isOldFirefox() {
-    var matches = navigator.userAgent.match(/firefox\/([0-9]+)/i);
-    if (!matches) return;
-    var version = +matches[1];
-    return version < 37;
-}
