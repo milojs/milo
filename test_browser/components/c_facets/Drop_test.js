@@ -34,25 +34,25 @@ describe('Drop facet', function() {
         }
     });
 
-    function onDragEnter(msg, event) {
+    function onDragEnter(eventType, event) {
         var dt = new DragDrop(event);
         assert.deepEqual(dt.getComponentMeta(), COMP_META);
         enterCount++;
     }
 
-    function onDragOver(msg, data) {
+    function onDragOver(eventType, event) {
         var dt = new DragDrop(event);
         assert.deepEqual(dt.getComponentMeta(), COMP_META);
         overCount++;
     }
 
-    function onDragLeave(msg, data) {
+    function onDragLeave(eventType, event) {
         var dt = new DragDrop(event);
         assert.deepEqual(dt.getComponentMeta(), COMP_META);
         leaveCount++;
     }
 
-    function onDrop(msg, data) {
+    function onDrop(eventType, event) {
         var dt = new DragDrop(event);
         assert.deepEqual(dt.getComponentMeta(), COMP_META);
         dropCount++;
