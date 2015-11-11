@@ -1,11 +1,21 @@
 'use strict';
 
 var assert = require('assert')
-    , async = require('async');
+    , async = require('async')
+    , DragDrop = milo.util.dragDrop;
 
-describe.only('Drop facet', function() {
+var ENCODED_TYPE = 'x-application/milo/component-meta/9n4n6x31dtj62wk4/dnmprvuz64u38dhr6cr30dhm6gvk8/fch76x3tdhjq68hubdxj4tvjdxuq08hu49tpjvk7dhjj4b12d5j24eh264uk28hc49q62vb548x24u3mdnp5ywved5r70tbmbxtpjvk7dhjj4zax5gh6jwucd5v6a8hueht7atbx';
+var COMP_META = {"compClass":"MIStandard","compName":"milo_1446830064474","params":{"styles":[{"group":"single","id":"151","name":"html_snippet_single"}],"isLive":true},"metaDataType": ENCODED_TYPE,"metaData":{"blah":"yo"}};
+var SERVICE_MESSAGES = ['dragenter', 'dragin', 'dragover', 'dragover', 'dragover', 'dragover', 'dragover', 'dragdropcompleted', 'drop'];
+
+
+describe('Drop facet', function() {
     milo.config.check = true; // Enable 'check' library so that inputs to the Css facet are validated
     var component;
+    var enterCount = 0;
+    var overCount = 0;
+    var leaveCount = 0;
+    var dropCount = 0;
 
     var ComponentClass = milo.createComponentClass({
         className: 'DropComponent',
@@ -24,20 +34,28 @@ describe.only('Drop facet', function() {
         }
     });
 
-    function onDragEnter(msg, data) {
-        console.log('DRAG ENTER!!!!');
+    function onDragEnter(msg, event) {
+        var dt = new DragDrop(event);
+        assert.deepEqual(dt.getComponentMeta(), COMP_META);
+        enterCount++;
     }
 
     function onDragOver(msg, data) {
-
+        var dt = new DragDrop(event);
+        assert.deepEqual(dt.getComponentMeta(), COMP_META);
+        overCount++;
     }
 
     function onDragLeave(msg, data) {
-
+        var dt = new DragDrop(event);
+        assert.deepEqual(dt.getComponentMeta(), COMP_META);
+        leaveCount++;
     }
 
     function onDrop(msg, data) {
-
+        var dt = new DragDrop(event);
+        assert.deepEqual(dt.getComponentMeta(), COMP_META);
+        dropCount++;
     }
 
     beforeEach(function() {
@@ -46,8 +64,37 @@ describe.only('Drop facet', function() {
 
 
     it('should proxy native events to facet events', function (done) {
-        var evt = new Event('dragenter');
-        component.el.dispatchEvent(evt);
+        var DDServiceMessages = [];
+        DragDrop.service.on(/.*/, function (msg, data) {
+            DDServiceMessages.push(msg);
+        })
+        createAndDispatchEvent(component, 'dragenter', 0);
+        createAndDispatchEvent(component, 'dragover', 25);
+        createAndDispatchEvent(component, 'dragover', 30);
+        createAndDispatchEvent(component, 'dragover', 35);
+        createAndDispatchEvent(component, 'dragover', 40);
+        createAndDispatchEvent(component, 'dragover', 50);
+        createAndDispatchEvent(component, 'drop', 75);
+
+        _.delay(function () {
+            assert.equal(enterCount, 1);
+            assert.equal(overCount, 5);
+            assert.equal(leaveCount, 0);
+            assert.equal(dropCount, 1);
+            assert.deepEqual(DDServiceMessages, SERVICE_MESSAGES);
+            done();
+        }, 400);
     });
 
 });
+
+function createAndDispatchEvent(comp, name, time) {
+    var evt = new Event(name);
+    evt.dataTransfer = {types: ['text/html', 'x-application/milo/component', ENCODED_TYPE]};
+    evt.dataTransfer.getData = function getData(dataType) {
+        return {blah: 'yo'};
+    };
+    _.delay(function () {
+        comp.el.dispatchEvent(evt);
+    }, time);
+}
