@@ -53,6 +53,12 @@ module.exports = function(grunt) {
                 }
             }
         },
+        copy: {
+            mocks: {
+                src: 'mocks/**/*.js',
+                dest: 'dist/'
+            }
+        },
         instrument: {
             files: 'lib/**/*.js',
             options: {
@@ -115,6 +121,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-mocha-test');
     grunt.loadNpmTasks('grunt-karma');
     grunt.loadNpmTasks('grunt-exorcise');
@@ -125,7 +132,7 @@ module.exports = function(grunt) {
     grunt.registerTask('karmatest', 'karma');
     grunt.registerTask('htmltest', ['browserify:test1', 'watch']);
     grunt.registerTask('tests', ['mochaTest', 'browserify', 'karmatest']);
-    grunt.registerTask('build', ['instrument', 'browserify', 'uglify', 'exorcise']);
+    grunt.registerTask('build', ['instrument', 'browserify', 'copy', 'uglify', 'exorcise']);
     grunt.registerTask('default', ['test', 'build', 'watch']);
     grunt.registerTask('skiptest', ['browserify', 'watch']);
 

@@ -13,3 +13,4 @@ bower_components
 build/
 coverage/
 dist/milo.cover.bundle.js
+dist/mocks
