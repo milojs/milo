@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" charset="utf-8">
+    <title>milo</title>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/cayman.min.css">
+    <link rel="stylesheet" href="../css/prism.min.css">
+    <link rel="stylesheet" href="../css/index.min.css">
+    <link rel="stylesheet" href="../css/docs.min.css">
+    <link rel="stylesheet" href="../css/bootstrap-responsive.min.css">
+  </head>
+  <body data-spy="scroll" data-target=".scrollspy">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container"><a class="brand">Mr. Doc</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav pull-right sponsored"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <header id="overview" class="jumbotron subhead">
+      <div class="container">
+        <h1>milo</h1>
+        <p class="lead"></p>
+      </div>
+    </header>
+    <div class="container">
+      <div class="row">
+        <div class="span3 bs-docs-sidebar">
+          <ul class="nav nav-list bs-docs-sidenav affix-top">
+            <li><a href="../index.html">Main</a></li>
+            <li><a href="../abstract/facet.js.html">abstract/facet.js</a></li>
+            <li><a href="../abstract/faceted_object.js.html">abstract/faceted_object.js</a></li>
+            <li><a href="../abstract/registry.js.html">abstract/registry.js</a></li>
+            <li><a href="../attributes/a_bind.js.html">attributes/a_bind.js</a></li>
+            <li><a href="../attributes/a_class.js.html">attributes/a_class.js</a></li>
+            <li><a href="../attributes/a_load.js.html">attributes/a_load.js</a></li>
+            <li><a href="../attributes/index.js.html">attributes/index.js</a></li>
+            <li><a href="../binder.js.html">binder.js</a></li>
+            <li><a href="../classes.js.html">classes.js</a></li>
+            <li><a href="../command/actions_history.js.html">command/actions_history.js</a></li>
+            <li><a href="../command/cmd_registry.js.html">command/cmd_registry.js</a></li>
+            <li><a href="../command/index.js.html">command/index.js</a></li>
+            <li><a href="../command/transaction.js.html">command/transaction.js</a></li>
+            <li><a href="../command/transaction_history.js.html">command/transaction_history.js</a></li>
+            <li><a href="../components/ComponentTemplate.js.html">components/ComponentTemplate.js</a></li>
+            <li><a href="../components/c_class.js.html">components/c_class.js</a></li>
+            <li><a href="../components/c_facet.js.html">components/c_facet.js</a></li>
+            <li><a href="../components/c_facets/Container.js.html">components/c_facets/Container.js</a></li>
+            <li><a href="../components/c_facets/Css.js.html">components/c_facets/Css.js</a></li>
+            <li><a href="../components/c_facets/Data.js.html">components/c_facets/Data.js</a></li>
+            <li><a href="../components/c_facets/Dom.js.html">components/c_facets/Dom.js</a></li>
+            <li><a href="../components/c_facets/Drag.js.html">components/c_facets/Drag.js</a></li>
+            <li><a href="../components/c_facets/Drop.js.html">components/c_facets/Drop.js</a></li>
+            <li><a href="../components/c_facets/Events.js.html">components/c_facets/Events.js</a></li>
+            <li><a href="../components/c_facets/Frame.js.html">components/c_facets/Frame.js</a></li>
+            <li><a href="../components/c_facets/Item.js.html">components/c_facets/Item.js</a></li>
+            <li><a href="../components/c_facets/List.js.html">components/c_facets/List.js</a></li>
+            <li><a href="../components/c_facets/ModelFacet.js.html">components/c_facets/ModelFacet.js</a></li>
+            <li><a href="../components/c_facets/Options.js.html">components/c_facets/Options.js</a></li>
+            <li><a href="../components/c_facets/Template.js.html">components/c_facets/Template.js</a></li>
+            <li><a href="../components/c_facets/Transfer.js.html">components/c_facets/Transfer.js</a></li>
+            <li><a href="../components/c_facets/cf_registry.js.html">components/c_facets/cf_registry.js</a></li>
+            <li><a href="../components/c_info.js.html">components/c_info.js</a></li>
+            <li><a href="../components/c_registry.js.html">components/c_registry.js</a></li>
+            <li><a href="../components/c_utils.js.html">components/c_utils.js</a></li>
+            <li><a href="../components/classes/View.js.html">components/classes/View.js</a></li>
+            <li><a href="../components/msg_api/data.js.html">components/msg_api/data.js</a></li>
+            <li><a href="../components/msg_api/de_data.js.html">components/msg_api/de_data.js</a></li>
+            <li><a href="../components/msg_api/drop.js.html">components/msg_api/drop.js</a></li>
+            <li><a href="../components/msg_src/dom_events.js.html">components/msg_src/dom_events.js</a></li>
+            <li><a href="../components/msg_src/frame.js.html">components/msg_src/frame.js</a></li>
+            <li><a href="../components/scope.js.html">components/scope.js</a></li>
+            <li><a href="../config.js.html">config.js</a></li>
+            <li><a href="../loader.js.html">loader.js</a></li>
+            <li><a href="../milo.js.html">milo.js</a></li>
+            <li><a href="../registry.js.html">registry.js</a></li>
+            <li><a href="../services/de_constrs.js.html">services/de_constrs.js</a></li>
+            <li><a href="../services/dom_source.js.html">services/dom_source.js</a></li>
+            <li><a href="../services/mail/index.js.html">services/mail/index.js</a></li>
+            <li><a href="../services/mail/mail_api.js.html">services/mail/mail_api.js</a></li>
+            <li><a href="../services/mail/mail_source.js.html">services/mail/mail_source.js</a></li>
+            <li><a href="../services/window.js.html">services/window.js</a></li>
+            <li><a href="../use_components.js.html">use_components.js</a></li>
+            <li><a href="../use_facets.js.html">use_facets.js</a></li>
+            <li><a href="../util/component_name.js.html">util/component_name.js</a></li>
+            <li><a href="../util/create_component_class.js.html">util/create_component_class.js</a></li>
+            <li><a href="../util/create_facet_class.js.html">util/create_facet_class.js</a></li>
+            <li><a href="../util/deprecate.js.html">util/deprecate.js</a></li>
+            <li class="active"><a href="../util/dom.js.html">util/dom.js</a></li>
+            <li><a href="../util/dom_listeners.js.html">util/dom_listeners.js</a></li>
+            <li><a href="../util/domready.js.html">util/domready.js</a></li>
+            <li><a href="../util/dragdrop.js.html">util/dragdrop.js</a></li>
+            <li><a href="../util/error.js.html">util/error.js</a></li>
+            <li><a href="../util/fragment.js.html">util/fragment.js</a></li>
+            <li><a href="../util/index.js.html">util/index.js</a></li>
+            <li><a href="../util/json_parse.js.html">util/json_parse.js</a></li>
+            <li><a href="../util/request.js.html">util/request.js</a></li>
+            <li><a href="../util/selection/index.js.html">util/selection/index.js</a></li>
+            <li><a href="../util/storage/index.js.html">util/storage/index.js</a></li>
+            <li><a href="../util/storage/model.js.html">util/storage/model.js</a></li>
+            <li><a href="../util/storage/msg_src.js.html">util/storage/msg_src.js</a></li>
+            <li><a href="../util/unique_id.js.html">util/unique_id.js</a></li>
+            <li><a href="../util/websocket/index.js.html">util/websocket/index.js</a></li>
+            <li><a href="../util/websocket/msg_api.js.html">util/websocket/msg_api.js</a></li>
+            <li><a href="../util/websocket/msg_src.js.html">util/websocket/msg_src.js</a></li>
+          </ul>
+          <div class="scrollspy">
+            <ul class="nav nav-list bs-docs-sidenav affix-top">
+              <li><a href="#children"><i class="alert alert-info"></i><span>children</span></a>
+              </li>
+              <li><a href="#filterNodeListByType"><i class="alert alert-info"></i><span>filterNodeListByType</span></a>
+              </li>
+              <li><a href="#containingElement"><i class="alert alert-info"></i><span>containingElement</span></a>
+              </li>
+              <li><a href="#selectElementContents"><i class="alert alert-info"></i><span>selectElementContents</span></a>
+              </li>
+              <li><a href="#selectElementText"><i class="alert alert-info"></i><span>selectElementText</span></a>
+              </li>
+              <li><a href="#setCaretPosition"><i class="alert alert-info"></i><span>setCaretPosition</span></a>
+              </li>
+              <li><a href="#getSelectionDirection"><i class="alert alert-info"></i><span>getSelectionDirection</span></a>
+              </li>
+              <li><a href="#setSelection"><i class="alert alert-info"></i><span>setSelection</span></a>
+              </li>
+              <li><a href="#clearSelection"><i class="alert alert-info"></i><span>clearSelection</span></a>
+              </li>
+              <li><a href="#getElementOffset"><i class="alert alert-info"></i><span>getElementOffset</span></a>
+              </li>
+              <li><a href="#removeElement"><i class="alert alert-info"></i><span>removeElement</span></a>
+              </li>
+              <li><a href="#firstTextNode"><i class="alert alert-info"></i><span>firstTextNode</span></a>
+              </li>
+              <li><a href="#lastTextNode"><i class="alert alert-info"></i><span>lastTextNode</span></a>
+              </li>
+              <li><a href="#unwrapElement"><i class="alert alert-info"></i><span>unwrapElement</span></a>
+              </li>
+              <li><a href="#wrapInElement"><i class="alert alert-info"></i><span>wrapInElement</span></a>
+              </li>
+              <li><a href="#trimNodeRight"><i class="alert alert-info"></i><span>trimNodeRight</span></a>
+              </li>
+              <li><a href="#trimNodeLeft"><i class="alert alert-info"></i><span>trimNodeLeft</span></a>
+              </li>
+              <li><a href="#detachComponent"><i class="alert alert-info"></i><span>detachComponent</span></a>
+              </li>
+              <li><a href="#stripHtml"><i class="alert alert-info"></i><span>stripHtml</span></a>
+              </li>
+              <li><a href="#walkTree"><i class="alert alert-info"></i><span>walkTree</span></a>
+              </li>
+              <li><a href="#treePathOf"><i class="alert alert-info"></i><span>treePathOf</span></a>
+              </li>
+              <li><a href="#getNodeAtTreePath"><i class="alert alert-info"></i><span>getNodeAtTreePath</span></a>
+              </li>
+              <li><a href="#insertAtTreePath"><i class="alert alert-info"></i><span>insertAtTreePath</span></a>
+              </li>
+              <li><a href="#isTreePathBefore"><i class="alert alert-info"></i><span>isTreePathBefore</span></a>
+              </li>
+              <li><a href="#htmlEntities"><i class="alert alert-info"></i><span>htmlEntities</span></a>
+              </li>
+              <li><a href="#getNodeWindow"><i class="alert alert-info"></i><span>getNodeWindow</span></a>
+              </li>
+              <li><a href="#forEachNodesInRange"><i class="alert alert-info"></i><span>forEachNodesInRange</span></a>
+              </li>
+              <li><a href="#getComponentsFromRange"><i class="alert alert-info"></i><span>getComponentsFromRange</span></a>
+              </li>
+              <li><a href="#deleteRangeWithComponents"><i class="alert alert-info"></i><span>deleteRangeWithComponents</span></a>
+              </li>
+              <li><a href="#areRangesEqual"><i class="alert alert-info"></i><span>areRangesEqual</span></a>
+              </li>
+              <li><a href="#xpathSelector"><i class="alert alert-info"></i><span>xpathSelector</span></a>
+              </li>
+              <li><a href="#xpathSelectorAll"><i class="alert alert-info"></i><span>xpathSelectorAll</span></a>
+              </li>
+              <li><a href="#addDebugPoint"><i class="alert alert-info"></i><span>addDebugPoint</span></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="span9">
+          <section id="children">
+            <h1>children</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>children()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>el</td>
+                <td>Element</td>
+                <td><p>element to return the children of (only DOM elements)</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Array.&lt;Element&gt;</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Returns the list of element children of DOM element</p></div>
+          <pre><code class="language-javascript">function children(el) {
+   return filterNodeListByType(el.childNodes, Node.ELEMENT_NODE);
+}</code></pre>
+          <section id="filterNodeListByType">
+            <h1>filterNodeListByType</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>filterNodeListByType()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>nodeList</td>
+                <td>NodeList</td>
+                <td><p>the list of nodes, for example childNodes property of DOM element</p></td>
+              </tr>
+              <tr>
+                <td>nodeType</td>
+                <td>Integer</td>
+                <td><p>an integer constant <a href="https://developer.mozilla.org/en-US/docs/Web/API/Node.nodeType">defined by DOM API</a>, e.g. <code>Node.ELEMENT_NODE</code> or <code>Node.TEXT_NODE</code></p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Array.&lt;Node&gt;</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Filters the list of nodes by type</p></div>
+          <pre><code class="language-javascript">function filterNodeListByType(nodeList, nodeType) {
+    return _.filter(nodeList, function (node) {
+        return node.nodeType == nodeType;
+    });
+}</code></pre>
+          <section id="containingElement">
+            <h1>containingElement</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>containingElement()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>node</td>
+                <td>Node</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Element</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Find nearest parent element for node.<br />If node is an element, it will be returned.</p></div>
+          <pre><code class="language-javascript">function containingElement(node) {
+    while (node) {
+        if (node.nodeType == Node.ELEMENT_NODE)
+            return node;
+        node = node.parentNode;
+    }
+    return null;
+}</code></pre>
+          <section id="selectElementContents">
+            <h1>selectElementContents</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>selectElementContents()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>el</td>
+                <td>Element</td>
+                <td><p>DOM element</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Selects inner contents of DOM element</p></div>
+          <pre><code class="language-javascript">function selectElementContents(el) {
+    var doc = el.ownerDocument;
+    if (! doc) return logger.error('selectElementContents: element has no document');
+    var range = doc.createRange();
+    range.selectNodeContents(el);
+    var win = getNodeWindow(el)
+        , sel = win.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+}</code></pre>
+          <section id="selectElementText">
+            <h1>selectElementText</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>selectElementText()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>el</td>
+                <td>Element</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Selects text inside element</p></div>
+          <pre><code class="language-javascript">function selectElementText(el) {
+    var fromNode = firstTextNode(el)
+        , toNode = lastTextNode(el);
+
+    if (fromNode &amp;&amp; toNode)
+        setSelection(fromNode, 0, toNode, toNode.textContent.length);
+}</code></pre>
+          <section id="setCaretPosition">
+            <h1>setCaretPosition</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>setCaretPosition()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>node</td>
+                <td>Node</td>
+                <td><p>DOM node</p></td>
+              </tr>
+              <tr>
+                <td>pos</td>
+                <td>Number</td>
+                <td><p>caret position</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Sets the caret position to the position in the node</p></div>
+          <pre><code class="language-javascript">function setCaretPosition(node, pos) {
+    var doc = node.ownerDocument;
+    if (! doc) return logger.error('setCaretPosition: element has no document');
+    var range = doc.createRange();
+    range.setStart(node, pos);
+    var win = getNodeWindow(node)
+        , sel = win.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+}</code></pre>
+          <section id="getSelectionDirection">
+            <h1>getSelectionDirection</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>getSelectionDirection()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>a</td>
+                <td>sel</td>
+                <td><p>selection object</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Integer</td>
+                <td><p>can be -1, 0, 1 or undefined</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>get the direction of a selection</p><p>1 forward, -1 backward, 0 no direction, undefined one of the node is detached or in a different frame</p></div>
+          <pre><code class="language-javascript">function getSelectionDirection(sel){
+    return _getDirection(sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset);
+}
+
+function _getDirection(fromNode, startOffset, toNode, endOffset){
+    var docPosition = fromNode.compareDocumentPosition(toNode);
+    if (docPosition &amp; Node.DOCUMENT_POSITION_FOLLOWING){
+        return 1;
+    }
+    else if (docPosition &amp; Node.DOCUMENT_POSITION_PRECEDING){
+        return -1;
+    }
+    else if (fromNode == toNode){
+        if (startOffset &lt; endOffset){
+            return 1;
+        }
+        else if (startOffset &gt; endOffset){
+            return -1;
+        }
+        else {
+            return 0;
+        }
+    }
+}</code></pre>
+          <section id="setSelection">
+            <h1>setSelection</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>setSelection()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>fromNode</td>
+                <td>Node</td>
+                <td><p>DOM node to start selection in</p></td>
+              </tr>
+              <tr>
+                <td>startOffset</td>
+                <td>Number</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>toNode</td>
+                <td>Node</td>
+                <td><p>DOM node to end selection in</p></td>
+              </tr>
+              <tr>
+                <td>endOffset</td>
+                <td>Number</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Selects a range in a document</p></div>
+          <pre><code class="language-javascript">function setSelection(fromNode, startOffset, toNode, endOffset) {
+    var doc = fromNode.ownerDocument;
+    if (! doc) return logger('setCaretPosition: element has no document');
+    var backward = _getDirection(fromNode, startOffset, toNode, endOffset) == -1;
+    var range = doc.createRange();
+    var container, originalContentEditable;
+    // does not work in non contentEditable items
+
+    var win = getNodeWindow(fromNode)
+        , sel = win.getSelection();
+
+
+    if (backward){
+        range.setStart(toNode, endOffset);
+        range.setEnd(fromNode, startOffset);
+        range.collapse(false);
+    }
+    else {
+        range.setStart(fromNode, startOffset);
+        range.setEnd(toNode, endOffset);
+    }
+
+    container = range.commonAncestorContainer == Node.ELEMENT_NODE ?
+        range.commonAncestorContainer :
+        range.commonAncestorContainer.parentElement;
+
+    if (!container.isContentEditable){
+        originalContentEditable = container.contentEditable; // false or inherit
+        container.contentEditable = &quot;true&quot;;
+    }
+
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    if (backward){
+        sel.extend(toNode, endOffset);
+    }
+
+    if (originalContentEditable){
+        // restoring contentEditable
+        container.contentEditable = originalContentEditable;
+    }
+}</code></pre>
+          <section id="clearSelection">
+            <h1>clearSelection</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>clearSelection()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>win</td>
+                <td>Window</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Clears selection in a given window</p></div>
+          <pre><code class="language-javascript">function clearSelection(win) {
+    win = win || window;
+    var sel = win.getSelection();
+    sel.removeAllRanges();
+}</code></pre>
+          <section id="getElementOffset">
+            <h1>getElementOffset</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>getElementOffset()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>el</td>
+                <td>Element</td>
+                <td><p>the element for which position needs to be returned</p></td>
+              </tr>
+              <tr>
+                <td>if</td>
+                <td>includeBorder</td>
+                <td><p>is to include the border width</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Object</td>
+                <td><p>vector object with properties topOffset and leftOffset</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Calculates an element&#39;s total top and left offset from the document edge.</p></div>
+          <pre><code class="language-javascript">function getElementOffset(el, includeBorder) {
+    var yPos, xPos;
+
+    yPos = el.offsetTop;
+    xPos = el.offsetLeft;
+    el = el.offsetParent;
+
+    while (el) {
+        yPos += el.offsetTop + getBorder(el, 'Height', includeBorder);
+        xPos += el.offsetLeft + getBorder(el, 'Width', includeBorder);
+        el = el.offsetParent;
+    }
+
+    return { topOffset: yPos, leftOffset: xPos };
+}
+
+
+function getBorder(el, type, includeBorder) {
+    if (includeBorder) {
+        var side = (type == 'Height') ? 'top' : 'left',
+            styles = window.getComputedStyle(el),
+            sideValue = parseInt(styles.getPropertyValue('border-' + side + '-width'), 10);
+
+        if (sideValue) return sideValue;
+    }
+    return 0;
+}</code></pre>
+          <section id="removeElement">
+            <h1>removeElement</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>removeElement()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>el</td>
+                <td>Element</td>
+                <td><p>the element to be removed</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Removes element from the document</p></div>
+          <pre><code class="language-javascript">function removeElement(el) {
+    var parent = el.parentNode;
+    if (parent){
+        parent.removeChild(el);
+        parent.normalize();
+    }
+}</code></pre>
+          <section id="firstTextNode">
+            <h1>firstTextNode</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>firstTextNode()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>node</td>
+                <td>Element, Node</td>
+                <td><p>the node to be searched, if the node is text node we return the node.</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>TextNode</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Returns the first child text node of an element</p></div>
+          <pre><code class="language-javascript">function firstTextNode(node) {
+    if (node.nodeType == Node.TEXT_NODE) return node;
+    var treeWalker = createTreeWalker(node, NodeFilter.SHOW_TEXT);
+    return treeWalker.firstChild();
+}</code></pre>
+          <section id="lastTextNode">
+            <h1>lastTextNode</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>lastTextNode()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>node</td>
+                <td>Element, Node</td>
+                <td><p>the node to be searched, if the node is text node we return the node.</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>TextNode</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Returns the last child text node of an element</p></div>
+          <pre><code class="language-javascript">function lastTextNode(node) {
+    if (node.nodeType == Node.TEXT_NODE) return node;
+    var treeWalker = createTreeWalker(node, NodeFilter.SHOW_TEXT);
+    return treeWalker.lastChild();
+}</code></pre>
+          <section id="unwrapElement">
+            <h1>unwrapElement</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>unwrapElement()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>el</td>
+                <td>Element</td>
+                <td><p>the element to be &quot;unwrapped&quot;</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Removes element from the document putting its children in its place</p></div>
+          <pre><code class="language-javascript">function unwrapElement(el) {
+    var parent = el.parentNode;
+
+    if (parent) {
+        var frag = document.createDocumentFragment();
+        // must be copied to avoid iterating a mutating list of childNodes
+        var children = _.slice(el.childNodes);
+        children.forEach(frag.appendChild, frag);
+        parent.replaceChild(frag, el);
+        parent.normalize();
+    }
+}</code></pre>
+          <section id="wrapInElement">
+            <h1>wrapInElement</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>wrapInElement()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>wrapIntoEl</td>
+                <td>Element</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>el</td>
+                <td>Element</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Wraps an element in another element</p></div>
+          <pre><code class="language-javascript">function wrapInElement(wrapIntoEl, el) {
+    var parent = el.parentNode;
+
+    if (parent) {
+        parent.insertBefore(wrapIntoEl, el);
+        wrapIntoEl.appendChild(el);
+    }
+}</code></pre>
+          <section id="trimNodeRight">
+            <h1>trimNodeRight</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>trimNodeRight()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>node</td>
+                <td>TextNode</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Boolean</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Trims a text node of trailing spaces, and returns true if a trim was performed.</p></div>
+          <pre><code class="language-javascript">function trimNodeRight(node) {
+    return _trimNode(node, 'trimRight');
+}</code></pre>
+          <section id="trimNodeLeft">
+            <h1>trimNodeLeft</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>trimNodeLeft()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>node</td>
+                <td>TextNode</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Boolean</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Trims a text node of leading spaces, and returns true if a trim was performed.</p></div>
+          <pre><code class="language-javascript">function trimNodeLeft(node) {
+    return _trimNode(node, 'trimLeft');
+}
+
+
+function _trimNode(node, methodName) {
+    var len = node.length;
+    node.textContent = node.textContent[methodName]();
+    return len !== node.length;
+}</code></pre>
+          <section id="detachComponent">
+            <h1>detachComponent</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>detachComponent()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>el</td>
+                <td>Element</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Removes the reference to component from element</p></div>
+          <pre><code class="language-javascript">function detachComponent(el) {
+    delete el[config.componentRef];
+}</code></pre>
+          <section id="stripHtml">
+            <h1>stripHtml</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>stripHtml()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>str</td>
+                <td>String</td>
+                <td><p>Any string</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>String</td>
+                <td><p>returns the string cleaned of any html content.</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Retrieves the content of a html string</p></div>
+          <pre><code class="language-javascript">function stripHtml(str) {
+    var div = document.createElement('DIV');
+    div.innerHTML = str;
+    return div.textContent || '';
+}</code></pre>
+          <section id="walkTree">
+            <h1>walkTree</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>walkTree()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>root</td>
+                <td>HTMLElement</td>
+                <td><p>The containing root element to be walked. Will not be iterated.</p></td>
+              </tr>
+              <tr>
+                <td>filter</td>
+                <td>NodeFiler</td>
+                <td><p>A NodeFilter constant, see <a href="https://developer.mozilla.org/en/docs/Web/API/TreeWalker">https://developer.mozilla.org/en/docs/Web/API/TreeWalker</a></p></td>
+              </tr>
+              <tr>
+                <td>iterator</td>
+                <td>Function</td>
+                <td><p>A function to be called on each node. Returning &#39;false&#39; will break.</p></td>
+              </tr>
+              <tr>
+                <td>context</td>
+                <td>Object</td>
+                <td><p>An optional context to passed, defaults to root.</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Convenience wrapper for native TreeWalker that automatically walks the tree and calls an iterator function.<br />This will not iterate the root element.</p></div>
+          <pre><code class="language-javascript">function walkTree(root, filter, iterator, context) {
+    var tw = document.createTreeWalker(root, filter);
+    while(tw.nextNode()) {
+        var result = iterator.call(context || root, tw.currentNode);
+        if (result === false) break;
+    }
+}</code></pre>
+          <section id="treePathOf">
+            <h1>treePathOf</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>treePathOf()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>rootEl</td>
+                <td>Element</td>
+                <td><p>element to search</p></td>
+              </tr>
+              <tr>
+                <td>el</td>
+                <td>Element</td>
+                <td><p>element to find the index of</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Array.&lt;Number&gt;</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Returns array of child indexes of element path inside root element in DOM tree using breadth first tree traversal.<br />Returns undefined if the element is not inside root element, 0 if the root element itself is passed.</p></div>
+          <pre><code class="language-javascript">function treePathOf(rootEl, el) {
+    if (! (rootEl &amp;&amp; rootEl.contains(el))) return;
+
+    var treePath = []
+        , node = rootEl;
+
+    while (node != el) {
+        var nodeIndex = _.findIndex(node.childNodes, containsEl);
+        treePath.push(nodeIndex);
+        node = node.childNodes[nodeIndex];
+    }
+
+    return treePath;
+
+    function containsEl(child) {
+        return child.contains(el);
+    }
+}</code></pre>
+          <section id="getNodeAtTreePath">
+            <h1>getNodeAtTreePath</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>getNodeAtTreePath()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>rootEl</td>
+                <td>Element</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>treePath</td>
+                <td>Array.&lt;Number&gt;</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>nearest</td>
+                <td>Boolean</td>
+                <td><p>return nearest possible node if exact node does not exist</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Node</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Returns element at given tree path</p></div>
+          <pre><code class="language-javascript">function getNodeAtTreePath(rootEl, treePath, nearest) {
+    if (!treePath) return;
+
+    var len = treePath.length;
+    if (len === 0) return rootEl;
+
+    var node = rootEl;
+
+    for (var i = 0; i &lt; len; i++) {
+        var children = node.childNodes;
+        if (! children) {
+            if (! nearest) node = undefined;
+            break;
+        }
+        var childIndex = treePath[i]
+            , child = children[childIndex];
+        if (! child) {
+            node = nearest
+                    ? children[children.length - 1]
+                    : undefined;
+            break;
+        }
+        node = child;
+    }
+
+    return node;
+}</code></pre>
+          <section id="insertAtTreePath">
+            <h1>insertAtTreePath</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>insertAtTreePath()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>rootEl</td>
+                <td>Element</td>
+                <td><p>element into which to insert</p></td>
+              </tr>
+              <tr>
+                <td>treeIndex</td>
+                <td>Number</td>
+                <td><p>index in DOM tree inside root element (see treePathOf)</p></td>
+              </tr>
+              <tr>
+                <td>el</td>
+                <td>Element</td>
+                <td><p>element to be inserted</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Boolean</td>
+                <td><p>true if was successfully inserted</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Inserts an element inside root at a given path in tree (that has the same meaning as the index returned by <code>treePathOf</code> function). If element is already in the root&#39;s tree, it will be removed first and then moved to the passed treeIndex<br />Insertion at index 0 is not possible and will return undefined as it would mean replacing the root element.</p></div>
+          <pre><code class="language-javascript">function insertAtTreePath(rootEl, treePath, el, nearest) {
+    var toNormalize = el.nodeType == Node.TEXT_NODE;
+    if (rootEl.contains(el))
+        removeElement(el); // can't use removeChild as rootEl here is not an immediate parent
+
+    if (treePath.length === 0) return;
+
+    var parent = getNodeAtTreePath(rootEl, treePath.slice(0, -1), nearest)
+        , children = parent.childNodes;
+
+    if (! children) {
+        if (nearest) {
+            parent = parent.parentNode;
+            children = parent.childNodes;
+        } else return;
+    }
+
+    var childIndex = treePath[treePath.length - 1]
+        , child = children[childIndex];
+
+    if (child) {
+        parent.insertBefore(el, child);
+        if (toNormalize) parent.normalize();
+        return true;
+    } else if (children.length === 0 &amp;&amp; (childIndex === 0 || nearest)) {
+        parent.appendChild(el);
+        if (toNormalize) parent.normalize();
+        return true;
+    } else {
+        child = children[childIndex - 1];
+        if (child || nearest) {
+            parent.appendChild(el);
+            if (toNormalize) parent.normalize();
+            return true;
+        }
+    }
+}</code></pre>
+          <section id="isTreePathBefore">
+            <h1>isTreePathBefore</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>isTreePathBefore()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>path1</td>
+                <td>Array</td>
+                <td><p>A treepath array</p></td>
+              </tr>
+              <tr>
+                <td>path2</td>
+                <td>Array</td>
+                <td><p>A treepath array</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Boolean</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Returns <code>true</code> if the first tree path points to a node which is before the other in the document order.</p></div>
+          <pre><code class="language-javascript">function isTreePathBefore(path1, path2) {
+    var i = 0
+        , isBefore;
+    if (!Array.isArray(path1) &amp;&amp; Array.isArray(path2))
+        return logger.error('isTreePathBefore: One or both paths are not valid treepath arrays.');
+
+    for (i; i &lt; path1.length; i++) {
+        if (path1[i] &lt; path2[i]) {
+            isBefore = true;
+            break;
+        } else if (path1[i] &gt; path2[i]) {
+            isBefore = false;
+            break;
+        }
+    }
+
+    if (typeof isBefore == 'undefined')
+        if (path1.length &lt; path2.length)
+            logger.warn('isTreePathBefore: One node is inside another');
+
+    return isBefore || false;
+}</code></pre>
+          <section id="htmlEntities">
+            <h1>htmlEntities</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>htmlEntities()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>str</td>
+                <td>String</td>
+                <td><p>the string to convert</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>String</td>
+                <td><p>the string with html entities</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Converts non latin characters to HTML entity codes.</p></div>
+          <pre><code class="language-javascript">function htmlEntities(str) {
+    return str.replace(/[\u00A0-\u99999&lt;&gt;\&amp;]/gim, function(i) {
+        return '&amp;#'+i.charCodeAt(0)+';';
+    });
+}
+
+
+function createTreeWalker(el, whatToShow) {
+    whatToShow = whatToShow || (NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+    return document.createTreeWalker(el, whatToShow);
+}</code></pre>
+          <section id="getNodeWindow">
+            <h1>getNodeWindow</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>getNodeWindow()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>node</td>
+                <td>Node</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Window</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Returns the reference to the window the node is in</p></div>
+          <pre><code class="language-javascript">function getNodeWindow(node) {
+    var doc = node.ownerDocument;
+    return doc &amp;&amp; (doc.defaultView || doc.parentWindow);
+}</code></pre>
+          <section id="forEachNodesInRange">
+            <h1>forEachNodesInRange</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>forEachNodesInRange()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>a</td>
+                <td>range</td>
+                <td><p>range</p></td>
+              </tr>
+              <tr>
+                <td>a</td>
+                <td>cb</td>
+                <td><p>function taking a node as argument</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>do something for each nodes contained in a range</p></div>
+          <pre><code class="language-javascript">function forEachNodesInRange(range, cb){
+    var rangeContainer = range.commonAncestorContainer
+        , doc = rangeContainer.ownerDocument;
+
+    function isNodeInsideRange(node){
+        var nodeRange = document.createRange();
+        var isInside = false;
+        nodeRange.selectNode(node);
+
+        if (nodeRange.compareBoundaryPoints(window.Range.START_TO_START, range) != -1
+            &amp;&amp; nodeRange.compareBoundaryPoints(window.Range.END_TO_END, range) != 1){
+            isInside = true;
+        }
+        return isInside;
+    }
+
+    var treeWalker = doc.createTreeWalker(rangeContainer,
+            NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
+
+    var currentNode;
+    while (currentNode = treeWalker.nextNode()){ // should be assignment
+        if (isNodeInsideRange(currentNode)){
+            cb(currentNode);
+        }
+    }
+}</code></pre>
+          <section id="getComponentsFromRange">
+            <h1>getComponentsFromRange</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>getComponentsFromRange()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>a</td>
+                <td>range</td>
+                <td><p>DOM range.</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>get all components contained in a range</p></div>
+          <pre><code class="language-javascript">function getComponentsFromRange(range) {
+    var win = getNodeWindow(range.startContainer)
+        , Component = win.milo.Component;
+
+    var components = [];
+    forEachNodesInRange(range, function (node){
+        if (node.nodeType != Node.TEXT_NODE) {
+            var comp = Component.getComponent(node);
+            if (comp)
+                components.push(comp);
+        }
+    });
+
+    return components;
+}</code></pre>
+          <section id="deleteRangeWithComponents">
+            <h1>deleteRangeWithComponents</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>deleteRangeWithComponents()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>delete</td>
+                <td>range</td>
+                <td><p>a DOM range and all the components inside</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>delete a range</p></div>
+          <pre><code class="language-javascript">function deleteRangeWithComponents(range) {
+    var components = getComponentsFromRange(range);
+
+    components.forEach(function(comp) {
+        comp.destroy(true);
+    });
+
+    range.deleteContents();
+}</code></pre>
+          <section id="areRangesEqual">
+            <h1>areRangesEqual</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>areRangesEqual()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>range1</td>
+                <td>range</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>range2</td>
+                <td>range</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Boolean</td>
+                <td><p>are the two ranges equivalent</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>check if two ranges are equivalent</p></div>
+          <pre><code class="language-javascript">function areRangesEqual(range1, range2){
+    return range1.compareBoundaryPoints(window.Range.START_TO_START, range2) === 0 &amp;&amp; range1.compareBoundaryPoints(window.Range.END_TO_END, range2) === 0;
+}</code></pre>
+          <section id="xpathSelector">
+            <h1>xpathSelector</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>xpathSelector()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>xpath</td>
+                <td>String</td>
+                <td><p>xpath expression, e.g. &#39;//a[contains(text(), &quot;Click here&quot;)]&#39; or &#39;/html/body//h1&#39;</p></td>
+              </tr>
+              <tr>
+                <td>context</td>
+                <td>Node</td>
+                <td><p>optional context node to search inside, document by default</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Node</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Return the first node that matches xpath expression</p></div>
+          <pre><code class="language-javascript">function xpathSelector(xpath, context) {
+    if (!document.evaluate) return logger.error('document.evaluate is not supported');
+    context = context || document;
+    var result = document.evaluate(xpath, context, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    return result &amp;&amp; result.singleNodeValue;
+}</code></pre>
+          <section id="xpathSelectorAll">
+            <h1>xpathSelectorAll</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>xpathSelectorAll()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>xpath</td>
+                <td>String</td>
+                <td><p>xpath expression, e.g. &#39;//a[contains(text(), &quot;Click here&quot;)]&#39; or &#39;/html/body//h1&#39;</p></td>
+              </tr>
+              <tr>
+                <td>context</td>
+                <td>Node</td>
+                <td><p>optional context node to search inside, document by default</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Array.&lt;Node&gt;</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Return array of nodes that match xpath expression</p></div>
+          <pre><code class="language-javascript">function xpathSelectorAll(xpath, context) {
+    if (!document.evaluate) return logger.error('document.evaluate is not supported');
+    context = context || document;
+    var result = document.evaluate(xpath, context, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+    var nodes = [], i = 0, node;
+    while (node = result.snapshotItem(i)) nodes[i++] = node;
+    return nodes;
+}</code></pre>
+          <section id="addDebugPoint">
+            <h1>addDebugPoint</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>addDebugPoint()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>x</td>
+                <td>Number</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>y</td>
+                <td>Number</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Adds a single pixel div to the body at a given x and y position. Useful for debugging position specific code.</p></div>
+          <pre><code class="language-javascript">function addDebugPoint(x, y) {
+    var dbEl = document.createElement('div');
+    dbEl.setAttribute('style', 'width: 1px; height: 1px; position:fixed; left:'+x+'px; top:'+y+'px; background-color:red; z-index: 100');
+    setTimeout(function() {document.body.appendChild(dbEl);}, 200);
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="container">
+        <p>Documentation generated with <a href="https://github.com/mr-doc/mr-doc">Mr. Doc </a> created by <a href="https://twitter.com/FGRibreau" data-show-count="false" class="twitter-follow-button">Francois-Guillaume Ribreau </a></p>
+        <p>Mr. Doc is sponsored by <a href="http://bringr.net/?btt" title="Outil d'analyse des réseaux sociaux" class="bringr">Bringr </a> and <a href="https://redsmin.com/?btt" title="Full Redis GUI" class="redsmin">Redsmin</a></p>
+        <p>Theme borrowed from Twitter Bootstrap</p>
+      </div>
+    </footer>
+    <script src="../js/twitter-widget.min.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/bootstrap-transition.min.js"></script>
+    <script src="../js/bootstrap-scrollspy.min.js"></script>
+    <script src="../js/bootstrap-dropdown.min.js"></script>
+    <script src="../js/bootstrap-collapse.min.js"></script>
+    <script src="../js/bootstrap-affix.min.js"></script>
+    <script src="../js/prism.min.js"></script>
+    <script src="../js/index.min.js"></script>
+  </body>
+</html>

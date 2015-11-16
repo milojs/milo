@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" charset="utf-8">
+    <title>milo</title>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/cayman.min.css">
+    <link rel="stylesheet" href="../css/prism.min.css">
+    <link rel="stylesheet" href="../css/index.min.css">
+    <link rel="stylesheet" href="../css/docs.min.css">
+    <link rel="stylesheet" href="../css/bootstrap-responsive.min.css">
+  </head>
+  <body data-spy="scroll" data-target=".scrollspy">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container"><a class="brand">Mr. Doc</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav pull-right sponsored"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <header id="overview" class="jumbotron subhead">
+      <div class="container">
+        <h1>milo</h1>
+        <p class="lead"></p>
+      </div>
+    </header>
+    <div class="container">
+      <div class="row">
+        <div class="span3 bs-docs-sidebar">
+          <ul class="nav nav-list bs-docs-sidenav affix-top">
+            <li><a href="../index.html">Main</a></li>
+            <li><a href="../abstract/facet.js.html">abstract/facet.js</a></li>
+            <li><a href="../abstract/faceted_object.js.html">abstract/faceted_object.js</a></li>
+            <li><a href="../abstract/registry.js.html">abstract/registry.js</a></li>
+            <li><a href="../attributes/a_bind.js.html">attributes/a_bind.js</a></li>
+            <li><a href="../attributes/a_class.js.html">attributes/a_class.js</a></li>
+            <li><a href="../attributes/a_load.js.html">attributes/a_load.js</a></li>
+            <li><a href="../attributes/index.js.html">attributes/index.js</a></li>
+            <li><a href="../binder.js.html">binder.js</a></li>
+            <li><a href="../classes.js.html">classes.js</a></li>
+            <li><a href="../command/actions_history.js.html">command/actions_history.js</a></li>
+            <li><a href="../command/cmd_registry.js.html">command/cmd_registry.js</a></li>
+            <li><a href="../command/index.js.html">command/index.js</a></li>
+            <li><a href="../command/transaction.js.html">command/transaction.js</a></li>
+            <li><a href="../command/transaction_history.js.html">command/transaction_history.js</a></li>
+            <li><a href="../components/ComponentTemplate.js.html">components/ComponentTemplate.js</a></li>
+            <li class="active"><a href="../components/c_class.js.html">components/c_class.js</a></li>
+            <li><a href="../components/c_facet.js.html">components/c_facet.js</a></li>
+            <li><a href="../components/c_facets/Container.js.html">components/c_facets/Container.js</a></li>
+            <li><a href="../components/c_facets/Css.js.html">components/c_facets/Css.js</a></li>
+            <li><a href="../components/c_facets/Data.js.html">components/c_facets/Data.js</a></li>
+            <li><a href="../components/c_facets/Dom.js.html">components/c_facets/Dom.js</a></li>
+            <li><a href="../components/c_facets/Drag.js.html">components/c_facets/Drag.js</a></li>
+            <li><a href="../components/c_facets/Drop.js.html">components/c_facets/Drop.js</a></li>
+            <li><a href="../components/c_facets/Events.js.html">components/c_facets/Events.js</a></li>
+            <li><a href="../components/c_facets/Frame.js.html">components/c_facets/Frame.js</a></li>
+            <li><a href="../components/c_facets/Item.js.html">components/c_facets/Item.js</a></li>
+            <li><a href="../components/c_facets/List.js.html">components/c_facets/List.js</a></li>
+            <li><a href="../components/c_facets/ModelFacet.js.html">components/c_facets/ModelFacet.js</a></li>
+            <li><a href="../components/c_facets/Options.js.html">components/c_facets/Options.js</a></li>
+            <li><a href="../components/c_facets/Template.js.html">components/c_facets/Template.js</a></li>
+            <li><a href="../components/c_facets/Transfer.js.html">components/c_facets/Transfer.js</a></li>
+            <li><a href="../components/c_facets/cf_registry.js.html">components/c_facets/cf_registry.js</a></li>
+            <li><a href="../components/c_info.js.html">components/c_info.js</a></li>
+            <li><a href="../components/c_registry.js.html">components/c_registry.js</a></li>
+            <li><a href="../components/c_utils.js.html">components/c_utils.js</a></li>
+            <li><a href="../components/classes/View.js.html">components/classes/View.js</a></li>
+            <li><a href="../components/msg_api/data.js.html">components/msg_api/data.js</a></li>
+            <li><a href="../components/msg_api/de_data.js.html">components/msg_api/de_data.js</a></li>
+            <li><a href="../components/msg_api/drop.js.html">components/msg_api/drop.js</a></li>
+            <li><a href="../components/msg_src/dom_events.js.html">components/msg_src/dom_events.js</a></li>
+            <li><a href="../components/msg_src/frame.js.html">components/msg_src/frame.js</a></li>
+            <li><a href="../components/scope.js.html">components/scope.js</a></li>
+            <li><a href="../config.js.html">config.js</a></li>
+            <li><a href="../loader.js.html">loader.js</a></li>
+            <li><a href="../milo.js.html">milo.js</a></li>
+            <li><a href="../registry.js.html">registry.js</a></li>
+            <li><a href="../services/de_constrs.js.html">services/de_constrs.js</a></li>
+            <li><a href="../services/dom_source.js.html">services/dom_source.js</a></li>
+            <li><a href="../services/mail/index.js.html">services/mail/index.js</a></li>
+            <li><a href="../services/mail/mail_api.js.html">services/mail/mail_api.js</a></li>
+            <li><a href="../services/mail/mail_source.js.html">services/mail/mail_source.js</a></li>
+            <li><a href="../services/window.js.html">services/window.js</a></li>
+            <li><a href="../use_components.js.html">use_components.js</a></li>
+            <li><a href="../use_facets.js.html">use_facets.js</a></li>
+            <li><a href="../util/component_name.js.html">util/component_name.js</a></li>
+            <li><a href="../util/create_component_class.js.html">util/create_component_class.js</a></li>
+            <li><a href="../util/create_facet_class.js.html">util/create_facet_class.js</a></li>
+            <li><a href="../util/deprecate.js.html">util/deprecate.js</a></li>
+            <li><a href="../util/dom.js.html">util/dom.js</a></li>
+            <li><a href="../util/dom_listeners.js.html">util/dom_listeners.js</a></li>
+            <li><a href="../util/domready.js.html">util/domready.js</a></li>
+            <li><a href="../util/dragdrop.js.html">util/dragdrop.js</a></li>
+            <li><a href="../util/error.js.html">util/error.js</a></li>
+            <li><a href="../util/fragment.js.html">util/fragment.js</a></li>
+            <li><a href="../util/index.js.html">util/index.js</a></li>
+            <li><a href="../util/json_parse.js.html">util/json_parse.js</a></li>
+            <li><a href="../util/request.js.html">util/request.js</a></li>
+            <li><a href="../util/selection/index.js.html">util/selection/index.js</a></li>
+            <li><a href="../util/storage/index.js.html">util/storage/index.js</a></li>
+            <li><a href="../util/storage/model.js.html">util/storage/model.js</a></li>
+            <li><a href="../util/storage/msg_src.js.html">util/storage/msg_src.js</a></li>
+            <li><a href="../util/unique_id.js.html">util/unique_id.js</a></li>
+            <li><a href="../util/websocket/index.js.html">util/websocket/index.js</a></li>
+            <li><a href="../util/websocket/msg_api.js.html">util/websocket/msg_api.js</a></li>
+            <li><a href="../util/websocket/msg_src.js.html">util/websocket/msg_src.js</a></li>
+          </ul>
+          <div class="scrollspy">
+            <ul class="nav nav-list bs-docs-sidenav affix-top">
+              <li><a href="#Component"><i class="alert alert-success"></i><span>Component</span></a>
+              </li>
+              <li><a href="#MESSENGER_PROPERTY"><i class="alert alert-success"></i><span>MESSENGER_PROPERTY</span></a>
+              </li>
+              <li><a href="#Component$$createComponentClass"><i class="alert alert-info"></i><span>Component$$createComponentClass</span></a>
+              </li>
+              <li><a href="#Component$$create"><i class="alert alert-info"></i><span>Component$$create</span></a>
+              </li>
+              <li><a href="#Component$$copy"><i class="alert alert-info"></i><span>Component$$copy</span></a>
+              </li>
+              <li><a href="#Component$$createOnElement"><i class="alert alert-info"></i><span>Component$$createOnElement</span></a>
+              </li>
+              <li><a href="#Component$$createFromState"><i class="alert alert-info"></i><span>Component$$createFromState</span></a>
+              </li>
+              <li><a href="#Component$$createFromDataTransfer"><i class="alert alert-info"></i><span>Component$$createFromDataTransfer</span></a>
+              </li>
+              <li><a href="#Component$init"><i class="alert alert-info"></i><span>Component$init</span></a>
+              </li>
+              <li><a href="#Component$start"><i class="alert alert-info"></i><span>Component$start</span></a>
+              </li>
+              <li><a href="#Component$createElement"><i class="alert alert-info"></i><span>Component$createElement</span></a>
+              </li>
+              <li><a href="#Component$hasFacet"><i class="alert alert-info"></i><span>Component$hasFacet</span></a>
+              </li>
+              <li><a href="#Component$addFacet"><i class="alert alert-info"></i><span>Component$addFacet</span></a>
+              </li>
+              <li><a href="#Component$allFacets"><i class="alert alert-info"></i><span>Component$allFacets</span></a>
+              </li>
+              <li><a href="#Component$rename"><i class="alert alert-info"></i><span>Component$rename</span></a>
+              </li>
+              <li><a href="#Component$remove"><i class="alert alert-info"></i><span>Component$remove</span></a>
+              </li>
+              <li><a href="#Component$insertInto"><i class="alert alert-info"></i><span>Component$insertInto</span></a>
+              </li>
+              <li><a href="#Component$getState"><i class="alert alert-info"></i><span>Component$getState</span></a>
+              </li>
+              <li><a href="#Component$getTransferState"><i class="alert alert-info"></i><span>Component$getTransferState</span></a>
+              </li>
+              <li><a href="#Component$getScopeParent"><i class="alert alert-info"></i><span>Component$getScopeParent</span></a>
+              </li>
+              <li><a href="#Component$getScopeParentWithClass"><i class="alert alert-info"></i><span>Component$getScopeParentWithClass</span></a>
+              </li>
+              <li><a href="#Component$getTopScopeParent"><i class="alert alert-info"></i><span>Component$getTopScopeParent</span></a>
+              </li>
+              <li><a href="#Component$getTopScopeParentWithClass"><i class="alert alert-info"></i><span>Component$getTopScopeParentWithClass</span></a>
+              </li>
+              <li><a href="#Component$setScopeParentFromDOM"><i class="alert alert-info"></i><span>Component$setScopeParentFromDOM</span></a>
+              </li>
+              <li><a href="#Component$walkScopeTree"><i class="alert alert-info"></i><span>Component$walkScopeTree</span></a>
+              </li>
+              <li><a href="#Component$broadcast"><i class="alert alert-info"></i><span>Component$broadcast</span></a>
+              </li>
+              <li><a href="#Component$destroy"><i class="alert alert-info"></i><span>Component$destroy</span></a>
+              </li>
+              <li><a href="#Component$isDestroyed"><i class="alert alert-info"></i><span>Component$isDestroyed</span></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="span9">
+          <section id="Component">
+            <h1>Component</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>Component</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>scope</td>
+                <td>Scope</td>
+                <td><p>scope to which component will belong. It is usually a top level scope object returned by <code>milo.binder</code> or <code>scope</code> property of Container facet.</p></td>
+              </tr>
+              <tr>
+                <td>element</td>
+                <td>Element</td>
+                <td><p>DOM element that component is attached to</p></td>
+              </tr>
+              <tr>
+                <td>name</td>
+                <td>String</td>
+                <td><p>component name, should be unique in the scope of component</p></td>
+              </tr>
+              <tr>
+                <td>componentInfo</td>
+                <td>ComponentInfo</td>
+                <td><p>instance of ComponentInfo class that can be used to create a copy of component  TODO try removing it</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Component</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p><code>milo.Component</code><br />Base Component class. Subclass of <a href="../abstract/faceted_object.js.html">FacetedObject</a>, but none of this class methods should be directly used with component.<br />Its constructor passes its parameters, including its <a href="./scope.js.html">scope</a>, DOM element and name to <a href="#init"><code>init</code></a> method.<br />The constructor of Component class rarely needs to be used directly, as <a href="../binder.js.html">milo.binder</a> creates components when it scans DOM tree.<br /><a href="#createComponentClass"><code>Component.createComponentClass</code></a> should be used to create a subclass of Component class with configured facets.</p><p>####Component instance properties####</p><ul>
+<li>el - DOM element that component is attached to. If the second component is attached to the same DOM element, the warning will be logged to console. To get component reference from DOM element use <a href="./c_utils.js.html#getComponent">Component.getComponent</a> class method. To inspect component via element in browser check <code>___milo_component</code> property of element (property name be changed using <code>milo.config</code>).</li>
+<li>scope - parent scope object, an instance of <a href="./scope.js.html">Scope</a> class. To get parent component use <a href="#Component$getScopeParent">getScopeParent</a> instance method of component. The actual path to get parent of conponent is <code>component.scope._hostObject.owner</code>, where <code>_hostObject</code> refers to <a href="c_facets/Container.js.html">Container</a> facet of parent component and <code>owner</code> to the parent itself. The children of component are accessible via the scope of its container facet: <code>component.container.scope</code>. The scope hierarchy can be the same or different as the DOM hierarchy - DOM children of the component will be on the same scope as component if it does not have <code>Container</code> facet and in the scope of its Container facet if it has it. See <a href="./scope.js.html">Scope</a>.</li>
+<li>name - the name of component, should be unique for the scope where component belongs. To find component in scope the component&#39;s name should be used as property of scope object. See <a href="./scope.js.html">Scope</a>.</li>
+<li>facets - map of references of all component&#39;s facets (facet names are lowercase in this map). All facets can be accessed directly as properties of component, this property can be used to iterate facets (it is used in this way in <a href="#Component$allFacets">allFacets</a> component&#39;s instance method that allows to call method with the same name on all facets).</li>
+<li>extraFacets - an array of names of facets that are added to component and do not form the part of component&#39;s class.</li>
+<li>_messenger - the reference to component&#39;s <a href="../messenger/index.js.html">messenger</a>. Rarely needs to be used directly as all commonly used methods of mesenger are available directly on component.</li>
+</ul>
+<p>####Component events####</p><ul>
+<li>&#39;childrenbound&#39; - synchronously dispatched when children of DOM element which compnent is connected to are connected to components. The event is dispatched when component is created with <code>milo.binder</code> (as is almost always the case, as all Component class methods that create/copy components use <code>milo.binder</code> internally - component constructor and Component.create methods are not used in framework outside of <code>milo.binder</code> and rarely if ever need to be used in aplication).</li>
+<li>&#39;addedtoscope&#39; - synchronously dispatched when component is added to scope.</li>
+<li>&#39;stateready&#39; - aynchronously dispatched when component (together with its scope children) is created with <a href="#Component$$createFromState">Component.createFromState</a> (or <code>createFromDataTransfer</code>) method. Can be dispatched by application if the component&#39;s state is set with some other mechanism. This event is not used in <code>milo</code>, it can be used in application in particular subclasses of component.</li>
+<li>&#39;getstatestarted&#39; - emitted synchronously just before getState executes so components and facets can clean up their state for serialization. </li>
+<li>&#39;getstatecompleted&#39; - emitted asynchronously after getState executes so components and facets can restore their state after serialization.</li>
+</ul>
+<p>####Component &quot;lifecycle&quot;####</p><ol>
+<li>Component constructor is called. Component&#39;s constructor simply calls constructor of <a href="../abstract/faceted_object.js.html">FacetedObject</a> that is a superclass of Component. Subclasses of Component should not implement their own constructor, they can optionally implement <code>init</code> method, but most components do not need to do it.</li>
+<li>constructors and <code>init</code> methods of all facets are called in sequence. Same as components, facet do not implement their constructors, they can optionally implement <code>init</code> and <code>start</code> methods (see below). Inside <code>init</code> method there should be only general initialization code without any dependency on component itself (it is not ready yet) and other facets (as there is no specific facets creation order). If facet implements <code>init</code> method it MUST call inherited init with <code>ComponentFacet.prototype.init.apply(this, arguments)</code>.</li>
+<li><code>init</code> method of component is called. At this point all facets are created but facets still can be not ready as they can have initialization code in <code>start</code> method. If component subclass implements <code>init</code> method it MUST call inherited method with <code>&lt;Superclass&gt;.prototype.init.apply(this, arguments)</code>, where <Superclass> is Component or another superclass the component is a subclass of.</li>
+<li><code>check</code> method of all facets is called. This method adds facets that are not part of the component declaration (being part of the class or explicitely listed in bind attribute) but are required by facets that the compnent already has. Subclasses of <a href="./c_facet.js.html">ComponentFacet</a> do not need to implement this method.</li>
+<li><code>start</code> method of all facets is called. This method is usually implemented by ComponentFacet subclasses and it can have any initialization code that depends on component or on other facets that are the dependencies of a facet. Inherited <code>start</code> method should be called int he same way as written above.</li>
+<li><code>start</code> method of component is called. This component method can be implemented by subclasses if they need to have some initialization code that depends on some facets and requires that these facets are fully inialized. Often such code also depends on component&#39;s scope children as well so this code should be inside <code>&#39;childrenbound&#39;</code> event subscriber.</li>
+<li>&#39;addedtoscope&#39; event is dispatched when component is added to its parent&#39;s scope or to top level scope created by <code>milo.binder</code>.</li>
+<li>component&#39;s children are created (steps 1-6 above are followed for each child).</li>
+<li>&#39;childrenbound&#39; event is dispatched when all component&#39;s children are created and added to their scope (see event description below).</li>
+<li>&#39;stateready&#39; event is dispatched for component and all its children when component is create from state (see event description below).</li>
+<li>at this point component is in the &quot;interactive&quot; state when it and its facets will only respond to messages/events that they subscribed to during initialization.</li>
+</ol>
+</div>
+          <pre><code class="language-javascript">var Component = _.createSubclass(FacetedObject, 'Component', true);
+
+module.exports = Component;
+
+_registerWithDomStorage('Component');</code></pre>
+          <div class="description"><p>####Component class methods####</p><ul>
+<li><a href="#Component$$createComponentClass">createComponentClass</a></li>
+<li><a href="#Component$$create">create</a></li>
+<li><a href="#Component$$copy">copy</a></li>
+<li><a href="#Component$$createOnElement">createOnElement</a></li>
+<li><a href="c_utils.js.html#isComponent">isComponent</a></li>
+<li><a href="c_utils.js.html#getComponent">getComponent</a></li>
+<li><a href="c_utils.js.html#getContainingComponent">getContainingComponent</a></li>
+<li><a href="#Component$$createFromState">createFromState</a></li>
+<li><a href="#Component$$createFromDataTransfer">createFromDataTransfer</a></li>
+</ul>
+</div>
+          <pre><code class="language-javascript">_.extend(Component, {
+    createComponentClass: Component$$createComponentClass,
+    create: Component$$create,
+    copy: Component$$copy,
+    createOnElement: Component$$createOnElement,
+    isComponent: componentUtils.isComponent,
+    getComponent: componentUtils.getComponent,
+    getContainingComponent: componentUtils.getContainingComponent,
+    createFromState: Component$$createFromState,
+    createFromDataTransfer: Component$$createFromDataTransfer
+});
+delete Component.createFacetedClass;</code></pre>
+          <div class="description"><p>####Component instance methods####</p><ul>
+<li><a href="#Component$init">init</a></li>
+<li><a href="#Component$createElement">createElement</a></li>
+<li><a href="#Component$hasFacet">hasFacet</a></li>
+<li><a href="#Component$addFacet">addFacet</a></li>
+<li><a href="#Component$allFacets">allFacets</a></li>
+<li><a href="#Component$rename">rename</a></li>
+<li><a href="#Component$remove">remove</a></li>
+<li><a href="#Component$getState">getState</a></li>
+<li><a href="#Component$getTransferState">getTransferState</a></li>
+<li><a href="#Component$setState">setState</a></li>
+<li><a href="#Component$getScopeParent">getScopeParent</a></li>
+<li><a href="#Component$getTopScopeParent">getTopScopeParent</a></li>
+<li><a href="#Component$getScopeParentWithClass">getScopeParentWithClass</a></li>
+<li><a href="#Component$getTopScopeParentWithClass">getTopScopeParentWithClass</a></li>
+<li><a href="#Component$walkScopeTree">walkScopeTree</a></li>
+<li><a href="#Component$broadcast">broadcast</a></li>
+<li><a href="#Component$destroy">destroy</a></li>
+<li><a href="#Component$isDestroyed">isDestroyed</a></li>
+</ul>
+<p>#####<a href="../messenger/index.js.html">Messenger</a> methods available on component#####</p><ul>
+<li><a href="../messenger/index.js.html#Messenger$on">on</a> - single subscribe</li>
+<li><a href="../messenger/index.js.html#Messenger$off">off</a> - single unsubscribe</li>
+<li><a href="../messenger/index.js.html#Messenger$onMessages">onMessages</a> - multiple subscribe</li>
+<li><a href="../messenger/index.js.html#Messenger$offMessages">offMessages</a> - multiple unsubscribe</li>
+<li><a href="../messenger/index.js.html#Messenger$postMessage">postMessage</a> - post message on component</li>
+<li><a href="../messenger/index.js.html#Messenger$getSubscribers">getSubscribers</a> - get subscribers for a given message</li>
+</ul>
+</div>
+          <pre><code class="language-javascript">_.extendProto(Component, {
+    init: Component$init,
+    start: Component$start,
+    createElement: Component$createElement,
+    hasFacet: Component$hasFacet,
+    addFacet: Component$addFacet,
+    allFacets: Component$allFacets,
+    rename: Component$rename,
+    remove: Component$remove,
+    insertInto: Component$insertInto,
+
+    getState: Component$getState,
+    getTransferState: Component$getTransferState,
+    _getState: Component$_getState,
+    setState: Component$setState,
+    
+    getScopeParent: Component$getScopeParent,
+    getTopScopeParent: Component$getTopScopeParent,
+    getScopeParentWithClass: Component$getScopeParentWithClass,
+    getTopScopeParentWithClass: Component$getTopScopeParentWithClass,
+
+    setScopeParentFromDOM: Component$setScopeParentFromDOM,
+
+    walkScopeTree: Component$walkScopeTree,
+
+    treePathOf: Component$treePathOf,
+    getComponentAtTreePath: Component$getComponentAtTreePath,
+    insertAtTreePath: Component$insertAtTreePath,
+
+    broadcast: Component$broadcast,
+    destroy: Component$destroy,
+    isDestroyed: Component$isDestroyed
+});</code></pre>
+          <section id="MESSENGER_PROPERTY">
+            <h1>MESSENGER_PROPERTY</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>MESSENGER_PROPERTY</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Expose Messenger methods on Component prototype</p></div>
+          <pre><code class="language-javascript">var MESSENGER_PROPERTY = '_messenger';
+Messenger.useWith(Component, MESSENGER_PROPERTY, Messenger.defaultMethods);
+
+
+var COMPONENT_DATA_TYPE_PREFIX = 'x-application/milo-component';
+var COMPONENT_DATA_TYPE_REGEX = /x-application\/milo-component\/([a-z_$][0-9a-z_$]*)(?:\/())/i;</code></pre>
+          <section id="Component$$createComponentClass">
+            <h1>Component$$createComponentClass</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$$createComponentClass()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>name</td>
+                <td>String</td>
+                <td><p>class name</p></td>
+              </tr>
+              <tr>
+                <td>facetsConfig</td>
+                <td>Object.&lt;Object&gt;, Array.&lt;String&gt;</td>
+                <td><p>map of facets configuration.  If some facet does not require configuration, <code>undefined</code> should be passed as the configuration for the facet.<br /> If no facet requires configuration, the array of facets names can be passed.</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Subclass.&lt;Component&gt;</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Component class method<br />Creates a subclass of component from the map of configured facets.<br />This method wraps and replaces <a href="../abstract/faceted_object.js.html#createFacetedClass"><code>createFacetedClass</code></a> class method of FacetedObject.<br />Unlike createFacetedClass, this method take facet classes from registry by their name, so only map of facets configuration needs to be passed. All facets classes should be subclasses of <a href="./c_facet.js.html">ComponentFacet</a></p></div>
+          <pre><code class="language-javascript">function Component$$createComponentClass(name, facetsConfig) {
+    // convert array of facet names to map of empty facets configurations
+    if (Array.isArray(facetsConfig)) {
+        var configMap = {};
+        facetsConfig.forEach(function(fct) {
+            var fctName = _.firstLowerCase(fct);
+            configMap[fctName] = {};
+        });
+        facetsConfig = configMap;
+    }
+
+    // construct map of facets classes from facetRegistry
+    var facetsClasses;
+    if (typeof facetsConfig == 'object' &amp;&amp; _.keys(facetsConfig).length) {
+        facetsClasses = {};
+        _.eachKey(facetsConfig, function(fctConfig, fct) {
+            var fctName = _.firstLowerCase(fct);
+            var fctClassName = _.firstUpperCase(fct);
+            facetsClasses[fctName] = facetsRegistry.get(fctClassName);
+        });
+    }
+
+    // create subclass of Component using method of FacetedObject
+    var ComponentClass = FacetedObject.createFacetedClass.call(this, name, facetsClasses, facetsConfig);
+    
+    _registerWithDomStorage(name);
+
+    return ComponentClass;
+}
+
+
+function _registerWithDomStorage(className) {
+    DOMStorage.registerDataType(className, Component_domStorageSerializer, Component_domStorageParser);
+}
+
+
+function Component_domStorageSerializer(component) {
+    var state = component.getState();
+    return JSON.stringify(state);   
+}
+
+
+function Component_domStorageParser(compStr, compClassName) {
+    var state = _.jsonParse(compStr);
+    if (state)
+        return Component.createFromState(state);
+}</code></pre>
+          <section id="Component$$create">
+            <h1>Component$$create</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$$create()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>info</td>
+                <td>ComponentInfo</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>throwOnErrors</td>
+                <td>Boolean</td>
+                <td><p>If set to false, then errors will only be logged to console. True by default.</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Component</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Component class method<br />Creates component from <a href="./c_info.js.html">ComponentInfo</a> (used by <a href="../binder.js.html">milo.binder</a> and to copy component)<br />Component of any registered class (see <a href="./c_registry.js.html">componentsRegistry</a>) with any additional registered facets (see <a href="./c_facets/cf_registry.js.html">facetsRegistry</a>) can be created using this method.</p></div>
+          <pre><code class="language-javascript">function Component$$create(info, throwOnErrors) {
+    var ComponentClass = info.ComponentClass;
+
+    if (typeof ComponentClass != 'function') {
+        var message = 'create: component class should be function, &quot;' + typeof ComponentClass + '&quot; passed'; 
+        if (throwOnErrors === false) {
+            logger.error('Component', message, ';using base Component class instead');
+            ComponentClass = Component;
+        } else
+            throw new Error(message);
+    }
+
+    var aComponent = new ComponentClass(info.scope, info.el, info.name, info);
+
+    if (info.extraFacetsClasses)
+        _.eachKey(info.extraFacetsClasses, function(FacetClass) {
+            if (! aComponent.hasFacet(FacetClass))
+                aComponent.addFacet(FacetClass, undefined, undefined, throwOnErrors);
+        });
+
+    return aComponent;
+}</code></pre>
+          <section id="Component$$copy">
+            <h1>Component$$copy</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$$copy()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>component</td>
+                <td>Component</td>
+                <td><p>an instance of Component class or subclass</p></td>
+              </tr>
+              <tr>
+                <td>deepCopy</td>
+                <td>Boolean</td>
+                <td><p>optional <code>true</code> to make deep copy of DOM element, otherwise only element without children is copied</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Component</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Component class method<br />Create a copy of component, including a copy of DOM element. Returns a copy of <code>component</code> (of the same class) with new DOM element (not inserted into page).<br />Component is added to the same scope as the original component.</p></div>
+          <pre><code class="language-javascript">function Component$$copy(component, deepCopy) {
+    check(component, Component);
+    check(deepCopy, Match.Optional(Boolean));
+
+    if (deepCopy &amp;&amp; !component.container) 
+        throw new Error('Cannot deep copy component without container facet');
+
+    // copy DOM element, using Dom facet if it is available
+    var newEl = component.dom 
+                    ? component.dom.copy(deepCopy)
+                    : component.el.cloneNode(deepCopy);
+
+    var ComponentClass = component.constructor;
+
+    // create component of the same class on the element
+    var aComponent = ComponentClass.createOnElement(newEl, undefined, component.scope, component.extraFacets);
+    var state = component._getState(deepCopy || false);
+    aComponent.setState(state);
+    _.deferMethod(aComponent, 'broadcast', 'stateready');
+    return aComponent;
+}</code></pre>
+          <section id="Component$$createOnElement">
+            <h1>Component$$createOnElement</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$$createOnElement()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>el</td>
+                <td>Element</td>
+                <td><p>optional element to attach component to. If element is not passed, it will be created</p></td>
+              </tr>
+              <tr>
+                <td>innerHTML</td>
+                <td>String</td>
+                <td><p>optional inner html to insert in element before binding.</p></td>
+              </tr>
+              <tr>
+                <td>rootScope</td>
+                <td>Scope</td>
+                <td><p>optional scope to put component in. If not passed, component will be attached to the scope that contains the element. If such scope does not exist, new scope will be created.</p></td>
+              </tr>
+              <tr>
+                <td>extraFacets</td>
+                <td>Array.&lt;String&gt;</td>
+                <td><p>list of extra facet to add to component</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Subclass.&lt;Component&gt;</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Component class method<br />Creates an instance of component atached to element. All subclasses of component inherit this method.<br />Returns the component of the class this method is used with (thecontext of the method call).</p></div>
+          <pre><code class="language-javascript">function Component$$createOnElement(el, innerHTML, rootScope, extraFacets) {
+    check(innerHTML, Match.Optional(String));
+    check(rootScope, Match.Optional(Scope));
+    check(extraFacets, Match.Optional([String]));
+
+    // &quot;this&quot; refers to the class of component here, as this is a class method
+    if (el &amp;&amp; innerHTML) el.innerHTML = innerHTML;
+    el = el || _createComponentElement.call(this, innerHTML);
+    rootScope = rootScope || _findOrCreateComponentRootScope(el);
+    var aComponent = _addAttributeAndBindComponent.call(this, el, rootScope, extraFacets);
+    aComponent.broadcast('stateready');
+    return aComponent;
+}
+
+function _createComponentElement(innerHTML) {
+    // &quot;this&quot; refers to the class of component here, as this is a class method
+    var Dom = facetsRegistry.get('Dom')
+        , domFacetConfig = this.getFacetConfig('dom')
+        , templateFacetConfig = this.getFacetConfig('template')
+        , template = templateFacetConfig &amp;&amp; templateFacetConfig.template;
+
+    var elConfig = {
+        domConfig: domFacetConfig,
+        template: template,
+        content: innerHTML
+    };
+
+    return Dom.createElement(elConfig);
+}
+
+function _findOrCreateComponentRootScope(el) {
+    var parent = Component.getContainingComponent(el, false, 'Container');
+    return parent ? parent.container.scope : new Scope(el);
+}
+
+function _addAttributeAndBindComponent(el, rootScope, extraFacets) {
+    // add bind attribute to element
+    var attr = new BindAttribute(el);
+    // &quot;this&quot; refers to the class of component here, as this is a class method
+    attr.compClass = this.name;
+    attr.compFacets = extraFacets;
+    attr.decorate();
+
+    // should be required here to resolve circular dependency
+    var miloBinder = require('../binder');
+    miloBinder(el, rootScope);
+
+    return rootScope[attr.compName];
+}</code></pre>
+          <section id="Component$$createFromState">
+            <h1>Component$$createFromState</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$$createFromState()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>state</td>
+                <td>Object</td>
+                <td><p>state from which component will be created</p></td>
+              </tr>
+              <tr>
+                <td>rootScope</td>
+                <td>Scope</td>
+                <td><p>scope to which component will be added</p></td>
+              </tr>
+              <tr>
+                <td>newUniqueName</td>
+                <td>Boolean</td>
+                <td><p>optional <code>true</code> to create component with the name different from the original one. <code>False</code> by default.</p></td>
+              </tr>
+              <tr>
+                <td>throwOnErrors</td>
+                <td>Boolean</td>
+                <td><p>If set to false, then errors will only be logged to console. True by default.</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Component</td>
+                <td><p>component</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Component class method<br />Creates component from component state, that includes information about its class, extra facets, facets data and all scope children.<br />This is used to save/load, copy/paste and drag/drop component</p></div>
+          <pre><code class="language-javascript">function Component$$createFromState(state, rootScope, newUniqueName, throwOnErrors) {
+    check(state, Match.ObjectIncluding({
+        compName: Match.Optional(String),
+        compClass: Match.Optional(String),
+        extraFacets: Match.Optional([String]),
+        facetsStates: Match.Optional(Object),
+        outerHTML: String
+    }));
+
+    var miloBinder = require('../binder');
+
+    // create wrapper element optionally renaming component
+    var wrapEl = _createComponentWrapElement(state, newUniqueName);
+
+    // instantiate all components from HTML
+    var scope = miloBinder(wrapEl, undefined, undefined, throwOnErrors);
+
+    // as there should only be one component, call to _any will return it
+    var component = scope._any();
+
+    // set component's scope
+    if (rootScope) {
+        component.scope = rootScope;
+        rootScope._add(component);
+    }
+
+    // restore component state
+    component.setState(state);
+    _.deferMethod(component, 'broadcast', 'stateready');
+
+    return component;   
+}
+
+
+// used by Component$$createFromState
+function _createComponentWrapElement(state, newUniqueName) {
+    var wrapEl = document.createElement('div');
+    wrapEl.innerHTML = state.outerHTML;
+
+    var children = domUtils.children(wrapEl);
+    if (children.length != 1)
+        throw new Error('cannot create component: incorrect HTML, elements number: ' + children.length + ' (should be 1)');
+    var compEl = children[0];
+    var attr = new BindAttribute(compEl);
+    attr.compName = newUniqueName ? miloComponentName() : state.compName;
+    attr.compClass = state.compClass;
+    attr.compFacets = state.extraFacets;
+    attr.decorate();
+
+    return wrapEl;
+}</code></pre>
+          <section id="Component$$createFromDataTransfer">
+            <h1>Component$$createFromDataTransfer</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$$createFromDataTransfer()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>dataTransfer</td>
+                <td>DataTransfer</td>
+                <td><p>Data transfer</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Creates a component from a DataTransfer object (if possible)</p></div>
+          <pre><code class="language-javascript">function Component$$createFromDataTransfer(dataTransfer) {
+    var dataType = _.find(dataTransfer.types, function (type) {
+        return COMPONENT_DATA_TYPE_REGEX.test(type);
+    });
+    if (!dataType) return;
+
+    var state = _.jsonParse(dataTransfer.getData(dataType));
+    if (!state) return;
+
+    return Component.createFromState(state, undefined, true);
+}</code></pre>
+          <section id="Component$init">
+            <h1>Component$init</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$init()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>scope</td>
+                <td>Scope</td>
+                <td><p>scope to which component will belong. It is usually a top level scope object returned by <code>milo.binder</code> or <code>scope</code> property of Container facet.</p></td>
+              </tr>
+              <tr>
+                <td>element</td>
+                <td>Element</td>
+                <td><p>DOM element that component is attached to</p></td>
+              </tr>
+              <tr>
+                <td>name</td>
+                <td>String</td>
+                <td><p>component name, should be unique in the scope of component</p></td>
+              </tr>
+              <tr>
+                <td>componentInfo</td>
+                <td>ComponentInfo</td>
+                <td><p>instance of ComponentInfo class that can be used to create a copy of component  TODO try removing it</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Component instance method.<br />Initializes component. Automatically called by inherited constructor of FacetedObject.<br />Subclasses should call inherited init methods:</p><pre><code>Component.prototype.init.apply(this, arguments)
+</code></pre></div>
+          <pre><code class="language-javascript">function Component$init(scope, element, name, componentInfo) {
+    // create DOM element if it wasn't passed to Constructor
+    this.el = element || this.createElement();
+
+    // store reference to component on DOM element
+    if (this.el) {
+        // check that element does not have a component already atached
+        var elComp = this.el[config.componentRef];
+        if (elComp)
+            logger.warn('component ' + name + ' attached to element that already has component ' + elComp.name);
+
+        this.el[config.componentRef] = this;
+    }
+
+    _.defineProperties(this, {
+        componentInfo: componentInfo,
+        extraFacets: []
+    }, _.ENUM);
+
+    this.name = name;
+    this.scope = scope;
+
+    // create component messenger
+    var messenger = new Messenger(this);
+    _.defineProperty(this, MESSENGER_PROPERTY, messenger);
+
+    // check all facets dependencies (required facets)
+    this.allFacets('check');
+
+    // start all facets
+    this.allFacets('start');
+
+    // call start method if it's defined in subclass
+    if (this.start) this.start();
+}</code></pre>
+          <section id="Component$start">
+            <h1>Component$start</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$start()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>This is a stub to avoid confusion whether the method of superclass should be called in subclasses<br />The start method of subclass instance is called once all the facets are created, initialized and started (see above)</p></div>
+          <pre><code class="language-javascript">function Component$start() {}</code></pre>
+          <section id="Component$createElement">
+            <h1>Component$createElement</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$createElement()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Component instance method.<br />Initializes the element which this component is bound to</p><p>This method is called when a component is instantiated outside the DOM and<br />will generate a new element for the component.</p></div>
+          <pre><code class="language-javascript">function Component$createElement() {
+    if (typeof document == 'undefined')
+        return;
+
+    this.el = this.dom
+                ? this.dom.createElement()
+                : document.createElement('DIV');
+
+    return this.el;
+}</code></pre>
+          <section id="Component$hasFacet">
+            <h1>Component$hasFacet</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$hasFacet()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>facetNameOrClass</td>
+                <td>Function, String</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Boolean</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Component instance method<br />Returns true if component has facet</p></div>
+          <pre><code class="language-javascript">function Component$hasFacet(facetNameOrClass) {
+    var facetName = _.firstLowerCase(typeof facetNameOrClass == 'function'
+                                        ? facetNameOrClass.name
+                                        : facetNameOrClass);
+
+    var facet = this[facetName];
+    if (! facet instanceof ComponentFacet)
+        logger.warn('expected facet', facetName, 'but this property name is used for something else');
+
+    return !! facet;
+}</code></pre>
+          <section id="Component$addFacet">
+            <h1>Component$addFacet</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$addFacet()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>facetNameOrClass</td>
+                <td>String, Subclass.&lt;Component&gt;</td>
+                <td><p>name of facet class or the class itself. If name is passed, the class will be retireved from facetsRegistry</p></td>
+              </tr>
+              <tr>
+                <td>facetConfig</td>
+                <td>Object</td>
+                <td><p>optional facet configuration</p></td>
+              </tr>
+              <tr>
+                <td>facetName</td>
+                <td>String</td>
+                <td><p>optional facet name. Allows to add facet under a name different from the class name supplied.</p></td>
+              </tr>
+              <tr>
+                <td>throwOnErrors</td>
+                <td>Boolean</td>
+                <td><p>If set to false, then errors will only be logged to console. True by default.</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Component instance method.<br />Adds facet with given name or class to the instance of Component (or its subclass).</p></div>
+          <pre><code class="language-javascript">function Component$addFacet(facetNameOrClass, facetConfig, facetName, throwOnErrors) {
+    check(facetNameOrClass, Match.OneOf(String, Match.Subclass(ComponentFacet)));
+    check(facetConfig, Match.Optional(Object));
+    check(facetName, Match.Optional(String));
+
+    var FacetClass;
+    // if only name passed, retrieve facet class from registry
+    if (typeof facetNameOrClass == 'string') {
+        var facetClassName = _.firstUpperCase(facetNameOrClass);
+        FacetClass = facetsRegistry.get(facetClassName);
+    } else 
+        FacetClass = facetNameOrClass;
+
+    if (!facetName)
+        facetName = _.firstLowerCase(FacetClass.name);
+
+    this.extraFacets.push(facetName);
+
+    // add facet using method of FacetedObject
+    var newFacet = FacetedObject.prototype.addFacet.call(this, FacetClass, facetConfig, facetName, throwOnErrors);
+
+    // check depenedencies and start facet
+    if (newFacet.check) newFacet.check();
+    if (newFacet.start) newFacet.start();
+}</code></pre>
+          <section id="Component$allFacets">
+            <h1>Component$allFacets</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$allFacets()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>method</td>
+                <td>String</td>
+                <td><p>method name to envoke on the facet</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Object</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Component instance method.<br />Envoke given method with optional parameters on all facets.<br />Returns the map of values returned by all facets. If the facet doesn&#39;t have the method it is simply not called and the value in the map will be undefined.</p></div>
+          <pre><code class="language-javascript">function Component$allFacets(method) { // ,... arguments
+    var args = _.slice(arguments, 1);
+
+    return _.mapKeys(this.facets, function(facet, fctName) {
+        if (facet &amp;&amp; typeof facet[method] == 'function')
+            return facet[method].apply(facet, args);
+    });
+}</code></pre>
+          <section id="Component$rename">
+            <h1>Component$rename</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$rename()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>[name]</td>
+                <td>String</td>
+                <td><p>optional new name of component,</p></td>
+              </tr>
+              <tr>
+                <td>[renameInScope]</td>
+                <td>Boolean</td>
+                <td><p>optional false to not rename ComponentInfo object in its scope, true by default</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Component instance method.</p></div>
+          <pre><code class="language-javascript">function Component$rename(name, renameInScope) {
+    name = name || miloComponentName();
+    this.componentInfo.rename(name, false);
+    Scope.rename(this, name, renameInScope);
+}</code></pre>
+          <section id="Component$remove">
+            <h1>Component$remove</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$remove()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>preserveScopeProperty</td>
+                <td>Boolean</td>
+                <td><p>true not to delete scope property of component</p></td>
+              </tr>
+              <tr>
+                <td>quiet</td>
+                <td>Boolean</td>
+                <td><p>optional true to suppress the warning message if the component is not in scope</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Component instance method.<br />Removes component from its scope.</p></div>
+          <pre><code class="language-javascript">function Component$remove(preserveScopeProperty, quiet) {
+    if (this.scope) {
+        this.scope._remove(this.name, quiet);
+        if (! preserveScopeProperty)
+            delete this.scope;
+    }
+}</code></pre>
+          <section id="Component$insertInto">
+            <h1>Component$insertInto</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$insertInto()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>parentEl</td>
+                <td>HTMLElement</td>
+                <td><p>The element into which the component should be inserted.</p></td>
+              </tr>
+              <tr>
+                <td>referenceEl</td>
+                <td>HTMLElement</td>
+                <td><p>(optional) The reference element it should be inserted before.</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Component instance method.<br />Inserts the component into the DOM and attempts to adjust the scope tree accordingly.</p></div>
+          <pre><code class="language-javascript">function Component$insertInto(parentEl, referenceEl) {
+    parentEl.insertBefore(this.el, referenceEl);
+    this.setScopeParentFromDOM();
+}</code></pre>
+          <section id="Component$getState">
+            <h1>Component$getState</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$getState()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Component instance method<br />Retrieves all component state, including information about its class, extra facets, facets data and all scope children.<br />This information is used to save/load, copy/paste and drag/drop component<br />Returns component state</p></div>
+          <pre><code class="language-javascript">function Component$getState() {
+    this.broadcast('getstatestarted', { rootComponent: this }, undefined, true);
+    var state = this._getState(true);
+    state.outerHTML = this.el.outerHTML;
+    _.deferMethod(this, 'broadcast', 'getstatecompleted', { rootComponent: this }, undefined, true);
+    return state;
+}</code></pre>
+          <section id="Component$getTransferState">
+            <h1>Component$getTransferState</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$getTransferState()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>options</td>
+                <td>Object</td>
+                <td><p>can be used by subclasses.</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Object</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Component instance method<br />Retrieves all component state, including information about its class, extra facets, facets data and all scope children.<br />This information is used to save/load, copy/paste and drag/drop component<br />If component has <a href="./c_facets/Transfer.js.html">Transfer</a> facet on it, this method retrieves state from this facet<br />Returns component state</p></div>
+          <pre><code class="language-javascript">function Component$getTransferState(options) {
+    return this.transfer
+            ? this.transfer.getState(options)
+            : this.getState(options);
+}</code></pre>
+          <section id="Component$getScopeParent">
+            <h1>Component$getScopeParent</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$getScopeParent()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>conditionOrFacet</td>
+                <td>Function, String</td>
+                <td><p>optional condition that component should pass (or facet name it should contain)</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Component</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Component instance method.<br />Returns the scope parent of a component.<br />If <code>conditionOrFacet</code> parameter is not specified, an immediate parent will be returned, otherwise the closest ancestor with a specified facet or passing condition test.</p></div>
+          <pre><code class="language-javascript">function Component$getScopeParent(conditionOrFacet) {
+    return _callGetScopeParent.call(this, _getScopeParent, conditionOrFacet);
+}
+
+function _callGetScopeParent(_getScopeParentFunc, conditionOrFacet) {
+    check(conditionOrFacet, Match.Optional(Match.OneOf(Function, String)));
+    var conditionFunc = componentUtils._makeComponentConditionFunc(conditionOrFacet);
+    return _getScopeParentFunc.call(this, conditionFunc);   
+}
+
+function _getScopeParent(conditionFunc) {
+    var parent;
+    try { parent = this.scope._hostObject.owner; } catch(e) {}
+
+    // Where there is no parent, this function will return undefined
+    // The parent component is checked recursively
+    if (parent) {
+        if (! conditionFunc || conditionFunc(parent) )
+            return parent;
+        else
+            return _getScopeParent.call(parent, conditionFunc);
+    }
+}</code></pre>
+          <section id="Component$getScopeParentWithClass">
+            <h1>Component$getScopeParentWithClass</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$getScopeParentWithClass()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>[ComponentClass]</td>
+                <td>Function</td>
+                <td><p>component class that the parent should have, same class by default</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Component</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Component instance method<br />Returns scope parent with a given class, with same class if not specified</p></div>
+          <pre><code class="language-javascript">function Component$getScopeParentWithClass(ComponentClass) {
+    ComponentClass = ComponentClass || this.constructor;
+    return _getScopeParent.call(this, function(comp) {
+        return comp instanceof ComponentClass;
+    });
+}</code></pre>
+          <section id="Component$getTopScopeParent">
+            <h1>Component$getTopScopeParent</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$getTopScopeParent()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>conditionOrFacet</td>
+                <td>Function, String</td>
+                <td><p>optional condition that component should pass (or facet name it should contain)</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Component</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Component instance method.<br />Returns the topmost scope parent of a component.<br />If <code>conditionOrFacet</code> parameter is not specified, the topmost scope parent will be returned, otherwise the topmost ancestor with a specified facet or passing condition test.</p></div>
+          <pre><code class="language-javascript">function Component$getTopScopeParent(conditionOrFacet) {
+    return _callGetScopeParent.call(this, _getTopScopeParent, conditionOrFacet);
+}
+
+function _getTopScopeParent(conditionFunc) {
+    var topParent
+        , parent = this;
+    do {
+        parent = _getScopeParent.call(parent, conditionFunc);
+        if (parent)
+            topParent = parent;
+    } while (parent);
+
+    return topParent;
+}</code></pre>
+          <section id="Component$getTopScopeParentWithClass">
+            <h1>Component$getTopScopeParentWithClass</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$getTopScopeParentWithClass()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>[ComponentClass]</td>
+                <td>Function</td>
+                <td><p>component class that the parent should have, same class by default</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Component</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Component instance method<br />Returns scope parent with a given class, with same class if not specified</p></div>
+          <pre><code class="language-javascript">function Component$getTopScopeParentWithClass(ComponentClass) {
+    ComponentClass = ComponentClass || this.constructor;
+    return _getTopScopeParent.call(this, function(comp) {
+        return comp instanceof ComponentClass;
+    });
+}</code></pre>
+          <section id="Component$setScopeParentFromDOM">
+            <h1>Component$setScopeParentFromDOM</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$setScopeParentFromDOM()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Component instance method<br />Finds scope parent of component using DOM tree (unlike getScopeParent that simply goes up the scope tree).<br />While getScopeParent is faster it may fail if scope chain is not setup yet (e.g., when component has been just inserted).<br />The scope property of component will be changed to point to scope object of container facet of that parent.<br />Returned scope parent of the component will be undefined (as well as component&#39;s scope property) if no parent in the DOM tree has container facet.<br />TODO Method will not bind DOM children correctly if component has no container facet.</p></div>
+          <pre><code class="language-javascript">function Component$setScopeParentFromDOM() {
+    var parentEl = this.el.parentNode;
+
+    var parent, foundParent;
+    while (parentEl &amp;&amp; ! foundParent) {
+        parent = Component.getComponent(parentEl);
+        foundParent = parent &amp;&amp; parent.container;
+        parentEl = parentEl.parentNode;
+    }
+
+    this.remove(); // remove component from its current scope (if it is defined)
+    if (foundParent) {
+        this.rename(undefined, false);
+        parent.container.scope._add(this);
+        return parent;
+    }        
+}</code></pre>
+          <section id="Component$walkScopeTree">
+            <h1>Component$walkScopeTree</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$walkScopeTree()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>callback</td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>thisArg</td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Walks component tree, calling provided callback on each component</p></div>
+          <pre><code class="language-javascript">function Component$walkScopeTree(callback, thisArg) {
+    callback.call(thisArg, this);
+    if (!this.container) return;
+    this.container.scope._each(function(component) {
+        component.walkScopeTree(callback, thisArg);
+    });
+}
+
+
+function Component$treePathOf(component) {
+    return domUtils.treePathOf(this.el, component.el);
+}
+
+
+function Component$getComponentAtTreePath(treePath, nearest) {
+    var node = domUtils.getNodeAtTreePath(this.el, treePath, nearest);
+    return Component.getComponent(node);
+}
+
+
+function Component$insertAtTreePath(treePath, component, nearest) {
+    var wasInserted = domUtils.insertAtTreePath(this.el, treePath, component.el);
+    if (wasInserted) component.setScopeParentFromDOM();
+    return wasInserted;
+}</code></pre>
+          <section id="Component$broadcast">
+            <h1>Component$broadcast</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$broadcast()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>msg</td>
+                <td>String, RegExp</td>
+                <td><p>message to be sent</p></td>
+              </tr>
+              <tr>
+                <td>[data]</td>
+                <td>Any</td>
+                <td><p>optional message data</p></td>
+              </tr>
+              <tr>
+                <td>[callback]</td>
+                <td>Function</td>
+                <td><p>optional callback</p></td>
+              </tr>
+              <tr>
+                <td>[synchronously]</td>
+                <td>Boolean</td>
+                <td><p>if it should use postMessageSync</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Broadcast message to component and to all its scope children</p></div>
+          <pre><code class="language-javascript">function Component$broadcast(msg, data, callback, synchronously) {
+    var postMethod = synchronously ? 'postMessageSync' : 'postMessage';
+    this.walkScopeTree(function(component) {
+        component[postMethod](msg, data, callback);
+    });
+}</code></pre>
+          <section id="Component$destroy">
+            <h1>Component$destroy</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$destroy()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Destroy component: removes component from DOM, removes it from scope, deletes all references to DOM nodes and unsubscribes from all messages both component and all facets</p></div>
+          <pre><code class="language-javascript">function Component$destroy(opts) {
+    if (typeof opts == 'boolean') opts = { quiet: opts };
+    else if (!opts) opts = {};
+
+    if (this._destroyed) {
+        if (!opts.quiet) logger.warn('Component destroy: component is already destroyed');
+        return;
+    }
+    this.remove(false, opts.quiet);
+    this.allFacets('destroy', opts);
+    this[MESSENGER_PROPERTY].destroy();
+    if (this.el) {
+        domUtils.detachComponent(this.el);
+        domUtils.removeElement(this.el);
+        delete this.el;
+    }
+    this.componentInfo.destroy();
+    this._destroyed = true;
+}</code></pre>
+          <section id="Component$isDestroyed">
+            <h1>Component$isDestroyed</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Component$isDestroyed()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Returns true if component was destroyed</p></div>
+          <pre><code class="language-javascript">function Component$isDestroyed() {
+    return !!this._destroyed;
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="container">
+        <p>Documentation generated with <a href="https://github.com/mr-doc/mr-doc">Mr. Doc </a> created by <a href="https://twitter.com/FGRibreau" data-show-count="false" class="twitter-follow-button">Francois-Guillaume Ribreau </a></p>
+        <p>Mr. Doc is sponsored by <a href="http://bringr.net/?btt" title="Outil d'analyse des réseaux sociaux" class="bringr">Bringr </a> and <a href="https://redsmin.com/?btt" title="Full Redis GUI" class="redsmin">Redsmin</a></p>
+        <p>Theme borrowed from Twitter Bootstrap</p>
+      </div>
+    </footer>
+    <script src="../js/twitter-widget.min.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/bootstrap-transition.min.js"></script>
+    <script src="../js/bootstrap-scrollspy.min.js"></script>
+    <script src="../js/bootstrap-dropdown.min.js"></script>
+    <script src="../js/bootstrap-collapse.min.js"></script>
+    <script src="../js/bootstrap-affix.min.js"></script>
+    <script src="../js/prism.min.js"></script>
+    <script src="../js/index.min.js"></script>
+  </body>
+</html>

@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" charset="utf-8">
+    <title>milo</title>
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../css/cayman.min.css">
+    <link rel="stylesheet" href="../../css/prism.min.css">
+    <link rel="stylesheet" href="../../css/index.min.css">
+    <link rel="stylesheet" href="../../css/docs.min.css">
+    <link rel="stylesheet" href="../../css/bootstrap-responsive.min.css">
+  </head>
+  <body data-spy="scroll" data-target=".scrollspy">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container"><a class="brand">Mr. Doc</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav pull-right sponsored"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <header id="overview" class="jumbotron subhead">
+      <div class="container">
+        <h1>milo</h1>
+        <p class="lead"></p>
+      </div>
+    </header>
+    <div class="container">
+      <div class="row">
+        <div class="span3 bs-docs-sidebar">
+          <ul class="nav nav-list bs-docs-sidenav affix-top">
+            <li><a href="../../index.html">Main</a></li>
+            <li><a href="../../abstract/facet.js.html">abstract/facet.js</a></li>
+            <li><a href="../../abstract/faceted_object.js.html">abstract/faceted_object.js</a></li>
+            <li><a href="../../abstract/registry.js.html">abstract/registry.js</a></li>
+            <li><a href="../../attributes/a_bind.js.html">attributes/a_bind.js</a></li>
+            <li><a href="../../attributes/a_class.js.html">attributes/a_class.js</a></li>
+            <li><a href="../../attributes/a_load.js.html">attributes/a_load.js</a></li>
+            <li><a href="../../attributes/index.js.html">attributes/index.js</a></li>
+            <li><a href="../../binder.js.html">binder.js</a></li>
+            <li><a href="../../classes.js.html">classes.js</a></li>
+            <li><a href="../../command/actions_history.js.html">command/actions_history.js</a></li>
+            <li><a href="../../command/cmd_registry.js.html">command/cmd_registry.js</a></li>
+            <li><a href="../../command/index.js.html">command/index.js</a></li>
+            <li><a href="../../command/transaction.js.html">command/transaction.js</a></li>
+            <li><a href="../../command/transaction_history.js.html">command/transaction_history.js</a></li>
+            <li><a href="../../components/ComponentTemplate.js.html">components/ComponentTemplate.js</a></li>
+            <li><a href="../../components/c_class.js.html">components/c_class.js</a></li>
+            <li><a href="../../components/c_facet.js.html">components/c_facet.js</a></li>
+            <li><a href="../../components/c_facets/Container.js.html">components/c_facets/Container.js</a></li>
+            <li><a href="../../components/c_facets/Css.js.html">components/c_facets/Css.js</a></li>
+            <li><a href="../../components/c_facets/Data.js.html">components/c_facets/Data.js</a></li>
+            <li><a href="../../components/c_facets/Dom.js.html">components/c_facets/Dom.js</a></li>
+            <li><a href="../../components/c_facets/Drag.js.html">components/c_facets/Drag.js</a></li>
+            <li><a href="../../components/c_facets/Drop.js.html">components/c_facets/Drop.js</a></li>
+            <li><a href="../../components/c_facets/Events.js.html">components/c_facets/Events.js</a></li>
+            <li><a href="../../components/c_facets/Frame.js.html">components/c_facets/Frame.js</a></li>
+            <li><a href="../../components/c_facets/Item.js.html">components/c_facets/Item.js</a></li>
+            <li class="active"><a href="../../components/c_facets/List.js.html">components/c_facets/List.js</a></li>
+            <li><a href="../../components/c_facets/ModelFacet.js.html">components/c_facets/ModelFacet.js</a></li>
+            <li><a href="../../components/c_facets/Options.js.html">components/c_facets/Options.js</a></li>
+            <li><a href="../../components/c_facets/Template.js.html">components/c_facets/Template.js</a></li>
+            <li><a href="../../components/c_facets/Transfer.js.html">components/c_facets/Transfer.js</a></li>
+            <li><a href="../../components/c_facets/cf_registry.js.html">components/c_facets/cf_registry.js</a></li>
+            <li><a href="../../components/c_info.js.html">components/c_info.js</a></li>
+            <li><a href="../../components/c_registry.js.html">components/c_registry.js</a></li>
+            <li><a href="../../components/c_utils.js.html">components/c_utils.js</a></li>
+            <li><a href="../../components/classes/View.js.html">components/classes/View.js</a></li>
+            <li><a href="../../components/msg_api/data.js.html">components/msg_api/data.js</a></li>
+            <li><a href="../../components/msg_api/de_data.js.html">components/msg_api/de_data.js</a></li>
+            <li><a href="../../components/msg_api/drop.js.html">components/msg_api/drop.js</a></li>
+            <li><a href="../../components/msg_src/dom_events.js.html">components/msg_src/dom_events.js</a></li>
+            <li><a href="../../components/msg_src/frame.js.html">components/msg_src/frame.js</a></li>
+            <li><a href="../../components/scope.js.html">components/scope.js</a></li>
+            <li><a href="../../config.js.html">config.js</a></li>
+            <li><a href="../../loader.js.html">loader.js</a></li>
+            <li><a href="../../milo.js.html">milo.js</a></li>
+            <li><a href="../../registry.js.html">registry.js</a></li>
+            <li><a href="../../services/de_constrs.js.html">services/de_constrs.js</a></li>
+            <li><a href="../../services/dom_source.js.html">services/dom_source.js</a></li>
+            <li><a href="../../services/mail/index.js.html">services/mail/index.js</a></li>
+            <li><a href="../../services/mail/mail_api.js.html">services/mail/mail_api.js</a></li>
+            <li><a href="../../services/mail/mail_source.js.html">services/mail/mail_source.js</a></li>
+            <li><a href="../../services/window.js.html">services/window.js</a></li>
+            <li><a href="../../use_components.js.html">use_components.js</a></li>
+            <li><a href="../../use_facets.js.html">use_facets.js</a></li>
+            <li><a href="../../util/component_name.js.html">util/component_name.js</a></li>
+            <li><a href="../../util/create_component_class.js.html">util/create_component_class.js</a></li>
+            <li><a href="../../util/create_facet_class.js.html">util/create_facet_class.js</a></li>
+            <li><a href="../../util/deprecate.js.html">util/deprecate.js</a></li>
+            <li><a href="../../util/dom.js.html">util/dom.js</a></li>
+            <li><a href="../../util/dom_listeners.js.html">util/dom_listeners.js</a></li>
+            <li><a href="../../util/domready.js.html">util/domready.js</a></li>
+            <li><a href="../../util/dragdrop.js.html">util/dragdrop.js</a></li>
+            <li><a href="../../util/error.js.html">util/error.js</a></li>
+            <li><a href="../../util/fragment.js.html">util/fragment.js</a></li>
+            <li><a href="../../util/index.js.html">util/index.js</a></li>
+            <li><a href="../../util/json_parse.js.html">util/json_parse.js</a></li>
+            <li><a href="../../util/request.js.html">util/request.js</a></li>
+            <li><a href="../../util/selection/index.js.html">util/selection/index.js</a></li>
+            <li><a href="../../util/storage/index.js.html">util/storage/index.js</a></li>
+            <li><a href="../../util/storage/model.js.html">util/storage/model.js</a></li>
+            <li><a href="../../util/storage/msg_src.js.html">util/storage/msg_src.js</a></li>
+            <li><a href="../../util/unique_id.js.html">util/unique_id.js</a></li>
+            <li><a href="../../util/websocket/index.js.html">util/websocket/index.js</a></li>
+            <li><a href="../../util/websocket/msg_api.js.html">util/websocket/msg_api.js</a></li>
+            <li><a href="../../util/websocket/msg_src.js.html">util/websocket/msg_src.js</a></li>
+          </ul>
+          <div class="scrollspy">
+            <ul class="nav nav-list bs-docs-sidenav affix-top">
+              <li><a href="#List"><i class="alert alert-success"></i><span>List</span></a>
+              </li>
+              <li><a href="#List$init"><i class="alert alert-info"></i><span>List$init</span></a>
+              </li>
+              <li><a href="#List$start"><i class="alert alert-info"></i><span>List$start</span></a>
+              </li>
+              <li><a href="#List$item"><i class="alert alert-info"></i><span>List$item</span></a>
+              </li>
+              <li><a href="#List$count"><i class="alert alert-info"></i><span>List$count</span></a>
+              </li>
+              <li><a href="#List$contains"><i class="alert alert-info"></i><span>List$contains</span></a>
+              </li>
+              <li><a href="#List$addItem"><i class="alert alert-info"></i><span>List$addItem</span></a>
+              </li>
+              <li><a href="#List$_addItem"><i class="alert alert-info"></i><span>List$_addItem</span></a>
+              </li>
+              <li><a href="#List$_addItems"><i class="alert alert-info"></i><span>List$_addItems</span></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="span9">
+          <section id="List">
+            <h1>List</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>List</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p><code>milo.registry.facets.get(&#39;List&#39;)</code><br />Facet enabling list functionality</p></div>
+          <pre><code class="language-javascript">var List = _.createSubclass(ComponentFacet, 'List');
+
+_.extendProto(List, {
+    init: List$init,
+    start: List$start,
+    destroy: List$destroy,
+
+    require: ['Container', 'Dom', 'Data'],
+    _itemPreviousComponent: _itemPreviousComponent,
+
+    item: List$item,
+    count: List$count,
+    contains: List$contains,
+    addItem: List$addItem,
+    addItems: List$addItems,
+    replaceItem: List$replaceItem,
+    moveItem: List$moveItem,
+    removeItem: List$removeItem,
+    extractItem: List$extractItem,
+    each: List$each,
+    map: List$map,
+    _setItem: List$_setItem,
+    _removeItem: List$_removeItem,
+    _addItem: List$_addItem,
+    _addItems: List$_addItems,
+    _createCacheTemplate: List$_createCacheTemplate,
+    _updateDataPaths: List$_updateDataPaths
+});
+
+facetsRegistry.add(List);
+
+module.exports = List;</code></pre>
+          <section id="List$init">
+            <h1>List$init</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>List$init()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Facet instance method<br />Initialized List facet instance and sets up item properties.</p></div>
+          <pre><code class="language-javascript">function List$init() {
+    ComponentFacet.prototype.init.apply(this, arguments);
+    var self = this;
+
+    _.defineProperties(this, {
+        _listItems: [],
+        _listItemsHash: {}
+    });
+    _.defineProperty(this, 'itemSample', null, _.WRIT);
+}</code></pre>
+          <section id="List$start">
+            <h1>List$start</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>List$start()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Facet instance method<br />Starts the List facet instance, finds child with Item facet.</p></div>
+          <pre><code class="language-javascript">function List$start() {
+    // Fired by __binder__ when all children of component are bound
+    this.owner.on('childrenbound', onChildrenBound);
+}
+
+
+function onChildrenBound() {
+    // get items already in the list
+    var children = this.dom.children()
+        , items = this.list._listItems
+        , itemsHash = this.list._listItemsHash;
+
+    if (children) children.forEach(function(childEl) {
+        var comp = Component.getComponent(childEl);
+        if (comp &amp;&amp; comp.item) {
+            items.push(comp);
+            itemsHash[comp.name] = comp;
+            comp.item.list = this.list;
+        }
+    }, this);
+
+    if (items.length) {
+        var foundItem = items[0];
+        items.splice(0, 1);
+        delete itemsHash[foundItem.name];
+        items.forEach(function(item, index) {
+            item.item.setIndex(index);
+        });
+    }
+
+    // Component must have one child with an Item facet
+    if (! foundItem) throw new Error('No child component has Item facet');
+
+    this.list.itemSample = foundItem;
+
+    // After keeping a reference to the item sample, it must be hidden and removed from scope.  The item sample will
+    // remain in the DOM and as such is marked with a CSS class allowing other code to ignore this element if required.
+    foundItem.dom.hide();
+    foundItem.remove(true);
+    foundItem.dom.addCssClasses(LIST_SAMPLE_CSS_CLASS);
+
+    // remove references to components from sample item
+    foundItem.walkScopeTree(function(comp) {
+        delete comp.el[miloConfig.componentRef];
+    });
+
+    this.list._createCacheTemplate();
+}
+
+
+function List$_createCacheTemplate() {
+    if (!this.itemSample) return false;
+
+    var itemSample = this.itemSample;
+
+    // create item template to insert many items at once
+    var itemElCopy = itemSample.el.cloneNode(true);
+    itemElCopy.classList.remove(LIST_SAMPLE_CSS_CLASS);
+
+    var attr = itemSample.componentInfo.attr;
+    var attrCopy = _.clone(attr);
+    attr.compName = '{{= it.componentName() }}';
+    attr.el = itemElCopy;
+    attr.decorate();
+
+    var itemsTemplateStr =
+          '{{ var i = it.count; while(i--) { }}'
+        + itemElCopy.outerHTML
+        + '{{ } }}';
+
+    this.itemsTemplate = doT.compile(itemsTemplateStr);
+}</code></pre>
+          <section id="List$item">
+            <h1>List$item</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>List$item()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>index</td>
+                <td>Integer</td>
+                <td><p>The index of the child item to get.</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Component</td>
+                <td><p>The component found</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Facet instance method<br />Retrieve a particular child item by index</p></div>
+          <pre><code class="language-javascript">function List$item(index) {
+    return this._listItems[index];
+}</code></pre>
+          <section id="List$count">
+            <h1>List$count</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>List$count()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Facet instance method<br />Gets the total number of child items</p></div>
+          <pre><code class="language-javascript">function List$count() {
+    return this._listItems.length;
+}
+
+
+function List$_setItem(index, component) {
+    this._listItems.splice(index, 0, component);
+    this._listItemsHash[component.name] = component;
+    component.item.list = this;
+    component.item.setIndex(+index);
+}</code></pre>
+          <section id="List$contains">
+            <h1>List$contains</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>List$contains()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>component</td>
+                <td>Component</td>
+                <td><p>The component to look for.</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Boolean</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Facet instance method<br />Returns true if a particular child item exists in the list</p></div>
+          <pre><code class="language-javascript">function List$contains(component) {
+    return this._listItemsHash[component.name] == component;
+}</code></pre>
+          <section id="List$addItem">
+            <h1>List$addItem</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>List$addItem()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>index</td>
+                <td>Integer</td>
+                <td><p>The index to add at</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Component</td>
+                <td><p>The newly created component</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Facet instance method<br />Adds a new child component at a particular index and returns the new component.<br />This method uses data facet, so notification will be emitted on data facet.</p></div>
+          <pre><code class="language-javascript">function List$addItem(index, itemData) {
+    index = isNaN(+index) ? this.count() : +index;
+    this.owner.data.splice(index, 0, itemData || {});
+    return this.item(index);
+}</code></pre>
+          <section id="List$_addItem">
+            <h1>List$_addItem</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>List$_addItem()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>index</td>
+                <td>Integer</td>
+                <td><p>The index to add at</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Component</td>
+                <td><p>The newly created component</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Facet instance method<br />Adds a new child component at a particular index and returns the new component</p></div>
+          <pre><code class="language-javascript">function List$_addItem(index) {
+    if (this.item(index))
+        throw Error('attempt to create item with ID of existing item');
+
+    // Copy component
+    var component = Component.copy(this.itemSample, true);
+    var prevComponent = this._itemPreviousComponent(index);
+
+    if (!prevComponent.el.parentNode)
+        return logger.warn('list item sample was removed from DOM, probably caused by wrong data. Reset list data with array');
+
+    // Add it to the DOM
+    prevComponent.dom.insertAfter(component.el);
+
+    // Add to list items
+    this._setItem(index, component);
+
+    // Show the list item component
+    component.el.style.display = '';
+    component.el.classList.remove(LIST_SAMPLE_CSS_CLASS);
+
+    _updateItemsIndexes.call(this, index + 1);
+
+    return component;
+}
+
+
+function _updateItemsIndexes(fromIndex, toIndex) {
+    fromIndex = fromIndex || 0;
+    toIndex = toIndex || this.count();
+    for (var i = fromIndex; i &lt; toIndex; i++) {
+        var component = this._listItems[i];
+        if (component)
+            component.item.setIndex(i);
+        else
+            logger.warn('List: no item at position', i);
+    }
+}
+
+
+function List$addItems(count, index) { // ,... items data
+    var itemsData = _.slice(arguments, 2);
+    if (itemsData.length &lt; count)
+        itemsData.concat(_.repeat(count - itemsData.length, {}));
+    var spliceArgs = [index, 0].concat(itemsData);
+    var dataFacet = this.owner.data;
+    dataFacet.splice.apply(dataFacet, spliceArgs);
+}</code></pre>
+          <section id="List$_addItems">
+            <h1>List$_addItems</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>List$_addItems()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>count</td>
+                <td>Integer</td>
+                <td><p>number of items to add</p></td>
+              </tr>
+              <tr>
+                <td>[index]</td>
+                <td>Integer</td>
+                <td><p>optional index of item after which to add</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>List facet instance method<br />Adds a given number of items using template rendering rather than adding elements one by one</p></div>
+          <pre><code class="language-javascript">function List$_addItems(count, index) {
+    check(count, Match.Integer);
+    if (count &lt; 0)
+        throw new Error('can\'t add negative number of items');
+
+    if (count === 0) return;
+
+    var itemsHTML = this.itemsTemplate({
+        componentName: componentName,
+        count: count
+    });
+
+    var wrapEl = document.createElement(this.owner.el.tagName);
+    wrapEl.innerHTML = itemsHTML;
+
+    miloBinder(wrapEl, this.owner.container.scope);
+    var children = domUtils.children(wrapEl);
+
+    if (count != children.length)
+        logger.error('number of items added is different from requested');
+
+    if (children &amp;&amp; children.length) {
+        var listLength = this.count();
+        var spliceIndex = index &lt; 0
+                            ? 0
+                            : typeof index == 'undefined' || index &gt; listLength
+                                ? listLength
+                                : index;
+
+        var prevComponent = spliceIndex === 0
+                                ? this.itemSample
+                                : this._listItems[spliceIndex - 1];
+
+        var frag = document.createDocumentFragment()
+            , newComponents = [];
+
+        children.forEach(function(el, i) {
+            var component = Component.getComponent(el);
+            if (! component)
+                return logger.error('List: element in new items is not a component');
+            newComponents.push(component);
+            this._setItem(spliceIndex++, component);
+            frag.appendChild(el);
+            el.style.display = '';
+        }, this);
+
+        _updateItemsIndexes.call(this, spliceIndex);
+
+        if (!prevComponent.el.parentNode)
+            return logger.warn('list item sample was removed from DOM, probably caused by wrong data. Reset list data with array');
+
+        // Add it to the DOM
+        prevComponent.dom.insertAfter(frag);
+
+        _.deferMethod(newComponents, 'forEach', function(comp) {
+            comp.broadcast('stateready');
+        });
+    }
+}
+
+
+/**
+ * List facet instance method
+ * @param {Integer} index The index of the item to remove
+ * @return {Array[Object]} The spliced data
+ */
+function List$removeItem(index) {
+    return this.owner.data.splice(index, 1);
+}
+
+
+/**
+ * List facet instance method
+ * @param {Integer} index The index of the item to extract
+ * @return {Component} The extracted item
+ */
+function List$extractItem(index) {
+    var itemComp = this._removeItem(index, false);
+    this._updateDataPaths(index, this.count());
+    return itemComp;
+}
+
+
+/**
+ * List facet instance method
+ * Removes item, returns the removed item that is destroyed by default.
+ *
+ * @param  {Number} index item index
+ * @param  {Boolean} doDestroyItem optional false to prevent item destruction, true by default
+ * @return {Component}
+ */
+function List$_removeItem(index, doDestroyItem) {
+    var comp = this.item(index);
+
+    if (! comp)
+        return logger.warn('attempt to remove list item with id that does not exist');
+
+    this._listItems[index] = undefined;
+    delete this._listItemsHash[comp.name];
+    if (doDestroyItem !== false) comp.destroy();
+    else {
+        comp.remove();
+        comp.dom.remove();
+    }
+
+    this._listItems.splice(index, 1);
+    _updateItemsIndexes.call(this, index);
+
+    return comp;
+}
+
+
+function List$replaceItem(index, newItem){
+    var oldItem = this.item(index);
+    oldItem.dom.insertAfter(newItem.el);
+    this._removeItem(index);
+    this._setItem(index, newItem);
+}
+
+
+function List$moveItem(fromIndex, toIndex) {
+    var componentToMove = this.extractItem(fromIndex);
+    var toComponent = this.item(toIndex);
+
+    componentToMove.insertInto(this.owner.el, toComponent.el);
+
+    this._setItem(toIndex, componentToMove);
+    _updateItemsIndexes.call(this, 0);
+}
+
+
+// Returns the previous item component given an index
+function _itemPreviousComponent(index) {
+    while (index &gt;= 0 &amp;&amp; ! this._listItems[index])
+        index--;
+
+    return index &gt;= 0
+                ? this._listItems[index]
+                : this.itemSample;
+}
+
+
+// toIndex is not included
+// no range checking is made
+function List$_updateDataPaths(fromIndex, toIndex) {
+    for (var i = fromIndex; i &lt; toIndex; i++) {
+        var item = this.item(i);
+        if (item)
+            item.data._path = '[' + i + ']';
+        else
+            logger.warn('Data: no item for index', i);
+    }
+}
+
+
+/**
+ * Facet instance method
+ * Similar to forEach method of Array, iterates each of the child items.
+ * @param {Function} callback An iterator function to be called on each child item.
+ * @param {Any} [thisArg]  Context to set `this`.
+ */
+function List$each(callback, thisArg) {
+    this._listItems.forEach(function(item, index) {
+        if (item) callback.apply(this, arguments); // passes item, index to callback
+        else logger.warn('List$each: item', index, 'is undefined');
+    }, thisArg || this);
+}
+
+
+function List$map(callback, thisArg) {
+    return this._listItems.map(function(item, index) {
+        if (item) return callback.apply(this, arguments); // passes item, index to callback
+        else logger.warn('List$map: item', index, 'is undefined');
+    }, thisArg || this);
+}
+
+
+/**
+ * Facet instance method
+ * Destroys the list
+ */
+function List$destroy() {
+    if (this.itemSample) this.itemSample.destroy(true);
+    ComponentFacet.prototype.destroy.apply(this, arguments);
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="container">
+        <p>Documentation generated with <a href="https://github.com/mr-doc/mr-doc">Mr. Doc </a> created by <a href="https://twitter.com/FGRibreau" data-show-count="false" class="twitter-follow-button">Francois-Guillaume Ribreau </a></p>
+        <p>Mr. Doc is sponsored by <a href="http://bringr.net/?btt" title="Outil d'analyse des réseaux sociaux" class="bringr">Bringr </a> and <a href="https://redsmin.com/?btt" title="Full Redis GUI" class="redsmin">Redsmin</a></p>
+        <p>Theme borrowed from Twitter Bootstrap</p>
+      </div>
+    </footer>
+    <script src="../../js/twitter-widget.min.js"></script>
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/bootstrap-transition.min.js"></script>
+    <script src="../../js/bootstrap-scrollspy.min.js"></script>
+    <script src="../../js/bootstrap-dropdown.min.js"></script>
+    <script src="../../js/bootstrap-collapse.min.js"></script>
+    <script src="../../js/bootstrap-affix.min.js"></script>
+    <script src="../../js/prism.min.js"></script>
+    <script src="../../js/index.min.js"></script>
+  </body>
+</html>

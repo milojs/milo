@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" charset="utf-8">
+    <title>milo</title>
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../css/cayman.min.css">
+    <link rel="stylesheet" href="../../css/prism.min.css">
+    <link rel="stylesheet" href="../../css/index.min.css">
+    <link rel="stylesheet" href="../../css/docs.min.css">
+    <link rel="stylesheet" href="../../css/bootstrap-responsive.min.css">
+  </head>
+  <body data-spy="scroll" data-target=".scrollspy">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container"><a class="brand">Mr. Doc</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav pull-right sponsored"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <header id="overview" class="jumbotron subhead">
+      <div class="container">
+        <h1>milo</h1>
+        <p class="lead"></p>
+      </div>
+    </header>
+    <div class="container">
+      <div class="row">
+        <div class="span3 bs-docs-sidebar">
+          <ul class="nav nav-list bs-docs-sidenav affix-top">
+            <li><a href="../../index.html">Main</a></li>
+            <li><a href="../../abstract/facet.js.html">abstract/facet.js</a></li>
+            <li><a href="../../abstract/faceted_object.js.html">abstract/faceted_object.js</a></li>
+            <li><a href="../../abstract/registry.js.html">abstract/registry.js</a></li>
+            <li><a href="../../attributes/a_bind.js.html">attributes/a_bind.js</a></li>
+            <li><a href="../../attributes/a_class.js.html">attributes/a_class.js</a></li>
+            <li><a href="../../attributes/a_load.js.html">attributes/a_load.js</a></li>
+            <li><a href="../../attributes/index.js.html">attributes/index.js</a></li>
+            <li><a href="../../binder.js.html">binder.js</a></li>
+            <li><a href="../../classes.js.html">classes.js</a></li>
+            <li><a href="../../command/actions_history.js.html">command/actions_history.js</a></li>
+            <li><a href="../../command/cmd_registry.js.html">command/cmd_registry.js</a></li>
+            <li><a href="../../command/index.js.html">command/index.js</a></li>
+            <li><a href="../../command/transaction.js.html">command/transaction.js</a></li>
+            <li><a href="../../command/transaction_history.js.html">command/transaction_history.js</a></li>
+            <li><a href="../../components/ComponentTemplate.js.html">components/ComponentTemplate.js</a></li>
+            <li><a href="../../components/c_class.js.html">components/c_class.js</a></li>
+            <li><a href="../../components/c_facet.js.html">components/c_facet.js</a></li>
+            <li><a href="../../components/c_facets/Container.js.html">components/c_facets/Container.js</a></li>
+            <li><a href="../../components/c_facets/Css.js.html">components/c_facets/Css.js</a></li>
+            <li><a href="../../components/c_facets/Data.js.html">components/c_facets/Data.js</a></li>
+            <li><a href="../../components/c_facets/Dom.js.html">components/c_facets/Dom.js</a></li>
+            <li><a href="../../components/c_facets/Drag.js.html">components/c_facets/Drag.js</a></li>
+            <li><a href="../../components/c_facets/Drop.js.html">components/c_facets/Drop.js</a></li>
+            <li><a href="../../components/c_facets/Events.js.html">components/c_facets/Events.js</a></li>
+            <li><a href="../../components/c_facets/Frame.js.html">components/c_facets/Frame.js</a></li>
+            <li><a href="../../components/c_facets/Item.js.html">components/c_facets/Item.js</a></li>
+            <li><a href="../../components/c_facets/List.js.html">components/c_facets/List.js</a></li>
+            <li><a href="../../components/c_facets/ModelFacet.js.html">components/c_facets/ModelFacet.js</a></li>
+            <li><a href="../../components/c_facets/Options.js.html">components/c_facets/Options.js</a></li>
+            <li><a href="../../components/c_facets/Template.js.html">components/c_facets/Template.js</a></li>
+            <li><a href="../../components/c_facets/Transfer.js.html">components/c_facets/Transfer.js</a></li>
+            <li><a href="../../components/c_facets/cf_registry.js.html">components/c_facets/cf_registry.js</a></li>
+            <li><a href="../../components/c_info.js.html">components/c_info.js</a></li>
+            <li><a href="../../components/c_registry.js.html">components/c_registry.js</a></li>
+            <li><a href="../../components/c_utils.js.html">components/c_utils.js</a></li>
+            <li><a href="../../components/classes/View.js.html">components/classes/View.js</a></li>
+            <li><a href="../../components/msg_api/data.js.html">components/msg_api/data.js</a></li>
+            <li><a href="../../components/msg_api/de_data.js.html">components/msg_api/de_data.js</a></li>
+            <li><a href="../../components/msg_api/drop.js.html">components/msg_api/drop.js</a></li>
+            <li><a href="../../components/msg_src/dom_events.js.html">components/msg_src/dom_events.js</a></li>
+            <li><a href="../../components/msg_src/frame.js.html">components/msg_src/frame.js</a></li>
+            <li><a href="../../components/scope.js.html">components/scope.js</a></li>
+            <li><a href="../../config.js.html">config.js</a></li>
+            <li><a href="../../loader.js.html">loader.js</a></li>
+            <li><a href="../../milo.js.html">milo.js</a></li>
+            <li><a href="../../registry.js.html">registry.js</a></li>
+            <li><a href="../../services/de_constrs.js.html">services/de_constrs.js</a></li>
+            <li><a href="../../services/dom_source.js.html">services/dom_source.js</a></li>
+            <li><a href="../../services/mail/index.js.html">services/mail/index.js</a></li>
+            <li><a href="../../services/mail/mail_api.js.html">services/mail/mail_api.js</a></li>
+            <li><a href="../../services/mail/mail_source.js.html">services/mail/mail_source.js</a></li>
+            <li><a href="../../services/window.js.html">services/window.js</a></li>
+            <li><a href="../../use_components.js.html">use_components.js</a></li>
+            <li><a href="../../use_facets.js.html">use_facets.js</a></li>
+            <li><a href="../../util/component_name.js.html">util/component_name.js</a></li>
+            <li><a href="../../util/create_component_class.js.html">util/create_component_class.js</a></li>
+            <li><a href="../../util/create_facet_class.js.html">util/create_facet_class.js</a></li>
+            <li><a href="../../util/deprecate.js.html">util/deprecate.js</a></li>
+            <li><a href="../../util/dom.js.html">util/dom.js</a></li>
+            <li><a href="../../util/dom_listeners.js.html">util/dom_listeners.js</a></li>
+            <li><a href="../../util/domready.js.html">util/domready.js</a></li>
+            <li><a href="../../util/dragdrop.js.html">util/dragdrop.js</a></li>
+            <li><a href="../../util/error.js.html">util/error.js</a></li>
+            <li><a href="../../util/fragment.js.html">util/fragment.js</a></li>
+            <li><a href="../../util/index.js.html">util/index.js</a></li>
+            <li><a href="../../util/json_parse.js.html">util/json_parse.js</a></li>
+            <li><a href="../../util/request.js.html">util/request.js</a></li>
+            <li class="active"><a href="../../util/selection/index.js.html">util/selection/index.js</a></li>
+            <li><a href="../../util/storage/index.js.html">util/storage/index.js</a></li>
+            <li><a href="../../util/storage/model.js.html">util/storage/model.js</a></li>
+            <li><a href="../../util/storage/msg_src.js.html">util/storage/msg_src.js</a></li>
+            <li><a href="../../util/unique_id.js.html">util/unique_id.js</a></li>
+            <li><a href="../../util/websocket/index.js.html">util/websocket/index.js</a></li>
+            <li><a href="../../util/websocket/msg_api.js.html">util/websocket/msg_api.js</a></li>
+            <li><a href="../../util/websocket/msg_src.js.html">util/websocket/msg_src.js</a></li>
+          </ul>
+          <div class="scrollspy">
+            <ul class="nav nav-list bs-docs-sidenav affix-top">
+              <li><a href="#TextSelection"><i class="alert alert-info"></i><span>TextSelection</span></a>
+              </li>
+              <li><a href="#TextSelection$startElement"><i class="alert alert-success"></i><span>TextSelection$startElement</span></a>
+              </li>
+              <li><a href="#TextSelection$endElement"><i class="alert alert-success"></i><span>TextSelection$endElement</span></a>
+              </li>
+              <li><a href="#TextSelection$containingElement"><i class="alert alert-success"></i><span>TextSelection$containingElement</span></a>
+              </li>
+              <li><a href="#TextSelection$startComponent"><i class="alert alert-success"></i><span>TextSelection$startComponent</span></a>
+              </li>
+              <li><a href="#TextSelection$endComponent"><i class="alert alert-success"></i><span>TextSelection$endComponent</span></a>
+              </li>
+              <li><a href="#TextSelection$containingComponent"><i class="alert alert-success"></i><span>TextSelection$containingComponent</span></a>
+              </li>
+              <li><a href="#TextSelection$init"><i class="alert alert-info"></i><span>TextSelection$init</span></a>
+              </li>
+              <li><a href="#TextSelection$text"><i class="alert alert-info"></i><span>TextSelection$text</span></a>
+              </li>
+              <li><a href="#TextSelection$textNodes"><i class="alert alert-info"></i><span>TextSelection$textNodes</span></a>
+              </li>
+              <li><a href="#TextSelection$del"><i class="alert alert-info"></i><span>TextSelection$del</span></a>
+              </li>
+              <li><a href="#TextSelection$getRange"><i class="alert alert-info"></i><span>TextSelection$getRange</span></a>
+              </li>
+              <li><a href="#TextSelection$getState"><i class="alert alert-info"></i><span>TextSelection$getState</span></a>
+              </li>
+              <li><a href="#TextSelection$$createFromState"><i class="alert alert-info"></i><span>TextSelection$$createFromState</span></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="span9">
+          <section id="TextSelection">
+            <h1>TextSelection</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>TextSelection()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>win</td>
+                <td>Window</td>
+                <td><p>window in which text selection is processed</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Text selection class.<br />Serves as a helper to manage current selection<br />The object cannot be reused, if the selection changes some of its properties may contain information related to previous selection</p></div>
+          <pre><code class="language-javascript">function TextSelection(win) {
+    if (! this instanceof TextSelection)
+        return new TextSelection(win);
+    this.window = win || window;
+    this.init();
+}</code></pre>
+          <section id="TextSelection$startElement">
+            <h1>TextSelection$startElement</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>TextSelection$startElement</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>TextSelection instance method<br />Returns selection start element</p></div>
+          <pre><code class="language-javascript">var TextSelection$startElement = 
+    _.partial(_getElement, '_startElement', 'startContainer');</code></pre>
+          <section id="TextSelection$endElement">
+            <h1>TextSelection$endElement</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>TextSelection$endElement</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>TextSelection instance method<br />Returns selection end element</p></div>
+          <pre><code class="language-javascript">var TextSelection$endElement = 
+    _.partial(_getElement, '_endElement', 'endContainer');</code></pre>
+          <section id="TextSelection$containingElement">
+            <h1>TextSelection$containingElement</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>TextSelection$containingElement</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>TextSelection instance method<br />Returns selection end element</p></div>
+          <pre><code class="language-javascript">var TextSelection$containingElement = 
+    _.partial(_getElement, '_containingElement', 'commonAncestorContainer');</code></pre>
+          <section id="TextSelection$startComponent">
+            <h1>TextSelection$startComponent</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>TextSelection$startComponent</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>TextSelection instance method<br />Returns selection start Component</p></div>
+          <pre><code class="language-javascript">var TextSelection$startComponent = 
+    _.partial(_getComponent, '_startComponent', 'startElement');</code></pre>
+          <section id="TextSelection$endComponent">
+            <h1>TextSelection$endComponent</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>TextSelection$endComponent</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>TextSelection instance method<br />Returns selection end Component</p></div>
+          <pre><code class="language-javascript">var TextSelection$endComponent = 
+    _.partial(_getComponent, '_endComponent', 'endElement');</code></pre>
+          <section id="TextSelection$containingComponent">
+            <h1>TextSelection$containingComponent</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>TextSelection$containingComponent</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>TextSelection instance method<br />Returns selection end Component</p></div>
+          <pre><code class="language-javascript">var TextSelection$containingComponent = 
+    _.partial(_getComponent, '_containingComponent', 'containingElement');
+
+
+_.extendProto(TextSelection, {
+    init: TextSelection$init,
+    text: TextSelection$text,
+    textNodes: TextSelection$textNodes,
+    clear: TextSelection$clear,
+
+    startElement: TextSelection$startElement,
+    endElement: TextSelection$endElement,
+    containingElement: TextSelection$containingElement,
+
+    startComponent: TextSelection$startComponent,
+    endComponent: TextSelection$endComponent,
+    containingComponent: TextSelection$containingComponent,
+
+    containedComponents: TextSelection$containedComponents,
+    eachContainedComponent: TextSelection$eachContainedComponent,
+    del: TextSelection$del,
+    _getPostDeleteSelectionPoint: _getPostDeleteSelectionPoint,
+    _selectAfterDelete: _selectAfterDelete,
+
+    getRange: TextSelection$getRange,
+    getState: TextSelection$getState,
+    getNormalizedRange: TextSelection$$getNormalizedRange,
+    getDirection: TextSelection$$getDirection
+});
+
+
+_.extend(TextSelection, {
+    createFromRange: TextSelection$$createFromRange,
+    createFromState: TextSelection$$createFromState,
+    createStateObject: TextSelection$$createStateObject
+});</code></pre>
+          <section id="TextSelection$init">
+            <h1>TextSelection$init</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>TextSelection$init()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>TextSelection instance method<br />Initializes TextSelection from the current selection</p></div>
+          <pre><code class="language-javascript">function TextSelection$init() {
+    this.selection = this.window.getSelection();
+    if (this.selection.rangeCount)
+        this.range = this.selection.getRangeAt(0);
+    this.isCollapsed = this.selection.isCollapsed;
+}</code></pre>
+          <section id="TextSelection$text">
+            <h1>TextSelection$text</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>TextSelection$text()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>TextSelection instance method<br />Retrieves and returns selection text</p></div>
+          <pre><code class="language-javascript">function TextSelection$text() {
+    if (! this.range) return undefined;
+
+    if (! this._text)
+        this._text = this.range.toString();
+
+    return this._text;
+}</code></pre>
+          <section id="TextSelection$textNodes">
+            <h1>TextSelection$textNodes</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>TextSelection$textNodes()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>TextSelection instance method<br />Retrieves and returns selection text nodes</p></div>
+          <pre><code class="language-javascript">function TextSelection$textNodes() {
+    if (! this.range) return undefined;
+
+    if (! this._textNodes)
+        this._textNodes = _getTextNodes.call(this);
+    return this._textNodes;
+}
+
+
+function TextSelection$clear() {
+    this.selection.removeAllRanges();
+}</code></pre>
+          <section id="TextSelection$del">
+            <h1>TextSelection$del</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>TextSelection$del()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>selectEndContainer</td>
+                <td>Boolean</td>
+                <td><p>set to true if the end container should be selected after deletion</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>TextSelection instance method<br />Deletes the current selection and all components in it</p></div>
+          <pre><code class="language-javascript">function TextSelection$del(selectEndContainer) {
+    if (this.isCollapsed || ! this.range) return;
+
+    var selPoint = this._getPostDeleteSelectionPoint(selectEndContainer);
+
+    deleteRangeWithComponents(this.range);
+
+    this._selectAfterDelete(selPoint);
+    selPoint.node.parentNode.normalize();
+}
+
+
+function _getPostDeleteSelectionPoint(selectEndContainer) {
+    var selNode = this.range.startContainer;
+    var selOffset = this.range.startOffset;
+    if (selectEndContainer &amp;&amp; this.range.startContainer != this.range.endContainer) {
+        selNode = this.range.endContainer;
+        selOffset = 0;
+    }
+    return { node: selNode, offset: selOffset };
+}
+
+
+function _selectAfterDelete(selPoint) {
+    var selNode = selPoint.node
+        , selOffset = selPoint.offset;
+
+    if (!selNode) return;
+    if (selNode.nodeType == Node.TEXT_NODE)
+        selNode.textContent = selNode.textContent.trimRight();
+    if (!selNode.nodeValue)
+        selNode.nodeValue = '\u00A0'; //non-breaking space, \u200B for zero width space;
+
+    var position = selOffset &gt; selNode.length ? selNode.length : selOffset;
+    setCaretPosition(selNode, position);
+}</code></pre>
+          <section id="TextSelection$getRange">
+            <h1>TextSelection$getRange</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>TextSelection$getRange()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Returns selection range</p></div>
+          <pre><code class="language-javascript">function TextSelection$getRange() {
+    return this.range;
+}</code></pre>
+          <section id="TextSelection$getState">
+            <h1>TextSelection$getState</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>TextSelection$getState()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Stores selection window, nodes and offsets in object</p></div>
+          <pre><code class="language-javascript">function TextSelection$getState(rootEl) {
+    var r = this.range;
+    var doc = rootEl.ownerDocument
+        , win = doc.defaultView || doc.parentWindow;
+    if (!r) return { window: win };
+    return TextSelection.createStateObject(rootEl, r.startContainer, r.startOffset, r.endContainer, r.endOffset);
+}
+
+
+function TextSelection$$createStateObject(rootEl, startContainer, startOffset, endContainer, endOffset) {
+    endContainer = endContainer || startContainer;
+    endOffset = endOffset || startOffset;
+    var doc = rootEl.ownerDocument
+        , win = doc.defaultView || doc.parentWindow;
+    return {
+        window: win,
+        rootEl: rootEl,
+        start: _getSelectionPointState(rootEl, startContainer, startOffset),
+        end: _getSelectionPointState(rootEl, endContainer, endOffset)
+    };
+}
+
+
+function _getSelectionPointState(rootEl, node, offset) {
+    var treePath = domUtils.treePathOf(rootEl, node);
+    if (! treePath) logger.error('Selection point is outside of root element');
+    return {
+        treePath: treePath,
+        offset: offset
+    };
+}</code></pre>
+          <section id="TextSelection$$createFromState">
+            <h1>TextSelection$$createFromState</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>TextSelection$$createFromState()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Restores actual selection to the stored range</p></div>
+          <pre><code class="language-javascript">function TextSelection$$createFromState(state) {
+    var domUtils = state.window.milo.util.dom;
+
+    if (state.rootEl &amp;&amp; state.start &amp;&amp; state.end) {
+        var startNode = _selectionNodeFromState(state.rootEl, state.start)
+            , endNode = _selectionNodeFromState(state.rootEl, state.end);
+
+        try {
+            domUtils.setSelection(startNode, state.start.offset, endNode, state.end.offset);
+            return new TextSelection(state.window);
+        } catch(e) {
+            logger.error('Text selection: can\'t create selection', e, e.message);
+        }
+    } else {
+        domUtils.clearSelection(state.window);
+        return new TextSelection(state.window);
+    }
+}
+
+
+function _selectionNodeFromState(rootEl, pointState) {
+    var node = domUtils.getNodeAtTreePath(rootEl, pointState.treePath);
+    if (! node) logger.error('TextSelection createFromState: no node at treePath');
+    return node;
+}
+
+
+/**
+ * Creates selection from passed range
+ * 
+ * @param {Range} range
+ * @param {Boolean} backward
+ *
+ * @return {TextSelection}
+ */
+function TextSelection$$createFromRange(range, backward) {
+    var win = range.startContainer.ownerDocument.defaultView
+        , sel = win.getSelection()
+        , endRange;
+
+    sel.removeAllRanges();
+
+    if (backward){
+        endRange = range.cloneRange();
+        endRange.collapse(false);
+
+        sel.addRange(endRange);
+        sel.extend(range.startContainer, range.startOffset);
+    }
+    else {
+        sel.addRange(range);
+    }
+
+    return new TextSelection(win);
+}
+
+/**
+ * Returns a normalized copy of the range
+ * If you triple click an item, the end of the range is positioned at the beginning of the NEXT node.
+ * this function returns a range with the end positioned at the end of the last textnode contained 
+ * inside a component with the &quot;editable&quot; facet
+ * 
+ * @return {range}
+ */
+function TextSelection$$getNormalizedRange(){
+    var doc = this.range.commonAncestorContainer.ownerDocument
+        , tw, previousNode
+        , newRange = this.range.cloneRange();
+
+    if (newRange.endContainer.nodeType !== Node.TEXT_NODE) {
+        tw = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
+        tw.currentNode = newRange.endContainer;
+        previousNode = tw.previousNode();
+        newRange.setEnd(previousNode, previousNode.length);
+    }
+
+    return newRange;
+}
+
+/**
+ * get the direction of a selection
+ *
+ * 1 forward, -1 backward, 0 no direction, undefined one of the node is detached or in a different frame
+ *
+ * @return {Integer} can be -1, 0, 1 or undefined
+ */
+function TextSelection$$getDirection(){
+    return domUtils.getSelectionDirection(this.selection);    
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="container">
+        <p>Documentation generated with <a href="https://github.com/mr-doc/mr-doc">Mr. Doc </a> created by <a href="https://twitter.com/FGRibreau" data-show-count="false" class="twitter-follow-button">Francois-Guillaume Ribreau </a></p>
+        <p>Mr. Doc is sponsored by <a href="http://bringr.net/?btt" title="Outil d'analyse des réseaux sociaux" class="bringr">Bringr </a> and <a href="https://redsmin.com/?btt" title="Full Redis GUI" class="redsmin">Redsmin</a></p>
+        <p>Theme borrowed from Twitter Bootstrap</p>
+      </div>
+    </footer>
+    <script src="../../js/twitter-widget.min.js"></script>
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/bootstrap-transition.min.js"></script>
+    <script src="../../js/bootstrap-scrollspy.min.js"></script>
+    <script src="../../js/bootstrap-dropdown.min.js"></script>
+    <script src="../../js/bootstrap-collapse.min.js"></script>
+    <script src="../../js/bootstrap-affix.min.js"></script>
+    <script src="../../js/prism.min.js"></script>
+    <script src="../../js/index.min.js"></script>
+  </body>
+</html>

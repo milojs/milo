@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" charset="utf-8">
+    <title>milo</title>
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../css/cayman.min.css">
+    <link rel="stylesheet" href="../../css/prism.min.css">
+    <link rel="stylesheet" href="../../css/index.min.css">
+    <link rel="stylesheet" href="../../css/docs.min.css">
+    <link rel="stylesheet" href="../../css/bootstrap-responsive.min.css">
+  </head>
+  <body data-spy="scroll" data-target=".scrollspy">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container"><a class="brand">Mr. Doc</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav pull-right sponsored"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <header id="overview" class="jumbotron subhead">
+      <div class="container">
+        <h1>milo</h1>
+        <p class="lead"></p>
+      </div>
+    </header>
+    <div class="container">
+      <div class="row">
+        <div class="span3 bs-docs-sidebar">
+          <ul class="nav nav-list bs-docs-sidenav affix-top">
+            <li><a href="../../index.html">Main</a></li>
+            <li><a href="../../abstract/facet.js.html">abstract/facet.js</a></li>
+            <li><a href="../../abstract/faceted_object.js.html">abstract/faceted_object.js</a></li>
+            <li><a href="../../abstract/registry.js.html">abstract/registry.js</a></li>
+            <li><a href="../../attributes/a_bind.js.html">attributes/a_bind.js</a></li>
+            <li><a href="../../attributes/a_class.js.html">attributes/a_class.js</a></li>
+            <li><a href="../../attributes/a_load.js.html">attributes/a_load.js</a></li>
+            <li><a href="../../attributes/index.js.html">attributes/index.js</a></li>
+            <li><a href="../../binder.js.html">binder.js</a></li>
+            <li><a href="../../classes.js.html">classes.js</a></li>
+            <li><a href="../../command/actions_history.js.html">command/actions_history.js</a></li>
+            <li><a href="../../command/cmd_registry.js.html">command/cmd_registry.js</a></li>
+            <li><a href="../../command/index.js.html">command/index.js</a></li>
+            <li><a href="../../command/transaction.js.html">command/transaction.js</a></li>
+            <li><a href="../../command/transaction_history.js.html">command/transaction_history.js</a></li>
+            <li><a href="../../components/ComponentTemplate.js.html">components/ComponentTemplate.js</a></li>
+            <li><a href="../../components/c_class.js.html">components/c_class.js</a></li>
+            <li><a href="../../components/c_facet.js.html">components/c_facet.js</a></li>
+            <li><a href="../../components/c_facets/Container.js.html">components/c_facets/Container.js</a></li>
+            <li><a href="../../components/c_facets/Css.js.html">components/c_facets/Css.js</a></li>
+            <li><a href="../../components/c_facets/Data.js.html">components/c_facets/Data.js</a></li>
+            <li><a href="../../components/c_facets/Dom.js.html">components/c_facets/Dom.js</a></li>
+            <li><a href="../../components/c_facets/Drag.js.html">components/c_facets/Drag.js</a></li>
+            <li class="active"><a href="../../components/c_facets/Drop.js.html">components/c_facets/Drop.js</a></li>
+            <li><a href="../../components/c_facets/Events.js.html">components/c_facets/Events.js</a></li>
+            <li><a href="../../components/c_facets/Frame.js.html">components/c_facets/Frame.js</a></li>
+            <li><a href="../../components/c_facets/Item.js.html">components/c_facets/Item.js</a></li>
+            <li><a href="../../components/c_facets/List.js.html">components/c_facets/List.js</a></li>
+            <li><a href="../../components/c_facets/ModelFacet.js.html">components/c_facets/ModelFacet.js</a></li>
+            <li><a href="../../components/c_facets/Options.js.html">components/c_facets/Options.js</a></li>
+            <li><a href="../../components/c_facets/Template.js.html">components/c_facets/Template.js</a></li>
+            <li><a href="../../components/c_facets/Transfer.js.html">components/c_facets/Transfer.js</a></li>
+            <li><a href="../../components/c_facets/cf_registry.js.html">components/c_facets/cf_registry.js</a></li>
+            <li><a href="../../components/c_info.js.html">components/c_info.js</a></li>
+            <li><a href="../../components/c_registry.js.html">components/c_registry.js</a></li>
+            <li><a href="../../components/c_utils.js.html">components/c_utils.js</a></li>
+            <li><a href="../../components/classes/View.js.html">components/classes/View.js</a></li>
+            <li><a href="../../components/msg_api/data.js.html">components/msg_api/data.js</a></li>
+            <li><a href="../../components/msg_api/de_data.js.html">components/msg_api/de_data.js</a></li>
+            <li><a href="../../components/msg_api/drop.js.html">components/msg_api/drop.js</a></li>
+            <li><a href="../../components/msg_src/dom_events.js.html">components/msg_src/dom_events.js</a></li>
+            <li><a href="../../components/msg_src/frame.js.html">components/msg_src/frame.js</a></li>
+            <li><a href="../../components/scope.js.html">components/scope.js</a></li>
+            <li><a href="../../config.js.html">config.js</a></li>
+            <li><a href="../../loader.js.html">loader.js</a></li>
+            <li><a href="../../milo.js.html">milo.js</a></li>
+            <li><a href="../../registry.js.html">registry.js</a></li>
+            <li><a href="../../services/de_constrs.js.html">services/de_constrs.js</a></li>
+            <li><a href="../../services/dom_source.js.html">services/dom_source.js</a></li>
+            <li><a href="../../services/mail/index.js.html">services/mail/index.js</a></li>
+            <li><a href="../../services/mail/mail_api.js.html">services/mail/mail_api.js</a></li>
+            <li><a href="../../services/mail/mail_source.js.html">services/mail/mail_source.js</a></li>
+            <li><a href="../../services/window.js.html">services/window.js</a></li>
+            <li><a href="../../use_components.js.html">use_components.js</a></li>
+            <li><a href="../../use_facets.js.html">use_facets.js</a></li>
+            <li><a href="../../util/component_name.js.html">util/component_name.js</a></li>
+            <li><a href="../../util/create_component_class.js.html">util/create_component_class.js</a></li>
+            <li><a href="../../util/create_facet_class.js.html">util/create_facet_class.js</a></li>
+            <li><a href="../../util/deprecate.js.html">util/deprecate.js</a></li>
+            <li><a href="../../util/dom.js.html">util/dom.js</a></li>
+            <li><a href="../../util/dom_listeners.js.html">util/dom_listeners.js</a></li>
+            <li><a href="../../util/domready.js.html">util/domready.js</a></li>
+            <li><a href="../../util/dragdrop.js.html">util/dragdrop.js</a></li>
+            <li><a href="../../util/error.js.html">util/error.js</a></li>
+            <li><a href="../../util/fragment.js.html">util/fragment.js</a></li>
+            <li><a href="../../util/index.js.html">util/index.js</a></li>
+            <li><a href="../../util/json_parse.js.html">util/json_parse.js</a></li>
+            <li><a href="../../util/request.js.html">util/request.js</a></li>
+            <li><a href="../../util/selection/index.js.html">util/selection/index.js</a></li>
+            <li><a href="../../util/storage/index.js.html">util/storage/index.js</a></li>
+            <li><a href="../../util/storage/model.js.html">util/storage/model.js</a></li>
+            <li><a href="../../util/storage/msg_src.js.html">util/storage/msg_src.js</a></li>
+            <li><a href="../../util/unique_id.js.html">util/unique_id.js</a></li>
+            <li><a href="../../util/websocket/index.js.html">util/websocket/index.js</a></li>
+            <li><a href="../../util/websocket/msg_api.js.html">util/websocket/msg_api.js</a></li>
+            <li><a href="../../util/websocket/msg_src.js.html">util/websocket/msg_src.js</a></li>
+          </ul>
+          <div class="scrollspy">
+            <ul class="nav nav-list bs-docs-sidenav affix-top">
+              <li><a href="#Drop"><i class="alert alert-success"></i><span>Drop</span></a>
+              </li>
+              <li><a href="#_isDropAllowed"><i class="alert alert-info"></i><span>_isDropAllowed</span></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="span9">
+          <section id="Drop">
+            <h1>Drop</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>Drop</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p><code>milo.registry.facets.get(&#39;Drop&#39;)</code><br />Facet for components that can accept drops<br />Drop facet supports the following configuration parameters:</p><ul>
+<li><p>allow - an object that will define allowed data types during drag (<code>dragenter</code> and <code>dragover</code> events) with these properties:</p><ul>
+<li>components: <code>true</code> by default (all components will be accepted)<pre><code>            OR string with allowed component class
+            OR list of allowed components classes (strings)
+            OR map with allowed classes in keys and `true`/test functions in values
+            OR test function that will be passed object defined below
+            OR `false` to NOT accept components
+</code></pre></li>
+<li>dataTypes:  <code>false</code> by default (no other data types will be accepted)<pre><code>            OR string with allowed data type
+            OR list of additional data types that a drop target would accept
+            OR test function that will be passed DragDrop object
+            OR `true` to accept all data types
+</code></pre></li>
+<li><p>checkParent: <code>false</code> by default</p><pre><code>            OR `true` will call parent component drop allow to check if parent component will accept the component
+</code></pre><p>If test functions are used, they should return boolean. Each test function can also set drop effect as defined here:<br /><a href="https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer#dropEffect.28.29">https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer#dropEffect.28.29</a><br />Setting drop effect that is not allowed by dragged object will prevent drop.<br />Test functions for components will be passed the owner of Drop facet as context, the object with the following possible properties as the first parameter:<br />  compClass - name of component class as stored in registry<br />  compName - name of component (all lowercase)<br />  params - parameters as encoded in dataType, passed to <code>milo.util.dragDrop.setComponentMeta</code> by Drag facet<br />  metaDataType - data type of the data that has compClass, compName and params encoded</p><p>... and DragDrop instance as the second parameter</p><p>Test function for other data types will be passed the owner of Drop facet as context and DragDrop instance as the first parameter</p></li>
+</ul>
+</li>
+</ul>
+<p>####Events####</p><p>In addition to configuring allowed components and data types, components classes should subscribe to events.<br />At the very least, they should subscribe to <code>drop</code> event.</p><p>Drop facet emits dragin/dragout messages that are emitted whenever actual component element is entered or left<br />(which is different from dragenter and dragleave messages that are emitted whenever any child element is entered or left, as long as event bubbles up)<br />If child component has drop facet attached, dragout will be emitted on the current component when the child is entered.</p><p>You can see the demonstration of when messages are emitted <a href="http://jsbin.com/buqov/6">here</a></p></div>
+          <pre><code class="language-javascript">var Drop = _.createSubclass(ComponentFacet, 'Drop');
+
+
+_.extendProto(Drop, {
+    init: Drop$init,
+    start: Drop$start
+    // _reattach: _reattachEventsOnElementChange
+});
+
+facetsRegistry.add(Drop);
+
+module.exports = Drop;
+
+
+function Drop$init() {
+    ComponentFacet.prototype.init.apply(this, arguments);
+    this._createMessageSourceWithAPI(DOMEventsSource, new DropMsgAPI);
+}
+
+
+function Drop$start() {
+    ComponentFacet.prototype.start.apply(this, arguments);
+    this.owner.el.classList.add('cc-module-relative');
+    this.onMessages({
+        'dragenter dragover': onDragging,
+        'drop': onDrop,
+        'dragenter dragover dragleave drop dragin dragout': postToService
+    });
+}
+
+
+function onDragging(eventType, event) {
+    var dt = new DragDrop(event);
+
+    event.stopPropagation();
+    event.preventDefault();
+
+    if (! _handleDropDependency.call(this, dt))
+        dt.setDropEffect('none');
+}
+
+
+function onDrop(eventType, event) {
+    event.stopPropagation();
+    var dt = new DragDrop(event);
+    DragDrop.service.postMessageSync('dragdropcompleted', {
+        eventType: 'drop',
+        dragDrop: dt,
+        dropFacet: this,
+        component: this.owner
+    });
+}
+
+
+function postToService(eventType, event) {
+    DragDrop.service.postMessageSync(eventType, {
+        event: event,
+        dropFacet: this,
+        component: this.owner
+    });
+}
+
+
+var _handleDropDependency = _.throttle(_handleDropDependencyNothrottle, 50);
+function _handleDropDependencyNothrottle(dt, originalDropComponent) {
+    var allow = this.config.allow
+        , parentAllowed = true;
+
+    originalDropComponent = originalDropComponent || this.owner;
+
+    if (allow &amp;&amp; allow.checkParent) {
+        var parent = this.owner.getScopeParent('Drop');
+        if (parent)
+            parentAllowed = _handleDropDependencyNothrottle.call(parent.drop, dt, originalDropComponent);
+    }
+
+    return parentAllowed &amp;&amp; _isDropAllowed.call(this, dt, originalDropComponent);
+}</code></pre>
+          <section id="_isDropAllowed">
+            <h1>_isDropAllowed</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>_isDropAllowed()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>dt</td>
+                <td>DragDrop</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Boolean</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Checks if drop is allowed based on facet configuration (see above)</p></div>
+          <pre><code class="language-javascript">function _isDropAllowed(dt, originalDropComponent) {
+    var allow = this.config.allow;
+
+    if (dt.isComponent()) {
+        var allowComps = allow &amp;&amp; allow.components
+            , meta = dt.getComponentMeta();
+
+        switch (typeof allowComps) {
+            case 'undefined':
+                return true;
+            case 'boolean':
+                return allowComps;
+            // component class
+            case 'string':
+                return meta &amp;&amp; meta.compClass == allowComps;
+            // test function
+            case 'function':
+                return allowComps.call(this.owner, meta, dt, originalDropComponent);
+            case 'object':
+                if (Array.isArray(allowComps))
+                    // list of allowed classes
+                    return allowComps.indexOf(meta &amp;&amp; meta.compClass) &gt;= 0;
+                else {
+                    // map of class: boolean|test function
+                    var test = allowComps[meta &amp;&amp; meta.compClass];
+                    return !! _.result(test, this.owner, meta, dt);
+                }
+                break;
+            default:
+                throw new Error('Incorrect allowed components in config');
+        }
+    } else {
+        var dataTypes = allow &amp;&amp; allow.dataTypes;
+        switch (typeof dataTypes) {
+            case 'undefined':
+                return false;
+            case 'string':
+                return dt.types.indexOf(dataTypes) &gt;= 0;
+        }
+    }
+
+    // TODO test for other data types
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="container">
+        <p>Documentation generated with <a href="https://github.com/mr-doc/mr-doc">Mr. Doc </a> created by <a href="https://twitter.com/FGRibreau" data-show-count="false" class="twitter-follow-button">Francois-Guillaume Ribreau </a></p>
+        <p>Mr. Doc is sponsored by <a href="http://bringr.net/?btt" title="Outil d'analyse des réseaux sociaux" class="bringr">Bringr </a> and <a href="https://redsmin.com/?btt" title="Full Redis GUI" class="redsmin">Redsmin</a></p>
+        <p>Theme borrowed from Twitter Bootstrap</p>
+      </div>
+    </footer>
+    <script src="../../js/twitter-widget.min.js"></script>
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/bootstrap-transition.min.js"></script>
+    <script src="../../js/bootstrap-scrollspy.min.js"></script>
+    <script src="../../js/bootstrap-dropdown.min.js"></script>
+    <script src="../../js/bootstrap-collapse.min.js"></script>
+    <script src="../../js/bootstrap-affix.min.js"></script>
+    <script src="../../js/prism.min.js"></script>
+    <script src="../../js/index.min.js"></script>
+  </body>
+</html>

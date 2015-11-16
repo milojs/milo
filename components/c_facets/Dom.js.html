@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" charset="utf-8">
+    <title>milo</title>
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../css/cayman.min.css">
+    <link rel="stylesheet" href="../../css/prism.min.css">
+    <link rel="stylesheet" href="../../css/index.min.css">
+    <link rel="stylesheet" href="../../css/docs.min.css">
+    <link rel="stylesheet" href="../../css/bootstrap-responsive.min.css">
+  </head>
+  <body data-spy="scroll" data-target=".scrollspy">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container"><a class="brand">Mr. Doc</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav pull-right sponsored"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <header id="overview" class="jumbotron subhead">
+      <div class="container">
+        <h1>milo</h1>
+        <p class="lead"></p>
+      </div>
+    </header>
+    <div class="container">
+      <div class="row">
+        <div class="span3 bs-docs-sidebar">
+          <ul class="nav nav-list bs-docs-sidenav affix-top">
+            <li><a href="../../index.html">Main</a></li>
+            <li><a href="../../abstract/facet.js.html">abstract/facet.js</a></li>
+            <li><a href="../../abstract/faceted_object.js.html">abstract/faceted_object.js</a></li>
+            <li><a href="../../abstract/registry.js.html">abstract/registry.js</a></li>
+            <li><a href="../../attributes/a_bind.js.html">attributes/a_bind.js</a></li>
+            <li><a href="../../attributes/a_class.js.html">attributes/a_class.js</a></li>
+            <li><a href="../../attributes/a_load.js.html">attributes/a_load.js</a></li>
+            <li><a href="../../attributes/index.js.html">attributes/index.js</a></li>
+            <li><a href="../../binder.js.html">binder.js</a></li>
+            <li><a href="../../classes.js.html">classes.js</a></li>
+            <li><a href="../../command/actions_history.js.html">command/actions_history.js</a></li>
+            <li><a href="../../command/cmd_registry.js.html">command/cmd_registry.js</a></li>
+            <li><a href="../../command/index.js.html">command/index.js</a></li>
+            <li><a href="../../command/transaction.js.html">command/transaction.js</a></li>
+            <li><a href="../../command/transaction_history.js.html">command/transaction_history.js</a></li>
+            <li><a href="../../components/ComponentTemplate.js.html">components/ComponentTemplate.js</a></li>
+            <li><a href="../../components/c_class.js.html">components/c_class.js</a></li>
+            <li><a href="../../components/c_facet.js.html">components/c_facet.js</a></li>
+            <li><a href="../../components/c_facets/Container.js.html">components/c_facets/Container.js</a></li>
+            <li><a href="../../components/c_facets/Css.js.html">components/c_facets/Css.js</a></li>
+            <li><a href="../../components/c_facets/Data.js.html">components/c_facets/Data.js</a></li>
+            <li class="active"><a href="../../components/c_facets/Dom.js.html">components/c_facets/Dom.js</a></li>
+            <li><a href="../../components/c_facets/Drag.js.html">components/c_facets/Drag.js</a></li>
+            <li><a href="../../components/c_facets/Drop.js.html">components/c_facets/Drop.js</a></li>
+            <li><a href="../../components/c_facets/Events.js.html">components/c_facets/Events.js</a></li>
+            <li><a href="../../components/c_facets/Frame.js.html">components/c_facets/Frame.js</a></li>
+            <li><a href="../../components/c_facets/Item.js.html">components/c_facets/Item.js</a></li>
+            <li><a href="../../components/c_facets/List.js.html">components/c_facets/List.js</a></li>
+            <li><a href="../../components/c_facets/ModelFacet.js.html">components/c_facets/ModelFacet.js</a></li>
+            <li><a href="../../components/c_facets/Options.js.html">components/c_facets/Options.js</a></li>
+            <li><a href="../../components/c_facets/Template.js.html">components/c_facets/Template.js</a></li>
+            <li><a href="../../components/c_facets/Transfer.js.html">components/c_facets/Transfer.js</a></li>
+            <li><a href="../../components/c_facets/cf_registry.js.html">components/c_facets/cf_registry.js</a></li>
+            <li><a href="../../components/c_info.js.html">components/c_info.js</a></li>
+            <li><a href="../../components/c_registry.js.html">components/c_registry.js</a></li>
+            <li><a href="../../components/c_utils.js.html">components/c_utils.js</a></li>
+            <li><a href="../../components/classes/View.js.html">components/classes/View.js</a></li>
+            <li><a href="../../components/msg_api/data.js.html">components/msg_api/data.js</a></li>
+            <li><a href="../../components/msg_api/de_data.js.html">components/msg_api/de_data.js</a></li>
+            <li><a href="../../components/msg_api/drop.js.html">components/msg_api/drop.js</a></li>
+            <li><a href="../../components/msg_src/dom_events.js.html">components/msg_src/dom_events.js</a></li>
+            <li><a href="../../components/msg_src/frame.js.html">components/msg_src/frame.js</a></li>
+            <li><a href="../../components/scope.js.html">components/scope.js</a></li>
+            <li><a href="../../config.js.html">config.js</a></li>
+            <li><a href="../../loader.js.html">loader.js</a></li>
+            <li><a href="../../milo.js.html">milo.js</a></li>
+            <li><a href="../../registry.js.html">registry.js</a></li>
+            <li><a href="../../services/de_constrs.js.html">services/de_constrs.js</a></li>
+            <li><a href="../../services/dom_source.js.html">services/dom_source.js</a></li>
+            <li><a href="../../services/mail/index.js.html">services/mail/index.js</a></li>
+            <li><a href="../../services/mail/mail_api.js.html">services/mail/mail_api.js</a></li>
+            <li><a href="../../services/mail/mail_source.js.html">services/mail/mail_source.js</a></li>
+            <li><a href="../../services/window.js.html">services/window.js</a></li>
+            <li><a href="../../use_components.js.html">use_components.js</a></li>
+            <li><a href="../../use_facets.js.html">use_facets.js</a></li>
+            <li><a href="../../util/component_name.js.html">util/component_name.js</a></li>
+            <li><a href="../../util/create_component_class.js.html">util/create_component_class.js</a></li>
+            <li><a href="../../util/create_facet_class.js.html">util/create_facet_class.js</a></li>
+            <li><a href="../../util/deprecate.js.html">util/deprecate.js</a></li>
+            <li><a href="../../util/dom.js.html">util/dom.js</a></li>
+            <li><a href="../../util/dom_listeners.js.html">util/dom_listeners.js</a></li>
+            <li><a href="../../util/domready.js.html">util/domready.js</a></li>
+            <li><a href="../../util/dragdrop.js.html">util/dragdrop.js</a></li>
+            <li><a href="../../util/error.js.html">util/error.js</a></li>
+            <li><a href="../../util/fragment.js.html">util/fragment.js</a></li>
+            <li><a href="../../util/index.js.html">util/index.js</a></li>
+            <li><a href="../../util/json_parse.js.html">util/json_parse.js</a></li>
+            <li><a href="../../util/request.js.html">util/request.js</a></li>
+            <li><a href="../../util/selection/index.js.html">util/selection/index.js</a></li>
+            <li><a href="../../util/storage/index.js.html">util/storage/index.js</a></li>
+            <li><a href="../../util/storage/model.js.html">util/storage/model.js</a></li>
+            <li><a href="../../util/storage/msg_src.js.html">util/storage/msg_src.js</a></li>
+            <li><a href="../../util/unique_id.js.html">util/unique_id.js</a></li>
+            <li><a href="../../util/websocket/index.js.html">util/websocket/index.js</a></li>
+            <li><a href="../../util/websocket/msg_api.js.html">util/websocket/msg_api.js</a></li>
+            <li><a href="../../util/websocket/msg_src.js.html">util/websocket/msg_src.js</a></li>
+          </ul>
+          <div class="scrollspy">
+            <ul class="nav nav-list bs-docs-sidenav affix-top">
+              <li><a href="#Dom"><i class="alert alert-success"></i><span>Dom</span></a>
+              </li>
+              <li><a href="#Dom$$createElement"><i class="alert alert-info"></i><span>Dom$$createElement</span></a>
+              </li>
+              <li><a href="#Dom$children"><i class="alert alert-info"></i><span>Dom$children</span></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="span9">
+          <section id="Dom">
+            <h1>Dom</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>Dom</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p><code>milo.registry.facets.get(&#39;Dom&#39;)</code><br />Facet with component related dom utils</p></div>
+          <pre><code class="language-javascript">var Dom = _.createSubclass(ComponentFacet, 'Dom');
+
+_.extend(Dom, {
+    createElement: Dom$$createElement
+});</code></pre>
+          <section id="Dom$$createElement">
+            <h1>Dom$$createElement</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Dom$$createElement()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>config</td>
+                <td>Object</td>
+                <td><p>with the properties <code>domConfig</code>, <code>content</code>, <code>template</code></p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Element</td>
+                <td><p>an html element</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Facet class method<br />Creates an element from a passed configuation object</p></div>
+          <pre><code class="language-javascript">function Dom$$createElement(config) {
+    var domConfig = config.domConfig || {}
+        , tagName = domConfig.tagName || 'div'
+        , newEl = document.createElement(tagName)
+        , content = config.content
+        , template = config.template;
+
+    // TODO it will be called again when/if component is instantiated
+    // Should be someproperty on element to indicate it's been called?
+    _applyConfigToElement(newEl, domConfig);
+
+    if (typeof content == 'string') {
+        if (template)
+            newEl.innerHTML = doT.template(template)({content: content});
+        else
+            newEl.innerHTML = content;
+    }
+    return newEl;
+}
+
+
+function _applyConfigToElement(el, config) {
+    var cssClasses = config &amp;&amp; config.cls
+        , configAttributes = config &amp;&amp; config.attributes;
+
+    if (configAttributes)
+        _.eachKey(configAttributes, function(attrValue, attrName) {
+            el.setAttribute(attrName, attrValue);
+        });
+
+    if (cssClasses)
+        _attachCssClasses(el, 'add', cssClasses);
+}
+
+
+_.extendProto(Dom, {
+    start: start,
+
+    show: show,
+    hide: hide,
+    toggle: toggle,
+    detach: detach,
+    remove: remove,
+    append: append,
+    prepend: prepend,
+    appendChildren: appendChildren,
+    prependChildren: prependChildren,
+    insertAfter: insertAfter,
+    insertBefore: insertBefore,
+    appendToScopeParent: appendToScopeParent,
+    children: Dom$children,
+    setStyle: setStyle,
+    setStyles: setStyles,
+    copy: copy,
+    createElement: createElement,
+
+    addCssClasses: _.partial(_manageCssClasses, 'add'),
+    removeCssClasses: _.partial(_manageCssClasses, 'remove'),
+    toggleCssClasses: _.partial(_manageCssClasses, 'toggle'),
+
+    find: find,
+    hasTextBeforeSelection: hasTextBeforeSelection,
+    hasTextAfterSelection: hasTextAfterSelection,
+});
+
+facetsRegistry.add(Dom);
+
+module.exports = Dom;
+
+
+// start Dom facet
+function start() {
+    var el = this.owner.el;
+    _applyConfigToElement(el, this.config);
+    var currentStyle = window.getComputedStyle(el);
+    this._visible = currentStyle &amp;&amp; currentStyle.display != 'none';
+}
+
+// show HTML element of component
+function show() {
+    this.toggle(true);
+}
+
+// hide HTML element of component
+function hide() {
+    this.toggle(false);
+}
+
+// show/hide
+function toggle(doShow) {
+    doShow = typeof doShow == 'undefined'
+                ? ! this._visible
+                : !! doShow;
+
+    this._visible = doShow;
+    var el = this.owner.el;
+
+    el.style.display = doShow ? 'block' : 'none';
+
+    return doShow;
+}
+
+
+function _manageCssClasses(methodName, cssClasses, enforce) {
+    _attachCssClasses(this.owner.el, methodName, cssClasses, enforce);
+}
+
+
+function _attachCssClasses(el, methodName, cssClasses, enforce) {
+    var classList = el.classList
+        , doToggle = methodName == 'toggle';
+
+    if (Array.isArray(cssClasses))
+        cssClasses.forEach(callMethod);
+    else if (typeof cssClasses == 'string')
+        callMethod(cssClasses);
+    else
+        throw new Error('unknown type of CSS classes parameter');
+
+    function callMethod(cssCls) {
+        if (doToggle) {
+            // Only pass 'enforce' if a value has been provided (The 'toggle' function of the classList will treat undefined === false resulting in only allowing classes to be removed)
+            if (enforce === undefined) classList[methodName](cssCls) 
+            else classList[methodName](cssCls, enforce);
+        } else
+            classList[methodName](cssCls);
+    }
+}
+
+
+function detach() {
+    if (this.owner.el)  
+        domUtils.detachComponent(this.owner.el);
+}
+
+
+function setStyle(property, value) {
+    if (!this.owner.el) {
+        throw new Error(&quot;Cannot call setStyle on owner with no element: &quot; + this.owner.constructor.name);
+    }
+    this.owner.el.style[property] = value;
+}
+
+function setStyles(properties) {
+    for (var property in properties)
+        this.owner.el.style[property] = properties[property];
+}
+
+
+// create a copy of DOM element using facet config if set
+function copy(isDeep) {
+    return this.owner.el &amp;&amp; this.owner.el.cloneNode(isDeep);
+}
+
+
+function createElement() {
+    var newEl = Dom.createElement(this.config);
+    return newEl;
+}
+
+
+// remove HTML element of component
+function remove() {
+    domUtils.removeElement(this.owner.el);
+}
+
+// append inside HTML element of component
+function append(el) {
+    this.owner.el.appendChild(el);
+}
+
+// prepend inside HTML element of component
+function prepend(el) {
+    var thisEl = this.owner.el
+        , firstChild = thisEl.firstChild;
+    if (firstChild)
+        thisEl.insertBefore(el, firstChild);
+    else
+        thisEl.appendChild(el);
+}
+
+// appends children of element inside this component's element
+function appendChildren(el) {
+    while(el.childNodes.length)
+        this.append(el.childNodes[0]);
+}
+
+// prepends children of element inside this component's element
+function prependChildren(el) {
+    while(el.childNodes.length)
+        this.prepend(el.childNodes[el.childNodes.length - 1]);
+}
+
+function insertAfter(el) {
+    var thisEl = this.owner.el
+        , parent = thisEl.parentNode;    
+    parent.insertBefore(el, thisEl.nextSibling);
+}
+
+function insertBefore(el) {
+    var thisEl = this.owner.el
+        , parent = thisEl.parentNode;
+    parent.insertBefore(el, thisEl);
+}
+
+
+// appends component's element to scope parent. If it was alredy in DOM it will be moved
+function appendToScopeParent() {
+    var parent = this.owner.getScopeParent();
+    if (parent) parent.el.appendChild(this.owner.el);
+}</code></pre>
+          <section id="Dom$children">
+            <h1>Dom$children</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Dom$children()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Dom facet instance method<br />Returns the list of child elements of the component element</p></div>
+          <pre><code class="language-javascript">function Dom$children() {
+    return domUtils.children(this.owner.el);
+}
+
+
+var findDirections = {
+    'up': 'previousNode',
+    'down': 'nextNode'
+};
+
+// Finds component passing optional iterator's test
+// in the same scope as the current component (this)
+// by traversing DOM tree upwards (direction = &quot;up&quot;)
+// or downwards (direction = &quot;down&quot;)
+function find(direction, iterator) {
+    if (! findDirections.hasOwnProperty(direction))
+        throw new Error('incorrect find direction: ' + direction);
+
+    var el = this.owner.el
+        , scope = this.owner.scope
+        , treeWalker = document.createTreeWalker(scope._rootEl, NodeFilter.SHOW_ELEMENT);
+
+    treeWalker.currentNode = el;
+    var nextNode = treeWalker[findDirections[direction]]()
+        , componentsNames = Object.keys(scope)
+        , found = false;
+
+    while (nextNode) {
+        var attr = new BindAttribute(nextNode);
+        if (attr.node) {
+            attr.parse().validate();
+            if (scope.hasOwnProperty(attr.compName)) {
+                var component = scope[attr.compName];
+                if (! iterator || iterator(component)) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        treeWalker.currentNode = nextNode;
+        nextNode = treeWalker[findDirections[direction]]();
+    }
+
+    if (found) return component;
+}
+
+
+// returns true if the element has text before selection
+function hasTextBeforeSelection() {
+    var selection = window.getSelection();
+    if (! selection.isCollapsed) return true;
+    
+    var text = selection.focusNode &amp;&amp; selection.focusNode.textContent;
+    var startPos = text &amp;&amp; text.charAt(0) == ' ' ? 1 : 0;
+    if (selection.anchorOffset != startPos) return true;
+
+    // walk up the DOM tree to check if there are text nodes before cursor
+    var treeWalker = document.createTreeWalker(this.owner.el, NodeFilter.SHOW_TEXT);
+    treeWalker.currentNode = selection.anchorNode;
+    var prevNode = treeWalker.previousNode();
+
+    var isText = prevNode ? prevNode.nodeValue.trim() !== '' : false;
+
+    return isText;
+}
+
+
+function hasTextAfterSelection() {
+    var selection = window.getSelection();
+    if (! selection.isCollapsed) return true;
+
+    var text = selection.focusNode &amp;&amp; selection.focusNode.textContent;
+    var startPos = text &amp;&amp; text.charAt(text.length-1) == ' ' ? selection.anchorNode.length-1 : selection.anchorNode.length;
+    if (selection.anchorOffset &lt; startPos) return true;
+
+    // walk up the DOM tree to check if there are text nodes after cursor
+    var treeWalker = document.createTreeWalker(this.owner.el, NodeFilter.SHOW_TEXT);
+    treeWalker.currentNode = selection.anchorNode;
+    var nextNode = treeWalker.nextNode();
+    
+    //To capture when treewalker gives us an empty text node (unknown reason)
+    var isText = nextNode ? !nextNode.nodeValue.trim() == '' : false;
+
+    return isText;
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="container">
+        <p>Documentation generated with <a href="https://github.com/mr-doc/mr-doc">Mr. Doc </a> created by <a href="https://twitter.com/FGRibreau" data-show-count="false" class="twitter-follow-button">Francois-Guillaume Ribreau </a></p>
+        <p>Mr. Doc is sponsored by <a href="http://bringr.net/?btt" title="Outil d'analyse des réseaux sociaux" class="bringr">Bringr </a> and <a href="https://redsmin.com/?btt" title="Full Redis GUI" class="redsmin">Redsmin</a></p>
+        <p>Theme borrowed from Twitter Bootstrap</p>
+      </div>
+    </footer>
+    <script src="../../js/twitter-widget.min.js"></script>
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/bootstrap-transition.min.js"></script>
+    <script src="../../js/bootstrap-scrollspy.min.js"></script>
+    <script src="../../js/bootstrap-dropdown.min.js"></script>
+    <script src="../../js/bootstrap-collapse.min.js"></script>
+    <script src="../../js/bootstrap-affix.min.js"></script>
+    <script src="../../js/prism.min.js"></script>
+    <script src="../../js/index.min.js"></script>
+  </body>
+</html>

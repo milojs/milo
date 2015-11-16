@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" charset="utf-8">
+    <title>milo</title>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/cayman.min.css">
+    <link rel="stylesheet" href="../css/prism.min.css">
+    <link rel="stylesheet" href="../css/index.min.css">
+    <link rel="stylesheet" href="../css/docs.min.css">
+    <link rel="stylesheet" href="../css/bootstrap-responsive.min.css">
+  </head>
+  <body data-spy="scroll" data-target=".scrollspy">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container"><a class="brand">Mr. Doc</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav pull-right sponsored"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <header id="overview" class="jumbotron subhead">
+      <div class="container">
+        <h1>milo</h1>
+        <p class="lead"></p>
+      </div>
+    </header>
+    <div class="container">
+      <div class="row">
+        <div class="span3 bs-docs-sidebar">
+          <ul class="nav nav-list bs-docs-sidenav affix-top">
+            <li><a href="../index.html">Main</a></li>
+            <li><a href="../abstract/facet.js.html">abstract/facet.js</a></li>
+            <li><a href="../abstract/faceted_object.js.html">abstract/faceted_object.js</a></li>
+            <li><a href="../abstract/registry.js.html">abstract/registry.js</a></li>
+            <li><a href="../attributes/a_bind.js.html">attributes/a_bind.js</a></li>
+            <li><a href="../attributes/a_class.js.html">attributes/a_class.js</a></li>
+            <li><a href="../attributes/a_load.js.html">attributes/a_load.js</a></li>
+            <li><a href="../attributes/index.js.html">attributes/index.js</a></li>
+            <li><a href="../binder.js.html">binder.js</a></li>
+            <li><a href="../classes.js.html">classes.js</a></li>
+            <li><a href="../command/actions_history.js.html">command/actions_history.js</a></li>
+            <li><a href="../command/cmd_registry.js.html">command/cmd_registry.js</a></li>
+            <li><a href="../command/index.js.html">command/index.js</a></li>
+            <li><a href="../command/transaction.js.html">command/transaction.js</a></li>
+            <li><a href="../command/transaction_history.js.html">command/transaction_history.js</a></li>
+            <li><a href="../components/ComponentTemplate.js.html">components/ComponentTemplate.js</a></li>
+            <li><a href="../components/c_class.js.html">components/c_class.js</a></li>
+            <li><a href="../components/c_facet.js.html">components/c_facet.js</a></li>
+            <li><a href="../components/c_facets/Container.js.html">components/c_facets/Container.js</a></li>
+            <li><a href="../components/c_facets/Css.js.html">components/c_facets/Css.js</a></li>
+            <li><a href="../components/c_facets/Data.js.html">components/c_facets/Data.js</a></li>
+            <li><a href="../components/c_facets/Dom.js.html">components/c_facets/Dom.js</a></li>
+            <li><a href="../components/c_facets/Drag.js.html">components/c_facets/Drag.js</a></li>
+            <li><a href="../components/c_facets/Drop.js.html">components/c_facets/Drop.js</a></li>
+            <li><a href="../components/c_facets/Events.js.html">components/c_facets/Events.js</a></li>
+            <li><a href="../components/c_facets/Frame.js.html">components/c_facets/Frame.js</a></li>
+            <li><a href="../components/c_facets/Item.js.html">components/c_facets/Item.js</a></li>
+            <li><a href="../components/c_facets/List.js.html">components/c_facets/List.js</a></li>
+            <li><a href="../components/c_facets/ModelFacet.js.html">components/c_facets/ModelFacet.js</a></li>
+            <li><a href="../components/c_facets/Options.js.html">components/c_facets/Options.js</a></li>
+            <li><a href="../components/c_facets/Template.js.html">components/c_facets/Template.js</a></li>
+            <li><a href="../components/c_facets/Transfer.js.html">components/c_facets/Transfer.js</a></li>
+            <li><a href="../components/c_facets/cf_registry.js.html">components/c_facets/cf_registry.js</a></li>
+            <li><a href="../components/c_info.js.html">components/c_info.js</a></li>
+            <li><a href="../components/c_registry.js.html">components/c_registry.js</a></li>
+            <li><a href="../components/c_utils.js.html">components/c_utils.js</a></li>
+            <li><a href="../components/classes/View.js.html">components/classes/View.js</a></li>
+            <li><a href="../components/msg_api/data.js.html">components/msg_api/data.js</a></li>
+            <li><a href="../components/msg_api/de_data.js.html">components/msg_api/de_data.js</a></li>
+            <li><a href="../components/msg_api/drop.js.html">components/msg_api/drop.js</a></li>
+            <li><a href="../components/msg_src/dom_events.js.html">components/msg_src/dom_events.js</a></li>
+            <li><a href="../components/msg_src/frame.js.html">components/msg_src/frame.js</a></li>
+            <li><a href="../components/scope.js.html">components/scope.js</a></li>
+            <li><a href="../config.js.html">config.js</a></li>
+            <li><a href="../loader.js.html">loader.js</a></li>
+            <li><a href="../milo.js.html">milo.js</a></li>
+            <li><a href="../registry.js.html">registry.js</a></li>
+            <li><a href="../services/de_constrs.js.html">services/de_constrs.js</a></li>
+            <li><a href="../services/dom_source.js.html">services/dom_source.js</a></li>
+            <li><a href="../services/mail/index.js.html">services/mail/index.js</a></li>
+            <li><a href="../services/mail/mail_api.js.html">services/mail/mail_api.js</a></li>
+            <li><a href="../services/mail/mail_source.js.html">services/mail/mail_source.js</a></li>
+            <li><a href="../services/window.js.html">services/window.js</a></li>
+            <li><a href="../use_components.js.html">use_components.js</a></li>
+            <li><a href="../use_facets.js.html">use_facets.js</a></li>
+            <li><a href="../util/component_name.js.html">util/component_name.js</a></li>
+            <li><a href="../util/create_component_class.js.html">util/create_component_class.js</a></li>
+            <li><a href="../util/create_facet_class.js.html">util/create_facet_class.js</a></li>
+            <li><a href="../util/deprecate.js.html">util/deprecate.js</a></li>
+            <li><a href="../util/dom.js.html">util/dom.js</a></li>
+            <li><a href="../util/dom_listeners.js.html">util/dom_listeners.js</a></li>
+            <li><a href="../util/domready.js.html">util/domready.js</a></li>
+            <li><a href="../util/dragdrop.js.html">util/dragdrop.js</a></li>
+            <li><a href="../util/error.js.html">util/error.js</a></li>
+            <li class="active"><a href="../util/fragment.js.html">util/fragment.js</a></li>
+            <li><a href="../util/index.js.html">util/index.js</a></li>
+            <li><a href="../util/json_parse.js.html">util/json_parse.js</a></li>
+            <li><a href="../util/request.js.html">util/request.js</a></li>
+            <li><a href="../util/selection/index.js.html">util/selection/index.js</a></li>
+            <li><a href="../util/storage/index.js.html">util/storage/index.js</a></li>
+            <li><a href="../util/storage/model.js.html">util/storage/model.js</a></li>
+            <li><a href="../util/storage/msg_src.js.html">util/storage/msg_src.js</a></li>
+            <li><a href="../util/unique_id.js.html">util/unique_id.js</a></li>
+            <li><a href="../util/websocket/index.js.html">util/websocket/index.js</a></li>
+            <li><a href="../util/websocket/msg_api.js.html">util/websocket/msg_api.js</a></li>
+            <li><a href="../util/websocket/msg_src.js.html">util/websocket/msg_src.js</a></li>
+          </ul>
+          <div class="scrollspy">
+            <ul class="nav nav-list bs-docs-sidenav affix-top">
+              <li><a href="#fragment_getState"><i class="alert alert-info"></i><span>fragment_getState</span></a>
+              </li>
+              <li><a href="#fragment_getStateAsync"><i class="alert alert-info"></i><span>fragment_getStateAsync</span></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="span9">
+          <section id="fragment_getState">
+            <h1>fragment_getState</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>fragment_getState()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>range</td>
+                <td>Range</td>
+                <td><p>DOM Range instance</p></td>
+              </tr>
+              <tr>
+                <td>renameChildren</td>
+                <td>Boolean</td>
+                <td><p>optional parameter, <code>true</code> to rename fragment child components</p></td>
+              </tr>
+              <tr>
+                <td>wrapperClassName</td>
+                <td>String</td>
+                <td><p>optional parameter to wrap in a custom component class</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Object</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Creates an object with the state of wrapped range with components, including partially selected. The range will be cloned and wrapped in component with container facet before getting its state.<br />This function will log error and return undefined if range has no common ancestor that has component with container facet</p></div>
+          <pre><code class="language-javascript">function fragment_getState(range, renameChildren, wrapperClassName) {
+    var rangeContainer = _getRangeContainer(range);
+    if (! rangeContainer) {
+        logger.error('fragment.getState: range has no common container');
+        return;
+    }
+
+    var frag = range.cloneContents()
+        , wrapper = _wrapFragmentInContainer(frag, wrapperClassName);
+
+    _transferStates(rangeContainer, wrapper);
+    if (renameChildren) _renameChildren(wrapper);
+    var wrapperState = wrapper.getState();
+    _.deferMethod(wrapper, 'destroy');
+    return wrapperState;
+}</code></pre>
+          <section id="fragment_getStateAsync">
+            <h1>fragment_getStateAsync</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>fragment_getStateAsync()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>range</td>
+                <td>Range</td>
+                <td><p>DOM Range instance</p></td>
+              </tr>
+              <tr>
+                <td>renameChildren</td>
+                <td>Boolean</td>
+                <td><p>optional parameter, <code>true</code> to rename fragment child components</p></td>
+              </tr>
+              <tr>
+                <td>callback</td>
+                <td>Function</td>
+                <td><p>always the last parameter, optional parameters can be dropped; result is passed via callback with any error as first parameter</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Creates an object with the state of wrapped range with components, including partially selected. The range will be cloned and wrapped in component with container facet before getting its state.<br />This function will return result and any error via callback.</p></div>
+          <pre><code class="language-javascript">function fragment_getStateAsync(range, renameChildren, callback) {
+    try {
+        var rangeContainer = _getRangeContainer(range);
+        if (! rangeContainer) {
+            callback(new Error('fragment.getState: range has no common container'));
+            return; // do NOT connect return to previous callback, getState should return undefined
+        }
+
+        if (typeof renameChildren == 'function') {
+            callback = renameChildren;
+            renameChildren = false;
+        }
+
+        var frag = range.cloneContents()
+            , wrapper = _wrapFragmentInContainer(frag);
+
+        _transferStates(rangeContainer, wrapper);
+        _.defer(function() {
+            wrapper.broadcast('stateready');
+            _.defer(function() {
+                if (renameChildren) _renameChildren(wrapper);
+                var wrapperState = wrapper.getState();
+                wrapper.destroy();
+                callback(null, wrapperState);
+            });
+        });
+    } catch (err) {
+        callback(err);
+    }
+}
+
+
+function _wrapFragmentInContainer(frag, wrapperClassName) {
+    var wrapEl = document.createElement('div')
+        , attr = new BindAttribute(wrapEl);
+
+    _.extend(attr, {
+        compClass: wrapperClassName || 'Component',
+        compFacets: wrapperClassName ? [] : ['container'],
+        compName: 'wrapper'
+    });
+
+    attr.decorate();
+
+    wrapEl.appendChild(frag);
+    var scope = binder(wrapEl);
+    return scope.wrapper;
+}
+
+
+function _getRangeContainer(range) {
+    var el = domUtils.containingElement(range.commonAncestorContainer);
+    return Component.getContainingComponent(el, true, 'container');
+}
+
+
+function _transferStates(fromComp, toComp) {
+    var fromScope = fromComp.container.scope;
+    toComp.container.scope._each(function(toChildComp, name) {
+        var fromChildComp = fromScope[name];
+        if (! fromChildComp) return logger.error('fragment.getState: conponent', name, 'not found in range');
+        var state = fromChildComp._getState(true);
+        toChildComp.setState(state);
+    });
+}
+
+
+function _renameChildren(comp) {
+    comp.container.scope._each(function(child) {
+        child.rename();
+    });
+}
+
+
+function expandRangeToSiblings(range) {
+    var siblings = getRangeSiblings(range);
+    range = createRangeFromSiblings(siblings);
+    return range;
+}
+
+
+function createRangeFromSiblings(nodes) {
+    var range = document.createRange();
+    if (nodes.siblings) {
+        range.setStartBefore(nodes.start);
+        range.setEndAfter(nodes.end);
+    } else
+        range.selectNode(nodes.start);
+    return range;
+}
+
+
+function getRangeSiblings(range) {
+    var containerNode = range.commonAncestorContainer
+        , startNode = range.startContainer
+        , endNode = range.endContainer;
+
+    if (startNode == endNode) {
+        if (startNode != containerNode) logger.error('deleteSelectionCommand logical error: start==end, but container is different');
+        return { siblings: false, start: startNode };
+    }
+
+    if (startNode == containerNode || endNode == containerNode)
+        return { siblings: false, start: containerNode };
+
+    var startSibling = _findContainingChild(containerNode, startNode);
+    var endSibling = _findContainingChild(containerNode, endNode);
+
+    if (startSibling &amp;&amp; endSibling) {
+        if (startSibling == endSibling) {
+            logger.error('deleteSelectionCommand logical error: same siblings');
+            return { siblings: false, start: startSibling };
+        } else
+            return { siblings: true, start: startSibling, end: endSibling };
+    }
+}
+
+
+function _findContainingChild(containerNode, selNode) {
+    return _.find(containerNode.childNodes, function(node) {
+        return node.contains(selNode);
+    });
+}
+
+
+function _createNodesAndPathsFunc(func) {
+    return function(rootEl, fromObj) {
+        var toObj = {
+            siblings: fromObj.siblings,
+            start: func(rootEl, fromObj.start)
+        };
+        if (toObj.siblings)
+            toObj.end = func(rootEl, fromObj.end);
+        return toObj;
+    };
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="container">
+        <p>Documentation generated with <a href="https://github.com/mr-doc/mr-doc">Mr. Doc </a> created by <a href="https://twitter.com/FGRibreau" data-show-count="false" class="twitter-follow-button">Francois-Guillaume Ribreau </a></p>
+        <p>Mr. Doc is sponsored by <a href="http://bringr.net/?btt" title="Outil d'analyse des réseaux sociaux" class="bringr">Bringr </a> and <a href="https://redsmin.com/?btt" title="Full Redis GUI" class="redsmin">Redsmin</a></p>
+        <p>Theme borrowed from Twitter Bootstrap</p>
+      </div>
+    </footer>
+    <script src="../js/twitter-widget.min.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/bootstrap-transition.min.js"></script>
+    <script src="../js/bootstrap-scrollspy.min.js"></script>
+    <script src="../js/bootstrap-dropdown.min.js"></script>
+    <script src="../js/bootstrap-collapse.min.js"></script>
+    <script src="../js/bootstrap-affix.min.js"></script>
+    <script src="../js/prism.min.js"></script>
+    <script src="../js/index.min.js"></script>
+  </body>
+</html>

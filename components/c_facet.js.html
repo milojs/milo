@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" charset="utf-8">
+    <title>milo</title>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/cayman.min.css">
+    <link rel="stylesheet" href="../css/prism.min.css">
+    <link rel="stylesheet" href="../css/index.min.css">
+    <link rel="stylesheet" href="../css/docs.min.css">
+    <link rel="stylesheet" href="../css/bootstrap-responsive.min.css">
+  </head>
+  <body data-spy="scroll" data-target=".scrollspy">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container"><a class="brand">Mr. Doc</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav pull-right sponsored"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <header id="overview" class="jumbotron subhead">
+      <div class="container">
+        <h1>milo</h1>
+        <p class="lead"></p>
+      </div>
+    </header>
+    <div class="container">
+      <div class="row">
+        <div class="span3 bs-docs-sidebar">
+          <ul class="nav nav-list bs-docs-sidenav affix-top">
+            <li><a href="../index.html">Main</a></li>
+            <li><a href="../abstract/facet.js.html">abstract/facet.js</a></li>
+            <li><a href="../abstract/faceted_object.js.html">abstract/faceted_object.js</a></li>
+            <li><a href="../abstract/registry.js.html">abstract/registry.js</a></li>
+            <li><a href="../attributes/a_bind.js.html">attributes/a_bind.js</a></li>
+            <li><a href="../attributes/a_class.js.html">attributes/a_class.js</a></li>
+            <li><a href="../attributes/a_load.js.html">attributes/a_load.js</a></li>
+            <li><a href="../attributes/index.js.html">attributes/index.js</a></li>
+            <li><a href="../binder.js.html">binder.js</a></li>
+            <li><a href="../classes.js.html">classes.js</a></li>
+            <li><a href="../command/actions_history.js.html">command/actions_history.js</a></li>
+            <li><a href="../command/cmd_registry.js.html">command/cmd_registry.js</a></li>
+            <li><a href="../command/index.js.html">command/index.js</a></li>
+            <li><a href="../command/transaction.js.html">command/transaction.js</a></li>
+            <li><a href="../command/transaction_history.js.html">command/transaction_history.js</a></li>
+            <li><a href="../components/ComponentTemplate.js.html">components/ComponentTemplate.js</a></li>
+            <li><a href="../components/c_class.js.html">components/c_class.js</a></li>
+            <li class="active"><a href="../components/c_facet.js.html">components/c_facet.js</a></li>
+            <li><a href="../components/c_facets/Container.js.html">components/c_facets/Container.js</a></li>
+            <li><a href="../components/c_facets/Css.js.html">components/c_facets/Css.js</a></li>
+            <li><a href="../components/c_facets/Data.js.html">components/c_facets/Data.js</a></li>
+            <li><a href="../components/c_facets/Dom.js.html">components/c_facets/Dom.js</a></li>
+            <li><a href="../components/c_facets/Drag.js.html">components/c_facets/Drag.js</a></li>
+            <li><a href="../components/c_facets/Drop.js.html">components/c_facets/Drop.js</a></li>
+            <li><a href="../components/c_facets/Events.js.html">components/c_facets/Events.js</a></li>
+            <li><a href="../components/c_facets/Frame.js.html">components/c_facets/Frame.js</a></li>
+            <li><a href="../components/c_facets/Item.js.html">components/c_facets/Item.js</a></li>
+            <li><a href="../components/c_facets/List.js.html">components/c_facets/List.js</a></li>
+            <li><a href="../components/c_facets/ModelFacet.js.html">components/c_facets/ModelFacet.js</a></li>
+            <li><a href="../components/c_facets/Options.js.html">components/c_facets/Options.js</a></li>
+            <li><a href="../components/c_facets/Template.js.html">components/c_facets/Template.js</a></li>
+            <li><a href="../components/c_facets/Transfer.js.html">components/c_facets/Transfer.js</a></li>
+            <li><a href="../components/c_facets/cf_registry.js.html">components/c_facets/cf_registry.js</a></li>
+            <li><a href="../components/c_info.js.html">components/c_info.js</a></li>
+            <li><a href="../components/c_registry.js.html">components/c_registry.js</a></li>
+            <li><a href="../components/c_utils.js.html">components/c_utils.js</a></li>
+            <li><a href="../components/classes/View.js.html">components/classes/View.js</a></li>
+            <li><a href="../components/msg_api/data.js.html">components/msg_api/data.js</a></li>
+            <li><a href="../components/msg_api/de_data.js.html">components/msg_api/de_data.js</a></li>
+            <li><a href="../components/msg_api/drop.js.html">components/msg_api/drop.js</a></li>
+            <li><a href="../components/msg_src/dom_events.js.html">components/msg_src/dom_events.js</a></li>
+            <li><a href="../components/msg_src/frame.js.html">components/msg_src/frame.js</a></li>
+            <li><a href="../components/scope.js.html">components/scope.js</a></li>
+            <li><a href="../config.js.html">config.js</a></li>
+            <li><a href="../loader.js.html">loader.js</a></li>
+            <li><a href="../milo.js.html">milo.js</a></li>
+            <li><a href="../registry.js.html">registry.js</a></li>
+            <li><a href="../services/de_constrs.js.html">services/de_constrs.js</a></li>
+            <li><a href="../services/dom_source.js.html">services/dom_source.js</a></li>
+            <li><a href="../services/mail/index.js.html">services/mail/index.js</a></li>
+            <li><a href="../services/mail/mail_api.js.html">services/mail/mail_api.js</a></li>
+            <li><a href="../services/mail/mail_source.js.html">services/mail/mail_source.js</a></li>
+            <li><a href="../services/window.js.html">services/window.js</a></li>
+            <li><a href="../use_components.js.html">use_components.js</a></li>
+            <li><a href="../use_facets.js.html">use_facets.js</a></li>
+            <li><a href="../util/component_name.js.html">util/component_name.js</a></li>
+            <li><a href="../util/create_component_class.js.html">util/create_component_class.js</a></li>
+            <li><a href="../util/create_facet_class.js.html">util/create_facet_class.js</a></li>
+            <li><a href="../util/deprecate.js.html">util/deprecate.js</a></li>
+            <li><a href="../util/dom.js.html">util/dom.js</a></li>
+            <li><a href="../util/dom_listeners.js.html">util/dom_listeners.js</a></li>
+            <li><a href="../util/domready.js.html">util/domready.js</a></li>
+            <li><a href="../util/dragdrop.js.html">util/dragdrop.js</a></li>
+            <li><a href="../util/error.js.html">util/error.js</a></li>
+            <li><a href="../util/fragment.js.html">util/fragment.js</a></li>
+            <li><a href="../util/index.js.html">util/index.js</a></li>
+            <li><a href="../util/json_parse.js.html">util/json_parse.js</a></li>
+            <li><a href="../util/request.js.html">util/request.js</a></li>
+            <li><a href="../util/selection/index.js.html">util/selection/index.js</a></li>
+            <li><a href="../util/storage/index.js.html">util/storage/index.js</a></li>
+            <li><a href="../util/storage/model.js.html">util/storage/model.js</a></li>
+            <li><a href="../util/storage/msg_src.js.html">util/storage/msg_src.js</a></li>
+            <li><a href="../util/unique_id.js.html">util/unique_id.js</a></li>
+            <li><a href="../util/websocket/index.js.html">util/websocket/index.js</a></li>
+            <li><a href="../util/websocket/msg_api.js.html">util/websocket/msg_api.js</a></li>
+            <li><a href="../util/websocket/msg_src.js.html">util/websocket/msg_src.js</a></li>
+          </ul>
+          <div class="scrollspy">
+            <ul class="nav nav-list bs-docs-sidenav affix-top">
+              <li><a href="#Facet"><i class="alert alert-success"></i><span>Facet</span></a>
+              </li>
+              <li><a href="#postDomParent"><i class="alert alert-success"></i><span>postDomParent</span></a>
+              </li>
+              <li><a href="#postScopeParent"><i class="alert alert-success"></i><span>postScopeParent</span></a>
+              </li>
+              <li><a href="#MESSENGER_PROPERTY"><i class="alert alert-success"></i><span>MESSENGER_PROPERTY</span></a>
+              </li>
+              <li><a href="#domParent"><i class="alert alert-info"></i><span>domParent</span></a>
+              </li>
+              <li><a href="#scopeParent"><i class="alert alert-info"></i><span>scopeParent</span></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="span9">
+          <section id="Facet">
+            <h1>Facet</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>Facet</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p><code>milo.Component.Facet</code></p><p>The class fot the facet of component. When a component is created, it<br />creates all its facets.</p><p>See Facets section on information about available facets and on<br />how to create new facets classes.</p><ul>
+<li>Component - basic compponent class</li>
+<li>ComponentFacet - basic</li>
+</ul>
+</div>
+          <pre><code class="language-javascript">var Facet = require('../abstract/facet')
+    , miloCore = require('milo-core')
+    , Messenger = miloCore.Messenger
+    , componentUtils = require('./c_utils')
+    , _ = miloCore.proto;
+
+var ComponentFacet = _.createSubclass(Facet, 'ComponentFacet');
+
+module.exports = ComponentFacet;</code></pre>
+          <section id="postDomParent">
+            <h1>postDomParent</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>postDomParent</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>messageType</td>
+                <td>String</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>messageData</td>
+                <td>Object</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>postDomParent</p><p>If facet has DOM parent facet (see <code>domParent</code> method), posts the message to this facet.</p></div>
+          <pre><code class="language-javascript">var postDomParent = _.partial(_postParent, domParent);</code></pre>
+          <section id="postScopeParent">
+            <h1>postScopeParent</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>postScopeParent</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>messageType</td>
+                <td>String</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>messageData</td>
+                <td>Object</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>postScopeParent</p><p>If facet has scope parent facet (see <code>scopeParent</code> method), posts the message to this facet.</p></div>
+          <pre><code class="language-javascript">var postScopeParent = _.partial(_postParent, scopeParent);
+
+
+_.extendProto(ComponentFacet, {
+    init: ComponentFacet$init,
+    start: ComponentFacet$start,
+    check: ComponentFacet$check,
+    destroy: ComponentFacet$destroy,
+    onConfigMessages: ComponentFacet$onConfigMessages,
+    domParent: domParent,
+    postDomParent: postDomParent,
+    scopeParent: scopeParent,
+    postScopeParent: postScopeParent,
+    getMessageSource: getMessageSource,
+    dispatchSourceMessage: dispatchSourceMessage,
+    _createMessenger: _createMessenger,
+    _setMessageSource: _setMessageSource,
+    _createMessageSource: _createMessageSource,
+    _createMessageSourceWithAPI: _createMessageSourceWithAPI
+});
+
+_.extend(ComponentFacet, {
+    requiresFacet: requiresFacet
+});</code></pre>
+          <section id="MESSENGER_PROPERTY">
+            <h1>MESSENGER_PROPERTY</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>MESSENGER_PROPERTY</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Expose Messenger methods on Facet prototype</p></div>
+          <pre><code class="language-javascript">var MESSENGER_PROPERTY = '_messenger';
+Messenger.useWith(ComponentFacet, MESSENGER_PROPERTY, Messenger.defaultMethods);
+
+
+// initComponentFacet
+function ComponentFacet$init() {
+    this._createMessenger();
+}
+
+
+// some subclasses (e.g. ModelFacet) overrride this method and do not create their own messenger
+function _createMessenger(){
+    _.defineProperty(this, MESSENGER_PROPERTY, new Messenger(this));
+}
+
+
+// startComponentFacet
+function ComponentFacet$start() {
+    if (this.config.messages)
+        this.onConfigMessages(this.config.messages);
+}
+
+
+function ComponentFacet$onConfigMessages(messageSubscribers) {
+    var notYetRegisteredMap = _.mapKeys(messageSubscribers, function(subscriber, messages) {
+        var subscriberType = typeof subscriber;
+        if (subscriberType == 'function')
+            return this.on(messages, subscriber);
+
+        if (subscriberType == 'object') {
+            var contextType = typeof subscriber.context;
+            if (contextType == 'object')
+                return this.on(messages, subscriber);
+
+            if (contextType == 'string') {
+                if (subscriber.context == this.name || subscriber.context == 'facet')
+                    subscriber = {
+                        subscriber: subscriber.subscriber,
+                        context: this
+                    };
+                else if (subscriber.context == 'owner')
+                    subscriber = {
+                        subscriber: subscriber.subscriber,
+                        context: this.owner
+                    };
+                else
+                    throw new Error('unknown subscriber context in configuration: ' + subscriber.context);
+
+                return this.on(messages, subscriber);
+            }
+
+            throw new Error('unknown subscriber context type in configuration: ' + contextType);
+        }
+
+        throw new Error('unknown subscriber type in configuration: ' + subscriberType);
+    }, this);
+
+    return notYetRegisteredMap;
+}
+
+
+// checkDependencies and config
+function ComponentFacet$check() {
+    if (this.require) {
+        this.require.forEach(function(reqFacet) {
+            if (! this.owner.hasFacet(reqFacet))
+                this.owner.addFacet(reqFacet);
+        }, this);
+    }
+
+    if (this.configSchema) {
+        try {
+            milo.util.check(this.config, this.configSchema);
+        } catch(e) {
+            throw 'Error validating config schema for &quot;' + this.name +'&quot; facet: ' + e;
+        }
+    }
+}
+
+
+// destroys facet
+function ComponentFacet$destroy() {
+    if (this[MESSENGER_PROPERTY]) this[MESSENGER_PROPERTY].destroy();
+    this._destroyed = true;
+}</code></pre>
+          <section id="domParent">
+            <h1>domParent</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>domParent()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>domParent</p></div>
+          <pre><code class="language-javascript">function domParent() {
+    var parentComponent = componentUtils.getContainingComponent(this.owner.el, false, this.name);
+    return parentComponent &amp;&amp; parentComponent[this.name];
+}</code></pre>
+          <section id="scopeParent">
+            <h1>scopeParent</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>scopeParent()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>scopeParent</p></div>
+          <pre><code class="language-javascript">function scopeParent() {
+    var parentComponent = this.owner.getScopeParent(this.name);
+    return parentComponent &amp;&amp; parentComponent[this.name];
+}
+
+
+function _postParent(getParentMethod, messageType, messageData) {
+    var parentFacet = getParentMethod.call(this);
+    if (parentFacet)
+        parentFacet.postMessage(messageType, messageData);
+}
+
+
+function _setMessageSource(messageSource) {
+    this[MESSENGER_PROPERTY]._setMessageSource(messageSource);
+}
+
+
+function getMessageSource() {
+    return this[MESSENGER_PROPERTY].getMessageSource();
+}
+
+
+function dispatchSourceMessage(message, data) {
+    return this.getMessageSource().dispatchMessage(message, data);
+}
+
+
+function _createMessageSource(MessageSourceClass, options) {
+    var messageSource = new MessageSourceClass(this, undefined, undefined, this.owner, options);
+    this._setMessageSource(messageSource);
+
+    _.defineProperty(this, '_messageSource', messageSource);
+}
+
+
+function _createMessageSourceWithAPI(MessageSourceClass, messengerAPIOrClass, options) {
+    var messageSource = new MessageSourceClass(this, undefined, messengerAPIOrClass, this.owner, options);
+    this._setMessageSource(messageSource);
+
+    _.defineProperty(this, '_messageSource', messageSource);
+}
+
+
+function requiresFacet(facetName) {
+    // 'this' refers to the Facet Class
+    var facetRequire = this.prototype.require;
+
+    return facetRequire &amp;&amp; (facetRequire.indexOf(_.firstUpperCase(facetName)) &gt;= 0
+                        || facetRequire.indexOf(_.firstLowerCase(facetName)) &gt;= 0);
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="container">
+        <p>Documentation generated with <a href="https://github.com/mr-doc/mr-doc">Mr. Doc </a> created by <a href="https://twitter.com/FGRibreau" data-show-count="false" class="twitter-follow-button">Francois-Guillaume Ribreau </a></p>
+        <p>Mr. Doc is sponsored by <a href="http://bringr.net/?btt" title="Outil d'analyse des réseaux sociaux" class="bringr">Bringr </a> and <a href="https://redsmin.com/?btt" title="Full Redis GUI" class="redsmin">Redsmin</a></p>
+        <p>Theme borrowed from Twitter Bootstrap</p>
+      </div>
+    </footer>
+    <script src="../js/twitter-widget.min.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/bootstrap-transition.min.js"></script>
+    <script src="../js/bootstrap-scrollspy.min.js"></script>
+    <script src="../js/bootstrap-dropdown.min.js"></script>
+    <script src="../js/bootstrap-collapse.min.js"></script>
+    <script src="../js/bootstrap-affix.min.js"></script>
+    <script src="../js/prism.min.js"></script>
+    <script src="../js/index.min.js"></script>
+  </body>
+</html>

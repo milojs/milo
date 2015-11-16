@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" charset="utf-8">
+    <title>milo</title>
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../css/cayman.min.css">
+    <link rel="stylesheet" href="../../css/prism.min.css">
+    <link rel="stylesheet" href="../../css/index.min.css">
+    <link rel="stylesheet" href="../../css/docs.min.css">
+    <link rel="stylesheet" href="../../css/bootstrap-responsive.min.css">
+  </head>
+  <body data-spy="scroll" data-target=".scrollspy">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container"><a class="brand">Mr. Doc</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav pull-right sponsored"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <header id="overview" class="jumbotron subhead">
+      <div class="container">
+        <h1>milo</h1>
+        <p class="lead"></p>
+      </div>
+    </header>
+    <div class="container">
+      <div class="row">
+        <div class="span3 bs-docs-sidebar">
+          <ul class="nav nav-list bs-docs-sidenav affix-top">
+            <li><a href="../../index.html">Main</a></li>
+            <li><a href="../../abstract/facet.js.html">abstract/facet.js</a></li>
+            <li><a href="../../abstract/faceted_object.js.html">abstract/faceted_object.js</a></li>
+            <li><a href="../../abstract/registry.js.html">abstract/registry.js</a></li>
+            <li><a href="../../attributes/a_bind.js.html">attributes/a_bind.js</a></li>
+            <li><a href="../../attributes/a_class.js.html">attributes/a_class.js</a></li>
+            <li><a href="../../attributes/a_load.js.html">attributes/a_load.js</a></li>
+            <li><a href="../../attributes/index.js.html">attributes/index.js</a></li>
+            <li><a href="../../binder.js.html">binder.js</a></li>
+            <li><a href="../../classes.js.html">classes.js</a></li>
+            <li><a href="../../command/actions_history.js.html">command/actions_history.js</a></li>
+            <li><a href="../../command/cmd_registry.js.html">command/cmd_registry.js</a></li>
+            <li><a href="../../command/index.js.html">command/index.js</a></li>
+            <li><a href="../../command/transaction.js.html">command/transaction.js</a></li>
+            <li><a href="../../command/transaction_history.js.html">command/transaction_history.js</a></li>
+            <li><a href="../../components/ComponentTemplate.js.html">components/ComponentTemplate.js</a></li>
+            <li><a href="../../components/c_class.js.html">components/c_class.js</a></li>
+            <li><a href="../../components/c_facet.js.html">components/c_facet.js</a></li>
+            <li><a href="../../components/c_facets/Container.js.html">components/c_facets/Container.js</a></li>
+            <li><a href="../../components/c_facets/Css.js.html">components/c_facets/Css.js</a></li>
+            <li><a href="../../components/c_facets/Data.js.html">components/c_facets/Data.js</a></li>
+            <li><a href="../../components/c_facets/Dom.js.html">components/c_facets/Dom.js</a></li>
+            <li><a href="../../components/c_facets/Drag.js.html">components/c_facets/Drag.js</a></li>
+            <li><a href="../../components/c_facets/Drop.js.html">components/c_facets/Drop.js</a></li>
+            <li><a href="../../components/c_facets/Events.js.html">components/c_facets/Events.js</a></li>
+            <li class="active"><a href="../../components/c_facets/Frame.js.html">components/c_facets/Frame.js</a></li>
+            <li><a href="../../components/c_facets/Item.js.html">components/c_facets/Item.js</a></li>
+            <li><a href="../../components/c_facets/List.js.html">components/c_facets/List.js</a></li>
+            <li><a href="../../components/c_facets/ModelFacet.js.html">components/c_facets/ModelFacet.js</a></li>
+            <li><a href="../../components/c_facets/Options.js.html">components/c_facets/Options.js</a></li>
+            <li><a href="../../components/c_facets/Template.js.html">components/c_facets/Template.js</a></li>
+            <li><a href="../../components/c_facets/Transfer.js.html">components/c_facets/Transfer.js</a></li>
+            <li><a href="../../components/c_facets/cf_registry.js.html">components/c_facets/cf_registry.js</a></li>
+            <li><a href="../../components/c_info.js.html">components/c_info.js</a></li>
+            <li><a href="../../components/c_registry.js.html">components/c_registry.js</a></li>
+            <li><a href="../../components/c_utils.js.html">components/c_utils.js</a></li>
+            <li><a href="../../components/classes/View.js.html">components/classes/View.js</a></li>
+            <li><a href="../../components/msg_api/data.js.html">components/msg_api/data.js</a></li>
+            <li><a href="../../components/msg_api/de_data.js.html">components/msg_api/de_data.js</a></li>
+            <li><a href="../../components/msg_api/drop.js.html">components/msg_api/drop.js</a></li>
+            <li><a href="../../components/msg_src/dom_events.js.html">components/msg_src/dom_events.js</a></li>
+            <li><a href="../../components/msg_src/frame.js.html">components/msg_src/frame.js</a></li>
+            <li><a href="../../components/scope.js.html">components/scope.js</a></li>
+            <li><a href="../../config.js.html">config.js</a></li>
+            <li><a href="../../loader.js.html">loader.js</a></li>
+            <li><a href="../../milo.js.html">milo.js</a></li>
+            <li><a href="../../registry.js.html">registry.js</a></li>
+            <li><a href="../../services/de_constrs.js.html">services/de_constrs.js</a></li>
+            <li><a href="../../services/dom_source.js.html">services/dom_source.js</a></li>
+            <li><a href="../../services/mail/index.js.html">services/mail/index.js</a></li>
+            <li><a href="../../services/mail/mail_api.js.html">services/mail/mail_api.js</a></li>
+            <li><a href="../../services/mail/mail_source.js.html">services/mail/mail_source.js</a></li>
+            <li><a href="../../services/window.js.html">services/window.js</a></li>
+            <li><a href="../../use_components.js.html">use_components.js</a></li>
+            <li><a href="../../use_facets.js.html">use_facets.js</a></li>
+            <li><a href="../../util/component_name.js.html">util/component_name.js</a></li>
+            <li><a href="../../util/create_component_class.js.html">util/create_component_class.js</a></li>
+            <li><a href="../../util/create_facet_class.js.html">util/create_facet_class.js</a></li>
+            <li><a href="../../util/deprecate.js.html">util/deprecate.js</a></li>
+            <li><a href="../../util/dom.js.html">util/dom.js</a></li>
+            <li><a href="../../util/dom_listeners.js.html">util/dom_listeners.js</a></li>
+            <li><a href="../../util/domready.js.html">util/domready.js</a></li>
+            <li><a href="../../util/dragdrop.js.html">util/dragdrop.js</a></li>
+            <li><a href="../../util/error.js.html">util/error.js</a></li>
+            <li><a href="../../util/fragment.js.html">util/fragment.js</a></li>
+            <li><a href="../../util/index.js.html">util/index.js</a></li>
+            <li><a href="../../util/json_parse.js.html">util/json_parse.js</a></li>
+            <li><a href="../../util/request.js.html">util/request.js</a></li>
+            <li><a href="../../util/selection/index.js.html">util/selection/index.js</a></li>
+            <li><a href="../../util/storage/index.js.html">util/storage/index.js</a></li>
+            <li><a href="../../util/storage/model.js.html">util/storage/model.js</a></li>
+            <li><a href="../../util/storage/msg_src.js.html">util/storage/msg_src.js</a></li>
+            <li><a href="../../util/unique_id.js.html">util/unique_id.js</a></li>
+            <li><a href="../../util/websocket/index.js.html">util/websocket/index.js</a></li>
+            <li><a href="../../util/websocket/msg_api.js.html">util/websocket/msg_api.js</a></li>
+            <li><a href="../../util/websocket/msg_src.js.html">util/websocket/msg_src.js</a></li>
+          </ul>
+          <div class="scrollspy">
+            <ul class="nav nav-list bs-docs-sidenav affix-top">
+              <li><a href="#Frame"><i class="alert alert-success"></i><span>Frame</span></a>
+              </li>
+              <li><a href="#Frame$whenReady"><i class="alert alert-success"></i><span>Frame$whenReady</span></a>
+              </li>
+              <li><a href="#Frame$whenMiloReady"><i class="alert alert-success"></i><span>Frame$whenMiloReady</span></a>
+              </li>
+              <li><a href="#MSG_SOURCE_KEY"><i class="alert alert-success"></i><span>MSG_SOURCE_KEY</span></a>
+              </li>
+              <li><a href="#Frame$init"><i class="alert alert-info"></i><span>Frame$init</span></a>
+              </li>
+              <li><a href="#Frame$start"><i class="alert alert-info"></i><span>Frame$start</span></a>
+              </li>
+              <li><a href="#Frame$getWindow"><i class="alert alert-info"></i><span>Frame$getWindow</span></a>
+              </li>
+              <li><a href="#Frame$isReady"><i class="alert alert-info"></i><span>Frame$isReady</span></a>
+              </li>
+              <li><a href="#Frame$isMiloReady"><i class="alert alert-info"></i><span>Frame$isMiloReady</span></a>
+              </li>
+              <li><a href="#Frame$milo"><i class="alert alert-info"></i><span>Frame$milo</span></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="span9">
+          <section id="Frame">
+            <h1>Frame</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>Frame</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p><code>milo.registry.facets.get(&#39;Frame&#39;)</code><br />Component facet that simplifies sending window messages to iframe and subscribing to messages on inner window of iframe.<br />All public methods of Messenger and <code>trigger</code> method of <a href="../msg_src/frame.js.html">FrameMessageSource</a> are proxied directly to this facet.<br />For example, to send custom message to iframe window use:</p><pre><code>iframeComponent.frame.trigger(&#39;mymessage&#39;, myData);
+</code></pre><p>To subscribe to this messages inside frame use (with milo - see <a href="../../mail/index.js.html">milo.mail</a>):</p><pre><code>milo.mail.on(&#39;message:mymessage&#39;, function(msgType, msgData) {
+    // data is inside of window message data
+    // msgType == &#39;message:mymessage&#39;
+    var myData = msgData.data;
+    // ... app logic here
+});
+</code></pre><p>or without milo:</p><pre><code>window.attachEventListener(&#39;message&#39;, function(message) {
+    var msgType = message.type; // e.g., &#39;mymessage&#39;
+    var myData = message.data;
+    // ... message routing and code here
+});
+</code></pre><p>Milo does routing based on sent message type automatically.<br />See <a href="../../messenger/index.js.html">Messenger</a> and <a href="../../mail/index.js.html">milo.mail</a>.</p></div>
+          <pre><code class="language-javascript">var Frame = _.createSubclass(ComponentFacet, 'Frame');</code></pre>
+          <section id="Frame$whenReady">
+            <h1>Frame$whenReady</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>Frame$whenReady</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Calls passed function when frame DOM becomes ready. If already ready calls immediately</p></div>
+          <pre><code class="language-javascript">var Frame$whenReady = _makeWhenReadyFunc(Frame$isReady, 'domready');</code></pre>
+          <section id="Frame$whenMiloReady">
+            <h1>Frame$whenMiloReady</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>Frame$whenMiloReady</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Calls passed function when frame milo becomes ready. If already ready calls immediately</p></div>
+          <pre><code class="language-javascript">var Frame$whenMiloReady = _makeWhenReadyFunc(Frame$isMiloReady, 'message:miloready');</code></pre>
+          <div class="description"><p>####Events facet instance methods####</p><ul>
+<li><a href="#Frame$init">init</a> - called by constructor automatically</li>
+</ul>
+</div>
+          <pre><code class="language-javascript">_.extendProto(Frame, {
+    init: Frame$init,
+    start: Frame$start,
+    destroy: Frame$destroy,
+    getWindow: Frame$getWindow,
+    isReady: Frame$isReady,
+    whenReady: Frame$whenReady,
+    isMiloReady: Frame$isMiloReady,
+    whenMiloReady: Frame$whenMiloReady,
+    milo: Frame$milo
+    // _reattach: _reattachEventsOnElementChange
+});
+
+
+facetsRegistry.add(Frame);
+
+module.exports = Frame;</code></pre>
+          <section id="MSG_SOURCE_KEY">
+            <h1>MSG_SOURCE_KEY</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>MSG_SOURCE_KEY</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Expose FrameMessageSource trigger method on Events prototype</p></div>
+          <pre><code class="language-javascript">var MSG_SOURCE_KEY = '_messageSource';
+FrameMessageSource.useWith(Frame, MSG_SOURCE_KEY, ['trigger']);</code></pre>
+          <section id="Frame$init">
+            <h1>Frame$init</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Frame$init()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Frame facet instance method<br />Initialzes facet, connects FrameMessageSource to facet&#39;s messenger</p></div>
+          <pre><code class="language-javascript">function Frame$init() {
+    ComponentFacet.prototype.init.apply(this, arguments);
+    
+    var messageSource = new FrameMessageSource(this, undefined, undefined, this.owner);
+    this._setMessageSource(messageSource);
+
+    _.defineProperty(this, MSG_SOURCE_KEY, messageSource);
+}</code></pre>
+          <section id="Frame$start">
+            <h1>Frame$start</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Frame$start()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Frame facet instance method<br />Emits frameloaded event when ready.</p></div>
+          <pre><code class="language-javascript">function Frame$start() {
+    ComponentFacet.prototype.start.apply(this, arguments);
+    var self = this;
+    milo(postDomReady);
+
+    function postDomReady(event) {
+        self.postMessage('domready', event);
+    }
+}
+
+
+function Frame$destroy() {
+    ComponentFacet.prototype.destroy.apply(this, arguments);
+}</code></pre>
+          <section id="Frame$getWindow">
+            <h1>Frame$getWindow</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Frame$getWindow()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td></td>
+                <td>Window</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Frame facet instance method<br />Retrieves the internal window of the frame </p></div>
+          <pre><code class="language-javascript">function Frame$getWindow() {
+    return this.owner.el.contentWindow;
+}</code></pre>
+          <section id="Frame$isReady">
+            <h1>Frame$isReady</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Frame$isReady()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Frame facet instance method<br />Returns document.readyState if frame doument state is &#39;interactive&#39; or &#39;complete&#39;, false otherwise</p></div>
+          <pre><code class="language-javascript">function Frame$isReady() {
+    var readyState = this.getWindow().document.readyState;
+    return  readyState != 'loading' ? readyState : false;
+}</code></pre>
+          <section id="Frame$isMiloReady">
+            <h1>Frame$isMiloReady</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Frame$isMiloReady()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Frame facet instance method<br />Returns true if milo is loaded and has finished initializing inside the frame</p></div>
+          <pre><code class="language-javascript">function Frame$isMiloReady() {
+    var frameMilo = this.getWindow().milo;
+    return this.isReady() &amp;&amp; frameMilo &amp;&amp; frameMilo.milo_version;
+}</code></pre>
+          <section id="Frame$milo">
+            <h1>Frame$milo</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Frame$milo()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>func</td>
+                <td>Function</td>
+                <td><p>function to be called when milo and DOM are ready in the frame</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Function</td>
+                <td><p>reference to milo in the frame</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Gives access to milo in the frame (assuming it is loaded there)<br />Calls function when both milo and DOM are ready if function is passed.<br />Returns the reference to milo inside the frame if the window is already available.</p></div>
+          <pre><code class="language-javascript">function Frame$milo(func) {
+    if (typeof func == 'function') {
+        var self = this;
+        this.whenMiloReady(function() {
+            self.getWindow().milo(func);
+        });
+    }
+    var win = this.getWindow();
+    return win &amp;&amp; win.milo;
+}
+
+
+function _makeWhenReadyFunc(isReadyFunc, event) {
+    return function Frame_whenReadyFunc(func) { // , arguments
+        var self = this
+            , args = _.slice(arguments, 1);
+        if (isReadyFunc.call(this))
+            callFunc();
+        else
+            this.on(event, callFunc);
+
+        function callFunc() {
+            func.apply(self, args);
+        }
+    };
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="container">
+        <p>Documentation generated with <a href="https://github.com/mr-doc/mr-doc">Mr. Doc </a> created by <a href="https://twitter.com/FGRibreau" data-show-count="false" class="twitter-follow-button">Francois-Guillaume Ribreau </a></p>
+        <p>Mr. Doc is sponsored by <a href="http://bringr.net/?btt" title="Outil d'analyse des réseaux sociaux" class="bringr">Bringr </a> and <a href="https://redsmin.com/?btt" title="Full Redis GUI" class="redsmin">Redsmin</a></p>
+        <p>Theme borrowed from Twitter Bootstrap</p>
+      </div>
+    </footer>
+    <script src="../../js/twitter-widget.min.js"></script>
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/bootstrap-transition.min.js"></script>
+    <script src="../../js/bootstrap-scrollspy.min.js"></script>
+    <script src="../../js/bootstrap-dropdown.min.js"></script>
+    <script src="../../js/bootstrap-collapse.min.js"></script>
+    <script src="../../js/bootstrap-affix.min.js"></script>
+    <script src="../../js/prism.min.js"></script>
+    <script src="../../js/index.min.js"></script>
+  </body>
+</html>

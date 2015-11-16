@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" charset="utf-8">
+    <title>milo</title>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/cayman.min.css">
+    <link rel="stylesheet" href="../css/prism.min.css">
+    <link rel="stylesheet" href="../css/index.min.css">
+    <link rel="stylesheet" href="../css/docs.min.css">
+    <link rel="stylesheet" href="../css/bootstrap-responsive.min.css">
+  </head>
+  <body data-spy="scroll" data-target=".scrollspy">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container"><a class="brand">Mr. Doc</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav pull-right sponsored"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <header id="overview" class="jumbotron subhead">
+      <div class="container">
+        <h1>milo</h1>
+        <p class="lead"></p>
+      </div>
+    </header>
+    <div class="container">
+      <div class="row">
+        <div class="span3 bs-docs-sidebar">
+          <ul class="nav nav-list bs-docs-sidenav affix-top">
+            <li><a href="../index.html">Main</a></li>
+            <li><a href="../abstract/facet.js.html">abstract/facet.js</a></li>
+            <li><a href="../abstract/faceted_object.js.html">abstract/faceted_object.js</a></li>
+            <li><a href="../abstract/registry.js.html">abstract/registry.js</a></li>
+            <li><a href="../attributes/a_bind.js.html">attributes/a_bind.js</a></li>
+            <li><a href="../attributes/a_class.js.html">attributes/a_class.js</a></li>
+            <li><a href="../attributes/a_load.js.html">attributes/a_load.js</a></li>
+            <li><a href="../attributes/index.js.html">attributes/index.js</a></li>
+            <li><a href="../binder.js.html">binder.js</a></li>
+            <li><a href="../classes.js.html">classes.js</a></li>
+            <li><a href="../command/actions_history.js.html">command/actions_history.js</a></li>
+            <li><a href="../command/cmd_registry.js.html">command/cmd_registry.js</a></li>
+            <li><a href="../command/index.js.html">command/index.js</a></li>
+            <li><a href="../command/transaction.js.html">command/transaction.js</a></li>
+            <li><a href="../command/transaction_history.js.html">command/transaction_history.js</a></li>
+            <li><a href="../components/ComponentTemplate.js.html">components/ComponentTemplate.js</a></li>
+            <li><a href="../components/c_class.js.html">components/c_class.js</a></li>
+            <li><a href="../components/c_facet.js.html">components/c_facet.js</a></li>
+            <li><a href="../components/c_facets/Container.js.html">components/c_facets/Container.js</a></li>
+            <li><a href="../components/c_facets/Css.js.html">components/c_facets/Css.js</a></li>
+            <li><a href="../components/c_facets/Data.js.html">components/c_facets/Data.js</a></li>
+            <li><a href="../components/c_facets/Dom.js.html">components/c_facets/Dom.js</a></li>
+            <li><a href="../components/c_facets/Drag.js.html">components/c_facets/Drag.js</a></li>
+            <li><a href="../components/c_facets/Drop.js.html">components/c_facets/Drop.js</a></li>
+            <li><a href="../components/c_facets/Events.js.html">components/c_facets/Events.js</a></li>
+            <li><a href="../components/c_facets/Frame.js.html">components/c_facets/Frame.js</a></li>
+            <li><a href="../components/c_facets/Item.js.html">components/c_facets/Item.js</a></li>
+            <li><a href="../components/c_facets/List.js.html">components/c_facets/List.js</a></li>
+            <li><a href="../components/c_facets/ModelFacet.js.html">components/c_facets/ModelFacet.js</a></li>
+            <li><a href="../components/c_facets/Options.js.html">components/c_facets/Options.js</a></li>
+            <li><a href="../components/c_facets/Template.js.html">components/c_facets/Template.js</a></li>
+            <li><a href="../components/c_facets/Transfer.js.html">components/c_facets/Transfer.js</a></li>
+            <li><a href="../components/c_facets/cf_registry.js.html">components/c_facets/cf_registry.js</a></li>
+            <li><a href="../components/c_info.js.html">components/c_info.js</a></li>
+            <li><a href="../components/c_registry.js.html">components/c_registry.js</a></li>
+            <li><a href="../components/c_utils.js.html">components/c_utils.js</a></li>
+            <li><a href="../components/classes/View.js.html">components/classes/View.js</a></li>
+            <li><a href="../components/msg_api/data.js.html">components/msg_api/data.js</a></li>
+            <li><a href="../components/msg_api/de_data.js.html">components/msg_api/de_data.js</a></li>
+            <li><a href="../components/msg_api/drop.js.html">components/msg_api/drop.js</a></li>
+            <li><a href="../components/msg_src/dom_events.js.html">components/msg_src/dom_events.js</a></li>
+            <li><a href="../components/msg_src/frame.js.html">components/msg_src/frame.js</a></li>
+            <li class="active"><a href="../components/scope.js.html">components/scope.js</a></li>
+            <li><a href="../config.js.html">config.js</a></li>
+            <li><a href="../loader.js.html">loader.js</a></li>
+            <li><a href="../milo.js.html">milo.js</a></li>
+            <li><a href="../registry.js.html">registry.js</a></li>
+            <li><a href="../services/de_constrs.js.html">services/de_constrs.js</a></li>
+            <li><a href="../services/dom_source.js.html">services/dom_source.js</a></li>
+            <li><a href="../services/mail/index.js.html">services/mail/index.js</a></li>
+            <li><a href="../services/mail/mail_api.js.html">services/mail/mail_api.js</a></li>
+            <li><a href="../services/mail/mail_source.js.html">services/mail/mail_source.js</a></li>
+            <li><a href="../services/window.js.html">services/window.js</a></li>
+            <li><a href="../use_components.js.html">use_components.js</a></li>
+            <li><a href="../use_facets.js.html">use_facets.js</a></li>
+            <li><a href="../util/component_name.js.html">util/component_name.js</a></li>
+            <li><a href="../util/create_component_class.js.html">util/create_component_class.js</a></li>
+            <li><a href="../util/create_facet_class.js.html">util/create_facet_class.js</a></li>
+            <li><a href="../util/deprecate.js.html">util/deprecate.js</a></li>
+            <li><a href="../util/dom.js.html">util/dom.js</a></li>
+            <li><a href="../util/dom_listeners.js.html">util/dom_listeners.js</a></li>
+            <li><a href="../util/domready.js.html">util/domready.js</a></li>
+            <li><a href="../util/dragdrop.js.html">util/dragdrop.js</a></li>
+            <li><a href="../util/error.js.html">util/error.js</a></li>
+            <li><a href="../util/fragment.js.html">util/fragment.js</a></li>
+            <li><a href="../util/index.js.html">util/index.js</a></li>
+            <li><a href="../util/json_parse.js.html">util/json_parse.js</a></li>
+            <li><a href="../util/request.js.html">util/request.js</a></li>
+            <li><a href="../util/selection/index.js.html">util/selection/index.js</a></li>
+            <li><a href="../util/storage/index.js.html">util/storage/index.js</a></li>
+            <li><a href="../util/storage/model.js.html">util/storage/model.js</a></li>
+            <li><a href="../util/storage/msg_src.js.html">util/storage/msg_src.js</a></li>
+            <li><a href="../util/unique_id.js.html">util/unique_id.js</a></li>
+            <li><a href="../util/websocket/index.js.html">util/websocket/index.js</a></li>
+            <li><a href="../util/websocket/msg_api.js.html">util/websocket/msg_api.js</a></li>
+            <li><a href="../util/websocket/msg_src.js.html">util/websocket/msg_src.js</a></li>
+          </ul>
+          <div class="scrollspy">
+            <ul class="nav nav-list bs-docs-sidenav affix-top">
+              <li><a href="#Scope"><i class="alert alert-info"></i><span>Scope</span></a>
+              </li>
+              <li><a href="#Scope$_add"><i class="alert alert-info"></i><span>Scope$_add</span></a>
+              </li>
+              <li><a href="#Scope$_safeAdd"><i class="alert alert-info"></i><span>Scope$_safeAdd</span></a>
+              </li>
+              <li><a href="#Scope$_copy"><i class="alert alert-info"></i><span>Scope$_copy</span></a>
+              </li>
+              <li><a href="#Scope$_move"><i class="alert alert-info"></i><span>Scope$_move</span></a>
+              </li>
+              <li><a href="#Scope$_merge"><i class="alert alert-info"></i><span>Scope$_merge</span></a>
+              </li>
+              <li><a href="#Scope$_each"><i class="alert alert-info"></i><span>Scope$_each</span></a>
+              </li>
+              <li><a href="#Scope$_filter"><i class="alert alert-info"></i><span>Scope$_filter</span></a>
+              </li>
+              <li><a href="#checkName"><i class="alert alert-info"></i><span>checkName</span></a>
+              </li>
+              <li><a href="#Scope$_length"><i class="alert alert-info"></i><span>Scope$_length</span></a>
+              </li>
+              <li><a href="#Scope$_any"><i class="alert alert-info"></i><span>Scope$_any</span></a>
+              </li>
+              <li><a href="#Scope$_remove"><i class="alert alert-info"></i><span>Scope$_remove</span></a>
+              </li>
+              <li><a href="#Scope$_clean"><i class="alert alert-info"></i><span>Scope$_clean</span></a>
+              </li>
+              <li><a href="#Scope$_has"><i class="alert alert-info"></i><span>Scope$_has</span></a>
+              </li>
+              <li><a href="#Scope$$rename"><i class="alert alert-info"></i><span>Scope$$rename</span></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="span9">
+          <section id="Scope">
+            <h1>Scope</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Scope()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>rootEl</td>
+                <td>Element</td>
+                <td><p>the root element of this scope</p></td>
+              </tr>
+              <tr>
+                <td>hostObject</td>
+                <td>Object</td>
+                <td><p>the host</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Scope</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Scope class.</p></div>
+          <pre><code class="language-javascript">function Scope(rootEl, hostObject) {
+    _.defineProperties(this, {
+        _rootEl: rootEl,
+        _hostObject: hostObject
+    }, _.WRIT); // writable
+}
+
+_.extendProto(Scope, {
+    _add: Scope$_add,
+    _safeAdd: Scope$_safeAdd,
+    _copy: Scope$_copy,
+    _each: Scope$_each,
+    _move: Scope$_move,
+    _merge: Scope$_merge,
+    _length: Scope$_length,
+    _any: Scope$_any,
+    _remove: Scope$_remove,
+    _clean: Scope$_clean,
+    _detachElement: Scope$_detachElement,
+    _has: Scope$_has,
+    _filter: Scope$_filter
+});
+
+
+_.extend(Scope, {
+    rename: Scope$$rename
+});
+
+
+module.exports = Scope;
+
+
+var allowedNamePattern = /^[A-Za-z][A-Za-z0-9\_\$]*$/;</code></pre>
+          <section id="Scope$_add">
+            <h1>Scope$_add</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Scope$_add()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>object</td>
+                <td>Component, ComponentInfo</td>
+                <td><p>component or component info to add to the scope</p></td>
+              </tr>
+              <tr>
+                <td>name</td>
+                <td>String</td>
+                <td><p>the name of the component to add</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Scope instance method.<br />Adds object to the scope, throwing if name is not unique</p></div>
+          <pre><code class="language-javascript">function Scope$_add(object, name) {
+    if (typeof name == 'string')
+        object.name = name;
+    else
+        name = object.name;
+    
+    if (this.hasOwnProperty(name))
+        throw new Error('duplicate object name: ' + name);
+
+    checkName(name);
+    __add.call(this, object, name);
+}</code></pre>
+          <section id="Scope$_safeAdd">
+            <h1>Scope$_safeAdd</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Scope$_safeAdd()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>object</td>
+                <td>Component, ComponentInfo</td>
+                <td><p>component or component info to add to the scope</p></td>
+              </tr>
+              <tr>
+                <td>name</td>
+                <td>String</td>
+                <td><p>the name of the component to add</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Scope instance method<br />Adds object to scope renaming it if name is not unique</p></div>
+          <pre><code class="language-javascript">function Scope$_safeAdd(object, name) {
+    if (typeof name == 'string')
+        object.name = name;
+    else
+        name = object.name;
+
+    var shouldRename = this.hasOwnProperty(name);
+    if (shouldRename)
+        logger.error('Scope: duplicate object name: ' + name);
+    else {
+        shouldRename = ! allowedNamePattern.test(name);
+        if (shouldRename)
+            logger.error('Scope: name should start from letter, this name is not allowed: ' + name);
+    }
+
+    if (shouldRename) {
+        name = componentName();
+        object.name = name;
+    }
+
+    __add.call(this, object, name);
+}
+
+
+function __add(object, name) {
+    this[name] = object;
+    object.scope = this;
+
+    if (typeof object.postMessage === 'function')
+        object.postMessage('addedtoscope'); 
+}</code></pre>
+          <section id="Scope$_copy">
+            <h1>Scope$_copy</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Scope$_copy()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>aScope</td>
+                <td>Scope</td>
+                <td><p>the scope to copy</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Instance method.<br />copies all objects from one scope to another,<br />throwing if some object is not unique</p></div>
+          <pre><code class="language-javascript">function Scope$_copy(aScope) {
+    check(aScope, Scope);
+
+    aScope._each(Scope$_add, this);
+}</code></pre>
+          <section id="Scope$_move">
+            <h1>Scope$_move</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Scope$_move()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>component</td>
+                <td>Component</td>
+                <td><p>the component to be moved</p></td>
+              </tr>
+              <tr>
+                <td>otherScope</td>
+                <td>Scope</td>
+                <td><p>the scope to copy the component to</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Instance method.<br />Moves a component from this scope to another scope.</p></div>
+          <pre><code class="language-javascript">function Scope$_move(component, otherScope) {
+    otherScope._add(component);
+    this._remove(component.name);
+    component.scope = otherScope;
+}</code></pre>
+          <section id="Scope$_merge">
+            <h1>Scope$_merge</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Scope$_merge()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>scope</td>
+                <td>Scope</td>
+                <td><p>the scope to absorb</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Instance method.<br />Merges one scope into this scope</p></div>
+          <pre><code class="language-javascript">function Scope$_merge(scope) {
+    scope._each(function (comp) {
+        this._add(comp, comp.name);
+        scope._remove(comp.name);
+    }, this);
+}</code></pre>
+          <section id="Scope$_each">
+            <h1>Scope$_each</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Scope$_each()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>callback</td>
+                <td>Function</td>
+                <td><p>the function to execute for each component</p></td>
+              </tr>
+              <tr>
+                <td>thisArg</td>
+                <td>Object</td>
+                <td><p>the context</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Instance method.<br />Enumerates each component in the scope</p></div>
+          <pre><code class="language-javascript">function Scope$_each(callback, thisArg) {
+    _.eachKey(this, callback, thisArg || this, true); // enumerates enumerable properties only
+}</code></pre>
+          <section id="Scope$_filter">
+            <h1>Scope$_filter</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Scope$_filter()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>callback</td>
+                <td>Function</td>
+                <td><p>the function to execute for each component</p></td>
+              </tr>
+              <tr>
+                <td>thisArg</td>
+                <td>Object</td>
+                <td><p>the context</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Array</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Instance method.<br />Returns a filtered list of components based on a callback</p></div>
+          <pre><code class="language-javascript">function Scope$_filter(callback, thisArg) {
+    return _.filterKeys(this, callback, thisArg || this, true);
+}</code></pre>
+          <section id="checkName">
+            <h1>checkName</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>checkName()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>callback</td>
+                <td>Function</td>
+                <td><p>the function to execute for each component</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Checks the validity of a name.</p></div>
+          <pre><code class="language-javascript">function checkName(name) {
+    if (! allowedNamePattern.test(name))
+        throw new Error('name should start from letter, this name is not allowed: ' + name);
+}</code></pre>
+          <section id="Scope$_length">
+            <h1>Scope$_length</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Scope$_length()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Instance method.<br />Returns the number of objects in the scope</p></div>
+          <pre><code class="language-javascript">function Scope$_length() {
+    return Object.keys(this).length;
+}</code></pre>
+          <section id="Scope$_any">
+            <h1>Scope$_any</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Scope$_any()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Instance method.<br />Returns a component from the scope. It may look like it returns the first component<br />but in reality given that scopes are hashes, there is no such thing.</p></div>
+          <pre><code class="language-javascript">function Scope$_any() {
+    var key = Object.keys(this)[0];
+    return key &amp;&amp; this[key];
+}</code></pre>
+          <section id="Scope$_remove">
+            <h1>Scope$_remove</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Scope$_remove()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>name</td>
+                <td>String</td>
+                <td><p>the name of the component to remove</p></td>
+              </tr>
+              <tr>
+                <td>quiet</td>
+                <td>Boolean</td>
+                <td><p>optional true to suppress the warning message if the component is not in scope</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Instance method.<br />Removes a component from the scope by it&#39;s name.</p></div>
+          <pre><code class="language-javascript">function Scope$_remove(name, quiet) {
+    if (! (name in this)) {
+        if (!quiet) logger.warn('removing object that is not in scope');
+        return;
+    }
+
+    var object = this[name];
+
+    delete this[name];
+
+    if (typeof object.postMessage === 'function')
+        object.postMessage('removedfromscope');
+}</code></pre>
+          <section id="Scope$_clean">
+            <h1>Scope$_clean</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Scope$_clean()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Instance method.<br />Removes all components from the scope.</p></div>
+          <pre><code class="language-javascript">function Scope$_clean() {
+    this._each(function(object, name) {
+        delete this[name].scope;
+        delete this[name];
+    }, this);
+}
+
+function Scope$_detachElement() {
+    this._rootEl = null;
+}</code></pre>
+          <section id="Scope$_has">
+            <h1>Scope$_has</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Scope$_has()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>object</td>
+                <td>Object</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Boolean</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Checks if scope has object by object name</p></div>
+          <pre><code class="language-javascript">function Scope$_has(object) {
+    return this.hasOwnProperty(object.name);
+}</code></pre>
+          <section id="Scope$$rename">
+            <h1>Scope$$rename</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Scope$$rename()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>obj</td>
+                <td>Object</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>name</td>
+                <td>String</td>
+                <td><p>new name</p></td>
+              </tr>
+              <tr>
+                <td>renameInScope</td>
+                <td>Boolean</td>
+                <td><p>true by default</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Change object name, renaming it in scope unless renameInScope is false</p></div>
+          <pre><code class="language-javascript">function Scope$$rename(obj, name, renameInScope) {
+    if (obj.scope &amp;&amp; renameInScope !== false) {
+        obj.scope._remove(obj.name);
+        obj.scope._add(obj, name);
+    } else
+        obj.name = name;
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="container">
+        <p>Documentation generated with <a href="https://github.com/mr-doc/mr-doc">Mr. Doc </a> created by <a href="https://twitter.com/FGRibreau" data-show-count="false" class="twitter-follow-button">Francois-Guillaume Ribreau </a></p>
+        <p>Mr. Doc is sponsored by <a href="http://bringr.net/?btt" title="Outil d'analyse des réseaux sociaux" class="bringr">Bringr </a> and <a href="https://redsmin.com/?btt" title="Full Redis GUI" class="redsmin">Redsmin</a></p>
+        <p>Theme borrowed from Twitter Bootstrap</p>
+      </div>
+    </footer>
+    <script src="../js/twitter-widget.min.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/bootstrap-transition.min.js"></script>
+    <script src="../js/bootstrap-scrollspy.min.js"></script>
+    <script src="../js/bootstrap-dropdown.min.js"></script>
+    <script src="../js/bootstrap-collapse.min.js"></script>
+    <script src="../js/bootstrap-affix.min.js"></script>
+    <script src="../js/prism.min.js"></script>
+    <script src="../js/index.min.js"></script>
+  </body>
+</html>

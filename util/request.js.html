@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" charset="utf-8">
+    <title>milo</title>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/cayman.min.css">
+    <link rel="stylesheet" href="../css/prism.min.css">
+    <link rel="stylesheet" href="../css/index.min.css">
+    <link rel="stylesheet" href="../css/docs.min.css">
+    <link rel="stylesheet" href="../css/bootstrap-responsive.min.css">
+  </head>
+  <body data-spy="scroll" data-target=".scrollspy">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container"><a class="brand">Mr. Doc</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav pull-right sponsored"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <header id="overview" class="jumbotron subhead">
+      <div class="container">
+        <h1>milo</h1>
+        <p class="lead"></p>
+      </div>
+    </header>
+    <div class="container">
+      <div class="row">
+        <div class="span3 bs-docs-sidebar">
+          <ul class="nav nav-list bs-docs-sidenav affix-top">
+            <li><a href="../index.html">Main</a></li>
+            <li><a href="../abstract/facet.js.html">abstract/facet.js</a></li>
+            <li><a href="../abstract/faceted_object.js.html">abstract/faceted_object.js</a></li>
+            <li><a href="../abstract/registry.js.html">abstract/registry.js</a></li>
+            <li><a href="../attributes/a_bind.js.html">attributes/a_bind.js</a></li>
+            <li><a href="../attributes/a_class.js.html">attributes/a_class.js</a></li>
+            <li><a href="../attributes/a_load.js.html">attributes/a_load.js</a></li>
+            <li><a href="../attributes/index.js.html">attributes/index.js</a></li>
+            <li><a href="../binder.js.html">binder.js</a></li>
+            <li><a href="../classes.js.html">classes.js</a></li>
+            <li><a href="../command/actions_history.js.html">command/actions_history.js</a></li>
+            <li><a href="../command/cmd_registry.js.html">command/cmd_registry.js</a></li>
+            <li><a href="../command/index.js.html">command/index.js</a></li>
+            <li><a href="../command/transaction.js.html">command/transaction.js</a></li>
+            <li><a href="../command/transaction_history.js.html">command/transaction_history.js</a></li>
+            <li><a href="../components/ComponentTemplate.js.html">components/ComponentTemplate.js</a></li>
+            <li><a href="../components/c_class.js.html">components/c_class.js</a></li>
+            <li><a href="../components/c_facet.js.html">components/c_facet.js</a></li>
+            <li><a href="../components/c_facets/Container.js.html">components/c_facets/Container.js</a></li>
+            <li><a href="../components/c_facets/Css.js.html">components/c_facets/Css.js</a></li>
+            <li><a href="../components/c_facets/Data.js.html">components/c_facets/Data.js</a></li>
+            <li><a href="../components/c_facets/Dom.js.html">components/c_facets/Dom.js</a></li>
+            <li><a href="../components/c_facets/Drag.js.html">components/c_facets/Drag.js</a></li>
+            <li><a href="../components/c_facets/Drop.js.html">components/c_facets/Drop.js</a></li>
+            <li><a href="../components/c_facets/Events.js.html">components/c_facets/Events.js</a></li>
+            <li><a href="../components/c_facets/Frame.js.html">components/c_facets/Frame.js</a></li>
+            <li><a href="../components/c_facets/Item.js.html">components/c_facets/Item.js</a></li>
+            <li><a href="../components/c_facets/List.js.html">components/c_facets/List.js</a></li>
+            <li><a href="../components/c_facets/ModelFacet.js.html">components/c_facets/ModelFacet.js</a></li>
+            <li><a href="../components/c_facets/Options.js.html">components/c_facets/Options.js</a></li>
+            <li><a href="../components/c_facets/Template.js.html">components/c_facets/Template.js</a></li>
+            <li><a href="../components/c_facets/Transfer.js.html">components/c_facets/Transfer.js</a></li>
+            <li><a href="../components/c_facets/cf_registry.js.html">components/c_facets/cf_registry.js</a></li>
+            <li><a href="../components/c_info.js.html">components/c_info.js</a></li>
+            <li><a href="../components/c_registry.js.html">components/c_registry.js</a></li>
+            <li><a href="../components/c_utils.js.html">components/c_utils.js</a></li>
+            <li><a href="../components/classes/View.js.html">components/classes/View.js</a></li>
+            <li><a href="../components/msg_api/data.js.html">components/msg_api/data.js</a></li>
+            <li><a href="../components/msg_api/de_data.js.html">components/msg_api/de_data.js</a></li>
+            <li><a href="../components/msg_api/drop.js.html">components/msg_api/drop.js</a></li>
+            <li><a href="../components/msg_src/dom_events.js.html">components/msg_src/dom_events.js</a></li>
+            <li><a href="../components/msg_src/frame.js.html">components/msg_src/frame.js</a></li>
+            <li><a href="../components/scope.js.html">components/scope.js</a></li>
+            <li><a href="../config.js.html">config.js</a></li>
+            <li><a href="../loader.js.html">loader.js</a></li>
+            <li><a href="../milo.js.html">milo.js</a></li>
+            <li><a href="../registry.js.html">registry.js</a></li>
+            <li><a href="../services/de_constrs.js.html">services/de_constrs.js</a></li>
+            <li><a href="../services/dom_source.js.html">services/dom_source.js</a></li>
+            <li><a href="../services/mail/index.js.html">services/mail/index.js</a></li>
+            <li><a href="../services/mail/mail_api.js.html">services/mail/mail_api.js</a></li>
+            <li><a href="../services/mail/mail_source.js.html">services/mail/mail_source.js</a></li>
+            <li><a href="../services/window.js.html">services/window.js</a></li>
+            <li><a href="../use_components.js.html">use_components.js</a></li>
+            <li><a href="../use_facets.js.html">use_facets.js</a></li>
+            <li><a href="../util/component_name.js.html">util/component_name.js</a></li>
+            <li><a href="../util/create_component_class.js.html">util/create_component_class.js</a></li>
+            <li><a href="../util/create_facet_class.js.html">util/create_facet_class.js</a></li>
+            <li><a href="../util/deprecate.js.html">util/deprecate.js</a></li>
+            <li><a href="../util/dom.js.html">util/dom.js</a></li>
+            <li><a href="../util/dom_listeners.js.html">util/dom_listeners.js</a></li>
+            <li><a href="../util/domready.js.html">util/domready.js</a></li>
+            <li><a href="../util/dragdrop.js.html">util/dragdrop.js</a></li>
+            <li><a href="../util/error.js.html">util/error.js</a></li>
+            <li><a href="../util/fragment.js.html">util/fragment.js</a></li>
+            <li><a href="../util/index.js.html">util/index.js</a></li>
+            <li><a href="../util/json_parse.js.html">util/json_parse.js</a></li>
+            <li class="active"><a href="../util/request.js.html">util/request.js</a></li>
+            <li><a href="../util/selection/index.js.html">util/selection/index.js</a></li>
+            <li><a href="../util/storage/index.js.html">util/storage/index.js</a></li>
+            <li><a href="../util/storage/model.js.html">util/storage/model.js</a></li>
+            <li><a href="../util/storage/msg_src.js.html">util/storage/msg_src.js</a></li>
+            <li><a href="../util/unique_id.js.html">util/unique_id.js</a></li>
+            <li><a href="../util/websocket/index.js.html">util/websocket/index.js</a></li>
+            <li><a href="../util/websocket/msg_api.js.html">util/websocket/msg_api.js</a></li>
+            <li><a href="../util/websocket/msg_src.js.html">util/websocket/msg_src.js</a></li>
+          </ul>
+          <div class="scrollspy">
+            <ul class="nav nav-list bs-docs-sidenav affix-top">
+              <li><a href="#createPromiseOverride"><i class="alert alert-info"></i><span>createPromiseOverride</span></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="span9">
+          <section id="createPromiseOverride">
+            <h1>createPromiseOverride</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>createPromiseOverride()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Creates a function which is used to override standard promise behaviour and allow promise instances<br />created to maintain a reference to the request object no matter if .then() or .catch() is called.</p></div>
+          <pre><code class="language-javascript">function createPromiseOverride(functionName) {
+    return function() {
+        var promise = Promise.prototype[functionName].apply(this, arguments);
+        keepRequestObject(promise, this._request);
+        return promise;
+    };
+}
+
+
+function request(url, opts, callback) {
+    opts.url = url;
+    opts.contentType = opts.contentType || 'application/json;charset=UTF-8';
+
+    if (_messenger) request.postMessageSync('request', { options: opts });
+
+    var req = new XMLHttpRequest();
+    req.open(opts.method, opts.url, true);
+    req.setRequestHeader('Content-Type', opts.contentType);
+    setRequestHeaders(req, opts.headers);
+
+    req.timeout = opts.timeout || config.request.defaults.timeout;
+    req.onloadend = req.ontimeout = req.onabort = onReady;
+
+    var xPromise = _createXPromise(req);
+
+    req.send(JSON.stringify(opts.data));
+    req[config.request.optionsKey] = opts;
+
+    if (opts.trackCompletion !== false) _pendingRequests.push(req);
+
+    return xPromise.promise;
+
+    function onReady(e) {
+        _onReady(req, callback, xPromise, e.type);
+    }
+}
+
+
+function _createXPromise(request) {
+    var resolvePromise, rejectPromise;
+    var promise = new Promise(function(resolve, reject) {
+        resolvePromise = resolve;
+        rejectPromise = reject;
+    });
+
+    keepRequestObject(promise, request);
+    promise.catch(_.noop); // Sometimes errors are handled within callbacks, so uncaught promise error message should be suppressed.
+
+    return {
+        promise: promise,
+        resolve: resolvePromise,
+        reject: rejectPromise
+    };
+}
+
+// Ensures that the promise (and any promises created when calling .then/.catch) has a reference to the original request object
+function keepRequestObject(promise, request) {
+    promise._request = request;
+    promise.then = promiseThen;
+    promise.catch = promiseCatch;
+
+    return promise;
+}
+
+
+function setRequestHeaders(req, headers) {
+    if (headers)
+        _.eachKey(headers, function(value, key) {
+            req.setRequestHeader(key, value);
+        });
+}
+
+function _onReady(req, callback, xPromise, eventType) {
+    if (req.readyState != 4) return;
+    if (req[config.request.completedKey]) return;
+
+    _.spliceItem(_pendingRequests, req);
+
+    var error;
+    try {
+        if ( req.status &gt;= 200 &amp;&amp; req.status &lt; 400 ) {
+            try {
+                postMessage('success');
+                callback &amp;&amp; callback(null, req.responseText, req);
+            } catch(e) { error = e; }
+            xPromise.resolve(req.responseText);
+        }
+        else {
+            var errorReason = req.status || eventType;
+            try {
+                postMessage('error');
+                postMessage('error' + errorReason);
+                callback &amp;&amp; callback(errorReason, req.responseText, req);
+            } catch(e) { error = e; }
+            xPromise.reject({ reason: errorReason, response: req.responseText });
+        }
+    } catch(e) {
+        error = error || e;
+    } finally {
+        req[config.request.completedKey] = true;
+    }
+
+    // not removing subscription creates memory leak, deleting property would not remove subscription
+    req.onloadend = req.ontimeout = req.onabort = undefined;
+
+    if (!_pendingRequests.length)
+        postMessage('requestscompleted');
+
+    if (error) {
+        var errObj = new Error('Exception: ' + error);
+        logger.error(error.stack);
+        throw errObj;
+    }
+
+    function postMessage(msg) {
+        if (_messenger) request.postMessage(msg,
+            { status: status, response: req.responseText });
+    }
+}
+
+
+_.extend(request, {
+    get: request$get,
+    post: request$post,
+    json: request$json,
+    jsonp: request$jsonp,
+    file: request$file,
+    useMessenger: request$useMessenger,
+    destroy: request$destroy,
+    whenRequestsCompleted: whenRequestsCompleted
+});
+
+
+var _messenger;
+
+
+function request$useMessenger() {
+    _messenger = new Messenger(request, ['on', 'once', 'onSync', 'off', 'onMessages', 'offMessages', 'postMessage', 'postMessageSync']);
+}
+
+
+function request$get(url, callback) {
+    return request(url, { method: 'GET' }, callback);
+}
+
+
+function request$post(url, data, callback) {
+    return request(url, { method: 'POST', data: data }, callback);
+}
+
+
+function request$json(url, callback) {
+    var promise = request(url, { method: 'GET' });
+
+    var jsonPromise = promise.then(JSON.parse);
+
+    if (callback)
+        jsonPromise
+        .then(function(data) {
+            callback(null, data);
+        }, function(errData) {
+            callback(errData.reason, errData.response);
+        });
+
+    return jsonPromise;
+}
+
+
+var jsonpOptions = { method: 'GET', jsonp: true };
+function request$jsonp(url, callback) {
+    var script = document.createElement('script'),
+        xPromise = _createXPromise(script),
+        head = window.document.head,
+        uniqueCallback = config.request.jsonpCallbackPrefix + uniqueId();
+
+    var opts = _.extend({ url: url }, jsonpOptions);
+    if (_messenger) request.postMessageSync('request', { options: opts });
+
+    if (! _.isEqual(_.omitKeys(opts, 'url'), jsonpOptions))
+        logger.warn('Ignored not allowed request options change in JSONP request - only URL can be changed');
+
+    var timeout = setTimeout(function() {
+        var err = new Error('No JSONP response or no callback in response');
+        _onResult(err);
+    }, config.request.jsonpTimeout);
+
+    window[uniqueCallback] = _.partial(_onResult, null);
+
+    _pendingRequests.push(window[uniqueCallback]);
+
+    script.type = 'text/javascript';
+    script.src = opts.url + (opts.url.indexOf('?') == -1 ? '?' : '&amp;') + 'callback=' + uniqueCallback;
+
+    head.appendChild(script);
+
+    return xPromise.promise;
+
+
+    function _onResult(err, result) {
+        _.spliceItem(_pendingRequests, window[uniqueCallback]);
+        var error;
+        try {
+            postMessage(err ? 'error' : 'success', err, result);
+            if (err) {
+                logger.error('No JSONP response or timeout');
+                postMessage('errorjsonptimeout', err);
+            }
+            callback &amp;&amp; callback(err, result);
+        }
+        catch(e) { error = e; }
+        if (err) xPromise.reject(err);
+        else xPromise.resolve(result);
+
+        cleanUp();
+        if (!_pendingRequests.length)
+            postMessage('requestscompleted');
+
+        if (error) throw error;
+    }
+
+
+    function cleanUp() {
+        clearTimeout(timeout);
+        head.removeChild(script);
+        delete window[uniqueCallback];
+    }
+
+
+    function postMessage(msg, status, result) {
+        if (_messenger) request.postMessage(msg,
+            { status: status, response: result });
+    }
+}
+
+
+function request$file(opts, fileData, callback, progress) {
+    if (typeof opts == 'string')
+        opts = { method: 'POST', url: opts };
+
+    opts.method = opts.method || 'POST';
+    opts.file = true;
+
+    if (_messenger) request.postMessageSync('request', { options: opts });
+
+    var req = new XMLHttpRequest();
+    if (progress) req.upload.onprogress = progress;
+
+    req.open(opts.method, opts.url, true);
+    setRequestHeaders(req, opts.headers);
+
+    req.timeout = opts.timeout || config.request.defaults.timeout;
+    req.onloadend = req.ontimeout = req.onabort = onReady;
+
+    var xPromise = _createXPromise(req);
+
+    if (opts.binary)
+        req.send(fileData);
+    else {
+        var formData = new FormData();
+        formData.append('file', fileData);
+        req.send(formData);
+    }
+
+    req[config.request.optionsKey] = opts;
+
+    if (opts.trackCompletion !== false) _pendingRequests.push(req);
+
+    return xPromise.promise;
+
+    function onReady(e) {
+        if (progress) req.upload.onprogress = undefined;
+        _onReady(req, callback, xPromise, e.type);
+    }
+}
+
+
+function request$destroy() {
+    if (_messenger) _messenger.destroy();
+    request._destroyed = true;
+}
+
+
+function whenRequestsCompleted(callback, timeout) {
+    callback = _.once(callback);
+    if (timeout)
+        _.delay(callback, timeout, 'timeout');
+
+    if (_pendingRequests.length)
+        _messenger.once('requestscompleted', callback);
+    else
+        _.defer(callback);
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="container">
+        <p>Documentation generated with <a href="https://github.com/mr-doc/mr-doc">Mr. Doc </a> created by <a href="https://twitter.com/FGRibreau" data-show-count="false" class="twitter-follow-button">Francois-Guillaume Ribreau </a></p>
+        <p>Mr. Doc is sponsored by <a href="http://bringr.net/?btt" title="Outil d'analyse des réseaux sociaux" class="bringr">Bringr </a> and <a href="https://redsmin.com/?btt" title="Full Redis GUI" class="redsmin">Redsmin</a></p>
+        <p>Theme borrowed from Twitter Bootstrap</p>
+      </div>
+    </footer>
+    <script src="../js/twitter-widget.min.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/bootstrap-transition.min.js"></script>
+    <script src="../js/bootstrap-scrollspy.min.js"></script>
+    <script src="../js/bootstrap-dropdown.min.js"></script>
+    <script src="../js/bootstrap-collapse.min.js"></script>
+    <script src="../js/bootstrap-affix.min.js"></script>
+    <script src="../js/prism.min.js"></script>
+    <script src="../js/index.min.js"></script>
+  </body>
+</html>

@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" charset="utf-8">
+    <title>milo</title>
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../css/cayman.min.css">
+    <link rel="stylesheet" href="../../css/prism.min.css">
+    <link rel="stylesheet" href="../../css/index.min.css">
+    <link rel="stylesheet" href="../../css/docs.min.css">
+    <link rel="stylesheet" href="../../css/bootstrap-responsive.min.css">
+  </head>
+  <body data-spy="scroll" data-target=".scrollspy">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container"><a class="brand">Mr. Doc</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav pull-right sponsored"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <header id="overview" class="jumbotron subhead">
+      <div class="container">
+        <h1>milo</h1>
+        <p class="lead"></p>
+      </div>
+    </header>
+    <div class="container">
+      <div class="row">
+        <div class="span3 bs-docs-sidebar">
+          <ul class="nav nav-list bs-docs-sidenav affix-top">
+            <li><a href="../../index.html">Main</a></li>
+            <li><a href="../../abstract/facet.js.html">abstract/facet.js</a></li>
+            <li><a href="../../abstract/faceted_object.js.html">abstract/faceted_object.js</a></li>
+            <li><a href="../../abstract/registry.js.html">abstract/registry.js</a></li>
+            <li><a href="../../attributes/a_bind.js.html">attributes/a_bind.js</a></li>
+            <li><a href="../../attributes/a_class.js.html">attributes/a_class.js</a></li>
+            <li><a href="../../attributes/a_load.js.html">attributes/a_load.js</a></li>
+            <li><a href="../../attributes/index.js.html">attributes/index.js</a></li>
+            <li><a href="../../binder.js.html">binder.js</a></li>
+            <li><a href="../../classes.js.html">classes.js</a></li>
+            <li><a href="../../command/actions_history.js.html">command/actions_history.js</a></li>
+            <li><a href="../../command/cmd_registry.js.html">command/cmd_registry.js</a></li>
+            <li><a href="../../command/index.js.html">command/index.js</a></li>
+            <li><a href="../../command/transaction.js.html">command/transaction.js</a></li>
+            <li><a href="../../command/transaction_history.js.html">command/transaction_history.js</a></li>
+            <li><a href="../../components/ComponentTemplate.js.html">components/ComponentTemplate.js</a></li>
+            <li><a href="../../components/c_class.js.html">components/c_class.js</a></li>
+            <li><a href="../../components/c_facet.js.html">components/c_facet.js</a></li>
+            <li><a href="../../components/c_facets/Container.js.html">components/c_facets/Container.js</a></li>
+            <li><a href="../../components/c_facets/Css.js.html">components/c_facets/Css.js</a></li>
+            <li><a href="../../components/c_facets/Data.js.html">components/c_facets/Data.js</a></li>
+            <li><a href="../../components/c_facets/Dom.js.html">components/c_facets/Dom.js</a></li>
+            <li><a href="../../components/c_facets/Drag.js.html">components/c_facets/Drag.js</a></li>
+            <li><a href="../../components/c_facets/Drop.js.html">components/c_facets/Drop.js</a></li>
+            <li><a href="../../components/c_facets/Events.js.html">components/c_facets/Events.js</a></li>
+            <li><a href="../../components/c_facets/Frame.js.html">components/c_facets/Frame.js</a></li>
+            <li><a href="../../components/c_facets/Item.js.html">components/c_facets/Item.js</a></li>
+            <li><a href="../../components/c_facets/List.js.html">components/c_facets/List.js</a></li>
+            <li><a href="../../components/c_facets/ModelFacet.js.html">components/c_facets/ModelFacet.js</a></li>
+            <li><a href="../../components/c_facets/Options.js.html">components/c_facets/Options.js</a></li>
+            <li><a href="../../components/c_facets/Template.js.html">components/c_facets/Template.js</a></li>
+            <li><a href="../../components/c_facets/Transfer.js.html">components/c_facets/Transfer.js</a></li>
+            <li><a href="../../components/c_facets/cf_registry.js.html">components/c_facets/cf_registry.js</a></li>
+            <li><a href="../../components/c_info.js.html">components/c_info.js</a></li>
+            <li><a href="../../components/c_registry.js.html">components/c_registry.js</a></li>
+            <li><a href="../../components/c_utils.js.html">components/c_utils.js</a></li>
+            <li><a href="../../components/classes/View.js.html">components/classes/View.js</a></li>
+            <li><a href="../../components/msg_api/data.js.html">components/msg_api/data.js</a></li>
+            <li><a href="../../components/msg_api/de_data.js.html">components/msg_api/de_data.js</a></li>
+            <li><a href="../../components/msg_api/drop.js.html">components/msg_api/drop.js</a></li>
+            <li><a href="../../components/msg_src/dom_events.js.html">components/msg_src/dom_events.js</a></li>
+            <li><a href="../../components/msg_src/frame.js.html">components/msg_src/frame.js</a></li>
+            <li><a href="../../components/scope.js.html">components/scope.js</a></li>
+            <li><a href="../../config.js.html">config.js</a></li>
+            <li><a href="../../loader.js.html">loader.js</a></li>
+            <li><a href="../../milo.js.html">milo.js</a></li>
+            <li><a href="../../registry.js.html">registry.js</a></li>
+            <li><a href="../../services/de_constrs.js.html">services/de_constrs.js</a></li>
+            <li><a href="../../services/dom_source.js.html">services/dom_source.js</a></li>
+            <li><a href="../../services/mail/index.js.html">services/mail/index.js</a></li>
+            <li><a href="../../services/mail/mail_api.js.html">services/mail/mail_api.js</a></li>
+            <li><a href="../../services/mail/mail_source.js.html">services/mail/mail_source.js</a></li>
+            <li><a href="../../services/window.js.html">services/window.js</a></li>
+            <li><a href="../../use_components.js.html">use_components.js</a></li>
+            <li><a href="../../use_facets.js.html">use_facets.js</a></li>
+            <li><a href="../../util/component_name.js.html">util/component_name.js</a></li>
+            <li><a href="../../util/create_component_class.js.html">util/create_component_class.js</a></li>
+            <li><a href="../../util/create_facet_class.js.html">util/create_facet_class.js</a></li>
+            <li><a href="../../util/deprecate.js.html">util/deprecate.js</a></li>
+            <li><a href="../../util/dom.js.html">util/dom.js</a></li>
+            <li><a href="../../util/dom_listeners.js.html">util/dom_listeners.js</a></li>
+            <li><a href="../../util/domready.js.html">util/domready.js</a></li>
+            <li><a href="../../util/dragdrop.js.html">util/dragdrop.js</a></li>
+            <li><a href="../../util/error.js.html">util/error.js</a></li>
+            <li><a href="../../util/fragment.js.html">util/fragment.js</a></li>
+            <li><a href="../../util/index.js.html">util/index.js</a></li>
+            <li><a href="../../util/json_parse.js.html">util/json_parse.js</a></li>
+            <li><a href="../../util/request.js.html">util/request.js</a></li>
+            <li><a href="../../util/selection/index.js.html">util/selection/index.js</a></li>
+            <li class="active"><a href="../../util/storage/index.js.html">util/storage/index.js</a></li>
+            <li><a href="../../util/storage/model.js.html">util/storage/model.js</a></li>
+            <li><a href="../../util/storage/msg_src.js.html">util/storage/msg_src.js</a></li>
+            <li><a href="../../util/unique_id.js.html">util/unique_id.js</a></li>
+            <li><a href="../../util/websocket/index.js.html">util/websocket/index.js</a></li>
+            <li><a href="../../util/websocket/msg_api.js.html">util/websocket/msg_api.js</a></li>
+            <li><a href="../../util/websocket/msg_src.js.html">util/websocket/msg_src.js</a></li>
+          </ul>
+          <div class="scrollspy">
+            <ul class="nav nav-list bs-docs-sidenav affix-top">
+              <li><a href="#DOMStorage"><i class="alert alert-info"></i><span>DOMStorage</span></a>
+              </li>
+              <li><a href="#DOMStorage$set"><i class="alert alert-info"></i><span>DOMStorage$set</span></a>
+              </li>
+              <li><a href="#DOMStorage$get"><i class="alert alert-info"></i><span>DOMStorage$get</span></a>
+              </li>
+              <li><a href="#DOMStorage$remove"><i class="alert alert-info"></i><span>DOMStorage$remove</span></a>
+              </li>
+              <li><a href="#DOMStorage$hasItem"><i class="alert alert-info"></i><span>DOMStorage$hasItem</span></a>
+              </li>
+              <li><a href="#DOMStorage$getItem"><i class="alert alert-info"></i><span>DOMStorage$getItem</span></a>
+              </li>
+              <li><a href="#DOMStorage$setItem"><i class="alert alert-info"></i><span>DOMStorage$setItem</span></a>
+              </li>
+              <li><a href="#DOMStorage$removeItem"><i class="alert alert-info"></i><span>DOMStorage$removeItem</span></a>
+              </li>
+              <li><a href="#DOMStorage$getAllKeys"><i class="alert alert-info"></i><span>DOMStorage$getAllKeys</span></a>
+              </li>
+              <li><a href="#DOMStorage$getAllItems"><i class="alert alert-info"></i><span>DOMStorage$getAllItems</span></a>
+              </li>
+              <li><a href="#DOMStorage$_storageKey"><i class="alert alert-info"></i><span>DOMStorage$_storageKey</span></a>
+              </li>
+              <li><a href="#DOMStorage$_domStorageKey"><i class="alert alert-info"></i><span>DOMStorage$_domStorageKey</span></a>
+              </li>
+              <li><a href="#_getKeyDataType"><i class="alert alert-info"></i><span>_getKeyDataType</span></a>
+              </li>
+              <li><a href="#_setKeyDataType"><i class="alert alert-info"></i><span>_setKeyDataType</span></a>
+              </li>
+              <li><a href="#_removeKeyDataType"><i class="alert alert-info"></i><span>_removeKeyDataType</span></a>
+              </li>
+              <li><a href="#_dataTypeKey"><i class="alert alert-info"></i><span>_dataTypeKey</span></a>
+              </li>
+              <li><a href="#_getValueType"><i class="alert alert-info"></i><span>_getValueType</span></a>
+              </li>
+              <li><a href="#_serializeData"><i class="alert alert-info"></i><span>_serializeData</span></a>
+              </li>
+              <li><a href="#_parseData"><i class="alert alert-info"></i><span>_parseData</span></a>
+              </li>
+              <li><a href="#DOMStorage$$registerDataType"><i class="alert alert-info"></i><span>DOMStorage$$registerDataType</span></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="span9">
+          <section id="DOMStorage">
+            <h1>DOMStorage</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>DOMStorage()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>keyPrefix</td>
+                <td>String</td>
+                <td><p>prefix that will be added to all keys followed by <code>milo.config.domStorage.prefixSeparator</code> (&quot;/&quot; by default).</p></td>
+              </tr>
+              <tr>
+                <td>sessionOnly</td>
+                <td>Boolean</td>
+                <td><p>true to use sessionStorage. localStorage will be used by default.</p></td>
+              </tr>
+              <tr>
+                <td>win</td>
+                <td>Window</td>
+                <td><p>window to work in</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>DOMStorage class to simplify storage and retrieval of multiple items with types preservation to DOM storage (localStorage and sessionStorage).<br />Types will be stored in the key created from value keys with appended <code>milo.config.domStorage.typeSuffix</code></p></div>
+          <pre><code class="language-javascript">function DOMStorage(keyPrefix, sessionOnly, win) {
+    if (typeof window == 'undefined') return;
+    win = win || window;
+
+    keyPrefix = config.domStorage.root +
+                (keyPrefix
+                    ? keyPrefix + config.domStorage.prefixSeparator
+                    : '');
+
+    _.defineProperties(this, {
+        keyPrefix: keyPrefix,
+        sessionOnly: !! sessionOnly,
+        window: win,
+        _storage: sessionOnly ? win.sessionStorage : win.localStorage,
+        _typeSuffix: config.domStorage.typeSuffix,
+        _keys: {}
+    }, _.WRIT);
+}
+
+
+_.extendProto(DOMStorage, {
+    get: DOMStorage$get,
+    set: DOMStorage$set,
+    remove: DOMStorage$remove,
+    hasItem: DOMStorage$hasItem,
+    getItem: DOMStorage$getItem,
+    setItem: DOMStorage$setItem,
+    removeItem: DOMStorage$removeItem,
+    _storageKey: DOMStorage$_storageKey,
+    _domStorageKey: DOMStorage$_domStorageKey,
+    getAllKeys: DOMStorage$getAllKeys,
+    getAllItems: DOMStorage$getAllItems,
+    createMessenger: DOMStorage$createMessenger,
+    destroy: DOMStorage$destroy
+});</code></pre>
+          <div class="description"><p>Expose Mesenger and MessageSource methods on DOMStorage</p></div>
+          <pre><code class="language-javascript">Messenger.useWith(DOMStorage, '_messenger', Messenger.defaultMethods);
+StorageMessageSource.useWith(DOMStorage, '_messageSource', ['trigger']);
+
+
+var _sessionStorage = new DOMStorage('', true)
+    , _localStorage = new DOMStorage('', false);
+
+var _domStorage = {
+        true: _sessionStorage,
+        false: _localStorage
+    };
+
+_.extend(DOMStorage, {
+    registerDataType: DOMStorage$$registerDataType,
+    local: _localStorage,
+    session: _sessionStorage,
+    storage: _domStorage,
+    _storedKeys: _storedKeys // exposed for testing
+});</code></pre>
+          <section id="DOMStorage$set">
+            <h1>DOMStorage$set</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>DOMStorage$set()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>data</td>
+                <td>Object</td>
+                <td><p>single object can be passed in which case keys will be used as keys in local storage.</p></td>
+              </tr>
+              <tr>
+                <td>arguments</td>
+                <td>List</td>
+                <td><p>alternatively just the list of arguments can be passed where arguments can be sequentially used as keys and values.</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Sets data to DOM storage. <code>this.keyPrefix</code> is prepended to keys.</p></div>
+          <pre><code class="language-javascript">function DOMStorage$set(data) { // or arguments
+    if (typeof data == 'object')
+        _.eachKey(data, function(value, key) {
+            this.setItem(key, value);
+        }, this);
+    else {
+        var argsLen = arguments.length;
+        if (argsLen % 2)
+            throw new Error('DOMStorage: set should have even number of arguments or object');
+
+        for (var i = 0; i &lt; argsLen; i++) {
+            var key = arguments[i]
+                , value = arguments[++i];
+
+            this.setItem(key, value);
+        }
+    }
+}</code></pre>
+          <section id="DOMStorage$get">
+            <h1>DOMStorage$get</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>DOMStorage$get()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>arguments</td>
+                <td>List</td>
+                <td><p>keys can be passed as strings or arrays of strings</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Gets data from DOM storage. <code>this.keyPrefix</code> is prepended to passed keys, but returned object will have keys without root keys.</p></div>
+          <pre><code class="language-javascript">function DOMStorage$get() { // , ... arguments
+    var data = {};
+    _.deepForEach(arguments, function(key) {
+        data[key] = this.getItem(key);
+    }, this);
+    return data;
+}</code></pre>
+          <section id="DOMStorage$remove">
+            <h1>DOMStorage$remove</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>DOMStorage$remove()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>arguments</td>
+                <td>List</td>
+                <td><p>keys can be passed as strings or arrays of strings</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Removes keys from DOM storage. <code>this.keyPrefix</code> is prepended to passed keys.</p></div>
+          <pre><code class="language-javascript">function DOMStorage$remove() { //, ... arguments
+    _.deepForEach(arguments, function(key) {
+        this.removeItem(key);
+    }, this);
+}</code></pre>
+          <section id="DOMStorage$hasItem">
+            <h1>DOMStorage$hasItem</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>DOMStorage$hasItem()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>key</td>
+                <td>String</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Boolean</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Check for presence of single item in DOM storage. <code>this.keyPrefix</code> is prepended to passed key.</p></div>
+          <pre><code class="language-javascript">function DOMStorage$hasItem(key) {
+    var pKey = this._storageKey(key);
+    return this._storage.getItem(pKey) != null;
+}</code></pre>
+          <section id="DOMStorage$getItem">
+            <h1>DOMStorage$getItem</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>DOMStorage$getItem()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>key</td>
+                <td>String</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Any</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Gets single item from DOM storage prepending <code>this.keyPrefix</code> to passed key.<br />Reads type of the originally stored value from <code>key + this._typeSuffix</code> and converts data to the original type.</p></div>
+          <pre><code class="language-javascript">function DOMStorage$getItem(key) {
+    var pKey = this._storageKey(key);
+    var dataType = _getKeyDataType.call(this, pKey);
+    var valueStr = this._storage.getItem(pKey);
+    var value = _parseData(valueStr, dataType);
+    return value;
+}</code></pre>
+          <section id="DOMStorage$setItem">
+            <h1>DOMStorage$setItem</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>DOMStorage$setItem()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>key</td>
+                <td>String</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Any</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Sets single item to DOM storage prepending <code>this.keyPrefix</code> to passed key.<br />Stores type of the stored value to <code>key + this._typeSuffix</code>.</p></div>
+          <pre><code class="language-javascript">function DOMStorage$setItem(key, value) {
+    var pKey = this._storageKey(key);
+    var dataType = _setKeyDataType.call(this, pKey, value);
+    var valueStr = _serializeData(value, dataType);
+    try {
+        this._storage.setItem(pKey, valueStr);
+    } catch(e) {
+        if (e.name == 'QuotaExceededError') {
+            var cfg = config.domStorage.quotaExceeded;
+            if (cfg.message)
+                milo.mail.postMessage('quotaexceedederror', value);
+            if (cfg.throwError)
+                throw e;
+        } else
+            throw e;
+    }
+    this._keys[key] = true;
+    _domStorage[this.sessionOnly]._keys[pKey] = true;
+}</code></pre>
+          <section id="DOMStorage$removeItem">
+            <h1>DOMStorage$removeItem</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>DOMStorage$removeItem()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>key</td>
+                <td>String</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Any</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Removes single item from DOM storage prepending <code>this.keyPrefix</code> to passed key.<br />Type of the stored value (in <code>key + this._typeSuffix</code> key) is also removed.</p></div>
+          <pre><code class="language-javascript">function DOMStorage$removeItem(key) {
+    var pKey = this._storageKey(key);
+    this._storage.removeItem(pKey);
+    _removeKeyDataType.call(this, pKey);
+    delete this._keys[key];
+    delete _domStorage[this.sessionOnly]._keys[pKey];
+}</code></pre>
+          <section id="DOMStorage$getAllKeys">
+            <h1>DOMStorage$getAllKeys</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>DOMStorage$getAllKeys()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Returns the array of all keys stored by this instance of DOMStorage</p></div>
+          <pre><code class="language-javascript">function DOMStorage$getAllKeys() {
+    var storedKeys = Object.keys(this._keys);
+    var keysInStorage = storedKeys.filter(function(key) {
+        if (this.hasItem(key)) return true;
+        else delete this._keys[key];
+    }, this);
+    return keysInStorage;
+}</code></pre>
+          <section id="DOMStorage$getAllItems">
+            <h1>DOMStorage$getAllItems</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>DOMStorage$getAllItems()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Returns the map with all keys and values (deserialized) stored using this instance of DOMStorage</p></div>
+          <pre><code class="language-javascript">function DOMStorage$getAllItems() {
+    return this.get(this.getAllKeys());
+}</code></pre>
+          <section id="DOMStorage$_storageKey">
+            <h1>DOMStorage$_storageKey</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>DOMStorage$_storageKey()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>key</td>
+                <td>String</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>String</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Returns prefixed key for DOM storage for given unprefixed key.</p></div>
+          <pre><code class="language-javascript">function DOMStorage$_storageKey(key) {
+    return this.keyPrefix + key;
+}</code></pre>
+          <section id="DOMStorage$_domStorageKey">
+            <h1>DOMStorage$_domStorageKey</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>DOMStorage$_domStorageKey()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>storageKey</td>
+                <td>String</td>
+                <td><p>actual key in local/session storage</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>String</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Returns unprefixed key to be used with this instance of DOMStorage fir given actual key in storage<br />If key has different prefix from the keyPrefix returns undefined</p></div>
+          <pre><code class="language-javascript">function DOMStorage$_domStorageKey(storageKey) {
+    if (storageKey.indexOf(this._typeSuffix) &gt;= 0) return;
+    return _.unPrefix(storageKey, this.keyPrefix);
+}</code></pre>
+          <section id="_getKeyDataType">
+            <h1>_getKeyDataType</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>_getKeyDataType()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>pKey</td>
+                <td>String</td>
+                <td><p>prefixed key of stored value</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>String</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Gets originally stored data type for given (prefixed) <code>key</code>.</p></div>
+          <pre><code class="language-javascript">function _getKeyDataType(pKey) {
+    pKey = _dataTypeKey.call(this, pKey);
+    return this._storage.getItem(pKey);
+}</code></pre>
+          <section id="_setKeyDataType">
+            <h1>_setKeyDataType</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>_setKeyDataType()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>pKey</td>
+                <td>String</td>
+                <td><p>prefixed key of stored value</p></td>
+              </tr>
+              <tr>
+                <td>value</td>
+                <td>Any</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>String</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Stores data type for given (prefixed) <code>key</code> and <code>value</code>.<br />Returns data type for <code>value</code>.</p></div>
+          <pre><code class="language-javascript">function _setKeyDataType(pKey, value) {
+    var dataType = _getValueType(value);
+    pKey = _dataTypeKey.call(this, pKey);
+    this._storage.setItem(pKey, dataType);
+    return dataType;
+}</code></pre>
+          <section id="_removeKeyDataType">
+            <h1>_removeKeyDataType</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>_removeKeyDataType()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>pKey</td>
+                <td>String</td>
+                <td><p>prefixed key of stored value</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Removes stored data type for given (prefixed) <code>key</code>.</p></div>
+          <pre><code class="language-javascript">function _removeKeyDataType(pKey) {
+    pKey = _dataTypeKey.call(this, pKey);
+    this._storage.removeItem(pKey);
+}</code></pre>
+          <section id="_dataTypeKey">
+            <h1>_dataTypeKey</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>_dataTypeKey()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>pKey</td>
+                <td>String</td>
+                <td><p>prefixed key of stored value</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>String</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Returns the key to store data type for given (prefixed) <code>key</code>.</p></div>
+          <pre><code class="language-javascript">function _dataTypeKey(pKey) {
+    return pKey + this._typeSuffix;
+}</code></pre>
+          <section id="_getValueType">
+            <h1>_getValueType</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>_getValueType()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>value</td>
+                <td>Any</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>String</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Returns type of value as string. Class name returned for objects (&#39;null&#39; for null).</p></div>
+          <pre><code class="language-javascript">function _getValueType(value) {
+    var valueType = typeof value
+        , className = value &amp;&amp; value.constructor.name
+        , dataType = valuesDataTypes[className];
+    return dataType || (
+            valueType != 'object'
+                ? valueType
+                : value == null
+                    ? 'null'
+                    : value.constructor.name);
+}
+var valuesDataTypes = {
+    // can be registered with `registerDataType`
+};</code></pre>
+          <section id="_serializeData">
+            <h1>_serializeData</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>_serializeData()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>value</td>
+                <td>Any</td>
+                <td><p>value to be serialized</p></td>
+              </tr>
+              <tr>
+                <td>valueType</td>
+                <td>String</td>
+                <td><p>optional data type to define serializer, _getValueType is used if not passed.</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>String</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Serializes value to be stored in DOM storage.</p></div>
+          <pre><code class="language-javascript">function _serializeData(value, valueType) {
+    valueType = valueType || _getValueType(value);
+    var serializer = dataSerializers[valueType];
+    return serializer
+            ? serializer(value, valueType)
+            : value &amp;&amp; value.toString == Object.prototype.toString
+                ? JSON.stringify(value)
+                : '' + value;
+}
+var dataSerializers = {
+    'Array': JSON.stringify
+};</code></pre>
+          <section id="_parseData">
+            <h1>_parseData</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>_parseData()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>valueStr</td>
+                <td>String</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>valueType</td>
+                <td>String</td>
+                <td><p>data type that defines parser. Original sring will be returned if parser is not defined.</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Any</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Parses string retrieved from DOM storage.</p></div>
+          <pre><code class="language-javascript">function _parseData(valueStr, valueType) {
+    var parser = dataParsers[valueType];
+    return parser
+            ? parser(valueStr, valueType)
+            : valueStr;
+}
+var dataParsers = {
+    Object: _.jsonParse,
+    Array: _.jsonParse,
+    Date: function(valStr) { return new Date(valStr); },
+    boolean: function(valStr) { return valStr == 'true'; },
+    number: Number,
+    function: _.toFunction,
+    RegExp: _.toRegExp
+};</code></pre>
+          <section id="DOMStorage$$registerDataType">
+            <h1>DOMStorage$$registerDataType</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>DOMStorage$$registerDataType()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>valueType</td>
+                <td>String</td>
+                <td><p>class (constructor) name or the string returned by typeof.</p></td>
+              </tr>
+              <tr>
+                <td>serializer</td>
+                <td>Function</td>
+                <td><p>optional serializer for this type</p></td>
+              </tr>
+              <tr>
+                <td>parser</td>
+                <td>Function</td>
+                <td><p>optional parser for this type</p></td>
+              </tr>
+              <tr>
+                <td>[storeAsDataType]</td>
+                <td>String</td>
+                <td><p>optional name of stored data type if different from valueType</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Registers data type to be saved in DOM storage. Class name can be used or result of <code>typeof</code> operator for non-objects to override default conversions.</p></div>
+          <pre><code class="language-javascript">function DOMStorage$$registerDataType(valueType, serializer, parser, storeAsDataType) {
+    if (serializer) dataSerializers[valueType] = serializer;
+    if (parser) dataParsers[valueType] = parser;
+    valuesDataTypes[valueType] = storeAsDataType || valueType;
+}
+
+
+function DOMStorage$createMessenger() {
+    var storageMessageSource = new StorageMessageSource(this);
+    var messenger = new Messenger(this, undefined, storageMessageSource);
+    _.defineProperties(this, {
+        _messenger: messenger,
+        _messageSource: storageMessageSource
+    }, _.WRIT);
+}
+
+
+function DOMStorage$destroy() {
+    this._storage = undefined;
+    this.window = undefined;
+    if (this._messenger) this._messenger.destroy();
+    this._destroyed = true;
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="container">
+        <p>Documentation generated with <a href="https://github.com/mr-doc/mr-doc">Mr. Doc </a> created by <a href="https://twitter.com/FGRibreau" data-show-count="false" class="twitter-follow-button">Francois-Guillaume Ribreau </a></p>
+        <p>Mr. Doc is sponsored by <a href="http://bringr.net/?btt" title="Outil d'analyse des réseaux sociaux" class="bringr">Bringr </a> and <a href="https://redsmin.com/?btt" title="Full Redis GUI" class="redsmin">Redsmin</a></p>
+        <p>Theme borrowed from Twitter Bootstrap</p>
+      </div>
+    </footer>
+    <script src="../../js/twitter-widget.min.js"></script>
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/bootstrap-transition.min.js"></script>
+    <script src="../../js/bootstrap-scrollspy.min.js"></script>
+    <script src="../../js/bootstrap-dropdown.min.js"></script>
+    <script src="../../js/bootstrap-collapse.min.js"></script>
+    <script src="../../js/bootstrap-affix.min.js"></script>
+    <script src="../../js/prism.min.js"></script>
+    <script src="../../js/index.min.js"></script>
+  </body>
+</html>

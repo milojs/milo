@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" charset="utf-8">
+    <title>milo</title>
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../css/cayman.min.css">
+    <link rel="stylesheet" href="../../css/prism.min.css">
+    <link rel="stylesheet" href="../../css/index.min.css">
+    <link rel="stylesheet" href="../../css/docs.min.css">
+    <link rel="stylesheet" href="../../css/bootstrap-responsive.min.css">
+  </head>
+  <body data-spy="scroll" data-target=".scrollspy">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container"><a class="brand">Mr. Doc</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav pull-right sponsored"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <header id="overview" class="jumbotron subhead">
+      <div class="container">
+        <h1>milo</h1>
+        <p class="lead"></p>
+      </div>
+    </header>
+    <div class="container">
+      <div class="row">
+        <div class="span3 bs-docs-sidebar">
+          <ul class="nav nav-list bs-docs-sidenav affix-top">
+            <li><a href="../../index.html">Main</a></li>
+            <li><a href="../../abstract/facet.js.html">abstract/facet.js</a></li>
+            <li><a href="../../abstract/faceted_object.js.html">abstract/faceted_object.js</a></li>
+            <li><a href="../../abstract/registry.js.html">abstract/registry.js</a></li>
+            <li><a href="../../attributes/a_bind.js.html">attributes/a_bind.js</a></li>
+            <li><a href="../../attributes/a_class.js.html">attributes/a_class.js</a></li>
+            <li><a href="../../attributes/a_load.js.html">attributes/a_load.js</a></li>
+            <li><a href="../../attributes/index.js.html">attributes/index.js</a></li>
+            <li><a href="../../binder.js.html">binder.js</a></li>
+            <li><a href="../../classes.js.html">classes.js</a></li>
+            <li><a href="../../command/actions_history.js.html">command/actions_history.js</a></li>
+            <li><a href="../../command/cmd_registry.js.html">command/cmd_registry.js</a></li>
+            <li><a href="../../command/index.js.html">command/index.js</a></li>
+            <li><a href="../../command/transaction.js.html">command/transaction.js</a></li>
+            <li><a href="../../command/transaction_history.js.html">command/transaction_history.js</a></li>
+            <li><a href="../../components/ComponentTemplate.js.html">components/ComponentTemplate.js</a></li>
+            <li><a href="../../components/c_class.js.html">components/c_class.js</a></li>
+            <li><a href="../../components/c_facet.js.html">components/c_facet.js</a></li>
+            <li class="active"><a href="../../components/c_facets/Container.js.html">components/c_facets/Container.js</a></li>
+            <li><a href="../../components/c_facets/Css.js.html">components/c_facets/Css.js</a></li>
+            <li><a href="../../components/c_facets/Data.js.html">components/c_facets/Data.js</a></li>
+            <li><a href="../../components/c_facets/Dom.js.html">components/c_facets/Dom.js</a></li>
+            <li><a href="../../components/c_facets/Drag.js.html">components/c_facets/Drag.js</a></li>
+            <li><a href="../../components/c_facets/Drop.js.html">components/c_facets/Drop.js</a></li>
+            <li><a href="../../components/c_facets/Events.js.html">components/c_facets/Events.js</a></li>
+            <li><a href="../../components/c_facets/Frame.js.html">components/c_facets/Frame.js</a></li>
+            <li><a href="../../components/c_facets/Item.js.html">components/c_facets/Item.js</a></li>
+            <li><a href="../../components/c_facets/List.js.html">components/c_facets/List.js</a></li>
+            <li><a href="../../components/c_facets/ModelFacet.js.html">components/c_facets/ModelFacet.js</a></li>
+            <li><a href="../../components/c_facets/Options.js.html">components/c_facets/Options.js</a></li>
+            <li><a href="../../components/c_facets/Template.js.html">components/c_facets/Template.js</a></li>
+            <li><a href="../../components/c_facets/Transfer.js.html">components/c_facets/Transfer.js</a></li>
+            <li><a href="../../components/c_facets/cf_registry.js.html">components/c_facets/cf_registry.js</a></li>
+            <li><a href="../../components/c_info.js.html">components/c_info.js</a></li>
+            <li><a href="../../components/c_registry.js.html">components/c_registry.js</a></li>
+            <li><a href="../../components/c_utils.js.html">components/c_utils.js</a></li>
+            <li><a href="../../components/classes/View.js.html">components/classes/View.js</a></li>
+            <li><a href="../../components/msg_api/data.js.html">components/msg_api/data.js</a></li>
+            <li><a href="../../components/msg_api/de_data.js.html">components/msg_api/de_data.js</a></li>
+            <li><a href="../../components/msg_api/drop.js.html">components/msg_api/drop.js</a></li>
+            <li><a href="../../components/msg_src/dom_events.js.html">components/msg_src/dom_events.js</a></li>
+            <li><a href="../../components/msg_src/frame.js.html">components/msg_src/frame.js</a></li>
+            <li><a href="../../components/scope.js.html">components/scope.js</a></li>
+            <li><a href="../../config.js.html">config.js</a></li>
+            <li><a href="../../loader.js.html">loader.js</a></li>
+            <li><a href="../../milo.js.html">milo.js</a></li>
+            <li><a href="../../registry.js.html">registry.js</a></li>
+            <li><a href="../../services/de_constrs.js.html">services/de_constrs.js</a></li>
+            <li><a href="../../services/dom_source.js.html">services/dom_source.js</a></li>
+            <li><a href="../../services/mail/index.js.html">services/mail/index.js</a></li>
+            <li><a href="../../services/mail/mail_api.js.html">services/mail/mail_api.js</a></li>
+            <li><a href="../../services/mail/mail_source.js.html">services/mail/mail_source.js</a></li>
+            <li><a href="../../services/window.js.html">services/window.js</a></li>
+            <li><a href="../../use_components.js.html">use_components.js</a></li>
+            <li><a href="../../use_facets.js.html">use_facets.js</a></li>
+            <li><a href="../../util/component_name.js.html">util/component_name.js</a></li>
+            <li><a href="../../util/create_component_class.js.html">util/create_component_class.js</a></li>
+            <li><a href="../../util/create_facet_class.js.html">util/create_facet_class.js</a></li>
+            <li><a href="../../util/deprecate.js.html">util/deprecate.js</a></li>
+            <li><a href="../../util/dom.js.html">util/dom.js</a></li>
+            <li><a href="../../util/dom_listeners.js.html">util/dom_listeners.js</a></li>
+            <li><a href="../../util/domready.js.html">util/domready.js</a></li>
+            <li><a href="../../util/dragdrop.js.html">util/dragdrop.js</a></li>
+            <li><a href="../../util/error.js.html">util/error.js</a></li>
+            <li><a href="../../util/fragment.js.html">util/fragment.js</a></li>
+            <li><a href="../../util/index.js.html">util/index.js</a></li>
+            <li><a href="../../util/json_parse.js.html">util/json_parse.js</a></li>
+            <li><a href="../../util/request.js.html">util/request.js</a></li>
+            <li><a href="../../util/selection/index.js.html">util/selection/index.js</a></li>
+            <li><a href="../../util/storage/index.js.html">util/storage/index.js</a></li>
+            <li><a href="../../util/storage/model.js.html">util/storage/model.js</a></li>
+            <li><a href="../../util/storage/msg_src.js.html">util/storage/msg_src.js</a></li>
+            <li><a href="../../util/unique_id.js.html">util/unique_id.js</a></li>
+            <li><a href="../../util/websocket/index.js.html">util/websocket/index.js</a></li>
+            <li><a href="../../util/websocket/msg_api.js.html">util/websocket/msg_api.js</a></li>
+            <li><a href="../../util/websocket/msg_src.js.html">util/websocket/msg_src.js</a></li>
+          </ul>
+          <div class="scrollspy">
+            <ul class="nav nav-list bs-docs-sidenav affix-top">
+              <li><a href="#Container"><i class="alert alert-success"></i><span>Container</span></a>
+              </li>
+              <li><a href="#Container$binder"><i class="alert alert-info"></i><span>Container$binder</span></a>
+              </li>
+              <li><a href="#Container$start"><i class="alert alert-info"></i><span>Container$start</span></a>
+              </li>
+              <li><a href="#Container$path"><i class="alert alert-info"></i><span>Container$path</span></a>
+              </li>
+              <li><a href="#Container$getState"><i class="alert alert-info"></i><span>Container$getState</span></a>
+              </li>
+              <li><a href="#Container$setState"><i class="alert alert-info"></i><span>Container$setState</span></a>
+              </li>
+              <li><a href="#Container$unwrap"><i class="alert alert-info"></i><span>Container$unwrap</span></a>
+              </li>
+              <li><a href="#Container$append"><i class="alert alert-info"></i><span>Container$append</span></a>
+              </li>
+              <li><a href="#Container$insertBefore"><i class="alert alert-info"></i><span>Container$insertBefore</span></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="span9">
+          <section id="Container">
+            <h1>Container</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>&nbsp;</span><span>Container</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p><code>milo.registry.facets.get(&#39;Container&#39;)</code><br />A special component facet that makes component create its own inner scope.<br />When <a href="../../binder.js.html">milo.binder</a> binds DOM tree and creates components, if components are inside component WITH Container facet, they are put on the <code>scope</code> of it (component.container.scope - see <a href="../scope.js.html">Scope</a>), otherwise they are put on the same scope even though they may be deeper in DOM tree.<br />It allows creating namespaces avoiding components names conflicts, at the same time creating more shallow components tree than the DOM tree.<br />To create components for elements inside the current component use:</p><pre><code>component.container.binder();
+</code></pre><p>See <a href="../../binder.js.html">milo.binder</a></p></div>
+          <pre><code class="language-javascript">var Container = _.createSubclass(ComponentFacet, 'Container');</code></pre>
+          <div class="description"><p>####Container facet instance methods####</p><ul>
+<li><a href="#Container$binder">binder</a> - create components from DOM inside the current one</li>
+</ul>
+</div>
+          <pre><code class="language-javascript">_.extendProto(Container, {
+    start: Container$start,
+    path: Container$path,
+    getState: Container$getState,
+    setState: Container$setState,
+    binder: Container$binder,
+    destroy: Container$destroy,
+    unwrap: Container$unwrap,
+
+    append: Container$append,
+    insertBefore: Container$insertBefore,
+    remove: Container$remove
+});
+
+facetsRegistry.add(Container);
+
+module.exports = Container;</code></pre>
+          <section id="Container$binder">
+            <h1>Container$binder</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Container$binder()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Container instance method.<br />Scans DOM, creates components and adds to scope children of component element.</p></div>
+          <pre><code class="language-javascript">function Container$binder() {
+    return miloBinder(this.owner.el, this.scope, false);
+}</code></pre>
+          <section id="Container$start">
+            <h1>Container$start</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Container$start()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Container instance method.<br />Setup empty scope object on start</p></div>
+          <pre><code class="language-javascript">function Container$start() {
+    ComponentFacet.prototype.start.apply(this, arguments);
+    this.scope = new Scope(this.owner.el, this);
+}
+
+
+var allowedNamePattern = /^[A-Za-z][A-Za-z0-9\_\$]*$/;</code></pre>
+          <section id="Container$path">
+            <h1>Container$path</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Container$path()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>path</td>
+                <td>String</td>
+                <td><p>path of child component in scope, each name should be prefixed with &#39;.&#39;, e.g.: &#39;.child.subchild&#39;</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Component</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Container instance method.<br />Safely traverses component scope<br />Returns component in scope for a given path<br />If path is invalid the method will throw, if there is no component at a given path or some of the components along the path does not have Container facet the method will return undefined, </p></div>
+          <pre><code class="language-javascript">function Container$path(path) {
+    path = path.split('.');
+    var len = path.length;
+    if (path[0] || len &lt; 2) throwInvalidPath();
+    var comp = this.owner;
+    for (var i = 1; i &lt; len; i++) {
+        var name = path[i];
+        if (!allowedNamePattern.test(name)) throwInvalidPath();
+        if (!comp.container) return;
+        comp = comp.container.scope[name];
+        if (!comp) return;
+    }
+    return comp;
+
+    function throwInvalidPath() {
+        throw new Error('path ' + path + ' is invalid');
+    }
+}</code></pre>
+          <section id="Container$getState">
+            <h1>Container$getState</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Container$getState()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>deepCopy</td>
+                <td>Boolean</td>
+                <td><p>true by default</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Object</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Container instance method<br />Called by <code>Component.prototype.getState</code> to get facet&#39;s state<br />Returns the state of components in the scope</p></div>
+          <pre><code class="language-javascript">function Container$getState(deepCopy) {
+    var state = { scope: {} };
+    if (deepCopy !== false)
+        this.scope._each(function(component, compName) {
+            state.scope[compName] = component._getState();
+        });
+    return state;
+}</code></pre>
+          <section id="Container$setState">
+            <h1>Container$setState</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Container$setState()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>data</td>
+                <td>Object</td>
+                <td><p>data to set on facet&#39;s model</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Container instance method<br />Called by <code>Component.prototype.setState</code> to set facet&#39;s state<br />Sets the state of components in the scope</p></div>
+          <pre><code class="language-javascript">function Container$setState(state) {
+    _.eachKey(state.scope, function(compData, compName) {
+        var component = this.scope[compName];
+        if (component)
+            component.setState(compData);
+        else
+            logger.warn('component &quot;' + compName + '&quot; does not exist on scope');
+    }, this);
+}
+
+function Container$destroy(opts) {
+    this.scope._each(function(component) {
+        if (opts.async) _.deferMethod(component, 'destroy', opts);
+        else component.destroy(opts);
+    });
+    this.scope._detachElement();
+    ComponentFacet.prototype.destroy.apply(this, arguments);
+}</code></pre>
+          <section id="Container$unwrap">
+            <h1>Container$unwrap</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Container$unwrap()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>renameChildren</td>
+                <td>Boolean</td>
+                <td><p>pass false to not rename scope children (default is true)</p></td>
+              </tr>
+              <tr>
+                <td>destroy</td>
+                <td>Boolean</td>
+                <td><p>If not false, the component will be destroyed at the end (default is true).</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Container instance method<br />Moves all of the contents of the owner into the parent scope</p></div>
+          <pre><code class="language-javascript">function Container$unwrap(renameChildren, destroy) {
+    domUtils.unwrapElement(this.owner.el);
+    if (this.scope)
+        this.scope._each(function (child) {
+            child.remove();
+            if (renameChildren !== false) child.rename(undefined, false);
+            if (this.owner.scope) this.owner.scope._add(child);
+        }, this);
+    if (destroy !== false) this.owner.destroy();
+}</code></pre>
+          <section id="Container$append">
+            <h1>Container$append</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Container$append()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>comp</td>
+                <td>Component</td>
+                <td><p>component that will be appended</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Container instance method<br />Append component to DOM and to scope</p></div>
+          <pre><code class="language-javascript">function Container$append(comp) {
+    this.scope._add(comp);
+    this.owner.el.appendChild(comp.el);
+}</code></pre>
+          <section id="Container$insertBefore">
+            <h1>Container$insertBefore</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Container$insertBefore()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>comp</td>
+                <td>Component</td>
+                <td><p>component that will be inserted</p></td>
+              </tr>
+              <tr>
+                <td>sibling</td>
+                <td>Component</td>
+                <td><p>component before which component will be appended</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Container instance method<br />Insert component to DOM and to scope before another component</p></div>
+          <pre><code class="language-javascript">function Container$insertBefore(comp, sibling) {
+    this.scope._add(comp);
+    this.el.insertBefore(comp.el, sibling &amp;&amp; sibling.el);
+}
+
+function Container$remove(comp) {
+    this.scope._remove(comp);
+    this.owner.el.removeChild(comp.el);
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="container">
+        <p>Documentation generated with <a href="https://github.com/mr-doc/mr-doc">Mr. Doc </a> created by <a href="https://twitter.com/FGRibreau" data-show-count="false" class="twitter-follow-button">Francois-Guillaume Ribreau </a></p>
+        <p>Mr. Doc is sponsored by <a href="http://bringr.net/?btt" title="Outil d'analyse des réseaux sociaux" class="bringr">Bringr </a> and <a href="https://redsmin.com/?btt" title="Full Redis GUI" class="redsmin">Redsmin</a></p>
+        <p>Theme borrowed from Twitter Bootstrap</p>
+      </div>
+    </footer>
+    <script src="../../js/twitter-widget.min.js"></script>
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/bootstrap-transition.min.js"></script>
+    <script src="../../js/bootstrap-scrollspy.min.js"></script>
+    <script src="../../js/bootstrap-dropdown.min.js"></script>
+    <script src="../../js/bootstrap-collapse.min.js"></script>
+    <script src="../../js/bootstrap-affix.min.js"></script>
+    <script src="../../js/prism.min.js"></script>
+    <script src="../../js/index.min.js"></script>
+  </body>
+</html>

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" charset="utf-8">
+    <title>milo</title>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/cayman.min.css">
+    <link rel="stylesheet" href="../css/prism.min.css">
+    <link rel="stylesheet" href="../css/index.min.css">
+    <link rel="stylesheet" href="../css/docs.min.css">
+    <link rel="stylesheet" href="../css/bootstrap-responsive.min.css">
+  </head>
+  <body data-spy="scroll" data-target=".scrollspy">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container"><a class="brand">Mr. Doc</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav pull-right sponsored"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <header id="overview" class="jumbotron subhead">
+      <div class="container">
+        <h1>milo</h1>
+        <p class="lead"></p>
+      </div>
+    </header>
+    <div class="container">
+      <div class="row">
+        <div class="span3 bs-docs-sidebar">
+          <ul class="nav nav-list bs-docs-sidenav affix-top">
+            <li><a href="../index.html">Main</a></li>
+            <li><a href="../abstract/facet.js.html">abstract/facet.js</a></li>
+            <li><a href="../abstract/faceted_object.js.html">abstract/faceted_object.js</a></li>
+            <li><a href="../abstract/registry.js.html">abstract/registry.js</a></li>
+            <li><a href="../attributes/a_bind.js.html">attributes/a_bind.js</a></li>
+            <li><a href="../attributes/a_class.js.html">attributes/a_class.js</a></li>
+            <li><a href="../attributes/a_load.js.html">attributes/a_load.js</a></li>
+            <li><a href="../attributes/index.js.html">attributes/index.js</a></li>
+            <li><a href="../binder.js.html">binder.js</a></li>
+            <li><a href="../classes.js.html">classes.js</a></li>
+            <li><a href="../command/actions_history.js.html">command/actions_history.js</a></li>
+            <li><a href="../command/cmd_registry.js.html">command/cmd_registry.js</a></li>
+            <li class="active"><a href="../command/index.js.html">command/index.js</a></li>
+            <li><a href="../command/transaction.js.html">command/transaction.js</a></li>
+            <li><a href="../command/transaction_history.js.html">command/transaction_history.js</a></li>
+            <li><a href="../components/ComponentTemplate.js.html">components/ComponentTemplate.js</a></li>
+            <li><a href="../components/c_class.js.html">components/c_class.js</a></li>
+            <li><a href="../components/c_facet.js.html">components/c_facet.js</a></li>
+            <li><a href="../components/c_facets/Container.js.html">components/c_facets/Container.js</a></li>
+            <li><a href="../components/c_facets/Css.js.html">components/c_facets/Css.js</a></li>
+            <li><a href="../components/c_facets/Data.js.html">components/c_facets/Data.js</a></li>
+            <li><a href="../components/c_facets/Dom.js.html">components/c_facets/Dom.js</a></li>
+            <li><a href="../components/c_facets/Drag.js.html">components/c_facets/Drag.js</a></li>
+            <li><a href="../components/c_facets/Drop.js.html">components/c_facets/Drop.js</a></li>
+            <li><a href="../components/c_facets/Events.js.html">components/c_facets/Events.js</a></li>
+            <li><a href="../components/c_facets/Frame.js.html">components/c_facets/Frame.js</a></li>
+            <li><a href="../components/c_facets/Item.js.html">components/c_facets/Item.js</a></li>
+            <li><a href="../components/c_facets/List.js.html">components/c_facets/List.js</a></li>
+            <li><a href="../components/c_facets/ModelFacet.js.html">components/c_facets/ModelFacet.js</a></li>
+            <li><a href="../components/c_facets/Options.js.html">components/c_facets/Options.js</a></li>
+            <li><a href="../components/c_facets/Template.js.html">components/c_facets/Template.js</a></li>
+            <li><a href="../components/c_facets/Transfer.js.html">components/c_facets/Transfer.js</a></li>
+            <li><a href="../components/c_facets/cf_registry.js.html">components/c_facets/cf_registry.js</a></li>
+            <li><a href="../components/c_info.js.html">components/c_info.js</a></li>
+            <li><a href="../components/c_registry.js.html">components/c_registry.js</a></li>
+            <li><a href="../components/c_utils.js.html">components/c_utils.js</a></li>
+            <li><a href="../components/classes/View.js.html">components/classes/View.js</a></li>
+            <li><a href="../components/msg_api/data.js.html">components/msg_api/data.js</a></li>
+            <li><a href="../components/msg_api/de_data.js.html">components/msg_api/de_data.js</a></li>
+            <li><a href="../components/msg_api/drop.js.html">components/msg_api/drop.js</a></li>
+            <li><a href="../components/msg_src/dom_events.js.html">components/msg_src/dom_events.js</a></li>
+            <li><a href="../components/msg_src/frame.js.html">components/msg_src/frame.js</a></li>
+            <li><a href="../components/scope.js.html">components/scope.js</a></li>
+            <li><a href="../config.js.html">config.js</a></li>
+            <li><a href="../loader.js.html">loader.js</a></li>
+            <li><a href="../milo.js.html">milo.js</a></li>
+            <li><a href="../registry.js.html">registry.js</a></li>
+            <li><a href="../services/de_constrs.js.html">services/de_constrs.js</a></li>
+            <li><a href="../services/dom_source.js.html">services/dom_source.js</a></li>
+            <li><a href="../services/mail/index.js.html">services/mail/index.js</a></li>
+            <li><a href="../services/mail/mail_api.js.html">services/mail/mail_api.js</a></li>
+            <li><a href="../services/mail/mail_source.js.html">services/mail/mail_source.js</a></li>
+            <li><a href="../services/window.js.html">services/window.js</a></li>
+            <li><a href="../use_components.js.html">use_components.js</a></li>
+            <li><a href="../use_facets.js.html">use_facets.js</a></li>
+            <li><a href="../util/component_name.js.html">util/component_name.js</a></li>
+            <li><a href="../util/create_component_class.js.html">util/create_component_class.js</a></li>
+            <li><a href="../util/create_facet_class.js.html">util/create_facet_class.js</a></li>
+            <li><a href="../util/deprecate.js.html">util/deprecate.js</a></li>
+            <li><a href="../util/dom.js.html">util/dom.js</a></li>
+            <li><a href="../util/dom_listeners.js.html">util/dom_listeners.js</a></li>
+            <li><a href="../util/domready.js.html">util/domready.js</a></li>
+            <li><a href="../util/dragdrop.js.html">util/dragdrop.js</a></li>
+            <li><a href="../util/error.js.html">util/error.js</a></li>
+            <li><a href="../util/fragment.js.html">util/fragment.js</a></li>
+            <li><a href="../util/index.js.html">util/index.js</a></li>
+            <li><a href="../util/json_parse.js.html">util/json_parse.js</a></li>
+            <li><a href="../util/request.js.html">util/request.js</a></li>
+            <li><a href="../util/selection/index.js.html">util/selection/index.js</a></li>
+            <li><a href="../util/storage/index.js.html">util/storage/index.js</a></li>
+            <li><a href="../util/storage/model.js.html">util/storage/model.js</a></li>
+            <li><a href="../util/storage/msg_src.js.html">util/storage/msg_src.js</a></li>
+            <li><a href="../util/unique_id.js.html">util/unique_id.js</a></li>
+            <li><a href="../util/websocket/index.js.html">util/websocket/index.js</a></li>
+            <li><a href="../util/websocket/msg_api.js.html">util/websocket/msg_api.js</a></li>
+            <li><a href="../util/websocket/msg_src.js.html">util/websocket/msg_src.js</a></li>
+          </ul>
+          <div class="scrollspy">
+            <ul class="nav nav-list bs-docs-sidenav affix-top">
+              <li><a href="#Command"><i class="alert alert-success"></i><span>Command</span></a>
+              </li>
+              <li><a href="#Command$execute"><i class="alert alert-info"></i><span>Command$execute</span></a>
+              </li>
+              <li><a href="#Command$setUndo"><i class="alert alert-info"></i><span>Command$setUndo</span></a>
+              </li>
+              <li><a href="#Command$getUndo"><i class="alert alert-info"></i><span>Command$getUndo</span></a>
+              </li>
+              <li><a href="#Command$undo"><i class="alert alert-info"></i><span>Command$undo</span></a>
+              </li>
+              <li><a href="#Command$setArguments"><i class="alert alert-info"></i><span>Command$setArguments</span></a>
+              </li>
+              <li><a href="#Command$addArguments"><i class="alert alert-info"></i><span>Command$addArguments</span></a>
+              </li>
+              <li><a href="#Command$$create"><i class="alert alert-info"></i><span>Command$$create</span></a>
+              </li>
+              <li><a href="#Command$destroy"><i class="alert alert-info"></i><span>Command$destroy</span></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="span9">
+          <section id="Command">
+            <h1>Command</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">constructor</div><span>&nbsp;</span><span>Command()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>func</td>
+                <td>Function</td>
+                <td><p>method name or function to be executed</p></td>
+              </tr>
+              <tr>
+                <td>*arguments</td>
+                <td>List</td>
+                <td><p>parameters to be passed to method or function</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Command class to implement &quot;command pattern&quot; - packaging ll information necessary for delayed method execution</p></div>
+          <pre><code class="language-javascript">function Command(func) { // , ... arguments
+    this.init.apply(this, arguments);
+}</code></pre>
+          <div class="description"><p>Command instance methods</p><ul>
+<li><a href="#Command$execute">init</a> - initialize command, should be overwritten by subclasses</li>
+<li><a href="#Command$execute">execute</a> - execute command</li>
+<li><a href="#Command$setUndo">setUndo</a> - set undo command for this command</li>
+<li><a href="#Command$getUndo">getUndo</a> - get undo command of this command</li>
+<li><a href="#Command$setArguments">setArguments</a> - set commands arguments</li>
+<li><a href="#Command$addArguments">addArguments</a> - add arguments to command</li>
+<li><a href="#Command$destroy">destroy</a></li>
+</ul>
+</div>
+          <pre><code class="language-javascript">_.extendProto(Command, {
+    init: Command$init,
+    execute: Command$execute,
+    setUndo: Command$setUndo,
+    getUndo: Command$getUndo,
+    undo: Command$undo,
+    redo: Command$execute, // same for command, different for transaction
+    setArguments: Command$setArguments,
+    addArguments: Command$addArguments,
+    getArguments: Command$getArguments,
+    changeArguments: Command$changeArguments,
+    destroy: Command$destroy,
+
+    setComment: Command$setComment,
+    getDescription: Command$getDescription
+});</code></pre>
+          <div class="description"><p>Command class methods</p><ul>
+<li><a href="#Command$$create">create</a> - commands factory</li>
+</ul>
+</div>
+          <pre><code class="language-javascript">_.extend(Command, {
+    create: Command$$create,
+    createWithUndo: Command$$createWithUndo
+});
+
+
+function Command$init(func) { // , ... arguments
+    check(func, Match.Optional(Function));
+    this.func = func || function(){};
+    this.args = _.slice(arguments, 1);    
+}</code></pre>
+          <section id="Command$execute">
+            <h1>Command$execute</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Command$execute()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Execute command making command object available via function property.</p></div>
+          <pre><code class="language-javascript">function Command$execute(cb) {
+    var result = this.func.apply(this, this.args);
+    if (cb) _.defer(cb);
+    return result;
+}</code></pre>
+          <section id="Command$setUndo">
+            <h1>Command$setUndo</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Command$setUndo()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>undoCommand</td>
+                <td>Command</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Set undo command for this command. This command becomes undo command for undo command (so undo command can change this command during its execution).</p></div>
+          <pre><code class="language-javascript">function Command$setUndo(undoCommand) {
+    if (this[UNDO_COMMAND])
+        logger.warn('Command setUndo: undo command is already set');
+
+    this[UNDO_COMMAND] = undoCommand;
+    undoCommand[UNDO_COMMAND] = this;
+}</code></pre>
+          <section id="Command$getUndo">
+            <h1>Command$getUndo</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Command$getUndo()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Returns undo command of a given command</p></div>
+          <pre><code class="language-javascript">function Command$getUndo() {
+    return this[UNDO_COMMAND];
+}</code></pre>
+          <section id="Command$undo">
+            <h1>Command$undo</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Command$undo()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Executes undo command of current command</p></div>
+          <pre><code class="language-javascript">function Command$undo(cb) {
+    var undoCmd = this.getUndo();
+    if (! undoCmd) return logger.error('Command undo called without undo command present');
+    var result = undoCmd.execute();
+    if (cb) _.defer(cb);
+    return result;
+}</code></pre>
+          <section id="Command$setArguments">
+            <h1>Command$setArguments</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Command$setArguments()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>*arguments</td>
+                <td>List</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Set command&#39;s arguments. If arguments were set during command&#39;s creation, this method will overwrite arguments and log warning.</p></div>
+          <pre><code class="language-javascript">function Command$setArguments() { //, ... arguments
+    if (this.args &amp;&amp; this.args.length)
+        logger.warn('Command setArguments: command arguments are already set');
+    this.args = _.toArray(arguments);
+}
+
+
+function Command$getArguments() {
+    return this.args;
+}
+
+
+function Command$changeArguments() { //, ... arguments
+    this.args = _.toArray(arguments);
+}</code></pre>
+          <section id="Command$addArguments">
+            <h1>Command$addArguments</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Command$addArguments()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>*arguments</td>
+                <td>List</td>
+                <td><p>arguments list to be appended to command</p></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Add (append) arguments to command</p></div>
+          <pre><code class="language-javascript">function Command$addArguments() { //, ... arguments
+    if (! this.args) this.args = [];
+    _.appendArray(this.args, arguments);
+}</code></pre>
+          <section id="Command$$create">
+            <h1>Command$$create</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Command$$create()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th style="width:20%">Option name</th>
+                <th style="width:20%">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>func</td>
+                <td>Function</td>
+                <td><p>method name or function to be executed</p></td>
+              </tr>
+              <tr>
+                <td>*arguments</td>
+                <td>List</td>
+                <td><p>parameters to be passed to method or function</p></td>
+              </tr>
+              <tr>
+                <td>return</td>
+                <td>Command</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="description"><p>Commands factory. Likely ot be overridden by subclasses to implement custom logic of command construction</p></div>
+          <pre><code class="language-javascript">function Command$$create(func) { // , ... arguments
+    return _.newApply(this, arguments);
+}
+
+
+function Command$$createWithUndo() {
+    throw new Error('createWithUndo should be implemented by subsclass');
+}</code></pre>
+          <section id="Command$destroy">
+            <h1>Command$destroy</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-info radius ctx-type">function</div><span>&nbsp;</span><span>Command$destroy()</span><span>&nbsp;</span>
+            </p>
+          </section>
+          <div class="description"><p>Destroy current command (to prevent potential memory leaks when commands point to DOM elements)</p></div>
+          <pre><code class="language-javascript">function Command$destroy() {
+    delete this.func;
+    delete this.args;
+    var undoCmd = this[UNDO_COMMAND];
+    if (undoCmd) {
+        delete this[UNDO_COMMAND][UNDO_COMMAND];
+        delete this[UNDO_COMMAND];
+        undoCmd.destroy();
+    }
+}
+
+
+function Command$setComment(comment) {
+    this.comment = comment;
+}
+
+
+function Command$getDescription() {
+    return {
+        func: this.func.name,
+        comment: this.comment
+    };
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="container">
+        <p>Documentation generated with <a href="https://github.com/mr-doc/mr-doc">Mr. Doc </a> created by <a href="https://twitter.com/FGRibreau" data-show-count="false" class="twitter-follow-button">Francois-Guillaume Ribreau </a></p>
+        <p>Mr. Doc is sponsored by <a href="http://bringr.net/?btt" title="Outil d'analyse des réseaux sociaux" class="bringr">Bringr </a> and <a href="https://redsmin.com/?btt" title="Full Redis GUI" class="redsmin">Redsmin</a></p>
+        <p>Theme borrowed from Twitter Bootstrap</p>
+      </div>
+    </footer>
+    <script src="../js/twitter-widget.min.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/bootstrap-transition.min.js"></script>
+    <script src="../js/bootstrap-scrollspy.min.js"></script>
+    <script src="../js/bootstrap-dropdown.min.js"></script>
+    <script src="../js/bootstrap-collapse.min.js"></script>
+    <script src="../js/bootstrap-affix.min.js"></script>
+    <script src="../js/prism.min.js"></script>
+    <script src="../js/index.min.js"></script>
+  </body>
+</html>
