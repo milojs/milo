@@ -99,6 +99,10 @@ module.exports = function(grunt) {
                 ],
                 tasks: ['browserify']
             },
+            mocks: {
+                files: 'mocks/**/*.js',
+                tasks: 'copy'
+            },
             test1: {
                 files: ['test_html/bind_test/*.js'],
                 tasks: 'browserify:test1'

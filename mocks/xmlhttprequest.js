@@ -36,7 +36,7 @@ function send(data) {
     var self = this;
     this.data = data;
     var url = this.url;
-    var methodRoutes = _mock_routes[this.method.toUpperCase()] || {};
+    var methodRoutes = _mock_routes && _mock_routes[this.method.toUpperCase()] || {};
 
     var handlerKey = _.find(Object.keys(methodRoutes), function(regex) {
         return url.match(new RegExp(regex));
