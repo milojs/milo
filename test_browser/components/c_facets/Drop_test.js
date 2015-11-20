@@ -9,7 +9,7 @@ var COMP_META = {"compClass":"MIStandard","compName":"milo_1446830064474","param
 var SERVICE_MESSAGES = ['dragenter', 'dragin', 'dragover', 'dragover', 'dragover', 'dragover', 'dragover', 'dragdropcompleted', 'drop'];
 
 
-describe.only('Drop facet', function() {
+describe('Drop facet', function() {
     var component;
     var parentComponent;
     var enterCount = 0;
