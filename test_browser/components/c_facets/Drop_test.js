@@ -96,7 +96,7 @@ describe('Drop facet', function() {
         var DDServiceMessages = [];
         DragDrop.service.on(/.*/, function (msg, data) {
             DDServiceMessages.push(msg);
-        })
+        });
         createAndDispatchEvent(component, 'dragenter', 0);
         createAndDispatchEvent(component, 'dragover', 25);
         createAndDispatchEvent(component, 'dragover', 30);
