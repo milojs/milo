@@ -25,7 +25,7 @@ describe('Drag facet', function() {
         }
     });
 
-    it.only('should initialise and collect state on drag', function (done) {
+    it('should initialise and collect state on drag', function (done) {
         component = milo.Component.createFromState(COMP_STATE);
         document.body.appendChild(component.el);
 
