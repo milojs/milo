@@ -18568,7 +18568,7 @@ if (typeof module == 'object' && module.exports) {
 },{"./dotjs/functions":103,"./dotjs/methods":111}],118:[function(require,module,exports){
 module.exports={
   "name": "milojs",
-  "version": "1.1.4",
+  "version": "1.1.6",
   "description": "Browser/nodejs reactive programming and data driven DOM manipulation with modular components.",
   "keywords": [
     "framework",
@@ -18602,7 +18602,7 @@ module.exports={
   },
   "dependencies": {
     "base32": "git://github.com/milojs/base32-js",
-    "milo-core": "1.0.1"
+    "milo-core": "1.0.2"
   },
   "devDependencies": {
     "async": "~0.2.9",
