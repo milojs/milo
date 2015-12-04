@@ -57,6 +57,10 @@ module.exports = function(grunt) {
             mocks: {
                 src: 'mocks/**/*.js',
                 dest: 'dist/'
+            },
+            package: {
+                src: 'package.json',
+                dest: 'build/instrument/'
             }
         },
         instrument: {
@@ -135,8 +139,8 @@ module.exports = function(grunt) {
     grunt.registerTask('karma', 'browserify:tests');
     grunt.registerTask('karmatest', 'karma');
     grunt.registerTask('htmltest', ['browserify:test1', 'watch']);
-    grunt.registerTask('tests', ['mochaTest', 'browserify', 'karmatest']);
-    grunt.registerTask('build', ['instrument', 'browserify', 'copy', 'uglify', 'exorcise']);
+    grunt.registerTask('tests', ['mochaTest', 'copy', 'browserify', 'karmatest']);
+    grunt.registerTask('build', ['instrument', 'copy', 'browserify', 'uglify', 'exorcise']);
     grunt.registerTask('default', ['test', 'build', 'watch']);
     grunt.registerTask('skiptest', ['browserify', 'watch']);
 
