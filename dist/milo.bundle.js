@@ -3828,6 +3828,7 @@ module.exports = Dom;
 
 // start Dom facet
 function start() {
+    ComponentFacet.prototype.start.apply(this, arguments);
     var el = this.owner.el;
     _applyConfigToElement(el, this.config);
     var currentStyle = window.getComputedStyle(el);
@@ -4913,6 +4914,7 @@ function List$init() {
  * Starts the List facet instance, finds child with Item facet.
  */
 function List$start() {
+    ComponentFacet.prototype.start.apply(this, arguments);
     // Fired by __binder__ when all children of component are bound
     this.owner.on('childrenbound', onChildrenBound);
 }
@@ -18601,7 +18603,7 @@ module.exports={
     "url": "https://github.com/milojs/milo/issues"
   },
   "dependencies": {
-    "base32": "git://github.com/milojs/base32-js",
+    "base32": "git+ssh://git@github.com/milojs/base32-js.git",
     "milo-core": "^1.0.3"
   },
   "devDependencies": {
