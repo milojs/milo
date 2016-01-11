@@ -880,8 +880,10 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
         function postChildrenBoundMessage(el) {
             var elComp = Component.getComponent(el);
 
-            if (elComp)
+            if (elComp) {
                 elComp.postMessageSync('childrenbound');
+                elComp.childrenBound();
+            }
         }
     }
 
@@ -1581,10 +1583,10 @@ var _makeComponentConditionFunc = componentUtils._makeComponentConditionFunc;
  * 3. `init` method of component is called. At this point all facets are created but facets still can be not ready as they can have initialization code in `start` method. If component subclass implements `init` method it MUST call inherited method with `<Superclass>.prototype.init.apply(this, arguments)`, where <Superclass> is Component or another superclass the component is a subclass of.
  * 4. `check` method of all facets is called. This method adds facets that are not part of the component declaration (being part of the class or explicitely listed in bind attribute) but are required by facets that the compnent already has. Subclasses of [ComponentFacet](./c_facet.js.html) do not need to implement this method.
  * 5. `start` method of all facets is called. This method is usually implemented by ComponentFacet subclasses and it can have any initialization code that depends on component or on other facets that are the dependencies of a facet. Inherited `start` method should be called int he same way as written above.
- * 6. `start` method of component is called. This component method can be implemented by subclasses if they need to have some initialization code that depends on some facets and requires that these facets are fully inialized. Often such code also depends on component's scope children as well so this code should be inside `'childrenbound'` event subscriber.
+ * 6. `start` method of component is called. This component method can be implemented by subclasses if they need to have some initialization code that depends on some facets and requires that these facets are fully inialized. Often such code also depends on component's scope children as well so this code should be inside `'childrenbound'` method. `start` of scope parent is called BEFORE `start` of children.
  * 7. 'addedtoscope' event is dispatched when component is added to its parent's scope or to top level scope created by `milo.binder`.
  * 8. component's children are created (steps 1-6 above are followed for each child).
- * 9. 'childrenbound' event is dispatched when all component's children are created and added to their scope (see event description below).
+ * 9. `childrenBound` method is called and 'childrenbound' event is dispatched when all component's children are created and added to their scope (see event description below). `childrenBound` of scope parent is called AFTER `childrenBound` of all children.
  * 10. 'stateready' event is dispatched for component and all its children when component is create from state (see event description below).
  * 11. at this point component is in the "interactive" state when it and its facets will only respond to messages/events that they subscribed to during initialization.
  *
@@ -1665,6 +1667,7 @@ delete Component.createFacetedClass;
 _.extendProto(Component, {
     init: Component$init,
     start: Component$start,
+    childrenBound: Component$childrenBound,
     createElement: Component$createElement,
     hasFacet: Component$hasFacet,
     addFacet: Component$addFacet,
@@ -2029,10 +2032,17 @@ function Component$init(scope, element, name, componentInfo) {
 
 /**
  * This is a stub to avoid confusion whether the method of superclass should be called in subclasses
- * The start method of subclass instance is called once all the facets are created, initialized and started (see above)
+ * start method of subclass instance is called once all the facets are created, initialized and started (see above)
+ * start method of scope parent is called BEFORE the same method of the child
  */
 function Component$start() {}
 
+/**
+ * This is a stub to avoid confusion whether the method of superclass should be called in subclasses
+ * childrenBound method of subclass instance is called once all the scope children are created, initialized, started and bound (see above)
+ * childrenBound method of scope parent is called AFTER childrenBound method of the child
+ */
+function Component$childrenBound() {}
 
 /**
  * Component instance method.
@@ -18570,7 +18580,7 @@ if (typeof module == 'object' && module.exports) {
 },{"./dotjs/functions":103,"./dotjs/methods":111}],118:[function(require,module,exports){
 module.exports={
   "name": "milojs",
-  "version": "1.1.7",
+  "version": "1.2.0",
   "description": "Browser/nodejs reactive programming and data driven DOM manipulation with modular components.",
   "keywords": [
     "framework",

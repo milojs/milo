@@ -47,16 +47,16 @@ module.exports = function(config) {
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: false,
 
-     customLaunchers: {
+    customLaunchers: {
         'RemChrome': {
           base: 'WebDriver',
           config: {
             hostname: "localhost",
             port: 4444,
           },
-          browserName: 'chrome',
+          browserName: 'chrome'
         }
-      },
+    },
 
     // Start these browsers, currently available:
     // - Chrome
