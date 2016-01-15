@@ -91,7 +91,7 @@ milo(function () {
 
 ### Note on runtime parameter type checking
 
-Milo uses check module (`milo.util.check` - forked from check package of [Meteor framework](https://www.meteor.com/)) for runtime checking of parameter types. It is highly recommended to switch off this checks using: `milo.config({ check: false })`.
+Milo uses check module (`milo.util.check` - forked from check package of [Meteor framework](https://www.meteor.com/)) for runtime checking of parameter types. It is highly recommended to switch off this checks in production using: `milo.config({ check: false })`.
 
 Depending on your application, it can improve performance more than twice.
 
@@ -179,11 +179,10 @@ There are the following facets defined in __milo__:
 - [Data](http://milojs.github.io/milo/components/c_facets/Data.js.html) - an api to manipulate DOM tree inside component element as data, allowing both getting/setting structured data from/to many DOM elements at once and creating reactive data connection of Models (see below) to DOM.
 - [List](http://milojs.github.io/milo/components/c_facets/List.js.html) and [Item](http://milojs.github.io/milo/components/c_facets/Item.js.html) - allow creating lists in DOM from arays in your data. Component class using any of these facets require Data facet (will be added automatically) that should be used to get/set list data and to create reactive data connection.
 - [Template](http://milojs.github.io/milo/components/c_facets/Template.js.html) - simplifies rendering of component DOM element from template.
+- [Css](http://milojs.github.io/milo/components/c_facets/Css.js.html) - Allows you to bind DOM data, or models to css classes using declaritive rules in the facet config.
 - [Frame](http://milojs.github.io/milo/components/c_facets/Frame.js.html) - manages sending/receiveing messages to/from iframe.
 - [Drag](http://milojs.github.io/milo/components/c_facets/Drag.js.html) - allows easy management of draggable DOM elements.
 - [Drop](http://milojs.github.io/milo/components/c_facets/Drop.js.html) - helps creating drop targets.
-- Editable - manages contenteditable DOM elements enabling splitting and merging of components (moved to app)
-- Split - manages the process of splitting the component at the current selection point (moved to app)
 - [Model](http://milojs.github.io/milo/components/c_facets/ModelFacet.js.html) - simple wrapper for __milo__ Model (see below), helping to store data on component.
 
 There is a [Component facet template](https://github.com/milojs/milo/blob/master/lib/components/c_facets/facet_template.js) to simplify creation of your own facets. All facets of components should be subclasses of [ComponentFacet](http://milojs.github.io/milo/components/c_facet.js.html).
