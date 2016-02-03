@@ -9,10 +9,8 @@ milo.util.domReady = domReady;
 function domReady(func) { // , arguments
     var self = this
         , args = _.slice(arguments, 1);
-    if (isReady.call(this))
-        callFunc();
-    else
-        messenger.once('domready', callFunc);
+    if (mockDomIsReady) callFunc();
+    messenger.on('domready', callFunc);
 
     function callFunc() {
         func.apply(self, args);
