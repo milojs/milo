@@ -10,13 +10,19 @@ _.extendProto(window.XMLHttpRequest, {
 });
 
 _.extend(window.XMLHttpRequest, {
-    setMockRoutes: setMockRoutes
+    setMockRoutes: setMockRoutes,
+    setOptions: setOptions
 });
 
 
-var _mock_routes;
+var _mock_routes, _opts = {};
+
 function setMockRoutes(routes) {
     _mock_routes = routes;
+}
+
+function setOptions(opts) {
+    _opts = opts || {};
 }
 
 
@@ -59,7 +65,9 @@ function send(data) {
     }
 
     function done(res) {
-        _.deferMethod(self, _response_ready, res);
+        var delay = _opts && _opts.delay;
+        if (delay) _.delayMethod(self, _response_ready, delay, res);
+        else _.deferMethod(self, _response_ready, res);
     }
 }
 
