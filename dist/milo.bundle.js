@@ -18592,7 +18592,7 @@ if (typeof module == 'object' && module.exports) {
 },{"./dotjs/functions":103,"./dotjs/methods":111}],118:[function(require,module,exports){
 module.exports={
   "name": "milojs",
-  "version": "1.3.0",
+  "version": "1.3.2",
   "description": "Browser/nodejs reactive programming and data driven DOM manipulation with modular components.",
   "keywords": [
     "framework",

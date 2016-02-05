@@ -1,6 +1,6 @@
 {
   "name": "milojs",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "description": "Browser/nodejs reactive programming and data driven DOM manipulation with modular components.",
   "keywords": [
     "framework",
