@@ -955,7 +955,7 @@ _.extendProto(ActionsHistory, {
     deleteLast: ActionsHistory$deleteLast,
     undo: ActionsHistory$undo,
     redo: ActionsHistory$redo,
-    nextUndoAction: ActionsHistory$nextUndoAction,
+    nextUndoAction: ActionsHistory$getLastAction,
     nextRedoAction: ActionsHistory$nextRedoAction,
     undoAll: ActionsHistory$undoAll,
     redoAll: ActionsHistory$redoAll,
@@ -986,7 +986,8 @@ function ActionsHistory$store(command) {
 function ActionsHistory$deleteLast() {
     if (!this.actions.length) return;
     this.position--;
-    this.actions.length--;
+    var act = this.actions.pop();
+    act.destroy();
 }
 
 
@@ -1010,11 +1011,6 @@ function ActionsHistory$redo(cb) {
     var act = this.actions[this.position++];
     act.redo(cb);
     return act;
-}
-
-
-function ActionsHistory$nextUndoAction() {
-    return this.actions[this.position - 1];
 }
 
 
@@ -1362,6 +1358,7 @@ function Transaction$merge(transaction) {
     transaction.commands.each(function(cmd) {
         this.commands.store(cmd);
     }, this);
+    if (transaction.comment) this.comment = transaction.comment;
 }
 
 
@@ -1429,7 +1426,7 @@ function TransactionHistory$storeCommand(command, appendTransaction) {
         var transaction = this.transactions.getLastAction();
         transaction.storeCommand(command);
         _postTransactionMessage.call(this, 'appended', transaction);
-        return;
+        return transaction;
     }
 
     if (! this.currentBatch) this.currentBatch = new Transaction;
@@ -1438,6 +1435,7 @@ function TransactionHistory$storeCommand(command, appendTransaction) {
         this[SCHEDULED] = true;
         _.deferMethod(this, _storeTransaction);
     }
+    return this.currentBatch;
 }
 
 
@@ -1512,8 +1510,11 @@ function TransactionHistory$undo(cb) {
     var t = this.transactions.nextUndoAction();
     if (!t) return;
     _postTransactionMessageSync.call(this, 'undoing', t);
-    this.transactions.undo(cb);
-    _postTransactionMessage.call(this, 'undone', t);
+    var self = this;
+    this.transactions.undo(function() {
+        _postTransactionMessage.call(self, 'undone', t);
+        cb && cb();
+    });
     return t;
 }
 
@@ -1522,8 +1523,11 @@ function TransactionHistory$redo(cb) {
     var t = this.transactions.nextRedoAction();
     if (!t) return;
     _postTransactionMessageSync.call(this, 'redoing', t);
-    this.transactions.redo(cb);
-    _postTransactionMessage.call(this, 'redone', t);
+    var self = this;
+    this.transactions.redo(function() {
+        _postTransactionMessage.call(self, 'redone', t);
+        cb && cb();
+    });
     return t;
 }
 
@@ -18616,7 +18620,7 @@ if (typeof module == 'object' && module.exports) {
 },{"./dotjs/functions":103,"./dotjs/methods":111}],118:[function(require,module,exports){
 module.exports={
   "name": "milojs",
-  "version": "1.4.0",
+  "version": "1.4.2",
   "description": "Browser/nodejs reactive programming and data driven DOM manipulation with modular components.",
   "keywords": [
     "framework",

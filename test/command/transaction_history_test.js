@@ -158,9 +158,7 @@ describe('TransactionHistory', function() {
                     assert.equal(messages.length, 2);
                     assert.equal(messages[1].msg, 'appended');
     
-                    var t = history.undo();
-
-                    _.defer(function() {
+                    var t = history.undo(function() {
                         assert.equal(history.inTransaction(), false);
                         assert.equal(messages.length, 4);
                         assert.equal(messages[2].msg, 'undoing');
