@@ -955,6 +955,8 @@ _.extendProto(ActionsHistory, {
     deleteLast: ActionsHistory$deleteLast,
     undo: ActionsHistory$undo,
     redo: ActionsHistory$redo,
+    nextUndoAction: ActionsHistory$nextUndoAction,
+    nextRedoAction: ActionsHistory$nextRedoAction,
     undoAll: ActionsHistory$undoAll,
     redoAll: ActionsHistory$redoAll,
     undoAllAsync: ActionsHistory$undoAllAsync,
@@ -1008,6 +1010,16 @@ function ActionsHistory$redo(cb) {
     var act = this.actions[this.position++];
     act.redo(cb);
     return act;
+}
+
+
+function ActionsHistory$nextUndoAction() {
+    return this.actions[this.position - 1];
+}
+
+
+function ActionsHistory$nextRedoAction() {
+    return this.actions[this.position];
 }
 
 
@@ -1490,16 +1502,28 @@ function _postTransactionMessage(msg, transaction) {
 }
 
 
+function _postTransactionMessageSync(msg, transaction) {
+    if (this._messenger)
+        this._messenger.postMessageSync(msg, { transaction: transaction });
+}
+
+
 function TransactionHistory$undo(cb) {
-    var t = this.transactions.undo(cb);
-    if (t) _postTransactionMessage.call(this, 'undone', t);
+    var t = this.transactions.nextUndoAction();
+    if (!t) return;
+    _postTransactionMessageSync.call(this, 'undoing', t);
+    this.transactions.undo(cb);
+    _postTransactionMessage.call(this, 'undone', t);
     return t;
 }
 
 
 function TransactionHistory$redo(cb) {
-    var t = this.transactions.redo(cb);
-    if (t) _postTransactionMessage.call(this, 'redone', t);
+    var t = this.transactions.nextRedoAction();
+    if (!t) return;
+    _postTransactionMessageSync.call(this, 'redoing', t);
+    this.transactions.redo(cb);
+    _postTransactionMessage.call(this, 'redone', t);
     return t;
 }
 
@@ -18592,7 +18616,7 @@ if (typeof module == 'object' && module.exports) {
 },{"./dotjs/functions":103,"./dotjs/methods":111}],118:[function(require,module,exports){
 module.exports={
   "name": "milojs",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "description": "Browser/nodejs reactive programming and data driven DOM manipulation with modular components.",
   "keywords": [
     "framework",

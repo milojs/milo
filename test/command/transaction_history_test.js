@@ -162,9 +162,11 @@ describe('TransactionHistory', function() {
 
                     _.defer(function() {
                         assert.equal(history.inTransaction(), false);
-                        assert.equal(messages.length, 3);
-                        assert.equal(messages[2].msg, 'undone');
+                        assert.equal(messages.length, 4);
+                        assert.equal(messages[2].msg, 'undoing');
+                        assert.equal(messages[3].msg, 'undone');
                         assert(messages[2].data.transaction == t);
+                        assert(messages[3].data.transaction == t);
                         done();
                     });
                 }, 2);
