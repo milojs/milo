@@ -4280,6 +4280,7 @@ function onDragStart(eventType, event) {
     function setAdditionalDataTypes() {
         if (this.config.dataTypes) {
             this._dataTypesData = _.mapKeys(this.config.dataTypes, function (getDataFunc, dataType) {
+                if (typeof getDataFunc == 'string') getDataFunc = owner[getDataFunc];
                 var data = getDataFunc.call(this.owner, dataType);
                 if (typeof data == 'object') data = JSON.stringify(data);
                 if (data) dt.setData(dataType, data);
