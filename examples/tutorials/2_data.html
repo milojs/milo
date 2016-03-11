@@ -10,7 +10,7 @@
 <body>
 <!-- HTML -->
 
-    <script src="http://i.mol.im/cc/milo/496/dist/milo.bundle.js"></script>
+    <script src="../../dist/milo.bundle.js"></script>
 
     <!-- A simple component binding with a single data facet -->
     <div ml-bind="[data]:comp">My first component</div>
@@ -19,7 +19,7 @@
          Container creates a separate scope for child components. -->
     <div ml-bind="[data container]:nested">
         <h3 ml-bind="[data]:title"></h3>
-        <hp ml-bind="[data]:description"></hp>
+        <p ml-bind="[data]:description"></p>
     </div>
 
     <!-- A component and data facet bound to input element -->
