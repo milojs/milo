@@ -7,7 +7,7 @@ var fragmentUtils = milo.util.fragment
     , fs = require('fs');
 
 
-var html = fs.readFileSync(__dirname + '/fragment_test.html');
+var html = fs.readFileSync(__dirname + '/fragment_test.html', 'utf-8');
 
 
 describe('util.fragment', function() {

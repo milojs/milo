@@ -6,7 +6,7 @@ var domUtils = milo.util.dom
     , fs = require('fs');
 
 
-var html = fs.readFileSync(__dirname + '/dom_test.html');
+var html = fs.readFileSync(__dirname + '/dom_test.html', 'utf-8');
 
 
 describe('DOM utils', function() {

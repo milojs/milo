@@ -7,7 +7,7 @@ var fs = require('fs')
 describe('Data facet', function() {
     this.timeout(10000);
 
-    var testHtml = fs.readFileSync(__dirname + '/Data_test.html');
+    var testHtml = fs.readFileSync(__dirname + '/Data_test.html', 'utf-8');
     var element, scope;
 
 

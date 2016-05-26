@@ -5,7 +5,7 @@ var Component = milo.Component
     , fs = require('fs')
     , assert = require('assert');
 
-var html = fs.readFileSync(__dirname + '/c_class_test.html');
+var html = fs.readFileSync(__dirname + '/c_class_test.html', 'utf-8');
 
 
 var childDestroyCalled;

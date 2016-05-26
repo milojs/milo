@@ -8,7 +8,7 @@ var fs = require('fs')
 describe('List facet', function() {
     this.timeout(10000);
 
-    var testHtml = fs.readFileSync(__dirname + '/List_test.html');
+    var testHtml = fs.readFileSync(__dirname + '/List_test.html', 'utf-8');
     var element, scope,
         testData = [
             { name: 'Jason', surname: 'Green', contact: '07123123'},

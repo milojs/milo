@@ -5,7 +5,7 @@ var fs = require('fs')
 
 
 describe('milo.binder', function() {
-    var testHTML = fs.readFileSync(__dirname + '/binder_test.html');
+    var testHTML = fs.readFileSync(__dirname + '/binder_test.html', 'utf-8');
     var element;
 
     beforeEach(function() {
