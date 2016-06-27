@@ -48,7 +48,7 @@ describe('Drag facet', function() {
 
     function createAndDispatchEvent(comp, name, time) {
         var evt = new Event(name);
-        evt.dataTransfer = {};
+        evt.dataTransfer = { items: [] };
         evt.dataTransfer.setData = function getData(type, data) {
             assert(DATA_TYPES.hasOwnProperty(type));
             ACTUAL_DATA_TYPES[type] = data;

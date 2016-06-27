@@ -148,7 +148,10 @@ function runAllowedTest(component, isAllowed, cb) {
 
 function createAndDispatchEvent(comp, name, time) {
     var evt = new Event(name);
-    evt.dataTransfer = {types: ['text/html', 'x-application/milo/component', ENCODED_TYPE]};
+    evt.dataTransfer = {
+        items: [],
+        types: ['text/html', 'x-application/milo/component', ENCODED_TYPE]
+    };
     evt.dataTransfer.getData = function getData(dataType) {
         return {blah: 'yo'};
     };
