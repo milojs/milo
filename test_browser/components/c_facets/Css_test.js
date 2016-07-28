@@ -27,7 +27,10 @@ describe('Css facet', function() {
                     },
 
                     // Used for template tests
-                    '.modelPath4': '$-class'
+                    '.modelPath4': '$-class',
+
+                    // Used to test nested props
+                    '.nested.property': 'nested-example'
                 }
             }
         }
@@ -35,12 +38,22 @@ describe('Css facet', function() {
 
     var component;
     var dataSource;
+    var connector;
 
     beforeEach(function() {
         component = ComponentClass.createOnElement();
         dataSource = new milo.Model();
+        connector && milo.minder.destroyConnector(connector);
+        connector = milo.minder(dataSource, '->>>>>>', component.css);
+    });
 
-        milo.minder(dataSource, '->>', component.css);
+    it('should apply css class regardless of model path structure', function (done) {
+        runTests.call(this, done, [
+            test('.nested.property', true, ['nested-example']), // Add class
+            test('.nested.property', false, []), // Remove class
+            test('.nested.property', {}, ['nested-example']), // Add class (truthy value, not boolean true)
+            test('.nested.property', '', []) // Remove class (falsey value, not boolean false)
+        ]);
     });
 
     it('should apply css classes based on truthy values', function(done) {

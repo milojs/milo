@@ -189,7 +189,7 @@ describe('DOMStorage', function() {
             }
 
             function myClassParser(valueStr) {
-                var value = milo.util.jsonParse(valueStr);
+                var value = _.jsonParse(valueStr);
                 return new MyClass(value);
             }
 
