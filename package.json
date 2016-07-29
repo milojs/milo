@@ -35,7 +35,8 @@
   "dependencies": {
     "base32": "milojs/base32-js.git",
     "milo-core": "^1.0.3",
-    "querystringparser": "^0.1.1"
+    "querystringparser": "^0.1.1",
+    "dodgy": "1.3.0"
   },
   "devDependencies": {
     "async": "~0.2.9",
