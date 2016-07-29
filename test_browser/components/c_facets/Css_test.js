@@ -3,13 +3,17 @@
 var assert = require('assert')
     , async = require('async');
 
-describe('Css facet', function() {
+describe.only('Css facet', function() {
     milo.config.check = true; // Enable 'check' library so that inputs to the Css facet are validated
 
     var ComponentClass = milo.createComponentClass({
         className: 'CssComponent',
         facets: {
+            model: undefined,
             css: {
+                binding: {
+                    facetName: 'model'
+                },
                 classes: {
                     // Used for simple tests
                     '.modelPath1': 'css-class-1',
@@ -63,6 +67,21 @@ describe('Css facet', function() {
             test('.modelPath1', {}, ['css-class-1']), // Add class (truthy value, not boolean true)
             test('.modelPath1', '', []) // Remove class (falsey value, not boolean false)
         ]);
+    });
+
+    it('should setup minder connection based on binding config', function(done) {
+        dataSource = component.model.m;
+        runTests.call(this, almostDone, [
+            test('.modelPath1', true, ['css-class-1']), // Add class
+            test('.modelPath1', false, []), // Remove class
+            test('.modelPath1', {}, ['css-class-1']), // Add class (truthy value, not boolean true)
+            test('.modelPath1', '', []) // Remove class (falsey value, not boolean false)
+        ]);
+
+        function almostDone() {
+            assert.deepEqual(component.model.m.get(), {'modelPath1':''});
+            done();
+        }
     });
 
     it('should apply css classes to element supplied with getClassList', function(done) {
