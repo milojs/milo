@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
+
 var Component = require('../../lib/components/c_class')
     , ComponentFacet = require('../../lib/components/c_facet')
     , FacetedObject = require('../../lib/abstract/faceted_object')

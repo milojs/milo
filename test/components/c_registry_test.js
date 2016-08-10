@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
+
 var componentsRegistry = require('../../lib/components/c_registry')
     , Component = require('../../lib/components/c_class')
     , testRegistry = require('../utils/test_registry')

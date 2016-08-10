@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
+
 var _ = require('milo-core').proto
     , assert = require('assert')
     , check = require('milo-core').util.check

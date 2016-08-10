@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
+
 var FacetedObject = require('../../lib/abstract/faceted_object')
     , Facet = require('../../lib/abstract/facet')
     , assert = require('assert')

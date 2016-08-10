@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
+
 var facetsRegistry = require('../../../lib/components/c_facets/cf_registry')
     , ComponentFacet = require('../../../lib/components/c_facet')
     , testRegistry = require('../../utils/test_registry')

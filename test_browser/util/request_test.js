@@ -1,5 +1,6 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
 
 var assert = require('assert')
     , request = milo.util.request
@@ -86,7 +87,7 @@ describe('request', function() {
 
         var testData = { data: 'test2' };
         currentTestResponse = function(data) {
-            assert.deepEqual(JSON.parse(data), testData)
+            assert.deepEqual(JSON.parse(data), testData);
             return 'test2 response';
         };
 
@@ -142,7 +143,7 @@ describe('request', function() {
         });
 
         currentTestResponse = function(data) {
-            return 'test4 uploaded'
+            return 'test4 uploaded';
         };
 
         var promise = request.file('http://example.com/test4', 'file data', function(err, resp) {
@@ -158,7 +159,7 @@ describe('request', function() {
 
 
     it('should define request.whenRequestsCompleted', function(done) {
-        var completed = requestMessageDispatched = doneTimes(9, function() {
+        requestMessageDispatched = doneTimes(9, function() {
             assert.deepEqual(requestMessages, [
                 'request', 'test_whenRequestsCompleted_none',
                 'request', 'success', 'request',
@@ -187,6 +188,6 @@ describe('request', function() {
     function doneTimes(counter, done) {
         return function () {
             if (!--counter) done();
-        }
+        };
     }
 });

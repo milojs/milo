@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
+
 var fs = require('fs')
     , assert = require('assert')
     , Model = milo.Model;
@@ -9,7 +11,7 @@ describe('List facet', function() {
     this.timeout(10000);
 
     var testHtml = fs.readFileSync(__dirname + '/List_test.html', 'utf-8');
-    var element, scope,
+    var scope,
         testData = [
             { name: 'Jason', surname: 'Green', contact: '07123123'},
             { name: 'Luis', surname: 'Fetzner', contact: '07123124'},
@@ -50,7 +52,7 @@ describe('List facet', function() {
         // var m1 = new Model({hello:[]});
         var m1 = new Model;
         milo.minder(m1('.hello'), '<<<->>>', scope.myList1.data);
-        var valueSet = m1('.hello').push(testData[0]);
+        m1('.hello').push(testData[0]);
         _.deferTicks(function() {
             assert.deepEqual(m1('.hello').get(), scope.myList1.data.get(), 'should return data that was set');
             done();

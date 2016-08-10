@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
+
 var fs = require('fs')
     , assert = require('assert')
     , Model = milo.Model;
@@ -8,7 +10,7 @@ var fs = require('fs')
 describe('Data Model connection', function() {
     this.timeout(10000);
     var testHtml = fs.readFileSync(__dirname + '/Data_test.html', 'utf-8');
-    var element, scope, myItem;
+    var scope, myItem;
 
     var testData = {
             title: 'Title 1',

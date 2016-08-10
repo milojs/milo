@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
+
 var OptionsAttribute = require('../../lib/attributes/a_options')
     , assert = require('assert')
     , config = require('../../lib/config');

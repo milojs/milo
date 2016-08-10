@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
+
 var Component = require('../../lib/components/c_class')
     , assert = require('assert');
 
