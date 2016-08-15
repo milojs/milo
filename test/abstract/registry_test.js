@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
+
 var ClassRegistry = require('../../lib/abstract/registry.js')
     , _ = require('milo-core').proto
     , assert = require('assert')

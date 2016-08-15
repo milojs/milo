@@ -1,5 +1,6 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
 
 var domUtils = milo.util.dom
     , assert = require('assert')
@@ -51,10 +52,10 @@ describe('DOM utils', function() {
 
     it('getNodeAtTreePath should work with nearest paths', function() {
         var getNodeAtTreePath = domUtils.getNodeAtTreePath;
-        var p1 = document.getElementById('tree-index-1')
-            , p2 = document.getElementById('tree-index-6')
-            , p3 = document.getElementById('tree-index-11')
-            , p4 = document.getElementById('tree-index-16');
+        document.getElementById('tree-index-1');
+        document.getElementById('tree-index-6');
+        document.getElementById('tree-index-11');
+        var p4 = document.getElementById('tree-index-16');
 
         assert.equal(getNodeAtTreePath(root, [5]), undefined, 'p4 false');
         assert.equal(getNodeAtTreePath(root, [5], true), p4, 'p4 true');
@@ -89,8 +90,8 @@ describe('DOM utils', function() {
 
 
     it('should define xpathSelector', function() {
-        var p1 = document.getElementById('tree-index-1')        
-            , p2 = document.getElementById('tree-index-6')
+        var p1 = document.getElementById('tree-index-1')
+            , p2 = document.getElementById('tree-index-6');
         assert.equal(domUtils.xpathSelector('/html/body//p'), p1);
         assert.equal(domUtils.xpathSelector('//p[@id="tree-index-6"]'), p2);
         assert.equal(domUtils.xpathSelector('//p[contains(text(), "Second")]'), p2);

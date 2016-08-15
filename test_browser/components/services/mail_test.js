@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
+
 var assert = require('assert');
 
 
@@ -13,5 +15,5 @@ describe('milo.mail', function() {
         });
 
         milo.mail.trigger('test', { a: 'b' });
-    })
+    });
 });

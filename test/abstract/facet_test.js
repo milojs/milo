@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
+
 var Facet = require('../../lib/abstract/facet')
     , assert = require('assert')
     , _ = require('milo-core').proto;

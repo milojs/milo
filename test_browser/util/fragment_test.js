@@ -1,5 +1,6 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
 
 var fragmentUtils = milo.util.fragment
     , Component = milo.Component

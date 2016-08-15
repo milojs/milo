@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
+
 var fs = require('fs')
     , assert = require('assert');
 
@@ -34,7 +36,7 @@ describe('milo.binder', function() {
         var innerScope = scope.infoView.container.scope;
 
         var containerFacet1 = innerScope.para1.scope._hostObject
-            , containerFacet2 = innerScope.para2.scope._hostObject
+            , containerFacet2 = innerScope.para2.scope._hostObject;
         assert(containerFacet1 instanceof milo.ComponentFacet);
         assert(containerFacet2 instanceof milo.ComponentFacet);
 

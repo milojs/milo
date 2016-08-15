@@ -1,10 +1,12 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
+
 var assert = require('assert');
 var HTML = '<div ml-bind="OptionsComponent:comp" ml-options="foo=bar&test=test321"></div>'
          + '<div ml-bind="OptionsComponent:comp2"></div>';
 
-var HTML_COERCE = '<div ml-bind="OptionsComponentCoerce:comp" ml-options="bool1=true&bool2=false&num=34&float1=34.5&float2=0.034&addr=32 green st"></div>'
+var HTML_COERCE = '<div ml-bind="OptionsComponentCoerce:comp" ml-options="bool1=true&bool2=false&num=34&float1=34.5&float2=0.034&addr=32 green st"></div>';
 
 describe('Options facet', function() {
     milo.config.check = true; // Enable 'check' library so that inputs to the Css facet are validated

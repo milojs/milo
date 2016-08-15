@@ -99,12 +99,3 @@ function _response_ready(response) {
         }
     }
 }
-
-
-var ARGS_PATTERN = /\(\s*([^)]+?)\s*\)/;
-var WHITESPACE_PATTERN = /\s*,\s*/;
-function extractFuncArgs(func) {
-    var str = func.toString();
-    var args = ARGS_PATTERN.exec(str)[1];
-    if (args) return args.split(WHITESPACE_PATTERN);
-}

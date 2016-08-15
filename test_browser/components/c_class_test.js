@@ -1,5 +1,6 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
 
 var Component = milo.Component
     , fs = require('fs')
@@ -51,7 +52,7 @@ describe('Component', function() {
         para1.remove(); // removes from scope
         para1.dom.remove(); // and from DOM
 
-        root.insertAtTreePath(treePath, para1)
+        root.insertAtTreePath(treePath, para1);
         para1.rename('para1');
             assert.equal(currentHTML, root.el.innerHTML);
             assert.equal(para1.scope, infoView.container.scope, 'para1.scope');

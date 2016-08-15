@@ -1,7 +1,8 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
+
 var assert = require('assert')
-    , async = require('async')
     , DragDrop = milo.util.dragDrop;
 
 var ENCODED_TYPE = 'x-application/milo/component-meta/9n4n6x31dtj62wk4/dnmprvuz64u38dhr6cr30dhm6gvk8/fch76x3tdhjq68hubdxj4tvjdxuq08hu49tpjvk7dhjj4b12d5j24eh264uk28hc49q62vb548x24u3mdnp5ywved5r70tbmbxtpjvk7dhjj4zax5gh6jwucd5v6a8hueht7atbx';
@@ -86,7 +87,7 @@ describe('Drop facet', function() {
         leaveCount = 0;
         dropCount = 0;
         DragDrop.service.offAll();
-    })
+    });
 
 
     it('should proxy native events to facet events', function (done) {

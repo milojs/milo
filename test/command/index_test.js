@@ -1,5 +1,6 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
 
 var Command = require('../../lib/command')
     , assert = require('assert')

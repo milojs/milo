@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
+
 var fs = require('fs')
     , assert = require('assert');
 
@@ -8,7 +10,7 @@ describe('Data facet', function() {
     this.timeout(10000);
 
     var testHtml = fs.readFileSync(__dirname + '/Data_test.html', 'utf-8');
-    var element, scope;
+    var scope;
 
 
     beforeEach(function() {

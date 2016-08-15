@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
+
 var BindAttribute = require('../../lib/attributes/a_bind')
     , assert = require('assert')
     , config = require('../../lib/config');

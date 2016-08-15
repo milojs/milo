@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
+
 var ComponentInfo = require('../../lib/components/c_info')
     , BindAttribute = require('../../lib/attributes/a_bind')
     , Component = require('../../lib/components/c_class')

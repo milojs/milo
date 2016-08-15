@@ -1,7 +1,8 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
+
 var assert = require('assert')
-    , async = require('async')
     , DragDrop = milo.util.dragDrop;
 
 var EXPECTED_SERVICE_MESSAGES = ['dragdropstarted', 'dragdropcompleted', 'completedragdrop'];
@@ -18,7 +19,7 @@ describe('Drag facet', function() {
     var ACTUAL_DATA_TYPES = {};
     var component;
 
-    var DragComponent = milo.createComponentClass({
+    milo.createComponentClass({
         className: 'DragComponent',
         facets: {
             drag: undefined

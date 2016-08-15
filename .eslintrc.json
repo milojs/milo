@@ -1,0 +1,21 @@
+{
+    "env": {
+        "commonjs": true,
+        "browser": true,
+        "es6": true,
+        "node": true
+    },
+    "globals": {
+        "milo": true,
+        "_": true,
+        "CC": true
+    },
+    "rules": {
+        "linebreak-style": ["error", "unix"],
+        "semi": ["error", "always"],
+        "one-var": "off",
+        "strict": "error",
+        "no-undef": "error",
+        "no-unused-vars": ["error", {"vars": "all", "args": "none"}]
+    }
+}

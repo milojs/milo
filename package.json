@@ -41,6 +41,7 @@
     "async": "~0.2.9",
     "brfs": "0.0.8",
     "browserify": "~2.35.4",
+    "eslintify": "^2.1.0",
     "grunt": "~0.4.1",
     "grunt-browserify": "~1.2.11",
     "grunt-contrib-copy": "^0.8.2",
@@ -61,4 +62,3 @@
     "mocha": "~1.16.2"
   }
 }
-

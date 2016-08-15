@@ -1,5 +1,6 @@
 'use strict';
 
+/* eslint-env browser, commonjs, node, mocha */
 
 var TransactionHistory = require('../../lib/command/transaction_history')
     , Command = require('../../lib/command')
