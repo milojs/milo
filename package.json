@@ -39,9 +39,13 @@
   },
   "devDependencies": {
     "async": "~0.2.9",
+    "babel-plugin-syntax-flow": "^6.13.0",
+    "babel-plugin-transform-flow-strip-types": "^6.14.0",
+    "babel-plugin-typecheck": "^3.9.0",
     "brfs": "0.0.8",
     "browserify": "~2.35.4",
     "eslintify": "^2.1.0",
+    "flowify": "^2.3.1",
     "grunt": "~0.4.1",
     "grunt-browserify": "~1.2.11",
     "grunt-contrib-copy": "^0.8.2",
