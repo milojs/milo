@@ -50,7 +50,7 @@
     "grunt-exorcise": "^1.0.0",
     "grunt-istanbul": "^0.6.1",
     "grunt-karma": "^0.8.2",
-    "grunt-mocha-test": "~0.7.0",
+    "grunt-mocha-test": "~0.13.2",
     "istanbul": "^0.4.0",
     "karma": "~0.12",
     "karma-chrome-launcher": "~0.1.2",
