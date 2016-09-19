@@ -38,7 +38,8 @@
     "querystringparser": "^0.1.1"
   },
   "devDependencies": {
-    "async": "~0.2.9",
+    "async": "^2.0.1",
+    "babel-preset-es2015": "^6.14.0",
     "brfs": "0.0.8",
     "browserify": "~2.35.4",
     "eslintify": "^2.1.0",
