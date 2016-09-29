@@ -40,7 +40,7 @@
     "async": "^2.0.1",
     "brfs": "^1.4.3",
     "browserify": "^13.1.0",
-    "eslintify": "^2.1.0",
+    "eslintify": "^3.0.0",
     "grunt": "^1.0.1",
     "grunt-browserify": "^5.0.0",
     "grunt-contrib-copy": "^1.0.0",

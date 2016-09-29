@@ -510,7 +510,7 @@ function BindAttribute$$setInfo(el, componentClass, componentName, componentFace
     attr.decorate();
 }
 
-},{"../config":43,"../util/component_name":54,"./a_class":5,"milo-core":84}],5:[function(require,module,exports){
+},{"../config":43,"../util/component_name":55,"./a_class":5,"milo-core":84}],5:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -981,7 +981,7 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
     }
 }
 
-},{"./attributes/a_bind":4,"./components/c_info":33,"./components/c_registry":34,"./components/scope":42,"./util/dom":58,"milo-core":84}],10:[function(require,module,exports){
+},{"./attributes/a_bind":4,"./components/c_info":33,"./components/c_registry":34,"./components/scope":42,"./util/dom":59,"milo-core":84}],10:[function(require,module,exports){
 'use strict';
 
 var coreClasses = require('milo-core').classes;
@@ -2568,7 +2568,7 @@ function Component$isDestroyed() {
     return !!this._destroyed;
 }
 
-},{"../abstract/faceted_object":2,"../attributes/a_bind":4,"../binder":9,"../config":43,"../util/component_name":54,"../util/dom":58,"../util/storage":68,"./c_facets/cf_registry":32,"./c_utils":35,"./scope":42,"milo-core":84}],17:[function(require,module,exports){
+},{"../abstract/faceted_object":2,"../attributes/a_bind":4,"../binder":9,"../config":43,"../util/component_name":55,"../util/dom":59,"../util/storage":69,"./c_facets/cf_registry":32,"./c_utils":35,"./scope":42,"milo-core":84}],17:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2989,7 +2989,7 @@ function Container$remove(comp) {
     this.owner.el.removeChild(comp.el);
 }
 
-},{"../../binder":9,"../../util/dom":58,"../c_facet":17,"../scope":42,"./cf_registry":32,"milo-core":84}],19:[function(require,module,exports){
+},{"../../binder":9,"../../util/dom":59,"../c_facet":17,"../scope":42,"./cf_registry":32,"milo-core":84}],19:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -3208,7 +3208,7 @@ Path.prototype.del = function() {
     this.set(null);
 };
 
-},{"../../util/create_facet_class":56,"milo-core":84}],20:[function(require,module,exports){
+},{"../../util/create_facet_class":57,"milo-core":84}],20:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -4232,7 +4232,7 @@ function hasTextAfterSelection() {
     return isText;
 }
 
-},{"../../attributes/a_bind":4,"../../util/dom":58,"../c_facet":17,"./cf_registry":32,"milo-core":84}],22:[function(require,module,exports){
+},{"../../attributes/a_bind":4,"../../util/dom":59,"../c_facet":17,"./cf_registry":32,"milo-core":84}],22:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drag"></a>
@@ -4478,7 +4478,7 @@ function _dragIsDisabled(event) {
     return false;
 }
 
-},{"../../util/dragdrop":61,"../c_facet":17,"../msg_src/dom_events":40,"./cf_registry":32,"milo-core":84}],23:[function(require,module,exports){
+},{"../../util/dragdrop":62,"../c_facet":17,"../msg_src/dom_events":40,"./cf_registry":32,"milo-core":84}],23:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drop"></a>
@@ -4670,7 +4670,7 @@ function Drop$isDropAllowed(dt, originalDropComponent) {
     // TODO test for other data types
 }
 
-},{"../../util/dragdrop":61,"../c_facet":17,"../msg_api/drop":39,"../msg_src/dom_events":40,"./cf_registry":32,"milo-core":84}],24:[function(require,module,exports){
+},{"../../util/dragdrop":62,"../c_facet":17,"../msg_api/drop":39,"../msg_src/dom_events":40,"./cf_registry":32,"milo-core":84}],24:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -5470,7 +5470,7 @@ function List$destroy() {
     ComponentFacet.prototype.destroy.apply(this, arguments);
 }
 
-},{"../../binder":9,"../../config":43,"../../util/component_name":54,"../../util/dom":58,"../c_class":16,"../c_facet":17,"./cf_registry":32,"milo-core":84}],28:[function(require,module,exports){
+},{"../../binder":9,"../../config":43,"../../util/component_name":55,"../../util/dom":59,"../c_class":16,"../c_facet":17,"./cf_registry":32,"milo-core":84}],28:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -5597,7 +5597,7 @@ function Options$destroy() {
     Options.super.destroy.apply(this, arguments);
 }
 
-},{"../../attributes/a_options":7,"../../util/create_facet_class":56,"milo-core":84}],30:[function(require,module,exports){
+},{"../../attributes/a_options":7,"../../util/create_facet_class":57,"milo-core":84}],30:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-template"></a>
@@ -5959,7 +5959,7 @@ function hasContainerFacet(ComponentClass, extraFacetsClasses) {
     }
 }
 
-},{"../util/component_name":54,"./c_facets/cf_registry":32,"./c_registry":34,"./scope":42,"milo-core":84}],34:[function(require,module,exports){
+},{"../util/component_name":55,"./c_facets/cf_registry":32,"./c_registry":34,"./scope":42,"milo-core":84}],34:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -6745,7 +6745,7 @@ function Scope$$rename(obj, name, renameInScope) {
         obj.name = name;
 }
 
-},{"../util/component_name":54,"milo-core":84}],43:[function(require,module,exports){
+},{"../util/component_name":55,"milo-core":84}],43:[function(require,module,exports){
 'use strict';
 
 
@@ -6922,7 +6922,7 @@ function loadView(el, removeAttribute, callback) {
     });
 }
 
-},{"./attributes/a_load":6,"./config":43,"./services/mail":49,"./util/dom":58,"./util/request":66,"milo-core":84}],45:[function(require,module,exports){
+},{"./attributes/a_load":6,"./config":43,"./services/mail":49,"./util/dom":59,"./util/request":67,"milo-core":84}],45:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -7012,7 +7012,7 @@ function destroy() {
     milo.util.destroy();
 }
 
-},{"../package.json":121,"./attributes":8,"./binder":9,"./classes":10,"./command":13,"./components/c_class":16,"./components/c_facet":17,"./components/classes/View":36,"./config":43,"./loader":44,"./registry":46,"./services/mail":49,"./services/window":52,"./use_facets":53,"./util":64,"./util/create_component_class":55,"./util/create_facet_class":56,"milo-core":84}],46:[function(require,module,exports){
+},{"../package.json":121,"./attributes":8,"./binder":9,"./classes":10,"./command":13,"./components/c_class":16,"./components/c_facet":17,"./components/classes/View":36,"./config":43,"./loader":44,"./registry":46,"./services/mail":49,"./services/window":52,"./use_facets":53,"./util":65,"./util/create_component_class":56,"./util/create_facet_class":57,"milo-core":84}],46:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7377,6 +7377,192 @@ require('./components/c_facets/Transfer');
 },{"./components/c_facets/Container":18,"./components/c_facets/Css":19,"./components/c_facets/Data":20,"./components/c_facets/Dom":21,"./components/c_facets/Drag":22,"./components/c_facets/Drop":23,"./components/c_facets/Events":24,"./components/c_facets/Frame":25,"./components/c_facets/Item":26,"./components/c_facets/List":27,"./components/c_facets/ModelFacet":28,"./components/c_facets/Options":29,"./components/c_facets/Template":30,"./components/c_facets/Transfer":31}],54:[function(require,module,exports){
 'use strict';
 
+// This would be the place to edit if you want a different
+// Base32 implementation
+
+var alphabet = '0123456789abcdefghjkmnpqrtuvwxyz';
+var alias = { o:0, i:1, l:1, s:5 };
+var DOLLAR = String.fromCharCode(36);
+
+/**
+ * Build a lookup table and memoize it
+ *
+ * Return an object that maps a character to its
+ * byte value.
+ */
+
+var lookup = function() {
+    var table = {};
+    // Invert 'alphabet'
+    for (var i = 0; i < alphabet.length; i++) {
+        table[alphabet[i]] = i;
+    }
+    // Splice in 'alias'
+    for (var key in alias) {
+        if (!alias.hasOwnProperty(key)) continue;
+        table[key] = table['' + alias[key]];
+    }
+    lookup = function() { return table; };
+    return table;
+};
+
+/**
+ * A streaming encoder
+ *
+ *     var encoder = new base32.Encoder()
+ *     var output1 = encoder.update(input1)
+ *     var output2 = encoder.update(input2)
+ *     var lastoutput = encode.update(lastinput, true)
+ */
+
+function Encoder() {
+    var skip = 0; // how many bits we will skip from the first byte
+    var bits = 0; // 5 high bits, carry from one byte to the next
+
+    this.output = '';
+
+    // Read one byte of input
+    // Should not really be used except by "update"
+    this.readByte = function(byte) {
+        // coerce the byte to an int
+        if (typeof byte == 'string') byte = byte.charCodeAt(0);
+
+        if (skip < 0) { // we have a carry from the previous byte
+            bits |= (byte >> (-skip));
+        } else { // no carry
+            bits = (byte << skip) & 248;
+        }
+
+        if (skip > 3) {
+            // not enough data to produce a character, get us another one
+            skip -= 8;
+            return 1;
+        }
+
+        if (skip < 4) {
+            // produce a character
+            this.output += alphabet[bits >> 3];
+            skip += 5;
+        }
+
+        return 0;
+    };
+
+    // Flush any remaining bits left in the stream
+    this.finish = function(check) {
+        var output = this.output + (skip < 0 ? alphabet[bits >> 3] : '') + (check ? DOLLAR : '');
+        this.output = '';
+        return output;
+    };
+}
+
+/**
+ * Process additional input
+ *
+ * input: string of bytes to convert
+ * flush: boolean, should we flush any trailing bits left
+ *        in the stream
+ * returns: a string of characters representing 'input' in base32
+ */
+
+Encoder.prototype.update = function(input, flush) {
+    for (var i = 0; i < input.length; ) {
+        i += this.readByte(input[i]);
+    }
+    // consume all output
+    var output = this.output;
+    this.output = '';
+    if (flush) {
+      output += this.finish();
+    }
+    return output;
+};
+
+// Functions analogously to Encoder
+
+function Decoder() {
+    var skip = 0; // how many bits we have from the previous character
+    var byte = 0; // current byte we're producing
+
+    this.output = '';
+
+    // Consume a character from the stream, store
+    // the output in this.output. As before, better
+    // to use update().
+    this.readChar = function(char) {
+        if (typeof char != 'string'){
+            if (typeof char == 'number') {
+                char = String.fromCharCode(char);
+            }
+        }
+        char = char.toLowerCase();
+        var val = lookup()[char];
+        if (typeof val == 'undefined') {
+            // character does not exist in our lookup table
+            return; // skip silently. An alternative would be:
+            // throw Error('Could not find character "' + char + '" in lookup table.')
+        }
+        val <<= 3; // move to the high bits
+        byte |= val >>> skip;
+        skip += 5;
+        if (skip >= 8) {
+            // we have enough to preduce output
+            this.output += String.fromCharCode(byte);
+            skip -= 8;
+            if (skip > 0) byte = (val << (5 - skip)) & 255;
+            else byte = 0;
+        }
+
+    };
+
+    this.finish = function(check) {
+        var output = this.output + (check ? DOLLAR : '');
+        this.output = '';
+        return output;
+    };
+}
+
+Decoder.prototype.update = function(input, flush) {
+    for (var i = 0; i < input.length; i++) {
+        this.readChar(input[i]);
+    }
+    var output = this.output;
+    this.output = '';
+    if (flush) {
+      output += this.finish();
+    }
+    return output;
+};
+
+/** Convenience functions
+ *
+ * These are the ones to use if you just have a string and
+ * want to convert it without dealing with streams and whatnot.
+ */
+
+// String of data goes in, Base32-encoded string comes out.
+function encode(input) {
+  var encoder = new Encoder();
+  var output = encoder.update(input, true);
+  return output;
+}
+
+// Base32-encoded string goes in, decoded data comes out.
+function decode(input) {
+    var decoder = new Decoder();
+    var output = decoder.update(input, true);
+    return output;
+}
+
+module.exports = {
+    Decoder: Decoder,
+    Encoder: Encoder,
+    encode: encode,
+    decode: decode
+};
+},{}],55:[function(require,module,exports){
+'use strict';
+
 var uniqueId = require('./unique_id')
     , config = require('../config')
     , prefix = config.componentPrefix;
@@ -7389,7 +7575,7 @@ function componentName() {
     return prefix + uniqueId();
 }
 
-},{"../config":43,"./unique_id":71}],55:[function(require,module,exports){
+},{"../config":43,"./unique_id":72}],56:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -7434,7 +7620,7 @@ function createComponentClass(config) {
     return ComponentClass;
 }
 
-},{"../components/c_registry":34,"milo-core":84}],56:[function(require,module,exports){
+},{"../components/c_registry":34,"milo-core":84}],57:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -7472,7 +7658,7 @@ function createFacetClass(config) {
     facetRegistry.add(FacetClass);
     return FacetClass;
 }
-},{"../components/c_facet":17,"../components/c_facets/cf_registry":32,"milo-core":84}],57:[function(require,module,exports){
+},{"../components/c_facet":17,"../components/c_facets/cf_registry":32,"milo-core":84}],58:[function(require,module,exports){
 'use strict';
 
 
@@ -7506,7 +7692,7 @@ module.exports = function deprecate(fn, message) {
     }
 };
 
-},{"../config":43,"milo-core":84}],58:[function(require,module,exports){
+},{"../config":43,"milo-core":84}],59:[function(require,module,exports){
 'use strict';
 
 
@@ -8222,7 +8408,7 @@ function addDebugPoint(x, y) {
     setTimeout(function() {document.body.appendChild(dbEl);}, 200);
 }
 
-},{"../config":43,"milo-core":84}],59:[function(require,module,exports){
+},{"../config":43,"milo-core":84}],60:[function(require,module,exports){
 'use strict';
 
 
@@ -8279,7 +8465,7 @@ function _removeListener(l) {
     l.target.removeEventListener(l.eventType, l.handler);
 }
 
-},{"milo-core":84}],60:[function(require,module,exports){
+},{"milo-core":84}],61:[function(require,module,exports){
 'use strict';
 
 
@@ -8328,7 +8514,7 @@ function isReady() {
     return readyState == 'loading' ? false : readyState;
 }
 
-},{"milo-core":84}],61:[function(require,module,exports){
+},{"milo-core":84}],62:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -8336,7 +8522,7 @@ var miloCore = require('milo-core')
     , dragDropConfig = require('../config').dragDrop
     , componentMetaRegex = dragDropConfig.dataTypes.componentMetaRegex
     , _ = miloCore.proto
-    , base32 = require('base32');
+    , base32 = require('./base32');
 
 
 module.exports = DragDrop;
@@ -8625,7 +8811,7 @@ function DragDrop_destroy() {
     dragDropService.offAll();
 }
 
-},{"../config":43,"base32":75,"milo-core":84}],62:[function(require,module,exports){
+},{"../config":43,"./base32":54,"milo-core":84}],63:[function(require,module,exports){
 // <a name="utils-error"></a>
 // milo.utils.error
 // -----------
@@ -8668,7 +8854,7 @@ function error$toBeImplemented() {
     throw new error.AbstractClass('calling the method of an absctract class');
 }
 
-},{"milo-core":84}],63:[function(require,module,exports){
+},{"milo-core":84}],64:[function(require,module,exports){
 'use strict';
 
 
@@ -8872,7 +9058,7 @@ function _createNodesAndPathsFunc(func) {
 
 
 
-},{"../attributes/a_bind":4,"../binder":9,"../components/c_class":16,"./dom":58,"milo-core":84}],64:[function(require,module,exports){
+},{"../attributes/a_bind":4,"../binder":9,"../components/c_class":16,"./dom":59,"milo-core":84}],65:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -8912,7 +9098,7 @@ function util_destroy() {
     util.dragDrop.destroy();
 }
 
-},{"./component_name":54,"./deprecate":57,"./dom":58,"./dom_listeners":59,"./domready":60,"./dragdrop":61,"./error":62,"./fragment":63,"./json_parse":65,"./request":66,"./selection":67,"./storage":68,"./unique_id":71,"./websocket":72,"milo-core":84,"querystringparser":119}],65:[function(require,module,exports){
+},{"./component_name":55,"./deprecate":58,"./dom":59,"./dom_listeners":60,"./domready":61,"./dragdrop":62,"./error":63,"./fragment":64,"./json_parse":66,"./request":67,"./selection":68,"./storage":69,"./unique_id":72,"./websocket":73,"milo-core":84,"querystringparser":119}],66:[function(require,module,exports){
 'use strict';
 
 
@@ -8932,7 +9118,7 @@ function jsonParse(str) {
     } catch (e) {}
 }
 
-},{}],66:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 'use strict';
 
 // milo.utils.request
@@ -9334,7 +9520,7 @@ function whenRequestsCompleted(callback, timeout) {
         _.defer(callback);
 }
 
-},{"../config":43,"./unique_id":71,"milo-core":84}],67:[function(require,module,exports){
+},{"../config":43,"./unique_id":72,"milo-core":84}],68:[function(require,module,exports){
 'use strict';
 
 
@@ -9776,7 +9962,7 @@ function TextSelection$$getDirection(){
 }
 
 
-},{"../../components/c_class":16,"../dom":58,"milo-core":84}],68:[function(require,module,exports){
+},{"../../components/c_class":16,"../dom":59,"milo-core":84}],69:[function(require,module,exports){
 'use strict';
 
 
@@ -10189,7 +10375,7 @@ function DOMStorage$destroy() {
     this._destroyed = true;
 }
 
-},{"../../config":43,"./model":69,"./msg_src":70,"milo-core":84}],69:[function(require,module,exports){
+},{"../../config":43,"./model":70,"./msg_src":71,"milo-core":84}],70:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -10217,7 +10403,7 @@ function Model_domStorageParser(valueStr) {
     return new Model(data);
 }
 
-},{"./index":68,"milo-core":84}],70:[function(require,module,exports){
+},{"./index":69,"milo-core":84}],71:[function(require,module,exports){
 'use strict';
 
 
@@ -10290,7 +10476,7 @@ function handleEvent(event) {
     this.dispatchMessage(msgType, data);
 }
 
-},{"../../config":43,"../../util/unique_id":71,"milo-core":84}],71:[function(require,module,exports){
+},{"../../config":43,"../../util/unique_id":72,"milo-core":84}],72:[function(require,module,exports){
 'use strict';
 
 var timestamp = Date.now()
@@ -10317,7 +10503,7 @@ uniqueCount.get = function() {
 
 module.exports = uniqueCount;
 
-},{}],72:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 'use strict';
 
 /**
@@ -10340,7 +10526,7 @@ function websocket() {
 
 module.exports = websocket;
 
-},{"./msg_api":73,"./msg_src":74,"milo-core":84}],73:[function(require,module,exports){
+},{"./msg_api":74,"./msg_src":75,"milo-core":84}],74:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -10385,7 +10571,7 @@ function createInternalData(sourceMessage, message, event) {
     return internalData;
 }
 
-},{"milo-core":84}],74:[function(require,module,exports){
+},{"milo-core":84}],75:[function(require,module,exports){
 'use strict';
 
 
@@ -10492,204 +10678,7 @@ function WSMessageSource$trigger (msg, data, callback) {
     }
 }
 
-},{"../../config":43,"../../util/unique_id":71,"milo-core":84}],75:[function(require,module,exports){
-;(function(){
-
-// This would be the place to edit if you want a different
-// Base32 implementation
-
-var alphabet = '0123456789abcdefghjkmnpqrtuvwxyz'
-var alias = { o:0, i:1, l:1, s:5 }
-
-/**
- * Build a lookup table and memoize it
- *
- * Return an object that maps a character to its
- * byte value.
- */
-
-var lookup = function() {
-    var table = {}
-    // Invert 'alphabet'
-    for (var i = 0; i < alphabet.length; i++) {
-        table[alphabet[i]] = i
-    }
-    // Splice in 'alias'
-    for (var key in alias) {
-        if (!alias.hasOwnProperty(key)) continue
-        table[key] = table['' + alias[key]]
-    }
-    lookup = function() { return table }
-    return table
-}
-
-/**
- * A streaming encoder
- *
- *     var encoder = new base32.Encoder()
- *     var output1 = encoder.update(input1)
- *     var output2 = encoder.update(input2)
- *     var lastoutput = encode.update(lastinput, true)
- */
-
-function Encoder() {
-    var skip = 0 // how many bits we will skip from the first byte
-    var bits = 0 // 5 high bits, carry from one byte to the next
-
-    this.output = ''
-
-    // Read one byte of input
-    // Should not really be used except by "update"
-    this.readByte = function(byte) {
-        // coerce the byte to an int
-        if (typeof byte == 'string') byte = byte.charCodeAt(0)
-
-        if (skip < 0) { // we have a carry from the previous byte
-            bits |= (byte >> (-skip))
-        } else { // no carry
-            bits = (byte << skip) & 248
-        }
-
-        if (skip > 3) {
-            // not enough data to produce a character, get us another one
-            skip -= 8
-            return 1
-        }
-
-        if (skip < 4) {
-            // produce a character
-            this.output += alphabet[bits >> 3]
-            skip += 5
-        }
-
-        return 0
-    }
-
-    // Flush any remaining bits left in the stream
-    this.finish = function(check) {
-        var output = this.output + (skip < 0 ? alphabet[bits >> 3] : '') + (check ? '$' : '')
-        this.output = ''
-        return output
-    }
-}
-
-/**
- * Process additional input
- *
- * input: string of bytes to convert
- * flush: boolean, should we flush any trailing bits left
- *        in the stream
- * returns: a string of characters representing 'input' in base32
- */
-
-Encoder.prototype.update = function(input, flush) {
-    for (var i = 0; i < input.length; ) {
-        i += this.readByte(input[i])
-    }
-    // consume all output
-    var output = this.output
-    this.output = ''
-    if (flush) {
-      output += this.finish()
-    }
-    return output
-}
-
-// Functions analogously to Encoder
-
-function Decoder() {
-    var skip = 0 // how many bits we have from the previous character
-    var byte = 0 // current byte we're producing
-
-    this.output = ''
-
-    // Consume a character from the stream, store
-    // the output in this.output. As before, better
-    // to use update().
-    this.readChar = function(char) {
-        if (typeof char != 'string'){
-            if (typeof char == 'number') {
-                char = String.fromCharCode(char)
-            }
-        }
-        char = char.toLowerCase()
-        var val = lookup()[char]
-        if (typeof val == 'undefined') {
-            // character does not exist in our lookup table
-            return // skip silently. An alternative would be:
-            // throw Error('Could not find character "' + char + '" in lookup table.')
-        }
-        val <<= 3 // move to the high bits
-        byte |= val >>> skip
-        skip += 5
-        if (skip >= 8) {
-            // we have enough to preduce output
-            this.output += String.fromCharCode(byte)
-            skip -= 8
-            if (skip > 0) byte = (val << (5 - skip)) & 255
-            else byte = 0
-        }
-
-    }
-
-    this.finish = function(check) {
-        var output = this.output + (skip < 0 ? alphabet[bits >> 3] : '') + (check ? '$' : '')
-        this.output = ''
-        return output
-    }
-}
-
-Decoder.prototype.update = function(input, flush) {
-    for (var i = 0; i < input.length; i++) {
-        this.readChar(input[i])
-    }
-    var output = this.output
-    this.output = ''
-    if (flush) {
-      output += this.finish()
-    }
-    return output
-}
-
-/** Convenience functions
- *
- * These are the ones to use if you just have a string and
- * want to convert it without dealing with streams and whatnot.
- */
-
-// String of data goes in, Base32-encoded string comes out.
-function encode(input) {
-  var encoder = new Encoder()
-  var output = encoder.update(input, true)
-  return output
-}
-
-// Base32-encoded string goes in, decoded data comes out.
-function decode(input) {
-    var decoder = new Decoder()
-    var output = decoder.update(input, true)
-    return output
-}
-
-var base32 = {
-    Decoder: Decoder,
-    Encoder: Encoder,
-    encode: encode,
-    decode: decode
-}
-
-if (typeof window !== 'undefined') {
-  // we're in a browser - OMG!
-  window.base32 = base32
-}
-
-if (typeof module !== 'undefined' && module.exports) {
-  // nodejs/browserify
-  module.exports = base32
-}
-})();
-
-},{}],76:[function(require,module,exports){
+},{"../../config":43,"../../util/unique_id":72,"milo-core":84}],76:[function(require,module,exports){
 
 // not implemented
 // The reason for having an empty file and not throwing is to allow
@@ -13731,10 +13720,10 @@ var pathUtils = require('../path_utils')
  * Templates to synthesize model getters and setters
  */
 var templates = {
-    get: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\nmethod = function get() {\n    var m = {{# def.modelAccessPrefix }};\n    return m {{~ it.parsedPath :pathNode }}\n        {{? pathNode.interpolate}}\n            && (m = m[this._args[ {{= pathNode.interpolate }} ]])\n        {{??}}\n            && (m = m{{= pathNode.property }})\n        {{?}} {{~}};\n};\n",
-    set: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n\n\n/**\n * Template that synthesizes setter for Model and for ModelPath\n */\nmethod = function set(value) {\n    {{# def.initVars:'set' }}\n\n    {{# def.createTree:'set' }}\n\n    {{\n        currNode = nextNode;\n        currProp = currNode && currNode.property;\n    }}\n\n    {{ /* assign value to the last property */ }}\n    {{? currProp }}\n        wasDef = {{# def.wasDefined}};\n        {{# def.changeAccessPath }}\n\n        var old = m{{# def.currProp }};\n\n        {{ /* clone value to prevent same reference in linked models */ }}\n        m{{# def.currProp }} = cloneTree(value);\n    {{?}}\n\n    {{ /* add message related to the last property change */ }}\n    if (this._options.reactive !== false) {\n        if (! wasDef)\n            {{# def.addMsg }} accessPath, type: 'added',\n                newValue: value });\n        else if (old != value)\n            {{# def.addMsg }} accessPath, type: 'changed',\n                oldValue: old, newValue: value });\n\n        {{ /* add message related to changes in (sub)properties inside removed and assigned value */ }}\n        if (! wasDef || old != value)\n            addTreeChangesMessages(messages, messagesHash,\n                accessPath, old, value); /* defined in the function that synthesizes ModelPath setter */\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n};\n",
-    del: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_traverse_tree }}\n\nmethod = function del() {\n    {{# def.initVars:'del' }}\n\n    {{? it.parsedPath.length }}\n        {{# def.traverseTree }}\n\n        {{\n            var currNode = it.parsedPath[count];\n            var currProp = currNode.property;       \n        }}\n\n        if (! treeDoesNotExist && m && m.hasOwnProperty && {{# def.wasDefined}}) {\n            var old = m{{# def.currProp }};\n            delete m{{# def.currProp }};\n            {{# def.changeAccessPath }}\n            var didDelete = true;\n        }\n    {{??}}\n        if (typeof m != 'undefined') {\n            var old = m;\n            {{# def.modelAccessPrefix }} = undefined;\n            var didDelete = true;\n        }\n    {{?}}\n\n    if (didDelete && this._options.reactive !== false) {\n        {{# def.addMsg }} accessPath, type: 'deleted', oldValue: old });\n\n        addTreeChangesMessages(messages, messagesHash,\n            accessPath, old, undefined); /* defined in the function that synthesizes ModelPath setter */\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n};\n",
-    splice: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n{{# def.include_traverse_tree }}\n\nmethod = function splice(spliceIndex, spliceHowMany) { /* ,... - extra arguments to splice into array */\n    {{# def.initVars:'splice' }}\n\n    var argsLen = arguments.length;\n    var addItems = argsLen > 2;\n\n    if (addItems) {\n        {{ /* only create model tree if items are inserted in array */ }}\n\n        {{ /* if model is undefined it will be set to an empty array */ }}  \n        var value = [];\n        {{# def.createTree:'splice' }}\n\n        {{? nextNode }}\n            {{\n                var currNode = nextNode;\n                var currProp = currNode.property;\n                var emptyProp = '[]';\n            }}\n\n            {{# def.createTreeStep }}\n        {{?}}\n\n    } else if (spliceHowMany > 0) {\n        {{ /* if items are not inserted, only traverse model tree if items are deleted from array */ }}\n        {{? it.parsedPath.length }}\n            {{# def.traverseTree }}\n\n            {{\n                var currNode = it.parsedPath[count];\n                var currProp = currNode.property;       \n            }}\n\n            {{ /* extra brace closes 'else' in def.traverseTreeStep */ }}\n            {{# def.traverseTreeStep }} }\n        {{?}}\n    }\n\n    {{ /* splice items */ }}\n    if (addItems || (! treeDoesNotExist && m\n            && m.length > spliceIndex ) ) {\n        var oldLength = m.length = m.length || 0;\n\n        arguments[0] = spliceIndex = normalizeSpliceIndex(spliceIndex, m.length);\n\n        {{ /* clone added arguments to prevent same references in linked models */ }}\n        if (addItems)\n            for (var i = 2; i < argsLen; i++)\n                arguments[i] = cloneTree(arguments[i]);\n\n        {{ /* actual splice call */ }}\n        var removed = Array.prototype.splice.apply(m, arguments);\n\n        if (this._options.reactive !== false) {\n            {{# def.addMsg }} accessPath, type: 'splice',\n                    index: spliceIndex, removed: removed, addedCount: addItems ? argsLen - 2 : 0,\n                    newValue: m });\n\n            if (removed && removed.length)\n                removed.forEach(function(item, index) {\n                    var itemPath = accessPath + '[' + (spliceIndex + index) + ']';\n                    {{# def.addMsg }} itemPath, type: 'removed', oldValue: item });\n\n                    if (valueIsTree(item))\n                        addMessages(messages, messagesHash, itemPath, item, 'removed', 'oldValue');\n                });\n\n            if (addItems)\n                for (var i = 2; i < argsLen; i++) {\n                    var item = arguments[i];\n                    var itemPath = accessPath + '[' + (spliceIndex + i - 2) + ']';\n                    {{# def.addMsg }} itemPath, type: 'added', newValue: item });\n\n                    if (valueIsTree(item))\n                        addMessages(messages, messagesHash, itemPath, item, 'added', 'newValue');\n                }\n\n            {{ /* post all stored messages */ }}\n            {{# def.postMessages }}\n        }\n    }\n\n    return removed || [];\n}\n"
+    get: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\nreturn function get() {\n    var m = {{# def.modelAccessPrefix }};\n    return m {{~ it.parsedPath :pathNode }}\n        {{? pathNode.interpolate}}\n            && (m = m[this._args[ {{= pathNode.interpolate }} ]])\n        {{??}}\n            && (m = m{{= pathNode.property }})\n        {{?}} {{~}};\n};\n",
+    set: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n\n\n/**\n * Template that synthesizes setter for Model and for ModelPath\n */\nreturn function set(value) {\n    {{# def.initVars:'set' }}\n\n    {{# def.createTree:'set' }}\n\n    {{\n        currNode = nextNode;\n        currProp = currNode && currNode.property;\n    }}\n\n    {{ /* assign value to the last property */ }}\n    {{? currProp }}\n        wasDef = {{# def.wasDefined}};\n        {{# def.changeAccessPath }}\n\n        var old = m{{# def.currProp }};\n\n        {{ /* clone value to prevent same reference in linked models */ }}\n        m{{# def.currProp }} = cloneTree(value);\n    {{?}}\n\n    {{ /* add message related to the last property change */ }}\n    if (this._options.reactive !== false) {\n        if (! wasDef)\n            {{# def.addMsg }} accessPath, type: 'added',\n                newValue: value });\n        else if (old != value)\n            {{# def.addMsg }} accessPath, type: 'changed',\n                oldValue: old, newValue: value });\n\n        {{ /* add message related to changes in (sub)properties inside removed and assigned value */ }}\n        if (! wasDef || old != value)\n            addTreeChangesMessages(messages, messagesHash,\n                accessPath, old, value); /* defined in the function that synthesizes ModelPath setter */\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n};\n",
+    del: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_traverse_tree }}\n\nreturn function del() {\n    {{# def.initVars:'del' }}\n\n    {{? it.parsedPath.length }}\n        {{# def.traverseTree }}\n\n        {{\n            var currNode = it.parsedPath[count];\n            var currProp = currNode.property;       \n        }}\n\n        if (! treeDoesNotExist && m && m.hasOwnProperty && {{# def.wasDefined}}) {\n            var old = m{{# def.currProp }};\n            delete m{{# def.currProp }};\n            {{# def.changeAccessPath }}\n            var didDelete = true;\n        }\n    {{??}}\n        if (typeof m != 'undefined') {\n            var old = m;\n            {{# def.modelAccessPrefix }} = undefined;\n            var didDelete = true;\n        }\n    {{?}}\n\n    if (didDelete && this._options.reactive !== false) {\n        {{# def.addMsg }} accessPath, type: 'deleted', oldValue: old });\n\n        addTreeChangesMessages(messages, messagesHash,\n            accessPath, old, undefined); /* defined in the function that synthesizes ModelPath setter */\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n};\n",
+    splice: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n{{# def.include_traverse_tree }}\n\nreturn function splice(spliceIndex, spliceHowMany) { /* ,... - extra arguments to splice into array */\n    {{# def.initVars:'splice' }}\n\n    var argsLen = arguments.length;\n    var addItems = argsLen > 2;\n\n    if (addItems) {\n        {{ /* only create model tree if items are inserted in array */ }}\n\n        {{ /* if model is undefined it will be set to an empty array */ }}  \n        var value = [];\n        {{# def.createTree:'splice' }}\n\n        {{? nextNode }}\n            {{\n                var currNode = nextNode;\n                var currProp = currNode.property;\n                var emptyProp = '[]';\n            }}\n\n            {{# def.createTreeStep }}\n        {{?}}\n\n    } else if (spliceHowMany > 0) {\n        {{ /* if items are not inserted, only traverse model tree if items are deleted from array */ }}\n        {{? it.parsedPath.length }}\n            {{# def.traverseTree }}\n\n            {{\n                var currNode = it.parsedPath[count];\n                var currProp = currNode.property;       \n            }}\n\n            {{ /* extra brace closes 'else' in def.traverseTreeStep */ }}\n            {{# def.traverseTreeStep }} }\n        {{?}}\n    }\n\n    {{ /* splice items */ }}\n    if (addItems || (! treeDoesNotExist && m\n            && m.length > spliceIndex ) ) {\n        var oldLength = m.length = m.length || 0;\n\n        arguments[0] = spliceIndex = normalizeSpliceIndex(spliceIndex, m.length);\n\n        {{ /* clone added arguments to prevent same references in linked models */ }}\n        if (addItems)\n            for (var i = 2; i < argsLen; i++)\n                arguments[i] = cloneTree(arguments[i]);\n\n        {{ /* actual splice call */ }}\n        var removed = Array.prototype.splice.apply(m, arguments);\n\n        if (this._options.reactive !== false) {\n            {{# def.addMsg }} accessPath, type: 'splice',\n                    index: spliceIndex, removed: removed, addedCount: addItems ? argsLen - 2 : 0,\n                    newValue: m });\n\n            if (removed && removed.length)\n                removed.forEach(function(item, index) {\n                    var itemPath = accessPath + '[' + (spliceIndex + index) + ']';\n                    {{# def.addMsg }} itemPath, type: 'removed', oldValue: item });\n\n                    if (valueIsTree(item))\n                        addMessages(messages, messagesHash, itemPath, item, 'removed', 'oldValue');\n                });\n\n            if (addItems)\n                for (var i = 2; i < argsLen; i++) {\n                    var item = arguments[i];\n                    var itemPath = accessPath + '[' + (spliceIndex + i - 2) + ']';\n                    {{# def.addMsg }} itemPath, type: 'added', newValue: item });\n\n                    if (valueIsTree(item))\n                        addMessages(messages, messagesHash, itemPath, item, 'added', 'newValue');\n                }\n\n            {{ /* post all stored messages */ }}\n            {{# def.postMessages }}\n        }\n    }\n\n    return removed || [];\n}\n"
 };
 
 var include_defines = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts initialization code\n */\n {{## def.initVars:method:\n    var m = {{# def.modelAccessPrefix }};\n    var messages = [], messagesHash = {};\n    var accessPath = '';\n    var treeDoesNotExist;\n    /* hack to prevent sending finished events to allow for propagation of batches without splitting them */\n    var inChangeTransaction = getTransactionFlag( {{= method }} );\n #}}\n\n/**\n * Inserts the beginning of function call to add message to list\n */\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n/**\n * Inserts current property/index for both normal and interpolated properties/indexes\n */\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n/**\n * Inserts condition to test whether normal/interpolated property/index exists\n */\n{{## def.wasDefined: m.hasOwnProperty(\n    {{? currNode.interpolate }}\n        this._args[ {{= currNode.interpolate }} ]\n    {{??}}\n        '{{= it.getPathNodeKey(currNode) }}'\n    {{?}}\n) #}}\n\n\n/**\n * Inserts code to update access path for current property\n * Because of the possibility of interpolated properties, it can't be calculated in template, it can only be calculated during accessor call.\n */\n{{## def.changeAccessPath:\n    accessPath += {{? currNode.interpolate }}\n        {{? currNode.syntax == 'array' }}\n            '[' + this._args[ {{= currNode.interpolate }} ] + ']';\n        {{??}}\n            '.' + this._args[ {{= currNode.interpolate }} ];\n        {{?}}\n    {{??}}\n        '{{= currProp }}';\n    {{?}}\n#}}\n\n\n/**\n * Inserts code to post stored messages\n */\n{{## def.postMessages:\n    if (messages.length) {\n        {{# def.modelPostBatchCode }}('datachanges', {\n            changes: messages,\n            transaction: inChangeTransaction\n        });\n\n        messages.forEach(function(msg) {\n            {{# def.modelPostMessageCode }}(msg.path, msg);\n        }, this);\n    }\n#}}\n"
@@ -13795,19 +13784,34 @@ var normalizeSpliceIndex = modelUtils.normalizeSpliceIndex; // used in splice.do
 
 
 function _synthesize(synthesizer, path, parsedPath) {
-    var method
-        , methodCode = synthesizer({
+    var methodCode = synthesizer({
             parsedPath: parsedPath,
             getPathNodeKey: pathUtils.getPathNodeKey
         });
 
     try {
-        eval(methodCode);
+        var createMethod = new Function(
+            'getTransactionFlag',
+            'addTreeChangesMessages',
+            'addChangeMessage',
+            'addMessages',
+            'cloneTree',
+            'valueIsTree',
+            'normalizeSpliceIndex',
+            methodCode
+        );
+        return createMethod(
+            getTransactionFlag,
+            addTreeChangesMessages,
+            addChangeMessage,
+            addMessages,
+            cloneTree,
+            valueIsTree,
+            normalizeSpliceIndex
+        );
     } catch (e) {
         throw Error('ModelPath method compilation error; path: ' + path + ', code: ' + methodCode);
     }
-
-    return method;
 
 
     // functions used by methods `set`, `delete` and `splice` (synthesized by template)
@@ -13873,14 +13877,6 @@ function _synthesize(synthesizer, path, parsedPath) {
                 : value;
     }
 
-    function protectValue(value) {
-        return ! valueIsNormalObject(value)
-                ? value
-                : Array.isArray(value)
-                    ? value.slice()
-                    : Object.create(value);
-    }
-
     function valueIsTree(value) {
         return valueIsNormalObject(value)
                 && Object.keys(value).length;
@@ -13891,13 +13887,6 @@ function _synthesize(synthesizer, path, parsedPath) {
                 && typeof value == "object"
                 && ! (value instanceof Date)
                 && ! (value instanceof RegExp);
-    }
-
-    function addBatchIdsToMessage(msg, batchId, msgId) {
-        _.defineProperties(msg, {
-            __batch_id: batchId,
-            __msg_id: msgId
-        });
     }
 }
 
@@ -19305,33 +19294,32 @@ module.exports={
     "url": "https://github.com/milojs/milo/issues"
   },
   "dependencies": {
-    "base32": "milojs/base32-js.git",
     "milo-core": "^1.0.6",
     "querystringparser": "^0.1.1"
   },
   "devDependencies": {
-    "async": "~0.2.9",
-    "brfs": "0.0.8",
-    "browserify": "~2.35.4",
-    "eslintify": "^2.1.0",
-    "grunt": "~0.4.1",
-    "grunt-browserify": "~1.2.11",
-    "grunt-contrib-copy": "^0.8.2",
-    "grunt-contrib-uglify": "~1",
-    "grunt-contrib-watch": "~0.5.3",
-    "grunt-exorcise": "^1.0.0",
-    "grunt-istanbul": "^0.6.1",
-    "grunt-karma": "^0.8.2",
-    "grunt-mocha-test": "~0.7.0",
-    "istanbul": "^0.4.0",
-    "karma": "~0.12",
-    "karma-chrome-launcher": "~0.1.2",
-    "karma-coverage": "^0.5.3",
-    "karma-firefox-launcher": "^0.1.6",
-    "karma-mocha": "~0.1.1",
-    "karma-spec-reporter": "0.0.6",
-    "karma-webdriver-launcher": "^0.2.0",
-    "mocha": "~1.16.2"
+    "async": "^2.0.1",
+    "brfs": "^1.4.3",
+    "browserify": "^13.1.0",
+    "eslintify": "^3.0.0",
+    "grunt": "^1.0.1",
+    "grunt-browserify": "^5.0.0",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-contrib-uglify": "^2.0.0",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-exorcise": "^2.1.1",
+    "grunt-istanbul": "^0.7.1",
+    "grunt-karma": "^2.0.0",
+    "grunt-mocha-test": "^0.13.2",
+    "istanbul": "^0.4.5",
+    "karma": "^1.3.0",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-coverage": "^1.1.1",
+    "karma-firefox-launcher": "^1.0.0",
+    "karma-mocha": "^1.1.1",
+    "karma-spec-reporter": "0.0.26",
+    "karma-webdriver-launcher": "^1.0.4",
+    "mocha": "^3.0.2"
   }
 }
 
