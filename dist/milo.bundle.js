@@ -1,4 +1,4 @@
-;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
 
@@ -29,7 +29,7 @@ _.extendProto(Facet, {
     init: function() {}
 });
 
-},{"milo-core":84}],2:[function(require,module,exports){
+},{"milo-core":88}],2:[function(require,module,exports){
 'use strict';
 
 
@@ -239,7 +239,7 @@ function FacetedObject$$createFacetedClass(name, facetsClasses, facetsConfig) {
     }
 }
 
-},{"./facet":1,"milo-core":84}],3:[function(require,module,exports){
+},{"./facet":1,"milo-core":88}],3:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -359,7 +359,7 @@ function setClass(FoundationClass) {
     _.defineProperty(this, 'FoundationClass', FoundationClass, _.ENUM);
 }
 
-},{"milo-core":84}],4:[function(require,module,exports){
+},{"milo-core":88}],4:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -510,7 +510,7 @@ function BindAttribute$$setInfo(el, componentClass, componentName, componentFace
     attr.decorate();
 }
 
-},{"../config":43,"../util/component_name":55,"./a_class":5,"milo-core":84}],5:[function(require,module,exports){
+},{"../config":43,"../util/component_name":55,"./a_class":5,"milo-core":88}],5:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -628,7 +628,7 @@ function toBeImplemented() {
     throw new Error('calling the method of an absctract class');
 }
 
-},{"milo-core":84}],6:[function(require,module,exports){
+},{"milo-core":88}],6:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -714,7 +714,7 @@ function render() {
     return this.loadUrl;
 }
 
-},{"../config":43,"./a_class":5,"milo-core":84}],7:[function(require,module,exports){
+},{"../config":43,"./a_class":5,"milo-core":88}],7:[function(require,module,exports){
 'use strict';
 
 var Attribute = require('./a_class')
@@ -802,7 +802,7 @@ function render() {
     return qs.stringify(this.options);
 }
 
-},{"../config":43,"./a_class":5,"milo-core":84,"querystringparser":119}],8:[function(require,module,exports){
+},{"../config":43,"./a_class":5,"milo-core":88,"querystringparser":123}],8:[function(require,module,exports){
 'use strict';
 
 /**
@@ -981,7 +981,7 @@ function createBinderScope(scopeEl, scopeObjectFactory, rootScope, bindRootEleme
     }
 }
 
-},{"./attributes/a_bind":4,"./components/c_info":33,"./components/c_registry":34,"./components/scope":42,"./util/dom":59,"milo-core":84}],10:[function(require,module,exports){
+},{"./attributes/a_bind":4,"./components/c_info":33,"./components/c_registry":34,"./components/scope":42,"./util/dom":59,"milo-core":88}],10:[function(require,module,exports){
 'use strict';
 
 var coreClasses = require('milo-core').classes;
@@ -1008,7 +1008,7 @@ var classes = {
 
 module.exports = classes;
 
-},{"./abstract/facet":1,"./abstract/faceted_object":2,"./abstract/registry":3,"./command/transaction":14,"./command/transaction_history":15,"./components/msg_src/dom_events":40,"./components/scope":42,"milo-core":84}],11:[function(require,module,exports){
+},{"./abstract/facet":1,"./abstract/faceted_object":2,"./abstract/registry":3,"./command/transaction":14,"./command/transaction_history":15,"./components/msg_src/dom_events":40,"./components/scope":42,"milo-core":88}],11:[function(require,module,exports){
 'use strict';
 
 
@@ -1165,7 +1165,7 @@ function ActionsHistory$getDescription() {
     };
 }
 
-},{"milo-core":84}],12:[function(require,module,exports){
+},{"milo-core":88}],12:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -1382,7 +1382,7 @@ function Command$getDescription() {
     };
 }
 
-},{"milo-core":84}],14:[function(require,module,exports){
+},{"milo-core":88}],14:[function(require,module,exports){
 'use strict';
 
 
@@ -1457,7 +1457,7 @@ function Transaction$getDescription() {
     };
 }
 
-},{"./actions_history":11,"milo-core":84}],15:[function(require,module,exports){
+},{"./actions_history":11,"milo-core":88}],15:[function(require,module,exports){
 'use strict';
 
 
@@ -1634,7 +1634,7 @@ function TransactionHistory$destroy() {
     delete this.transactions;
 }
 
-},{"./actions_history":11,"./transaction":14,"milo-core":84}],16:[function(require,module,exports){
+},{"./actions_history":11,"./transaction":14,"milo-core":88}],16:[function(require,module,exports){
 'use strict';
 
 
@@ -2568,7 +2568,7 @@ function Component$isDestroyed() {
     return !!this._destroyed;
 }
 
-},{"../abstract/faceted_object":2,"../attributes/a_bind":4,"../binder":9,"../config":43,"../util/component_name":55,"../util/dom":59,"../util/storage":69,"./c_facets/cf_registry":32,"./c_utils":35,"./scope":42,"milo-core":84}],17:[function(require,module,exports){
+},{"../abstract/faceted_object":2,"../attributes/a_bind":4,"../binder":9,"../config":43,"../util/component_name":55,"../util/dom":59,"../util/storage":69,"./c_facets/cf_registry":32,"./c_utils":35,"./scope":42,"milo-core":88}],17:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2797,7 +2797,7 @@ function requiresFacet(facetName) {
                         || facetRequire.indexOf(_.firstLowerCase(facetName)) >= 0);
 }
 
-},{"../abstract/facet":1,"./c_utils":35,"milo-core":84}],18:[function(require,module,exports){
+},{"../abstract/facet":1,"./c_utils":35,"milo-core":88}],18:[function(require,module,exports){
 'use strict';
 
 
@@ -2989,7 +2989,7 @@ function Container$remove(comp) {
     this.owner.el.removeChild(comp.el);
 }
 
-},{"../../binder":9,"../../util/dom":59,"../c_facet":17,"../scope":42,"./cf_registry":32,"milo-core":84}],19:[function(require,module,exports){
+},{"../../binder":9,"../../util/dom":59,"../c_facet":17,"../scope":42,"./cf_registry":32,"milo-core":88}],19:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -3208,7 +3208,7 @@ Path.prototype.del = function() {
     this.set(null);
 };
 
-},{"../../util/create_facet_class":57,"milo-core":84}],20:[function(require,module,exports){
+},{"../../util/create_facet_class":57,"milo-core":88}],20:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -3889,7 +3889,7 @@ function Data$setState(state) {
     if (setterProperty != 'innerHTML') return this.set(state.state);
 }
 
-},{"../c_facet":17,"../msg_api/data":37,"../msg_api/de_data":38,"../msg_src/dom_events":40,"./cf_registry":32,"milo-core":84}],21:[function(require,module,exports){
+},{"../c_facet":17,"../msg_api/data":37,"../msg_api/de_data":38,"../msg_src/dom_events":40,"./cf_registry":32,"milo-core":88}],21:[function(require,module,exports){
 'use strict';
 
 
@@ -4232,7 +4232,7 @@ function hasTextAfterSelection() {
     return isText;
 }
 
-},{"../../attributes/a_bind":4,"../../util/dom":59,"../c_facet":17,"./cf_registry":32,"milo-core":84}],22:[function(require,module,exports){
+},{"../../attributes/a_bind":4,"../../util/dom":59,"../c_facet":17,"./cf_registry":32,"milo-core":88}],22:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drag"></a>
@@ -4478,7 +4478,7 @@ function _dragIsDisabled(event) {
     return false;
 }
 
-},{"../../util/dragdrop":62,"../c_facet":17,"../msg_src/dom_events":40,"./cf_registry":32,"milo-core":84}],23:[function(require,module,exports){
+},{"../../util/dragdrop":62,"../c_facet":17,"../msg_src/dom_events":40,"./cf_registry":32,"milo-core":88}],23:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-drop"></a>
@@ -4670,7 +4670,7 @@ function Drop$isDropAllowed(dt, originalDropComponent) {
     // TODO test for other data types
 }
 
-},{"../../util/dragdrop":62,"../c_facet":17,"../msg_api/drop":39,"../msg_src/dom_events":40,"./cf_registry":32,"milo-core":84}],24:[function(require,module,exports){
+},{"../../util/dragdrop":62,"../c_facet":17,"../msg_api/drop":39,"../msg_src/dom_events":40,"./cf_registry":32,"milo-core":88}],24:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -4729,7 +4729,7 @@ function Events$init() {
     _.defineProperty(this, MSG_SOURCE_KEY, domEventsSource);
 }
 
-},{"../c_facet":17,"../msg_src/dom_events":40,"./cf_registry":32,"milo-core":84}],25:[function(require,module,exports){
+},{"../c_facet":17,"../msg_src/dom_events":40,"./cf_registry":32,"milo-core":88}],25:[function(require,module,exports){
 'use strict';
 
 
@@ -4917,7 +4917,7 @@ function _makeWhenReadyFunc(isReadyFunc, event) {
     };
 }
 
-},{"../c_facet":17,"../msg_src/frame":41,"./cf_registry":32,"milo-core":84}],26:[function(require,module,exports){
+},{"../c_facet":17,"../msg_src/frame":41,"./cf_registry":32,"milo-core":88}],26:[function(require,module,exports){
 'use strict';
 
 
@@ -5007,7 +5007,7 @@ function ItemFacet$isSample() {
    return this.list.itemSample == this.owner;
 }
 
-},{"../c_facet":17,"./cf_registry":32,"milo-core":84}],27:[function(require,module,exports){
+},{"../c_facet":17,"./cf_registry":32,"milo-core":88}],27:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -5470,7 +5470,7 @@ function List$destroy() {
     ComponentFacet.prototype.destroy.apply(this, arguments);
 }
 
-},{"../../binder":9,"../../config":43,"../../util/component_name":55,"../../util/dom":59,"../c_class":16,"../c_facet":17,"./cf_registry":32,"milo-core":84}],28:[function(require,module,exports){
+},{"../../binder":9,"../../config":43,"../../util/component_name":55,"../../util/dom":59,"../c_class":16,"../c_facet":17,"./cf_registry":32,"milo-core":88}],28:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -5546,7 +5546,7 @@ function ModelFacet$destroy() {
     ComponentFacet.prototype.destroy.apply(this, arguments);
 }
 
-},{"../c_facet":17,"./cf_registry":32,"milo-core":84}],29:[function(require,module,exports){
+},{"../c_facet":17,"./cf_registry":32,"milo-core":88}],29:[function(require,module,exports){
 'use strict';
 
 var Model = require('milo-core').Model
@@ -5597,7 +5597,7 @@ function Options$destroy() {
     Options.super.destroy.apply(this, arguments);
 }
 
-},{"../../attributes/a_options":7,"../../util/create_facet_class":57,"milo-core":84}],30:[function(require,module,exports){
+},{"../../attributes/a_options":7,"../../util/create_facet_class":57,"milo-core":88}],30:[function(require,module,exports){
 'use strict';
 
 // <a name="components-facets-template"></a>
@@ -5706,7 +5706,7 @@ function Template$binder() {
         logger.error('TemplateFacet: Binder called without container facet.');
 }
 
-},{"../../config":43,"../c_facet":17,"./cf_registry":32,"milo-core":84}],31:[function(require,module,exports){
+},{"../../config":43,"../c_facet":17,"./cf_registry":32,"milo-core":88}],31:[function(require,module,exports){
 'use strict';
 
 var ComponentFacet = require('../c_facet')
@@ -5959,7 +5959,7 @@ function hasContainerFacet(ComponentClass, extraFacetsClasses) {
     }
 }
 
-},{"../util/component_name":55,"./c_facets/cf_registry":32,"./c_registry":34,"./scope":42,"milo-core":84}],34:[function(require,module,exports){
+},{"../util/component_name":55,"./c_facets/cf_registry":32,"./c_registry":34,"./scope":42,"milo-core":88}],34:[function(require,module,exports){
 'use strict';
 
 var ClassRegistry = require('../abstract/registry')
@@ -6069,7 +6069,7 @@ function _getContainingComponent(el, returnCurrent, conditionFunc) {
         return _getContainingComponent(el.parentNode, true, conditionFunc);
 }
 
-},{"../config":43,"milo-core":84}],36:[function(require,module,exports){
+},{"../config":43,"milo-core":88}],36:[function(require,module,exports){
 'use strict';
 
 var Component = require('../c_class')
@@ -6166,7 +6166,7 @@ function createInternalData(sourceMessage, message, data) {
     return internalData;
 }
 
-},{"./de_data":38,"milo-core":84}],38:[function(require,module,exports){
+},{"./de_data":38,"milo-core":88}],38:[function(require,module,exports){
 'use strict';
 
 
@@ -6312,7 +6312,7 @@ function inputChangeEvent(el) {
             : inputElementTypes.byDefault.event;
 }
 
-},{"milo-core":84}],39:[function(require,module,exports){
+},{"milo-core":88}],39:[function(require,module,exports){
 'use strict';
 
 
@@ -6366,7 +6366,7 @@ function filterSourceMessage(sourceMessage, message, data) { // data is DOM even
     return ok;
 }
 
-},{"milo-core":84}],40:[function(require,module,exports){
+},{"milo-core":88}],40:[function(require,module,exports){
 'use strict';
 
 var DOMEmitterSource = require('../../services/dom_source')
@@ -6405,7 +6405,7 @@ function emitter() {
     return this.component.el;
 }
 
-},{"../../services/dom_source":48,"../c_class":16,"milo-core":84}],41:[function(require,module,exports){
+},{"../../services/dom_source":48,"../c_class":16,"milo-core":88}],41:[function(require,module,exports){
 'use strict';
 
 // ###component iframe source
@@ -6480,7 +6480,7 @@ function handleEvent(event) {
     this.dispatchMessage(event.data.type, event);
 }
 
-},{"../c_class":16,"milo-core":84}],42:[function(require,module,exports){
+},{"../c_class":16,"milo-core":88}],42:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -6745,7 +6745,7 @@ function Scope$$rename(obj, name, renameInScope) {
         obj.name = name;
 }
 
-},{"../util/component_name":55,"milo-core":84}],43:[function(require,module,exports){
+},{"../util/component_name":55,"milo-core":88}],43:[function(require,module,exports){
 'use strict';
 
 
@@ -6820,7 +6820,7 @@ config({
     deprecationWarning: 'once'
 });
 
-},{"milo-core":84}],44:[function(require,module,exports){
+},{"milo-core":88}],44:[function(require,module,exports){
 'use strict';
 
 
@@ -6922,7 +6922,7 @@ function loadView(el, removeAttribute, callback) {
     });
 }
 
-},{"./attributes/a_load":6,"./config":43,"./services/mail":49,"./util/dom":59,"./util/request":67,"milo-core":84}],45:[function(require,module,exports){
+},{"./attributes/a_load":6,"./config":43,"./services/mail":49,"./util/dom":59,"./util/request":67,"milo-core":88}],45:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -7012,7 +7012,7 @@ function destroy() {
     milo.util.destroy();
 }
 
-},{"../package.json":121,"./attributes":8,"./binder":9,"./classes":10,"./command":13,"./components/c_class":16,"./components/c_facet":17,"./components/classes/View":36,"./config":43,"./loader":44,"./registry":46,"./services/mail":49,"./services/window":52,"./use_facets":53,"./util":65,"./util/create_component_class":56,"./util/create_facet_class":57,"milo-core":84}],46:[function(require,module,exports){
+},{"../package.json":125,"./attributes":8,"./binder":9,"./classes":10,"./command":13,"./components/c_class":16,"./components/c_facet":17,"./components/classes/View":36,"./config":43,"./loader":44,"./registry":46,"./services/mail":49,"./services/window":52,"./use_facets":53,"./util":65,"./util/create_component_class":56,"./util/create_facet_class":57,"milo-core":88}],46:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7078,7 +7078,7 @@ _.eachKey(eventTypes, function(eTypes, eventConstructorName) {
 
 module.exports = domEventsConstructors;
 
-},{"milo-core":84}],48:[function(require,module,exports){
+},{"milo-core":88}],48:[function(require,module,exports){
 'use strict';
 
 
@@ -7176,7 +7176,7 @@ function trigger(eventType, properties) {
     return notCancelled;
 }
 
-},{"./de_constrs":47,"milo-core":84}],49:[function(require,module,exports){
+},{"./de_constrs":47,"milo-core":88}],49:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7208,7 +7208,7 @@ miloMail._setMessageSource(mailMsgSource);
 
 module.exports = miloMail;
 
-},{"./mail_api":50,"./mail_source":51,"milo-core":84}],50:[function(require,module,exports){
+},{"./mail_api":50,"./mail_source":51,"milo-core":88}],50:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -7252,7 +7252,7 @@ function filterSourceMessage(sourceMessage, msgType, msgData) {
         return windowMessagePrefix + msgData.data.type == msgType;
 }
 
-},{"milo-core":84}],51:[function(require,module,exports){
+},{"milo-core":88}],51:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -7329,7 +7329,7 @@ function trigger(msgType, data) {
         window.postMessage(data, '*');
 }
 
-},{"../de_constrs":47,"milo-core":84}],52:[function(require,module,exports){
+},{"../de_constrs":47,"milo-core":88}],52:[function(require,module,exports){
 'use strict';
 
 
@@ -7356,7 +7356,7 @@ function windowService_isTop() {
     return window.top == window.self || window.__karma__;
 }
 
-},{"./dom_source":48,"milo-core":84}],53:[function(require,module,exports){
+},{"./dom_source":48,"milo-core":88}],53:[function(require,module,exports){
 'use strict';
 
 require('./components/c_facets/Css');
@@ -7620,7 +7620,7 @@ function createComponentClass(config) {
     return ComponentClass;
 }
 
-},{"../components/c_registry":34,"milo-core":84}],57:[function(require,module,exports){
+},{"../components/c_registry":34,"milo-core":88}],57:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -7658,7 +7658,7 @@ function createFacetClass(config) {
     facetRegistry.add(FacetClass);
     return FacetClass;
 }
-},{"../components/c_facet":17,"../components/c_facets/cf_registry":32,"milo-core":84}],58:[function(require,module,exports){
+},{"../components/c_facet":17,"../components/c_facets/cf_registry":32,"milo-core":88}],58:[function(require,module,exports){
 'use strict';
 
 
@@ -7692,7 +7692,7 @@ module.exports = function deprecate(fn, message) {
     }
 };
 
-},{"../config":43,"milo-core":84}],59:[function(require,module,exports){
+},{"../config":43,"milo-core":88}],59:[function(require,module,exports){
 'use strict';
 
 
@@ -8408,7 +8408,7 @@ function addDebugPoint(x, y) {
     setTimeout(function() {document.body.appendChild(dbEl);}, 200);
 }
 
-},{"../config":43,"milo-core":84}],60:[function(require,module,exports){
+},{"../config":43,"milo-core":88}],60:[function(require,module,exports){
 'use strict';
 
 
@@ -8465,7 +8465,7 @@ function _removeListener(l) {
     l.target.removeEventListener(l.eventType, l.handler);
 }
 
-},{"milo-core":84}],61:[function(require,module,exports){
+},{"milo-core":88}],61:[function(require,module,exports){
 'use strict';
 
 
@@ -8514,7 +8514,7 @@ function isReady() {
     return readyState == 'loading' ? false : readyState;
 }
 
-},{"milo-core":84}],62:[function(require,module,exports){
+},{"milo-core":88}],62:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -8811,7 +8811,7 @@ function DragDrop_destroy() {
     dragDropService.offAll();
 }
 
-},{"../config":43,"./base32":54,"milo-core":84}],63:[function(require,module,exports){
+},{"../config":43,"./base32":54,"milo-core":88}],63:[function(require,module,exports){
 // <a name="utils-error"></a>
 // milo.utils.error
 // -----------
@@ -8854,7 +8854,7 @@ function error$toBeImplemented() {
     throw new error.AbstractClass('calling the method of an absctract class');
 }
 
-},{"milo-core":84}],64:[function(require,module,exports){
+},{"milo-core":88}],64:[function(require,module,exports){
 'use strict';
 
 
@@ -9058,7 +9058,7 @@ function _createNodesAndPathsFunc(func) {
 
 
 
-},{"../attributes/a_bind":4,"../binder":9,"../components/c_class":16,"./dom":59,"milo-core":84}],65:[function(require,module,exports){
+},{"../attributes/a_bind":4,"../binder":9,"../components/c_class":16,"./dom":59,"milo-core":88}],65:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -9098,7 +9098,7 @@ function util_destroy() {
     util.dragDrop.destroy();
 }
 
-},{"./component_name":55,"./deprecate":58,"./dom":59,"./dom_listeners":60,"./domready":61,"./dragdrop":62,"./error":63,"./fragment":64,"./json_parse":66,"./request":67,"./selection":68,"./storage":69,"./unique_id":72,"./websocket":73,"milo-core":84,"querystringparser":119}],66:[function(require,module,exports){
+},{"./component_name":55,"./deprecate":58,"./dom":59,"./dom_listeners":60,"./domready":61,"./dragdrop":62,"./error":63,"./fragment":64,"./json_parse":66,"./request":67,"./selection":68,"./storage":69,"./unique_id":72,"./websocket":73,"milo-core":88,"querystringparser":123}],66:[function(require,module,exports){
 'use strict';
 
 
@@ -9520,7 +9520,7 @@ function whenRequestsCompleted(callback, timeout) {
         _.defer(callback);
 }
 
-},{"../config":43,"./unique_id":72,"milo-core":84}],68:[function(require,module,exports){
+},{"../config":43,"./unique_id":72,"milo-core":88}],68:[function(require,module,exports){
 'use strict';
 
 
@@ -9962,7 +9962,7 @@ function TextSelection$$getDirection(){
 }
 
 
-},{"../../components/c_class":16,"../dom":59,"milo-core":84}],69:[function(require,module,exports){
+},{"../../components/c_class":16,"../dom":59,"milo-core":88}],69:[function(require,module,exports){
 'use strict';
 
 
@@ -10375,7 +10375,7 @@ function DOMStorage$destroy() {
     this._destroyed = true;
 }
 
-},{"../../config":43,"./model":70,"./msg_src":71,"milo-core":84}],70:[function(require,module,exports){
+},{"../../config":43,"./model":70,"./msg_src":71,"milo-core":88}],70:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -10403,7 +10403,7 @@ function Model_domStorageParser(valueStr) {
     return new Model(data);
 }
 
-},{"./index":69,"milo-core":84}],71:[function(require,module,exports){
+},{"./index":69,"milo-core":88}],71:[function(require,module,exports){
 'use strict';
 
 
@@ -10476,7 +10476,7 @@ function handleEvent(event) {
     this.dispatchMessage(msgType, data);
 }
 
-},{"../../config":43,"../../util/unique_id":72,"milo-core":84}],72:[function(require,module,exports){
+},{"../../config":43,"../../util/unique_id":72,"milo-core":88}],72:[function(require,module,exports){
 'use strict';
 
 var timestamp = Date.now()
@@ -10526,7 +10526,7 @@ function websocket() {
 
 module.exports = websocket;
 
-},{"./msg_api":74,"./msg_src":75,"milo-core":84}],74:[function(require,module,exports){
+},{"./msg_api":74,"./msg_src":75,"milo-core":88}],74:[function(require,module,exports){
 'use strict';
 
 var miloCore = require('milo-core')
@@ -10571,7 +10571,7 @@ function createInternalData(sourceMessage, message, event) {
     return internalData;
 }
 
-},{"milo-core":84}],75:[function(require,module,exports){
+},{"milo-core":88}],75:[function(require,module,exports){
 'use strict';
 
 
@@ -10678,13 +10678,1780 @@ function WSMessageSource$trigger (msg, data, callback) {
     }
 }
 
-},{"../../config":43,"../../util/unique_id":72,"milo-core":84}],76:[function(require,module,exports){
-
-// not implemented
-// The reason for having an empty file and not throwing is to allow
-// untraditional implementation of this module.
+},{"../../config":43,"../../util/unique_id":72,"milo-core":88}],76:[function(require,module,exports){
 
 },{}],77:[function(require,module,exports){
+(function (global){
+/*!
+ * The buffer module from node.js, for the browser.
+ *
+ * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * @license  MIT
+ */
+/* eslint-disable no-proto */
+
+'use strict'
+
+var base64 = require('base64-js')
+var ieee754 = require('ieee754')
+var isArray = require('isarray')
+
+exports.Buffer = Buffer
+exports.SlowBuffer = SlowBuffer
+exports.INSPECT_MAX_BYTES = 50
+Buffer.poolSize = 8192 // not used by this implementation
+
+var rootParent = {}
+
+/**
+ * If `Buffer.TYPED_ARRAY_SUPPORT`:
+ *   === true    Use Uint8Array implementation (fastest)
+ *   === false   Use Object implementation (most compatible, even IE6)
+ *
+ * Browsers that support typed arrays are IE 10+, Firefox 4+, Chrome 7+, Safari 5.1+,
+ * Opera 11.6+, iOS 4.2+.
+ *
+ * Due to various browser bugs, sometimes the Object implementation will be used even
+ * when the browser supports typed arrays.
+ *
+ * Note:
+ *
+ *   - Firefox 4-29 lacks support for adding new properties to `Uint8Array` instances,
+ *     See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438.
+ *
+ *   - Safari 5-7 lacks support for changing the `Object.prototype.constructor` property
+ *     on objects.
+ *
+ *   - Chrome 9-10 is missing the `TypedArray.prototype.subarray` function.
+ *
+ *   - IE10 has a broken `TypedArray.prototype.subarray` function which returns arrays of
+ *     incorrect length in some situations.
+
+ * We detect these buggy browsers and set `Buffer.TYPED_ARRAY_SUPPORT` to `false` so they
+ * get the Object implementation, which is slower but behaves correctly.
+ */
+Buffer.TYPED_ARRAY_SUPPORT = global.TYPED_ARRAY_SUPPORT !== undefined
+  ? global.TYPED_ARRAY_SUPPORT
+  : typedArraySupport()
+
+function typedArraySupport () {
+  function Bar () {}
+  try {
+    var arr = new Uint8Array(1)
+    arr.foo = function () { return 42 }
+    arr.constructor = Bar
+    return arr.foo() === 42 && // typed array instances can be augmented
+        arr.constructor === Bar && // constructor can be set
+        typeof arr.subarray === 'function' && // chrome 9-10 lack `subarray`
+        arr.subarray(1, 1).byteLength === 0 // ie10 has broken `subarray`
+  } catch (e) {
+    return false
+  }
+}
+
+function kMaxLength () {
+  return Buffer.TYPED_ARRAY_SUPPORT
+    ? 0x7fffffff
+    : 0x3fffffff
+}
+
+/**
+ * Class: Buffer
+ * =============
+ *
+ * The Buffer constructor returns instances of `Uint8Array` that are augmented
+ * with function properties for all the node `Buffer` API functions. We use
+ * `Uint8Array` so that square bracket notation works as expected -- it returns
+ * a single octet.
+ *
+ * By augmenting the instances, we can avoid modifying the `Uint8Array`
+ * prototype.
+ */
+function Buffer (arg) {
+  if (!(this instanceof Buffer)) {
+    // Avoid going through an ArgumentsAdaptorTrampoline in the common case.
+    if (arguments.length > 1) return new Buffer(arg, arguments[1])
+    return new Buffer(arg)
+  }
+
+  if (!Buffer.TYPED_ARRAY_SUPPORT) {
+    this.length = 0
+    this.parent = undefined
+  }
+
+  // Common case.
+  if (typeof arg === 'number') {
+    return fromNumber(this, arg)
+  }
+
+  // Slightly less common case.
+  if (typeof arg === 'string') {
+    return fromString(this, arg, arguments.length > 1 ? arguments[1] : 'utf8')
+  }
+
+  // Unusual.
+  return fromObject(this, arg)
+}
+
+function fromNumber (that, length) {
+  that = allocate(that, length < 0 ? 0 : checked(length) | 0)
+  if (!Buffer.TYPED_ARRAY_SUPPORT) {
+    for (var i = 0; i < length; i++) {
+      that[i] = 0
+    }
+  }
+  return that
+}
+
+function fromString (that, string, encoding) {
+  if (typeof encoding !== 'string' || encoding === '') encoding = 'utf8'
+
+  // Assumption: byteLength() return value is always < kMaxLength.
+  var length = byteLength(string, encoding) | 0
+  that = allocate(that, length)
+
+  that.write(string, encoding)
+  return that
+}
+
+function fromObject (that, object) {
+  if (Buffer.isBuffer(object)) return fromBuffer(that, object)
+
+  if (isArray(object)) return fromArray(that, object)
+
+  if (object == null) {
+    throw new TypeError('must start with number, buffer, array or string')
+  }
+
+  if (typeof ArrayBuffer !== 'undefined') {
+    if (object.buffer instanceof ArrayBuffer) {
+      return fromTypedArray(that, object)
+    }
+    if (object instanceof ArrayBuffer) {
+      return fromArrayBuffer(that, object)
+    }
+  }
+
+  if (object.length) return fromArrayLike(that, object)
+
+  return fromJsonObject(that, object)
+}
+
+function fromBuffer (that, buffer) {
+  var length = checked(buffer.length) | 0
+  that = allocate(that, length)
+  buffer.copy(that, 0, 0, length)
+  return that
+}
+
+function fromArray (that, array) {
+  var length = checked(array.length) | 0
+  that = allocate(that, length)
+  for (var i = 0; i < length; i += 1) {
+    that[i] = array[i] & 255
+  }
+  return that
+}
+
+// Duplicate of fromArray() to keep fromArray() monomorphic.
+function fromTypedArray (that, array) {
+  var length = checked(array.length) | 0
+  that = allocate(that, length)
+  // Truncating the elements is probably not what people expect from typed
+  // arrays with BYTES_PER_ELEMENT > 1 but it's compatible with the behavior
+  // of the old Buffer constructor.
+  for (var i = 0; i < length; i += 1) {
+    that[i] = array[i] & 255
+  }
+  return that
+}
+
+function fromArrayBuffer (that, array) {
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    // Return an augmented `Uint8Array` instance, for best performance
+    array.byteLength
+    that = Buffer._augment(new Uint8Array(array))
+  } else {
+    // Fallback: Return an object instance of the Buffer class
+    that = fromTypedArray(that, new Uint8Array(array))
+  }
+  return that
+}
+
+function fromArrayLike (that, array) {
+  var length = checked(array.length) | 0
+  that = allocate(that, length)
+  for (var i = 0; i < length; i += 1) {
+    that[i] = array[i] & 255
+  }
+  return that
+}
+
+// Deserialize { type: 'Buffer', data: [1,2,3,...] } into a Buffer object.
+// Returns a zero-length buffer for inputs that don't conform to the spec.
+function fromJsonObject (that, object) {
+  var array
+  var length = 0
+
+  if (object.type === 'Buffer' && isArray(object.data)) {
+    array = object.data
+    length = checked(array.length) | 0
+  }
+  that = allocate(that, length)
+
+  for (var i = 0; i < length; i += 1) {
+    that[i] = array[i] & 255
+  }
+  return that
+}
+
+if (Buffer.TYPED_ARRAY_SUPPORT) {
+  Buffer.prototype.__proto__ = Uint8Array.prototype
+  Buffer.__proto__ = Uint8Array
+} else {
+  // pre-set for values that may exist in the future
+  Buffer.prototype.length = undefined
+  Buffer.prototype.parent = undefined
+}
+
+function allocate (that, length) {
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    // Return an augmented `Uint8Array` instance, for best performance
+    that = Buffer._augment(new Uint8Array(length))
+    that.__proto__ = Buffer.prototype
+  } else {
+    // Fallback: Return an object instance of the Buffer class
+    that.length = length
+    that._isBuffer = true
+  }
+
+  var fromPool = length !== 0 && length <= Buffer.poolSize >>> 1
+  if (fromPool) that.parent = rootParent
+
+  return that
+}
+
+function checked (length) {
+  // Note: cannot use `length < kMaxLength` here because that fails when
+  // length is NaN (which is otherwise coerced to zero.)
+  if (length >= kMaxLength()) {
+    throw new RangeError('Attempt to allocate Buffer larger than maximum ' +
+                         'size: 0x' + kMaxLength().toString(16) + ' bytes')
+  }
+  return length | 0
+}
+
+function SlowBuffer (subject, encoding) {
+  if (!(this instanceof SlowBuffer)) return new SlowBuffer(subject, encoding)
+
+  var buf = new Buffer(subject, encoding)
+  delete buf.parent
+  return buf
+}
+
+Buffer.isBuffer = function isBuffer (b) {
+  return !!(b != null && b._isBuffer)
+}
+
+Buffer.compare = function compare (a, b) {
+  if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b)) {
+    throw new TypeError('Arguments must be Buffers')
+  }
+
+  if (a === b) return 0
+
+  var x = a.length
+  var y = b.length
+
+  var i = 0
+  var len = Math.min(x, y)
+  while (i < len) {
+    if (a[i] !== b[i]) break
+
+    ++i
+  }
+
+  if (i !== len) {
+    x = a[i]
+    y = b[i]
+  }
+
+  if (x < y) return -1
+  if (y < x) return 1
+  return 0
+}
+
+Buffer.isEncoding = function isEncoding (encoding) {
+  switch (String(encoding).toLowerCase()) {
+    case 'hex':
+    case 'utf8':
+    case 'utf-8':
+    case 'ascii':
+    case 'binary':
+    case 'base64':
+    case 'raw':
+    case 'ucs2':
+    case 'ucs-2':
+    case 'utf16le':
+    case 'utf-16le':
+      return true
+    default:
+      return false
+  }
+}
+
+Buffer.concat = function concat (list, length) {
+  if (!isArray(list)) throw new TypeError('list argument must be an Array of Buffers.')
+
+  if (list.length === 0) {
+    return new Buffer(0)
+  }
+
+  var i
+  if (length === undefined) {
+    length = 0
+    for (i = 0; i < list.length; i++) {
+      length += list[i].length
+    }
+  }
+
+  var buf = new Buffer(length)
+  var pos = 0
+  for (i = 0; i < list.length; i++) {
+    var item = list[i]
+    item.copy(buf, pos)
+    pos += item.length
+  }
+  return buf
+}
+
+function byteLength (string, encoding) {
+  if (typeof string !== 'string') string = '' + string
+
+  var len = string.length
+  if (len === 0) return 0
+
+  // Use a for loop to avoid recursion
+  var loweredCase = false
+  for (;;) {
+    switch (encoding) {
+      case 'ascii':
+      case 'binary':
+      // Deprecated
+      case 'raw':
+      case 'raws':
+        return len
+      case 'utf8':
+      case 'utf-8':
+        return utf8ToBytes(string).length
+      case 'ucs2':
+      case 'ucs-2':
+      case 'utf16le':
+      case 'utf-16le':
+        return len * 2
+      case 'hex':
+        return len >>> 1
+      case 'base64':
+        return base64ToBytes(string).length
+      default:
+        if (loweredCase) return utf8ToBytes(string).length // assume utf8
+        encoding = ('' + encoding).toLowerCase()
+        loweredCase = true
+    }
+  }
+}
+Buffer.byteLength = byteLength
+
+function slowToString (encoding, start, end) {
+  var loweredCase = false
+
+  start = start | 0
+  end = end === undefined || end === Infinity ? this.length : end | 0
+
+  if (!encoding) encoding = 'utf8'
+  if (start < 0) start = 0
+  if (end > this.length) end = this.length
+  if (end <= start) return ''
+
+  while (true) {
+    switch (encoding) {
+      case 'hex':
+        return hexSlice(this, start, end)
+
+      case 'utf8':
+      case 'utf-8':
+        return utf8Slice(this, start, end)
+
+      case 'ascii':
+        return asciiSlice(this, start, end)
+
+      case 'binary':
+        return binarySlice(this, start, end)
+
+      case 'base64':
+        return base64Slice(this, start, end)
+
+      case 'ucs2':
+      case 'ucs-2':
+      case 'utf16le':
+      case 'utf-16le':
+        return utf16leSlice(this, start, end)
+
+      default:
+        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)
+        encoding = (encoding + '').toLowerCase()
+        loweredCase = true
+    }
+  }
+}
+
+Buffer.prototype.toString = function toString () {
+  var length = this.length | 0
+  if (length === 0) return ''
+  if (arguments.length === 0) return utf8Slice(this, 0, length)
+  return slowToString.apply(this, arguments)
+}
+
+Buffer.prototype.equals = function equals (b) {
+  if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
+  if (this === b) return true
+  return Buffer.compare(this, b) === 0
+}
+
+Buffer.prototype.inspect = function inspect () {
+  var str = ''
+  var max = exports.INSPECT_MAX_BYTES
+  if (this.length > 0) {
+    str = this.toString('hex', 0, max).match(/.{2}/g).join(' ')
+    if (this.length > max) str += ' ... '
+  }
+  return '<Buffer ' + str + '>'
+}
+
+Buffer.prototype.compare = function compare (b) {
+  if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
+  if (this === b) return 0
+  return Buffer.compare(this, b)
+}
+
+Buffer.prototype.indexOf = function indexOf (val, byteOffset) {
+  if (byteOffset > 0x7fffffff) byteOffset = 0x7fffffff
+  else if (byteOffset < -0x80000000) byteOffset = -0x80000000
+  byteOffset >>= 0
+
+  if (this.length === 0) return -1
+  if (byteOffset >= this.length) return -1
+
+  // Negative offsets start from the end of the buffer
+  if (byteOffset < 0) byteOffset = Math.max(this.length + byteOffset, 0)
+
+  if (typeof val === 'string') {
+    if (val.length === 0) return -1 // special case: looking for empty string always fails
+    return String.prototype.indexOf.call(this, val, byteOffset)
+  }
+  if (Buffer.isBuffer(val)) {
+    return arrayIndexOf(this, val, byteOffset)
+  }
+  if (typeof val === 'number') {
+    if (Buffer.TYPED_ARRAY_SUPPORT && Uint8Array.prototype.indexOf === 'function') {
+      return Uint8Array.prototype.indexOf.call(this, val, byteOffset)
+    }
+    return arrayIndexOf(this, [ val ], byteOffset)
+  }
+
+  function arrayIndexOf (arr, val, byteOffset) {
+    var foundIndex = -1
+    for (var i = 0; byteOffset + i < arr.length; i++) {
+      if (arr[byteOffset + i] === val[foundIndex === -1 ? 0 : i - foundIndex]) {
+        if (foundIndex === -1) foundIndex = i
+        if (i - foundIndex + 1 === val.length) return byteOffset + foundIndex
+      } else {
+        foundIndex = -1
+      }
+    }
+    return -1
+  }
+
+  throw new TypeError('val must be string, number or Buffer')
+}
+
+// `get` is deprecated
+Buffer.prototype.get = function get (offset) {
+  console.log('.get() is deprecated. Access using array indexes instead.')
+  return this.readUInt8(offset)
+}
+
+// `set` is deprecated
+Buffer.prototype.set = function set (v, offset) {
+  console.log('.set() is deprecated. Access using array indexes instead.')
+  return this.writeUInt8(v, offset)
+}
+
+function hexWrite (buf, string, offset, length) {
+  offset = Number(offset) || 0
+  var remaining = buf.length - offset
+  if (!length) {
+    length = remaining
+  } else {
+    length = Number(length)
+    if (length > remaining) {
+      length = remaining
+    }
+  }
+
+  // must be an even number of digits
+  var strLen = string.length
+  if (strLen % 2 !== 0) throw new Error('Invalid hex string')
+
+  if (length > strLen / 2) {
+    length = strLen / 2
+  }
+  for (var i = 0; i < length; i++) {
+    var parsed = parseInt(string.substr(i * 2, 2), 16)
+    if (isNaN(parsed)) throw new Error('Invalid hex string')
+    buf[offset + i] = parsed
+  }
+  return i
+}
+
+function utf8Write (buf, string, offset, length) {
+  return blitBuffer(utf8ToBytes(string, buf.length - offset), buf, offset, length)
+}
+
+function asciiWrite (buf, string, offset, length) {
+  return blitBuffer(asciiToBytes(string), buf, offset, length)
+}
+
+function binaryWrite (buf, string, offset, length) {
+  return asciiWrite(buf, string, offset, length)
+}
+
+function base64Write (buf, string, offset, length) {
+  return blitBuffer(base64ToBytes(string), buf, offset, length)
+}
+
+function ucs2Write (buf, string, offset, length) {
+  return blitBuffer(utf16leToBytes(string, buf.length - offset), buf, offset, length)
+}
+
+Buffer.prototype.write = function write (string, offset, length, encoding) {
+  // Buffer#write(string)
+  if (offset === undefined) {
+    encoding = 'utf8'
+    length = this.length
+    offset = 0
+  // Buffer#write(string, encoding)
+  } else if (length === undefined && typeof offset === 'string') {
+    encoding = offset
+    length = this.length
+    offset = 0
+  // Buffer#write(string, offset[, length][, encoding])
+  } else if (isFinite(offset)) {
+    offset = offset | 0
+    if (isFinite(length)) {
+      length = length | 0
+      if (encoding === undefined) encoding = 'utf8'
+    } else {
+      encoding = length
+      length = undefined
+    }
+  // legacy write(string, encoding, offset, length) - remove in v0.13
+  } else {
+    var swap = encoding
+    encoding = offset
+    offset = length | 0
+    length = swap
+  }
+
+  var remaining = this.length - offset
+  if (length === undefined || length > remaining) length = remaining
+
+  if ((string.length > 0 && (length < 0 || offset < 0)) || offset > this.length) {
+    throw new RangeError('attempt to write outside buffer bounds')
+  }
+
+  if (!encoding) encoding = 'utf8'
+
+  var loweredCase = false
+  for (;;) {
+    switch (encoding) {
+      case 'hex':
+        return hexWrite(this, string, offset, length)
+
+      case 'utf8':
+      case 'utf-8':
+        return utf8Write(this, string, offset, length)
+
+      case 'ascii':
+        return asciiWrite(this, string, offset, length)
+
+      case 'binary':
+        return binaryWrite(this, string, offset, length)
+
+      case 'base64':
+        // Warning: maxLength not taken into account in base64Write
+        return base64Write(this, string, offset, length)
+
+      case 'ucs2':
+      case 'ucs-2':
+      case 'utf16le':
+      case 'utf-16le':
+        return ucs2Write(this, string, offset, length)
+
+      default:
+        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)
+        encoding = ('' + encoding).toLowerCase()
+        loweredCase = true
+    }
+  }
+}
+
+Buffer.prototype.toJSON = function toJSON () {
+  return {
+    type: 'Buffer',
+    data: Array.prototype.slice.call(this._arr || this, 0)
+  }
+}
+
+function base64Slice (buf, start, end) {
+  if (start === 0 && end === buf.length) {
+    return base64.fromByteArray(buf)
+  } else {
+    return base64.fromByteArray(buf.slice(start, end))
+  }
+}
+
+function utf8Slice (buf, start, end) {
+  end = Math.min(buf.length, end)
+  var res = []
+
+  var i = start
+  while (i < end) {
+    var firstByte = buf[i]
+    var codePoint = null
+    var bytesPerSequence = (firstByte > 0xEF) ? 4
+      : (firstByte > 0xDF) ? 3
+      : (firstByte > 0xBF) ? 2
+      : 1
+
+    if (i + bytesPerSequence <= end) {
+      var secondByte, thirdByte, fourthByte, tempCodePoint
+
+      switch (bytesPerSequence) {
+        case 1:
+          if (firstByte < 0x80) {
+            codePoint = firstByte
+          }
+          break
+        case 2:
+          secondByte = buf[i + 1]
+          if ((secondByte & 0xC0) === 0x80) {
+            tempCodePoint = (firstByte & 0x1F) << 0x6 | (secondByte & 0x3F)
+            if (tempCodePoint > 0x7F) {
+              codePoint = tempCodePoint
+            }
+          }
+          break
+        case 3:
+          secondByte = buf[i + 1]
+          thirdByte = buf[i + 2]
+          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80) {
+            tempCodePoint = (firstByte & 0xF) << 0xC | (secondByte & 0x3F) << 0x6 | (thirdByte & 0x3F)
+            if (tempCodePoint > 0x7FF && (tempCodePoint < 0xD800 || tempCodePoint > 0xDFFF)) {
+              codePoint = tempCodePoint
+            }
+          }
+          break
+        case 4:
+          secondByte = buf[i + 1]
+          thirdByte = buf[i + 2]
+          fourthByte = buf[i + 3]
+          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80 && (fourthByte & 0xC0) === 0x80) {
+            tempCodePoint = (firstByte & 0xF) << 0x12 | (secondByte & 0x3F) << 0xC | (thirdByte & 0x3F) << 0x6 | (fourthByte & 0x3F)
+            if (tempCodePoint > 0xFFFF && tempCodePoint < 0x110000) {
+              codePoint = tempCodePoint
+            }
+          }
+      }
+    }
+
+    if (codePoint === null) {
+      // we did not generate a valid codePoint so insert a
+      // replacement char (U+FFFD) and advance only 1 byte
+      codePoint = 0xFFFD
+      bytesPerSequence = 1
+    } else if (codePoint > 0xFFFF) {
+      // encode to utf16 (surrogate pair dance)
+      codePoint -= 0x10000
+      res.push(codePoint >>> 10 & 0x3FF | 0xD800)
+      codePoint = 0xDC00 | codePoint & 0x3FF
+    }
+
+    res.push(codePoint)
+    i += bytesPerSequence
+  }
+
+  return decodeCodePointsArray(res)
+}
+
+// Based on http://stackoverflow.com/a/22747272/680742, the browser with
+// the lowest limit is Chrome, with 0x10000 args.
+// We go 1 magnitude less, for safety
+var MAX_ARGUMENTS_LENGTH = 0x1000
+
+function decodeCodePointsArray (codePoints) {
+  var len = codePoints.length
+  if (len <= MAX_ARGUMENTS_LENGTH) {
+    return String.fromCharCode.apply(String, codePoints) // avoid extra slice()
+  }
+
+  // Decode in chunks to avoid "call stack size exceeded".
+  var res = ''
+  var i = 0
+  while (i < len) {
+    res += String.fromCharCode.apply(
+      String,
+      codePoints.slice(i, i += MAX_ARGUMENTS_LENGTH)
+    )
+  }
+  return res
+}
+
+function asciiSlice (buf, start, end) {
+  var ret = ''
+  end = Math.min(buf.length, end)
+
+  for (var i = start; i < end; i++) {
+    ret += String.fromCharCode(buf[i] & 0x7F)
+  }
+  return ret
+}
+
+function binarySlice (buf, start, end) {
+  var ret = ''
+  end = Math.min(buf.length, end)
+
+  for (var i = start; i < end; i++) {
+    ret += String.fromCharCode(buf[i])
+  }
+  return ret
+}
+
+function hexSlice (buf, start, end) {
+  var len = buf.length
+
+  if (!start || start < 0) start = 0
+  if (!end || end < 0 || end > len) end = len
+
+  var out = ''
+  for (var i = start; i < end; i++) {
+    out += toHex(buf[i])
+  }
+  return out
+}
+
+function utf16leSlice (buf, start, end) {
+  var bytes = buf.slice(start, end)
+  var res = ''
+  for (var i = 0; i < bytes.length; i += 2) {
+    res += String.fromCharCode(bytes[i] + bytes[i + 1] * 256)
+  }
+  return res
+}
+
+Buffer.prototype.slice = function slice (start, end) {
+  var len = this.length
+  start = ~~start
+  end = end === undefined ? len : ~~end
+
+  if (start < 0) {
+    start += len
+    if (start < 0) start = 0
+  } else if (start > len) {
+    start = len
+  }
+
+  if (end < 0) {
+    end += len
+    if (end < 0) end = 0
+  } else if (end > len) {
+    end = len
+  }
+
+  if (end < start) end = start
+
+  var newBuf
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    newBuf = Buffer._augment(this.subarray(start, end))
+  } else {
+    var sliceLen = end - start
+    newBuf = new Buffer(sliceLen, undefined)
+    for (var i = 0; i < sliceLen; i++) {
+      newBuf[i] = this[i + start]
+    }
+  }
+
+  if (newBuf.length) newBuf.parent = this.parent || this
+
+  return newBuf
+}
+
+/*
+ * Need to make sure that buffer isn't trying to write out of bounds.
+ */
+function checkOffset (offset, ext, length) {
+  if ((offset % 1) !== 0 || offset < 0) throw new RangeError('offset is not uint')
+  if (offset + ext > length) throw new RangeError('Trying to access beyond buffer length')
+}
+
+Buffer.prototype.readUIntLE = function readUIntLE (offset, byteLength, noAssert) {
+  offset = offset | 0
+  byteLength = byteLength | 0
+  if (!noAssert) checkOffset(offset, byteLength, this.length)
+
+  var val = this[offset]
+  var mul = 1
+  var i = 0
+  while (++i < byteLength && (mul *= 0x100)) {
+    val += this[offset + i] * mul
+  }
+
+  return val
+}
+
+Buffer.prototype.readUIntBE = function readUIntBE (offset, byteLength, noAssert) {
+  offset = offset | 0
+  byteLength = byteLength | 0
+  if (!noAssert) {
+    checkOffset(offset, byteLength, this.length)
+  }
+
+  var val = this[offset + --byteLength]
+  var mul = 1
+  while (byteLength > 0 && (mul *= 0x100)) {
+    val += this[offset + --byteLength] * mul
+  }
+
+  return val
+}
+
+Buffer.prototype.readUInt8 = function readUInt8 (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 1, this.length)
+  return this[offset]
+}
+
+Buffer.prototype.readUInt16LE = function readUInt16LE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 2, this.length)
+  return this[offset] | (this[offset + 1] << 8)
+}
+
+Buffer.prototype.readUInt16BE = function readUInt16BE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 2, this.length)
+  return (this[offset] << 8) | this[offset + 1]
+}
+
+Buffer.prototype.readUInt32LE = function readUInt32LE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 4, this.length)
+
+  return ((this[offset]) |
+      (this[offset + 1] << 8) |
+      (this[offset + 2] << 16)) +
+      (this[offset + 3] * 0x1000000)
+}
+
+Buffer.prototype.readUInt32BE = function readUInt32BE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 4, this.length)
+
+  return (this[offset] * 0x1000000) +
+    ((this[offset + 1] << 16) |
+    (this[offset + 2] << 8) |
+    this[offset + 3])
+}
+
+Buffer.prototype.readIntLE = function readIntLE (offset, byteLength, noAssert) {
+  offset = offset | 0
+  byteLength = byteLength | 0
+  if (!noAssert) checkOffset(offset, byteLength, this.length)
+
+  var val = this[offset]
+  var mul = 1
+  var i = 0
+  while (++i < byteLength && (mul *= 0x100)) {
+    val += this[offset + i] * mul
+  }
+  mul *= 0x80
+
+  if (val >= mul) val -= Math.pow(2, 8 * byteLength)
+
+  return val
+}
+
+Buffer.prototype.readIntBE = function readIntBE (offset, byteLength, noAssert) {
+  offset = offset | 0
+  byteLength = byteLength | 0
+  if (!noAssert) checkOffset(offset, byteLength, this.length)
+
+  var i = byteLength
+  var mul = 1
+  var val = this[offset + --i]
+  while (i > 0 && (mul *= 0x100)) {
+    val += this[offset + --i] * mul
+  }
+  mul *= 0x80
+
+  if (val >= mul) val -= Math.pow(2, 8 * byteLength)
+
+  return val
+}
+
+Buffer.prototype.readInt8 = function readInt8 (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 1, this.length)
+  if (!(this[offset] & 0x80)) return (this[offset])
+  return ((0xff - this[offset] + 1) * -1)
+}
+
+Buffer.prototype.readInt16LE = function readInt16LE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 2, this.length)
+  var val = this[offset] | (this[offset + 1] << 8)
+  return (val & 0x8000) ? val | 0xFFFF0000 : val
+}
+
+Buffer.prototype.readInt16BE = function readInt16BE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 2, this.length)
+  var val = this[offset + 1] | (this[offset] << 8)
+  return (val & 0x8000) ? val | 0xFFFF0000 : val
+}
+
+Buffer.prototype.readInt32LE = function readInt32LE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 4, this.length)
+
+  return (this[offset]) |
+    (this[offset + 1] << 8) |
+    (this[offset + 2] << 16) |
+    (this[offset + 3] << 24)
+}
+
+Buffer.prototype.readInt32BE = function readInt32BE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 4, this.length)
+
+  return (this[offset] << 24) |
+    (this[offset + 1] << 16) |
+    (this[offset + 2] << 8) |
+    (this[offset + 3])
+}
+
+Buffer.prototype.readFloatLE = function readFloatLE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 4, this.length)
+  return ieee754.read(this, offset, true, 23, 4)
+}
+
+Buffer.prototype.readFloatBE = function readFloatBE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 4, this.length)
+  return ieee754.read(this, offset, false, 23, 4)
+}
+
+Buffer.prototype.readDoubleLE = function readDoubleLE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 8, this.length)
+  return ieee754.read(this, offset, true, 52, 8)
+}
+
+Buffer.prototype.readDoubleBE = function readDoubleBE (offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 8, this.length)
+  return ieee754.read(this, offset, false, 52, 8)
+}
+
+function checkInt (buf, value, offset, ext, max, min) {
+  if (!Buffer.isBuffer(buf)) throw new TypeError('buffer must be a Buffer instance')
+  if (value > max || value < min) throw new RangeError('value is out of bounds')
+  if (offset + ext > buf.length) throw new RangeError('index out of range')
+}
+
+Buffer.prototype.writeUIntLE = function writeUIntLE (value, offset, byteLength, noAssert) {
+  value = +value
+  offset = offset | 0
+  byteLength = byteLength | 0
+  if (!noAssert) checkInt(this, value, offset, byteLength, Math.pow(2, 8 * byteLength), 0)
+
+  var mul = 1
+  var i = 0
+  this[offset] = value & 0xFF
+  while (++i < byteLength && (mul *= 0x100)) {
+    this[offset + i] = (value / mul) & 0xFF
+  }
+
+  return offset + byteLength
+}
+
+Buffer.prototype.writeUIntBE = function writeUIntBE (value, offset, byteLength, noAssert) {
+  value = +value
+  offset = offset | 0
+  byteLength = byteLength | 0
+  if (!noAssert) checkInt(this, value, offset, byteLength, Math.pow(2, 8 * byteLength), 0)
+
+  var i = byteLength - 1
+  var mul = 1
+  this[offset + i] = value & 0xFF
+  while (--i >= 0 && (mul *= 0x100)) {
+    this[offset + i] = (value / mul) & 0xFF
+  }
+
+  return offset + byteLength
+}
+
+Buffer.prototype.writeUInt8 = function writeUInt8 (value, offset, noAssert) {
+  value = +value
+  offset = offset | 0
+  if (!noAssert) checkInt(this, value, offset, 1, 0xff, 0)
+  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
+  this[offset] = (value & 0xff)
+  return offset + 1
+}
+
+function objectWriteUInt16 (buf, value, offset, littleEndian) {
+  if (value < 0) value = 0xffff + value + 1
+  for (var i = 0, j = Math.min(buf.length - offset, 2); i < j; i++) {
+    buf[offset + i] = (value & (0xff << (8 * (littleEndian ? i : 1 - i)))) >>>
+      (littleEndian ? i : 1 - i) * 8
+  }
+}
+
+Buffer.prototype.writeUInt16LE = function writeUInt16LE (value, offset, noAssert) {
+  value = +value
+  offset = offset | 0
+  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = (value & 0xff)
+    this[offset + 1] = (value >>> 8)
+  } else {
+    objectWriteUInt16(this, value, offset, true)
+  }
+  return offset + 2
+}
+
+Buffer.prototype.writeUInt16BE = function writeUInt16BE (value, offset, noAssert) {
+  value = +value
+  offset = offset | 0
+  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = (value >>> 8)
+    this[offset + 1] = (value & 0xff)
+  } else {
+    objectWriteUInt16(this, value, offset, false)
+  }
+  return offset + 2
+}
+
+function objectWriteUInt32 (buf, value, offset, littleEndian) {
+  if (value < 0) value = 0xffffffff + value + 1
+  for (var i = 0, j = Math.min(buf.length - offset, 4); i < j; i++) {
+    buf[offset + i] = (value >>> (littleEndian ? i : 3 - i) * 8) & 0xff
+  }
+}
+
+Buffer.prototype.writeUInt32LE = function writeUInt32LE (value, offset, noAssert) {
+  value = +value
+  offset = offset | 0
+  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset + 3] = (value >>> 24)
+    this[offset + 2] = (value >>> 16)
+    this[offset + 1] = (value >>> 8)
+    this[offset] = (value & 0xff)
+  } else {
+    objectWriteUInt32(this, value, offset, true)
+  }
+  return offset + 4
+}
+
+Buffer.prototype.writeUInt32BE = function writeUInt32BE (value, offset, noAssert) {
+  value = +value
+  offset = offset | 0
+  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = (value >>> 24)
+    this[offset + 1] = (value >>> 16)
+    this[offset + 2] = (value >>> 8)
+    this[offset + 3] = (value & 0xff)
+  } else {
+    objectWriteUInt32(this, value, offset, false)
+  }
+  return offset + 4
+}
+
+Buffer.prototype.writeIntLE = function writeIntLE (value, offset, byteLength, noAssert) {
+  value = +value
+  offset = offset | 0
+  if (!noAssert) {
+    var limit = Math.pow(2, 8 * byteLength - 1)
+
+    checkInt(this, value, offset, byteLength, limit - 1, -limit)
+  }
+
+  var i = 0
+  var mul = 1
+  var sub = value < 0 ? 1 : 0
+  this[offset] = value & 0xFF
+  while (++i < byteLength && (mul *= 0x100)) {
+    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF
+  }
+
+  return offset + byteLength
+}
+
+Buffer.prototype.writeIntBE = function writeIntBE (value, offset, byteLength, noAssert) {
+  value = +value
+  offset = offset | 0
+  if (!noAssert) {
+    var limit = Math.pow(2, 8 * byteLength - 1)
+
+    checkInt(this, value, offset, byteLength, limit - 1, -limit)
+  }
+
+  var i = byteLength - 1
+  var mul = 1
+  var sub = value < 0 ? 1 : 0
+  this[offset + i] = value & 0xFF
+  while (--i >= 0 && (mul *= 0x100)) {
+    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF
+  }
+
+  return offset + byteLength
+}
+
+Buffer.prototype.writeInt8 = function writeInt8 (value, offset, noAssert) {
+  value = +value
+  offset = offset | 0
+  if (!noAssert) checkInt(this, value, offset, 1, 0x7f, -0x80)
+  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
+  if (value < 0) value = 0xff + value + 1
+  this[offset] = (value & 0xff)
+  return offset + 1
+}
+
+Buffer.prototype.writeInt16LE = function writeInt16LE (value, offset, noAssert) {
+  value = +value
+  offset = offset | 0
+  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = (value & 0xff)
+    this[offset + 1] = (value >>> 8)
+  } else {
+    objectWriteUInt16(this, value, offset, true)
+  }
+  return offset + 2
+}
+
+Buffer.prototype.writeInt16BE = function writeInt16BE (value, offset, noAssert) {
+  value = +value
+  offset = offset | 0
+  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = (value >>> 8)
+    this[offset + 1] = (value & 0xff)
+  } else {
+    objectWriteUInt16(this, value, offset, false)
+  }
+  return offset + 2
+}
+
+Buffer.prototype.writeInt32LE = function writeInt32LE (value, offset, noAssert) {
+  value = +value
+  offset = offset | 0
+  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = (value & 0xff)
+    this[offset + 1] = (value >>> 8)
+    this[offset + 2] = (value >>> 16)
+    this[offset + 3] = (value >>> 24)
+  } else {
+    objectWriteUInt32(this, value, offset, true)
+  }
+  return offset + 4
+}
+
+Buffer.prototype.writeInt32BE = function writeInt32BE (value, offset, noAssert) {
+  value = +value
+  offset = offset | 0
+  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
+  if (value < 0) value = 0xffffffff + value + 1
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = (value >>> 24)
+    this[offset + 1] = (value >>> 16)
+    this[offset + 2] = (value >>> 8)
+    this[offset + 3] = (value & 0xff)
+  } else {
+    objectWriteUInt32(this, value, offset, false)
+  }
+  return offset + 4
+}
+
+function checkIEEE754 (buf, value, offset, ext, max, min) {
+  if (value > max || value < min) throw new RangeError('value is out of bounds')
+  if (offset + ext > buf.length) throw new RangeError('index out of range')
+  if (offset < 0) throw new RangeError('index out of range')
+}
+
+function writeFloat (buf, value, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    checkIEEE754(buf, value, offset, 4, 3.4028234663852886e+38, -3.4028234663852886e+38)
+  }
+  ieee754.write(buf, value, offset, littleEndian, 23, 4)
+  return offset + 4
+}
+
+Buffer.prototype.writeFloatLE = function writeFloatLE (value, offset, noAssert) {
+  return writeFloat(this, value, offset, true, noAssert)
+}
+
+Buffer.prototype.writeFloatBE = function writeFloatBE (value, offset, noAssert) {
+  return writeFloat(this, value, offset, false, noAssert)
+}
+
+function writeDouble (buf, value, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    checkIEEE754(buf, value, offset, 8, 1.7976931348623157E+308, -1.7976931348623157E+308)
+  }
+  ieee754.write(buf, value, offset, littleEndian, 52, 8)
+  return offset + 8
+}
+
+Buffer.prototype.writeDoubleLE = function writeDoubleLE (value, offset, noAssert) {
+  return writeDouble(this, value, offset, true, noAssert)
+}
+
+Buffer.prototype.writeDoubleBE = function writeDoubleBE (value, offset, noAssert) {
+  return writeDouble(this, value, offset, false, noAssert)
+}
+
+// copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
+Buffer.prototype.copy = function copy (target, targetStart, start, end) {
+  if (!start) start = 0
+  if (!end && end !== 0) end = this.length
+  if (targetStart >= target.length) targetStart = target.length
+  if (!targetStart) targetStart = 0
+  if (end > 0 && end < start) end = start
+
+  // Copy 0 bytes; we're done
+  if (end === start) return 0
+  if (target.length === 0 || this.length === 0) return 0
+
+  // Fatal error conditions
+  if (targetStart < 0) {
+    throw new RangeError('targetStart out of bounds')
+  }
+  if (start < 0 || start >= this.length) throw new RangeError('sourceStart out of bounds')
+  if (end < 0) throw new RangeError('sourceEnd out of bounds')
+
+  // Are we oob?
+  if (end > this.length) end = this.length
+  if (target.length - targetStart < end - start) {
+    end = target.length - targetStart + start
+  }
+
+  var len = end - start
+  var i
+
+  if (this === target && start < targetStart && targetStart < end) {
+    // descending copy from end
+    for (i = len - 1; i >= 0; i--) {
+      target[i + targetStart] = this[i + start]
+    }
+  } else if (len < 1000 || !Buffer.TYPED_ARRAY_SUPPORT) {
+    // ascending copy from start
+    for (i = 0; i < len; i++) {
+      target[i + targetStart] = this[i + start]
+    }
+  } else {
+    target._set(this.subarray(start, start + len), targetStart)
+  }
+
+  return len
+}
+
+// fill(value, start=0, end=buffer.length)
+Buffer.prototype.fill = function fill (value, start, end) {
+  if (!value) value = 0
+  if (!start) start = 0
+  if (!end) end = this.length
+
+  if (end < start) throw new RangeError('end < start')
+
+  // Fill 0 bytes; we're done
+  if (end === start) return
+  if (this.length === 0) return
+
+  if (start < 0 || start >= this.length) throw new RangeError('start out of bounds')
+  if (end < 0 || end > this.length) throw new RangeError('end out of bounds')
+
+  var i
+  if (typeof value === 'number') {
+    for (i = start; i < end; i++) {
+      this[i] = value
+    }
+  } else {
+    var bytes = utf8ToBytes(value.toString())
+    var len = bytes.length
+    for (i = start; i < end; i++) {
+      this[i] = bytes[i % len]
+    }
+  }
+
+  return this
+}
+
+/**
+ * Creates a new `ArrayBuffer` with the *copied* memory of the buffer instance.
+ * Added in Node 0.12. Only available in browsers that support ArrayBuffer.
+ */
+Buffer.prototype.toArrayBuffer = function toArrayBuffer () {
+  if (typeof Uint8Array !== 'undefined') {
+    if (Buffer.TYPED_ARRAY_SUPPORT) {
+      return (new Buffer(this)).buffer
+    } else {
+      var buf = new Uint8Array(this.length)
+      for (var i = 0, len = buf.length; i < len; i += 1) {
+        buf[i] = this[i]
+      }
+      return buf.buffer
+    }
+  } else {
+    throw new TypeError('Buffer.toArrayBuffer not supported in this browser')
+  }
+}
+
+// HELPER FUNCTIONS
+// ================
+
+var BP = Buffer.prototype
+
+/**
+ * Augment a Uint8Array *instance* (not the Uint8Array class!) with Buffer methods
+ */
+Buffer._augment = function _augment (arr) {
+  arr.constructor = Buffer
+  arr._isBuffer = true
+
+  // save reference to original Uint8Array set method before overwriting
+  arr._set = arr.set
+
+  // deprecated
+  arr.get = BP.get
+  arr.set = BP.set
+
+  arr.write = BP.write
+  arr.toString = BP.toString
+  arr.toLocaleString = BP.toString
+  arr.toJSON = BP.toJSON
+  arr.equals = BP.equals
+  arr.compare = BP.compare
+  arr.indexOf = BP.indexOf
+  arr.copy = BP.copy
+  arr.slice = BP.slice
+  arr.readUIntLE = BP.readUIntLE
+  arr.readUIntBE = BP.readUIntBE
+  arr.readUInt8 = BP.readUInt8
+  arr.readUInt16LE = BP.readUInt16LE
+  arr.readUInt16BE = BP.readUInt16BE
+  arr.readUInt32LE = BP.readUInt32LE
+  arr.readUInt32BE = BP.readUInt32BE
+  arr.readIntLE = BP.readIntLE
+  arr.readIntBE = BP.readIntBE
+  arr.readInt8 = BP.readInt8
+  arr.readInt16LE = BP.readInt16LE
+  arr.readInt16BE = BP.readInt16BE
+  arr.readInt32LE = BP.readInt32LE
+  arr.readInt32BE = BP.readInt32BE
+  arr.readFloatLE = BP.readFloatLE
+  arr.readFloatBE = BP.readFloatBE
+  arr.readDoubleLE = BP.readDoubleLE
+  arr.readDoubleBE = BP.readDoubleBE
+  arr.writeUInt8 = BP.writeUInt8
+  arr.writeUIntLE = BP.writeUIntLE
+  arr.writeUIntBE = BP.writeUIntBE
+  arr.writeUInt16LE = BP.writeUInt16LE
+  arr.writeUInt16BE = BP.writeUInt16BE
+  arr.writeUInt32LE = BP.writeUInt32LE
+  arr.writeUInt32BE = BP.writeUInt32BE
+  arr.writeIntLE = BP.writeIntLE
+  arr.writeIntBE = BP.writeIntBE
+  arr.writeInt8 = BP.writeInt8
+  arr.writeInt16LE = BP.writeInt16LE
+  arr.writeInt16BE = BP.writeInt16BE
+  arr.writeInt32LE = BP.writeInt32LE
+  arr.writeInt32BE = BP.writeInt32BE
+  arr.writeFloatLE = BP.writeFloatLE
+  arr.writeFloatBE = BP.writeFloatBE
+  arr.writeDoubleLE = BP.writeDoubleLE
+  arr.writeDoubleBE = BP.writeDoubleBE
+  arr.fill = BP.fill
+  arr.inspect = BP.inspect
+  arr.toArrayBuffer = BP.toArrayBuffer
+
+  return arr
+}
+
+var INVALID_BASE64_RE = /[^+\/0-9A-Za-z-_]/g
+
+function base64clean (str) {
+  // Node strips out invalid characters like \n and \t from the string, base64-js does not
+  str = stringtrim(str).replace(INVALID_BASE64_RE, '')
+  // Node converts strings with length < 2 to ''
+  if (str.length < 2) return ''
+  // Node allows for non-padded base64 strings (missing trailing ===), base64-js does not
+  while (str.length % 4 !== 0) {
+    str = str + '='
+  }
+  return str
+}
+
+function stringtrim (str) {
+  if (str.trim) return str.trim()
+  return str.replace(/^\s+|\s+$/g, '')
+}
+
+function toHex (n) {
+  if (n < 16) return '0' + n.toString(16)
+  return n.toString(16)
+}
+
+function utf8ToBytes (string, units) {
+  units = units || Infinity
+  var codePoint
+  var length = string.length
+  var leadSurrogate = null
+  var bytes = []
+
+  for (var i = 0; i < length; i++) {
+    codePoint = string.charCodeAt(i)
+
+    // is surrogate component
+    if (codePoint > 0xD7FF && codePoint < 0xE000) {
+      // last char was a lead
+      if (!leadSurrogate) {
+        // no lead yet
+        if (codePoint > 0xDBFF) {
+          // unexpected trail
+          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
+          continue
+        } else if (i + 1 === length) {
+          // unpaired lead
+          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
+          continue
+        }
+
+        // valid lead
+        leadSurrogate = codePoint
+
+        continue
+      }
+
+      // 2 leads in a row
+      if (codePoint < 0xDC00) {
+        if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
+        leadSurrogate = codePoint
+        continue
+      }
+
+      // valid surrogate pair
+      codePoint = (leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00) + 0x10000
+    } else if (leadSurrogate) {
+      // valid bmp char, but last char was a lead
+      if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
+    }
+
+    leadSurrogate = null
+
+    // encode utf8
+    if (codePoint < 0x80) {
+      if ((units -= 1) < 0) break
+      bytes.push(codePoint)
+    } else if (codePoint < 0x800) {
+      if ((units -= 2) < 0) break
+      bytes.push(
+        codePoint >> 0x6 | 0xC0,
+        codePoint & 0x3F | 0x80
+      )
+    } else if (codePoint < 0x10000) {
+      if ((units -= 3) < 0) break
+      bytes.push(
+        codePoint >> 0xC | 0xE0,
+        codePoint >> 0x6 & 0x3F | 0x80,
+        codePoint & 0x3F | 0x80
+      )
+    } else if (codePoint < 0x110000) {
+      if ((units -= 4) < 0) break
+      bytes.push(
+        codePoint >> 0x12 | 0xF0,
+        codePoint >> 0xC & 0x3F | 0x80,
+        codePoint >> 0x6 & 0x3F | 0x80,
+        codePoint & 0x3F | 0x80
+      )
+    } else {
+      throw new Error('Invalid code point')
+    }
+  }
+
+  return bytes
+}
+
+function asciiToBytes (str) {
+  var byteArray = []
+  for (var i = 0; i < str.length; i++) {
+    // Node's code seems to be doing this and not & 0x7F..
+    byteArray.push(str.charCodeAt(i) & 0xFF)
+  }
+  return byteArray
+}
+
+function utf16leToBytes (str, units) {
+  var c, hi, lo
+  var byteArray = []
+  for (var i = 0; i < str.length; i++) {
+    if ((units -= 2) < 0) break
+
+    c = str.charCodeAt(i)
+    hi = c >> 8
+    lo = c % 256
+    byteArray.push(lo)
+    byteArray.push(hi)
+  }
+
+  return byteArray
+}
+
+function base64ToBytes (str) {
+  return base64.toByteArray(base64clean(str))
+}
+
+function blitBuffer (src, dst, offset, length) {
+  for (var i = 0; i < length; i++) {
+    if ((i + offset >= dst.length) || (i >= src.length)) break
+    dst[i + offset] = src[i]
+  }
+  return i
+}
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"base64-js":78,"ieee754":79,"isarray":80}],78:[function(require,module,exports){
+var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+;(function (exports) {
+	'use strict';
+
+  var Arr = (typeof Uint8Array !== 'undefined')
+    ? Uint8Array
+    : Array
+
+	var PLUS   = '+'.charCodeAt(0)
+	var SLASH  = '/'.charCodeAt(0)
+	var NUMBER = '0'.charCodeAt(0)
+	var LOWER  = 'a'.charCodeAt(0)
+	var UPPER  = 'A'.charCodeAt(0)
+	var PLUS_URL_SAFE = '-'.charCodeAt(0)
+	var SLASH_URL_SAFE = '_'.charCodeAt(0)
+
+	function decode (elt) {
+		var code = elt.charCodeAt(0)
+		if (code === PLUS ||
+		    code === PLUS_URL_SAFE)
+			return 62 // '+'
+		if (code === SLASH ||
+		    code === SLASH_URL_SAFE)
+			return 63 // '/'
+		if (code < NUMBER)
+			return -1 //no match
+		if (code < NUMBER + 10)
+			return code - NUMBER + 26 + 26
+		if (code < UPPER + 26)
+			return code - UPPER
+		if (code < LOWER + 26)
+			return code - LOWER + 26
+	}
+
+	function b64ToByteArray (b64) {
+		var i, j, l, tmp, placeHolders, arr
+
+		if (b64.length % 4 > 0) {
+			throw new Error('Invalid string. Length must be a multiple of 4')
+		}
+
+		// the number of equal signs (place holders)
+		// if there are two placeholders, than the two characters before it
+		// represent one byte
+		// if there is only one, then the three characters before it represent 2 bytes
+		// this is just a cheap hack to not do indexOf twice
+		var len = b64.length
+		placeHolders = '=' === b64.charAt(len - 2) ? 2 : '=' === b64.charAt(len - 1) ? 1 : 0
+
+		// base64 is 4/3 + up to two characters of the original data
+		arr = new Arr(b64.length * 3 / 4 - placeHolders)
+
+		// if there are placeholders, only get up to the last complete 4 chars
+		l = placeHolders > 0 ? b64.length - 4 : b64.length
+
+		var L = 0
+
+		function push (v) {
+			arr[L++] = v
+		}
+
+		for (i = 0, j = 0; i < l; i += 4, j += 3) {
+			tmp = (decode(b64.charAt(i)) << 18) | (decode(b64.charAt(i + 1)) << 12) | (decode(b64.charAt(i + 2)) << 6) | decode(b64.charAt(i + 3))
+			push((tmp & 0xFF0000) >> 16)
+			push((tmp & 0xFF00) >> 8)
+			push(tmp & 0xFF)
+		}
+
+		if (placeHolders === 2) {
+			tmp = (decode(b64.charAt(i)) << 2) | (decode(b64.charAt(i + 1)) >> 4)
+			push(tmp & 0xFF)
+		} else if (placeHolders === 1) {
+			tmp = (decode(b64.charAt(i)) << 10) | (decode(b64.charAt(i + 1)) << 4) | (decode(b64.charAt(i + 2)) >> 2)
+			push((tmp >> 8) & 0xFF)
+			push(tmp & 0xFF)
+		}
+
+		return arr
+	}
+
+	function uint8ToBase64 (uint8) {
+		var i,
+			extraBytes = uint8.length % 3, // if we have 1 byte left, pad 2 bytes
+			output = "",
+			temp, length
+
+		function encode (num) {
+			return lookup.charAt(num)
+		}
+
+		function tripletToBase64 (num) {
+			return encode(num >> 18 & 0x3F) + encode(num >> 12 & 0x3F) + encode(num >> 6 & 0x3F) + encode(num & 0x3F)
+		}
+
+		// go through the array every three bytes, we'll deal with trailing stuff later
+		for (i = 0, length = uint8.length - extraBytes; i < length; i += 3) {
+			temp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2])
+			output += tripletToBase64(temp)
+		}
+
+		// pad the end with zeros, but make sure to not forget the extra bytes
+		switch (extraBytes) {
+			case 1:
+				temp = uint8[uint8.length - 1]
+				output += encode(temp >> 2)
+				output += encode((temp << 4) & 0x3F)
+				output += '=='
+				break
+			case 2:
+				temp = (uint8[uint8.length - 2] << 8) + (uint8[uint8.length - 1])
+				output += encode(temp >> 10)
+				output += encode((temp >> 4) & 0x3F)
+				output += encode((temp << 2) & 0x3F)
+				output += '='
+				break
+		}
+
+		return output
+	}
+
+	exports.toByteArray = b64ToByteArray
+	exports.fromByteArray = uint8ToBase64
+}(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
+
+},{}],79:[function(require,module,exports){
+exports.read = function (buffer, offset, isLE, mLen, nBytes) {
+  var e, m
+  var eLen = nBytes * 8 - mLen - 1
+  var eMax = (1 << eLen) - 1
+  var eBias = eMax >> 1
+  var nBits = -7
+  var i = isLE ? (nBytes - 1) : 0
+  var d = isLE ? -1 : 1
+  var s = buffer[offset + i]
+
+  i += d
+
+  e = s & ((1 << (-nBits)) - 1)
+  s >>= (-nBits)
+  nBits += eLen
+  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}
+
+  m = e & ((1 << (-nBits)) - 1)
+  e >>= (-nBits)
+  nBits += mLen
+  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}
+
+  if (e === 0) {
+    e = 1 - eBias
+  } else if (e === eMax) {
+    return m ? NaN : ((s ? -1 : 1) * Infinity)
+  } else {
+    m = m + Math.pow(2, mLen)
+    e = e - eBias
+  }
+  return (s ? -1 : 1) * m * Math.pow(2, e - mLen)
+}
+
+exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
+  var e, m, c
+  var eLen = nBytes * 8 - mLen - 1
+  var eMax = (1 << eLen) - 1
+  var eBias = eMax >> 1
+  var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0)
+  var i = isLE ? 0 : (nBytes - 1)
+  var d = isLE ? 1 : -1
+  var s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0
+
+  value = Math.abs(value)
+
+  if (isNaN(value) || value === Infinity) {
+    m = isNaN(value) ? 1 : 0
+    e = eMax
+  } else {
+    e = Math.floor(Math.log(value) / Math.LN2)
+    if (value * (c = Math.pow(2, -e)) < 1) {
+      e--
+      c *= 2
+    }
+    if (e + eBias >= 1) {
+      value += rt / c
+    } else {
+      value += rt * Math.pow(2, 1 - eBias)
+    }
+    if (value * c >= 2) {
+      e++
+      c /= 2
+    }
+
+    if (e + eBias >= eMax) {
+      m = 0
+      e = eMax
+    } else if (e + eBias >= 1) {
+      m = (value * c - 1) * Math.pow(2, mLen)
+      e = e + eBias
+    } else {
+      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen)
+      e = 0
+    }
+  }
+
+  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
+
+  e = (e << mLen) | m
+  eLen += mLen
+  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
+
+  buffer[offset + i - d] |= s * 128
+}
+
+},{}],80:[function(require,module,exports){
+var toString = {}.toString;
+
+module.exports = Array.isArray || function (arr) {
+  return toString.call(arr) == '[object Array]';
+};
+
+},{}],81:[function(require,module,exports){
 'use strict';
 
 // <a name="classes"></a>
@@ -10703,7 +12470,7 @@ var classes = {
 
 module.exports = classes;
 
-},{"./messenger/m_api":80,"./messenger/m_api_rx":81,"./messenger/m_source":82,"./messenger/msngr_source":83,"ml-mixin":101}],78:[function(require,module,exports){
+},{"./messenger/m_api":84,"./messenger/m_api_rx":85,"./messenger/m_source":86,"./messenger/msngr_source":87,"ml-mixin":105}],82:[function(require,module,exports){
 'use strict';
 
 
@@ -10724,7 +12491,7 @@ config({
     debug: false
 });
 
-},{"protojs":118}],79:[function(require,module,exports){
+},{"protojs":122}],83:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('ml-mixin')
@@ -11410,7 +13177,7 @@ function getMessageSource() {
     return this._messageSource
 }
 
-},{"./m_source":82,"ml-check":100,"ml-mixin":101,"protojs":118}],80:[function(require,module,exports){
+},{"./m_source":86,"ml-check":104,"ml-mixin":105,"protojs":122}],84:[function(require,module,exports){
 'use strict';
 
 var _ = require('protojs');
@@ -11602,7 +13369,7 @@ function filterSourceMessage(sourceMessage, message, internalData) {
     return true;
 }
 
-},{"../util/logger":96,"protojs":118}],81:[function(require,module,exports){
+},{"../util/logger":100,"protojs":122}],85:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('./m_api')
@@ -11716,7 +13483,7 @@ function getInternalMessages(sourceMessage) {
     return internalMessages;
 }
 
-},{"./m_api":80,"protojs":118}],82:[function(require,module,exports){
+},{"./m_api":84,"protojs":122}],86:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('ml-mixin')
@@ -11891,7 +13658,7 @@ function toBeImplemented() {
     throw new Error('calling the method of an absctract class');
 }
 
-},{"./m_api":80,"ml-check":100,"ml-mixin":101,"protojs":118}],83:[function(require,module,exports){
+},{"./m_api":84,"ml-check":104,"ml-mixin":105,"protojs":122}],87:[function(require,module,exports){
 'use strict';
 
 
@@ -11960,7 +13727,7 @@ function MessengerMessageSource$postMessage(message, data) {
     this.messenger.postMessageSync(message, data);
 }
 
-},{"./m_source":82,"ml-check":100,"protojs":118}],84:[function(require,module,exports){
+},{"./m_source":86,"ml-check":104,"protojs":122}],88:[function(require,module,exports){
 'use strict';
 
 var _ = require('protojs');
@@ -12001,7 +13768,7 @@ function destroy() {
     milo.minder.destroy();
 }
 
-},{"./classes":77,"./config":78,"./messenger":79,"./minder":85,"./model":88,"./util":95,"protojs":118}],85:[function(require,module,exports){
+},{"./classes":81,"./config":82,"./messenger":83,"./minder":89,"./model":92,"./util":99,"protojs":122}],89:[function(require,module,exports){
 'use strict';
 
 var Connector = require('./model/connector')
@@ -12221,7 +13988,7 @@ function minder_destroy() {
     }
 }
 
-},{"./messenger":79,"./model/connector":87,"./util/logger":96,"protojs":118}],86:[function(require,module,exports){
+},{"./messenger":83,"./model/connector":91,"./util/logger":100,"protojs":122}],90:[function(require,module,exports){
 'use strict';
 
 
@@ -12456,7 +14223,7 @@ function executeMethod(modelPath, data) {
         logger.error('unknown data change type');
 }
 
-},{"../config":78,"../util/logger":96,"./path_utils":93,"protojs":118}],87:[function(require,module,exports){
+},{"../config":82,"../util/logger":100,"./path_utils":97,"protojs":122}],91:[function(require,module,exports){
 'use strict';
 
 var Messenger = require('../messenger')
@@ -12871,7 +14638,7 @@ function Connector$destroy() {
     this._destroyed = true;
 }
 
-},{"../messenger":79,"../util/logger":96,"./path_utils":93,"protojs":118}],88:[function(require,module,exports){
+},{"../messenger":83,"../util/logger":100,"./path_utils":97,"protojs":122}],92:[function(require,module,exports){
 'use strict';
 
 var ModelPath = require('./m_path')
@@ -13100,7 +14867,7 @@ function Model$destroy() {
     this._destroyed = true;
 }
 
-},{"../messenger":79,"../messenger/msngr_source":83,"../util/logger":96,"./change_data":86,"./m_msg_api":89,"./m_path":90,"./model_utils":91,"./path_utils":93,"./synthesize":94,"ml-check":100,"ml-mixin":101,"protojs":118}],89:[function(require,module,exports){
+},{"../messenger":83,"../messenger/msngr_source":87,"../util/logger":100,"./change_data":90,"./m_msg_api":93,"./m_path":94,"./model_utils":95,"./path_utils":97,"./synthesize":98,"ml-check":104,"ml-mixin":105,"protojs":122}],93:[function(require,module,exports){
 'use strict';
 
 var MessengerRegexpAPI = require('../messenger/m_api_rx')
@@ -13139,7 +14906,7 @@ function translateToSourceMessage(accessPath) {
     return pathUtils.createRegexPath(accessPath);
 }
 
-},{"../messenger/m_api_rx":81,"./path_utils":93,"protojs":118}],90:[function(require,module,exports){
+},{"../messenger/m_api_rx":85,"./path_utils":97,"protojs":122}],94:[function(require,module,exports){
 'use strict';
 
 var synthesize = require('./synthesize')
@@ -13436,7 +15203,7 @@ function ModelPath$destroy() {
     this[MESSENGER_PROPERTY].destroy();
 }
 
-},{"../messenger":79,"../messenger/msngr_source":83,"./change_data":86,"./path_msg_api":92,"./path_utils":93,"./synthesize":94,"ml-check":100,"protojs":118}],91:[function(require,module,exports){
+},{"../messenger":83,"../messenger/msngr_source":87,"./change_data":90,"./path_msg_api":96,"./path_utils":97,"./synthesize":98,"ml-check":104,"protojs":122}],95:[function(require,module,exports){
 'use strict';
 
 
@@ -13457,7 +15224,7 @@ function normalizeSpliceIndex(spliceIndex, length) {
                     : 0;
 }
 
-},{}],92:[function(require,module,exports){
+},{}],96:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('../messenger/m_api')
@@ -13558,7 +15325,7 @@ function truncateChangePath(change) {
     }
 }
 
-},{"../messenger/m_api":80,"../util/logger":96,"./path_utils":93,"protojs":118}],93:[function(require,module,exports){
+},{"../messenger/m_api":84,"../util/logger":100,"./path_utils":97,"protojs":122}],97:[function(require,module,exports){
 'use strict';
 
 // <a name="model-path"></a>
@@ -13702,13 +15469,13 @@ function wrapMessengerMethods(methodsNames) {
     _.defineProperties(this, wrappedMethods);
 }
 
-},{"ml-check":100,"protojs":118}],94:[function(require,module,exports){
+},{"ml-check":104,"protojs":122}],98:[function(require,module,exports){
+(function (Buffer){
 'use strict';
 
 var pathUtils = require('../path_utils')
     , modelUtils = require('../model_utils')
     , logger = require('../../util/logger')
-    , fs = require('fs')
     , doT = require('dot')
     , _ = require('protojs')
     , changeDataHandler = require('../change_data')
@@ -13720,15 +15487,15 @@ var pathUtils = require('../path_utils')
  * Templates to synthesize model getters and setters
  */
 var templates = {
-    get: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\nreturn function get() {\n    var m = {{# def.modelAccessPrefix }};\n    return m {{~ it.parsedPath :pathNode }}\n        {{? pathNode.interpolate}}\n            && (m = m[this._args[ {{= pathNode.interpolate }} ]])\n        {{??}}\n            && (m = m{{= pathNode.property }})\n        {{?}} {{~}};\n};\n",
-    set: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n\n\n/**\n * Template that synthesizes setter for Model and for ModelPath\n */\nreturn function set(value) {\n    {{# def.initVars:'set' }}\n\n    {{# def.createTree:'set' }}\n\n    {{\n        currNode = nextNode;\n        currProp = currNode && currNode.property;\n    }}\n\n    {{ /* assign value to the last property */ }}\n    {{? currProp }}\n        wasDef = {{# def.wasDefined}};\n        {{# def.changeAccessPath }}\n\n        var old = m{{# def.currProp }};\n\n        {{ /* clone value to prevent same reference in linked models */ }}\n        m{{# def.currProp }} = cloneTree(value);\n    {{?}}\n\n    {{ /* add message related to the last property change */ }}\n    if (this._options.reactive !== false) {\n        if (! wasDef)\n            {{# def.addMsg }} accessPath, type: 'added',\n                newValue: value });\n        else if (old != value)\n            {{# def.addMsg }} accessPath, type: 'changed',\n                oldValue: old, newValue: value });\n\n        {{ /* add message related to changes in (sub)properties inside removed and assigned value */ }}\n        if (! wasDef || old != value)\n            addTreeChangesMessages(messages, messagesHash,\n                accessPath, old, value); /* defined in the function that synthesizes ModelPath setter */\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n};\n",
-    del: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_traverse_tree }}\n\nreturn function del() {\n    {{# def.initVars:'del' }}\n\n    {{? it.parsedPath.length }}\n        {{# def.traverseTree }}\n\n        {{\n            var currNode = it.parsedPath[count];\n            var currProp = currNode.property;       \n        }}\n\n        if (! treeDoesNotExist && m && m.hasOwnProperty && {{# def.wasDefined}}) {\n            var old = m{{# def.currProp }};\n            delete m{{# def.currProp }};\n            {{# def.changeAccessPath }}\n            var didDelete = true;\n        }\n    {{??}}\n        if (typeof m != 'undefined') {\n            var old = m;\n            {{# def.modelAccessPrefix }} = undefined;\n            var didDelete = true;\n        }\n    {{?}}\n\n    if (didDelete && this._options.reactive !== false) {\n        {{# def.addMsg }} accessPath, type: 'deleted', oldValue: old });\n\n        addTreeChangesMessages(messages, messagesHash,\n            accessPath, old, undefined); /* defined in the function that synthesizes ModelPath setter */\n\n        {{ /* post all stored messages */ }}\n        {{# def.postMessages }}\n    }\n};\n",
-    splice: "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n{{# def.include_defines }}\n{{# def.include_create_tree }}\n{{# def.include_traverse_tree }}\n\nreturn function splice(spliceIndex, spliceHowMany) { /* ,... - extra arguments to splice into array */\n    {{# def.initVars:'splice' }}\n\n    var argsLen = arguments.length;\n    var addItems = argsLen > 2;\n\n    if (addItems) {\n        {{ /* only create model tree if items are inserted in array */ }}\n\n        {{ /* if model is undefined it will be set to an empty array */ }}  \n        var value = [];\n        {{# def.createTree:'splice' }}\n\n        {{? nextNode }}\n            {{\n                var currNode = nextNode;\n                var currProp = currNode.property;\n                var emptyProp = '[]';\n            }}\n\n            {{# def.createTreeStep }}\n        {{?}}\n\n    } else if (spliceHowMany > 0) {\n        {{ /* if items are not inserted, only traverse model tree if items are deleted from array */ }}\n        {{? it.parsedPath.length }}\n            {{# def.traverseTree }}\n\n            {{\n                var currNode = it.parsedPath[count];\n                var currProp = currNode.property;       \n            }}\n\n            {{ /* extra brace closes 'else' in def.traverseTreeStep */ }}\n            {{# def.traverseTreeStep }} }\n        {{?}}\n    }\n\n    {{ /* splice items */ }}\n    if (addItems || (! treeDoesNotExist && m\n            && m.length > spliceIndex ) ) {\n        var oldLength = m.length = m.length || 0;\n\n        arguments[0] = spliceIndex = normalizeSpliceIndex(spliceIndex, m.length);\n\n        {{ /* clone added arguments to prevent same references in linked models */ }}\n        if (addItems)\n            for (var i = 2; i < argsLen; i++)\n                arguments[i] = cloneTree(arguments[i]);\n\n        {{ /* actual splice call */ }}\n        var removed = Array.prototype.splice.apply(m, arguments);\n\n        if (this._options.reactive !== false) {\n            {{# def.addMsg }} accessPath, type: 'splice',\n                    index: spliceIndex, removed: removed, addedCount: addItems ? argsLen - 2 : 0,\n                    newValue: m });\n\n            if (removed && removed.length)\n                removed.forEach(function(item, index) {\n                    var itemPath = accessPath + '[' + (spliceIndex + index) + ']';\n                    {{# def.addMsg }} itemPath, type: 'removed', oldValue: item });\n\n                    if (valueIsTree(item))\n                        addMessages(messages, messagesHash, itemPath, item, 'removed', 'oldValue');\n                });\n\n            if (addItems)\n                for (var i = 2; i < argsLen; i++) {\n                    var item = arguments[i];\n                    var itemPath = accessPath + '[' + (spliceIndex + i - 2) + ']';\n                    {{# def.addMsg }} itemPath, type: 'added', newValue: item });\n\n                    if (valueIsTree(item))\n                        addMessages(messages, messagesHash, itemPath, item, 'added', 'newValue');\n                }\n\n            {{ /* post all stored messages */ }}\n            {{# def.postMessages }}\n        }\n    }\n\n    return removed || [];\n}\n"
+    get: Buffer("J3VzZSBzdHJpY3QnOwovKiBPbmx5IHVzZSB0aGlzIHN0eWxlIG9mIGNvbW1lbnRzLCBub3QgIi8vIiAqLwoKcmV0dXJuIGZ1bmN0aW9uIGdldCgpIHsKICAgIHZhciBtID0ge3sjIGRlZi5tb2RlbEFjY2Vzc1ByZWZpeCB9fTsKICAgIHJldHVybiBtIHt7fiBpdC5wYXJzZWRQYXRoIDpwYXRoTm9kZSB9fQogICAgICAgIHt7PyBwYXRoTm9kZS5pbnRlcnBvbGF0ZX19CiAgICAgICAgICAgICYmIChtID0gbVt0aGlzLl9hcmdzWyB7ez0gcGF0aE5vZGUuaW50ZXJwb2xhdGUgfX0gXV0pCiAgICAgICAge3s/P319CiAgICAgICAgICAgICYmIChtID0gbXt7PSBwYXRoTm9kZS5wcm9wZXJ0eSB9fSkKICAgICAgICB7ez99fSB7e359fTsKfTsK","base64"),
+    set: Buffer("J3VzZSBzdHJpY3QnOwovKiBPbmx5IHVzZSB0aGlzIHN0eWxlIG9mIGNvbW1lbnRzLCBub3QgIi8vIiAqLwoKe3sjIGRlZi5pbmNsdWRlX2RlZmluZXMgfX0Ke3sjIGRlZi5pbmNsdWRlX2NyZWF0ZV90cmVlIH19CgoKLyoqCiAqIFRlbXBsYXRlIHRoYXQgc3ludGhlc2l6ZXMgc2V0dGVyIGZvciBNb2RlbCBhbmQgZm9yIE1vZGVsUGF0aAogKi8KcmV0dXJuIGZ1bmN0aW9uIHNldCh2YWx1ZSkgewogICAge3sjIGRlZi5pbml0VmFyczonc2V0JyB9fQoKICAgIHt7IyBkZWYuY3JlYXRlVHJlZTonc2V0JyB9fQoKICAgIHt7CiAgICAgICAgY3Vyck5vZGUgPSBuZXh0Tm9kZTsKICAgICAgICBjdXJyUHJvcCA9IGN1cnJOb2RlICYmIGN1cnJOb2RlLnByb3BlcnR5OwogICAgfX0KCiAgICB7eyAvKiBhc3NpZ24gdmFsdWUgdG8gdGhlIGxhc3QgcHJvcGVydHkgKi8gfX0KICAgIHt7PyBjdXJyUHJvcCB9fQogICAgICAgIHdhc0RlZiA9IHt7IyBkZWYud2FzRGVmaW5lZH19OwogICAgICAgIHt7IyBkZWYuY2hhbmdlQWNjZXNzUGF0aCB9fQoKICAgICAgICB2YXIgb2xkID0gbXt7IyBkZWYuY3VyclByb3AgfX07CgogICAgICAgIHt7IC8qIGNsb25lIHZhbHVlIHRvIHByZXZlbnQgc2FtZSByZWZlcmVuY2UgaW4gbGlua2VkIG1vZGVscyAqLyB9fQogICAgICAgIG17eyMgZGVmLmN1cnJQcm9wIH19ID0gY2xvbmVUcmVlKHZhbHVlKTsKICAgIHt7P319CgogICAge3sgLyogYWRkIG1lc3NhZ2UgcmVsYXRlZCB0byB0aGUgbGFzdCBwcm9wZXJ0eSBjaGFuZ2UgKi8gfX0KICAgIGlmICh0aGlzLl9vcHRpb25zLnJlYWN0aXZlICE9PSBmYWxzZSkgewogICAgICAgIGlmICghIHdhc0RlZikKICAgICAgICAgICAge3sjIGRlZi5hZGRNc2cgfX0gYWNjZXNzUGF0aCwgdHlwZTogJ2FkZGVkJywKICAgICAgICAgICAgICAgIG5ld1ZhbHVlOiB2YWx1ZSB9KTsKICAgICAgICBlbHNlIGlmIChvbGQgIT0gdmFsdWUpCiAgICAgICAgICAgIHt7IyBkZWYuYWRkTXNnIH19IGFjY2Vzc1BhdGgsIHR5cGU6ICdjaGFuZ2VkJywKICAgICAgICAgICAgICAgIG9sZFZhbHVlOiBvbGQsIG5ld1ZhbHVlOiB2YWx1ZSB9KTsKCiAgICAgICAge3sgLyogYWRkIG1lc3NhZ2UgcmVsYXRlZCB0byBjaGFuZ2VzIGluIChzdWIpcHJvcGVydGllcyBpbnNpZGUgcmVtb3ZlZCBhbmQgYXNzaWduZWQgdmFsdWUgKi8gfX0KICAgICAgICBpZiAoISB3YXNEZWYgfHwgb2xkICE9IHZhbHVlKQogICAgICAgICAgICBhZGRUcmVlQ2hhbmdlc01lc3NhZ2VzKG1lc3NhZ2VzLCBtZXNzYWdlc0hhc2gsCiAgICAgICAgICAgICAgICBhY2Nlc3NQYXRoLCBvbGQsIHZhbHVlKTsgLyogZGVmaW5lZCBpbiB0aGUgZnVuY3Rpb24gdGhhdCBzeW50aGVzaXplcyBNb2RlbFBhdGggc2V0dGVyICovCgogICAgICAgIHt7IC8qIHBvc3QgYWxsIHN0b3JlZCBtZXNzYWdlcyAqLyB9fQogICAgICAgIHt7IyBkZWYucG9zdE1lc3NhZ2VzIH19CiAgICB9Cn07Cg==","base64"),
+    del: Buffer("J3VzZSBzdHJpY3QnOwovKiBPbmx5IHVzZSB0aGlzIHN0eWxlIG9mIGNvbW1lbnRzLCBub3QgIi8vIiAqLwoKe3sjIGRlZi5pbmNsdWRlX2RlZmluZXMgfX0Ke3sjIGRlZi5pbmNsdWRlX3RyYXZlcnNlX3RyZWUgfX0KCnJldHVybiBmdW5jdGlvbiBkZWwoKSB7CiAgICB7eyMgZGVmLmluaXRWYXJzOidkZWwnIH19CgogICAge3s/IGl0LnBhcnNlZFBhdGgubGVuZ3RoIH19CiAgICAgICAge3sjIGRlZi50cmF2ZXJzZVRyZWUgfX0KCiAgICAgICAge3sKICAgICAgICAgICAgdmFyIGN1cnJOb2RlID0gaXQucGFyc2VkUGF0aFtjb3VudF07CiAgICAgICAgICAgIHZhciBjdXJyUHJvcCA9IGN1cnJOb2RlLnByb3BlcnR5OyAgICAgICAKICAgICAgICB9fQoKICAgICAgICBpZiAoISB0cmVlRG9lc05vdEV4aXN0ICYmIG0gJiYgbS5oYXNPd25Qcm9wZXJ0eSAmJiB7eyMgZGVmLndhc0RlZmluZWR9fSkgewogICAgICAgICAgICB2YXIgb2xkID0gbXt7IyBkZWYuY3VyclByb3AgfX07CiAgICAgICAgICAgIGRlbGV0ZSBte3sjIGRlZi5jdXJyUHJvcCB9fTsKICAgICAgICAgICAge3sjIGRlZi5jaGFuZ2VBY2Nlc3NQYXRoIH19CiAgICAgICAgICAgIHZhciBkaWREZWxldGUgPSB0cnVlOwogICAgICAgIH0KICAgIHt7Pz99fQogICAgICAgIGlmICh0eXBlb2YgbSAhPSAndW5kZWZpbmVkJykgewogICAgICAgICAgICB2YXIgb2xkID0gbTsKICAgICAgICAgICAge3sjIGRlZi5tb2RlbEFjY2Vzc1ByZWZpeCB9fSA9IHVuZGVmaW5lZDsKICAgICAgICAgICAgdmFyIGRpZERlbGV0ZSA9IHRydWU7CiAgICAgICAgfQogICAge3s/fX0KCiAgICBpZiAoZGlkRGVsZXRlICYmIHRoaXMuX29wdGlvbnMucmVhY3RpdmUgIT09IGZhbHNlKSB7CiAgICAgICAge3sjIGRlZi5hZGRNc2cgfX0gYWNjZXNzUGF0aCwgdHlwZTogJ2RlbGV0ZWQnLCBvbGRWYWx1ZTogb2xkIH0pOwoKICAgICAgICBhZGRUcmVlQ2hhbmdlc01lc3NhZ2VzKG1lc3NhZ2VzLCBtZXNzYWdlc0hhc2gsCiAgICAgICAgICAgIGFjY2Vzc1BhdGgsIG9sZCwgdW5kZWZpbmVkKTsgLyogZGVmaW5lZCBpbiB0aGUgZnVuY3Rpb24gdGhhdCBzeW50aGVzaXplcyBNb2RlbFBhdGggc2V0dGVyICovCgogICAgICAgIHt7IC8qIHBvc3QgYWxsIHN0b3JlZCBtZXNzYWdlcyAqLyB9fQogICAgICAgIHt7IyBkZWYucG9zdE1lc3NhZ2VzIH19CiAgICB9Cn07Cg==","base64"),
+    splice: Buffer("J3VzZSBzdHJpY3QnOwovKiBPbmx5IHVzZSB0aGlzIHN0eWxlIG9mIGNvbW1lbnRzLCBub3QgIi8vIiAqLwoKe3sjIGRlZi5pbmNsdWRlX2RlZmluZXMgfX0Ke3sjIGRlZi5pbmNsdWRlX2NyZWF0ZV90cmVlIH19Cnt7IyBkZWYuaW5jbHVkZV90cmF2ZXJzZV90cmVlIH19CgpyZXR1cm4gZnVuY3Rpb24gc3BsaWNlKHNwbGljZUluZGV4LCBzcGxpY2VIb3dNYW55KSB7IC8qICwuLi4gLSBleHRyYSBhcmd1bWVudHMgdG8gc3BsaWNlIGludG8gYXJyYXkgKi8KICAgIHt7IyBkZWYuaW5pdFZhcnM6J3NwbGljZScgfX0KCiAgICB2YXIgYXJnc0xlbiA9IGFyZ3VtZW50cy5sZW5ndGg7CiAgICB2YXIgYWRkSXRlbXMgPSBhcmdzTGVuID4gMjsKCiAgICBpZiAoYWRkSXRlbXMpIHsKICAgICAgICB7eyAvKiBvbmx5IGNyZWF0ZSBtb2RlbCB0cmVlIGlmIGl0ZW1zIGFyZSBpbnNlcnRlZCBpbiBhcnJheSAqLyB9fQoKICAgICAgICB7eyAvKiBpZiBtb2RlbCBpcyB1bmRlZmluZWQgaXQgd2lsbCBiZSBzZXQgdG8gYW4gZW1wdHkgYXJyYXkgKi8gfX0gIAogICAgICAgIHZhciB2YWx1ZSA9IFtdOwogICAgICAgIHt7IyBkZWYuY3JlYXRlVHJlZTonc3BsaWNlJyB9fQoKICAgICAgICB7ez8gbmV4dE5vZGUgfX0KICAgICAgICAgICAge3sKICAgICAgICAgICAgICAgIHZhciBjdXJyTm9kZSA9IG5leHROb2RlOwogICAgICAgICAgICAgICAgdmFyIGN1cnJQcm9wID0gY3Vyck5vZGUucHJvcGVydHk7CiAgICAgICAgICAgICAgICB2YXIgZW1wdHlQcm9wID0gJ1tdJzsKICAgICAgICAgICAgfX0KCiAgICAgICAgICAgIHt7IyBkZWYuY3JlYXRlVHJlZVN0ZXAgfX0KICAgICAgICB7ez99fQoKICAgIH0gZWxzZSBpZiAoc3BsaWNlSG93TWFueSA+IDApIHsKICAgICAgICB7eyAvKiBpZiBpdGVtcyBhcmUgbm90IGluc2VydGVkLCBvbmx5IHRyYXZlcnNlIG1vZGVsIHRyZWUgaWYgaXRlbXMgYXJlIGRlbGV0ZWQgZnJvbSBhcnJheSAqLyB9fQogICAgICAgIHt7PyBpdC5wYXJzZWRQYXRoLmxlbmd0aCB9fQogICAgICAgICAgICB7eyMgZGVmLnRyYXZlcnNlVHJlZSB9fQoKICAgICAgICAgICAge3sKICAgICAgICAgICAgICAgIHZhciBjdXJyTm9kZSA9IGl0LnBhcnNlZFBhdGhbY291bnRdOwogICAgICAgICAgICAgICAgdmFyIGN1cnJQcm9wID0gY3Vyck5vZGUucHJvcGVydHk7ICAgICAgIAogICAgICAgICAgICB9fQoKICAgICAgICAgICAge3sgLyogZXh0cmEgYnJhY2UgY2xvc2VzICdlbHNlJyBpbiBkZWYudHJhdmVyc2VUcmVlU3RlcCAqLyB9fQogICAgICAgICAgICB7eyMgZGVmLnRyYXZlcnNlVHJlZVN0ZXAgfX0gfQogICAgICAgIHt7P319CiAgICB9CgogICAge3sgLyogc3BsaWNlIGl0ZW1zICovIH19CiAgICBpZiAoYWRkSXRlbXMgfHwgKCEgdHJlZURvZXNOb3RFeGlzdCAmJiBtCiAgICAgICAgICAgICYmIG0ubGVuZ3RoID4gc3BsaWNlSW5kZXggKSApIHsKICAgICAgICB2YXIgb2xkTGVuZ3RoID0gbS5sZW5ndGggPSBtLmxlbmd0aCB8fCAwOwoKICAgICAgICBhcmd1bWVudHNbMF0gPSBzcGxpY2VJbmRleCA9IG5vcm1hbGl6ZVNwbGljZUluZGV4KHNwbGljZUluZGV4LCBtLmxlbmd0aCk7CgogICAgICAgIHt7IC8qIGNsb25lIGFkZGVkIGFyZ3VtZW50cyB0byBwcmV2ZW50IHNhbWUgcmVmZXJlbmNlcyBpbiBsaW5rZWQgbW9kZWxzICovIH19CiAgICAgICAgaWYgKGFkZEl0ZW1zKQogICAgICAgICAgICBmb3IgKHZhciBpID0gMjsgaSA8IGFyZ3NMZW47IGkrKykKICAgICAgICAgICAgICAgIGFyZ3VtZW50c1tpXSA9IGNsb25lVHJlZShhcmd1bWVudHNbaV0pOwoKICAgICAgICB7eyAvKiBhY3R1YWwgc3BsaWNlIGNhbGwgKi8gfX0KICAgICAgICB2YXIgcmVtb3ZlZCA9IEFycmF5LnByb3RvdHlwZS5zcGxpY2UuYXBwbHkobSwgYXJndW1lbnRzKTsKCiAgICAgICAgaWYgKHRoaXMuX29wdGlvbnMucmVhY3RpdmUgIT09IGZhbHNlKSB7CiAgICAgICAgICAgIHt7IyBkZWYuYWRkTXNnIH19IGFjY2Vzc1BhdGgsIHR5cGU6ICdzcGxpY2UnLAogICAgICAgICAgICAgICAgICAgIGluZGV4OiBzcGxpY2VJbmRleCwgcmVtb3ZlZDogcmVtb3ZlZCwgYWRkZWRDb3VudDogYWRkSXRlbXMgPyBhcmdzTGVuIC0gMiA6IDAsCiAgICAgICAgICAgICAgICAgICAgbmV3VmFsdWU6IG0gfSk7CgogICAgICAgICAgICBpZiAocmVtb3ZlZCAmJiByZW1vdmVkLmxlbmd0aCkKICAgICAgICAgICAgICAgIHJlbW92ZWQuZm9yRWFjaChmdW5jdGlvbihpdGVtLCBpbmRleCkgewogICAgICAgICAgICAgICAgICAgIHZhciBpdGVtUGF0aCA9IGFjY2Vzc1BhdGggKyAnWycgKyAoc3BsaWNlSW5kZXggKyBpbmRleCkgKyAnXSc7CiAgICAgICAgICAgICAgICAgICAge3sjIGRlZi5hZGRNc2cgfX0gaXRlbVBhdGgsIHR5cGU6ICdyZW1vdmVkJywgb2xkVmFsdWU6IGl0ZW0gfSk7CgogICAgICAgICAgICAgICAgICAgIGlmICh2YWx1ZUlzVHJlZShpdGVtKSkKICAgICAgICAgICAgICAgICAgICAgICAgYWRkTWVzc2FnZXMobWVzc2FnZXMsIG1lc3NhZ2VzSGFzaCwgaXRlbVBhdGgsIGl0ZW0sICdyZW1vdmVkJywgJ29sZFZhbHVlJyk7CiAgICAgICAgICAgICAgICB9KTsKCiAgICAgICAgICAgIGlmIChhZGRJdGVtcykKICAgICAgICAgICAgICAgIGZvciAodmFyIGkgPSAyOyBpIDwgYXJnc0xlbjsgaSsrKSB7CiAgICAgICAgICAgICAgICAgICAgdmFyIGl0ZW0gPSBhcmd1bWVudHNbaV07CiAgICAgICAgICAgICAgICAgICAgdmFyIGl0ZW1QYXRoID0gYWNjZXNzUGF0aCArICdbJyArIChzcGxpY2VJbmRleCArIGkgLSAyKSArICddJzsKICAgICAgICAgICAgICAgICAgICB7eyMgZGVmLmFkZE1zZyB9fSBpdGVtUGF0aCwgdHlwZTogJ2FkZGVkJywgbmV3VmFsdWU6IGl0ZW0gfSk7CgogICAgICAgICAgICAgICAgICAgIGlmICh2YWx1ZUlzVHJlZShpdGVtKSkKICAgICAgICAgICAgICAgICAgICAgICAgYWRkTWVzc2FnZXMobWVzc2FnZXMsIG1lc3NhZ2VzSGFzaCwgaXRlbVBhdGgsIGl0ZW0sICdhZGRlZCcsICduZXdWYWx1ZScpOwogICAgICAgICAgICAgICAgfQoKICAgICAgICAgICAge3sgLyogcG9zdCBhbGwgc3RvcmVkIG1lc3NhZ2VzICovIH19CiAgICAgICAgICAgIHt7IyBkZWYucG9zdE1lc3NhZ2VzIH19CiAgICAgICAgfQogICAgfQoKICAgIHJldHVybiByZW1vdmVkIHx8IFtdOwp9Cg==","base64")
 };
 
-var include_defines = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts initialization code\n */\n {{## def.initVars:method:\n    var m = {{# def.modelAccessPrefix }};\n    var messages = [], messagesHash = {};\n    var accessPath = '';\n    var treeDoesNotExist;\n    /* hack to prevent sending finished events to allow for propagation of batches without splitting them */\n    var inChangeTransaction = getTransactionFlag( {{= method }} );\n #}}\n\n/**\n * Inserts the beginning of function call to add message to list\n */\n{{## def.addMsg: addChangeMessage(messages, messagesHash, { path: #}}\n\n/**\n * Inserts current property/index for both normal and interpolated properties/indexes\n */\n{{## def.currProp:{{? currNode.interpolate }}[this._args[ {{= currNode.interpolate }} ]]{{??}}{{= currProp }}{{?}} #}}\n\n/**\n * Inserts condition to test whether normal/interpolated property/index exists\n */\n{{## def.wasDefined: m.hasOwnProperty(\n    {{? currNode.interpolate }}\n        this._args[ {{= currNode.interpolate }} ]\n    {{??}}\n        '{{= it.getPathNodeKey(currNode) }}'\n    {{?}}\n) #}}\n\n\n/**\n * Inserts code to update access path for current property\n * Because of the possibility of interpolated properties, it can't be calculated in template, it can only be calculated during accessor call.\n */\n{{## def.changeAccessPath:\n    accessPath += {{? currNode.interpolate }}\n        {{? currNode.syntax == 'array' }}\n            '[' + this._args[ {{= currNode.interpolate }} ] + ']';\n        {{??}}\n            '.' + this._args[ {{= currNode.interpolate }} ];\n        {{?}}\n    {{??}}\n        '{{= currProp }}';\n    {{?}}\n#}}\n\n\n/**\n * Inserts code to post stored messages\n */\n{{## def.postMessages:\n    if (messages.length) {\n        {{# def.modelPostBatchCode }}('datachanges', {\n            changes: messages,\n            transaction: inChangeTransaction\n        });\n\n        messages.forEach(function(msg) {\n            {{# def.modelPostMessageCode }}(msg.path, msg);\n        }, this);\n    }\n#}}\n"
-    , include_create_tree = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts code to create model tree as neccessary for `set` and `splice` accessors and to add messages to send list if the tree changes.\n */\n{{## def.createTree:method:\n    var wasDef = true;\n    var old = m;\n\n    {{ var emptyProp = it.parsedPath[0] && it.parsedPath[0].empty; }}\n    {{? emptyProp }}\n        {{ /* create top level model if it was not previously defined */ }}\n        if (! m) {\n            m = {{# def.modelAccessPrefix }} = {{= emptyProp }};\n            wasDef = false;\n\n            if (this._options.reactive !== false) {\n                {{# def.addMsg }} '', type: 'added',\n                      newValue: m });\n            }\n        }\n    {{??}}\n        {{? method == 'splice' }}\n            if (! m) {\n        {{?}}\n                m = {{# def.modelAccessPrefix }} = cloneTree(value);\n                wasDef = typeof old != 'undefined';\n        {{? method == 'splice' }}\n            }\n        {{?}}       \n    {{?}}\n\n\n    {{ /* create model tree if it doesn't exist */ }}\n    {{  var modelDataProperty = '';\n        var nextNode = it.parsedPath[0];\n        var count = it.parsedPath.length - 1;\n\n        for (var i = 0; i < count; i++) {\n            var currNode = nextNode;\n            var currProp = currNode.property;\n            nextNode = it.parsedPath[i + 1];\n            var emptyProp = nextNode && nextNode.empty;\n    }}\n\n        {{# def.createTreeStep }}\n\n    {{  } /* for loop */ }}\n#}}\n\n\n/**\n * Inserts code to create one step in the model tree\n */\n{{## def.createTreeStep:\n    {{# def.changeAccessPath }}\n\n    if (! {{# def.wasDefined }}) { \n        {{ /* property does not exist */ }}\n        m = m{{# def.currProp }} = {{= emptyProp }};\n\n        if (this._options.reactive !== false) {\n            {{# def.addMsg }} accessPath, type: 'added', \n                  newValue: m });\n        }\n\n    } else if (typeof m{{# def.currProp }} != 'object' || m{{# def.currProp }} === null) {\n        {{ /* property is not object */ }}\n        var old = m{{# def.currProp }};\n        m = m{{# def.currProp }} = {{= emptyProp }};\n\n        if (this._options.reactive !== false) {\n            {{# def.addMsg }} accessPath, type: 'changed', \n                  oldValue: old, newValue: m });\n        }\n\n    } else {\n        {{ /* property exists, just traverse down the model tree */ }}\n        m = m{{# def.currProp }};\n    }\n#}}\n"
-    , include_traverse_tree = "'use strict';\n/* Only use this style of comments, not \"//\" */\n\n/**\n * Inserts code to traverse model tree for `delete` and `splice` accessors.\n */\n{{## def.traverseTree:\n    {{ \n        var count = it.parsedPath.length-1;\n\n        for (var i = 0; i < count; i++) { \n            var currNode = it.parsedPath[i];\n            var currProp = currNode.property;\n    }}\n            {{# def.traverseTreeStep }}\n\n    {{ } /* for loop */\n\n        var i = count;\n        while (i--) { /* closing braces for else's above */\n    }}\n            }\n    {{ } /* while loop */ }}\n#}}\n\n\n/**\n * Inserts code to traverse one step in the model tree\n */\n{{## def.traverseTreeStep:\n    if (! (m && m.hasOwnProperty && {{# def.wasDefined}} ) )\n        treeDoesNotExist = true;\n    else {\n        m = m{{# def.currProp }};\n        {{# def.changeAccessPath }}\n    {{ /* brace from else is not closed on purpose - all braces are closed in while loop */ }}\n#}}\n";
+var include_defines = Buffer("J3VzZSBzdHJpY3QnOwovKiBPbmx5IHVzZSB0aGlzIHN0eWxlIG9mIGNvbW1lbnRzLCBub3QgIi8vIiAqLwoKLyoqCiAqIEluc2VydHMgaW5pdGlhbGl6YXRpb24gY29kZQogKi8KIHt7IyMgZGVmLmluaXRWYXJzOm1ldGhvZDoKICAgIHZhciBtID0ge3sjIGRlZi5tb2RlbEFjY2Vzc1ByZWZpeCB9fTsKICAgIHZhciBtZXNzYWdlcyA9IFtdLCBtZXNzYWdlc0hhc2ggPSB7fTsKICAgIHZhciBhY2Nlc3NQYXRoID0gJyc7CiAgICB2YXIgdHJlZURvZXNOb3RFeGlzdDsKICAgIC8qIGhhY2sgdG8gcHJldmVudCBzZW5kaW5nIGZpbmlzaGVkIGV2ZW50cyB0byBhbGxvdyBmb3IgcHJvcGFnYXRpb24gb2YgYmF0Y2hlcyB3aXRob3V0IHNwbGl0dGluZyB0aGVtICovCiAgICB2YXIgaW5DaGFuZ2VUcmFuc2FjdGlvbiA9IGdldFRyYW5zYWN0aW9uRmxhZygge3s9IG1ldGhvZCB9fSApOwogI319CgovKioKICogSW5zZXJ0cyB0aGUgYmVnaW5uaW5nIG9mIGZ1bmN0aW9uIGNhbGwgdG8gYWRkIG1lc3NhZ2UgdG8gbGlzdAogKi8Ke3sjIyBkZWYuYWRkTXNnOiBhZGRDaGFuZ2VNZXNzYWdlKG1lc3NhZ2VzLCBtZXNzYWdlc0hhc2gsIHsgcGF0aDogI319CgovKioKICogSW5zZXJ0cyBjdXJyZW50IHByb3BlcnR5L2luZGV4IGZvciBib3RoIG5vcm1hbCBhbmQgaW50ZXJwb2xhdGVkIHByb3BlcnRpZXMvaW5kZXhlcwogKi8Ke3sjIyBkZWYuY3VyclByb3A6e3s/IGN1cnJOb2RlLmludGVycG9sYXRlIH19W3RoaXMuX2FyZ3NbIHt7PSBjdXJyTm9kZS5pbnRlcnBvbGF0ZSB9fSBdXXt7Pz99fXt7PSBjdXJyUHJvcCB9fXt7P319ICN9fQoKLyoqCiAqIEluc2VydHMgY29uZGl0aW9uIHRvIHRlc3Qgd2hldGhlciBub3JtYWwvaW50ZXJwb2xhdGVkIHByb3BlcnR5L2luZGV4IGV4aXN0cwogKi8Ke3sjIyBkZWYud2FzRGVmaW5lZDogbS5oYXNPd25Qcm9wZXJ0eSgKICAgIHt7PyBjdXJyTm9kZS5pbnRlcnBvbGF0ZSB9fQogICAgICAgIHRoaXMuX2FyZ3NbIHt7PSBjdXJyTm9kZS5pbnRlcnBvbGF0ZSB9fSBdCiAgICB7ez8/fX0KICAgICAgICAne3s9IGl0LmdldFBhdGhOb2RlS2V5KGN1cnJOb2RlKSB9fScKICAgIHt7P319CikgI319CgoKLyoqCiAqIEluc2VydHMgY29kZSB0byB1cGRhdGUgYWNjZXNzIHBhdGggZm9yIGN1cnJlbnQgcHJvcGVydHkKICogQmVjYXVzZSBvZiB0aGUgcG9zc2liaWxpdHkgb2YgaW50ZXJwb2xhdGVkIHByb3BlcnRpZXMsIGl0IGNhbid0IGJlIGNhbGN1bGF0ZWQgaW4gdGVtcGxhdGUsIGl0IGNhbiBvbmx5IGJlIGNhbGN1bGF0ZWQgZHVyaW5nIGFjY2Vzc29yIGNhbGwuCiAqLwp7eyMjIGRlZi5jaGFuZ2VBY2Nlc3NQYXRoOgogICAgYWNjZXNzUGF0aCArPSB7ez8gY3Vyck5vZGUuaW50ZXJwb2xhdGUgfX0KICAgICAgICB7ez8gY3Vyck5vZGUuc3ludGF4ID09ICdhcnJheScgfX0KICAgICAgICAgICAgJ1snICsgdGhpcy5fYXJnc1sge3s9IGN1cnJOb2RlLmludGVycG9sYXRlIH19IF0gKyAnXSc7CiAgICAgICAge3s/P319CiAgICAgICAgICAgICcuJyArIHRoaXMuX2FyZ3NbIHt7PSBjdXJyTm9kZS5pbnRlcnBvbGF0ZSB9fSBdOwogICAgICAgIHt7P319CiAgICB7ez8/fX0KICAgICAgICAne3s9IGN1cnJQcm9wIH19JzsKICAgIHt7P319CiN9fQoKCi8qKgogKiBJbnNlcnRzIGNvZGUgdG8gcG9zdCBzdG9yZWQgbWVzc2FnZXMKICovCnt7IyMgZGVmLnBvc3RNZXNzYWdlczoKICAgIGlmIChtZXNzYWdlcy5sZW5ndGgpIHsKICAgICAgICB7eyMgZGVmLm1vZGVsUG9zdEJhdGNoQ29kZSB9fSgnZGF0YWNoYW5nZXMnLCB7CiAgICAgICAgICAgIGNoYW5nZXM6IG1lc3NhZ2VzLAogICAgICAgICAgICB0cmFuc2FjdGlvbjogaW5DaGFuZ2VUcmFuc2FjdGlvbgogICAgICAgIH0pOwoKICAgICAgICBtZXNzYWdlcy5mb3JFYWNoKGZ1bmN0aW9uKG1zZykgewogICAgICAgICAgICB7eyMgZGVmLm1vZGVsUG9zdE1lc3NhZ2VDb2RlIH19KG1zZy5wYXRoLCBtc2cpOwogICAgICAgIH0sIHRoaXMpOwogICAgfQojfX0K","base64")
+    , include_create_tree = Buffer("J3VzZSBzdHJpY3QnOwovKiBPbmx5IHVzZSB0aGlzIHN0eWxlIG9mIGNvbW1lbnRzLCBub3QgIi8vIiAqLwoKLyoqCiAqIEluc2VydHMgY29kZSB0byBjcmVhdGUgbW9kZWwgdHJlZSBhcyBuZWNjZXNzYXJ5IGZvciBgc2V0YCBhbmQgYHNwbGljZWAgYWNjZXNzb3JzIGFuZCB0byBhZGQgbWVzc2FnZXMgdG8gc2VuZCBsaXN0IGlmIHRoZSB0cmVlIGNoYW5nZXMuCiAqLwp7eyMjIGRlZi5jcmVhdGVUcmVlOm1ldGhvZDoKICAgIHZhciB3YXNEZWYgPSB0cnVlOwogICAgdmFyIG9sZCA9IG07CgogICAge3sgdmFyIGVtcHR5UHJvcCA9IGl0LnBhcnNlZFBhdGhbMF0gJiYgaXQucGFyc2VkUGF0aFswXS5lbXB0eTsgfX0KICAgIHt7PyBlbXB0eVByb3AgfX0KICAgICAgICB7eyAvKiBjcmVhdGUgdG9wIGxldmVsIG1vZGVsIGlmIGl0IHdhcyBub3QgcHJldmlvdXNseSBkZWZpbmVkICovIH19CiAgICAgICAgaWYgKCEgbSkgewogICAgICAgICAgICBtID0ge3sjIGRlZi5tb2RlbEFjY2Vzc1ByZWZpeCB9fSA9IHt7PSBlbXB0eVByb3AgfX07CiAgICAgICAgICAgIHdhc0RlZiA9IGZhbHNlOwoKICAgICAgICAgICAgaWYgKHRoaXMuX29wdGlvbnMucmVhY3RpdmUgIT09IGZhbHNlKSB7CiAgICAgICAgICAgICAgICB7eyMgZGVmLmFkZE1zZyB9fSAnJywgdHlwZTogJ2FkZGVkJywKICAgICAgICAgICAgICAgICAgICAgIG5ld1ZhbHVlOiBtIH0pOwogICAgICAgICAgICB9CiAgICAgICAgfQogICAge3s/P319CiAgICAgICAge3s/IG1ldGhvZCA9PSAnc3BsaWNlJyB9fQogICAgICAgICAgICBpZiAoISBtKSB7CiAgICAgICAge3s/fX0KICAgICAgICAgICAgICAgIG0gPSB7eyMgZGVmLm1vZGVsQWNjZXNzUHJlZml4IH19ID0gY2xvbmVUcmVlKHZhbHVlKTsKICAgICAgICAgICAgICAgIHdhc0RlZiA9IHR5cGVvZiBvbGQgIT0gJ3VuZGVmaW5lZCc7CiAgICAgICAge3s/IG1ldGhvZCA9PSAnc3BsaWNlJyB9fQogICAgICAgICAgICB9CiAgICAgICAge3s/fX0gICAgICAgCiAgICB7ez99fQoKCiAgICB7eyAvKiBjcmVhdGUgbW9kZWwgdHJlZSBpZiBpdCBkb2Vzbid0IGV4aXN0ICovIH19CiAgICB7eyAgdmFyIG1vZGVsRGF0YVByb3BlcnR5ID0gJyc7CiAgICAgICAgdmFyIG5leHROb2RlID0gaXQucGFyc2VkUGF0aFswXTsKICAgICAgICB2YXIgY291bnQgPSBpdC5wYXJzZWRQYXRoLmxlbmd0aCAtIDE7CgogICAgICAgIGZvciAodmFyIGkgPSAwOyBpIDwgY291bnQ7IGkrKykgewogICAgICAgICAgICB2YXIgY3Vyck5vZGUgPSBuZXh0Tm9kZTsKICAgICAgICAgICAgdmFyIGN1cnJQcm9wID0gY3Vyck5vZGUucHJvcGVydHk7CiAgICAgICAgICAgIG5leHROb2RlID0gaXQucGFyc2VkUGF0aFtpICsgMV07CiAgICAgICAgICAgIHZhciBlbXB0eVByb3AgPSBuZXh0Tm9kZSAmJiBuZXh0Tm9kZS5lbXB0eTsKICAgIH19CgogICAgICAgIHt7IyBkZWYuY3JlYXRlVHJlZVN0ZXAgfX0KCiAgICB7eyAgfSAvKiBmb3IgbG9vcCAqLyB9fQojfX0KCgovKioKICogSW5zZXJ0cyBjb2RlIHRvIGNyZWF0ZSBvbmUgc3RlcCBpbiB0aGUgbW9kZWwgdHJlZQogKi8Ke3sjIyBkZWYuY3JlYXRlVHJlZVN0ZXA6CiAgICB7eyMgZGVmLmNoYW5nZUFjY2Vzc1BhdGggfX0KCiAgICBpZiAoISB7eyMgZGVmLndhc0RlZmluZWQgfX0pIHsgCiAgICAgICAge3sgLyogcHJvcGVydHkgZG9lcyBub3QgZXhpc3QgKi8gfX0KICAgICAgICBtID0gbXt7IyBkZWYuY3VyclByb3AgfX0gPSB7ez0gZW1wdHlQcm9wIH19OwoKICAgICAgICBpZiAodGhpcy5fb3B0aW9ucy5yZWFjdGl2ZSAhPT0gZmFsc2UpIHsKICAgICAgICAgICAge3sjIGRlZi5hZGRNc2cgfX0gYWNjZXNzUGF0aCwgdHlwZTogJ2FkZGVkJywgCiAgICAgICAgICAgICAgICAgIG5ld1ZhbHVlOiBtIH0pOwogICAgICAgIH0KCiAgICB9IGVsc2UgaWYgKHR5cGVvZiBte3sjIGRlZi5jdXJyUHJvcCB9fSAhPSAnb2JqZWN0JyB8fCBte3sjIGRlZi5jdXJyUHJvcCB9fSA9PT0gbnVsbCkgewogICAgICAgIHt7IC8qIHByb3BlcnR5IGlzIG5vdCBvYmplY3QgKi8gfX0KICAgICAgICB2YXIgb2xkID0gbXt7IyBkZWYuY3VyclByb3AgfX07CiAgICAgICAgbSA9IG17eyMgZGVmLmN1cnJQcm9wIH19ID0ge3s9IGVtcHR5UHJvcCB9fTsKCiAgICAgICAgaWYgKHRoaXMuX29wdGlvbnMucmVhY3RpdmUgIT09IGZhbHNlKSB7CiAgICAgICAgICAgIHt7IyBkZWYuYWRkTXNnIH19IGFjY2Vzc1BhdGgsIHR5cGU6ICdjaGFuZ2VkJywgCiAgICAgICAgICAgICAgICAgIG9sZFZhbHVlOiBvbGQsIG5ld1ZhbHVlOiBtIH0pOwogICAgICAgIH0KCiAgICB9IGVsc2UgewogICAgICAgIHt7IC8qIHByb3BlcnR5IGV4aXN0cywganVzdCB0cmF2ZXJzZSBkb3duIHRoZSBtb2RlbCB0cmVlICovIH19CiAgICAgICAgbSA9IG17eyMgZGVmLmN1cnJQcm9wIH19OwogICAgfQojfX0K","base64")
+    , include_traverse_tree = Buffer("J3VzZSBzdHJpY3QnOwovKiBPbmx5IHVzZSB0aGlzIHN0eWxlIG9mIGNvbW1lbnRzLCBub3QgIi8vIiAqLwoKLyoqCiAqIEluc2VydHMgY29kZSB0byB0cmF2ZXJzZSBtb2RlbCB0cmVlIGZvciBgZGVsZXRlYCBhbmQgYHNwbGljZWAgYWNjZXNzb3JzLgogKi8Ke3sjIyBkZWYudHJhdmVyc2VUcmVlOgogICAge3sgCiAgICAgICAgdmFyIGNvdW50ID0gaXQucGFyc2VkUGF0aC5sZW5ndGgtMTsKCiAgICAgICAgZm9yICh2YXIgaSA9IDA7IGkgPCBjb3VudDsgaSsrKSB7IAogICAgICAgICAgICB2YXIgY3Vyck5vZGUgPSBpdC5wYXJzZWRQYXRoW2ldOwogICAgICAgICAgICB2YXIgY3VyclByb3AgPSBjdXJyTm9kZS5wcm9wZXJ0eTsKICAgIH19CiAgICAgICAgICAgIHt7IyBkZWYudHJhdmVyc2VUcmVlU3RlcCB9fQoKICAgIHt7IH0gLyogZm9yIGxvb3AgKi8KCiAgICAgICAgdmFyIGkgPSBjb3VudDsKICAgICAgICB3aGlsZSAoaS0tKSB7IC8qIGNsb3NpbmcgYnJhY2VzIGZvciBlbHNlJ3MgYWJvdmUgKi8KICAgIH19CiAgICAgICAgICAgIH0KICAgIHt7IH0gLyogd2hpbGUgbG9vcCAqLyB9fQojfX0KCgovKioKICogSW5zZXJ0cyBjb2RlIHRvIHRyYXZlcnNlIG9uZSBzdGVwIGluIHRoZSBtb2RlbCB0cmVlCiAqLwp7eyMjIGRlZi50cmF2ZXJzZVRyZWVTdGVwOgogICAgaWYgKCEgKG0gJiYgbS5oYXNPd25Qcm9wZXJ0eSAmJiB7eyMgZGVmLndhc0RlZmluZWR9fSApICkKICAgICAgICB0cmVlRG9lc05vdEV4aXN0ID0gdHJ1ZTsKICAgIGVsc2UgewogICAgICAgIG0gPSBte3sjIGRlZi5jdXJyUHJvcCB9fTsKICAgICAgICB7eyMgZGVmLmNoYW5nZUFjY2Vzc1BhdGggfX0KICAgIHt7IC8qIGJyYWNlIGZyb20gZWxzZSBpcyBub3QgY2xvc2VkIG9uIHB1cnBvc2UgLSBhbGwgYnJhY2VzIGFyZSBjbG9zZWQgaW4gd2hpbGUgbG9vcCAqLyB9fQojfX0K","base64");
 
 var dotDef = {
     include_defines: include_defines,
@@ -13906,7 +15673,8 @@ var modelMethods = _.mapKeys(modelSynthesizers, function(synthesizer) {
 
 synthesizePathMethods.modelMethods = modelMethods;
 
-},{"../../util/logger":96,"../change_data":86,"../model_utils":91,"../path_utils":93,"dot":99,"fs":76,"protojs":118}],95:[function(require,module,exports){
+}).call(this,require("buffer").Buffer)
+},{"../../util/logger":100,"../change_data":90,"../model_utils":95,"../path_utils":97,"buffer":77,"dot":103,"protojs":122}],99:[function(require,module,exports){
 'use strict';
 
 var config = require('../config');
@@ -13924,7 +15692,7 @@ util.check.disable = !config.check;
 
 module.exports = util;
 
-},{"../config":78,"./logger":96,"dot":99,"ml-check":100}],96:[function(require,module,exports){
+},{"../config":82,"./logger":100,"dot":103,"ml-check":104}],100:[function(require,module,exports){
 'use strict';
 
 // <a name="utils-logger"></a>
@@ -13954,7 +15722,7 @@ var logger = new Logger({ level: 3 });
 
 module.exports = logger;
 
-},{"./logger_class":97}],97:[function(require,module,exports){
+},{"./logger_class":101}],101:[function(require,module,exports){
 'use strict';
 
 // ### Logger Class
@@ -14098,7 +15866,7 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"../messenger":79,"protojs":118}],98:[function(require,module,exports){
+},{"../messenger":83,"protojs":122}],102:[function(require,module,exports){
 // doT.js
 // 2011-2014, Laura Doktorova, https://github.com/olado/doT
 // Licensed under the MIT license.
@@ -14240,7 +16008,7 @@ module.exports = Logger;
 	};
 }());
 
-},{}],99:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 /* doT + auto-compilation of doT templates
  *
  * 2012, Laura Doktorova, https://github.com/olado/doT
@@ -14385,7 +16153,7 @@ InstallDots.prototype.compileAll = function() {
 	return this.__rendermodule;
 };
 
-},{"./doT":98,"fs":76}],100:[function(require,module,exports){
+},{"./doT":102,"fs":76}],104:[function(require,module,exports){
 'use strict';
 
 var _ = require('protojs');
@@ -14687,7 +16455,7 @@ function _prependPath(key, base) {
     return key + base;
 }
 
-},{"protojs":118}],101:[function(require,module,exports){
+},{"protojs":122}],105:[function(require,module,exports){
 'use strict';
 
 var _ = require('protojs')
@@ -14917,7 +16685,7 @@ function Mixin$$useWith(hostClass, instanceKey, mixinMethods) {
     }
 }
 
-},{"ml-check":100,"protojs":118}],102:[function(require,module,exports){
+},{"ml-check":104,"protojs":122}],106:[function(require,module,exports){
 'use strict';
 /**
  * - [find](#find)
@@ -15128,7 +16896,7 @@ function spliceItem(self, item) {
     return self;
 }
 
-},{}],103:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 'use strict';
 /**
  * - [makeFunction](#makeFunction)
@@ -15479,7 +17247,7 @@ function not(self) {
     return func;
 }
 
-},{}],104:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 'use strict';
 module.exports = {
     array: require('./array'),
@@ -15491,7 +17259,7 @@ module.exports = {
     utils: require('./utils')
 };
 
-},{"./array":102,"./function":103,"./number":105,"./object":106,"./prototype":107,"./string":108,"./utils":109}],105:[function(require,module,exports){
+},{"./array":106,"./function":107,"./number":109,"./object":110,"./prototype":111,"./string":112,"./utils":113}],109:[function(require,module,exports){
 'use strict';
 /**
  * - [isNumeric](#isNumeric)
@@ -15510,7 +17278,7 @@ function isNumeric(self) {
     return result;
 }
 
-},{}],106:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 'use strict';
 /**
  * - [extend](#extend)
@@ -16302,7 +18070,7 @@ function isNot(self, obj) {
     return equal;
 }
 
-},{}],107:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 'use strict';
 var __ = require('../functions/object');
 /**
@@ -16422,7 +18190,7 @@ function newApply(self, args) {
     return obj;
 }
 
-},{"../functions/object":106}],108:[function(require,module,exports){
+},{"../functions/object":110}],112:[function(require,module,exports){
 'use strict';
 var slice = Array.prototype.slice;
 /**
@@ -16614,7 +18382,7 @@ function format(self) { // , ... arguments
     return result;
 };
 
-},{}],109:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 'use strict';
 var slice = Array.prototype.slice;
 /**
@@ -16725,7 +18493,7 @@ function noop() {
     return undefined;
 }
 
-},{}],110:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
 'use strict';
 /**
  * - [find](#find)
@@ -16951,7 +18719,7 @@ function spliceItem(item) {
     return this;
 }
 
-},{}],111:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 'use strict';
 /**
  * - [makeFunction](#makeFunction)
@@ -17335,9 +19103,9 @@ function not() {
     return this;
 }
 
-},{}],112:[function(require,module,exports){
-arguments[4][104][0].apply(exports,arguments)
-},{"./array":110,"./function":111,"./number":113,"./object":114,"./prototype":115,"./string":116,"./utils":117}],113:[function(require,module,exports){
+},{}],116:[function(require,module,exports){
+arguments[4][108][0].apply(exports,arguments)
+},{"./array":114,"./function":115,"./number":117,"./object":118,"./prototype":119,"./string":120,"./utils":121,"dup":108}],117:[function(require,module,exports){
 'use strict';
 /**
  * - [isNumeric](#isNumeric)
@@ -17357,7 +19125,7 @@ function isNumeric() {
     return this;
 }
 
-},{}],114:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 'use strict';
 /**
  * - [extend](#extend)
@@ -18201,7 +19969,7 @@ function isNot(obj) {
     return this;
 }
 
-},{}],115:[function(require,module,exports){
+},{}],119:[function(require,module,exports){
 'use strict';
 var __ = require('../functions/object');
 /**
@@ -18329,7 +20097,7 @@ function newApply(args) {
     return this;
 }
 
-},{"../functions/object":106}],116:[function(require,module,exports){
+},{"../functions/object":110}],120:[function(require,module,exports){
 'use strict';
 var slice = Array.prototype.slice;
 /**
@@ -18545,7 +20313,7 @@ function format() { // , ... arguments
     return this;
 };
 
-},{}],117:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 'use strict';
 var slice = Array.prototype.slice;
 /**
@@ -18670,7 +20438,7 @@ function noop() {
     return this;
 }
 
-},{}],118:[function(require,module,exports){
+},{}],122:[function(require,module,exports){
 'use strict';
 
 
@@ -18743,7 +20511,7 @@ if (typeof module == 'object' && module.exports) {
     module.exports = Proto;
 }
 
-},{"./dotjs/functions":104,"./dotjs/methods":112}],119:[function(require,module,exports){
+},{"./dotjs/functions":108,"./dotjs/methods":116}],123:[function(require,module,exports){
 /**
  * Copyright (c) 2013 Petka Antonov
  * 
@@ -19151,7 +20919,7 @@ function QueryStringParser$parseString(str, noDecode) {
     return dictionary;
 };
 
-},{"./querystringserializer.js":120}],120:[function(require,module,exports){
+},{"./querystringserializer.js":124}],124:[function(require,module,exports){
 /**
  * Copyright (c) 2013 Petka Antonov
  * 
@@ -19258,7 +21026,7 @@ function QueryStringSerializer$serialize(obj) {
     return ret.join("&");
 };
 
-},{}],121:[function(require,module,exports){
+},{}],125:[function(require,module,exports){
 module.exports={
   "name": "milojs",
   "version": "1.6.0",
@@ -19323,7 +21091,4 @@ module.exports={
   }
 }
 
-},{}]},{},[45])
-
-;
-//# sourceMappingURL=milo.bundle.map
+},{}]},{},[45]);

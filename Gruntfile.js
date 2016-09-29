@@ -69,20 +69,12 @@ module.exports = function(grunt) {
                 cwd: __dirname
             }
         },
-        exorcise: {
-            build: {
-                options: {},
-                files: {
-                    'dist/milo.bundle.map': 'dist/milo.bundle.js'
-                }
-            }
-        },
         uglify: {
             options: {
                 sourceMap: sourceMap,
                 sourceMappingURL: sourceMappingURL,
                 sourceMapRoot: '/',
-                mangle: !grunt.option('no-mangle')
+                mangle: false
             },
             milo: {
                 files: {
@@ -132,7 +124,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-mocha-test');
     grunt.loadNpmTasks('grunt-karma');
-    grunt.loadNpmTasks('grunt-exorcise');
     grunt.loadNpmTasks('grunt-istanbul');
 
     grunt.registerTask('test', 'mochaTest');
@@ -140,7 +131,7 @@ module.exports = function(grunt) {
     grunt.registerTask('karmatest', 'karma');
     grunt.registerTask('htmltest', ['browserify:test1', 'watch']);
     grunt.registerTask('tests', ['mochaTest', 'copy', 'browserify', 'karmatest']);
-    grunt.registerTask('build', ['instrument', 'copy', 'browserify', 'uglify', 'exorcise']);
+    grunt.registerTask('build', ['instrument', 'copy', 'browserify', 'uglify']);
     grunt.registerTask('default', ['test', 'build', 'watch']);
     grunt.registerTask('skiptest', ['browserify', 'watch']);
 
