@@ -28,7 +28,7 @@ describe('ClassRegistry class', function() {
 
         assert.throws(registry.add, 'should fail if name or constructor not specified');
         assert.throws(function() {
-            registry.add(ComponentClass1, '');
+            registry.add(function () { this.prop = 1; }, '');
         }, 'should fail if name not specified');
         assert.throws(function() {
             registry.add(undefined, 'Class1');
