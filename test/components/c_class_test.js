@@ -3,7 +3,6 @@
 /* eslint-env browser, commonjs, node, mocha */
 
 var Component = require('../../lib/components/c_class')
-    , ComponentFacet = require('../../lib/components/c_facet')
     , FacetedObject = require('../../lib/abstract/faceted_object')
     , Messenger = require('milo-core').Messenger
     , assert = require('assert');
@@ -35,5 +34,26 @@ describe('Component class', function() {
     it('should be able to be created without facet config', function() {
         assert(Component.createComponentClass('MyComponent') != null);
         assert(Component.createComponentClass('MyComponent', {}) != null);
+    });
+
+    it('removes event listeners on destroy', function(done) {
+        const comp = new MyComponent(null, null, null, { destroy: () => {} });
+        comp.on('event', () => { throw new Error(''); });
+        comp.destroy();
+        comp.postMessage('event');
+
+        // Wait for the event to be emitted
+        setTimeout(done, 4);
+    });
+
+    it('prevents calling event listeners on disposed elements', function(done) {
+        const comp = new MyComponent(null, null, null, { destroy: () => {} });
+        comp.on('event', () => { throw new Error(''); });
+        comp.postMessage('event');
+        // broadcast is asynchronous, if the component is destroyed in the mean time, it shouldn't throw
+        comp.destroy();
+
+        // Wait for the event to be emitted
+        setTimeout(done, 4);
     });
 });
