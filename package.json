@@ -39,7 +39,7 @@
   "devDependencies": {
     "async": "^2.1.2",
     "brfs": "^1.4.3",
-    "browserify": "^14.0.0",
+    "browserify": "^14.3.0",
     "eslintify": "^3.1.0",
     "grunt": "^1.0.1",
     "grunt-browserify": "^5.0.0",
