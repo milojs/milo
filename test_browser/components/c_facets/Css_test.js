@@ -5,7 +5,7 @@
 var assert = require('assert')
     , async = require('async');
 
-describe.only('Css facet', function() {
+describe('Css facet', function() {
     milo.config.check = true; // Enable 'check' library so that inputs to the Css facet are validated
 
     var ComponentClass = milo.createComponentClass({
