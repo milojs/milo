@@ -802,7 +802,7 @@ function render() {
     return qs.stringify(this.options);
 }
 
-},{"../config":43,"./a_class":5,"milo-core":87,"querystringparser":122}],8:[function(require,module,exports){
+},{"../config":43,"./a_class":5,"milo-core":87,"querystringparser":121}],8:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2101,6 +2101,9 @@ function Component$$createFromDataTransfer(dataTransfer) {
  *  TODO try removing it
  */
 function Component$init(scope, element, name, componentInfo) {
+    // flag ASAP as not ready
+    this.isReady = false;
+
     // create DOM element if it wasn't passed to Constructor
     this.el = element || this.createElement();
 
@@ -2530,6 +2533,9 @@ function Component$insertAtTreePath(treePath, component, nearest) {
 function Component$broadcast(msg, data, callback, synchronously) {
     var postMethod = synchronously ? 'postMessageSync' : 'postMessage';
     this.walkScopeTree(function(component) {
+        if (msg === 'stateready' && !component._destroyed) {
+            component.isReady = true;
+        }
         component[postMethod](msg, data, callback);
     });
 }
@@ -2539,6 +2545,7 @@ function Component$broadcast(msg, data, callback, synchronously) {
  * Destroy component: removes component from DOM, removes it from scope, deletes all references to DOM nodes and unsubscribes from all messages both component and all facets
  */
 function Component$destroy(opts) {
+    this.isReady = undefined;
     if (typeof opts == 'boolean') opts = { quiet: opts };
     else if (!opts) opts = {};
 
@@ -5117,7 +5124,7 @@ function onChildrenBound() {
     }
 
     // Component must have one child with an Item facet
-    if (! foundItem) throw new Error('No child component has Item facet');
+    if (! foundItem) return logger.error('List_onChildrenBound: No child component has Item facet');
 
     this.list.itemSample = foundItem;
 
@@ -5219,6 +5226,7 @@ function List$contains(component) {
  * @return {Component} The newly created component
  */
 function List$addItem(index, itemData) {
+    if (!this.itemSample) return logger.error('List$addItem: Item sample missing.');
     index = isNaN(+index) ? this.count() : +index;
     this.owner.data.splice(index, 0, itemData || {});
     return this.item(index);
@@ -5234,6 +5242,9 @@ function List$addItem(index, itemData) {
 function List$_addItem(index) {
     if (this.item(index))
         throw Error('attempt to create item with ID of existing item');
+
+    if (!this.itemSample)
+        return logger.error('List$_addItem: Item sample missing.');
 
     // Copy component
     var component = Component.copy(this.itemSample, true);
@@ -5271,6 +5282,7 @@ function _updateItemsIndexes(fromIndex, toIndex) {
 }
 
 function List$addItems(itemsData, index) {
+    if (!this.itemSample) return logger.error('List$addItems: Item sample missing.');
     var spliceArgs = [index === undefined ? this.count() : index, 0].concat(itemsData);
     var dataFacet = this.owner.data;
     dataFacet.splice.apply(dataFacet, spliceArgs);
@@ -5286,6 +5298,10 @@ function List$addItems(itemsData, index) {
  */
 function List$_addItems(count, index) {
     check(count, Match.Integer);
+
+    if (!this.itemSample)
+        return logger.error('List$_addItems: Item sample missing.');
+
     if (count < 0)
         throw new Error('can\'t add negative number of items');
 
@@ -7013,7 +7029,7 @@ function destroy() {
     milo.util.destroy();
 }
 
-},{"../package.json":124,"./attributes":8,"./binder":9,"./classes":10,"./command":13,"./components/c_class":16,"./components/c_facet":17,"./components/classes/View":36,"./config":43,"./loader":44,"./registry":46,"./services/mail":49,"./services/window":52,"./use_facets":53,"./util":65,"./util/create_component_class":56,"./util/create_facet_class":57,"milo-core":87}],46:[function(require,module,exports){
+},{"../package.json":123,"./attributes":8,"./binder":9,"./classes":10,"./command":13,"./components/c_class":16,"./components/c_facet":17,"./components/classes/View":36,"./config":43,"./loader":44,"./registry":46,"./services/mail":49,"./services/window":52,"./use_facets":53,"./util":65,"./util/create_component_class":56,"./util/create_facet_class":57,"milo-core":87}],46:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7936,17 +7952,20 @@ function clearSelection(win) {
  * Calculates an element's total top and left offset from the document edge.
  *
  * @param {Element} el the element for which position needs to be returned
- * @param {includeBorder} if is to include the border width
+ * @param {Boolean} includeBorder if is to include the border width
+ * @param {Element} rootEl the element to be considered the root, if not the body 
  * @return {Object} vector object with properties topOffset and leftOffset
  */
-function getElementOffset(el, includeBorder) {
+function getElementOffset(el, includeBorder, rootEl) {
+    rootEl = rootEl || document.body;
+
     var yPos, xPos;
 
     yPos = el.offsetTop;
     xPos = el.offsetLeft;
     el = el.offsetParent;
 
-    while (el) {
+    while (el && rootEl.contains(el) && el !== rootEl) {
         yPos += el.offsetTop + getBorder(el, 'Height', includeBorder);
         xPos += el.offsetLeft + getBorder(el, 'Width', includeBorder);
         el = el.offsetParent;
@@ -9099,7 +9118,7 @@ function util_destroy() {
     util.dragDrop.destroy();
 }
 
-},{"./component_name":55,"./deprecate":58,"./dom":59,"./dom_listeners":60,"./domready":61,"./dragdrop":62,"./error":63,"./fragment":64,"./json_parse":66,"./request":67,"./selection":68,"./storage":69,"./unique_id":72,"./websocket":73,"milo-core":87,"querystringparser":122}],66:[function(require,module,exports){
+},{"./component_name":55,"./deprecate":58,"./dom":59,"./dom_listeners":60,"./domready":61,"./dragdrop":62,"./error":63,"./fragment":64,"./json_parse":66,"./request":67,"./selection":68,"./storage":69,"./unique_id":72,"./websocket":73,"milo-core":87,"querystringparser":121}],66:[function(require,module,exports){
 'use strict';
 
 
@@ -10680,8 +10699,7 @@ function WSMessageSource$trigger (msg, data, callback) {
 }
 
 },{"../../config":43,"../../util/unique_id":72,"milo-core":87}],76:[function(require,module,exports){
-
-},{}],77:[function(require,module,exports){
+(function (global){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -10694,55 +10712,80 @@ function WSMessageSource$trigger (msg, data, callback) {
 
 var base64 = require('base64-js')
 var ieee754 = require('ieee754')
+var isArray = require('isarray')
 
 exports.Buffer = Buffer
 exports.SlowBuffer = SlowBuffer
 exports.INSPECT_MAX_BYTES = 50
 
-var K_MAX_LENGTH = 0x7fffffff
-exports.kMaxLength = K_MAX_LENGTH
-
 /**
  * If `Buffer.TYPED_ARRAY_SUPPORT`:
  *   === true    Use Uint8Array implementation (fastest)
- *   === false   Print warning and recommend using `buffer` v4.x which has an Object
- *               implementation (most compatible, even IE6)
+ *   === false   Use Object implementation (most compatible, even IE6)
  *
  * Browsers that support typed arrays are IE 10+, Firefox 4+, Chrome 7+, Safari 5.1+,
  * Opera 11.6+, iOS 4.2+.
  *
- * We report that the browser does not support typed arrays if the are not subclassable
- * using __proto__. Firefox 4-29 lacks support for adding new properties to `Uint8Array`
- * (See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438). IE 10 lacks support
- * for __proto__ and has a buggy typed array implementation.
- */
-Buffer.TYPED_ARRAY_SUPPORT = typedArraySupport()
+ * Due to various browser bugs, sometimes the Object implementation will be used even
+ * when the browser supports typed arrays.
+ *
+ * Note:
+ *
+ *   - Firefox 4-29 lacks support for adding new properties to `Uint8Array` instances,
+ *     See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438.
+ *
+ *   - Chrome 9-10 is missing the `TypedArray.prototype.subarray` function.
+ *
+ *   - IE10 has a broken `TypedArray.prototype.subarray` function which returns arrays of
+ *     incorrect length in some situations.
 
-if (!Buffer.TYPED_ARRAY_SUPPORT) {
-  console.error(
-    'This browser lacks typed array (Uint8Array) support which is required by ' +
-    '`buffer` v5.x. Use `buffer` v4.x if you require old browser support.')
-}
+ * We detect these buggy browsers and set `Buffer.TYPED_ARRAY_SUPPORT` to `false` so they
+ * get the Object implementation, which is slower but behaves correctly.
+ */
+Buffer.TYPED_ARRAY_SUPPORT = global.TYPED_ARRAY_SUPPORT !== undefined
+  ? global.TYPED_ARRAY_SUPPORT
+  : typedArraySupport()
+
+/*
+ * Export kMaxLength after typed array support is determined.
+ */
+exports.kMaxLength = kMaxLength()
 
 function typedArraySupport () {
-  // Can typed array instances can be augmented?
   try {
     var arr = new Uint8Array(1)
     arr.__proto__ = {__proto__: Uint8Array.prototype, foo: function () { return 42 }}
-    return arr.foo() === 42
+    return arr.foo() === 42 && // typed array instances can be augmented
+        typeof arr.subarray === 'function' && // chrome 9-10 lack `subarray`
+        arr.subarray(1, 1).byteLength === 0 // ie10 has broken `subarray`
   } catch (e) {
     return false
   }
 }
 
-function createBuffer (length) {
-  if (length > K_MAX_LENGTH) {
+function kMaxLength () {
+  return Buffer.TYPED_ARRAY_SUPPORT
+    ? 0x7fffffff
+    : 0x3fffffff
+}
+
+function createBuffer (that, length) {
+  if (kMaxLength() < length) {
     throw new RangeError('Invalid typed array length')
   }
-  // Return an augmented `Uint8Array` instance
-  var buf = new Uint8Array(length)
-  buf.__proto__ = Buffer.prototype
-  return buf
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    // Return an augmented `Uint8Array` instance, for best performance
+    that = new Uint8Array(length)
+    that.__proto__ = Buffer.prototype
+  } else {
+    // Fallback: Return an object instance of the Buffer class
+    if (that === null) {
+      that = new Buffer(length)
+    }
+    that.length = length
+  }
+
+  return that
 }
 
 /**
@@ -10756,6 +10799,10 @@ function createBuffer (length) {
  */
 
 function Buffer (arg, encodingOrOffset, length) {
+  if (!Buffer.TYPED_ARRAY_SUPPORT && !(this instanceof Buffer)) {
+    return new Buffer(arg, encodingOrOffset, length)
+  }
+
   // Common case.
   if (typeof arg === 'number') {
     if (typeof encodingOrOffset === 'string') {
@@ -10763,38 +10810,33 @@ function Buffer (arg, encodingOrOffset, length) {
         'If encoding is specified then the first argument must be a string'
       )
     }
-    return allocUnsafe(arg)
+    return allocUnsafe(this, arg)
   }
-  return from(arg, encodingOrOffset, length)
-}
-
-// Fix subarray() in ES2016. See: https://github.com/feross/buffer/pull/97
-if (typeof Symbol !== 'undefined' && Symbol.species &&
-    Buffer[Symbol.species] === Buffer) {
-  Object.defineProperty(Buffer, Symbol.species, {
-    value: null,
-    configurable: true,
-    enumerable: false,
-    writable: false
-  })
+  return from(this, arg, encodingOrOffset, length)
 }
 
 Buffer.poolSize = 8192 // not used by this implementation
 
-function from (value, encodingOrOffset, length) {
+// TODO: Legacy, not needed anymore. Remove in next major version.
+Buffer._augment = function (arr) {
+  arr.__proto__ = Buffer.prototype
+  return arr
+}
+
+function from (that, value, encodingOrOffset, length) {
   if (typeof value === 'number') {
     throw new TypeError('"value" argument must not be a number')
   }
 
   if (typeof ArrayBuffer !== 'undefined' && value instanceof ArrayBuffer) {
-    return fromArrayBuffer(value, encodingOrOffset, length)
+    return fromArrayBuffer(that, value, encodingOrOffset, length)
   }
 
   if (typeof value === 'string') {
-    return fromString(value, encodingOrOffset)
+    return fromString(that, value, encodingOrOffset)
   }
 
-  return fromObject(value)
+  return fromObject(that, value)
 }
 
 /**
@@ -10806,13 +10848,21 @@ function from (value, encodingOrOffset, length) {
  * Buffer.from(arrayBuffer[, byteOffset[, length]])
  **/
 Buffer.from = function (value, encodingOrOffset, length) {
-  return from(value, encodingOrOffset, length)
+  return from(null, value, encodingOrOffset, length)
 }
 
-// Note: Change prototype *after* Buffer.from is defined to workaround Chrome bug:
-// https://github.com/feross/buffer/pull/148
-Buffer.prototype.__proto__ = Uint8Array.prototype
-Buffer.__proto__ = Uint8Array
+if (Buffer.TYPED_ARRAY_SUPPORT) {
+  Buffer.prototype.__proto__ = Uint8Array.prototype
+  Buffer.__proto__ = Uint8Array
+  if (typeof Symbol !== 'undefined' && Symbol.species &&
+      Buffer[Symbol.species] === Buffer) {
+    // Fix subarray() in ES2016. See: https://github.com/feross/buffer/pull/97
+    Object.defineProperty(Buffer, Symbol.species, {
+      value: null,
+      configurable: true
+    })
+  }
+}
 
 function assertSize (size) {
   if (typeof size !== 'number') {
@@ -10822,20 +10872,20 @@ function assertSize (size) {
   }
 }
 
-function alloc (size, fill, encoding) {
+function alloc (that, size, fill, encoding) {
   assertSize(size)
   if (size <= 0) {
-    return createBuffer(size)
+    return createBuffer(that, size)
   }
   if (fill !== undefined) {
     // Only pay attention to encoding if it's a string. This
     // prevents accidentally sending in a number that would
     // be interpretted as a start offset.
     return typeof encoding === 'string'
-      ? createBuffer(size).fill(fill, encoding)
-      : createBuffer(size).fill(fill)
+      ? createBuffer(that, size).fill(fill, encoding)
+      : createBuffer(that, size).fill(fill)
   }
-  return createBuffer(size)
+  return createBuffer(that, size)
 }
 
 /**
@@ -10843,28 +10893,34 @@ function alloc (size, fill, encoding) {
  * alloc(size[, fill[, encoding]])
  **/
 Buffer.alloc = function (size, fill, encoding) {
-  return alloc(size, fill, encoding)
+  return alloc(null, size, fill, encoding)
 }
 
-function allocUnsafe (size) {
+function allocUnsafe (that, size) {
   assertSize(size)
-  return createBuffer(size < 0 ? 0 : checked(size) | 0)
+  that = createBuffer(that, size < 0 ? 0 : checked(size) | 0)
+  if (!Buffer.TYPED_ARRAY_SUPPORT) {
+    for (var i = 0; i < size; ++i) {
+      that[i] = 0
+    }
+  }
+  return that
 }
 
 /**
  * Equivalent to Buffer(num), by default creates a non-zero-filled Buffer instance.
  * */
 Buffer.allocUnsafe = function (size) {
-  return allocUnsafe(size)
+  return allocUnsafe(null, size)
 }
 /**
  * Equivalent to SlowBuffer(num), by default creates a non-zero-filled Buffer instance.
  */
 Buffer.allocUnsafeSlow = function (size) {
-  return allocUnsafe(size)
+  return allocUnsafe(null, size)
 }
 
-function fromString (string, encoding) {
+function fromString (that, string, encoding) {
   if (typeof encoding !== 'string' || encoding === '') {
     encoding = 'utf8'
   }
@@ -10874,30 +10930,30 @@ function fromString (string, encoding) {
   }
 
   var length = byteLength(string, encoding) | 0
-  var buf = createBuffer(length)
+  that = createBuffer(that, length)
 
-  var actual = buf.write(string, encoding)
+  var actual = that.write(string, encoding)
 
   if (actual !== length) {
     // Writing a hex string, for example, that contains invalid characters will
     // cause everything after the first invalid character to be ignored. (e.g.
     // 'abxxcd' will be treated as 'ab')
-    buf = buf.slice(0, actual)
+    that = that.slice(0, actual)
   }
 
-  return buf
+  return that
 }
 
-function fromArrayLike (array) {
+function fromArrayLike (that, array) {
   var length = array.length < 0 ? 0 : checked(array.length) | 0
-  var buf = createBuffer(length)
+  that = createBuffer(that, length)
   for (var i = 0; i < length; i += 1) {
-    buf[i] = array[i] & 255
+    that[i] = array[i] & 255
   }
-  return buf
+  return that
 }
 
-function fromArrayBuffer (array, byteOffset, length) {
+function fromArrayBuffer (that, array, byteOffset, length) {
   array.byteLength // this throws if `array` is not a valid ArrayBuffer
 
   if (byteOffset < 0 || array.byteLength < byteOffset) {
@@ -10908,44 +10964,49 @@ function fromArrayBuffer (array, byteOffset, length) {
     throw new RangeError('\'length\' is out of bounds')
   }
 
-  var buf
   if (byteOffset === undefined && length === undefined) {
-    buf = new Uint8Array(array)
+    array = new Uint8Array(array)
   } else if (length === undefined) {
-    buf = new Uint8Array(array, byteOffset)
+    array = new Uint8Array(array, byteOffset)
   } else {
-    buf = new Uint8Array(array, byteOffset, length)
+    array = new Uint8Array(array, byteOffset, length)
   }
 
-  // Return an augmented `Uint8Array` instance
-  buf.__proto__ = Buffer.prototype
-  return buf
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    // Return an augmented `Uint8Array` instance, for best performance
+    that = array
+    that.__proto__ = Buffer.prototype
+  } else {
+    // Fallback: Return an object instance of the Buffer class
+    that = fromArrayLike(that, array)
+  }
+  return that
 }
 
-function fromObject (obj) {
+function fromObject (that, obj) {
   if (Buffer.isBuffer(obj)) {
     var len = checked(obj.length) | 0
-    var buf = createBuffer(len)
+    that = createBuffer(that, len)
 
-    if (buf.length === 0) {
-      return buf
+    if (that.length === 0) {
+      return that
     }
 
-    obj.copy(buf, 0, 0, len)
-    return buf
+    obj.copy(that, 0, 0, len)
+    return that
   }
 
   if (obj) {
     if ((typeof ArrayBuffer !== 'undefined' &&
         obj.buffer instanceof ArrayBuffer) || 'length' in obj) {
       if (typeof obj.length !== 'number' || isnan(obj.length)) {
-        return createBuffer(0)
+        return createBuffer(that, 0)
       }
-      return fromArrayLike(obj)
+      return fromArrayLike(that, obj)
     }
 
-    if (obj.type === 'Buffer' && Array.isArray(obj.data)) {
-      return fromArrayLike(obj.data)
+    if (obj.type === 'Buffer' && isArray(obj.data)) {
+      return fromArrayLike(that, obj.data)
     }
   }
 
@@ -10953,11 +11014,11 @@ function fromObject (obj) {
 }
 
 function checked (length) {
-  // Note: cannot use `length < K_MAX_LENGTH` here because that fails when
+  // Note: cannot use `length < kMaxLength()` here because that fails when
   // length is NaN (which is otherwise coerced to zero.)
-  if (length >= K_MAX_LENGTH) {
+  if (length >= kMaxLength()) {
     throw new RangeError('Attempt to allocate Buffer larger than maximum ' +
-                         'size: 0x' + K_MAX_LENGTH.toString(16) + ' bytes')
+                         'size: 0x' + kMaxLength().toString(16) + ' bytes')
   }
   return length | 0
 }
@@ -11016,7 +11077,7 @@ Buffer.isEncoding = function isEncoding (encoding) {
 }
 
 Buffer.concat = function concat (list, length) {
-  if (!Array.isArray(list)) {
+  if (!isArray(list)) {
     throw new TypeError('"list" argument must be an Array of Buffers')
   }
 
@@ -11208,7 +11269,7 @@ Buffer.prototype.swap64 = function swap64 () {
 }
 
 Buffer.prototype.toString = function toString () {
-  var length = this.length
+  var length = this.length | 0
   if (length === 0) return ''
   if (arguments.length === 0) return utf8Slice(this, 0, length)
   return slowToString.apply(this, arguments)
@@ -11341,7 +11402,8 @@ function bidirectionalIndexOf (buffer, val, byteOffset, encoding, dir) {
     return arrayIndexOf(buffer, val, byteOffset, encoding, dir)
   } else if (typeof val === 'number') {
     val = val & 0xFF // Search for a byte value [0-255]
-    if (typeof Uint8Array.prototype.indexOf === 'function') {
+    if (Buffer.TYPED_ARRAY_SUPPORT &&
+        typeof Uint8Array.prototype.indexOf === 'function') {
       if (dir) {
         return Uint8Array.prototype.indexOf.call(buffer, val, byteOffset)
       } else {
@@ -11482,9 +11544,9 @@ Buffer.prototype.write = function write (string, offset, length, encoding) {
     offset = 0
   // Buffer#write(string, offset[, length][, encoding])
   } else if (isFinite(offset)) {
-    offset = offset >>> 0
+    offset = offset | 0
     if (isFinite(length)) {
-      length = length >>> 0
+      length = length | 0
       if (encoding === undefined) encoding = 'utf8'
     } else {
       encoding = length
@@ -11715,9 +11777,18 @@ Buffer.prototype.slice = function slice (start, end) {
 
   if (end < start) end = start
 
-  var newBuf = this.subarray(start, end)
-  // Return an augmented `Uint8Array` instance
-  newBuf.__proto__ = Buffer.prototype
+  var newBuf
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    newBuf = this.subarray(start, end)
+    newBuf.__proto__ = Buffer.prototype
+  } else {
+    var sliceLen = end - start
+    newBuf = new Buffer(sliceLen, undefined)
+    for (var i = 0; i < sliceLen; ++i) {
+      newBuf[i] = this[i + start]
+    }
+  }
+
   return newBuf
 }
 
@@ -11730,8 +11801,8 @@ function checkOffset (offset, ext, length) {
 }
 
 Buffer.prototype.readUIntLE = function readUIntLE (offset, byteLength, noAssert) {
-  offset = offset >>> 0
-  byteLength = byteLength >>> 0
+  offset = offset | 0
+  byteLength = byteLength | 0
   if (!noAssert) checkOffset(offset, byteLength, this.length)
 
   var val = this[offset]
@@ -11745,8 +11816,8 @@ Buffer.prototype.readUIntLE = function readUIntLE (offset, byteLength, noAssert)
 }
 
 Buffer.prototype.readUIntBE = function readUIntBE (offset, byteLength, noAssert) {
-  offset = offset >>> 0
-  byteLength = byteLength >>> 0
+  offset = offset | 0
+  byteLength = byteLength | 0
   if (!noAssert) {
     checkOffset(offset, byteLength, this.length)
   }
@@ -11761,25 +11832,21 @@ Buffer.prototype.readUIntBE = function readUIntBE (offset, byteLength, noAssert)
 }
 
 Buffer.prototype.readUInt8 = function readUInt8 (offset, noAssert) {
-  offset = offset >>> 0
   if (!noAssert) checkOffset(offset, 1, this.length)
   return this[offset]
 }
 
 Buffer.prototype.readUInt16LE = function readUInt16LE (offset, noAssert) {
-  offset = offset >>> 0
   if (!noAssert) checkOffset(offset, 2, this.length)
   return this[offset] | (this[offset + 1] << 8)
 }
 
 Buffer.prototype.readUInt16BE = function readUInt16BE (offset, noAssert) {
-  offset = offset >>> 0
   if (!noAssert) checkOffset(offset, 2, this.length)
   return (this[offset] << 8) | this[offset + 1]
 }
 
 Buffer.prototype.readUInt32LE = function readUInt32LE (offset, noAssert) {
-  offset = offset >>> 0
   if (!noAssert) checkOffset(offset, 4, this.length)
 
   return ((this[offset]) |
@@ -11789,7 +11856,6 @@ Buffer.prototype.readUInt32LE = function readUInt32LE (offset, noAssert) {
 }
 
 Buffer.prototype.readUInt32BE = function readUInt32BE (offset, noAssert) {
-  offset = offset >>> 0
   if (!noAssert) checkOffset(offset, 4, this.length)
 
   return (this[offset] * 0x1000000) +
@@ -11799,8 +11865,8 @@ Buffer.prototype.readUInt32BE = function readUInt32BE (offset, noAssert) {
 }
 
 Buffer.prototype.readIntLE = function readIntLE (offset, byteLength, noAssert) {
-  offset = offset >>> 0
-  byteLength = byteLength >>> 0
+  offset = offset | 0
+  byteLength = byteLength | 0
   if (!noAssert) checkOffset(offset, byteLength, this.length)
 
   var val = this[offset]
@@ -11817,8 +11883,8 @@ Buffer.prototype.readIntLE = function readIntLE (offset, byteLength, noAssert) {
 }
 
 Buffer.prototype.readIntBE = function readIntBE (offset, byteLength, noAssert) {
-  offset = offset >>> 0
-  byteLength = byteLength >>> 0
+  offset = offset | 0
+  byteLength = byteLength | 0
   if (!noAssert) checkOffset(offset, byteLength, this.length)
 
   var i = byteLength
@@ -11835,28 +11901,24 @@ Buffer.prototype.readIntBE = function readIntBE (offset, byteLength, noAssert) {
 }
 
 Buffer.prototype.readInt8 = function readInt8 (offset, noAssert) {
-  offset = offset >>> 0
   if (!noAssert) checkOffset(offset, 1, this.length)
   if (!(this[offset] & 0x80)) return (this[offset])
   return ((0xff - this[offset] + 1) * -1)
 }
 
 Buffer.prototype.readInt16LE = function readInt16LE (offset, noAssert) {
-  offset = offset >>> 0
   if (!noAssert) checkOffset(offset, 2, this.length)
   var val = this[offset] | (this[offset + 1] << 8)
   return (val & 0x8000) ? val | 0xFFFF0000 : val
 }
 
 Buffer.prototype.readInt16BE = function readInt16BE (offset, noAssert) {
-  offset = offset >>> 0
   if (!noAssert) checkOffset(offset, 2, this.length)
   var val = this[offset + 1] | (this[offset] << 8)
   return (val & 0x8000) ? val | 0xFFFF0000 : val
 }
 
 Buffer.prototype.readInt32LE = function readInt32LE (offset, noAssert) {
-  offset = offset >>> 0
   if (!noAssert) checkOffset(offset, 4, this.length)
 
   return (this[offset]) |
@@ -11866,7 +11928,6 @@ Buffer.prototype.readInt32LE = function readInt32LE (offset, noAssert) {
 }
 
 Buffer.prototype.readInt32BE = function readInt32BE (offset, noAssert) {
-  offset = offset >>> 0
   if (!noAssert) checkOffset(offset, 4, this.length)
 
   return (this[offset] << 24) |
@@ -11876,25 +11937,21 @@ Buffer.prototype.readInt32BE = function readInt32BE (offset, noAssert) {
 }
 
 Buffer.prototype.readFloatLE = function readFloatLE (offset, noAssert) {
-  offset = offset >>> 0
   if (!noAssert) checkOffset(offset, 4, this.length)
   return ieee754.read(this, offset, true, 23, 4)
 }
 
 Buffer.prototype.readFloatBE = function readFloatBE (offset, noAssert) {
-  offset = offset >>> 0
   if (!noAssert) checkOffset(offset, 4, this.length)
   return ieee754.read(this, offset, false, 23, 4)
 }
 
 Buffer.prototype.readDoubleLE = function readDoubleLE (offset, noAssert) {
-  offset = offset >>> 0
   if (!noAssert) checkOffset(offset, 8, this.length)
   return ieee754.read(this, offset, true, 52, 8)
 }
 
 Buffer.prototype.readDoubleBE = function readDoubleBE (offset, noAssert) {
-  offset = offset >>> 0
   if (!noAssert) checkOffset(offset, 8, this.length)
   return ieee754.read(this, offset, false, 52, 8)
 }
@@ -11907,8 +11964,8 @@ function checkInt (buf, value, offset, ext, max, min) {
 
 Buffer.prototype.writeUIntLE = function writeUIntLE (value, offset, byteLength, noAssert) {
   value = +value
-  offset = offset >>> 0
-  byteLength = byteLength >>> 0
+  offset = offset | 0
+  byteLength = byteLength | 0
   if (!noAssert) {
     var maxBytes = Math.pow(2, 8 * byteLength) - 1
     checkInt(this, value, offset, byteLength, maxBytes, 0)
@@ -11926,8 +11983,8 @@ Buffer.prototype.writeUIntLE = function writeUIntLE (value, offset, byteLength, 
 
 Buffer.prototype.writeUIntBE = function writeUIntBE (value, offset, byteLength, noAssert) {
   value = +value
-  offset = offset >>> 0
-  byteLength = byteLength >>> 0
+  offset = offset | 0
+  byteLength = byteLength | 0
   if (!noAssert) {
     var maxBytes = Math.pow(2, 8 * byteLength) - 1
     checkInt(this, value, offset, byteLength, maxBytes, 0)
@@ -11945,55 +12002,87 @@ Buffer.prototype.writeUIntBE = function writeUIntBE (value, offset, byteLength, 
 
 Buffer.prototype.writeUInt8 = function writeUInt8 (value, offset, noAssert) {
   value = +value
-  offset = offset >>> 0
+  offset = offset | 0
   if (!noAssert) checkInt(this, value, offset, 1, 0xff, 0)
+  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
   this[offset] = (value & 0xff)
   return offset + 1
 }
 
+function objectWriteUInt16 (buf, value, offset, littleEndian) {
+  if (value < 0) value = 0xffff + value + 1
+  for (var i = 0, j = Math.min(buf.length - offset, 2); i < j; ++i) {
+    buf[offset + i] = (value & (0xff << (8 * (littleEndian ? i : 1 - i)))) >>>
+      (littleEndian ? i : 1 - i) * 8
+  }
+}
+
 Buffer.prototype.writeUInt16LE = function writeUInt16LE (value, offset, noAssert) {
   value = +value
-  offset = offset >>> 0
+  offset = offset | 0
   if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
-  this[offset] = (value & 0xff)
-  this[offset + 1] = (value >>> 8)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = (value & 0xff)
+    this[offset + 1] = (value >>> 8)
+  } else {
+    objectWriteUInt16(this, value, offset, true)
+  }
   return offset + 2
 }
 
 Buffer.prototype.writeUInt16BE = function writeUInt16BE (value, offset, noAssert) {
   value = +value
-  offset = offset >>> 0
+  offset = offset | 0
   if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
-  this[offset] = (value >>> 8)
-  this[offset + 1] = (value & 0xff)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = (value >>> 8)
+    this[offset + 1] = (value & 0xff)
+  } else {
+    objectWriteUInt16(this, value, offset, false)
+  }
   return offset + 2
+}
+
+function objectWriteUInt32 (buf, value, offset, littleEndian) {
+  if (value < 0) value = 0xffffffff + value + 1
+  for (var i = 0, j = Math.min(buf.length - offset, 4); i < j; ++i) {
+    buf[offset + i] = (value >>> (littleEndian ? i : 3 - i) * 8) & 0xff
+  }
 }
 
 Buffer.prototype.writeUInt32LE = function writeUInt32LE (value, offset, noAssert) {
   value = +value
-  offset = offset >>> 0
+  offset = offset | 0
   if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0)
-  this[offset + 3] = (value >>> 24)
-  this[offset + 2] = (value >>> 16)
-  this[offset + 1] = (value >>> 8)
-  this[offset] = (value & 0xff)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset + 3] = (value >>> 24)
+    this[offset + 2] = (value >>> 16)
+    this[offset + 1] = (value >>> 8)
+    this[offset] = (value & 0xff)
+  } else {
+    objectWriteUInt32(this, value, offset, true)
+  }
   return offset + 4
 }
 
 Buffer.prototype.writeUInt32BE = function writeUInt32BE (value, offset, noAssert) {
   value = +value
-  offset = offset >>> 0
+  offset = offset | 0
   if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0)
-  this[offset] = (value >>> 24)
-  this[offset + 1] = (value >>> 16)
-  this[offset + 2] = (value >>> 8)
-  this[offset + 3] = (value & 0xff)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = (value >>> 24)
+    this[offset + 1] = (value >>> 16)
+    this[offset + 2] = (value >>> 8)
+    this[offset + 3] = (value & 0xff)
+  } else {
+    objectWriteUInt32(this, value, offset, false)
+  }
   return offset + 4
 }
 
 Buffer.prototype.writeIntLE = function writeIntLE (value, offset, byteLength, noAssert) {
   value = +value
-  offset = offset >>> 0
+  offset = offset | 0
   if (!noAssert) {
     var limit = Math.pow(2, 8 * byteLength - 1)
 
@@ -12016,7 +12105,7 @@ Buffer.prototype.writeIntLE = function writeIntLE (value, offset, byteLength, no
 
 Buffer.prototype.writeIntBE = function writeIntBE (value, offset, byteLength, noAssert) {
   value = +value
-  offset = offset >>> 0
+  offset = offset | 0
   if (!noAssert) {
     var limit = Math.pow(2, 8 * byteLength - 1)
 
@@ -12039,8 +12128,9 @@ Buffer.prototype.writeIntBE = function writeIntBE (value, offset, byteLength, no
 
 Buffer.prototype.writeInt8 = function writeInt8 (value, offset, noAssert) {
   value = +value
-  offset = offset >>> 0
+  offset = offset | 0
   if (!noAssert) checkInt(this, value, offset, 1, 0x7f, -0x80)
+  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
   if (value < 0) value = 0xff + value + 1
   this[offset] = (value & 0xff)
   return offset + 1
@@ -12048,42 +12138,58 @@ Buffer.prototype.writeInt8 = function writeInt8 (value, offset, noAssert) {
 
 Buffer.prototype.writeInt16LE = function writeInt16LE (value, offset, noAssert) {
   value = +value
-  offset = offset >>> 0
+  offset = offset | 0
   if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
-  this[offset] = (value & 0xff)
-  this[offset + 1] = (value >>> 8)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = (value & 0xff)
+    this[offset + 1] = (value >>> 8)
+  } else {
+    objectWriteUInt16(this, value, offset, true)
+  }
   return offset + 2
 }
 
 Buffer.prototype.writeInt16BE = function writeInt16BE (value, offset, noAssert) {
   value = +value
-  offset = offset >>> 0
+  offset = offset | 0
   if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
-  this[offset] = (value >>> 8)
-  this[offset + 1] = (value & 0xff)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = (value >>> 8)
+    this[offset + 1] = (value & 0xff)
+  } else {
+    objectWriteUInt16(this, value, offset, false)
+  }
   return offset + 2
 }
 
 Buffer.prototype.writeInt32LE = function writeInt32LE (value, offset, noAssert) {
   value = +value
-  offset = offset >>> 0
+  offset = offset | 0
   if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
-  this[offset] = (value & 0xff)
-  this[offset + 1] = (value >>> 8)
-  this[offset + 2] = (value >>> 16)
-  this[offset + 3] = (value >>> 24)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = (value & 0xff)
+    this[offset + 1] = (value >>> 8)
+    this[offset + 2] = (value >>> 16)
+    this[offset + 3] = (value >>> 24)
+  } else {
+    objectWriteUInt32(this, value, offset, true)
+  }
   return offset + 4
 }
 
 Buffer.prototype.writeInt32BE = function writeInt32BE (value, offset, noAssert) {
   value = +value
-  offset = offset >>> 0
+  offset = offset | 0
   if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
   if (value < 0) value = 0xffffffff + value + 1
-  this[offset] = (value >>> 24)
-  this[offset + 1] = (value >>> 16)
-  this[offset + 2] = (value >>> 8)
-  this[offset + 3] = (value & 0xff)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = (value >>> 24)
+    this[offset + 1] = (value >>> 16)
+    this[offset + 2] = (value >>> 8)
+    this[offset + 3] = (value & 0xff)
+  } else {
+    objectWriteUInt32(this, value, offset, false)
+  }
   return offset + 4
 }
 
@@ -12093,8 +12199,6 @@ function checkIEEE754 (buf, value, offset, ext, max, min) {
 }
 
 function writeFloat (buf, value, offset, littleEndian, noAssert) {
-  value = +value
-  offset = offset >>> 0
   if (!noAssert) {
     checkIEEE754(buf, value, offset, 4, 3.4028234663852886e+38, -3.4028234663852886e+38)
   }
@@ -12111,8 +12215,6 @@ Buffer.prototype.writeFloatBE = function writeFloatBE (value, offset, noAssert) 
 }
 
 function writeDouble (buf, value, offset, littleEndian, noAssert) {
-  value = +value
-  offset = offset >>> 0
   if (!noAssert) {
     checkIEEE754(buf, value, offset, 8, 1.7976931348623157E+308, -1.7976931348623157E+308)
   }
@@ -12161,7 +12263,7 @@ Buffer.prototype.copy = function copy (target, targetStart, start, end) {
     for (i = len - 1; i >= 0; --i) {
       target[i + targetStart] = this[i + start]
     }
-  } else if (len < 1000) {
+  } else if (len < 1000 || !Buffer.TYPED_ARRAY_SUPPORT) {
     // ascending copy from start
     for (i = 0; i < len; ++i) {
       target[i + targetStart] = this[i + start]
@@ -12230,7 +12332,7 @@ Buffer.prototype.fill = function fill (val, start, end, encoding) {
   } else {
     var bytes = Buffer.isBuffer(val)
       ? val
-      : new Buffer(val, encoding)
+      : utf8ToBytes(new Buffer(val, encoding).toString())
     var len = bytes.length
     for (i = 0; i < end - start; ++i) {
       this[i + start] = bytes[i % len]
@@ -12243,7 +12345,7 @@ Buffer.prototype.fill = function fill (val, start, end, encoding) {
 // HELPER FUNCTIONS
 // ================
 
-var INVALID_BASE64_RE = /[^+/0-9A-Za-z-_]/g
+var INVALID_BASE64_RE = /[^+\/0-9A-Za-z-_]/g
 
 function base64clean (str) {
   // Node strips out invalid characters like \n and \t from the string, base64-js does not
@@ -12388,7 +12490,8 @@ function isnan (val) {
   return val !== val // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":78,"ieee754":79}],78:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"base64-js":77,"ieee754":78,"isarray":79}],77:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -12504,7 +12607,7 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],79:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -12590,6 +12693,13 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
+},{}],79:[function(require,module,exports){
+var toString = {}.toString;
+
+module.exports = Array.isArray || function (arr) {
+  return toString.call(arr) == '[object Array]';
+};
+
 },{}],80:[function(require,module,exports){
 'use strict';
 
@@ -12609,7 +12719,7 @@ var classes = {
 
 module.exports = classes;
 
-},{"./messenger/m_api":83,"./messenger/m_api_rx":84,"./messenger/m_source":85,"./messenger/msngr_source":86,"ml-mixin":104}],81:[function(require,module,exports){
+},{"./messenger/m_api":83,"./messenger/m_api_rx":84,"./messenger/m_source":85,"./messenger/msngr_source":86,"ml-mixin":103}],81:[function(require,module,exports){
 'use strict';
 
 
@@ -12633,7 +12743,7 @@ config({
     debug: false
 });
 
-},{"./util":98,"protojs":121}],82:[function(require,module,exports){
+},{"./util":98,"protojs":120}],82:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('ml-mixin')
@@ -13324,7 +13434,7 @@ function getMessageSource() {
     return this._messageSource
 }
 
-},{"./m_source":85,"ml-check":103,"ml-mixin":104,"protojs":121}],83:[function(require,module,exports){
+},{"./m_source":85,"ml-check":102,"ml-mixin":103,"protojs":120}],83:[function(require,module,exports){
 'use strict';
 
 var _ = require('protojs');
@@ -13516,7 +13626,7 @@ function filterSourceMessage(sourceMessage, message, internalData) {
     return true;
 }
 
-},{"../util/logger":99,"protojs":121}],84:[function(require,module,exports){
+},{"../util/logger":99,"protojs":120}],84:[function(require,module,exports){
 'use strict';
 
 var MessengerAPI = require('./m_api')
@@ -13630,7 +13740,7 @@ function getInternalMessages(sourceMessage) {
     return internalMessages;
 }
 
-},{"./m_api":83,"protojs":121}],85:[function(require,module,exports){
+},{"./m_api":83,"protojs":120}],85:[function(require,module,exports){
 'use strict';
 
 var Mixin = require('ml-mixin')
@@ -13805,7 +13915,7 @@ function toBeImplemented() {
     throw new Error('calling the method of an absctract class');
 }
 
-},{"./m_api":83,"ml-check":103,"ml-mixin":104,"protojs":121}],86:[function(require,module,exports){
+},{"./m_api":83,"ml-check":102,"ml-mixin":103,"protojs":120}],86:[function(require,module,exports){
 'use strict';
 
 
@@ -13874,7 +13984,7 @@ function MessengerMessageSource$postMessage(message, data) {
     this.messenger.postMessageSync(message, data);
 }
 
-},{"./m_source":85,"ml-check":103,"protojs":121}],87:[function(require,module,exports){
+},{"./m_source":85,"ml-check":102,"protojs":120}],87:[function(require,module,exports){
 'use strict';
 
 var _ = require('protojs');
@@ -13915,7 +14025,7 @@ function destroy() {
     milo.minder.destroy();
 }
 
-},{"./classes":80,"./config":81,"./messenger":82,"./minder":88,"./model":91,"./util":98,"protojs":121}],88:[function(require,module,exports){
+},{"./classes":80,"./config":81,"./messenger":82,"./minder":88,"./model":91,"./util":98,"protojs":120}],88:[function(require,module,exports){
 'use strict';
 
 var Connector = require('./model/connector')
@@ -14135,7 +14245,7 @@ function minder_destroy() {
     }
 }
 
-},{"./messenger":82,"./model/connector":90,"./util/logger":99,"protojs":121}],89:[function(require,module,exports){
+},{"./messenger":82,"./model/connector":90,"./util/logger":99,"protojs":120}],89:[function(require,module,exports){
 'use strict';
 
 
@@ -14370,7 +14480,7 @@ function executeMethod(modelPath, data) {
         logger.error('unknown data change type');
 }
 
-},{"../config":81,"../util/logger":99,"./path_utils":96,"protojs":121}],90:[function(require,module,exports){
+},{"../config":81,"../util/logger":99,"./path_utils":96,"protojs":120}],90:[function(require,module,exports){
 'use strict';
 
 var Messenger = require('../messenger')
@@ -14785,7 +14895,7 @@ function Connector$destroy() {
     this._destroyed = true;
 }
 
-},{"../messenger":82,"../util/logger":99,"./path_utils":96,"protojs":121}],91:[function(require,module,exports){
+},{"../messenger":82,"../util/logger":99,"./path_utils":96,"protojs":120}],91:[function(require,module,exports){
 'use strict';
 
 var ModelPath = require('./m_path')
@@ -15014,7 +15124,7 @@ function Model$destroy() {
     this._destroyed = true;
 }
 
-},{"../messenger":82,"../messenger/msngr_source":86,"../util/logger":99,"./change_data":89,"./m_msg_api":92,"./m_path":93,"./model_utils":94,"./path_utils":96,"./synthesize":97,"ml-check":103,"ml-mixin":104,"protojs":121}],92:[function(require,module,exports){
+},{"../messenger":82,"../messenger/msngr_source":86,"../util/logger":99,"./change_data":89,"./m_msg_api":92,"./m_path":93,"./model_utils":94,"./path_utils":96,"./synthesize":97,"ml-check":102,"ml-mixin":103,"protojs":120}],92:[function(require,module,exports){
 'use strict';
 
 var MessengerRegexpAPI = require('../messenger/m_api_rx')
@@ -15053,7 +15163,7 @@ function translateToSourceMessage(accessPath) {
     return pathUtils.createRegexPath(accessPath);
 }
 
-},{"../messenger/m_api_rx":84,"./path_utils":96,"protojs":121}],93:[function(require,module,exports){
+},{"../messenger/m_api_rx":84,"./path_utils":96,"protojs":120}],93:[function(require,module,exports){
 'use strict';
 
 var synthesize = require('./synthesize')
@@ -15350,7 +15460,7 @@ function ModelPath$destroy() {
     this[MESSENGER_PROPERTY].destroy();
 }
 
-},{"../messenger":82,"../messenger/msngr_source":86,"./change_data":89,"./path_msg_api":95,"./path_utils":96,"./synthesize":97,"ml-check":103,"protojs":121}],94:[function(require,module,exports){
+},{"../messenger":82,"../messenger/msngr_source":86,"./change_data":89,"./path_msg_api":95,"./path_utils":96,"./synthesize":97,"ml-check":102,"protojs":120}],94:[function(require,module,exports){
 'use strict';
 
 
@@ -15472,7 +15582,7 @@ function truncateChangePath(change) {
     }
 }
 
-},{"../messenger/m_api":83,"../util/logger":99,"./path_utils":96,"protojs":121}],96:[function(require,module,exports){
+},{"../messenger/m_api":83,"../util/logger":99,"./path_utils":96,"protojs":120}],96:[function(require,module,exports){
 'use strict';
 
 // <a name="model-path"></a>
@@ -15616,7 +15726,7 @@ function wrapMessengerMethods(methodsNames) {
     _.defineProperties(this, wrappedMethods);
 }
 
-},{"ml-check":103,"protojs":121}],97:[function(require,module,exports){
+},{"ml-check":102,"protojs":120}],97:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -15821,7 +15931,7 @@ var modelMethods = _.mapKeys(modelSynthesizers, function(synthesizer) {
 synthesizePathMethods.modelMethods = modelMethods;
 
 }).call(this,require("buffer").Buffer)
-},{"../../util/logger":99,"../change_data":89,"../model_utils":94,"../path_utils":96,"buffer":77,"dot":102,"protojs":121}],98:[function(require,module,exports){
+},{"../../util/logger":99,"../change_data":89,"../model_utils":94,"../path_utils":96,"buffer":76,"dot":101,"protojs":120}],98:[function(require,module,exports){
 'use strict';
 
 /**
@@ -15835,7 +15945,7 @@ var util = {
 
 module.exports = util;
 
-},{"./logger":99,"dot":102,"ml-check":103}],99:[function(require,module,exports){
+},{"./logger":99,"dot":101,"ml-check":102}],99:[function(require,module,exports){
 'use strict';
 
 // <a name="utils-logger"></a>
@@ -16009,15 +16119,16 @@ levels.forEach(function (name) {
 
 module.exports = Logger;
 
-},{"../messenger":82,"protojs":121}],101:[function(require,module,exports){
+},{"../messenger":82,"protojs":120}],101:[function(require,module,exports){
 // doT.js
 // 2011-2014, Laura Doktorova, https://github.com/olado/doT
 // Licensed under the MIT license.
 
-(function() {
+(function () {
 	"use strict";
 
 	var doT = {
+		name: "doT",
 		version: "1.1.1",
 		templateSettings: {
 			evaluate:    /\{\{([\s\S]+?(\}?)+)\}\}/g,
@@ -16155,152 +16266,6 @@ module.exports = Logger;
 }());
 
 },{}],102:[function(require,module,exports){
-/* doT + auto-compilation of doT templates
- *
- * 2012, Laura Doktorova, https://github.com/olado/doT
- * Licensed under the MIT license
- *
- * Compiles .def, .dot, .jst files found under the specified path.
- * It ignores sub-directories.
- * Template files can have multiple extensions at the same time.
- * Files with .def extension can be included in other files via {{#def.name}}
- * Files with .dot extension are compiled into functions with the same name and
- * can be accessed as renderer.filename
- * Files with .jst extension are compiled into .js files. Produced .js file can be
- * loaded as a commonJS, AMD module, or just installed into a global variable
- * (default is set to window.render).
- * All inline defines defined in the .jst file are
- * compiled into separate functions and are available via _render.filename.definename
- *
- * Basic usage:
- * var dots = require("dot").process({path: "./views"});
- * dots.mytemplate({foo:"hello world"});
- *
- * The above snippet will:
- * 1. Compile all templates in views folder (.dot, .def, .jst)
- * 2. Place .js files compiled from .jst templates into the same folder.
- *    These files can be used with require, i.e. require("./views/mytemplate").
- * 3. Return an object with functions compiled from .dot templates as its properties.
- * 4. Render mytemplate template.
- */
-
-var fs = require("fs"),
-	doT = module.exports = require("./doT");
-
-doT.process = function(options) {
-	//path, destination, global, rendermodule, templateSettings
-	return new InstallDots(options).compileAll();
-};
-
-function InstallDots(o) {
-	this.__path 		= o.path || "./";
-	if (this.__path[this.__path.length-1] !== '/') this.__path += '/';
-	this.__destination	= o.destination || this.__path;
-	if (this.__destination[this.__destination.length-1] !== '/') this.__destination += '/';
-	this.__global		= o.global || "window.render";
-	this.__rendermodule	= o.rendermodule || {};
-	this.__settings 	= o.templateSettings ? copy(o.templateSettings, copy(doT.templateSettings)) : undefined;
-	this.__includes		= {};
-}
-
-InstallDots.prototype.compileToFile = function(path, template, def) {
-	def = def || {};
-	var modulename = path.substring(path.lastIndexOf("/")+1, path.lastIndexOf("."))
-		, defs = copy(this.__includes, copy(def))
-		, settings = this.__settings || doT.templateSettings
-		, compileoptions = copy(settings)
-		, defaultcompiled = doT.template(template, settings, defs)
-		, exports = []
-		, compiled = ""
-		, fn;
-
-	for (var property in defs) {
-		if (defs[property] !== def[property] && defs[property] !== this.__includes[property]) {
-			fn = undefined;
-			if (typeof defs[property] === 'string') {
-				fn = doT.template(defs[property], settings, defs);
-			} else if (typeof defs[property] === 'function') {
-				fn = defs[property];
-			} else if (defs[property].arg) {
-				compileoptions.varname = defs[property].arg;
-				fn = doT.template(defs[property].text, compileoptions, defs);
-			}
-			if (fn) {
-				compiled += fn.toString().replace('anonymous', property);
-				exports.push(property);
-			}
-		}
-	}
-	compiled += defaultcompiled.toString().replace('anonymous', modulename);
-	fs.writeFileSync(path, "(function(){" + compiled
-		+ "var itself=" + modulename + ", _encodeHTML=(" + doT.encodeHTMLSource.toString() + "(" + (settings.doNotSkipEncoded || '') + "));"
-		+ addexports(exports)
-		+ "if(typeof module!=='undefined' && module.exports) module.exports=itself;else if(typeof define==='function')define(function(){return itself;});else {"
-		+ this.__global + "=" + this.__global + "||{};" + this.__global + "['" + modulename + "']=itself;}}());");
-};
-
-function addexports(exports) {
-	var ret = '';
-	for (var i=0; i< exports.length; i++) {
-		ret += "itself." + exports[i]+ "=" + exports[i]+";";
-	}
-	return ret;
-}
-
-function copy(o, to) {
-	to = to || {};
-	for (var property in o) {
-		to[property] = o[property];
-	}
-	return to;
-}
-
-function readdata(path) {
-	var data = fs.readFileSync(path);
-	if (data) return data.toString();
-	console.log("problems with " + path);
-}
-
-InstallDots.prototype.compilePath = function(path) {
-	var data = readdata(path);
-	if (data) {
-		return doT.template(data,
-					this.__settings || doT.templateSettings,
-					copy(this.__includes));
-	}
-};
-
-InstallDots.prototype.compileAll = function() {
-	if (doT.log) console.log("Compiling all doT templates...");
-
-	var defFolder = this.__path,
-		sources = fs.readdirSync(defFolder),
-		k, l, name;
-
-	for( k = 0, l = sources.length; k < l; k++) {
-		name = sources[k];
-		if (/\.def(\.dot|\.jst)?$/.test(name)) {
-			if (doT.log) console.log("Loaded def " + name);
-			this.__includes[name.substring(0, name.indexOf('.'))] = readdata(defFolder + name);
-		}
-	}
-
-	for( k = 0, l = sources.length; k < l; k++) {
-		name = sources[k];
-		if (/\.dot(\.def|\.jst)?$/.test(name)) {
-			if (doT.log) console.log("Compiling " + name + " to function");
-			this.__rendermodule[name.substring(0, name.indexOf('.'))] = this.compilePath(defFolder + name);
-		}
-		if (/\.jst(\.dot|\.def)?$/.test(name)) {
-			if (doT.log) console.log("Compiling " + name + " to file");
-			this.compileToFile(this.__destination + name.substring(0, name.indexOf('.')) + '.js',
-					readdata(defFolder + name));
-		}
-	}
-	return this.__rendermodule;
-};
-
-},{"./doT":101,"fs":76}],103:[function(require,module,exports){
 'use strict';
 
 var _ = require('protojs');
@@ -16602,7 +16567,7 @@ function _prependPath(key, base) {
     return key + base;
 }
 
-},{"protojs":121}],104:[function(require,module,exports){
+},{"protojs":120}],103:[function(require,module,exports){
 'use strict';
 
 var _ = require('protojs')
@@ -16832,7 +16797,7 @@ function Mixin$$useWith(hostClass, instanceKey, mixinMethods) {
     }
 }
 
-},{"ml-check":103,"protojs":121}],105:[function(require,module,exports){
+},{"ml-check":102,"protojs":120}],104:[function(require,module,exports){
 'use strict';
 /**
  * - [find](#find)
@@ -17043,7 +17008,7 @@ function spliceItem(self, item) {
     return self;
 }
 
-},{}],106:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 'use strict';
 /**
  * - [makeFunction](#makeFunction)
@@ -17097,10 +17062,10 @@ function makeFunction(self, arg1, arg2, funcBody) {
     var name = self,
         count = arguments.length - 1,
         funcBody = arguments[count],
-        func, code = '';
+        code = '';
     for (var i = 1; i < count; i++) code += ', ' + arguments[i];
-    code = ['func = function ', name, '(', code.slice(2), ') {\n', funcBody, '\n}'].join('');
-    eval(code);
+    code = 'return function ' + name + '(' + code.slice(2) + ') {\n' + funcBody + '\n}';
+    var func = (new Function(code))();
     return func;
 }
 /**
@@ -17394,7 +17359,7 @@ function not(self) {
     return func;
 }
 
-},{}],107:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 'use strict';
 module.exports = {
     array: require('./array'),
@@ -17406,7 +17371,7 @@ module.exports = {
     utils: require('./utils')
 };
 
-},{"./array":105,"./function":106,"./number":108,"./object":109,"./prototype":110,"./string":111,"./utils":112}],108:[function(require,module,exports){
+},{"./array":104,"./function":105,"./number":107,"./object":108,"./prototype":109,"./string":110,"./utils":111}],107:[function(require,module,exports){
 'use strict';
 /**
  * - [isNumeric](#isNumeric)
@@ -17425,7 +17390,7 @@ function isNumeric(self) {
     return result;
 }
 
-},{}],109:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 'use strict';
 /**
  * - [extend](#extend)
@@ -17508,13 +17473,15 @@ function extend(self, obj, onlyEnumerable) {
     var key;
     if (onlyEnumerable) {
         for (key in obj) {
-            descriptors[key] = Object.getOwnPropertyDescriptor(obj, key);
+            var desc = Object.getOwnPropertyDescriptor(obj, key);
+            if (desc) descriptors[key] = desc;
         }
     } else {
         var keys = Object.getOwnPropertyNames(obj);
         for (var i = 0; i < keys.length; i++) {
             key = keys[i];
-            descriptors[key] = Object.getOwnPropertyDescriptor(obj, key);
+            var desc = Object.getOwnPropertyDescriptor(obj, key);
+            if (desc) descriptors[key] = desc;
         }
     }
     Object.defineProperties(self, descriptors);
@@ -17542,13 +17509,15 @@ function clone(self, onlyEnumerable) {
         var key;
         if (onlyEnumerable) {
             for (key in self) {
-                descriptors[key] = Object.getOwnPropertyDescriptor(self, key);
+                var desc = Object.getOwnPropertyDescriptor(self, key);
+                if (desc) descriptors[key] = desc;
             }
         } else {
             var keys = Object.getOwnPropertyNames(self);
             for (var i = 0; i < keys.length; i++) {
                 key = keys[i];
-                descriptors[key] = Object.getOwnPropertyDescriptor(self, key);
+                var desc = Object.getOwnPropertyDescriptor(self, key);
+                if (desc) descriptors[key] = desc;
             }
         }
         clonedObject = Object.create(self.constructor.prototype, descriptors);
@@ -17752,7 +17721,7 @@ function _extendTree(selfNode, objNode, onlyEnumerable, preserveStructure, objTr
                 _extendTree(selfNode[key], value, onlyEnumerable, preserveStructure, objTraversed);
             } else {
                 var descriptor = Object.getOwnPropertyDescriptor(objNode, key);
-                Object.defineProperty(selfNode, key, descriptor);
+                if (descriptor) Object.defineProperty(selfNode, key, descriptor);
             }
         }
     } else {
@@ -17770,7 +17739,7 @@ function _extendTree(selfNode, objNode, onlyEnumerable, preserveStructure, objTr
                     _extendTree(selfNode[key], value, onlyEnumerable, preserveStructure, objTraversed);
                 } else {
                     var descriptor = Object.getOwnPropertyDescriptor(objNode, key);
-                    Object.defineProperty(selfNode, key, descriptor);
+                    if (descriptor) Object.defineProperty(selfNode, key, descriptor);
                 }
             }
         } else {
@@ -17788,11 +17757,12 @@ function _extendTree(selfNode, objNode, onlyEnumerable, preserveStructure, objTr
                     _extendTree(selfNode[key], value, onlyEnumerable, preserveStructure, objTraversed);
                 } else {
                     var descriptor = Object.getOwnPropertyDescriptor(objNode, key);
-                    Object.defineProperty(selfNode, key, descriptor);
+                    if (descriptor) Object.defineProperty(selfNode, key, descriptor);
                 }
             }
         }
     }
+    objTraversed.pop();
     return selfNode;
 }
 /**
@@ -18125,13 +18095,15 @@ function omitKeys(self) { // , ... keys
     var key;
     if (onlyEnumerable) {
         for (key in self) {
-            descriptors[key] = Object.getOwnPropertyDescriptor(self, key);
+            var desc = Object.getOwnPropertyDescriptor(self, key);
+            if (desc) descriptors[key] = desc;
         }
     } else {
         var keys = Object.getOwnPropertyNames(self);
         for (var i = 0; i < keys.length; i++) {
             key = keys[i];
-            descriptors[key] = Object.getOwnPropertyDescriptor(self, key);
+            var desc = Object.getOwnPropertyDescriptor(self, key);
+            if (desc) descriptors[key] = desc;
         }
     }
     clonedObject = Object.create(self.constructor.prototype, descriptors);
@@ -18217,7 +18189,7 @@ function isNot(self, obj) {
     return equal;
 }
 
-},{}],110:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 'use strict';
 var __ = require('../functions/object');
 /**
@@ -18287,7 +18259,8 @@ function createSubclass(self, name, applyConstructor) {
     name = name || '';
     // apply superclass constructor
     var constructorCode = applyConstructor === false ? '' : 'self.apply(this, arguments);';
-    eval('subclass = function ' + name + '(){ ' + constructorCode + ' }');
+    var code = 'return function ' + name + '(){ ' + constructorCode + ' }';
+    var subclass = (new Function('self', code))(self);
     // prototype chain
     subclass.prototype = Object.create(self.prototype);
     // subclass identity
@@ -18337,7 +18310,7 @@ function newApply(self, args) {
     return obj;
 }
 
-},{"../functions/object":109}],111:[function(require,module,exports){
+},{"../functions/object":108}],110:[function(require,module,exports){
 'use strict';
 var slice = Array.prototype.slice;
 /**
@@ -18405,10 +18378,10 @@ var regexpStringPattern = /^\/(.*)\/([gimy]*)$/;
  * @return {Function}
  */
 function toFunction(self) {
+    var code = 'return ' + self + ';';
     var func;
-    var code = 'func = ' + self + ';';
     try {
-        eval(code);
+        func = (new Function(code))();
     } catch (e) {}
     return func;
 }
@@ -18529,7 +18502,7 @@ function format(self) { // , ... arguments
     return result;
 };
 
-},{}],112:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 'use strict';
 var slice = Array.prototype.slice;
 /**
@@ -18640,7 +18613,7 @@ function noop() {
     return undefined;
 }
 
-},{}],113:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 'use strict';
 /**
  * - [find](#find)
@@ -18866,7 +18839,7 @@ function spliceItem(item) {
     return this;
 }
 
-},{}],114:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 'use strict';
 /**
  * - [makeFunction](#makeFunction)
@@ -18920,10 +18893,10 @@ function makeFunction(arg1, arg2, funcBody) {
     var name = this.self,
         count = arguments.length - 1,
         funcBody = arguments[count],
-        func, code = '';
+        code = '';
     for (var i = 0; i < count; i++) code += ', ' + arguments[i];
-    code = ['func = function ', name, '(', code.slice(2), ') {\n', funcBody, '\n}'].join('');
-    eval(code);
+    code = 'return function ' + name + '(' + code.slice(2) + ') {\n' + funcBody + '\n}';
+    var func = (new Function(code))();
     this.self = func;
     return this;
 }
@@ -19250,9 +19223,9 @@ function not() {
     return this;
 }
 
-},{}],115:[function(require,module,exports){
-arguments[4][107][0].apply(exports,arguments)
-},{"./array":113,"./function":114,"./number":116,"./object":117,"./prototype":118,"./string":119,"./utils":120,"dup":107}],116:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
+arguments[4][106][0].apply(exports,arguments)
+},{"./array":112,"./function":113,"./number":115,"./object":116,"./prototype":117,"./string":118,"./utils":119,"dup":106}],115:[function(require,module,exports){
 'use strict';
 /**
  * - [isNumeric](#isNumeric)
@@ -19272,7 +19245,7 @@ function isNumeric() {
     return this;
 }
 
-},{}],117:[function(require,module,exports){
+},{}],116:[function(require,module,exports){
 'use strict';
 /**
  * - [extend](#extend)
@@ -19355,13 +19328,15 @@ function extend(obj, onlyEnumerable) {
     var key;
     if (onlyEnumerable) {
         for (key in obj) {
-            descriptors[key] = Object.getOwnPropertyDescriptor(obj, key);
+            var desc = Object.getOwnPropertyDescriptor(obj, key);
+            if (desc) descriptors[key] = desc;
         }
     } else {
         var keys = Object.getOwnPropertyNames(obj);
         for (var i = 0; i < keys.length; i++) {
             key = keys[i];
-            descriptors[key] = Object.getOwnPropertyDescriptor(obj, key);
+            var desc = Object.getOwnPropertyDescriptor(obj, key);
+            if (desc) descriptors[key] = desc;
         }
     }
     Object.defineProperties(this.self, descriptors);
@@ -19390,13 +19365,15 @@ function clone(onlyEnumerable) {
         var key;
         if (onlyEnumerable) {
             for (key in self) {
-                descriptors[key] = Object.getOwnPropertyDescriptor(self, key);
+                var desc = Object.getOwnPropertyDescriptor(self, key);
+                if (desc) descriptors[key] = desc;
             }
         } else {
             var keys = Object.getOwnPropertyNames(self);
             for (var i = 0; i < keys.length; i++) {
                 key = keys[i];
-                descriptors[key] = Object.getOwnPropertyDescriptor(self, key);
+                var desc = Object.getOwnPropertyDescriptor(self, key);
+                if (desc) descriptors[key] = desc;
             }
         }
         clonedObject = Object.create(self.constructor.prototype, descriptors);
@@ -19608,7 +19585,7 @@ function _extendTree(selfNode, objNode, onlyEnumerable, preserveStructure, objTr
                 _extendTree(selfNode[key], value, onlyEnumerable, preserveStructure, objTraversed);
             } else {
                 var descriptor = Object.getOwnPropertyDescriptor(objNode, key);
-                Object.defineProperty(selfNode, key, descriptor);
+                if (descriptor) Object.defineProperty(selfNode, key, descriptor);
             }
         }
     } else {
@@ -19626,7 +19603,7 @@ function _extendTree(selfNode, objNode, onlyEnumerable, preserveStructure, objTr
                     _extendTree(selfNode[key], value, onlyEnumerable, preserveStructure, objTraversed);
                 } else {
                     var descriptor = Object.getOwnPropertyDescriptor(objNode, key);
-                    Object.defineProperty(selfNode, key, descriptor);
+                    if (descriptor) Object.defineProperty(selfNode, key, descriptor);
                 }
             }
         } else {
@@ -19644,11 +19621,12 @@ function _extendTree(selfNode, objNode, onlyEnumerable, preserveStructure, objTr
                     _extendTree(selfNode[key], value, onlyEnumerable, preserveStructure, objTraversed);
                 } else {
                     var descriptor = Object.getOwnPropertyDescriptor(objNode, key);
-                    Object.defineProperty(selfNode, key, descriptor);
+                    if (descriptor) Object.defineProperty(selfNode, key, descriptor);
                 }
             }
         }
     }
+    objTraversed.pop();
     return selfNode;
 }
 /**
@@ -20005,13 +19983,15 @@ function omitKeys() { // , ... keys
     var key;
     if (onlyEnumerable) {
         for (key in self) {
-            descriptors[key] = Object.getOwnPropertyDescriptor(self, key);
+            var desc = Object.getOwnPropertyDescriptor(self, key);
+            if (desc) descriptors[key] = desc;
         }
     } else {
         var keys = Object.getOwnPropertyNames(self);
         for (var i = 0; i < keys.length; i++) {
             key = keys[i];
-            descriptors[key] = Object.getOwnPropertyDescriptor(self, key);
+            var desc = Object.getOwnPropertyDescriptor(self, key);
+            if (desc) descriptors[key] = desc;
         }
     }
     clonedObject = Object.create(self.constructor.prototype, descriptors);
@@ -20116,7 +20096,7 @@ function isNot(obj) {
     return this;
 }
 
-},{}],118:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
 'use strict';
 var __ = require('../functions/object');
 /**
@@ -20189,7 +20169,8 @@ function createSubclass(name, applyConstructor) {
     name = name || '';
     // apply superclass constructor
     var constructorCode = applyConstructor === false ? '' : 'self.apply(this, arguments);';
-    eval('subclass = function ' + name + '(){ ' + constructorCode + ' }');
+    var code = 'return function ' + name + '(){ ' + constructorCode + ' }';
+    var subclass = (new Function('self', code))(self);
     // prototype chain
     subclass.prototype = Object.create(self.prototype);
     // subclass identity
@@ -20244,7 +20225,7 @@ function newApply(args) {
     return this;
 }
 
-},{"../functions/object":109}],119:[function(require,module,exports){
+},{"../functions/object":108}],118:[function(require,module,exports){
 'use strict';
 var slice = Array.prototype.slice;
 /**
@@ -20319,10 +20300,10 @@ var regexpStringPattern = /^\/(.*)\/([gimy]*)$/;
  */
 function toFunction() {
     var self = this.self;
+    var code = 'return ' + self + ';';
     var func;
-    var code = 'func = ' + self + ';';
     try {
-        eval(code);
+        func = (new Function(code))();
     } catch (e) {}
     this.self = func;
     return this;
@@ -20460,7 +20441,7 @@ function format() { // , ... arguments
     return this;
 };
 
-},{}],120:[function(require,module,exports){
+},{}],119:[function(require,module,exports){
 'use strict';
 var slice = Array.prototype.slice;
 /**
@@ -20585,7 +20566,7 @@ function noop() {
     return this;
 }
 
-},{}],121:[function(require,module,exports){
+},{}],120:[function(require,module,exports){
 'use strict';
 
 
@@ -20658,7 +20639,7 @@ if (typeof module == 'object' && module.exports) {
     module.exports = Proto;
 }
 
-},{"./dotjs/functions":107,"./dotjs/methods":115}],122:[function(require,module,exports){
+},{"./dotjs/functions":106,"./dotjs/methods":114}],121:[function(require,module,exports){
 /**
  * Copyright (c) 2013 Petka Antonov
  * 
@@ -21066,7 +21047,7 @@ function QueryStringParser$parseString(str, noDecode) {
     return dictionary;
 };
 
-},{"./querystringserializer.js":123}],123:[function(require,module,exports){
+},{"./querystringserializer.js":122}],122:[function(require,module,exports){
 /**
  * Copyright (c) 2013 Petka Antonov
  * 
@@ -21173,7 +21154,7 @@ function QueryStringSerializer$serialize(obj) {
     return ret.join("&");
 };
 
-},{}],124:[function(require,module,exports){
+},{}],123:[function(require,module,exports){
 module.exports={
   "name": "milojs",
   "version": "1.6.1",
@@ -21195,7 +21176,7 @@ module.exports={
   "main": "lib/milo.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha --recursive --reporter=spec",
-    "test-cov": "istanbul cover -x 'test' --dir ./coverage/node node_modules/mocha/bin/_mocha -- --recursive --reporter=spec",
+    "test-cov": "istanbul cover --dir ./coverage/node node_modules/mocha/bin/_mocha -- --recursive --reporter=spec",
     "test-browser": "grunt karma && karma start --single-run --browsers Chrome",
     "test-travis": "npm run test-cov && grunt build && karma start --single-run --browsers Firefox && istanbul report"
   },
