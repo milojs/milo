@@ -2204,6 +2204,7 @@ function Component$hasFacet(facetNameOrClass) {
  * @param {Object} facetConfig optional facet configuration
  * @param {String} facetName optional facet name. Allows to add facet under a name different from the class name supplied.
  * @param {Boolean} throwOnErrors If set to false, then errors will only be logged to console. True by default.
+ * @return Subclass<Component> The created facet
  */
 function Component$addFacet(facetNameOrClass, facetConfig, facetName, throwOnErrors) {
     check(facetNameOrClass, Match.OneOf(String, Match.Subclass(ComponentFacet)));
@@ -2229,6 +2230,8 @@ function Component$addFacet(facetNameOrClass, facetConfig, facetName, throwOnErr
     // check depenedencies and start facet
     if (newFacet.check) newFacet.check();
     if (newFacet.start) newFacet.start();
+
+    return newFacet;
 }
 
 
@@ -2364,8 +2367,18 @@ function Component$setState(state) {
     if (state.facetsStates)
         _.eachKey(state.facetsStates, function(fctState, fctName) {
             var facet = this[fctName];
-            if (facet && typeof facet.setState == 'function')
+
+            if (!facet) {
+                try {
+                    facet = this.addFacet(fctName);
+                } catch (e) {
+                    logger.error('Facet "' + fctName + '" could not be restored from state. ' + e);
+                }
+            }
+            
+            if (facet && typeof facet.setState == 'function') {
                 facet.setState(fctState);
+            }
         }, this);
 }
 
@@ -21176,7 +21189,7 @@ module.exports={
   "main": "lib/milo.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha --recursive --reporter=spec",
-    "test-cov": "istanbul cover --dir ./coverage/node node_modules/mocha/bin/_mocha -- --recursive --reporter=spec",
+    "test-cov": "istanbul cover -x 'test' --dir ./coverage/node node_modules/mocha/bin/_mocha -- --recursive --reporter=spec",
     "test-browser": "grunt karma && karma start --single-run --browsers Chrome",
     "test-travis": "npm run test-cov && grunt build && karma start --single-run --browsers Firefox && istanbul report"
   },
