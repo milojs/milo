@@ -22,7 +22,7 @@ describe('Drag facet', function() {
     milo.createComponentClass({
         className: 'DragComponent',
         facets: {
-            drag: { off: false }
+            drag: undefined
         }
     });
 
