@@ -127,12 +127,64 @@ describe('List facet', function() {
             // check the data directly on DOM
             listsComponents.forEach(function (listComponent) {
                 listComponent.list.each(function(listItem, index) {
-                    var innerScope = listItem.container.scope;                    
+                    var innerScope = listItem.container.scope;
                     assert.equal(innerScope.name.el.innerHTML, cloneTest[index].name, 'should set name innerHTML span element');
                     assert.equal(innerScope.surname.el.innerHTML, cloneTest[index].surname, 'should set surname innerHTML div element');
                     assert.equal(innerScope.contact.el.value, cloneTest[index].contact, 'should set value for input element');
                 });
             });
         }
+    });
+
+    describe('List items', function() {
+        it('should notify when item index changes', function(done) {
+            var list = scope.myList1.list;
+            var changeEvents = [];
+            scope.myList1.data.set(testData.slice());
+
+            assert.equal(list.count(), 4);
+            list.each(function(item, index) {
+                assert.equal(item.item.index, index);
+                item.item.on('indexchanged', function(msg, data) {
+                    changeEvents.push({ item: item, oldIndex: data.oldIndex, newIndex: data.newIndex });
+                });
+            });
+
+            var expectedChanges = [
+                { item: list.item(2), oldIndex: 2, newIndex: 1 },
+                { item: list.item(3), oldIndex: 3, newIndex: 2 }
+            ];
+
+            scope.myList1.data.splice(1, 1); // Remove an item
+
+            _.deferTicks(function() {
+                assertExpectedChangeEvents();
+                changeEvents = [];
+                expectedChanges = [
+                    { item: list.item(0), oldIndex: 0, newIndex: 1 },
+                    { item: list.item(1), oldIndex: 1, newIndex: 2 },
+                    { item: list.item(2), oldIndex: 2, newIndex: 3 },
+                ];
+
+                scope.myList1.data.unshift({}); // Add an item
+
+                _.deferTicks(function() {
+                    assertExpectedChangeEvents();
+                    done();
+                }, 10);
+            }, 10);
+
+            function assertExpectedChangeEvents() {
+                assert.equal(changeEvents.length, expectedChanges.length);
+
+                changeEvents.forEach(function(event, i) {
+                    var expected = expectedChanges[i];
+
+                    assert(event.item == expected.item);
+                    assert.equal(event.oldIndex, expected.oldIndex);
+                    assert.equal(event.newIndex, expected.newIndex);
+                });
+            }
+        });
     });
 });
