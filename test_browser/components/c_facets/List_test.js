@@ -157,7 +157,7 @@ describe('List facet', function() {
 
             scope.myList1.data.splice(1, 1); // Remove an item
 
-            _.deferTicks(function() {
+            _.defer(function() {
                 assertExpectedChangeEvents();
                 changeEvents = [];
                 expectedChanges = [
@@ -168,11 +168,11 @@ describe('List facet', function() {
 
                 scope.myList1.data.unshift({}); // Add an item
 
-                _.deferTicks(function() {
+                _.defer(function() {
                     assertExpectedChangeEvents();
                     done();
-                }, 10);
-            }, 10);
+                });
+            });
 
             function assertExpectedChangeEvents() {
                 assert.equal(changeEvents.length, expectedChanges.length);
