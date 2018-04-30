@@ -5170,11 +5170,12 @@ function resetSample (providedSample) {
 }
 
 
-function List$setSample (comp) {
+function List$setSample (comp, schema) {
     comp.item.list = this.list;
     this.owner.dom.prepend(comp.el);
     this.itemSample.destroy();
     resetSample.call(this.owner, comp);
+    this.itemSchema = schema;
 }
 
 
@@ -5283,6 +5284,9 @@ function List$_addItem(index) {
 
     // Copy component
     var component = Component.copy(this.itemSample, true);
+
+    this.config.embellishItem && this.config.embellishItem.call(this, component, this.itemSchema);
+
     var prevComponent = this._itemPreviousComponent(index);
 
     if (!prevComponent.el.parentNode)
@@ -5388,10 +5392,10 @@ function List$_addItems(count, index) {
 
         // Add it to the DOM
         prevComponent.dom.insertAfter(frag);
-
         _.deferMethod(newComponents, 'forEach', function(comp) {
+            this.config.embellishItem && this.config.embellishItem.call(this, comp, this.itemSchema);
             comp.broadcast('stateready');
-        });
+        }.bind(this));
     }
 }
 
