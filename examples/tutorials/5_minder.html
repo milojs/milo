@@ -230,7 +230,21 @@
                 console.log(msg, response);
             });
         });
+        
+        // Just for fun, let's implement the standard reactive programming task,
+        // the two-way temperature converter
+        var C = new milo.Model;
+        var F = new milo.Model;
 
+        milo.minder(C, '<->', F, {
+            dataTranslation: {
+                '->': { '': val => val * 1.8 + 32 },
+                '<-': { '': val => (val - 32) / 1.8 }
+            }
+        });
+
+        C.set(32); // F will be 89.6 (after data propagation)
+        F.set(100); // C will be 37.7... (after data propagation)
     //END JS
     </script>
 
