@@ -1,4 +1,5 @@
 module.exports = function(grunt) {
+    const isparta = require('isparta');
 
     grunt.initConfig({
         mochaTest: {
@@ -66,7 +67,8 @@ module.exports = function(grunt) {
         instrument: {
             files: 'lib/**/*.js',
             options: {
-                cwd: __dirname
+                cwd: __dirname,
+                instrumenter: isparta.Instrumenter
             }
         },
         uglify: {
@@ -119,7 +121,7 @@ module.exports = function(grunt) {
     }
 
     grunt.loadNpmTasks('grunt-browserify');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-uglify-es');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-mocha-test');

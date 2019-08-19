@@ -10,6 +10,9 @@
         "_": true,
         "CC": true
     },
+    "parserOptions": {
+        "ecmaVersion": 9
+    },
     "rules": {
         "linebreak-style": ["error", "unix"],
         "semi": ["error", "always"],
