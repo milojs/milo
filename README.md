@@ -1,6 +1,8 @@
 Milo
 ====
 
+> Milo - bringing the best developers to their knees since 2010
+
 Browser/nodejs [reactive programming](http://en.wikipedia.org/wiki/Reactive_programming) and data driven DOM manipulation with modular components.
 
 [![Build Status](https://travis-ci.org/milojs/milo.svg?branch=master)](https://travis-ci.org/milojs/milo)
