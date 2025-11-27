@@ -33,7 +33,7 @@
     "url": "https://github.com/milojs/milo/issues"
   },
   "dependencies": {
-    "milo-core": "git+ssh://git@github.com:milojs/milo-core.git#fix/memory-leaks",
+    "milo-core": "git+ssh://git@github.com:milojs/milo-core.git",
     "querystringparser": "^0.1.1"
   },
   "devDependencies": {
